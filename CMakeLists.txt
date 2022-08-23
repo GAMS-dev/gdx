@@ -8,5 +8,5 @@ if(CCACHE_FOUND)
 	set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
-add_executable(gdxnativetest tests/doctestmain.cpp tests/gxfiletests.cpp)
+add_executable(gdxnativetest tests/doctestmain.cpp tests/gxfiletests.cpp gxfile.cpp gxfile.h)
 target_link_libraries(gdxnativetest dl pthread)
