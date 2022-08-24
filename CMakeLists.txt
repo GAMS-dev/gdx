@@ -42,5 +42,5 @@ add_executable(gdxnativetest
 		tests/xptests.cpp
 		tests/doctestmain.cpp
 		tests/gxfiletests.cpp
-		tests/xpwraptests.cpp)
+		tests/xpwraptests.cpp tests/tgxtests.cpp)
 target_link_libraries(gdxnativetest dl pthread)
