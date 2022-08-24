@@ -12,6 +12,7 @@ set(common
 		global/gmslibname.h global/gmslibname.cpp
 		global/gmsspecs.h global/gmsspecs.cpp
 		global/modhead.h global/modhead.cpp
+		global/unit.h
 
 		rtl/p3utils.h rtl/p3utils.cpp
 		rtl/sysutils_p3.h rtl/sysutils_p3.cpp
@@ -32,12 +33,14 @@ set(common
 		simplegdx/mistream.h simplegdx/mistream.cpp
 
 		utils.h utils.cpp
-
 		gxfile.h gxfile.cpp
-		global/unit.h igdx.h tests/xptests.cpp)
+		igdx.h
+		xpwrap.cpp xpwrap.h)
 
 add_executable(gdxnativetest
+		${common}
+		tests/xptests.cpp
 		tests/doctestmain.cpp
 		tests/gxfiletests.cpp
-		${common})
+		tests/xpwraptests.cpp)
 target_link_libraries(gdxnativetest dl pthread)

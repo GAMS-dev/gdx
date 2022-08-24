@@ -13,7 +13,8 @@ namespace gxfile {
         return 0;
     }
 
-    int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Typ, int UserInfo) {
+    int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
+                                         int UserInfo) {
         return 0;
     }
 
@@ -22,6 +23,10 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxDataWriteDone() {
+        return 0;
+    }
+
+    int TGXFileObj::gdxClose() {
         return 0;
     }
 }
