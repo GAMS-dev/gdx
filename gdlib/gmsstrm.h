@@ -195,7 +195,6 @@ namespace gdlib::gmsstrm {
         bool FillBuffer();
         
     protected:
-        int64_t GetPosition() override;
         void SetPosition(int64_t p) override;
         int64_t GetSize() override;
     public:
@@ -211,6 +210,8 @@ namespace gdlib::gmsstrm {
         bool GetCompression() const;
         void SetCompression(bool V);
         bool GetCanCompress() const;
+
+        int64_t GetPosition() override;
     };
 
     void reverseBytesMax8(void *psrc, void *pdest, int sz);

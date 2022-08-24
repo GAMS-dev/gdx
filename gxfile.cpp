@@ -8,6 +8,10 @@ using namespace gdlib::gmsstrm;
 
 namespace gxfile {
 
+    const int   VERSION = 7,
+                gdxHeaderNr = 123;
+    const std::string gdxHeaderId = "GAMSGDX";
+
     std::string DLLLoadPath;
     
     const int
@@ -113,6 +117,36 @@ namespace gxfile {
             return false;
         }
         FFile = std::make_unique<TMiBufferedStreamDelphi>(FileName, fmCreate, DLLLoadPath);
+        ErrNr = FFile->GetLastIOResult();
+        if(ErrNr) {
+            FFile.reset();
+            if(ErrNr == strmErrorZLib) ErrNr = ERR_ZLIB_NOT_FOUND;
+            LastError = ErrNr;
+            return false;
+        }
+
+        Compr &= (FFile->GetCanCompress() ? 1 : 0);
+        fComprLev = Compr;
+        CompressOut = Compr > 0;
+        fmode = f_not_open;
+        ReadPtr = nullptr;
+        MajContext = "OpenWrite";
+        TraceLevel = trl_none;
+        InitErrors();
+        FFile->WriteByte(gdxHeaderNr);
+        FFile->WriteString(gdxHeaderId);
+        VersionRead = VERSION;
+        FFile->WriteInteger(VersionRead);
+        FFile->WriteInteger(Compr);
+        // FIXME: Call actual function (see cppmex palxxx::gdlaudit)
+        FileSystemID = ""; //gdlGetAuditLine();
+        FFile->WriteString(FileSystemID);
+        FProducer = Producer;
+        FProducer2.clear();
+        FFile->WriteString(FProducer);
+        // Reserve some space for positions
+        MajorIndexPosition = FFile->GetPosition();
+        for(int N{1}; N<=10; N++) FFile->WriteInt64(0);
         // ...
         return 0;
     }
@@ -132,5 +166,10 @@ namespace gxfile {
 
     int TGXFileObj::gdxClose() {
         return 0;
+    }
+
+    void TGXFileObj::InitErrors() {
+        ErrCnt = ErrCntTotal = 0;
+        LastError = LastRepError = ERR_NOERROR;
     }
 }
