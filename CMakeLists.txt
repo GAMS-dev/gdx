@@ -23,10 +23,18 @@ set(common
 		gdlib/strutilx.h gdlib/strutilx.cpp
 		gdlib/xcompress.h gdlib/xcompress.cpp
 
+		expertapi/gdxcc.h expertapi/gdxcc.c
+		expertapi/gclgms.h expertapi/gclgms.c
+		expertapi/gcmt.h expertapi/gcmt.c
+
+		simplegdx/tgx.h simplegdx/tgx.cpp
+		simplegdx/twostream.h simplegdx/twostream.cpp
+		simplegdx/mistream.h simplegdx/mistream.cpp
+
 		utils.h utils.cpp
 
 		gxfile.h gxfile.cpp
-		global/unit.h)
+		global/unit.h igdx.h tests/xptests.cpp)
 
 add_executable(gdxnativetest
 		tests/doctestmain.cpp

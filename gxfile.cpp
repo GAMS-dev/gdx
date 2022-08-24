@@ -1,5 +1,7 @@
 #include "gxfile.h"
 
+using namespace igdx;
+
 namespace gxfile {
 
 
