@@ -87,14 +87,30 @@ namespace tests::tgxtests {
 
     // TODO: Complete this one
     void checkFileWithTGX() {
-        GAMSDataExchange gdx {testfn};
+        const std::array<std::pair<std::string, double>, 3> exampleData
+        {{
+                 {"New-York", 324.0},
+                 {"Chicago", 299.0},
+                 {"Topeka", 274.0}
+         }};
+
+        GAMSDataExchange gdx{testfn};
         gdx.ReadSymbolHeader();
         auto sym = gdx.ReadSymbol();
         gdx.ReadRecordHeader(sym);
-        int keys[1];
-        double vals[1];
-        gdx.ReadRecord(keys, vals);
-        std::cout << std::endl;
+
+        auto readRec = [&gdx]() {
+            static std::array<int32_t, 20> keys{};
+            static std::array<double, 5> vals{};
+            gdx.ReadRecord(keys.data(), vals.data());
+            return std::make_pair(keys[0], vals[0]);
+        };
+
+        for(int i{1}; i<=3; i++) {
+            auto pair = readRec();
+            REQUIRE_EQ(i, pair.first);
+            REQUIRE_EQ(exampleData[i-1].second, pair.second);
+        }
     }
 
     TEST_CASE("Test simple gdx file creation") {
