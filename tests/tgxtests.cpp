@@ -24,7 +24,7 @@ namespace tests::tgxtests {
         std::array<int32_t, 1> keys {1};
         std::array<double, 5> vals {};
         vals[0] = 324.0;
-        int minKey{1}, maxKey{255};
+        int minKey{1}, maxKey{3};
         gdx.WriteRecordHeader(sym, &minKey, &maxKey);
         gdx.WriteRecord(sym, keys.data(), vals.data());
     }
