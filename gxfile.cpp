@@ -2,6 +2,7 @@
 #include "rtl/sysutils_p3.h"
 #include "utils.h"
 #include "gdlib/gmsstrm.h"
+#include "global/modhead.h"
 
 using namespace igdx;
 using namespace gdlib::gmsstrm;
@@ -153,23 +154,57 @@ namespace gxfile {
 
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
                                          int UserInfo) {
+        // ...
+        STUBWARN();
         return 0;
     }
 
     int TGXFileObj::gdxDataWriteStr(const TgdxStrIndex &KeyStr, const TgdxValues &Values) {
+        // ...
+        STUBWARN();
         return 0;
     }
 
     int TGXFileObj::gdxDataWriteDone() {
+        // ...
+        STUBWARN();
         return 0;
     }
 
+    // Brief:
+    //   Close a gdx file
+    // Description
+    //   Close a gdx file that was previously opened for reading or writing.
+    //   Before the file is closed, any pending write operations will be
+    //   finished. To free the gdx object, call gdxFree.
+    // Returns:
+    //   Returns the value of gdxGetLastError
+    // See Also:
+    //   gdxOpenRead, gdxOpenWrite
     int TGXFileObj::gdxClose() {
+        // ...
+        STUBWARN();
         return 0;
     }
 
     void TGXFileObj::InitErrors() {
         ErrCnt = ErrCntTotal = 0;
         LastError = LastRepError = ERR_NOERROR;
+    }
+
+    TGXFileObj::TGXFileObj(std::string &ErrMsg) : fstatus{stat_notopen} {
+        ErrMsg.clear();
+        gdxResetSpecialValues();
+    }
+
+    TGXFileObj::~TGXFileObj() {
+        if(fmode != f_not_open) {
+            fmode = fr_init;
+            gdxClose();
+        }
+    }
+
+    int TGXFileObj::gdxResetSpecialValues() {
+        return 0;
     }
 }

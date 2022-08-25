@@ -69,13 +69,15 @@ namespace gxfile {
 
     class TGXFileObj : public igdx::IGDX {
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
-        TgxFileMode fmode;
+        TgxFileMode fmode {f_not_open};
         int ErrCnt, ErrCntTotal;
         int LastError, LastRepError, fComprLev;
         bool CompressOut;
         void *ReadPtr;
         std::string MajContext;
         enum { trl_none, trl_errors, trl_some, trl_all } TraceLevel;
+        enum {stat_notopen, stat_read, stat_write} fstatus;
+        int AutoConvert{1};
 
         std::map<std::string, PgdxSymbRecord> NameList;
         TUELTable UELTable;
@@ -84,10 +86,17 @@ namespace gxfile {
         int VersionRead;
         std::string FileSystemID, FProducer, FProducer2;
         int64_t MajorIndexPosition;
+        int NextAutoAcronym{};
+        bool AppendActive{}, StoreDomainSets{true};
 
         void InitErrors();
 
+        int gdxResetSpecialValues();
+
     public:
+        TGXFileObj(std::string &ErrMsg);
+        ~TGXFileObj();
+
         int gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
         int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) override;
         int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
