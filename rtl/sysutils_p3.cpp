@@ -4,8 +4,7 @@
 #include <ctime>
 
 #include "sysutils_p3.h"
-//#include "../ctv.h"
-//#include "p3platform.h"
+#include "p3platform.h"
 
 #if defined(_WIN32)
 #include <Windows.h>

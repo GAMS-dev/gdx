@@ -9,7 +9,7 @@ namespace tests::tgxtests {
     TEST_SUITE_BEGIN("tgx");
 
     void writeFileWithTGX() {
-        GAMSDataExchange gdx {"test.gdx"};
+        GAMSDataExchange gdx {"test.gdx", "TGX", false};
         SymbolRaw sym;
         sym.name = "demand";
         sym.explanatory_text = "demand data";

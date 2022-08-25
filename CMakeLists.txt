@@ -8,6 +8,12 @@ if(CCACHE_FOUND)
 	set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
+set(mylibs dl pthread)
+if (MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+	set(mylibs "")
+endif (MSVC)
+
 set(common
 		global/gmslibname.h global/gmslibname.cpp
 		global/gmsspecs.h global/gmsspecs.cpp
@@ -43,4 +49,4 @@ add_executable(gdxnativetest
 		tests/doctestmain.cpp
 		tests/gxfiletests.cpp
 		tests/xpwraptests.cpp tests/tgxtests.cpp)
-target_link_libraries(gdxnativetest dl pthread)
+target_link_libraries(gdxnativetest ${mylibs})
