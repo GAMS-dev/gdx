@@ -17,7 +17,7 @@ namespace tests::xpwraptests {
 
         // Write data
         int ErrNr{};
-        const std::string fn {"demanddata.gdx"};
+        const std::string fn {"xpwraptest.gdx"};
         REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "xptests" , ErrNr));
         REQUIRE_EQ(0, ErrNr);
         REQUIRE(pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0));

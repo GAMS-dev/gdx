@@ -41,6 +41,7 @@ namespace tests::xptests {
         REQUIRE_EQ(0, ErrNr);
         int nrRecs{};
         REQUIRE(gdxDataReadStrStart(pgx, 1, &nrRecs));
+        REQUIRE_EQ(3, nrRecs);
         int dimFrst{};
         KVBuffers bufs;
         for(int i{}; i<nrRecs; i++) {
@@ -67,7 +68,7 @@ namespace tests::xptests {
                 {"Topeka"s, 274.0}
             }
         };
-        const std::string fn {"demanddata.gdx"};
+        const std::string fn {"xptest.gdx"};
 
         writeDemandData(pgx, fn, exampleData);
         readDemandData(pgx, fn, exampleData);
