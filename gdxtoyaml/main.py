@@ -18,7 +18,7 @@ def read_gdx(fn):
         header['sizeof_int'] = intsize = read_byte()
 
         def read_int():
-            return int.from_bytes(fp.read(intsize), byteorder=endian)
+            return int.from_bytes(fp.read(intsize), byteorder=endian, signed=True)
 
         header['example_int'] = hex(read_int())
         header['sizeof_double'] = dblsize = read_byte()
@@ -67,20 +67,69 @@ def read_gdx(fn):
                 sym['domain_symbols_per_dim'] = [read_int() for i in range(sym['dim'])]
             if int(version) >= 7:
                 sym['num_comments'] = ncomments = read_int()
-                sym['comments'] = [read_string() for _ in range(ncomments)]
+                if ncomments > 0:
+                    sym['comments'] = [read_string() for _ in range(ncomments)]
             return sym
 
         fp.seek(index_pos['symbols_pos'])
         syms = {}
         syms['head'] = read_string()
         syms['num_symbols'] = nsyms = read_int()
-        syms['symbols'] = [ read_symbol() for i in range(nsyms)]
+        syms['symbols'] = [read_symbol() for i in range(nsyms)]
         syms['foot'] = read_string()
+
+        fp.seek(index_pos['set_text_pos'])
+        set_texts = dict(head=read_string())
+        set_texts['num_set_texts'] = num_set_texts = read_int()
+        if num_set_texts > 0:
+            set_texts['set_texts'] = [read_string() for _ in range(num_set_texts)]
+        set_texts['foot'] = read_string()
+
+        fp.seek(index_pos['uel_pos'])
+        uels = dict(head=read_string())
+        uels['num_uels'] = num_uels = read_int()
+        if num_uels > 0:
+            uels['uels'] = [read_string() for _ in range(num_uels)]
+        uels['foot'] = read_string()
+
+        fp.seek(index_pos['acronym_pos'])
+        acros = dict(head=read_string())
+        acros['num_acronyms'] = num_acros = read_int()
+        if num_acros > 0:
+            acros['acronyms'] = [dict(name=read_string(), text=read_string(), index=read_int())
+                                 for _ in range(num_acros)]
+        acros['foot'] = read_string()
+
+        fp.seek(index_pos['domain_pos'])
+        domains = dict(head=read_string())
+        domains['num_domains'] = num_domains = read_int()
+        if num_domains > 0:
+            domains['domains'] = [read_string() for _ in range(num_domains)]
+        domains['midsep'] = read_string()
+
+        def dim_of_sym(index):
+            return int(syms['symbols'][index]['dim'])
+
+        def read_controlled_sym():
+            sym_index = read_int()
+            return dict(sym_index=sym_index,
+                        dom_indices=[read_int() for _ in range(dim_of_sym(sym_index))])
+
+        if num_domains > 0:
+            domains['controlled_syms'] = { read_controlled_sym() for _ in range(num_domains) }
+
+        domains['check_minus_one'] = read_int()
+        domains['foot'] = read_string()
 
         obj = dict(header=header,
                    gdx_signature=gdx_sig,
                    major_index_positions=index_pos,
-                   symbol_section=syms)
+                   data_section={},
+                   symbol_section=syms,
+                   set_text_section=set_texts,
+                   uel_section=uels,
+                   acronym_section=acros,
+                   domains_section=domains)
         print(yaml.dump(obj, sort_keys=False, default_flow_style=False))
 
 
