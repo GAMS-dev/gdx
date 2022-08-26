@@ -182,9 +182,11 @@ namespace gxfile {
 
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
                                          int UserInfo) {
-        // ...
-        STUBWARN();
-        return 0;
+        if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
+        for(int D{1}; D <= FCurrentDim; D++)
+            LastStrElem[D] = (char)0xFF;
+        fmode = fw_dom_str;
+        return true;
     }
 
     int TGXFileObj::gdxDataWriteStr(const TgdxStrIndex &KeyStr, const TgdxValues &Values) {
@@ -247,5 +249,17 @@ namespace gxfile {
         copyIntlMapDblToI64(intlValueMapDbl, intlValueMapI64);
         Zvalacr = valacr;
         return true;
+    }
+
+    bool TGXFileObj::PrepareSymbolWrite(const std::string &Caller,
+                                        const std::string &AName,
+                                        const std::string &AText,
+                                        int ADim,
+                                        int AType,
+                                        int AUserType) {
+        const TgxModeSet AllowModes{fw_init};
+        // ...
+        STUBWARN();
+        return false;
     }
 }

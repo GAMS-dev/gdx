@@ -40,6 +40,8 @@ namespace gxfile {
         fr_slice
     };
 
+    using TgxModeSet = std::set<TgxFileMode>;
+
     struct TgdxSymbRecord {
         int SSyNr;
         int64_t SPosition;
@@ -126,12 +128,20 @@ namespace gxfile {
         double Zvalacr;
 
         int64_t NextWritePosition;
+        int FCurrentDim;
+        std::vector<std::string> LastStrElem;
 
         std::vector<std::string> SetTextList;
 
         void InitErrors();
 
         int gdxResetSpecialValues();
+        bool PrepareSymbolWrite(const std::string &Caller,
+                                const std::string &AName,
+                                const std::string &AText,
+                                int ADim,
+                                int AType,
+                                int AUserType);
 
     public:
         TGXFileObj(std::string &ErrMsg);
@@ -145,6 +155,8 @@ namespace gxfile {
         int gdxDataWriteDone() override;
 
         int gdxClose() override;
+
+
     };
 
     extern std::string DLLLoadPath;
