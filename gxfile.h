@@ -11,6 +11,14 @@ namespace gdlib::gmsstrm {
 }
 
 namespace gxfile {
+    const std::string   BADUEL_PREFIX = "?L__",
+                        BADStr_PREFIX = "?Str__",
+                        strGDXCOMPRESS = "GDXCOMPRESS",
+                        strGDXCONVERT = "GDXCONVERT";
+
+    // TODO: Also port gxdefs.pas as gxdefs.h
+    using PUELIndex = global::gmsspecs::TIndex*;
+
     enum TgxFileMode {
         f_not_open   ,
         fr_init      ,
@@ -48,12 +56,32 @@ namespace gxfile {
     };
     using PgdxSymbRecord = TgdxSymbRecord*;
 
+    enum TgdxIntlValTyp { // values stored internally via the indicator byte
+        vm_valund ,
+        vm_valna  ,
+        vm_valpin ,
+        vm_valmin ,
+        vm_valeps ,
+        vm_zero   ,
+        vm_one    ,
+        vm_mone   ,
+        vm_half   ,
+        vm_two    ,
+        vm_normal
+    };
+
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
 
     class TUELTable {
         std::map<int, int> UsrUel2Ent;
         std::vector<std::string> uelNames;
         // ...
+
+    public:
+        void clear() {
+            UsrUel2Ent.clear();
+            uelNames.clear();
+        }
     };
 
     class TAcronym {
@@ -68,6 +96,9 @@ namespace gxfile {
         // ...
     };
 
+    using TIntlValueMapDbl = std::array<double, 11>;
+    using TIntlValueMapI64 = std::array<int64_t, 11>;
+
     class TGXFileObj : public gdxinterface::GDXInterface {
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
         TgxFileMode fmode {f_not_open};
@@ -81,6 +112,7 @@ namespace gxfile {
         int AutoConvert{1};
 
         std::map<std::string, PgdxSymbRecord> NameList;
+        std::vector<std::string> DomainStrList;
         TUELTable UELTable;
         std::vector<TAcronym> AcronymList;
         std::vector<TDFilter> FilterList;
@@ -89,6 +121,13 @@ namespace gxfile {
         int64_t MajorIndexPosition;
         int NextAutoAcronym{};
         bool AppendActive{}, StoreDomainSets{true};
+        TIntlValueMapDbl intlValueMapDbl, readIntlValueMapDbl;
+        TIntlValueMapI64  intlValueMapI64;
+        double Zvalacr;
+
+        int64_t NextWritePosition;
+
+        std::vector<std::string> SetTextList;
 
         void InitErrors();
 

@@ -1,0 +1,2 @@
+namespace global::gmsglobx1 {
+}

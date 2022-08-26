@@ -3,9 +3,13 @@
 #include "utils.h"
 #include "gdlib/gmsstrm.h"
 #include "global/modhead.h"
+#include "global/gmsspecs.h"
+#include "palxxx/gdlaudit.h"
 
 using namespace gdxinterface;
 using namespace gdlib::gmsstrm;
+using namespace global::gmsspecs;
+using namespace std::literals::string_literals;
 
 namespace gxfile {
 
@@ -97,8 +101,24 @@ namespace gxfile {
     ERR_CANNOT_DELETE        = ERR_GDXCOPY - 12,
     ERR_CANNOT_RENAME        = ERR_GDXCOPY - 13;
 
+    union TI64Rec {
+        double x;
+        int64_t i64;
+    };
+
+    int64_t dblToI64(double x) {
+        TI64Rec i64Rec {x};
+        return i64Rec.i64;
+    }
+
+    void copyIntlMapDblToI64(const TIntlValueMapDbl &dMap, TIntlValueMapI64 &iMap) {
+        for(int k=0; k<iMap.size(); k++) {
+            iMap[k] = dblToI64(dMap[k]);
+        }
+    }
+
     int GetEnvCompressFlag() {
-        std::string s{ rtl::sysutils_p3::QueryEnvironmentVariable("GDXCOMPRESS") };
+        std::string s{ rtl::sysutils_p3::QueryEnvironmentVariable(strGDXCOMPRESS) };
         s = utils::uppercase(s.substr(0, 1));
         return s.empty() || s == "N" || s == "0" ? 0 : 1;
     }
@@ -134,13 +154,16 @@ namespace gxfile {
         MajContext = "OpenWrite";
         TraceLevel = trl_none;
         InitErrors();
+        NameList.clear();
+        UELTable.clear();
+        AcronymList.clear();
+        FilterList.clear();
         FFile->WriteByte(gdxHeaderNr);
         FFile->WriteString(gdxHeaderId);
         VersionRead = VERSION;
         FFile->WriteInteger(VersionRead);
         FFile->WriteInteger(Compr);
-        // FIXME: Call actual function (see cppmex palxxx::gdlaudit)
-        FileSystemID = ""; //gdlGetAuditLine();
+        FileSystemID = palxxx::gdlaudit::gdlGetAuditLine();
         FFile->WriteString(FileSystemID);
         FProducer = Producer;
         FProducer2.clear();
@@ -148,8 +171,13 @@ namespace gxfile {
         // Reserve some space for positions
         MajorIndexPosition = FFile->GetPosition();
         for(int N{1}; N<=10; N++) FFile->WriteInt64(0);
-        // ...
-        return 0;
+        SetTextList.clear();
+        SetTextList.emplace_back(""s);
+        gdxResetSpecialValues();
+        NextWritePosition = FFile->GetPosition();
+        fmode = fw_init;
+        DomainStrList.clear();
+        return true;
     }
 
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
@@ -205,6 +233,19 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxResetSpecialValues() {
-        return 0;
+        intlValueMapDbl[vm_valund] = valund;
+        intlValueMapDbl[vm_valna ] = valna;
+        intlValueMapDbl[vm_valpin] = valpin;
+        intlValueMapDbl[vm_valmin] = valmin;
+        intlValueMapDbl[vm_valeps] = valeps;
+        intlValueMapDbl[vm_zero] = 0.0;
+        intlValueMapDbl[vm_one] = 1.0;
+        intlValueMapDbl[vm_mone] = -1.0;
+        intlValueMapDbl[vm_half] = 0.5;
+        intlValueMapDbl[vm_two] = 2.0;
+        readIntlValueMapDbl = intlValueMapDbl;
+        copyIntlMapDblToI64(intlValueMapDbl, intlValueMapI64);
+        Zvalacr = valacr;
+        return true;
     }
 }
