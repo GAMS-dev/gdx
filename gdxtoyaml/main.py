@@ -31,7 +31,7 @@ def read_gdx(fn):
         gdx_sig = {}
         gdx_sig['gdx_header_nr'] = read_byte()
         gdx_sig['gdx_header_id'] = read_string()
-        gdx_sig['version'] = read_int()
+        gdx_sig['version'] = version = read_int()
         gdx_sig['compressed'] = read_int()
 
         def trunc(s, maxlen):
@@ -50,8 +50,38 @@ def read_gdx(fn):
         for pn in pos_names:
             index_pos[pn + '_pos'] = read_int64()
 
-        obj = dict(header=header, gdx_signature=gdx_sig, major_index_positions=index_pos)
-        print(yaml.dump(obj))
+        def read_symbol():
+            sym = dict(name=read_string(),
+                       data_pos=read_int64(),
+                       dim=read_int(),
+                       type=read_byte(),
+                       user_info=read_int(),
+                       num_records=read_int(),
+                       num_errors=read_int(),
+                       has_set=read_byte(),
+                       explanatory_text=read_string(),
+                       compressed=read_byte(),
+                       )
+            sym['domain_controlled'] = dc = read_byte()
+            if dc != 0:
+                sym['domain_symbols_per_dim'] = [read_int() for i in range(sym['dim'])]
+            if int(version) >= 7:
+                sym['num_comments'] = ncomments = read_int()
+                sym['comments'] = [read_string() for _ in range(ncomments)]
+            return sym
+
+        fp.seek(index_pos['symbols_pos'])
+        syms = {}
+        syms['head'] = read_string()
+        syms['num_symbols'] = nsyms = read_int()
+        syms['symbols'] = [ read_symbol() for i in range(nsyms)]
+        syms['foot'] = read_string()
+
+        obj = dict(header=header,
+                   gdx_signature=gdx_sig,
+                   major_index_positions=index_pos,
+                   symbol_section=syms)
+        print(yaml.dump(obj, sort_keys=False, default_flow_style=False))
 
 
 if __name__ == '__main__':
