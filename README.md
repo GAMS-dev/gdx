@@ -3,11 +3,11 @@
 Native C++17 re-implementation of (proper) subset of classic expert-level GDX API. Should make "gdxio/gxfile.pas" obsolete and published as open source eventually.
 
 ## First steps
-- Add CI
-- Make writing demand data (parameter "demands") for `gamslib/trnsport` possible through three implementations of GDX-Interface GDXInterface
+- Make writing demand data (parameter "demands") for `gamslib/trnsport` possible through ~~~three~~~ two implementations of GDX-Interface IGDX
   1. just wrap expert level API
-  2. slightly extend and use `simplegdx` from @busul
+  ~~~2. slightly extend and use `simplegdx` from @busul~~~
   3. port `gxfile` from Delphi to C++
+- Add CI
 
 ## Long term
 - Not only statically linked but also available as DLL
