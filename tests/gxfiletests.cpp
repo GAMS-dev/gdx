@@ -10,10 +10,11 @@ namespace tests::gxfiletests {
 
     TEST_CASE("Test creating a simple gdx file with gxfile port") {
         std::string msg;
+        const std::string fn {"mytest.gdx"};
         {
             TGXFileObj pgx{msg};
             int ErrNr;
-            pgx.gdxOpenWrite("mytest.gdx", "TGXFileObjPort", ErrNr);
+            pgx.gdxOpenWrite(fn, "TGXFileObjPort", ErrNr);
             pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0);
             auto writeRec = [&pgx](const std::string &s, double v) {
                 static std::array<std::string, 20> keys{};
@@ -28,7 +29,7 @@ namespace tests::gxfiletests {
             pgx.gdxDataWriteDone();
             pgx.gdxClose();
         }
-        std::filesystem::remove("mytest.gdx");
+        std::filesystem::remove(fn);
     }
 
     TEST_SUITE_END();
