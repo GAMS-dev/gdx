@@ -15,7 +15,7 @@ namespace xpwrap {
         return ::gdxDataWriteStrStart(pgx, SyId.c_str(), ExplTxt.c_str(), Dim, Typ, UserInfo);
     }
 
-    int GDXFile::gdxDataWriteStr(const igdx::TgdxStrIndex &KeyStr, const igdx::TgdxValues &Values) {
+    int GDXFile::gdxDataWriteStr(const gdxinterface::TgdxStrIndex &KeyStr, const gdxinterface::TgdxValues &Values) {
         static std::array<const char *, 20> KeyStrCstrs {};
         for(int i{}; i<KeyStrCstrs.size(); i++)
             KeyStrCstrs[i] = KeyStr[i].c_str();

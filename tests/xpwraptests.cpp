@@ -26,8 +26,8 @@ namespace tests::xpwraptests {
                                                                            {"Chicago"s, 299.0},
                                                                            {"Topeka"s, 274.0}
                                                                    }};
-        igdx::TgdxStrIndex keys;
-        igdx::TgdxValues  vals;
+        gdxinterface::TgdxStrIndex keys;
+        gdxinterface::TgdxValues  vals;
         for(const auto &[key, value] : exampleData) {
             keys[0] = key;
             vals[0] = value;

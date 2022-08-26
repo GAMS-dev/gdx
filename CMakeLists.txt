@@ -40,7 +40,7 @@ set(common
 
 		utils.h utils.cpp
 		gxfile.h gxfile.cpp
-		igdx.h
+		gdxinterface.h
 		xpwrap.cpp xpwrap.h kvbuffers.h)
 
 add_executable(gdxnativetest

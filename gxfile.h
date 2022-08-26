@@ -1,8 +1,9 @@
 #pragma once
 
-#include "igdx.h"
+#include "gdxinterface.h"
 #include <memory>
 #include <map>
+#include <vector>
 #include "global/gmsspecs.h"
 
 namespace gdlib::gmsstrm {
@@ -67,7 +68,7 @@ namespace gxfile {
         // ...
     };
 
-    class TGXFileObj : public igdx::IGDX {
+    class TGXFileObj : public gdxinterface::GDXInterface {
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
         TgxFileMode fmode {f_not_open};
         int ErrCnt, ErrCntTotal;
@@ -101,7 +102,7 @@ namespace gxfile {
         int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) override;
         int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
                                  int UserInfo) override;
-        int gdxDataWriteStr(const igdx::TgdxStrIndex &KeyStr, const igdx::TgdxValues &Values) override;
+        int gdxDataWriteStr(const gdxinterface::TgdxStrIndex &KeyStr, const gdxinterface::TgdxValues &Values) override;
         int gdxDataWriteDone() override;
 
         int gdxClose() override;

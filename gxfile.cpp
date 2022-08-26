@@ -4,7 +4,7 @@
 #include "gdlib/gmsstrm.h"
 #include "global/modhead.h"
 
-using namespace igdx;
+using namespace gdxinterface;
 using namespace gdlib::gmsstrm;
 
 namespace gxfile {

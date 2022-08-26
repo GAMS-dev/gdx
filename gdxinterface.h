@@ -3,14 +3,14 @@
 #include <string>
 #include <array>
 
-namespace igdx {
+namespace gdxinterface {
     const int MaxDim = 20;
     using TgdxValues = std::array<double, 5>;
     using TgdxStrIndex = std::array<std::string, MaxDim>;
 
-    class IGDX {
+    class GDXInterface {
     public:
-        virtual ~IGDX() = default;
+        virtual ~GDXInterface() = default;
         virtual int gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) = 0;
         virtual int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) = 0;
         virtual int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) = 0;
