@@ -19,14 +19,35 @@ begin
   pgx.gdxDataWriteStr(keys, values);
 end;
 
+procedure testWriteGdx();
+begin;
+  pgx := TGXFileObj.Create(msg);
+  pgx.gdxOpenWrite('mytest.gdx', 'TGXFileObj', ErrNr);
+  pgx.gdxDataWriteStrStart('Demand', 'Demand data', 1, GMS_DT_PAR, 0);
+  writeRec('New-York', 324.0);
+  writeRec('Chicago', 299.0);
+  writeRec('Topeka', 274.0);
+  pgx.gdxDataWriteDone;
+  pgx.gdxClose;
+  pgx.Free;
+end;
+
+procedure testReadGdx();
+var
+  NrRecs, DimFrst, i: Integer;
+begin;
+  pgx := TGXFileObj.Create(msg);
+  pgx.gdxOpenRead('mytest.gdx', ErrNr);
+  pgx.gdxDataReadStrStart(1, NrRecs);
+  for i := 1 to NrRecs do begin
+    pgx.gdxDataReadStr(keys, values, DimFrst);
+    WriteLn('Key = ', keys[1], ' Value=', values[vallevel], ' DimFrst=', DimFrst);
+  end;
+  pgx.gdxClose;
+  pgx.Free;
+end;
+
 begin
-pgx := TGXFileObj.Create(msg);
-pgx.gdxOpenWrite('mytest.gdx', 'TGXFileObj', ErrNr);
-pgx.gdxDataWriteStrStart('Demand', 'Demand data', 1, GMS_DT_PAR, 0);
-writeRec('New-York', 324.0);
-writeRec('Chicago', 299.0);
-writeRec('Topeka', 274.0);
-pgx.gdxDataWriteDone;
-pgx.gdxClose;
-pgx.Free;
+  testWriteGdx();
+  testReadGdx();
 end.
