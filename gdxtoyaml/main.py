@@ -8,8 +8,8 @@ def read_gdx(fn):
             return ord(fp.read(1))
 
         def read_string():
-            len = ord(fp.read(1))
-            return str(fp.read(len), 'ascii')
+            length = ord(fp.read(1))
+            return str(fp.read(length), 'ascii')
 
         header = dict()
         header['size_of_word'] = read_byte()
@@ -66,7 +66,7 @@ def read_gdx(fn):
             sym_to_data_offs[sym['name']] = sym['data_pos']
             sym['domain_controlled'] = dc = read_byte()
             if dc != 0:
-                sym['domain_symbols_per_dim'] = [read_int() for i in range(sym['dim'])]
+                sym['domain_symbols_per_dim'] = [read_int() for _ in range(sym['dim'])]
             if int(version) >= 7:
                 sym['num_comments'] = ncomments = read_int()
                 if ncomments > 0:
@@ -77,7 +77,7 @@ def read_gdx(fn):
         syms = {}
         syms['head'] = read_string()
         syms['num_symbols'] = nsyms = read_int()
-        syms['symbols'] = [read_symbol() for i in range(nsyms)]
+        syms['symbols'] = [read_symbol() for _ in range(nsyms)]
         syms['foot'] = read_string()
 
         fp.seek(index_pos['set_text_pos'])
