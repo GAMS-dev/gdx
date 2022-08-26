@@ -50,6 +50,8 @@ def read_gdx(fn):
         for pn in pos_names:
             index_pos[pn + '_pos'] = read_int64()
 
+        sym_to_data_offs = {}
+
         def read_symbol():
             sym = dict(name=read_string(),
                        data_pos=read_int64(),
@@ -60,8 +62,8 @@ def read_gdx(fn):
                        num_errors=read_int(),
                        has_set=read_byte(),
                        explanatory_text=read_string(),
-                       compressed=read_byte(),
-                       )
+                       compressed=read_byte())
+            sym_to_data_offs[sym['name']] = sym['data_pos']
             sym['domain_controlled'] = dc = read_byte()
             if dc != 0:
                 sym['domain_symbols_per_dim'] = [read_int() for i in range(sym['dim'])]
@@ -121,10 +123,33 @@ def read_gdx(fn):
         domains['check_minus_one'] = read_int()
         domains['foot'] = read_string()
 
+        data = {}
+        for sym_name, data_offs in sym_to_data_offs.items():
+            fp.seek(data_offs)
+            data_block = dict(head=read_string())
+            data[sym_name] = data_block
+            data_block['dim'] = read_byte()
+            data_block['num_records'] = num_records = read_int()
+            data_block['min_uel'] = read_int()
+            data_block['max_uel'] = read_int()
+
+            # FIXME: Correctly treat key for scalar, small change in last dim and general change
+            def read_record(ix):
+                rec = dict(key=read_byte())
+                if ix == 0: # for now assume first is general change and afterwards small change
+                    rec['key2'] = read_byte()
+                rec['value_type'] = read_byte()
+                if rec['value_type'] == 10:
+                    rec['value'] = read_dbl()
+                return rec
+
+            data_block['records'] = [read_record(ix) for ix in range(num_records)]
+            data_block['end_of_data_marker'] = read_byte() # should be 255
+
         obj = dict(header=header,
                    gdx_signature=gdx_sig,
                    major_index_positions=index_pos,
-                   data_section={},
+                   data_section=data,
                    symbol_section=syms,
                    set_text_section=set_texts,
                    uel_section=uels,
