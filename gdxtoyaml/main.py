@@ -40,7 +40,17 @@ def read_gdx(fn):
         gdx_sig['audit_line'] = trunc(read_string(), 40)
         gdx_sig['producer'] = read_string()
 
-        obj = dict(header=header, gdx_signature=gdx_sig)
+        index_pos = {}
+
+        def read_int64():
+            return int.from_bytes(fp.read(8), byteorder=endian)
+
+        index_pos['check_pos'] = read_int()  # should be 19510624
+        pos_names = ['symbols', 'uel', 'set_text', 'acronym', 'next_write', 'domain']
+        for pn in pos_names:
+            index_pos[pn + '_pos'] = read_int64()
+
+        obj = dict(header=header, gdx_signature=gdx_sig, major_index_positions=index_pos)
         print(yaml.dump(obj))
 
 
