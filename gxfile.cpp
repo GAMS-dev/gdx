@@ -115,6 +115,19 @@ namespace gxfile {
 
     // ...
 
+    int GetEnvCompressFlag();
+
+    static int ConvertGDXFile(const std::string &fn, const std::string &MyComp) {
+        std::string Conv {utils::trim(utils::uppercase(rtl::sysutils_p3::QueryEnvironmentVariable(strGDXCONVERT)))};
+        if(Conv.empty()) Conv = "V7"s;
+        std::string Comp = Conv == "V5" ? ""s : (!GetEnvCompressFlag() ? "U" : "C");
+        if(utils::sameText(Conv+Comp, "V7"+MyComp)) return 0;
+
+        // ...
+        STUBWARN();
+        return 0;
+    }
+
     static std::string MakeGoodExplText(const std::string &s) {
         char q {'\0'};
         std::string res(s.length(), ' ');
@@ -251,9 +264,112 @@ namespace gxfile {
     // See Also:
     //   gdxOpenRead, gdxOpenWrite
     int TGXFileObj::gdxClose() {
+        std::string fnConv;
+        if(utils::in(fmode, fw_raw_data, fw_map_data, fw_str_data))
+            gdxDataWriteDone();
+        if(fmode == fw_init) {
+            fnConv = FFile->GetFileName();
+            FFile->SetCompression(CompressOut);
+            FFile->SetPosition(NextWritePosition);
+            int64_t SymbPos = NextWritePosition;
+            FFile->WriteString(MARK_SYMB);
+            FFile->WriteInteger(NameList.size());
+            for(const auto &[name, PSy] : NameList) {
+                FFile->WriteString(name);
+                FFile->WriteInteger(PSy->SDim);
+                FFile->WriteByte(PSy->SDataType);
+                FFile->WriteInteger(PSy->SUserInfo);
+                FFile->WriteInteger(PSy->SDataCount);
+                FFile->WriteInteger(PSy->SErrors);
+                FFile->WriteByte(PSy->SSetText);
+                FFile->WriteString(PSy->SExplTxt);
+                FFile->WriteByte(PSy->SIsCompressed);
+                FFile->WriteByte(PSy->SDomSymbols.empty() ? 0 : 1);
+                if(!PSy->SDomSymbols.empty()) {
+                    for(int D{}; D<PSy->SDim; D++)
+                        FFile->WriteInteger(PSy->SDomSymbols[D]);
+                }
+                int CommCnt {static_cast<int>(PSy->SCommentsList.size())};
+                FFile->WriteInteger(CommCnt);
+                for(int Cnt{}; Cnt<CommCnt; Cnt++)
+                    FFile->WriteString(PSy->SCommentsList[Cnt]);
+            }
+            FFile->WriteString(MARK_SYMB);
+
+            auto SetTextPos {static_cast<int64_t>(FFile->GetPosition())};
+            FFile->SetCompression(CompressOut);
+            FFile->WriteString(MARK_SETT);
+            FFile->WriteInteger(static_cast<int>(SetTextList.size()));
+            for(const auto &SetText : SetTextList)
+                FFile->WriteString(SetText);
+            FFile->WriteString(MARK_SETT);
+
+            auto UELPos {static_cast<int64_t>(FFile->GetPosition())};
+            FFile->SetCompression(CompressOut);
+            FFile->WriteString(MARK_UEL);
+            FFile->WriteInteger(UELTable.size());
+            for(const auto &uelName : UELTable.getNames())
+                FFile->WriteString(uelName);
+            FFile->WriteString(MARK_UEL);
+
+            auto AcronymPos {static_cast<int64_t>(FFile->GetPosition())};
+            FFile->SetCompression(CompressOut);
+            FFile->WriteString(MARK_ACRO);
+            FFile->WriteInteger(static_cast<int>(AcronymList.size()));
+            for(const auto &acro : AcronymList) {
+                FFile->WriteString(acro.AcrName.empty() ? "UnknownACRO" + std::to_string(acro.AcrMap) : acro.AcrName);
+                FFile->WriteString(acro.AcrText);
+                FFile->WriteInteger(acro.AcrMap);
+            }
+            FFile->WriteString(MARK_ACRO);
+
+            auto DomStrPos {static_cast<int64_t>(FFile->GetPosition())};
+            FFile->SetCompression(CompressOut);
+            FFile->WriteString(MARK_DOMS);
+            FFile->WriteInteger(static_cast<int>(DomainStrList.size()));
+            for(const auto &DomStr : DomainStrList)
+                FFile->WriteString(DomStr);
+            FFile->WriteString(MARK_DOMS);
+            int ix{};
+            for(const auto &[name, PSy] : NameList) {
+                if(!PSy->SDomStrings.empty()) {
+                    FFile->WriteInteger(ix);
+                    for(const auto &i : PSy->SDomStrings)
+                        FFile->WriteInteger(i);
+                }
+                ix++;
+            }
+            FFile->WriteInteger(-1);
+            FFile->WriteString(MARK_DOMS);
+
+            // This must be at the very end!!!
+            FFile->SetPosition(MajorIndexPosition);
+            FFile->SetCompression(false);
+            FFile->WriteInteger(MARK_BOI);
+            // Note that we have room for 10 indices; if we need more, create an overflow link in the 10th position.
+            const std::array<int64_t, 6> offsets = {SymbPos, UELPos, SetTextPos, AcronymPos, NextWritePosition, DomStrPos};
+            for(int64_t offset : offsets)
+                FFile->WriteInt64(offset);
+        }
+
+        int res{FFile->GetLastIOResult()};
+
+        // Many free operations. Some not necessary anymore due to RAII pattern (out of scope -> destroy)
+
         // ...
         STUBWARN();
-        return 0;
+
+        for(const auto &[name, psy] : NameList)
+            delete psy;
+
+        fmode = f_not_open;
+        fstatus = stat_notopen;
+
+        if(AutoConvert && !fnConv.empty()) {
+            res = ConvertGDXFile(fnConv, CompressOut ? "C" : "U");
+            if(res > 0) res += 100;
+        }
+        return res;
     }
 
     void TGXFileObj::InitErrors() {

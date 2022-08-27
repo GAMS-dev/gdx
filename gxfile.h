@@ -115,6 +115,14 @@ namespace gxfile {
             UsrUel2Ent.clear();
             uelNames.clear();
         }
+
+        int size() const {
+            return uelNames.size();
+        }
+
+        const std::vector<std::string> &getNames() {
+            return uelNames;
+        }
     };
 
     struct TAcronym {

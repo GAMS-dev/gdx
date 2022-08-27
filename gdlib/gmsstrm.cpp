@@ -739,6 +739,10 @@ namespace gdlib::gmsstrm {
         return res;
     }
 
+    std::string TXFileStreamDelphi::GetFileName() const {
+        return FFileName;
+    }
+
     bool TBufferedFileStreamDelphi::FillBuffer() {
         if(!FCompress) NrLoaded = TXFileStreamDelphi::Read(BufPtr.data(), BufSize);
         else if(!FCanCompress) {

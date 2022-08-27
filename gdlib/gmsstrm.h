@@ -168,6 +168,8 @@ namespace gdlib::gmsstrm {
 
         void SetPassWord(const std::string& s);
         bool GetUsesPassWord();
+
+        std::string GetFileName() const;
     };
 
     struct TCompressHeader {
@@ -195,7 +197,6 @@ namespace gdlib::gmsstrm {
         bool FillBuffer();
         
     protected:
-        void SetPosition(int64_t p) override;
         int64_t GetSize() override;
     public:
         TBufferedFileStreamDelphi(const std::string &FileName, uint16_t Mode, const std::string &LoadPath = "");
@@ -212,6 +213,8 @@ namespace gdlib::gmsstrm {
         bool GetCanCompress() const;
 
         int64_t GetPosition() override;
+
+        void SetPosition(int64_t p) override;
     };
 
     void reverseBytesMax8(void *psrc, void *pdest, int sz);
