@@ -258,6 +258,7 @@ namespace gxfile {
                                         int AType,
                                         int AUserType) {
         const TgxModeSet AllowModes{fw_init};
+
         // ...
         STUBWARN();
         return false;

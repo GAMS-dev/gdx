@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include "global/gmsspecs.h"
+#include "gxdefs.h"
 
 namespace gdlib::gmsstrm {
     class TMiBufferedStreamDelphi;
@@ -16,8 +17,20 @@ namespace gxfile {
                         strGDXCOMPRESS = "GDXCOMPRESS",
                         strGDXCONVERT = "GDXCONVERT";
 
-    // TODO: Also port gxdefs.pas as gxdefs.h
-    using PUELIndex = global::gmsspecs::TIndex*;
+    using PUELIndex = gxdefs::TgdxUELIndex*;
+
+    class TDFilter {
+        int FiltNumber, FiltMaxUel;
+        std::vector<bool> FiltMap;
+        bool FiltSorted;
+        // ...
+    };
+
+    enum TgdxDAction {
+        dm_unmapped,dm_strict,dm_filter,dm_expand
+    };
+
+    // ...
 
     enum TgxFileMode {
         f_not_open   ,
@@ -27,20 +40,44 @@ namespace gxfile {
         fw_dom_map   ,
         fw_dom_str   ,
         fw_raw_data  ,
-        fw_Map_data  ,
+        fw_map_data  ,
         fw_str_data  ,
         f_raw_elem   ,
-        f_Map_elem   ,
+        f_map_elem   ,
         f_str_elem   ,
         fr_raw_data  ,
-        fr_Map_data  ,
-        fr_MapR_data ,
+        fr_map_data  ,
+        fr_mapr_data ,
         fr_str_data  ,
         fr_filter    ,
         fr_slice
     };
 
     using TgxModeSet = std::set<TgxFileMode>;
+
+    const TgxModeSet    AnyWriteMode {fw_init,fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data,fw_map_data,fw_str_data},
+                        AnyReadMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data,fr_str_data};
+
+    enum TgdxElemSize {
+        sz_byte,
+        sz_word,
+        sz_integer
+    };
+
+    class TIntegerMapping {
+        // ...
+    };
+
+    enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
+
+    // ...
+
+    struct TDomain {
+        TDFilter DFilter;
+        TgdxDAction DAction;
+    };
+
+    using TDomainList = std::array<TDomain, global::gmsspecs::MaxDim>;
 
     struct TgdxSymbRecord {
         int SSyNr;
@@ -72,7 +109,6 @@ namespace gxfile {
         vm_normal
     };
 
-    enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
 
     class TUELTable {
         std::map<int, int> UsrUel2Ent;
@@ -90,48 +126,58 @@ namespace gxfile {
         // ...
     };
 
-    class TDFilter {
-        int FiltNumber, FiltMaxUel;
-        std::vector<bool> FiltMap;
-        bool FiltSorted;
-
-        // ...
-    };
-
     using TIntlValueMapDbl = std::array<double, 11>;
     using TIntlValueMapI64 = std::array<int64_t, 11>;
 
     class TGXFileObj : public gdxinterface::GDXInterface {
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
-        TgxFileMode fmode {f_not_open};
-        int ErrCnt, ErrCntTotal;
-        int LastError, LastRepError, fComprLev;
-        bool CompressOut;
-        void *ReadPtr;
-        std::string MajContext;
-        enum { trl_none, trl_errors, trl_some, trl_all } TraceLevel;
+        TgxFileMode fmode {f_not_open}, fmode_AftReg;
         enum {stat_notopen, stat_read, stat_write} fstatus;
-        int AutoConvert{1};
-
+        int fComprLev;
+        TUELTable UELTable;
+        std::vector<std::string> SetTextList;
+        std::vector<int> MapSetText;
+        int FCurrentDim;
+        global::gmsspecs::TIndex LastElem, PrevElem, MinElem, MaxElem;
+        std::vector<std::string> LastStrElem;
+        int DataSize;
+        global::gmsspecs::tvarvaltype LastDataField;
         std::map<std::string, PgdxSymbRecord> NameList;
         std::vector<std::string> DomainStrList;
-        TUELTable UELTable;
-        std::vector<TAcronym> AcronymList;
+        std::map<global::gmsspecs::TIndex, gdxinterface::TgdxValues> SortList, ErrorList;
+        PgdxSymbRecord CurSyPtr;
+        int ErrCnt, ErrCntTotal;
+        int LastError, LastRepError;
         std::vector<TDFilter> FilterList;
-        int VersionRead;
-        std::string FileSystemID, FProducer, FProducer2;
-        int64_t MajorIndexPosition;
-        int NextAutoAcronym{};
-        bool AppendActive{}, StoreDomainSets{true};
+        TDFilter CurFilter;
+        TDomainList DomainList;
+        bool StoreDomainSets{true};
         TIntlValueMapDbl intlValueMapDbl, readIntlValueMapDbl;
         TIntlValueMapI64  intlValueMapI64;
-        double Zvalacr;
-
+        enum { trl_none, trl_errors, trl_some, trl_all } TraceLevel;
+        std::string TraceStr;
+        int VersionRead;
+        std::string FProducer, FProducer2, FileSystemID;
+        int64_t MajorIndexPosition;
         int64_t NextWritePosition;
-        int FCurrentDim;
-        std::vector<std::string> LastStrElem;
-
-        std::vector<std::string> SetTextList;
+        int DataCount, NrMappedAdded;
+        std::array<TgdxElemSize, global::gmsspecs::MaxDim> ElemType;
+        std::string MajContext;
+        std::array<TIntegerMapping, global::gmsspecs::MaxDim> SliceIndxs, SliceRevMap;
+        int SliceSyNr;
+        gxdefs::TgdxStrIndex SliceElems;
+        void *ReadPtr;
+        bool DoUncompress, CompressOut;
+        int DeltaForWrite;
+        int DeltaForRead;
+        double Zvalacr;
+        std::vector<TAcronym> AcronymList;
+        std::array<std::vector<bool>, global::gmsspecs::MaxDim> WrBitMaps;
+        bool ReadUniverse;
+        int UniverseNr, UelCntOrig;
+        int AutoConvert{1};
+        int NextAutoAcronym{};
+        bool AppendActive{};
 
         void InitErrors();
 
