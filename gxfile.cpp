@@ -101,6 +101,15 @@ namespace gxfile {
     ERR_CANNOT_DELETE        = ERR_GDXCOPY - 12,
     ERR_CANNOT_RENAME        = ERR_GDXCOPY - 13;
 
+    // ...
+
+    static bool IsGoodIdent(const std::string &S) {
+        bool res {!S.empty() && true};
+        STUBWARN();
+        // ...
+        return true;
+    }
+
     union TI64Rec {
         double x;
         int64_t i64;
@@ -257,8 +266,62 @@ namespace gxfile {
                                         int ADim,
                                         int AType,
                                         int AUserType) {
-        const TgxModeSet AllowModes{fw_init};
+        const TgxModeSet AllowedModes{fw_init};
+        int D{};
 
+        CurSyPtr = nullptr;
+        ErrorList.clear();
+        SortList.clear();
+
+        if(!MajorCheckMode(Caller, AllowedModes)) return false;
+
+        if(TraceLevel >= trl_some)
+            WriteTrace("Symbol = "s + AName + ", Dim = "s + std::to_string(ADim));
+
+        if(!IsGoodNewSymbol(AName)) return false;
+
+        // ...
+        STUBWARN();
+        return false;
+    }
+
+    bool TGXFileObj::MajorCheckMode(const std::string &Routine, const TgxModeSet &MS) {
+        MajContext = Routine;
+        LastRepError = ERR_NOERROR;
+        if((TraceLevel >= trl_some || !utils::in(fmode, MS)) && !CheckMode(Routine, MS)) {
+            return false;
+        }
+        return true;
+    }
+
+    void TGXFileObj::WriteTrace(const std::string &s) {
+        std::cout << "gdxTrace " << TraceStr << ": " << s << '\n';
+
+    }
+
+    bool TGXFileObj::IsGoodNewSymbol(const std::string &s) {
+        if( ErrorCondition(utils::in(s, NameList), ERR_DUPLICATESYMBOL) ||
+            ErrorCondition(utils::indexOf<TAcronym>(AcronymList, [&s](auto acro) { return acro.AcrName == s; }) != -1, ERR_DUPLICATESYMBOL) ||
+            ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT)) return false;
+        return true;
+    }
+
+    bool TGXFileObj::ErrorCondition(bool cnd, int N) {
+        if(!cnd) ReportError(N);
+        return !cnd;
+    }
+
+    void TGXFileObj::ReportError(int N) {
+        if(TraceLevel >= trl_errors && N != LastRepError) {
+            // ...
+        }
+        // ...
+        STUBWARN();
+        //SetError(N);
+        LastRepError = N;
+    }
+
+    bool TGXFileObj::CheckMode(const std::string &Routine, const TgxModeSet &MS) {
         // ...
         STUBWARN();
         return false;

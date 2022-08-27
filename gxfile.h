@@ -122,7 +122,11 @@ namespace gxfile {
         }
     };
 
-    class TAcronym {
+    struct TAcronym {
+        std::string AcrName, AcrText;
+        int AcrMap, AcrReadMap;
+        bool AcrAutoGen;
+
         // ...
     };
 
@@ -181,6 +185,8 @@ namespace gxfile {
 
         void InitErrors();
 
+        bool MajorCheckMode(const std::string &Routine, const TgxModeSet &MS);
+
         int gdxResetSpecialValues();
         bool PrepareSymbolWrite(const std::string &Caller,
                                 const std::string &AName,
@@ -188,6 +194,12 @@ namespace gxfile {
                                 int ADim,
                                 int AType,
                                 int AUserType);
+
+        void WriteTrace(const std::string &s);
+        bool IsGoodNewSymbol(const std::string &s);
+        bool ErrorCondition(bool cnd, int N);
+        void ReportError(int N);
+        bool CheckMode(const std::string &Routine, const TgxModeSet &MS);
 
     public:
         TGXFileObj(std::string &ErrMsg);
