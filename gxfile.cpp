@@ -104,10 +104,12 @@ namespace gxfile {
     // ...
 
     static bool IsGoodIdent(const std::string &S) {
-        bool res {!S.empty() && true};
-        STUBWARN();
-        // ...
-        return true;
+        if(!S.empty() && S.length() <= MaxNameLen && isalpha(S.front())) {
+            for(int n{1}; n<S.length(); n++)
+                if(!isalnum(S[n]) && S[n] != '_') return false;
+            return true;
+        }
+        return false;
     }
 
     union TI64Rec {
@@ -326,4 +328,61 @@ namespace gxfile {
         STUBWARN();
         return false;
     }
+
+    int TGXFileObj::PrepareSymbolRead(const std::string &Caller, const std::string &AName, const std::string &AText,
+                                      int ADim, int AType, int AUserInfo) {
+        // ...
+        STUBWARN();
+        return 0;
+    }
+
+    void TGXFileObj::SetError(int N) {
+        // ...
+        STUBWARN();
+    }
+
+    void TGXFileObj::InitDoWrite(int NrRecs) {
+        STUBWARN();
+        // ...
+    }
+
+    bool TGXFileObj::DoWrite(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
+        STUBWARN();
+        // ...
+        return false;
+    }
+
+    bool TGXFileObj::DoRead(TgdxValues &AVals, int &AFDim) {
+        STUBWARN();
+        // ...
+        return false;
+    }
+
+    double TGXFileObj::AcronymRemap(double V) {
+        STUBWARN();
+        // ...
+        return 0.0;
+    }
+
+    void TGXFileObj::AddToErrorListDomErrs(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
+        STUBWARN();
+        // ...
+    }
+
+    void TGXFileObj::AddToErrorList(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
+        STUBWARN();
+        // ...
+    }
+
+    bool TGXFileObj::ResultWillBeSorted(const gxdefs::TgdxUELIndex &ADomainNrs) {
+        STUBWARN();
+        // ...
+        return false;
+    }
+
+    void TGXFileObj::GetDefaultRecord(TgdxValues &Avals) {
+        STUBWARN();
+        // ...
+    }
+
 }

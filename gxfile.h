@@ -30,7 +30,42 @@ namespace gxfile {
         dm_unmapped,dm_strict,dm_filter,dm_expand
     };
 
-    // ...
+    struct TDomain {
+        TDFilter DFilter;
+        TgdxDAction DAction;
+    };
+
+    using TDomainList = std::array<TDomain, global::gmsspecs::MaxDim>;
+
+    struct TgdxSymbRecord {
+        int SSyNr;
+        int64_t SPosition;
+        int SDim, SDataCount, SErrors;
+        global::gmsspecs::TgdxDataType SDataType;
+        int SUserInfo;
+        bool SSetText;
+        std::string SExplTxt;
+        bool SIsCompressed;
+        std::vector<int> SDomSymbols, SDomStrings;
+        std::vector<std::string> SCommentsList;
+        bool SScalarFrst;
+        std::vector<bool> SSetBitMap;
+    };
+    using PgdxSymbRecord = TgdxSymbRecord*;
+
+    enum TgdxIntlValTyp { // values stored internally via the indicator byte
+        vm_valund ,
+        vm_valna  ,
+        vm_valpin ,
+        vm_valmin ,
+        vm_valeps ,
+        vm_zero   ,
+        vm_one    ,
+        vm_mone   ,
+        vm_half   ,
+        vm_two    ,
+        vm_normal
+    };
 
     enum TgxFileMode {
         f_not_open   ,
@@ -69,46 +104,6 @@ namespace gxfile {
     };
 
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
-
-    // ...
-
-    struct TDomain {
-        TDFilter DFilter;
-        TgdxDAction DAction;
-    };
-
-    using TDomainList = std::array<TDomain, global::gmsspecs::MaxDim>;
-
-    struct TgdxSymbRecord {
-        int SSyNr;
-        int64_t SPosition;
-        int SDim, SDataCount, SErrors;
-        global::gmsspecs::TgdxDataType SDataType;
-        int SUserInfo;
-        bool SSetText;
-        std::string SExplTxt;
-        bool SIsCompressed;
-        std::vector<int> SDomSymbols, SDomStrings;
-        std::vector<std::string> SCommentsList;
-        bool SScalarFrst;
-        std::vector<bool> SSetBitMap;
-    };
-    using PgdxSymbRecord = TgdxSymbRecord*;
-
-    enum TgdxIntlValTyp { // values stored internally via the indicator byte
-        vm_valund ,
-        vm_valna  ,
-        vm_valpin ,
-        vm_valmin ,
-        vm_valeps ,
-        vm_zero   ,
-        vm_one    ,
-        vm_mone   ,
-        vm_half   ,
-        vm_two    ,
-        vm_normal
-    };
-
 
     class TUELTable {
         std::map<int, int> UsrUel2Ent;
@@ -183,11 +178,6 @@ namespace gxfile {
         int NextAutoAcronym{};
         bool AppendActive{};
 
-        void InitErrors();
-
-        bool MajorCheckMode(const std::string &Routine, const TgxModeSet &MS);
-
-        int gdxResetSpecialValues();
         bool PrepareSymbolWrite(const std::string &Caller,
                                 const std::string &AName,
                                 const std::string &AText,
@@ -195,15 +185,35 @@ namespace gxfile {
                                 int AType,
                                 int AUserType);
 
-        void WriteTrace(const std::string &s);
-        bool IsGoodNewSymbol(const std::string &s);
-        bool ErrorCondition(bool cnd, int N);
+        int PrepareSymbolRead(const std::string &Caller,
+                              const std::string &AName,
+                              const std::string &AText,
+                              int ADim,
+                              int AType,
+                              int AUserInfo);
+
+        void InitErrors();
+        void SetError(int N);
         void ReportError(int N);
+        bool ErrorCondition(bool cnd, int N);
+        bool MajorCheckMode(const std::string &Routine, const TgxModeSet &MS);
         bool CheckMode(const std::string &Routine, const TgxModeSet &MS);
+        void WriteTrace(const std::string &s);
+        void InitDoWrite(int NrRecs);
+        bool DoWrite(const gxdefs::TgdxUELIndex &AElements, const gxdefs::TgdxValues &AVals);
+        bool DoRead(gxdefs::TgdxValues &AVals, int &AFDim);
+        void AddToErrorListDomErrs(const gxdefs::TgdxUELIndex &AElements, const gxdefs::TgdxValues &AVals);
+        void AddToErrorList(const gxdefs::TgdxUELIndex &AElements, const gxdefs::TgdxValues &AVals);
+        void GetDefaultRecord(gxdefs::TgdxValues &Avals);
+        double AcronymRemap(double V);
+        bool IsGoodNewSymbol(const std::string &s);
+        bool ResultWillBeSorted(const gxdefs::TgdxUELIndex &ADomainNrs);
+
+        // ...
 
     public:
-        TGXFileObj(std::string &ErrMsg);
-        ~TGXFileObj();
+        explicit TGXFileObj(std::string &ErrMsg);
+        ~TGXFileObj() override;
 
         int gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
         int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) override;
@@ -214,6 +224,7 @@ namespace gxfile {
 
         int gdxClose() override;
 
+        int gdxResetSpecialValues();
 
     };
 
