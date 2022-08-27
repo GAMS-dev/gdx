@@ -13,6 +13,8 @@ namespace gxdefs {
 
     using TgdxValues = global::gmsspecs::tvarreca;
 
+    extern std::array<int, global::gmsspecs::TgdxDataType::dt_alias+1> DataTypSize;
+
     // ...
 
 }

@@ -17,6 +17,18 @@ namespace gxfile {
                 gdxHeaderNr = 123;
     const std::string gdxHeaderId = "GAMSGDX";
 
+    const int   MARK_BOI = 19510624;
+
+    const std::string
+        MARK_UEL  = "_UEL_"s,
+        MARK_SYMB = "_SYMB_"s,
+        MARK_DATA = "_DATA_"s,
+        MARK_SETT = "_SETT_"s,
+        MARK_ACRO = "_ACRO_"s,
+        MARK_DOMS = "_DOMS_"s;
+
+    const int INDEX_INITIAL = -256;
+
     std::string DLLLoadPath;
     
     const int
@@ -102,6 +114,22 @@ namespace gxfile {
     ERR_CANNOT_RENAME        = ERR_GDXCOPY - 13;
 
     // ...
+
+    static std::string MakeGoodExplText(const std::string &s) {
+        char q {'\0'};
+        std::string res(s.length(), ' ');
+        for(int i{}; i<s.length(); i++) {
+            char Ch = s[i];
+            if(!utils::in(Ch, '\"', '\'')) {
+                if(Ch < ' ') Ch = '?';
+            } else {
+                if(q == '\0') q = Ch;
+                Ch = q;
+            }
+            res[i] = Ch;
+        }
+        return res;
+    }
 
     static bool IsGoodIdent(const std::string &S) {
         if(!S.empty() && S.length() <= MaxNameLen && isalpha(S.front())) {
@@ -193,7 +221,7 @@ namespace gxfile {
 
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
                                          int UserInfo) {
-        if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
+        if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo, 0)) return false;
         for(int D{1}; D <= FCurrentDim; D++)
             LastStrElem[D] = (char)0xFF;
         fmode = fw_dom_str;
@@ -266,10 +294,9 @@ namespace gxfile {
                                         const std::string &AName,
                                         const std::string &AText,
                                         int ADim,
-                                        int AType,
-                                        int AUserType) {
+                                        int AType, int AUserType,
+                                        int AUserInfo) {
         const TgxModeSet AllowedModes{fw_init};
-        int D{};
 
         CurSyPtr = nullptr;
         ErrorList.clear();
@@ -282,9 +309,39 @@ namespace gxfile {
 
         if(!IsGoodNewSymbol(AName)) return false;
 
-        // ...
-        STUBWARN();
-        return false;
+        if( ErrorCondition(ADim >= 0 && ADim <= global::gmsspecs::MaxDim, ERR_BADDIMENSION) ||
+            ErrorCondition(AType >= 0 && AType <= dt_equ, ERR_BADDATATYPE)) return false;
+        CurSyPtr = new TgdxSymbRecord{};
+        auto &obj = CurSyPtr;
+        obj->SPosition = CurSyPtr->SDataCount = CurSyPtr->SErrors = 0;
+        obj->SDim = ADim;
+        obj->SDataType = static_cast<TgdxDataType>(AType);
+        obj->SUserInfo = AUserInfo;
+        obj->SSetText = false;
+        obj->SExplTxt = MakeGoodExplText(AText);
+        obj->SIsCompressed = CompressOut && ADim > 0;
+        obj->SCommentsList.clear();
+        obj->SDomSymbols.clear();
+        obj->SDomStrings.clear();
+
+        CurSyPtr->SSyNr = static_cast<int>(NameList.size());
+        NameList[AName] = CurSyPtr;
+        FCurrentDim = ADim;
+        DeltaForWrite = 255 - (VERSION <= 6 ? MaxDimV148 : FCurrentDim) - 1;
+
+        DataSize = gxdefs::DataTypSize[AType];
+        if(DataSize > 0)
+            LastDataField = static_cast<tvarvaltype>(DataSize - 1);
+
+        for(int D{}; D<FCurrentDim; D++) {
+            LastElem[D] = INDEX_INITIAL;
+            MinElem[D] = std::numeric_limits<int>::max();
+            MaxElem[D] = 0;
+            WrBitMaps[D].clear();
+        }
+
+        FFile->SetCompression(CurSyPtr->SIsCompressed);
+        return true;
     }
 
     bool TGXFileObj::MajorCheckMode(const std::string &Routine, const TgxModeSet &MS) {

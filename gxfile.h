@@ -178,12 +178,8 @@ namespace gxfile {
         int NextAutoAcronym{};
         bool AppendActive{};
 
-        bool PrepareSymbolWrite(const std::string &Caller,
-                                const std::string &AName,
-                                const std::string &AText,
-                                int ADim,
-                                int AType,
-                                int AUserType);
+        bool PrepareSymbolWrite(const std::string &Caller, const std::string &AName, const std::string &AText, int ADim,
+                                int AType, int AUserType, int AUserInfo);
 
         int PrepareSymbolRead(const std::string &Caller,
                               const std::string &AName,

@@ -1,8 +1,7 @@
-//
-// Created by aschn on 27/08/2022.
-//
-
 #include "gxdefs.h"
 
 namespace gxdefs {
-} // gxdefs
+
+    std::array<int, global::gmsspecs::TgdxDataType::dt_alias+1> DataTypSize {1,1,5,5,0};
+
+}
