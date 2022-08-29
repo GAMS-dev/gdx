@@ -231,6 +231,8 @@ namespace gxfile {
 
         int gdxResetSpecialValues();
 
+        int gdxErrorStr(int ErrNr, std::string &ErrMsg);
+
     };
 
     extern std::string DLLLoadPath;

@@ -492,7 +492,6 @@ namespace gxfile {
 
     void TGXFileObj::WriteTrace(const std::string &s) {
         std::cout << "gdxTrace " << TraceStr << ": " << s << '\n';
-
     }
 
     bool TGXFileObj::IsGoodNewSymbol(const std::string &s) {
@@ -509,11 +508,13 @@ namespace gxfile {
 
     void TGXFileObj::ReportError(int N) {
         if(TraceLevel >= trl_errors && N != LastRepError) {
-            // ...
+            if(!MajContext.empty())
+                std::cout << "Error after call to " << MajContext << '\n';
+            std::string s;
+            this->gdxErrorStr(N, s);
+            std::cout << "Error = " << N << " : " << s << "\n";
         }
-        // ...
-        STUBWARN();
-        //SetError(N);
+        SetError(N);
         LastRepError = N;
     }
 
@@ -594,6 +595,92 @@ namespace gxfile {
     void TGXFileObj::GetDefaultRecord(TgdxValues &Avals) {
         STUBWARN();
         // ...
+    }
+
+    const std::map<int, std::string> errorCodeToStr {
+        {ERR_NOFILE               , "File name is empty"s},
+        {ERR_FILEERROR            , "File I/O error"s},
+        {ERR_NOERROR              , "No error"s},
+        {ERR_BADMODE              , "Bad mode"s},
+        {ERR_BADDIMENSION         , "Bad dimension"s},
+        {ERR_BAD_ALIAS_DIM        , "Bad dimension for aliased set"s},
+        {ERR_BADELEMENTINDEX      , "Bad UEL Nr"s},
+        {ERR_BADSYMBOLINDEX       , "Bad symbol number"s},
+        {ERR_ELEMENTSEQUENCE      , "Element out of sequence"s},
+        {ERR_DUPLICATESYMBOL      , "Duplicate symbol"s},
+        {ERR_DATANOTSORTED        , "Data is not sorted"s},
+        {ERR_DATADUPLICATE        , "Duplicate keys"s},
+        {ERR_UNKNOWNFILTER        , "Unknown filter"s},
+        {ERR_BADSTRINGFORMAT      , "Bad quotes"s},
+        {ERR_BADIDENTFORMAT       , "Illegal identifier"s},
+        {ERR_UELCONFLICT          , "UEL string with different index"s},
+        {ERR_DUPLICATESPECVAL     , "Duplicate special value"s},
+        {ERR_BADERRORRECORD       , "Bad Error record number"s},
+        {ERR_DUPLICATEUEL         , "Duplicate UEL"s},
+        {ERR_BADUELSTR            , "Bad UEL string"s},
+        {ERR_UNDEFUEL             , "Unknown UEL"s},
+        {ERR_UELSECONDWRITE       , "gdx file has UEL table already"s},
+        {ERR_UELNOTEMPTY          , "UEL table is not empty"s},
+        {ERR_BAD_FILTER_NR        , "Bad filter number"s},
+        {ERR_BAD_FILTER_INDX      , "Bad index in filter"s},
+        {ERR_FILTER_UNMAPPED      , "Unmapped index in filter"s},
+        {ERR_OBSOLETE_FUNCTION    , "Use of obsolete function"s},
+        {ERR_RAWNOTSORTED         , "Data not sorted when writing raw"s},
+        {ERR_BADACROINDEX         , "Bad index for acronym"s},
+        {ERR_BADACRONUMBER        , "Bad acronym record number"s},
+        {ERR_BADACRONAME          , "Bad acronym name for update"s},
+        {ERR_ACRODUPEMAP          , "Bad acronym index for update"s},
+        {ERR_ACROBADADDITION      , "Bad addition to acronym table"s},
+        {ERR_UNKNOWNDOMAIN        , "Unknown domain"s},
+        {ERR_BADDOMAIN            , "Domain not set with dim=1"s},
+        {ERR_NODOMAINDATA         , "Set has no data"s},
+        {ERR_ALIASSETEXPECTED     , "Set expected for domain"s},
+        {ERR_BADDATATYPE          , "Bad data type"s},
+        {ERR_NOSYMBOLFORCOMMENT   , "No symbol to add comment to"s},
+        {ERR_DOMAINVIOLATION      , "Domain violation"s},
+        {ERR_FILEALREADYOPEN      , "File is already open"s},
+        {ERR_FILETOOLDFORAPPEND   , "File version to old for append"s},
+        {ERR_OPEN_DOMSMARKER1     , "Expected data marker (DOMS_1) not found in GDX file"s},
+        {ERR_OPEN_DOMSMARKER2     , "Expected data marker (DOMS_2) not found in GDX file"s},
+        {ERR_OPEN_DOMSMARKER3     , "Expected data marker (DOMS_3) not found in GDX file"s},
+        {ERR_BADDATAMARKER_DATA   , "Expected data marker (DATA) not found in GDX file"s},
+        {ERR_BADDATAMARKER_DIM    , "Expected data marker (DIM) not found in GDX file"s},
+        {ERR_OPEN_BOI             , "Expected data marker (BOI) not found in GDX file"s},
+        {ERR_OPEN_FILEHEADER      , "Expected data marker (FILEHEADER) not found in GDX file"s},
+        {ERR_OPEN_FILEMARKER      , "Expected data marker (FILEMARKER) not found in GDX file"s},
+        {ERR_OPEN_SYMBOLMARKER1   , "Expected data marker (SYMBOL_1) not found in GDX file"s},
+        {ERR_OPEN_SYMBOLMARKER2   , "Expected data marker (SYMBOL_2) not found in GDX file"s},
+        {ERR_OPEN_UELMARKER1      , "Expected data marker (UEL_1) not found in GDX file"s},
+        {ERR_OPEN_UELMARKER2      , "Expected data marker (UEL_2) not found in GDX file"s},
+        {ERR_OPEN_TEXTMARKER1     , "Expected data marker (TEXT_1) not found in GDX file"s},
+        {ERR_OPEN_TEXTMARKER2     , "Expected data marker (TEXT_2) not found in GDX file"s},
+        {ERR_OPEN_ACROMARKER1     , "Expected data marker (ACRO_1) not found in GDX file"s},
+        {ERR_OPEN_ACROMARKER2     , "Expected data marker (ACRO_2) not found in GDX file"s},
+        {ERR_OPEN_FILEVERSION     , "GDX file version not supported"s},
+        {ERR_BADDATAFORMAT        , "File not recognized as a GDX file"s},
+        {ERR_OUT_OF_MEMORY        , "Out of memory"s},
+        {ERR_ZLIB_NOT_FOUND       , "Compression library not found"s},
+        {ERR_GDXCOPY              , "GDXCOPY: Unknown error"s},
+        {ERR_PARAMETER            , "GDXCOPY: Parameter error"s},
+        {ERR_DLL_NOT_FOUND        , "GDXCOPY: DLL not found"s},
+        {ERR_CREATE_DIR           , "GDXCOPY: Cannot create directory"s},
+        {ERR_FILE_OPEN            , "GDXCOPY: File open failed"s},
+        {ERR_FILE_WRITE           , "GDXCOPY: Cannot open file for write"s},
+        {ERR_UEL_LENGTH           , "GDXCOPY: UEL length exceeds maximum"s},
+        {ERR_UEL_REGISTER         , "GDXCOPY: Cannot register UELs"s},
+        {ERR_EXPL_TEXT            , "GDXCOPY: Cannot save explanatory text"s},
+        {ERR_DIMENSION            , "GDXCOPY: Dimension exceeds maximum"s},
+        {ERR_WRITE_SYMBOL         , "GDXCOPY: Error writing symbol"s},
+        {ERR_CLOSE_FILE           , "GDXCOPY: Error closing file"s},
+        {ERR_CANNOT_DELETE        , "GDXCOPY: Cannot delete file"s},
+        {ERR_CANNOT_RENAME        , "GDXCOPY: Cannot rename file"s}
+    };
+
+    int TGXFileObj::gdxErrorStr(int ErrNr, std::string &ErrMsg) {
+        const auto it = errorCodeToStr.find(ErrNr);
+        if(it == errorCodeToStr.end()) ErrMsg = rtl::sysutils_p3::SysErrorMessage(ErrNr);
+        else ErrMsg = it->second;
+        return true;
     }
 
 }
