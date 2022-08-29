@@ -1,7 +1,9 @@
 #include "../rtl/p3library.h"
 #include "../global/gmslibname.h"
+#include "../global/unit.h"
 
 #include "../utils.h"
+
 //#include "../ctv.h"
 
 #include "xcompress.h"
@@ -141,7 +143,7 @@ namespace gdlib::xcompress {
 
 	}
 
-	//UNIT_INIT_FINI();
+	UNIT_INIT_FINI();
 
 
 }

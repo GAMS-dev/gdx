@@ -9,9 +9,11 @@
 #if defined(_WIN32)
 #include <Windows.h>
 #endif
+#include "../global/modhead.h"
+#include "../global/unit.h"
 
 using namespace global::delphitypes;
-//using namespace rtl::p3platform;
+using namespace rtl::p3platform;
 using namespace std::literals::chrono_literals;
 using namespace std::literals::string_literals;
 
@@ -177,6 +179,26 @@ namespace rtl::sysutils_p3 {
         return -1;
     }
 
+    int FindFirst(const std::string& Path, int Attr, TSearchRec& F)
+    {
+        // ...
+        STUBWARN();
+        return 0;
+    }
+
+    int FindNext(TSearchRec& F)
+    {
+        // ...
+        STUBWARN();
+        return 0;
+    }
+
+    void FindClose(TSearchRec& F)
+    {
+        // ...
+        STUBWARN();
+    }
+
     bool tryEncodeDate(uint16_t year, uint16_t month, uint16_t day, double& date) {
         const std::array<int, 12>& daysPerMonth = isLeapYear(year) ? daysPerMonthLeapYear : daysPerMonthRegularYear;
 
@@ -255,4 +277,34 @@ namespace rtl::sysutils_p3 {
         Day = later_tm->tm_mday;
     }
 
+    void initialization() {
+        switch(OSFileType()) {
+            case OSFileWIN:
+                PathDelim = '\\';
+                DriveDelim = ':';
+                PathSep = ';';
+                FileStopper = "\\:";
+                ExtStopper = "\\:.";
+                break;
+
+            case OSFileUNIX:
+                PathDelim = '/';
+                DriveDelim = '\0';
+                PathSep = ':';
+                FileStopper = "/";
+                ExtStopper = "/.";
+                break;
+
+            default:
+                PathDelim = DriveDelim = PathSep = '?';
+                FileStopper = ExtStopper = "?";
+                break;
+        }
+    }
+
+    void finalization() {
+
+    }
+
+    UNIT_INIT_FINI();
 }
