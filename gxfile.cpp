@@ -152,16 +152,16 @@ namespace gxfile {
 
     static std::string MakeGoodExplText(const std::string &s) {
         char q {'\0'};
-        std::string res(s.length(), ' ');
-        for(int i{}; i<s.length(); i++) {
-            char Ch = s[i];
+        std::string res;
+        res.reserve(s.length());
+        for(char Ch : s) {
             if(!utils::in(Ch, '\"', '\'')) {
                 if(Ch < ' ') Ch = '?';
             } else {
                 if(q == '\0') q = Ch;
                 Ch = q;
             }
-            res[i] = Ch;
+            res += Ch;
         }
         return res;
     }
@@ -173,6 +173,13 @@ namespace gxfile {
             return true;
         }
         return false;
+    }
+
+    static TgdxElemSize GetIntegerSize(int N) {
+        if (N <= 0) return sz_integer;
+        else if (N <= 255) return sz_byte;
+        else if (N <= 65535) return sz_word;
+        return sz_integer;
     }
 
     union TI64Rec {
@@ -237,7 +244,7 @@ namespace gxfile {
         VersionRead = VERSION;
         FFile->WriteInteger(VersionRead);
         FFile->WriteInteger(Compr);
-        FileSystemID = palxxx::gdlaudit::gdlGetAuditLine();
+        FileSystemID = "GDX Library      41.0.0 30fa42b3 Aug  9, 2022  (ALPHA) WEI x86 64bit/MS Window"s; // palxxx::gdlaudit::gdlGetAuditLine();
         FFile->WriteString(FileSystemID);
         FProducer = Producer;
         FProducer2.clear();
@@ -254,11 +261,10 @@ namespace gxfile {
         return true;
     }
 
-    int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
-                                         int UserInfo) {
+    int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) {
         if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo, 0)) return false;
-        for(int D{1}; D <= FCurrentDim; D++)
-            LastStrElem[D] = (char)0xFF;
+        /*for (int D{}; D < FCurrentDim; D++)
+            LastStrElem[D] = (char)0xFF;*/
         fmode = fw_dom_str;
         return true;
     }
@@ -291,7 +297,7 @@ namespace gxfile {
             std::string SV {utils::trimRight(KeyStr[D])};
             if(SV != LastStrElem[D]) {
                 int KD {UELTable.IndexOf(SV)};
-                if(KD <= 0) {
+                if(KD == -1) {
                     if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
                     KD = UELTable.AddObject(SV, -1);
                 }
@@ -556,8 +562,8 @@ namespace gxfile {
     }
 
     bool TGXFileObj::IsGoodNewSymbol(const std::string &s) {
-        if( ErrorCondition(utils::in(s, NameList), ERR_DUPLICATESYMBOL) ||
-            ErrorCondition(utils::indexOf<TAcronym>(AcronymList, [&s](auto acro) { return acro.AcrName == s; }) != -1, ERR_DUPLICATESYMBOL) ||
+        if( ErrorCondition(!utils::in(s, NameList), ERR_DUPLICATESYMBOL) ||
+            ErrorCondition(utils::indexOf<TAcronym>(AcronymList, [&s](auto acro) { return acro.AcrName == s; }) == -1, ERR_DUPLICATESYMBOL) ||
             ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT)) return false;
         return true;
     }
@@ -617,8 +623,18 @@ namespace gxfile {
     }
 
     void TGXFileObj::InitDoWrite(int NrRecs) {
-        STUBWARN();
-        // ...
+        DataCount = 0;
+        FFile->SetPosition(NextWritePosition);
+        CurSyPtr->SPosition = NextWritePosition;
+        FFile->WriteString(MARK_DATA);
+        FFile->WriteByte(FCurrentDim);
+        FFile->WriteInteger(NrRecs); // ignores dupes in count
+        for (int D{}; D < FCurrentDim; D++) {
+            LastElem[D] = INDEX_INITIAL;
+            ElemType[D] = GetIntegerSize(MaxElem[D] - MinElem[D] + 1);
+            FFile->WriteInteger(MinElem[D]);
+            FFile->WriteInteger(MaxElem[D]);
+        }
     }
 
     bool HAVE_MEM;

@@ -14,7 +14,7 @@ namespace tests::gxfiletests {
         {
             TGXFileObj pgx{msg};
             int ErrNr;
-            pgx.gdxOpenWrite(fn, "TGXFileObjPort", ErrNr);
+            pgx.gdxOpenWrite(fn, "TGXFileObj", ErrNr);
             pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0);
             auto writeRec = [&pgx](const std::string &s, double v) {
                 static std::array<std::string, 20> keys{};
