@@ -5,6 +5,7 @@
 #include "global/modhead.h"
 #include "global/gmsspecs.h"
 #include "palxxx/gdlaudit.h"
+#include "global/unit.h"
 
 using namespace gdxinterface;
 using namespace gdlib::gmsstrm;
@@ -244,7 +245,7 @@ namespace gxfile {
         VersionRead = VERSION;
         FFile->WriteInteger(VersionRead);
         FFile->WriteInteger(Compr);
-        FileSystemID = "GDX Library      41.0.0 30fa42b3 Aug  9, 2022  (ALPHA) WEI x86 64bit/MS Window"s; // palxxx::gdlaudit::gdlGetAuditLine();
+        FileSystemID = palxxx::gdlaudit::gdlGetAuditLine();
         FFile->WriteString(FileSystemID);
         FProducer = Producer;
         FProducer2.clear();
@@ -301,6 +302,7 @@ namespace gxfile {
                     if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
                     KD = UELTable.AddObject(SV, -1);
                 }
+                KD++; // increment here to match Delphi behavior
                 LastElem[D] = KD;
                 LastStrElem[D] = SV;
                 if(KD < MinElem[D]) MinElem[D] = KD;
@@ -684,7 +686,7 @@ namespace gxfile {
         for(int D{}; D<FCurrentDim; D++) {
             delta = AElements[D] - LastElem[D];
             if(delta) {
-                FDim = D;
+                FDim = D + 1; // plus one to match Delphi semantics
                 break;
             }
         }
@@ -706,7 +708,7 @@ namespace gxfile {
                 LastElem[FCurrentDim] = AElements[FCurrentDim];
             } else { // general change
                 FFile->WriteByte(FDim);
-                for(int D{FDim}; D<=FCurrentDim; D++) {
+                for(int D{FDim - 1}; D<FCurrentDim; D++) {
                     int v{AElements[D]-MinElem[D]};
                     switch(ElemType[D]) {
                         case sz_integer: FFile->WriteInteger(v); break;
@@ -718,12 +720,12 @@ namespace gxfile {
             }
         }
         if(DataSize > 0) {
-            for(int DV{}; DV < LastDataField; DV++) {
+            for(int DV{}; DV <= LastDataField; DV++) {
                 double X {AVals[DV]};
                 int64_t i64;
                 TDblClass dClass {dblInfo(X, i64)};
                 int xv{vm_valund};
-                for(; xv <= vm_normal; xv++)
+                for(; xv < vm_normal; xv++)
                     if(i64 == intlValueMapI64[xv]) break;
                 if(xv == vm_normal && dClass != DBL_FINITE) {
                     switch(dClass) {
@@ -892,4 +894,20 @@ namespace gxfile {
         uelNames.push_back(id);
         return static_cast<int>(uelNames.size()) - 1;
     }
+
+    void initialization() {
+        palxxx::gdlaudit::gdlSetSystemName("GDX Library");
+        DLLLoadPath.clear();
+        /*do this until P3 accepts large constants like $80000000000000000*/
+        signMask = 0x80000000;
+        signMask = signMask << 32;
+        expoMask = 0x7ff00000;
+        expoMask = expoMask << 32;
+        mantMask = ~(signMask | expoMask);
+    }
+
+    void finalization() {
+    }
+
+    UNIT_INIT_FINI();
 }
