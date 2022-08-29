@@ -246,6 +246,7 @@ namespace gxfile {
         FFile->WriteInteger(VersionRead);
         FFile->WriteInteger(Compr);
         FileSystemID = palxxx::gdlaudit::gdlGetAuditLine();
+        //FileSystemID = "GDX Library      41.0.0 30fa42b3 Aug  9, 2022  (ALPHA) WEI x86 64bit/MS Window"s;
         FFile->WriteString(FileSystemID);
         FProducer = Producer;
         FProducer2.clear();
@@ -334,7 +335,7 @@ namespace gxfile {
         }
         FFile->WriteByte(255); // end of data
         NextWritePosition = FFile->GetPosition();
-        CurSyPtr->SDataCount = DataCount;
+        CurSyPtr->SDataCount = DataCount; // reflects dupes
         CurSyPtr->SErrors = ErrCnt;
         ErrCnt = 0;
         fmode = fw_init;
@@ -366,6 +367,7 @@ namespace gxfile {
             FFile->WriteInteger(NameList.size());
             for(const auto &[name, PSy] : NameList) {
                 FFile->WriteString(name);
+                FFile->WriteInt64(PSy->SPosition);
                 FFile->WriteInteger(PSy->SDim);
                 FFile->WriteByte(PSy->SDataType);
                 FFile->WriteInteger(PSy->SUserInfo);
