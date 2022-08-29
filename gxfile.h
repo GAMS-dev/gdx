@@ -85,7 +85,8 @@ namespace gxfile {
         fr_mapr_data ,
         fr_str_data  ,
         fr_filter    ,
-        fr_slice
+        fr_slice,
+        tgxfilemode_count
     };
 
     using TgxModeSet = std::set<TgxFileMode>;
@@ -138,23 +139,23 @@ namespace gxfile {
 
     class TGXFileObj : public gdxinterface::GDXInterface {
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
-        TgxFileMode fmode {f_not_open}, fmode_AftReg;
+        TgxFileMode fmode {f_not_open}, fmode_AftReg {f_not_open};
         enum {stat_notopen, stat_read, stat_write} fstatus;
-        int fComprLev;
+        int fComprLev{};
         TUELTable UELTable;
         std::vector<std::string> SetTextList;
         std::vector<int> MapSetText;
-        int FCurrentDim;
+        int FCurrentDim{};
         global::gmsspecs::TIndex LastElem, PrevElem, MinElem, MaxElem;
         std::vector<std::string> LastStrElem;
-        int DataSize;
+        int DataSize{};
         global::gmsspecs::tvarvaltype LastDataField;
         std::map<std::string, PgdxSymbRecord> NameList;
         std::vector<std::string> DomainStrList;
         std::map<global::gmsspecs::TIndex, gdxinterface::TgdxValues> SortList, ErrorList;
-        PgdxSymbRecord CurSyPtr;
-        int ErrCnt, ErrCntTotal;
-        int LastError, LastRepError;
+        PgdxSymbRecord CurSyPtr{};
+        int ErrCnt{}, ErrCntTotal{};
+        int LastError{}, LastRepError{};
         std::vector<TDFilter> FilterList;
         TDFilter CurFilter;
         TDomainList DomainList;
@@ -163,25 +164,25 @@ namespace gxfile {
         TIntlValueMapI64  intlValueMapI64;
         enum { trl_none, trl_errors, trl_some, trl_all } TraceLevel;
         std::string TraceStr;
-        int VersionRead;
+        int VersionRead{};
         std::string FProducer, FProducer2, FileSystemID;
-        int64_t MajorIndexPosition;
-        int64_t NextWritePosition;
-        int DataCount, NrMappedAdded;
+        int64_t MajorIndexPosition{};
+        int64_t NextWritePosition{};
+        int DataCount{}, NrMappedAdded{};
         std::array<TgdxElemSize, global::gmsspecs::MaxDim> ElemType;
         std::string MajContext;
         std::array<TIntegerMapping, global::gmsspecs::MaxDim> SliceIndxs, SliceRevMap;
-        int SliceSyNr;
+        int SliceSyNr{};
         gxdefs::TgdxStrIndex SliceElems;
-        void *ReadPtr;
-        bool DoUncompress, CompressOut;
-        int DeltaForWrite;
-        int DeltaForRead;
-        double Zvalacr;
+        void *ReadPtr{};
+        bool DoUncompress{}, CompressOut{};
+        int DeltaForWrite{};
+        int DeltaForRead{};
+        double Zvalacr{};
         std::vector<TAcronym> AcronymList;
         std::array<std::vector<bool>, global::gmsspecs::MaxDim> WrBitMaps;
-        bool ReadUniverse;
-        int UniverseNr, UelCntOrig;
+        bool ReadUniverse{};
+        int UniverseNr{}, UelCntOrig{};
         int AutoConvert{1};
         int NextAutoAcronym{};
         bool AppendActive{};

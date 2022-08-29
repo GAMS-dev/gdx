@@ -29,6 +29,27 @@ namespace gxfile {
 
     const int INDEX_INITIAL = -256;
 
+    const std::array fmode_str {
+        "FileNotOpen"s  ,   //f_not_open
+        "ReadCommand"s  ,   //fr_init
+        "WriteCommand"s ,   //fw_init
+        "Write-Dom-Raw"s,
+        "Write-Dom-Map"s,
+        "Write-Dom-Str"s,
+        "Write-Raw"s    ,   //fw_raw_data
+        "Write-Map"s    ,   //fw_Map_data
+        "Write-Str"s    ,   //fw_str_data
+        "Regis-Raw"s    ,   //f_raw_elem
+        "Regis-Map"s    ,   //f_Map_elem
+        "Regis-Str"s    ,   //f_str_elem
+        "Read-Raw"s     ,   //fr_raw_data
+        "Read-Map"s     ,   //fr_Map_data
+        "Read_MapR"s    ,   //fr_MapR_data
+        "Read-Str"s     ,   //fr_str_data
+        "Regis-Filter"s ,   //fr_filter
+        "Read-Slice"s     //fr_slice
+    };
+
     std::string DLLLoadPath;
     
     const int
@@ -497,8 +518,25 @@ namespace gxfile {
     }
 
     bool TGXFileObj::CheckMode(const std::string &Routine, const TgxModeSet &MS) {
-        // ...
-        STUBWARN();
+        if(MS.empty() || utils::in(fmode, MS)) {
+            WriteTrace(Routine);
+            return true;
+        }
+        SetError(ERR_BADMODE);
+        std::cout << "**** Error: " << Routine << " called out of context\n";
+        if(!MajContext.empty() && !utils::sameText(MajContext, Routine))
+            std::cout << "     Previous major function called was " << MajContext << '\n';
+        std::cout << "     Current context = " << fmode_str[fmode] << '\n';
+        std::cout << "     Allowed = {";
+        bool f{true};
+        for(int M{}; M<tgxfilemode_count; M++) {
+            if(utils::in(static_cast<TgxFileMode>(M), MS)) {
+                if(f) f = false;
+                else std::cout << ',';
+                std::cout << fmode_str[M];
+            }
+        }
+        std::cout << "}" << std::endl;
         return false;
     }
 
