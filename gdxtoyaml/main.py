@@ -1,5 +1,7 @@
+import os
 import struct
 import yaml
+import sys
 
 
 def read_gdx(fn):
@@ -118,7 +120,7 @@ def read_gdx(fn):
                         dom_indices=[read_int() for _ in range(dim_of_sym(sym_index))])
 
         if num_domains > 0:
-            domains['controlled_syms'] = { read_controlled_sym() for _ in range(num_domains) }
+            domains['controlled_syms'] = {read_controlled_sym() for _ in range(num_domains)}
 
         domains['check_minus_one'] = read_int()
         domains['foot'] = read_string()
@@ -136,7 +138,7 @@ def read_gdx(fn):
             # FIXME: Correctly treat key for scalar, small change in last dim and general change
             def read_record(ix):
                 rec = dict(key=read_byte())
-                if ix == 0: # for now assume first is general change and afterwards small change
+                if ix == 0:  # for now assume first is general change and afterwards small change
                     rec['key2'] = read_byte()
                 rec['value_type'] = read_byte()
                 if rec['value_type'] == 10:
@@ -144,7 +146,7 @@ def read_gdx(fn):
                 return rec
 
             data_block['records'] = [read_record(ix) for ix in range(num_records)]
-            data_block['end_of_data_marker'] = read_byte() # should be 255
+            data_block['end_of_data_marker'] = read_byte()  # should be 255
 
         obj = dict(header=header,
                    gdx_signature=gdx_sig,
@@ -155,8 +157,27 @@ def read_gdx(fn):
                    uel_section=uels,
                    acronym_section=acros,
                    domains_section=domains)
-        print(yaml.dump(obj, sort_keys=False, default_flow_style=False))
+        return obj
+
+
+def to_yaml(obj):
+    return yaml.dump(obj, sort_keys=False, default_flow_style=False)
+
+
+def spit(s, fn):
+    with open(fn, 'w') as fp:
+        fp.write(s)
+
+
+def convert_file(fn):
+    out_fn = fn.replace('.gdx', '.yaml')
+    spit(to_yaml(read_gdx(fn)), out_fn)
+    return out_fn
 
 
 if __name__ == '__main__':
-    read_gdx('xptest.gdx')
+    args = sys.argv
+    if len(args) == 3:
+        os.system(f'diff {convert_file(args[1])} {convert_file(args[2])}')
+    else:
+        print(to_yaml(read_gdx('xptest.gdx' if len(sys.argv) <= 1 else sys.argv[1])))
