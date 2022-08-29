@@ -707,7 +707,7 @@ namespace gxfile {
             }
             if(FDim == FCurrentDim && delta <= DeltaForWrite) { // small change in last dimension
                 FFile->WriteByte(FCurrentDim + delta);
-                LastElem[FCurrentDim] = AElements[FCurrentDim];
+                LastElem[FCurrentDim-1] = AElements[FCurrentDim-1];
             } else { // general change
                 FFile->WriteByte(FDim);
                 for(int D{FDim - 1}; D<FCurrentDim; D++) {
