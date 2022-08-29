@@ -621,10 +621,119 @@ namespace gxfile {
         // ...
     }
 
+    bool HAVE_MEM;
+    int64_t signMask, expoMask, mantMask;
+
+    enum TDblClass {
+        DBL_NAN,       /* any sort of NaN */
+        DBL_NINF,      /* negative infinity */
+        DBL_PINF,      /* positive infinity */
+        DBL_FINITE     /* positive infinity */
+    };
+
+    const std::array DblClassText {
+        "NaN"s, "negative infinity"s, "positive infinity"s, "finite"s
+    };
+
+    TDblClass dblInfo(double x, int64_t &i) {
+        TI64Rec i64Rec{};
+        i64Rec.x = x;
+        i = i64Rec.i64;
+        int64_t exponent {i & expoMask};
+        if(exponent == expoMask) {
+            int64_t mantiassa {i & mantMask};
+            return mantiassa ? DBL_NAN : (i & signMask ? DBL_NINF : DBL_PINF);
+        }
+        return DBL_FINITE;
+    }
+
     bool TGXFileObj::DoWrite(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
-        STUBWARN();
-        // ...
-        return false;
+        int FDim {FCurrentDim+1}, delta{};
+        for(int D{}; D<FCurrentDim; D++) {
+            if(!WrBitMaps[D].empty() && !WrBitMaps[D][AElements[D]]) {
+                ReportError(ERR_DOMAINVIOLATION);
+                TgdxUELIndex  ErrorUELs;
+                for(int DD{}; DD<D-1; DD++)
+                    ErrorUELs[DD] = AElements[DD];
+                ErrorUELs[D] = -AElements[D];
+                // see if there are more domain violations
+                for(int DD{D+1}; DD < FCurrentDim; DD++) {
+                    bool neg {!WrBitMaps[DD].empty() && !WrBitMaps[DD][AElements[DD]]};
+                    ErrorUELs[DD] = (neg ? -1 : 1) * AElements[DD];
+                }
+                AddToErrorListDomErrs(ErrorUELs, AVals);
+                return false;
+            }
+        }
+        for(int D{}; D<FCurrentDim; D++) {
+            delta = AElements[D] - LastElem[D];
+            if(delta) {
+                FDim = D;
+                break;
+            }
+        }
+        if(FDim > FCurrentDim) {
+            if(FCurrentDim > 0 && DataCount >= 1) {
+                ReportError(ERR_DATADUPLICATE);
+                AddToErrorList(AElements, AVals);
+                return false;
+            }
+            FFile->WriteByte(1); // keeps logic working for scalars
+        } else {
+            if(delta < 0) {
+                ReportError(ERR_RAWNOTSORTED);
+                AddToErrorList(AElements, AVals);
+                return false;
+            }
+            if(FDim == FCurrentDim && delta <= DeltaForWrite) { // small change in last dimension
+                FFile->WriteByte(FCurrentDim + delta);
+                LastElem[FCurrentDim] = AElements[FCurrentDim];
+            } else { // general change
+                FFile->WriteByte(FDim);
+                for(int D{FDim}; D<=FCurrentDim; D++) {
+                    int v{AElements[D]-MinElem[D]};
+                    switch(ElemType[D]) {
+                        case sz_integer: FFile->WriteInteger(v); break;
+                        case sz_word: FFile->WriteWord(v); break;
+                        case sz_byte: FFile->WriteByte(v); break;
+                    }
+                    LastElem[D] = AElements[D];
+                }
+            }
+        }
+        if(DataSize > 0) {
+            for(int DV{}; DV < LastDataField; DV++) {
+                double X {AVals[DV]};
+                int64_t i64;
+                TDblClass dClass {dblInfo(X, i64)};
+                int xv{vm_valund};
+                for(; xv <= vm_normal; xv++)
+                    if(i64 == intlValueMapI64[xv]) break;
+                if(xv == vm_normal && dClass != DBL_FINITE) {
+                    switch(dClass) {
+                        case DBL_NINF: xv = vm_valmin; break;
+                        case DBL_PINF: xv = vm_valpin; break;
+                        case DBL_NAN: xv = vm_valna; break;
+                    }
+                }
+                FFile->WriteByte(xv);
+                if(xv == vm_normal) {
+                    FFile->WriteDouble(X);
+                    if(X >= Zvalacr) {
+                        int v = static_cast<int>(std::round(X / Zvalacr));
+                        int ix = utils::indexOf<TAcronym>(AcronymList, [&v](const TAcronym &acro) { return acro.AcrMap == v; });
+                        if(ix == -1) AcronymList.push_back(TAcronym{"", "", v, -1, false});
+                    }
+                }
+            }
+        }
+        DataCount++;
+        if(utils::in(CurSyPtr->SDataType, dt_set, dt_alias)) {
+            if(AVals[vallevel] != 0.0) CurSyPtr->SSetText = true;
+            if(FCurrentDim == 1 && !CurSyPtr->SSetBitMap.empty())
+                CurSyPtr->SSetBitMap[LastElem.front()] = true;
+        }
+        return true;
     }
 
     bool TGXFileObj::DoRead(TgdxValues &AVals, int &AFDim) {
