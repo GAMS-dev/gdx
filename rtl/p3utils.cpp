@@ -253,16 +253,16 @@ namespace rtl::p3utils {
 
     int p3FileOpen(const std::string& fName, Tp3FileOpenAction mode, Tp3FileHandle h)
     {
-        std::ios::openmode itsMode{};
+        std::ios::openmode itsMode{ std::ios::binary };
         switch (mode) {
             case p3OpenRead:
-                itsMode = std::ios::in;
+                itsMode |= std::ios::in;
                 break;
             case p3OpenWrite:
-                itsMode = std::ios::out;
+                itsMode |= std::ios::out;
                 break;
             case p3OpenReadWrite:
-                itsMode = std::ios::in | std::ios::out;
+                itsMode |= std::ios::in | std::ios::out;
                 break;
         }
         h->open(fName, itsMode);
