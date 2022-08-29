@@ -305,10 +305,34 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Finish a write operation
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //  gdxDataErrorCount, gdxDataWriteRawStart, gdxDataWriteMapStart, gdxDataWriteStrStart,
+    // Description:
     int TGXFileObj::gdxDataWriteDone() {
-        // ...
-        STUBWARN();
-        return 0;
+        const TgxModeSet AllowedModes {fw_raw_data,fw_map_data,fw_str_data, fw_dom_raw, fw_dom_map, fw_dom_str};
+        if(!MajorCheckMode("DataWriteDone"s, AllowedModes)) return false;
+        if(!utils::in(fmode, fw_raw_data, fw_dom_raw)) {
+            InitDoWrite(static_cast<int>(SortList.size()));
+            for(const auto &[keys, values] : SortList) {
+                /*TIndex AElements;
+                gxdefs::TgdxValues AVals;*/
+                DoWrite(keys, values);
+            }
+            SortList.clear();
+        }
+        FFile->WriteByte(255); // end of data
+        NextWritePosition = FFile->GetPosition();
+        CurSyPtr->SDataCount = DataCount;
+        CurSyPtr->SErrors = ErrCnt;
+        ErrCnt = 0;
+        fmode = fw_init;
+        FFile->SetCompression(false);
+        CurSyPtr = nullptr;
+        return true;
     }
 
     // Brief:
