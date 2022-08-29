@@ -13,8 +13,23 @@ namespace gxdefs {
 
     using TgdxValues = global::gmsspecs::tvarreca;
 
-    extern std::array<int, global::gmsspecs::TgdxDataType::dt_alias+1> DataTypSize;
+    using TgdxSVals = std::array<double, 7>;
 
-    // ...
+    const std::array<std::string, 5>    gdxDataTypStr {"Set", "Par", "Var", "Equ", "Alias"},
+                                        gdxDataTypStrL {"Set", "Parameter", "Variable", "Equation", "Alias"};
+    const std::array<int, global::gmsspecs::TgdxDataType::dt_alias+1> DataTypSize {1,1,5,5,0};
+
+    const std::array<std::string, 7> gdxSpecialValuesStr {
+            "Undf"  /*sv_valund */,
+            "NA"    /*sv_valna  */,
+            "+Inf"  /*sv_valpin */,
+            "-Inf"  /*sv_valmin */,
+            "Eps"   /*sv_valeps */,
+            "0"     /*sv_normal */,
+            "AcroN" /*acronym   */
+    };
+
+    bool CanBeQuoted(const std::string &s);
+    bool GoodUELString(const std::string &s);
 
 }

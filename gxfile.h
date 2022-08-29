@@ -112,18 +112,15 @@ namespace gxfile {
         // ...
 
     public:
-        void clear() {
-            UsrUel2Ent.clear();
-            uelNames.clear();
-        }
+        void clear();
 
-        int size() const {
-            return uelNames.size();
-        }
+        int size() const;
 
-        const std::vector<std::string> &getNames() {
-            return uelNames;
-        }
+        const std::vector<std::string> &getNames();
+
+        int IndexOf(const std::string &s) const;
+
+        int AddObject(const std::string &id, int mapping);
     };
 
     struct TAcronym {

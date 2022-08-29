@@ -10,6 +10,7 @@ using namespace gdxinterface;
 using namespace gdlib::gmsstrm;
 using namespace global::gmsspecs;
 using namespace std::literals::string_literals;
+using namespace gxdefs;
 
 namespace gxfile {
 
@@ -262,10 +263,46 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Write a data element in string mode
+    // Arguments:
+    //   KeyStr: The index for this element using strings for the unique elements
+    //   Values: The values for this element
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxDataWriteMapStart, gdxDataWriteDone
+    // Description:
+    //   When writing data using string elements, each string element is added
+    //   to the internal unique element table and assigned an index.
+    //   Writing using strings does not add the unique elements to the
+    //   user mapped space.
+    //   Each element string must follow the GAMS rules for unique elements.
     int TGXFileObj::gdxDataWriteStr(const TgdxStrIndex &KeyStr, const TgdxValues &Values) {
-        // ...
-        STUBWARN();
-        return 0;
+        const TgxModeSet AllowedModes {fw_str_data};
+        if(fmode == fw_dom_str) fmode = fw_str_data;
+        if(TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) {
+            if(!CheckMode("DataWriteStr", AllowedModes)) return false;
+            std::cout << "  Index =\n";
+            for(int D{}; D<FCurrentDim; D++)
+                std::cout << " " << KeyStr[D] << (D+1 < FCurrentDim ? "," : "") << "\n";
+        }
+        for(int D{}; D<FCurrentDim; D++) {
+            std::string SV {utils::trimRight(KeyStr[D])};
+            if(SV != LastStrElem[D]) {
+                int KD {UELTable.IndexOf(SV)};
+                if(KD <= 0) {
+                    if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
+                    KD = UELTable.AddObject(SV, -1);
+                }
+                LastElem[D] = KD;
+                LastStrElem[D] = SV;
+                if(KD < MinElem[D]) MinElem[D] = KD;
+                if(KD > MaxElem[D]) MaxElem[D] = KD;
+            }
+        }
+        SortList[LastElem] = Values;
+        return true;
     }
 
     int TGXFileObj::gdxDataWriteDone() {
@@ -549,8 +586,10 @@ namespace gxfile {
     }
 
     void TGXFileObj::SetError(int N) {
-        // ...
-        STUBWARN();
+        if(N == 0) return;
+        if(LastError == ERR_NOERROR) LastError = N;
+        ErrCnt++;
+        ErrCntTotal++;
     }
 
     void TGXFileObj::InitDoWrite(int NrRecs) {
@@ -683,4 +722,25 @@ namespace gxfile {
         return true;
     }
 
+    void TUELTable::clear() {
+        UsrUel2Ent.clear();
+        uelNames.clear();
+    }
+
+    int TUELTable::size() const {
+        return uelNames.size();
+    }
+
+    const std::vector<std::string> &TUELTable::getNames() {
+        return uelNames;
+    }
+
+    int TUELTable::IndexOf(const std::string &s) const {
+        return utils::indexOf(uelNames, s);
+    }
+
+    int TUELTable::AddObject(const std::string &id, int mapping) {
+        uelNames.push_back(id);
+        return static_cast<int>(uelNames.size()) - 1;
+    }
 }
