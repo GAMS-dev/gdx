@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="gdlib">
+      <UniqueIdentifier>{69b19e72-9ccc-46cc-b0fa-142f406d05d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="expertapi">
+      <UniqueIdentifier>{7062be8f-60ef-402c-8454-822f2e8eb87b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="root">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="generated">
+      <UniqueIdentifier>{eb84254e-fb9f-4037-b9c8-ed5307d81330}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="global">
+      <UniqueIdentifier>{1d63af84-eb63-415f-bdfa-5b2e349e9d68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="palxxx">
+      <UniqueIdentifier>{0863d7e1-0951-4e64-9731-cc9b6ec39fe5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="simplegdx">
+      <UniqueIdentifier>{ad21695d-22e4-4dcb-94c3-02e65a505006}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rtl">
+      <UniqueIdentifier>{bd776488-4312-48dc-80f2-3639cd524d23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{52cae6ab-922c-4873-b7dd-d49a95b9e287}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="gxdefs.cpp">
+      <Filter>root</Filter>
+    </ClCompile>
+    <ClCompile Include="gxfile.cpp">
+      <Filter>root</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>root</Filter>
+    </ClCompile>
+    <ClCompile Include="xpwrap.cpp">
+      <Filter>root</Filter>
+    </ClCompile>
+    <ClCompile Include="gdlib\gmsstrm.cpp">
+      <Filter>gdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="gdlib\strutilx.cpp">
+      <Filter>gdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="gdlib\xcompress.cpp">
+      <Filter>gdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="expertapi\gdxcc.c">
+      <Filter>expertapi</Filter>
+    </ClCompile>
+    <ClCompile Include="expertapi\gclgms.c">
+      <Filter>expertapi</Filter>
+    </ClCompile>
+    <ClCompile Include="expertapi\gcmt.c">
+      <Filter>expertapi</Filter>
+    </ClCompile>
+    <ClCompile Include="expertapi\palmcc.c">
+      <Filter>expertapi</Filter>
+    </ClCompile>
+    <ClCompile Include="generated\gmsglobx2.inc.cpp">
+      <Filter>generated</Filter>
+    </ClCompile>
+    <ClCompile Include="global\gmsglobx1.cpp">
+      <Filter>global</Filter>
+    </ClCompile>
+    <ClCompile Include="global\gmsglobx2.cpp">
+      <Filter>global</Filter>
+    </ClCompile>
+    <ClCompile Include="global\gmslibname.cpp">
+      <Filter>global</Filter>
+    </ClCompile>
+    <ClCompile Include="global\gmsspecs.cpp">
+      <Filter>global</Filter>
+    </ClCompile>
+    <ClCompile Include="global\modhead.cpp">
+      <Filter>global</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\doctestmain.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\gxfiletests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\tgxtests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\xptests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\xpwraptests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="rtl\math_p3.cpp">
+      <Filter>rtl</Filter>
+    </ClCompile>
+    <ClCompile Include="rtl\p3library.cpp">
+      <Filter>rtl</Filter>
+    </ClCompile>
+    <ClCompile Include="rtl\p3platform.cpp">
+      <Filter>rtl</Filter>
+    </ClCompile>
+    <ClCompile Include="rtl\p3utils.cpp">
+      <Filter>rtl</Filter>
+    </ClCompile>
+    <ClCompile Include="rtl\sysutils_p3.cpp">
+      <Filter>rtl</Filter>
+    </ClCompile>
+    <ClCompile Include="simplegdx\mistream.cpp">
+      <Filter>simplegdx</Filter>
+    </ClCompile>
+    <ClCompile Include="simplegdx\tgx.cpp">
+      <Filter>simplegdx</Filter>
+    </ClCompile>
+    <ClCompile Include="simplegdx\twostream.cpp">
+      <Filter>simplegdx</Filter>
+    </ClCompile>
+    <ClCompile Include="palxxx\gdlaudit.cpp">
+      <Filter>palxxx</Filter>
+    </ClCompile>
+    <ClCompile Include="palxxx\paldoorg.cpp">
+      <Filter>palxxx</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="gdlib\gmsstrm.h">
+      <Filter>gdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="gdlib\strutilx.h">
+      <Filter>gdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="gdlib\xcompress.h">
+      <Filter>gdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="expertapi\gclgms.h">
+      <Filter>expertapi</Filter>
+    </ClInclude>
+    <ClInclude Include="expertapi\gcmt.h">
+      <Filter>expertapi</Filter>
+    </ClInclude>
+    <ClInclude Include="expertapi\gdxcc.h">
+      <Filter>expertapi</Filter>
+    </ClInclude>
+    <ClInclude Include="expertapi\palmcc.h">
+      <Filter>expertapi</Filter>
+    </ClInclude>
+    <ClInclude Include="gdxinterface.h">
+      <Filter>root</Filter>
+    </ClInclude>
+    <ClInclude Include="gxdefs.h">
+      <Filter>root</Filter>
+    </ClInclude>
+    <ClInclude Include="gxfile.h">
+      <Filter>root</Filter>
+    </ClInclude>
+    <ClInclude Include="kvbuffers.h">
+      <Filter>root</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>root</Filter>
+    </ClInclude>
+    <ClInclude Include="xpwrap.h">
+      <Filter>root</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\gmsglobx1.inc.h">
+      <Filter>generated</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\gmsspecs.inc.h">
+      <Filter>generated</Filter>
+    </ClInclude>
+    <ClInclude Include="global\delphitypes.h">
+      <Filter>global</Filter>
+    </ClInclude>
+    <ClInclude Include="global\gmsglobx1.h">
+      <Filter>global</Filter>
+    </ClInclude>
+    <ClInclude Include="global\gmsglobx2.h">
+      <Filter>global</Filter>
+    </ClInclude>
+    <ClInclude Include="global\gmslibname.h">
+      <Filter>global</Filter>
+    </ClInclude>
+    <ClInclude Include="global\gmsspecs.h">
+      <Filter>global</Filter>
+    </ClInclude>
+    <ClInclude Include="global\modhead.h">
+      <Filter>global</Filter>
+    </ClInclude>
+    <ClInclude Include="global\unit.h">
+      <Filter>global</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\doctest.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="rtl\math_p3.h">
+      <Filter>rtl</Filter>
+    </ClInclude>
+    <ClInclude Include="rtl\p3library.h">
+      <Filter>rtl</Filter>
+    </ClInclude>
+    <ClInclude Include="rtl\p3platform.h">
+      <Filter>rtl</Filter>
+    </ClInclude>
+    <ClInclude Include="rtl\p3utils.h">
+      <Filter>rtl</Filter>
+    </ClInclude>
+    <ClInclude Include="rtl\sysutils_p3.h">
+      <Filter>rtl</Filter>
+    </ClInclude>
+    <ClInclude Include="simplegdx\mistream.h">
+      <Filter>simplegdx</Filter>
+    </ClInclude>
+    <ClInclude Include="simplegdx\tgx.h">
+      <Filter>simplegdx</Filter>
+    </ClInclude>
+    <ClInclude Include="simplegdx\twostream.h">
+      <Filter>simplegdx</Filter>
+    </ClInclude>
+    <ClInclude Include="palxxx\gdlaudit.h">
+      <Filter>palxxx</Filter>
+    </ClInclude>
+    <ClInclude Include="palxxx\paldoorg.h">
+      <Filter>palxxx</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

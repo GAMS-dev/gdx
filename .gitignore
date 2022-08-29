@@ -1,2 +1,5 @@
 .idea/
 cmake-build-debug/
+x64/
+.vs/
+gdxnative.vcxproj.user
