@@ -2,6 +2,7 @@
 #include "rtl/sysutils_p3.h"
 #include "utils.h"
 #include "gdlib/gmsstrm.h"
+#include "gdlib/gmsglob.h"
 #include "global/modhead.h"
 #include "global/gmsspecs.h"
 #include "palxxx/gdlaudit.h"
@@ -14,6 +15,7 @@ using namespace gdlib::gmsstrm;
 using namespace global::gmsspecs;
 using namespace std::literals::string_literals;
 using namespace gxdefs;
+using namespace gdlib::gmsglob;
 
 namespace gxfile {
 
@@ -840,8 +842,25 @@ namespace gxfile {
     }
 
     void TGXFileObj::GetDefaultRecord(TgdxValues &Avals) {
-        STUBWARN();
-        // ...
+        int ui{};
+        switch (CurSyPtr->SDataType) {
+        case dt_set:
+        case dt_alias:
+        case dt_par:
+            Avals[vallevel] = 0.0;
+            break;
+        case dt_var:
+            ui = CurSyPtr->SUserInfo;
+            Avals = ui >= stypunknwn && ui <= stypsemiint ? defrecvar[ui] : defrecvar[stypunknwn];
+            break;
+        case dt_equ:
+            ui = CurSyPtr->SUserInfo;
+            Avals = ui >= ssyeque && ui <= ssyeque + (styequb + 1) ? defrecequ[ui] : defrecequ[ssyeque];
+            break;
+        default:
+            assert(false && "GetDefaultRecord-2");
+            break;
+        }
     }
 
     const std::map<int, std::string> errorCodeToStr {

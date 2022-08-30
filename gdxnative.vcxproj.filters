@@ -127,6 +127,9 @@
     <ClCompile Include="palxxx\paldoorg.cpp">
       <Filter>palxxx</Filter>
     </ClCompile>
+    <ClCompile Include="gdlib\gmsglob.cpp">
+      <Filter>gdlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">
@@ -227,6 +230,9 @@
     </ClInclude>
     <ClInclude Include="palxxx\paldoorg.h">
       <Filter>palxxx</Filter>
+    </ClInclude>
+    <ClInclude Include="gdlib\gmsglob.h">
+      <Filter>gdlib</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
