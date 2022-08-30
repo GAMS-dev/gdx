@@ -826,13 +826,30 @@ namespace gxfile {
     }
 
     void TGXFileObj::AddToErrorListDomErrs(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
-        STUBWARN();
-        // ...
+        if (ErrorList.size() >= 11) return;
+
+        for (int D{}; D < FCurrentDim; D++) {
+            int EN{ AElements[D] };
+            if (EN < 0) {
+                bool Found{};
+                for (const auto& [keys, vals] : ErrorList) {
+                    if (keys[D] == EN) {
+                        Found = true;
+                        break;
+                    }
+                }
+                if (!Found) {
+                    ErrorList[AElements] = AVals;
+                    return;
+                }
+            }
+        }
     }
 
     void TGXFileObj::AddToErrorList(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
-        STUBWARN();
-        // ...
+        if (ErrorList.size() >= 11) // avoid storing too many errors
+            return;
+        ErrorList[AElements] = AVals;
     }
 
     bool TGXFileObj::ResultWillBeSorted(const gxdefs::TgdxUELIndex &ADomainNrs) {
