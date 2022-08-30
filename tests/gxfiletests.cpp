@@ -34,7 +34,6 @@ namespace tests::gxfiletests {
     }
 
     TEST_CASE("Test reading a simple gdx file with gxfile port") {
-        return;
         std::string msg;
         const std::string fn {"mytest.gdx"};
         TGXFileObj pgx{msg};

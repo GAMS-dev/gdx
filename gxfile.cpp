@@ -1152,11 +1152,82 @@ namespace gxfile {
         }
 
         // reading UEL table
-        // ...
+        FFile->SetCompression(DoUncompress);
+        FFile->SetPosition(UELPos);
+        UELTable.clear();
 
-        STUBWARN();
-        // ...
-        return 0;
+        if (ErrorCondition(FFile->ReadString() == MARK_UEL, ERR_OPEN_UELMARKER1))
+            return FileErrorNr();
+
+        NrElem = FFile->ReadInteger();
+        if (FileSystemID.substr(15, 4) == "2001") NrElem--;
+
+        while (UELTable.size() < NrElem) {
+            UELTable.AddObject(FFile->ReadString(), -1);
+        }
+        UelCntOrig = UELTable.size(); // needed when reading universe
+
+        if (ErrorCondition(FFile->ReadString() == MARK_UEL, ERR_OPEN_UELMARKER2)) return FileErrorNr();
+        if (ReadMode % 2 == 0) { // reading text table
+            FFile->SetCompression(DoUncompress);
+            FFile->SetPosition(SetTextPos);
+            SetTextList.clear();
+            if(ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1)) return FileErrorNr();
+            NrElem = FFile->ReadInteger();
+            SetTextList.reserve(NrElem);
+            for (int N{}; N < NrElem; N++) {
+                SetTextList.push_back(FFile->ReadString());
+                int TextNum{ static_cast<int>(SetTextList.size()) };
+                if (TextNum != N) {
+                    MapSetText.resize(NrElem);
+                    // TODO: Could this be replaced by std::iota?
+                    for (int D{}; D < N; D++)
+                        MapSetText[D] = D;
+                    MapSetText[N] = TextNum;
+                }
+            }
+        }
+        if (VersionRead >= 7) {
+            FFile->SetCompression(DoUncompress);
+            FFile->SetPosition(AcronymPos);
+            if (ErrorCondition(FFile->ReadString() == MARK_ACRO, ERR_OPEN_ACROMARKER1)) return FileErrorNr();
+            AcronymList.resize(FFile->ReadInteger());
+            for (int i = 0; i < AcronymList.size(); i++) {
+                auto& obj = AcronymList[i];
+                obj.AcrName = FFile->ReadString();
+                obj.AcrText = FFile->ReadString();
+                obj.AcrMap = FFile->ReadInteger();
+            }
+        }
+
+        if (VersionRead >= 7 && DomStrPos) {
+            FFile->SetCompression(DoUncompress);
+            FFile->SetPosition(DomStrPos);
+            if(ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER1)) return FileErrorNr();
+            DomainStrList.resize(FFile->ReadInteger());
+            for (int i = 0; i < DomainStrList.size(); i++)
+                DomainStrList[i] = FFile->ReadString();
+            if (ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER2)) return FileErrorNr();
+            while (true) {
+                int SyNr = FFile->ReadInteger();
+                if (SyNr <= 0) break;
+                auto maybeNameAndSym = symbolWithIndex(SyNr);
+                if (maybeNameAndSym) {
+                    auto sym = (*maybeNameAndSym).second;
+                    for (int D{}; D < sym->SDim; D++) {
+                        sym->SDomStrings[D] = FFile->ReadInteger();
+                    }
+                }
+            }
+            if (ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER3)) return FileErrorNr();
+        }
+
+        LastError = ERR_NOERROR;
+        gdxResetSpecialValues();
+        fmode = fr_init;
+        fstatus = stat_read;
+        FFile->SetCompression(false);
+        return true;
     }
 
     std::optional<std::pair<std::string, PgdxSymbRecord>> TGXFileObj::symbolWithIndex(int index)
