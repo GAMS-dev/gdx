@@ -5,6 +5,9 @@
 #include <map>
 #include <string>
 #include <filesystem>
+#include <iostream>
+#include "../global/gmsspecs.h"
+#include "../gxdefs.h"
 
 using namespace std::literals::string_literals;
 using namespace xpwrap;
@@ -18,7 +21,7 @@ namespace tests::xpwraptests {
         // Write data
         int ErrNr{};
         const std::string fn {"xpwraptest.gdx"};
-        REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "xptests" , ErrNr));
+        REQUIRE(pgx.gdxOpenWrite(fn, "xptests" , ErrNr));
         REQUIRE_EQ(0, ErrNr);
         REQUIRE(pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0));
         std::array<std::pair<std::string, double>, 3> exampleData {{
@@ -39,19 +42,23 @@ namespace tests::xpwraptests {
         REQUIRE(std::filesystem::exists(fn));
 
         // Read data
-        /*REQUIRE(gdxOpenRead(pgx, fn.c_str(), &ErrNr));
+        REQUIRE(pgx.gdxOpenRead(fn, ErrNr));
         REQUIRE_EQ(0, ErrNr);
         int nrRecs{};
-        REQUIRE(gdxDataReadStrStart(pgx, 1, &nrRecs));
-        int dimFrst{};
-        for(int i{}; i<nrRecs; i++) {
-            gdxDataReadStr(pgx, strPtrs, vals, &dimFrst);
-            REQUIRE_FALSE(strcmp(strPtrs[0], exampleData[i].first.c_str()));
-            REQUIRE_EQ(vals[GMS_VAL_LEVEL], exampleData[i].second);
-        }
-        REQUIRE(gdxDataReadDone(pgx));
+        REQUIRE(pgx.gdxDataReadStrStart(1, nrRecs));
 
-        pgx.gdxClose();*/
+        gxdefs::TgdxStrIndex index{};
+        gxdefs::TgdxValues values{};
+        int dimFrst{};
+
+        for(int i{}; i<nrRecs; i++) {
+            pgx.gdxDataReadStr(index, values, dimFrst);
+            REQUIRE_EQ(index[0], exampleData[i].first);
+            REQUIRE(vals[global::gmsspecs::vallevel] - exampleData[i].second < 0.001);
+        }
+        REQUIRE(pgx.gdxDataReadDone());
+
+        pgx.gdxClose();
 
         std::filesystem::remove(fn);
     }

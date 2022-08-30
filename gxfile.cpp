@@ -875,6 +875,40 @@ namespace gxfile {
         return true;
     }
 
+    int TGXFileObj::gdxOpenRead(const std::string &FileName, int &ErrNr) {
+        STUBWARN();
+        // ...
+        return 0;
+    }
+
+    int TGXFileObj::gdxFileVersion(std::string &FileStr, std::string &ProduceStr) {
+        STUBWARN();
+        // ...
+        return 0;
+    }
+
+    int TGXFileObj::gdxFindSymbol(const std::string &SyId, int &SyNr) {
+        STUBWARN();
+        // ...
+        return 0;
+    }
+
+    int TGXFileObj::gdxDataReadStr(TgdxStrIndex &KeyStr, TgdxValues &Values, int &DimFrst) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxDataReadDone() {
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxDataReadStrStart(int SyNr, int &NrRecs) {
+        return 0;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();

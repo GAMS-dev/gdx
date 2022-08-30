@@ -38,4 +38,46 @@ namespace xpwrap {
     int GDXFile::gdxClose() {
         return ::gdxClose(pgx);
     }
+
+    int GDXFile::gdxOpenRead(const std::string &FileName, int &ErrNr) {
+        return ::gdxOpenRead(pgx, FileName.c_str(), &ErrNr);
+    }
+
+    int GDXFile::gdxFileVersion(std::string &FileStr, std::string &ProduceStr) {
+        static std::array<char, 256> fsBuf{}, psBuf{};
+        int rc = ::gdxFileVersion(pgx, fsBuf.data(), psBuf.data());
+        FileStr.assign(fsBuf.data());
+        ProduceStr.assign(psBuf.data());
+        return rc;
+    }
+
+    int GDXFile::gdxFindSymbol(const std::string &SyId, int &SyNr) {
+        return ::gdxFindSymbol(pgx, SyId.c_str(), &SyNr);
+    }
+
+    int GDXFile::gdxDataReadStr(gdxinterface::TgdxStrIndex &KeyStr, gdxinterface::TgdxValues &Values, int &DimFrst) {
+        static std::array<std::array<char, 256>, 20> keyBuffers {};
+        static std::array<char *, 20> keys {};
+        for(int i=0; i<keys.size(); i++)
+            keys[i] = &keyBuffers[i][0];
+        int rc {::gdxDataReadStr(pgx, keys.data(), Values.data(), &DimFrst)};
+        for(int i=0; i<keys.size(); i++)
+            KeyStr[i].assign(keys[i]);
+        return rc;
+    }
+
+    int GDXFile::gdxDataReadDone() {
+        return ::gdxDataReadDone(pgx);
+    }
+
+    int GDXFile::gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) {
+        static std::array<char, 256> SyIdBuf{};
+        int rc{::gdxSymbolInfo(pgx, SyNr, SyIdBuf.data(), &Dim, &Typ)};
+        SyId.assign(SyIdBuf.data());
+        return rc;
+    }
+
+    int GDXFile::gdxDataReadStrStart(int SyNr, int &NrRecs) {
+        return ::gdxDataReadStrStart(pgx, SyNr, &NrRecs);
+    }
 }

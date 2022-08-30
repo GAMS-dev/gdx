@@ -1,6 +1,7 @@
 #include "doctest.h"
 #include "../gxfile.h"
 #include <filesystem>
+#include <iostream>
 
 using namespace gxfile;
 using namespace std::literals::string_literals;
@@ -30,6 +31,53 @@ namespace tests::gxfiletests {
             pgx.gdxClose();
         }
         std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test reading a simple gdx file with gxfile port") {
+        return;
+        std::string msg;
+        const std::string fn {"mytest.gdx"};
+        TGXFileObj pgx{msg};
+        int ErrNr;
+
+        REQUIRE(pgx.gdxOpenRead(fn, ErrNr));
+        REQUIRE_EQ(0, ErrNr);
+        //if (ErrNr) ReportIOError(ErrNr, "gdxOpenRead");
+        std::string Producer;
+        REQUIRE(pgx.gdxFileVersion(msg, Producer));
+
+        std::cout << "GDX file written using version: " << msg << '\n';
+        std::cout <<"GDX file written by: " << Producer << '\n';
+
+        int VarNr;
+        REQUIRE(pgx.gdxFindSymbol("x", VarNr));
+
+        int Dim, VarTyp;
+        std::string VarName;
+        REQUIRE(pgx.gdxSymbolInfo(VarNr, VarName, Dim, VarTyp));
+        REQUIRE(Dim == 2);
+        REQUIRE(global::gmsspecs::dt_var == VarTyp);
+
+        int NrRecs;
+        REQUIRE(pgx.gdxDataReadStrStart(VarNr,NrRecs));
+        //if (!pgx.gdxDataReadStrStart(VarNr,NrRecs)) ReportGDXError(PGX);
+
+        std::cout << "Variable X has " << std::to_string(NrRecs) << " records\n";
+
+        gxdefs::TgdxStrIndex Indx;
+        gxdefs::TgdxValues Values;
+        int N{};
+        while (pgx.gdxDataReadStr(Indx,Values,N)) {
+            // skip level 0.0 is default
+            if (0 == Values[global::gmsspecs::vallevel]) continue;
+            for (int D{}; D<Dim; D++)
+                std::cout << (D ? '.' : ' ') << Indx[D];
+            std::cout << " = %7.2f\n" << Values[global::gmsspecs::vallevel] << '\n';
+        }
+
+        std::cout << "All solution values shown\n";
+        REQUIRE(pgx.gdxDataReadDone());
+        REQUIRE_FALSE(pgx.gdxClose());
     }
 
     TEST_SUITE_END();

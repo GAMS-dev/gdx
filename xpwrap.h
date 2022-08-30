@@ -20,6 +20,20 @@ namespace xpwrap {
         int gdxDataWriteDone() override;
 
         int gdxClose() override;
+
+        int gdxOpenRead(const std::string &FileName, int &ErrNr) override;
+
+        int gdxFileVersion(std::string &FileStr, std::string &ProduceStr) override;
+
+        int gdxFindSymbol(const std::string &SyId, int &SyNr) override;
+
+        int gdxDataReadStr(gdxinterface::TgdxStrIndex &KeyStr, gdxinterface::TgdxValues &Values, int &DimFrst) override;
+
+        int gdxDataReadDone() override;
+
+        int gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) override;
+
+        int gdxDataReadStrStart(int SyNr, int &NrRecs) override;
     };
 
 }
