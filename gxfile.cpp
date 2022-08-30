@@ -7,6 +7,8 @@
 #include "palxxx/gdlaudit.h"
 #include "global/unit.h"
 
+#include <cassert>
+
 using namespace gdxinterface;
 using namespace gdlib::gmsstrm;
 using namespace global::gmsspecs;
@@ -612,8 +614,61 @@ namespace gxfile {
         return false;
     }
 
-    int TGXFileObj::PrepareSymbolRead(const std::string &Caller, const std::string &AName, const std::string &AText,
-                                      int ADim, int AType, int AUserInfo) {
+    int TGXFileObj::PrepareSymbolRead(const std::string& Caller, int SyNr, const gxdefs::TgdxUELIndex& ADomainNrs, TgxFileMode newmode) {
+        if (utils::in(fmode, fr_str_data, fr_map_data, fr_mapr_data, fr_raw_data))
+            gdxDataReadDone();
+
+        NrMappedAdded = 0;
+        TIntegerMapping ExpndList;
+        ErrorList.clear();
+        int res{ -1 };
+        CurSyPtr = nullptr;
+        SortList.clear();
+
+        const TgxModeSet AllowedModes{ fr_init };
+
+        if (!MajorCheckMode(Caller, AllowedModes)) {
+            fmode = fr_init;
+            return -1;
+        }
+        ReadUniverse = !SyNr;
+        if (!ReadUniverse) {
+            if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return -1;
+            CurSyPtr = (*symbolWithIndex(SyNr)).second;
+            if (CurSyPtr->SDataType == dt_alias) {
+                do {
+                    SyNr = CurSyPtr->SUserInfo;
+                    if (!SyNr) {
+                        ReadUniverse = true;
+                        break;
+                    }
+                    CurSyPtr = (*symbolWithIndex(SyNr)).second;
+                } while (CurSyPtr->SDataType == dt_alias);
+                if (!ReadUniverse) {
+                    assert(CurSyPtr->SDataType == dt_set && "Bad aliased set-1");
+                }
+            }
+        }
+        int NrRecs;
+        if (ReadUniverse) {
+            FCurrentDim = 1;
+            DataSize = DataTypSize[dt_set];
+            LastDataField = static_cast<tvarvaltype>( DataSize - 1 );
+            NrRecs = UelCntOrig;
+            UniverseNr = 0;
+            CurSyPtr = nullptr;
+        }
+        else {
+            FCurrentDim = CurSyPtr->SDim;
+            FFile->SetCompression(CurSyPtr->SIsCompressed);
+            FFile->SetPosition(CurSyPtr->SPosition);
+            DataSize = DataTypSize[CurSyPtr->SDataType];
+            if (DataSize > 0) LastDataField = static_cast<tvarvaltype>(DataSize - 1);
+            NrRecs = CurSyPtr->SDataCount;
+        }
+        DeltaForRead = VersionRead <= 6 ? MaxDimV148 : FCurrentDim;
+        // ...
+        
         // ...
         STUBWARN();
         return 0;
@@ -939,9 +994,10 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxDataReadStrStart(int SyNr, int &NrRecs) {
-        STUBWARN();
-        // ...
-        return 0;
+        TgdxUELIndex XDomains;
+        XDomains.fill(DOMC_UNMAPPED);
+        NrRecs = PrepareSymbolRead("DataReadStrStart"s, SyNr, XDomains, fr_str_data);
+        return NrRecs >= 0;
     }
 
     int TGXFileObj::gdxOpenReadXX(const std::string &Afn, int filemode, int ReadMode, int &ErrNr) {

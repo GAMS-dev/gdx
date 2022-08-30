@@ -188,12 +188,7 @@ namespace gxfile {
         bool PrepareSymbolWrite(const std::string &Caller, const std::string &AName, const std::string &AText, int ADim,
                                 int AType, int AUserType, int AUserInfo);
 
-        int PrepareSymbolRead(const std::string &Caller,
-                              const std::string &AName,
-                              const std::string &AText,
-                              int ADim,
-                              int AType,
-                              int AUserInfo);
+        int PrepareSymbolRead(const std::string &Caller, int SyNr, const gxdefs::TgdxUELIndex &ADomainNrs, TgxFileMode newmode);
 
         void InitErrors();
         void SetError(int N);
