@@ -880,15 +880,20 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxFileVersion(std::string &FileStr, std::string &ProduceStr) {
-        STUBWARN();
-        // ...
-        return 0;
+        FileStr = FileSystemID;
+        ProduceStr = FProducer;
+        return true;
     }
 
     int TGXFileObj::gdxFindSymbol(const std::string &SyId, int &SyNr) {
-        STUBWARN();
-        // ...
-        return 0;
+        if (SyId == "*") {
+            SyNr = 0;
+            return true;
+        }
+        const auto it = NameList.find(SyId);
+        if (it == NameList.end()) return false;
+        SyNr = (*it).second->SSyNr;
+        return true;
     }
 
     int TGXFileObj::gdxDataReadStr(TgdxStrIndex &KeyStr, TgdxValues &Values, int &DimFrst) {
@@ -904,9 +909,33 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) {
-        STUBWARN();
-        // ...
-        return 0;
+        static auto badLookup = [&]() {
+            SyId.clear();
+            Dim = -1;
+            Typ = dt_set;
+            return false;
+        };
+
+        if (!SyNr) {
+            SyId = "*";
+            Dim = 1;
+            Typ = dt_set;
+            return true;
+        }
+
+        if (SyNr < 1 && SyNr > NameList.size()) return badLookup();
+        
+        auto maybeNnameAndSym = symbolWithIndex(SyNr);
+        if (maybeNnameAndSym) {
+            // TODO: Use destructuring of the pair here
+            auto nameAndSym = *maybeNnameAndSym;
+            SyId = nameAndSym.first;
+            Dim = nameAndSym.second->SDim;
+            Typ = nameAndSym.second->SDataType;
+            return true;
+        }
+
+        return badLookup();
     }
 
     int TGXFileObj::gdxDataReadStrStart(int SyNr, int &NrRecs) {
@@ -1025,6 +1054,15 @@ namespace gxfile {
         STUBWARN();
         // ...
         return 0;
+    }
+
+    std::optional<std::pair<std::string, PgdxSymbRecord>> TGXFileObj::symbolWithIndex(int index)
+    {
+        // FIXME: This is super slow. How to get both by name and by index lookups with good time complexity?
+        for (const auto& pair : NameList) {
+            if (pair.second->SSyNr == index) return pair;
+        }
+        return std::nullopt;
     }
 
     void TUELTable::clear() {
