@@ -966,6 +966,60 @@ namespace gxfile {
         FProducer2.clear();
 
         MajorIndexPosition = FFile->GetPosition();
+        if(ErrorCondition(FFile->ReadInteger() == MARK_BOI, ERR_OPEN_BOI)) return FileErrorNr();
+        int64_t AcronymPos{}, DomStrPos{}, SymbPos{}, UELPos{}, SetTextPos{};
+
+        if(VersionRead <= 5) {
+            SymbPos = FFile->ReadInteger();
+            UELPos = FFile->ReadInteger();
+            SetTextPos = FFile->ReadInteger();
+            NextWritePosition = FFile->ReadInteger();
+        } else {
+            SymbPos = FFile->ReadInt64();
+            UELPos = FFile->ReadInt64();
+            SetTextPos = FFile->ReadInt64();
+            if(VersionRead >= 7) {
+                AcronymPos = FFile->ReadInt64();
+                NextWritePosition = FFile->ReadInt64();
+                DomStrPos = FFile->ReadInt64();
+            }
+        }
+        // reading symbol table
+        FFile->SetCompression(DoUncompress);
+        FFile->SetPosition(SymbPos);
+        if(ErrorCondition(FFile->ReadString() == MARK_SYMB, ERR_OPEN_SYMBOLMARKER1)) return FileErrorNr();
+        int NrElem {FFile->ReadInteger()};
+        NameList.clear();
+        AcronymList.clear();
+        FilterList.clear();
+        for(int N{1}; N<=NrElem; N++) {
+            std::string S {FFile->ReadString()};
+            CurSyPtr = new TgdxSymbRecord {};
+            CurSyPtr->SPosition = VersionRead <= 5 ? FFile->ReadInteger() : FFile->ReadInt64();
+            CurSyPtr->SDim = FFile->ReadInteger();
+            uint8_t B {FFile->ReadByte()};
+            CurSyPtr->SDataType = static_cast<TgdxDataType>(B);
+            CurSyPtr->SUserInfo = FFile->ReadInteger();
+            CurSyPtr->SDataCount = FFile->ReadInteger();
+            CurSyPtr->SErrors = FFile->ReadInteger();
+            B = FFile->ReadByte();
+            CurSyPtr->SSetText = B;
+            CurSyPtr->SExplTxt = FFile->ReadString();
+            CurSyPtr->SIsCompressed = VersionRead > 5 && FFile->ReadByte();
+            if(VersionRead >= 7) {
+                if(FFile->ReadByte()) {
+                    for(int D{}; D<CurSyPtr->SDim; D++)
+                        CurSyPtr->SDomSymbols.emplace_back(FFile->ReadInteger());
+                }
+                NrElem = FFile->ReadInteger();
+                if(NrElem) {
+                    CurSyPtr->SCommentsList.emplace_back(FFile->ReadString());
+                    NrElem--;
+                }
+            }
+        }
+
+        // reading UEL table
         // ...
 
         STUBWARN();
