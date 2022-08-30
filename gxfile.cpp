@@ -952,9 +952,20 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxDataReadStr(TgdxStrIndex &KeyStr, TgdxValues &Values, int &DimFrst) {
-        STUBWARN();
-        // ...
-        return 0;
+        const TgxModeSet AllowedModes{ fr_str_data };
+        if ((TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) && CheckMode("DataReadStr", AllowedModes))
+            return false;
+        if (!DoRead(Values, DimFrst)) {
+            gdxDataReadDone();
+            return false;
+        }
+        else {
+            for (int D{}; D < FCurrentDim; D++) {
+                int LED{ LastElem[D] };
+                KeyStr[D] = LED >= 1 && LED <= UELTable.size() ? UELTable[LED] : BADUEL_PREFIX + std::to_string(LED);
+            }
+            return true;
+        }
     }
 
     int TGXFileObj::gdxDataReadDone() {

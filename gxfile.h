@@ -122,6 +122,10 @@ namespace gxfile {
         int IndexOf(const std::string &s) const;
 
         int AddObject(const std::string &id, int mapping);
+
+        std::string operator[](int index) {
+            return uelNames[index];
+        }
     };
 
     struct TAcronym {
