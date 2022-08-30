@@ -213,6 +213,8 @@ namespace gxfile {
 
         // ...
 
+        int gdxOpenReadXX(const std::string &Afn, int filemode, int ReadMode, int &ErrNr);
+
     public:
         explicit TGXFileObj(std::string &ErrMsg);
         ~TGXFileObj() override;

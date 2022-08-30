@@ -876,9 +876,7 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxOpenRead(const std::string &FileName, int &ErrNr) {
-        STUBWARN();
-        // ...
-        return 0;
+        return gdxOpenReadXX(FileName, fmOpenRead, 0, ErrNr);
     }
 
     int TGXFileObj::gdxFileVersion(std::string &FileStr, std::string &ProduceStr) {
@@ -894,18 +892,84 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxDataReadStr(TgdxStrIndex &KeyStr, TgdxValues &Values, int &DimFrst) {
+        STUBWARN();
+        // ...
         return 0;
     }
 
     int TGXFileObj::gdxDataReadDone() {
+        STUBWARN();
+        // ...
         return 0;
     }
 
     int TGXFileObj::gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) {
+        STUBWARN();
+        // ...
         return 0;
     }
 
     int TGXFileObj::gdxDataReadStrStart(int SyNr, int &NrRecs) {
+        STUBWARN();
+        // ...
+        return 0;
+    }
+
+    int TGXFileObj::gdxOpenReadXX(const std::string &Afn, int filemode, int ReadMode, int &ErrNr) {
+        if(fmode != f_not_open) {
+            ErrNr = ERR_FILEALREADYOPEN;
+            return false;
+        }
+        MajContext = "OpenRead"s;
+        TraceLevel = trl_none;
+        fmode = f_not_open;
+        ReadPtr = nullptr;
+        InitErrors();
+
+        auto FileErrorNr = [&]() {
+            ErrNr = LastError;
+            FFile.release();
+            return false;
+        };
+
+        auto FileNoGood = [&]() {
+            LastError = ErrNr;
+            return FileErrorNr();
+        };
+
+        if(Afn.empty()) {
+            ErrNr = ERR_NOFILE;
+            return FileNoGood();
+        }
+        FFile = std::make_unique<TMiBufferedStreamDelphi>(Afn, filemode, DLLLoadPath);
+        ErrNr = FFile->GetLastIOResult();
+        if(ErrNr) return FileNoGood();
+        if(FFile->GoodByteOrder()) {
+            ErrNr = ERR_BADDATAFORMAT;
+            return FileNoGood();
+        }
+        if( ErrorCondition(FFile->ReadByte() == gdxHeaderNr, ERR_OPEN_FILEHEADER) ||
+            ErrorCondition(utils::sameText(FFile->ReadString(), gdxHeaderId), ERR_OPEN_FILEMARKER)) return FileErrorNr();
+        VersionRead = FFile->ReadInteger();
+        if(ErrorCondition(VersionRead >= VERSION, ERR_OPEN_FILEVERSION)) return FileErrorNr();
+
+        int Compr {VersionRead <= 5 ? 0 : FFile->ReadInteger()};
+        DoUncompress = Compr > 0;
+        if(DoUncompress && !FFile->GetCanCompress()) {
+            ErrNr = ERR_ZLIB_NOT_FOUND;
+            return FileNoGood();
+        }
+
+        fComprLev = Compr;
+        FileSystemID = FFile->ReadString();
+        FProducer = FFile->ReadString();
+        FProducer2.clear();
+
+        MajorIndexPosition = FFile->GetPosition();
+        // ...
+
+        STUBWARN();
+        // ...
         return 0;
     }
 
