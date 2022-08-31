@@ -814,6 +814,10 @@ namespace gxfile {
     }
 
     bool TGXFileObj::DoRead(TgdxValues &AVals, int &AFDim) {
+        const static auto maybeRemap = [&](int DV, double v) -> double {
+            return v >= Zvalacr ? AcronymRemap(v) : v;
+        };
+
         if (ReadUniverse) {
             UniverseNr++;
             bool res{ UniverseNr <= UelCntOrig };
@@ -833,10 +837,35 @@ namespace gxfile {
 
         uint8_t B;
         FFile->Read(&B, 1);
-
-        STUBWARN();
-        // ...
-        return false;
+        if(B > DeltaForRead) { // relative change in last dimension
+            if (B == 255) return false;
+            AFDim = FCurrentDim;
+            if(FCurrentDim > 0) LastElem[FCurrentDim] += B - DeltaForRead;
+        } else {
+            AFDim = B;
+            for(int D{AFDim}; D <=FCurrentDim; D++) {
+                switch(ElemType[D]) {
+                    case sz_integer: LastElem[D] = FFile->ReadInteger() + MinElem[D]; break;
+                    case sz_word: LastElem[D] = FFile->ReadWord() + MinElem[D]; break;
+                    case sz_byte: LastElem[D] = FFile->ReadByte() + MinElem[D]; break;
+                }
+            }
+        }
+        if(DataSize > 0) {
+            for(int DV{vallevel}; DV<=LastDataField; DV++) {
+                uint8_t BSV;
+                FFile->Read(&BSV, 1);
+                TgdxIntlValTyp SV {static_cast<TgdxIntlValTyp>(BSV)};
+                AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap(DV, FFile->ReadDouble());
+            }
+            if(!MapSetText.empty() && AVals[vallevel] != 0.0 && CurSyPtr->SDataType == gms_dt_set) { // remap settext number
+                double X {AVals[vallevel]};
+                int D {static_cast<int>(std::round(X))};
+                if(std::abs(X-D) < 1e-12 && D >= 0 && D < SetTextList.size())
+                    AVals[vallevel] = MapSetText[D];
+            }
+        }
+        return true;
     }
 
     double TGXFileObj::AcronymRemap(double V) {
