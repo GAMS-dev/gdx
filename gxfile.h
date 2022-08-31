@@ -136,6 +136,13 @@ namespace gxfile {
         // ...
     };
 
+    class TAcronymList : public std::vector<TAcronym> {
+    public:
+        int FindEntry(int Map) const;
+        int FindEntry(const std::string &Name) const;
+        int AddEntry(const std::string &Name, const std::string &Text, int Map);
+    };
+
     using TIntlValueMapDbl = std::array<double, 11>;
     using TIntlValueMapI64 = std::array<int64_t, 11>;
 
@@ -181,7 +188,7 @@ namespace gxfile {
         int DeltaForWrite{};
         int DeltaForRead{};
         double Zvalacr{};
-        std::vector<TAcronym> AcronymList;
+        TAcronymList AcronymList;
         std::array<std::vector<bool>, global::gmsspecs::MaxDim> WrBitMaps;
         bool ReadUniverse{};
         int UniverseNr{}, UelCntOrig{};

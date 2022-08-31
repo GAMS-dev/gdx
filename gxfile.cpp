@@ -871,21 +871,16 @@ namespace gxfile {
     double TGXFileObj::AcronymRemap(double V) {
         auto GetAsAcronym = [&](double V)-> double {
             int orgIndx {static_cast<int>(std::round(V / Zvalacr))};
-            const auto Nit = std::find_if(AcronymList.begin(), AcronymList.end(), [&](const auto &item) {
-                return item.AcrMap == orgIndx;
-            });
-            int N {Nit == AcronymList.end() ? -1 : (int)std::distance(AcronymList.begin(), Nit)};
+            int N {AcronymList.FindEntry(orgIndx)};
             int newIndx{};
             if(N < 0) { // not found
                 if(NextAutoAcronym <= 0) newIndx = orgIndx;
                 else {
                     newIndx = NextAutoAcronym;
                     NextAutoAcronym++;
-                    TAcronym acr {};
-                    acr.AcrMap = orgIndx;
-                    acr.AcrReadMap = newIndx;
-                    acr.AcrAutoGen = true;
-                    AcronymList.emplace_back(acr);
+                    N = AcronymList.AddEntry("", "", orgIndx);
+                    AcronymList[N].AcrReadMap = newIndx;
+                    AcronymList[N].AcrAutoGen = true;
                 }
             } else { // found
                 newIndx = AcronymList[N].AcrReadMap;
@@ -1361,6 +1356,29 @@ namespace gxfile {
     }
 
     void finalization() {
+    }
+
+    int TAcronymList::FindEntry(int Map) const {
+        const auto it = std::find_if(begin(), end(), [&](const auto &item) {
+            return item.AcrMap == Map;
+        });
+        return it == end() ? -1 : static_cast<int>(std::distance(begin(), it));
+    }
+
+    int TAcronymList::AddEntry(const std::string &Name, const std::string &Text, int Map) {
+        TAcronym acr {};
+        acr.AcrName = Name;
+        acr.AcrText = Text;
+        acr.AcrMap = Map;
+        emplace_back(acr);
+        return static_cast<int>(size())-1;
+    }
+
+    int TAcronymList::FindEntry(const std::string &Name) const {
+        const auto it = std::find_if(begin(), end(), [&](const auto &item) {
+            return item.AcrName == Name;
+        });
+        return it == end() ? -1 : static_cast<int>(std::distance(begin(), it));
     }
 
     UNIT_INIT_FINI();
