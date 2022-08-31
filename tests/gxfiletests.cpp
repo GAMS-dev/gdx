@@ -66,8 +66,7 @@ namespace tests::gxfiletests {
 
         gxdefs::TgdxStrIndex Indx;
         gxdefs::TgdxValues Values;
-        int N{};
-        while (pgx.gdxDataReadStr(Indx, Values, N)) {
+        for(int N{}; pgx.gdxDataReadStr(Indx, Values, N);) {
             /*if (0 == Values[global::gmsspecs::vallevel]) continue;
             for (int D{}; D < Dim; D++)
                 std::cout << (D ? '.' : ' ') << Indx[D];

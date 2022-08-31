@@ -1295,6 +1295,10 @@ namespace gxfile {
                     NrElem--;
                 }
             }
+            CurSyPtr->SSetBitMap.clear();
+            CurSyPtr->SDomStrings.clear();
+            NameList[S] = CurSyPtr;
+            CurSyPtr->SSyNr = static_cast<int>(NameList.size());
         }
 
         // reading UEL table
