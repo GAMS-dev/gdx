@@ -869,23 +869,48 @@ namespace gxfile {
     }
 
     double TGXFileObj::AcronymRemap(double V) {
-        auto GetAsAcronym = [](double V) {
-
+        auto GetAsAcronym = [&](double V)-> double {
+            int orgIndx {static_cast<int>(std::round(V / Zvalacr))};
+            const auto Nit = std::find_if(AcronymList.begin(), AcronymList.end(), [&](const auto &item) {
+                return item.AcrMap == orgIndx;
+            });
+            int N {Nit == AcronymList.end() ? -1 : (int)std::distance(AcronymList.begin(), Nit)};
+            int newIndx{};
+            if(N < 0) { // not found
+                if(NextAutoAcronym <= 0) newIndx = orgIndx;
+                else {
+                    newIndx = NextAutoAcronym;
+                    NextAutoAcronym++;
+                    TAcronym acr {};
+                    acr.AcrMap = orgIndx;
+                    acr.AcrReadMap = newIndx;
+                    acr.AcrAutoGen = true;
+                    AcronymList.emplace_back(acr);
+                }
+            } else { // found
+                newIndx = AcronymList[N].AcrReadMap;
+                if(newIndx <= 0) {
+                    if(NextAutoAcronym <= 0) newIndx = orgIndx;
+                    else {
+                        newIndx = NextAutoAcronym;
+                        NextAutoAcronym++;
+                        AcronymList[N].AcrReadMap = newIndx;
+                        AcronymList[N].AcrAutoGen = true;
+                    }
+                }
+            }
+            return Zvalacr * newIndx;
         };
 
-        if (V < Zvalacr) {
-
-        }
+        if (V < Zvalacr)
+            return V;
         else {
-            /*switch (FPClass(V)) {
-            case FP_SNAN:
-                break;
-            }*/
+            if(V == 0.0) return 0.0;
+            if(std::isnan(V)) return vm_valna;
+            if(std::isinf(V)) return V < 0.0 ? vm_valmin : vm_valpin;
+            if(std::isnormal(V)) return V < 0.0 ? V : GetAsAcronym(V);
+            return intlValueMapDbl[vm_valna];
         }
-
-        STUBWARN();
-        // ...
-        return 0.0;
     }
 
     void TGXFileObj::AddToErrorListDomErrs(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
