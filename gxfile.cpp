@@ -814,12 +814,46 @@ namespace gxfile {
     }
 
     bool TGXFileObj::DoRead(TgdxValues &AVals, int &AFDim) {
+        if (ReadUniverse) {
+            UniverseNr++;
+            bool res{ UniverseNr <= UelCntOrig };
+            if (res) {
+                LastElem[0] = UniverseNr;
+                AVals[vallevel] = 0.0;
+                AFDim = 1;
+            }
+            return res;
+        }
+        if (CurSyPtr->SScalarFrst) {
+            CurSyPtr->SScalarFrst = false;
+            GetDefaultRecord(AVals);
+            AFDim = 0;
+            return true;
+        }
+
+        uint8_t B;
+        FFile->Read(&B, 1);
+
         STUBWARN();
         // ...
         return false;
     }
 
     double TGXFileObj::AcronymRemap(double V) {
+        auto GetAsAcronym = [](double V) {
+
+        };
+
+        if (V < Zvalacr) {
+
+        }
+        else {
+            /*switch (FPClass(V)) {
+            case FP_SNAN:
+                break;
+            }*/
+        }
+
         STUBWARN();
         // ...
         return 0.0;
