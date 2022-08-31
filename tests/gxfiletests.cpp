@@ -48,33 +48,33 @@ namespace tests::gxfiletests {
         std::cout << "GDX file written using version: " << msg << '\n';
         std::cout << "GDX file written by: " << Producer << '\n';
 
-        int VarNr{};
-        REQUIRE(pgx.gdxFindSymbol("x", VarNr));
+        // FIXME: Why is name list empty here?
+        int SyNr{};
+        REQUIRE(pgx.gdxFindSymbol("demand", SyNr));
 
         int Dim{}, VarTyp{};
         std::string VarName{};
-        REQUIRE(pgx.gdxSymbolInfo(VarNr, VarName, Dim, VarTyp));
-        REQUIRE(Dim == 2);
-        REQUIRE(global::gmsspecs::dt_var == VarTyp);
+        REQUIRE(pgx.gdxSymbolInfo(SyNr, VarName, Dim, VarTyp));
+        REQUIRE(Dim == 1);
+        REQUIRE(global::gmsspecs::dt_par == VarTyp);
 
         int NrRecs;
-        REQUIRE(pgx.gdxDataReadStrStart(VarNr, NrRecs));
-        //if (!pgx.gdxDataReadStrStart(VarNr,NrRecs)) ReportGDXError(PGX);
+        REQUIRE(pgx.gdxDataReadStrStart(SyNr, NrRecs));
+        //if (!pgx.gdxDataReadStrStart(SyNr,NrRecs)) ReportGDXError(PGX);
 
-        std::cout << "Variable X has " << std::to_string(NrRecs) << " records\n";
+        std::cout << "Parameter demand has " << std::to_string(NrRecs) << " records\n";
 
         gxdefs::TgdxStrIndex Indx;
         gxdefs::TgdxValues Values;
         int N{};
         while (pgx.gdxDataReadStr(Indx, Values, N)) {
-            // skip level 0.0 is default
-            if (0 == Values[global::gmsspecs::vallevel]) continue;
+            /*if (0 == Values[global::gmsspecs::vallevel]) continue;
             for (int D{}; D < Dim; D++)
                 std::cout << (D ? '.' : ' ') << Indx[D];
-            std::cout << " = %7.2f\n" << Values[global::gmsspecs::vallevel] << '\n';
+            std::cout << " = %7.2f\n" << Values[global::gmsspecs::vallevel] << '\n';*/
+            std::cout << "Key=" << Indx.front() << ", Value=" << Values[global::gmsspecs::vallevel] << "\n";
         }
 
-        std::cout << "All solution values shown\n";
         REQUIRE(pgx.gdxDataReadDone());
         REQUIRE_FALSE(pgx.gdxClose());
     }

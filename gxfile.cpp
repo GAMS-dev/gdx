@@ -570,7 +570,7 @@ namespace gxfile {
     }
 
     bool TGXFileObj::IsGoodNewSymbol(const std::string &s) {
-        if( ErrorCondition(!utils::in(s, NameList), ERR_DUPLICATESYMBOL) ||
+        if( ErrorCondition(NameList.find(s) == NameList.end(), ERR_DUPLICATESYMBOL) ||
             ErrorCondition(utils::indexOf<TAcronym>(AcronymList, [&s](auto acro) { return acro.AcrName == s; }) == -1, ERR_DUPLICATESYMBOL) ||
             ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT)) return false;
         return true;

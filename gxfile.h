@@ -12,6 +12,11 @@ namespace gdlib::gmsstrm {
     class TMiBufferedStreamDelphi;
 }
 
+#if defined(_WIN32)
+#define strcasecmp  _stricmp
+#define strncasecmp _strnicmp
+#endif
+
 namespace gxfile {
     const std::string   BADUEL_PREFIX = "?L__",
                         BADStr_PREFIX = "?Str__",
@@ -19,6 +24,12 @@ namespace gxfile {
                         strGDXCONVERT = "GDXCONVERT";
 
     using PUELIndex = gxdefs::TgdxUELIndex*;
+
+    struct strCompCaseInsensitive {
+        bool operator() (const std::string& lhs, const std::string& rhs) const {
+            return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+        }
+    };
 
     struct TDFilter {
         int FiltNumber, FiltMaxUel;
@@ -164,7 +175,7 @@ namespace gxfile {
         std::array<std::string, global::gmsspecs::MaxDim> LastStrElem;
         int DataSize{};
         global::gmsspecs::tvarvaltype LastDataField;
-        std::map<std::string, PgdxSymbRecord> NameList;
+        std::map<std::string, PgdxSymbRecord, strCompCaseInsensitive> NameList;
         std::vector<std::string> DomainStrList;
         std::map<global::gmsspecs::TIndex, gdxinterface::TgdxValues> SortList, ErrorList;
         PgdxSymbRecord CurSyPtr{};

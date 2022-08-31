@@ -36,7 +36,7 @@ namespace gdlib::gmsstrm {
         strmErrorEncoding = 6;
     
     const uint16_t PAT_WORD = 0x1234u;
-    const uint32_t PAT_INTEGER = 0x12345678u;
+    const /*uint32_t*/ int PAT_INTEGER = 0x12345678 /*u*/;
     const double PAT_DOUBLE = 3.1415926535897932385;
     const int PAT_BAD_ORDER = 254;
     const int PAT_BAD_SIZE = 255;
@@ -237,14 +237,14 @@ namespace gdlib::gmsstrm {
         }
 
         template<typename T>
-        void initOrderCommon(uint8_t &order_type, uint8_t size_type, T patConstant) {
+        void initOrderCommon(uint8_t &order_type, uint8_t &size_type, T patConstant) {
             T v1, v2;
             Read(&size_type, sizeof(uint8_t));
-            if(size_type != sizeof(uint16_t)) {
+            if(size_type != sizeof(T)) {
                 order_type = PAT_BAD_SIZE;
                 SetPosition(GetPosition() + size_type);
             } else {
-                Read(&v1, sizeof(uint16_t));
+                Read(&v1, sizeof(T));
                 order_type = 0;
                 if(v1 != patConstant) {
                     order_type = 1;

@@ -969,13 +969,14 @@ namespace gdlib::gmsstrm {
 
     int TMiBufferedStreamDelphi::GoodByteOrder() const
     {
-        if(order_word == PAT_BAD_SIZE) return 1;
-        if(order_word == PAT_BAD_ORDER) return 2;
-        if(order_integer == PAT_BAD_SIZE) return 4;
-        if(order_integer == PAT_BAD_ORDER) return 8;
-        if(order_double == PAT_BAD_SIZE) return 16;
-        if(order_double == PAT_BAD_ORDER) return 32;
-        return 0;
+        int res{};
+        if(order_word == PAT_BAD_SIZE) res += 1;
+        if(order_word == PAT_BAD_ORDER) res += 2;
+        if(order_integer == PAT_BAD_SIZE) res += 4;
+        if(order_integer == PAT_BAD_ORDER) res += 8;
+        if(order_double == PAT_BAD_SIZE) res += 16;
+        if(order_double == PAT_BAD_ORDER) res += 32;
+        return res;
     }
 
     double TMiBufferedStreamDelphi::ReadDouble()
