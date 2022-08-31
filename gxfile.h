@@ -20,11 +20,16 @@ namespace gxfile {
 
     using PUELIndex = gxdefs::TgdxUELIndex*;
 
-    class TDFilter {
+    struct TDFilter {
         int FiltNumber, FiltMaxUel;
         std::vector<bool> FiltMap;
         bool FiltSorted;
         // ...
+    };
+
+    class TFilterList : public std::vector<TDFilter> {
+    public:
+        TDFilter *FindFilter(int Nr);
     };
 
     enum TgdxDAction {
@@ -32,7 +37,7 @@ namespace gxfile {
     };
 
     struct TDomain {
-        TDFilter DFilter;
+        TDFilter *DFilter;
         TgdxDAction DAction;
     };
 
@@ -101,7 +106,7 @@ namespace gxfile {
         sz_integer
     };
 
-    class TIntegerMapping {
+    class TIntegerMapping : public std::map<int, int> {
         // ...
     };
 
@@ -165,7 +170,7 @@ namespace gxfile {
         PgdxSymbRecord CurSyPtr{};
         int ErrCnt{}, ErrCntTotal{};
         int LastError{}, LastRepError{};
-        std::vector<TDFilter> FilterList;
+        TFilterList FilterList;
         TDFilter CurFilter;
         TDomainList DomainList;
         bool StoreDomainSets{true};

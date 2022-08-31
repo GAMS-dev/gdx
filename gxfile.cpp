@@ -619,11 +619,10 @@ namespace gxfile {
     int TGXFileObj::PrepareSymbolRead(const std::string& Caller, int SyNr, const gxdefs::TgdxUELIndex& ADomainNrs, TgxFileMode newmode) {
         if (utils::in(fmode, fr_str_data, fr_map_data, fr_mapr_data, fr_raw_data))
             gdxDataReadDone();
-
+        int res{-1};
         NrMappedAdded = 0;
         TIntegerMapping ExpndList;
         ErrorList.clear();
-        int res{ -1 };
         CurSyPtr = nullptr;
         SortList.clear();
 
@@ -669,11 +668,75 @@ namespace gxfile {
             NrRecs = CurSyPtr->SDataCount;
         }
         DeltaForRead = VersionRead <= 6 ? MaxDimV148 : FCurrentDim;
-        // ...
-        
-        // ...
-        STUBWARN();
-        return 0;
+        for(int D{}; D<FCurrentDim; D++) {
+            auto &obj = DomainList[D];
+            obj.DFilter = nullptr;
+            switch(ADomainNrs[D]) {
+                case DOMC_UNMAPPED: obj.DAction = dm_unmapped; break;
+                case DOMC_EXPAND: obj.DAction = dm_expand; break;
+                case DOMC_STRICT: obj.DAction = dm_strict; break;
+                default: // filter number
+                    obj.DFilter = FilterList.FindFilter(ADomainNrs[D]);
+                    if(obj.DFilter) obj.DAction = dm_filter;
+                    else {
+                        ReportError(ERR_UNKNOWNFILTER);
+                        return res;
+                    }
+                    break;
+            }
+        }
+
+        if(ReadUniverse) {
+
+        }
+
+        if(!FCurrentDim && !NrRecs) {
+            CurSyPtr->SScalarFrst = true;
+            fmode = newmode;
+            return 1;
+        }
+
+        if(!ReadUniverse) {
+            CurSyPtr->SScalarFrst = false;
+            std::fill_n(LastElem.begin(), FCurrentDim, INDEX_INITIAL);
+            std::fill_n(PrevElem.begin(), FCurrentDim, -1);
+            for(int D{}; D<FCurrentDim; D++) {
+                MinElem[D] = FFile->ReadInteger();
+                MaxElem[D] = FFile->ReadInteger();
+                ElemType[D] = GetIntegerSize(MaxElem[D] - MinElem[D] + 1);
+            }
+        }
+        bool AllocOk{true};
+        int FIDim{}; // First invalid dimension
+
+        if(utils::in(newmode, fr_raw_data, fr_str_data, fr_slice))
+            res = NrRecs;
+        else {
+            assert(newmode == fr_map_data && "Expect to read mapped data");
+            if(ResultWillBeSorted(ADomainNrs)) {
+                res = NrRecs;
+                newmode = fr_mapr_data;
+            } else {
+                TgdxValues Avals;
+                int AFDim;
+                while(DoRead(Avals, AFDim)) {
+                    if(FIDim < AFDim) AFDim = FIDim;
+                    FIDim = FCurrentDim;
+
+                }
+            }
+        }
+
+        if(AllocOk) {
+            std::fill_n(LastElem.begin(), FCurrentDim, -1);
+            fmode = newmode;
+            return res;
+        } else {
+            SetError(ERR_OUT_OF_MEMORY);
+            SortList.clear();
+            fmode = fr_init;
+            return -1;
+        }
     }
 
     void TGXFileObj::SetError(int N) {
@@ -1379,6 +1442,12 @@ namespace gxfile {
             return item.AcrName == Name;
         });
         return it == end() ? -1 : static_cast<int>(std::distance(begin(), it));
+    }
+
+    TDFilter *TFilterList::FindFilter(int Nr) {
+        const auto it = std::find_if(begin(), end(),
+                                     [&Nr](const auto &f) { return f.FiltNumber == Nr; });
+        return it == end() ? nullptr : &(*it);
     }
 
     UNIT_INIT_FINI();
