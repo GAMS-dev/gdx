@@ -54,11 +54,16 @@ namespace tests::xptests {
         gdxClose(pgx);
     }
 
-    TEST_CASE("Test writing and reading demand data for gamslib/trnsport to/from GDX") {
+    gdxHandle_t setupGdxObject() {
         std::array<char, 256> msgBuf {};
         gdxHandle_t pgx {};
         REQUIRE(gdxCreate(&pgx, msgBuf.data(), msgBuf.size()));
         REQUIRE_EQ('\0', msgBuf.front());
+        return pgx;
+    };
+
+    TEST_CASE("Test writing and reading demand data for gamslib/trnsport to/from GDX") {
+        auto pgx = setupGdxObject();
 
         const std::array<std::pair<std::string, double>, 3> exampleData
         {
@@ -73,6 +78,24 @@ namespace tests::xptests {
         writeDemandData(pgx, fn, exampleData);
         readDemandData(pgx, fn, exampleData);
 
+        gdxFree(&pgx);
+        std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Playing around with mapped writing and reading") {
+        auto pgx = setupGdxObject();
+        int ErrNr;
+        std::string fn {"mappedread.gdx"};
+        gdxOpenWrite(pgx, fn.c_str(), "xptests", &ErrNr);
+        gdxDataWriteMapStart(pgx, "a", "A symbol", 1, GMS_DT_PAR, 0);
+        std::array<int, 20> keys{};
+        std::array<double, 5> vals{};
+        for(int i{}; i<3; i++) {
+            keys[i] = i+1;
+            vals[i] = i+1;
+            gdxDataWriteMap(pgx, keys.data(), vals.data());
+        }
+        gdxDataWriteDone(pgx);
         gdxFree(&pgx);
         std::filesystem::remove(fn);
     }

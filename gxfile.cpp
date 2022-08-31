@@ -1376,13 +1376,12 @@ namespace gxfile {
         return true;
     }
 
-    std::optional<std::pair<std::string, PgdxSymbRecord>> TGXFileObj::symbolWithIndex(int index)
-    {
+    std::optional<std::pair<const std::string, PgdxSymbRecord>> TGXFileObj::symbolWithIndex(int index) {
         // FIXME: This is super slow. How to get both by name and by index lookups with good time complexity?
-        for (const auto& pair : NameList) {
-            if (pair.second->SSyNr == index) return pair;
-        }
-        return std::nullopt;
+        auto it = std::find_if(NameList.begin(), NameList.end(), [&index](const auto &pair) {
+            return pair.second->SSyNr == index;
+        });
+        return it == NameList.end() ? std::nullopt : std::make_optional(*it);
     }
 
     void TUELTable::clear() {
