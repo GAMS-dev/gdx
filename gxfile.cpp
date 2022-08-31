@@ -686,8 +686,10 @@ namespace gxfile {
             }
         }
 
-        if(ReadUniverse) {
-
+        if(!ReadUniverse) {
+            if( ErrorCondition(FFile->ReadString() == MARK_DATA,ERR_BADDATAMARKER_DATA) ||
+                ErrorCondition(FFile->ReadByte()  == FCurrentDim,ERR_BADDATAMARKER_DIM)) return -1;
+            FFile->ReadInteger();  //skip record counter
         }
 
         if(!FCurrentDim && !NrRecs) {
