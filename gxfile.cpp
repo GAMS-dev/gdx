@@ -226,7 +226,7 @@ namespace gxfile {
         FFile = std::make_unique<TMiBufferedStreamDelphi>(FileName, fmCreate, DLLLoadPath);
         ErrNr = FFile->GetLastIOResult();
         if(ErrNr) {
-            FFile.reset();
+            FFile = nullptr;
             if(ErrNr == strmErrorZLib) ErrNr = ERR_ZLIB_NOT_FOUND;
             LastError = ErrNr;
             return false;
@@ -1110,10 +1110,10 @@ namespace gxfile {
 
         if (SyNr < 1 && SyNr > NameList.size()) return badLookup();
         
-        auto maybeNnameAndSym = symbolWithIndex(SyNr);
-        if (maybeNnameAndSym) {
+        auto maybeNameAndSym = symbolWithIndex(SyNr);
+        if (maybeNameAndSym) {
             // TODO: Use destructuring of the pair here
-            auto nameAndSym = *maybeNnameAndSym;
+            auto nameAndSym = *maybeNameAndSym;
             SyId = nameAndSym.first;
             Dim = nameAndSym.second->SDim;
             Typ = nameAndSym.second->SDataType;
@@ -1143,7 +1143,7 @@ namespace gxfile {
 
         auto FileErrorNr = [&]() {
             ErrNr = LastError;
-            FFile.release();
+            FFile = nullptr;
             return false;
         };
 
