@@ -48,7 +48,6 @@ namespace tests::gxfiletests {
         std::cout << "GDX file written using version: " << msg << '\n';
         std::cout << "GDX file written by: " << Producer << '\n';
 
-        // FIXME: Why is name list empty here?
         int SyNr{};
         REQUIRE(pgx.gdxFindSymbol("demand", SyNr));
 

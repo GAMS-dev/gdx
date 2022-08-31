@@ -711,6 +711,8 @@ namespace gxfile {
         bool AllocOk{true};
         int FIDim{}; // First invalid dimension
 
+        bool AddNew{}, AddError{}, BadError{};
+
         if(utils::in(newmode, fr_raw_data, fr_str_data, fr_slice))
             res = NrRecs;
         else {
@@ -719,12 +721,17 @@ namespace gxfile {
                 res = NrRecs;
                 newmode = fr_mapr_data;
             } else {
+                FIDim = FCurrentDim;
                 TgdxValues Avals;
                 int AFDim;
+                AddNew = AddError = BadError = false;
                 while(DoRead(Avals, AFDim)) {
                     if(FIDim < AFDim) AFDim = FIDim;
                     FIDim = FCurrentDim;
-
+                    for(int D{AFDim}; D<=FCurrentDim; D++) {
+                        // ...
+                        STUBWARN();
+                    }
                 }
             }
         }
