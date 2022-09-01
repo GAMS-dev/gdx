@@ -1397,6 +1397,37 @@ namespace gxfile {
         return it == NameList.end() ? std::nullopt : std::make_optional(*it);
     }
 
+    int TGXFileObj::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
+        if(!MajorCheckMode("AddAlias", AnyWriteMode)) return false;
+        int SyNr1 = Id1 == "*" ? std::numeric_limits<int>::max() : NameList[Id1]->SSyNr;
+        int SyNr2 = Id2 == "*" ? std::numeric_limits<int>::max() : NameList[Id2]->SSyNr;
+        if(ErrorCondition((SyNr1 >= 0) != (SyNr2 >= 0), ERR_ALIASSETEXPECTED)) return false;
+        int SyNr;
+        std::string AName;
+        if(SyNr1 > 0) {
+            SyNr = SyNr1;
+            AName = Id2;
+        } else {
+            SyNr = SyNr2;
+            AName = Id1;
+        }
+        if(SyNr == std::numeric_limits<int>::max()) SyNr = 0;
+        else if(ErrorCondition(utils::in(symbolWithIndex(SyNr)->second->SDataType, dt_set, dt_alias), ERR_ALIASSETEXPECTED)) return false;
+        if(!IsGoodNewSymbol(AName)) return false;
+        auto SyPtr = new TgdxSymbRecord{};
+        SyPtr->SDataType = dt_alias;
+        SyPtr->SUserInfo = SyNr;
+        if(!SyNr) {
+            SyPtr->SDim = 1;
+            SyPtr->SExplTxt = "Aliased with *"s;
+        } else {
+            SyPtr->SDim = symbolWithIndex(SyNr)->second->SDim;
+            SyPtr->SExplTxt = "Aliased with "s + symbolWithIndex(SyNr)->first;
+        }
+        NameList[AName] = SyPtr;
+        return true;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();

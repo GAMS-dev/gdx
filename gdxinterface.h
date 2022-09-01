@@ -31,6 +31,8 @@ namespace gdxinterface {
         virtual int gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) = 0;
 
         virtual int gdxClose() = 0;
+
+        virtual int gdxAddAlias(const std::string &Id1, const std::string &Id2) = 0;
     };
 
 }

@@ -80,4 +80,8 @@ namespace xpwrap {
     int GDXFile::gdxDataReadStrStart(int SyNr, int &NrRecs) {
         return ::gdxDataReadStrStart(pgx, SyNr, &NrRecs);
     }
+
+    int GDXFile::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
+        return ::gdxAddAlias(pgx, Id1.c_str(), Id2.c_str());
+    }
 }

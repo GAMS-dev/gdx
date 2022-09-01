@@ -271,6 +271,8 @@ namespace gxfile {
 
         int gdxDataReadStrStart(int SyNr, int &NrRecs) override;
 
+        int gdxAddAlias(const std::string &Id1, const std::string &Id2) override;
+
     };
 
     extern std::string DLLLoadPath;
