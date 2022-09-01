@@ -33,6 +33,7 @@ namespace gdxinterface {
         virtual int gdxClose() = 0;
 
         virtual int gdxAddAlias(const std::string &Id1, const std::string &Id2) = 0;
+        virtual int gdxAddSetText(const std::string &Txt, int &TxtNr) = 0;
     };
 
 }

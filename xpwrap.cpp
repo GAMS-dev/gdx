@@ -84,4 +84,8 @@ namespace xpwrap {
     int GDXFile::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
         return ::gdxAddAlias(pgx, Id1.c_str(), Id2.c_str());
     }
+
+    int GDXFile::gdxAddSetText(const std::string &Txt, int &TxtNr) {
+        return ::gdxAddSetText(pgx, Txt.c_str(), &TxtNr);
+    }
 }

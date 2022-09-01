@@ -1428,6 +1428,14 @@ namespace gxfile {
         return true;
     }
 
+    int TGXFileObj::gdxAddSetText(const std::string &Txt, int &TxtNr) {
+        if(SetTextList.empty() || TraceLevel >= trl_all && !CheckMode("AddSetText", {}))
+            return false;
+        SetTextList.emplace_back(MakeGoodExplText(Txt));
+        TxtNr = static_cast<int>(SetTextList.size());
+        return true;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();

@@ -36,6 +36,8 @@ namespace xpwrap {
         int gdxDataReadStrStart(int SyNr, int &NrRecs) override;
 
         int gdxAddAlias(const std::string &Id1, const std::string &Id2) override;
+
+        int gdxAddSetText(const std::string &Txt, int &TxtNr) override;
     };
 
 }

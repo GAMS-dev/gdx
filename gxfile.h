@@ -273,6 +273,8 @@ namespace gxfile {
 
         int gdxAddAlias(const std::string &Id1, const std::string &Id2) override;
 
+        int gdxAddSetText(const std::string &Txt, int &TxtNr) override;
+
     };
 
     extern std::string DLLLoadPath;
