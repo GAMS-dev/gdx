@@ -3,6 +3,47 @@
 #include <cassert>
 
 namespace xpwrap {
+    class CharBuf {
+        std::array<char, 256> buf;
+
+    public:
+        char* get() { return buf.data(); }
+        std::string str() const {
+            return buf.data();
+        };
+
+        operator std::string() const {
+            return str();
+        }
+
+        int size() const { return (int)buf.size(); }
+    };
+
+    class StrIndexBuffers {
+        std::array<std::array<char, 256>, 20> bufContents{};
+        std::array<char*, 20> bufPtrs{};
+    public:
+        StrIndexBuffers(const gxdefs::TgdxStrIndex *strIndex = nullptr) {
+            for (int i{}; i < bufPtrs.size(); i++) {
+                bufPtrs[i] = bufContents[i].data();
+                if (strIndex) {
+                    strcpy(bufPtrs[i], (*strIndex)[i].c_str());
+                }
+            }
+        }
+
+        char **ptrs() { return bufPtrs.data(); }
+        const char** cptrs() { return (const char **)bufPtrs.data(); }
+
+        gxdefs::TgdxStrIndex strs() const {
+            gxdefs::TgdxStrIndex res;
+            for (int i{}; i < res.size(); i++) {
+                res[i].assign(bufPtrs[i]);
+            }
+            return res;
+        }
+    };
+
     int GDXFile::gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) {
         return ::gdxOpenWrite(pgx, FileName.c_str(), Producer.c_str(), &ErrNr);
     }
@@ -16,10 +57,8 @@ namespace xpwrap {
     }
 
     int GDXFile::gdxDataWriteStr(const gxdefs::TgdxStrIndex &KeyStr, const gxdefs::TgdxValues &Values) {
-        static std::array<const char *, 20> KeyStrCstrs {};
-        for(int i{}; i<KeyStrCstrs.size(); i++)
-            KeyStrCstrs[i] = KeyStr[i].c_str();
-        return ::gdxDataWriteStr(pgx, KeyStrCstrs.data(), Values.data());
+        static StrIndexBuffers keys{ &KeyStr };
+        return ::gdxDataWriteStr(pgx, keys.cptrs(), Values.data());
     }
 
     int GDXFile::gdxDataWriteDone() {
@@ -27,8 +66,8 @@ namespace xpwrap {
     }
 
     GDXFile::GDXFile() {
-        std::array<char, 256> msgBuf {};
-        assert(::gdxCreate(&pgx, msgBuf.data(), msgBuf.size()));
+        CharBuf msgBuf;
+        assert(::gdxCreate(&pgx, msgBuf.get(), msgBuf.size()));
     }
 
     GDXFile::~GDXFile() {
@@ -44,10 +83,10 @@ namespace xpwrap {
     }
 
     int GDXFile::gdxFileVersion(std::string &FileStr, std::string &ProduceStr) {
-        static std::array<char, 256> fsBuf{}, psBuf{};
-        int rc = ::gdxFileVersion(pgx, fsBuf.data(), psBuf.data());
-        FileStr.assign(fsBuf.data());
-        ProduceStr.assign(psBuf.data());
+        static CharBuf fsBuf, psBuf;
+        int rc = ::gdxFileVersion(pgx, fsBuf.get(), psBuf.get());
+        FileStr = fsBuf;
+        ProduceStr = psBuf;
         return rc;
     }
 
@@ -56,13 +95,9 @@ namespace xpwrap {
     }
 
     int GDXFile::gdxDataReadStr(gxdefs::TgdxStrIndex &KeyStr, gxdefs::TgdxValues &Values, int &DimFrst) {
-        static std::array<std::array<char, 256>, 20> keyBuffers {};
-        static std::array<char *, 20> keys {};
-        for(int i=0; i<keys.size(); i++)
-            keys[i] = &keyBuffers[i][0];
-        int rc {::gdxDataReadStr(pgx, keys.data(), Values.data(), &DimFrst)};
-        for(int i=0; i<keys.size(); i++)
-            KeyStr[i].assign(keys[i]);
+        static StrIndexBuffers keys;
+        int rc {::gdxDataReadStr(pgx, keys.ptrs(), Values.data(), &DimFrst)};
+        KeyStr = keys.strs();
         return rc;
     }
 
@@ -71,9 +106,9 @@ namespace xpwrap {
     }
 
     int GDXFile::gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) {
-        static std::array<char, 256> SyIdBuf{};
-        int rc{::gdxSymbolInfo(pgx, SyNr, SyIdBuf.data(), &Dim, &Typ)};
-        SyId.assign(SyIdBuf.data());
+        static CharBuf SyIdBuf;
+        int rc{::gdxSymbolInfo(pgx, SyNr, SyIdBuf.get(), &Dim, &Typ)};
+        SyId = SyIdBuf;
         return rc;
     }
 
@@ -118,90 +153,108 @@ namespace xpwrap {
     }
 
     int GDXFile::gdxErrorCount() {
-        return 0;
+        return ::gdxErrorCount(pgx);
     }
-
+    
     int GDXFile::gdxErrorStr(int ErrNr, std::string &ErrMsg) {
-        return 0;
+        static CharBuf ErrMsgBuf;
+        int rc{ ::gdxErrorStr(pgx, ErrNr, ErrMsgBuf.get()) };
+        ErrMsg = ErrMsgBuf;
+        return rc;
     }
 
     int GDXFile::gdxGetElemText(int TxtNr, std::string &Txt, int &Node) {
-        return 0;
+        static CharBuf TxtBuf;
+        int rc{ ::gdxGetElemText(pgx, TxtNr, TxtBuf.get(), &Node) };
+        Txt = TxtBuf;
+        return rc;
+
     }
 
     int GDXFile::gdxGetLastError() {
-        return 0;
+        return ::gdxGetLastError(pgx);
     }
 
     int GDXFile::gdxGetSpecialValues(gxdefs::TgdxSVals &Avals) {
-        return 0;
+        return ::gdxGetSpecialValues(pgx, Avals.data());
     }
 
     int GDXFile::gdxSetSpecialValues(const gxdefs::TgdxSVals &AVals) {
-        return 0;
+        return ::gdxSetSpecialValues(pgx, AVals.data());
     }
 
     int GDXFile::gdxSymbolGetDomain(int SyNr, gxdefs::TgdxUELIndex &DomainSyNrs) {
-        return 0;
+        return ::gdxSymbolGetDomain(pgx, SyNr, DomainSyNrs.data());
     }
 
     int GDXFile::gdxSymbolGetDomainX(int SyNr, gxdefs::TgdxStrIndex &DomainIDs) {
-        return 0;
+        static StrIndexBuffers domainIdBufs;
+        int rc{ ::gdxSymbolGetDomainX(pgx, SyNr, domainIdBufs.ptrs()) };
+        DomainIDs = domainIdBufs.strs();
+        return rc;
     }
 
     int GDXFile::gdxSymbolDim(int SyNr) {
-        return 0;
+        return ::gdxSymbolDim(pgx, SyNr);
     }
 
     int GDXFile::gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) {
-        return 0;
+        static CharBuf explTxtBuf;
+        int rc = ::gdxSymbolInfoX(pgx, SyNr, &RecCnt, &UserInfo, explTxtBuf.get());
+        ExplTxt = explTxtBuf;
+        return rc;
     }
 
     int GDXFile::gdxSymbolSetDomain(const gxdefs::TgdxStrIndex &DomainIDs) {
-        return 0;
+        static StrIndexBuffers domainIdBufs{ &DomainIDs };
+        return ::gdxSymbolSetDomain(pgx, domainIdBufs.cptrs());
     }
 
     int GDXFile::gdxSymbolSetDomainX(int SyNr, const gxdefs::TgdxStrIndex &DomainIDs) {
-        return 0;
+        static StrIndexBuffers domainIdBufs{ &DomainIDs };
+        return ::gdxSymbolSetDomainX(pgx, SyNr, domainIdBufs.cptrs());
     }
 
     int GDXFile::gdxSystemInfo(int &SyCnt, int &UelCnt) {
-        return 0;
+        return ::gdxSystemInfo(pgx, &SyCnt, &UelCnt);
     }
 
     int GDXFile::gdxUELRegisterDone() {
-        return 0;
+        return ::gdxUELRegisterDone(pgx);
     }
 
     int GDXFile::gdxUELRegisterRaw(const std::string &Uel) {
-        return 0;
+        return ::gdxUELRegisterRaw(pgx, Uel.c_str());
     }
 
     int GDXFile::gdxUELRegisterRawStart() {
-        return 0;
+        return ::gdxUELRegisterRawStart(pgx);
     }
 
     int GDXFile::gdxUELRegisterStr(const std::string &Uel, int &UelNr) {
-        return 0;
+        return ::gdxUELRegisterStr(pgx, Uel.c_str(), &UelNr);
     }
 
     int GDXFile::gdxUELRegisterStrStart() {
-        return 0;
+        return ::gdxUELRegisterStrStart(pgx);
     }
 
     int GDXFile::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
-        return 0;
+        CharBuf uelBuf;
+        int rc{ ::gdxUMUelGet(pgx, UelNr, uelBuf.get(), &UelMap)};
+        Uel = uelBuf;
+        return rc;
     }
 
     int GDXFile::gdxUMUelInfo(int &UelCnt, int &HighMap) {
-        return 0;
+        return ::gdxUMUelInfo(pgx, &UelCnt, &HighMap);
     }
 
     int GDXFile::gdxCurrentDim() {
-        return 0;
+        return ::gdxCurrentDim(pgx);
     }
 
     int GDXFile::gdxRenameUEL(const std::string &OldName, const std::string &NewName) {
-        return 0;
+        return ::gdxRenameUEL(pgx, OldName.c_str(), NewName.c_str());
     }
 }
