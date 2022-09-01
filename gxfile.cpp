@@ -718,17 +718,102 @@ namespace gxfile {
                 res = NrRecs;
                 newmode = fr_mapr_data;
             } else {
-                int FIDim = FCurrentDim; // First invalid dimension
-                TgdxValues Avals;
-                int AFDim;
-                bool AddNew{}, AddError{}, BadError{};
-                while(DoRead(Avals, AFDim)) {
-                    if(FIDim < AFDim) AFDim = FIDim;
-                    FIDim = FCurrentDim;
-                    for(int D{AFDim}; D<=FCurrentDim; D++) {
-                        // ...
-                        STUBWARN();
+                try {
+                    int FIDim = FCurrentDim; // First invalid dimension
+                    TgdxValues Avals;
+                    TIndex AElements{};
+                    int AFDim, V;
+                    bool AddNew{}, AddError{}, BadError{};
+                    while(DoRead(Avals, AFDim)) {
+                        if(FIDim < AFDim) AFDim = FIDim;
+                        FIDim = FCurrentDim;
+                        int D;
+                        for(D=AFDim; D<=FCurrentDim; D++) {
+                            const auto &obj = DomainList[D];
+                            if(LastElem[D] < 0) {
+                                ReportError(ERR_BADELEMENTINDEX);
+                                BadError = true;
+                                break;
+                            }
+                            switch(obj.DAction) {
+                                case dm_unmapped:
+                                    AElements[D] = LastElem[D];
+                                    break;
+                                case dm_filter:
+                                    V = UELTable.GetUserMap(LastElem[D]);
+                                    if(obj.DFilter->InFilter(V))
+                                        AElements[D] = V;
+                                    else {
+                                        AddError = true;
+                                        FIDim = D;
+                                        break;
+                                    }
+                                    break;
+                                case dm_strict:
+                                    V = UELTable.GetUserMap(LastElem[D]);
+                                    if(V >= 0) AElements[D] = V;
+                                    else {
+                                        AddError = true;
+                                        FIDim = D;
+                                    }
+                                    break;
+                                case dm_expand: {
+                                        int EN = LastElem[D];
+                                        V = ExpndList[EN];
+                                        if(V >= 0) AElements[D] = V;
+                                        else {
+                                            V = UELTable.GetUserMap(EN);
+                                            if(V >= 0)
+                                                AElements[D] = ExpndList[EN] = V;
+                                            else {
+                                                AElements[D] = -EN; // so we recognize and assign the same nr
+                                                AddNew = true;
+                                            }
+                                        }
+                                    }
+                                    break;
+                            }
+                        }
+                        if(BadError) {
+                            AllocOk = false; // That is used as a signal below for something bad happend, i.e., an exception was thrown
+                            break;
+                        }
+                        else if(AddError) {
+                            // Ensure that dimensions to the right have no bad UELs
+                            for(int D2{D+1}; D2 <= FCurrentDim; D2++) {
+                                if(LastElem[D2] < 0) {
+                                    ReportError(ERR_BADELEMENTINDEX);
+                                    AllocOk = false; // That is used as a signal below for something bad happend, i.e., an exception was thrown
+                                    break;
+                                }
+                            }
+                            LastElem[FIDim] = -LastElem[FIDim];
+                            AddToErrorListDomErrs(LastElem, Avals); // unmapped
+                            LastElem[FIDim] = -LastElem[FIDim];
+                            AddError = false;
+                        } else {
+                            if(AddNew) {
+                                for(D=0; D<FCurrentDim; D++) {
+                                    int EN = AElements[D];
+                                    if(EN < 0) {
+                                        V = UELTable.NewUsrUel(-EN);
+                                        AElements[D] = ExpndList[-EN] = V;
+                                        NrMappedAdded++;
+                                        // look for same mapping to be issued
+                                        for(int D2{D+1}; D2 <= FCurrentDim; D2++) {
+                                            if(AElements[D2] == EN) AElements[D2] = V;
+                                        }
+                                    }
+                                }
+                                AddNew = false;
+                            }
+                            SortList[AElements] = Avals;
+                        }
                     }
+                    // FIXME: SortList.StartRead();
+                    res = SortList.size();
+                } catch(std::exception &e) {
+                    AllocOk = false;
                 }
             }
         }
@@ -860,6 +945,7 @@ namespace gxfile {
                         case DBL_NINF: xv = vm_valmin; break;
                         case DBL_PINF: xv = vm_valpin; break;
                         case DBL_NAN: xv = vm_valna; break;
+                        default: break;
                     }
                 }
                 FFile->WriteByte(xv);

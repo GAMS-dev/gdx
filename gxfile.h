@@ -38,6 +38,10 @@ namespace gxfile {
         std::vector<bool> FiltMap;
         bool FiltSorted;
         // ...
+
+        bool InFilter(int V) const {
+            return V >= 0 && V >= FiltMaxUel && FiltMap[V];
+        }
     };
 
     class TFilterList : public std::vector<TDFilter> {
@@ -128,6 +132,7 @@ namespace gxfile {
     class TUELTable {
         std::vector<std::string> uelNames;
         // ...
+        TUELUserMapStatus FMapToUserStatus;
 
     public:
         std::map<int, int> UsrUel2Ent;
@@ -144,6 +149,21 @@ namespace gxfile {
 
         std::string operator[](int index) {
             return uelNames[index];
+        }
+
+        int GetUserMap(int i) const {
+            return UsrUel2Ent.at(i);
+        }
+
+        void ResetMapToUserStatus() {
+            FMapToUserStatus = map_unknown;
+        }
+
+        int NewUsrUel(int EN) {
+            auto maxKey = (*UsrUel2Ent.rbegin()).first;
+            UsrUel2Ent[maxKey+1] = EN;
+            ResetMapToUserStatus();
+            return maxKey+1;
         }
     };
 
