@@ -217,7 +217,7 @@ namespace gxfile {
         bool AppendActive{};
 
         bool PrepareSymbolWrite(const std::string &Caller, const std::string &AName, const std::string &AText, int ADim,
-                                int AType, int AUserType, int AUserInfo);
+                                int AType, int AUserInfo);
 
         int PrepareSymbolRead(const std::string &Caller, int SyNr, const gxdefs::TgdxUELIndex &ADomainNrs, TgxFileMode newmode);
 
@@ -284,7 +284,16 @@ namespace gxfile {
         int gdxDataErrorRecord(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) override;
 
         int gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) override;
-};
+
+        int gdxDataReadRaw(gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) override;
+
+        int gdxDataReadRawStart(int SyNr, int &NrRecs) override;
+
+        int gdxDataWriteRaw(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) override;
+
+        int gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+                                 int UserInfo) override;
+    };
 
     extern std::string DLLLoadPath;
 

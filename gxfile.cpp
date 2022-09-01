@@ -268,7 +268,7 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) {
-        if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo, 0)) return false;
+        if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
         /*for (int D{}; D < FCurrentDim; D++)
             LastStrElem[D] = (char)0xFF;*/
         fmode = fw_dom_str;
@@ -506,7 +506,7 @@ namespace gxfile {
                                         const std::string &AName,
                                         const std::string &AText,
                                         int ADim,
-                                        int AType, int AUserType,
+                                        int AType,
                                         int AUserInfo) {
         const TgxModeSet AllowedModes{fw_init};
 
@@ -1493,6 +1493,42 @@ namespace gxfile {
         }
 
         return false;
+    }
+
+    int TGXFileObj::gdxDataReadRaw(TgdxUELIndex &KeyInt, TgdxValues &Values, int &DimFrst) {
+        TgxModeSet  AllowedModes{fr_raw_data};
+        if((TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadRaw", AllowedModes)) return false;
+        if(!DoRead(Values, DimFrst)) gdxDataReadDone();
+        else {
+            std::copy(LastElem.begin(), LastElem.begin()+FCurrentDim-1, KeyInt.begin());
+            return true;
+        }
+        return false;
+    }
+
+    int TGXFileObj::gdxDataReadRawStart(int SyNr, int &NrRecs) {
+        TgdxUELIndex XDomains;
+        XDomains.fill(DOMC_UNMAPPED);
+        NrRecs = PrepareSymbolRead("DataReadRawStart", SyNr, XDomains, fr_raw_data);
+        return NrRecs >= 0;
+    }
+
+    int TGXFileObj::gdxDataWriteRaw(const TgdxUELIndex &KeyInt, const TgdxValues &Values) {
+        TgxModeSet AllowedModes {fw_raw_data};
+        if(fmode == fw_dom_raw) fmode = fw_raw_data;
+        if((TraceLevel >= trl_some || !utils::in(fmode, AllowedModes)) && CheckMode("DataWriteRaw", AllowedModes)) return false;
+        if(DoWrite(KeyInt, Values)) return true;
+        return false;
+    }
+
+    int TGXFileObj::gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+                                         int UserInfo) {
+        if(!PrepareSymbolWrite("DataWriteRawStart", SyId, ExplTxt, Dimen, Typ, UserInfo)) return false;
+        std::fill_n(MinElem.begin(), FCurrentDim-1, 0);
+        std::fill_n(MaxElem.begin(), FCurrentDim-1, std::numeric_limits<int>::max());
+        InitDoWrite(-1);
+        fmode = fw_dom_raw;
+        return true;
     }
 
     void TUELTable::clear() {

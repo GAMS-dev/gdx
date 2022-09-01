@@ -99,4 +99,21 @@ namespace xpwrap {
     int GDXFile::gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) {
         return ::gdxDataErrorRecordX(pgx, RecNr, KeyInt.data(), Values.data());
     }
+
+    int GDXFile::gdxDataReadRaw(gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) {
+        return ::gdxDataReadRaw(pgx, KeyInt.data(), Values.data(), &DimFrst);
+    }
+
+    int GDXFile::gdxDataReadRawStart(int SyNr, int &NrRecs) {
+        return ::gdxDataReadRawStart(pgx, SyNr, &NrRecs);
+    }
+
+    int GDXFile::gdxDataWriteRaw(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) {
+        return ::gdxDataWriteRaw(pgx, KeyInt.data(), Values.data());
+    }
+
+    int GDXFile::gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+                                      int UserInfo) {
+        return ::gdxDataWriteRawStart(pgx, SyId.c_str(), ExplTxt.c_str(), Dimen, Typ, UserInfo);
+    }
 }
