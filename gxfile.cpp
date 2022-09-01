@@ -1529,19 +1529,50 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxErrorCount() {
-        return 0;
+        return ErrCntTotal;
     }
 
     int TGXFileObj::gdxGetElemText(int TxtNr, std::string &Txt, int &Node) {
-        return 0;
+        Node = 0;
+        if(SetTextList.empty()) {
+            Txt.clear();
+            return false;
+        }
+        if(TraceLevel >= trl_all && !CheckMode("GetElemText", {}))
+            return false;
+        if(TxtNr < 0 || TxtNr >= SetTextList.size()) {
+            Txt = BADStr_PREFIX + std::to_string(TxtNr);
+        } else {
+            Txt = SetTextList[TxtNr];
+            //FIXME: Node = ???
+            return true;
+        }
+        return false;
     }
 
     int TGXFileObj::gdxGetLastError() {
-        return 0;
+        if(!FFile) {
+            int le{LastError};
+            LastError = ERR_NOERROR;
+            return le;
+        } else {
+            int res{FFile->GetLastIOResult()};
+            if(res == ERR_NOERROR) {
+                res = LastError;
+                LastError = ERR_NOERROR;
+            }
+            return res;
+        }
     }
 
-    int TGXFileObj::gdxGetSpecialValues(TgdxSVals &Avals) {
-        return 0;
+    int TGXFileObj::gdxGetSpecialValues(TgdxSVals &AVals) {
+        AVals[sv_valund] = intlValueMapDbl[vm_valund] ;
+        AVals[sv_valna ] = intlValueMapDbl[vm_valna ] ;
+        AVals[sv_valpin] = intlValueMapDbl[vm_valpin] ;
+        AVals[sv_valmin] = intlValueMapDbl[vm_valmin] ;
+        AVals[sv_valeps] = intlValueMapDbl[vm_valeps] ;
+        AVals[sv_acronym] = Zvalacr;
+        return true;
     }
 
     int TGXFileObj::gdxSetSpecialValues(const TgdxSVals &AVals) {
