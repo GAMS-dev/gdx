@@ -8,6 +8,7 @@
 #include "global/gmsspecs.h"
 #include "gxdefs.h"
 #include "gdlib/gmsdata.h"
+#include <cstring>
 
 namespace gdlib::gmsstrm {
     class TMiBufferedStreamDelphi;
@@ -259,7 +260,7 @@ namespace gxfile {
 
         int gdxResetSpecialValues();
 
-        int gdxErrorStr(int ErrNr, std::string &ErrMsg);
+        int gdxErrorStr(int ErrNr, std::string &ErrMsg) override;
 
         int gdxOpenRead(const std::string &FileName, int &ErrNr) override;
 

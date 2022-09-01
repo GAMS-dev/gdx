@@ -2,4 +2,5 @@
 cmake-build-debug/
 x64/
 .vs/
+build/
 gdxnative.vcxproj.user

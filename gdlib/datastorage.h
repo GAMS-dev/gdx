@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "../global/modhead.h"
+#include <limits>
 
 namespace gdlib::datastorage {
 
