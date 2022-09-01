@@ -7,6 +7,7 @@
 #include <optional>
 #include "global/gmsspecs.h"
 #include "gxdefs.h"
+#include "gdlib/gmsdata.h"
 
 namespace gdlib::gmsstrm {
     class TMiBufferedStreamDelphi;
@@ -177,7 +178,9 @@ namespace gxfile {
         global::gmsspecs::tvarvaltype LastDataField;
         std::map<std::string, PgdxSymbRecord, strCompCaseInsensitive> NameList;
         std::vector<std::string> DomainStrList;
-        std::map<global::gmsspecs::TIndex, gdxinterface::TgdxValues> SortList, ErrorList;
+        // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
+        std::map<global::gmsspecs::TIndex, gxdefs::TgdxValues> SortList;
+        gdlib::gmsdata::TTblGamsData ErrorList;
         PgdxSymbRecord CurSyPtr{};
         int ErrCnt{}, ErrCntTotal{};
         int LastError{}, LastRepError{};
@@ -248,7 +251,7 @@ namespace gxfile {
         int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) override;
         int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
                                  int UserInfo) override;
-        int gdxDataWriteStr(const gdxinterface::TgdxStrIndex &KeyStr, const gdxinterface::TgdxValues &Values) override;
+        int gdxDataWriteStr(const gxdefs::TgdxStrIndex &KeyStr, const gxdefs::TgdxValues &Values) override;
         int gdxDataWriteDone() override;
 
         int gdxClose() override;
@@ -263,7 +266,7 @@ namespace gxfile {
 
         int gdxFindSymbol(const std::string &SyId, int &SyNr) override;
 
-        int gdxDataReadStr(gdxinterface::TgdxStrIndex &KeyStr, gdxinterface::TgdxValues &Values, int &DimFrst) override;
+        int gdxDataReadStr(gxdefs::TgdxStrIndex &KeyStr, gxdefs::TgdxValues &Values, int &DimFrst) override;
 
         int gdxDataReadDone() override;
 
@@ -275,7 +278,12 @@ namespace gxfile {
 
         int gdxAddSetText(const std::string &Txt, int &TxtNr) override;
 
-    };
+        int gdxDataErrorCount() override;
+
+        int gdxDataErrorRecord(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) override;
+
+        int gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) override;
+};
 
     extern std::string DLLLoadPath;
 

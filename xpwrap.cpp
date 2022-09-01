@@ -15,7 +15,7 @@ namespace xpwrap {
         return ::gdxDataWriteStrStart(pgx, SyId.c_str(), ExplTxt.c_str(), Dim, Typ, UserInfo);
     }
 
-    int GDXFile::gdxDataWriteStr(const gdxinterface::TgdxStrIndex &KeyStr, const gdxinterface::TgdxValues &Values) {
+    int GDXFile::gdxDataWriteStr(const gxdefs::TgdxStrIndex &KeyStr, const gxdefs::TgdxValues &Values) {
         static std::array<const char *, 20> KeyStrCstrs {};
         for(int i{}; i<KeyStrCstrs.size(); i++)
             KeyStrCstrs[i] = KeyStr[i].c_str();
@@ -55,7 +55,7 @@ namespace xpwrap {
         return ::gdxFindSymbol(pgx, SyId.c_str(), &SyNr);
     }
 
-    int GDXFile::gdxDataReadStr(gdxinterface::TgdxStrIndex &KeyStr, gdxinterface::TgdxValues &Values, int &DimFrst) {
+    int GDXFile::gdxDataReadStr(gxdefs::TgdxStrIndex &KeyStr, gxdefs::TgdxValues &Values, int &DimFrst) {
         static std::array<std::array<char, 256>, 20> keyBuffers {};
         static std::array<char *, 20> keys {};
         for(int i=0; i<keys.size(); i++)
@@ -87,5 +87,16 @@ namespace xpwrap {
 
     int GDXFile::gdxAddSetText(const std::string &Txt, int &TxtNr) {
         return ::gdxAddSetText(pgx, Txt.c_str(), &TxtNr);
+    }
+
+    int GDXFile::gdxDataErrorCount() {
+        return ::gdxDataErrorCount(pgx);
+    }
+
+    int GDXFile::gdxDataErrorRecord(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) {
+        return ::gdxDataErrorRecord(pgx, RecNr, KeyInt.data(), Values.data());
+    }
+    int GDXFile::gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) {
+        return ::gdxDataErrorRecordX(pgx, RecNr, KeyInt.data(), Values.data());
     }
 }

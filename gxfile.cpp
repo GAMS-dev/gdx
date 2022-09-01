@@ -368,7 +368,7 @@ namespace gxfile {
             FFile->SetPosition(NextWritePosition);
             int64_t SymbPos = NextWritePosition;
             FFile->WriteString(MARK_SYMB);
-            FFile->WriteInteger(NameList.size());
+            FFile->WriteInteger(static_cast<int>(NameList.size()));
             for(const auto &[name, PSy] : NameList) {
                 FFile->WriteString(name);
                 FFile->WriteInt64(PSy->SPosition);
@@ -1436,13 +1436,48 @@ namespace gxfile {
         return true;
     }
 
+    int TGXFileObj::gdxDataErrorCount()
+    {
+        return static_cast<int>(ErrorList.size());
+    }
+
+    int TGXFileObj::gdxDataErrorRecord(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values)
+    {
+        int res{ gdxDataErrorRecordX(RecNr, KeyInt, Values) };
+        if (res) {
+            for (int D{}; D < KeyInt.size(); D++) {
+                if (KeyInt[D] < 0) KeyInt[D] = -KeyInt[D];
+            }
+        }
+        return res;
+    }
+
+    int TGXFileObj::gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values)
+    {
+        TgxModeSet AllowedModes{ fr_init,fw_init,fr_map_data, fr_mapr_data, fw_raw_data, fw_map_data,fw_str_data };
+        if ((TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) && CheckMode("DataErrorRecord", AllowedModes))
+            return false;
+
+        if (!ErrorList.empty()) {
+            if (RecNr < 1 || RecNr >= ErrorList.size()) {
+                ReportError(ERR_BADERRORRECORD);
+            }
+            else {
+                ErrorList.GetRecord(RecNr - 1, KeyInt, Values);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();
     }
 
     int TUELTable::size() const {
-        return uelNames.size();
+        return static_cast<int>(uelNames.size());
     }
 
     const std::vector<std::string> &TUELTable::getNames() {

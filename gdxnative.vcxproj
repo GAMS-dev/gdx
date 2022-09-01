@@ -23,6 +23,7 @@
     <ClCompile Include="expertapi\gcmt.c" />
     <ClCompile Include="expertapi\gdxcc.c" />
     <ClCompile Include="expertapi\palmcc.c" />
+    <ClCompile Include="gdlib\gmsdata.cpp" />
     <ClCompile Include="gdlib\gmsglob.cpp" />
     <ClCompile Include="gdlib\gmsstrm.cpp" />
     <ClCompile Include="gdlib\strutilx.cpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="expertapi\gcmt.h" />
     <ClInclude Include="expertapi\gdxcc.h" />
     <ClInclude Include="expertapi\palmcc.h" />
+    <ClInclude Include="gdlib\gmsdata.h" />
     <ClInclude Include="gdlib\gmsglob.h" />
     <ClInclude Include="gdlib\gmsstrm.h" />
     <ClInclude Include="gdlib\strutilx.h" />

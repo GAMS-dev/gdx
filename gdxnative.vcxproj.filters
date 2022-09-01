@@ -130,6 +130,9 @@
     <ClCompile Include="gdlib\gmsglob.cpp">
       <Filter>gdlib</Filter>
     </ClCompile>
+    <ClCompile Include="gdlib\gmsdata.cpp">
+      <Filter>gdlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">
@@ -232,6 +235,9 @@
       <Filter>palxxx</Filter>
     </ClInclude>
     <ClInclude Include="gdlib\gmsglob.h">
+      <Filter>gdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="gdlib\gmsdata.h">
       <Filter>gdlib</Filter>
     </ClInclude>
   </ItemGroup>

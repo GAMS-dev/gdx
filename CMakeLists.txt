@@ -35,6 +35,7 @@ set(common
 		gdlib/strutilx.h gdlib/strutilx.cpp
 		gdlib/xcompress.h gdlib/xcompress.cpp
 		gdlib/gmsglob.h gdlib/gmsglob.cpp
+		gdlib/gmsdata.h gdlib/gmsdata.cpp
 
 		expertapi/gdxcc.h expertapi/gdxcc.c
 		expertapi/gclgms.h expertapi/gclgms.c

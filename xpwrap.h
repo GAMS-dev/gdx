@@ -16,7 +16,7 @@ namespace xpwrap {
         int gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
         int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) override;
         int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) override;
-        int gdxDataWriteStr(const gdxinterface::TgdxStrIndex &KeyStr, const gdxinterface::TgdxValues &Values) override;
+        int gdxDataWriteStr(const gxdefs::TgdxStrIndex &KeyStr, const gxdefs::TgdxValues &Values) override;
         int gdxDataWriteDone() override;
 
         int gdxClose() override;
@@ -27,7 +27,7 @@ namespace xpwrap {
 
         int gdxFindSymbol(const std::string &SyId, int &SyNr) override;
 
-        int gdxDataReadStr(gdxinterface::TgdxStrIndex &KeyStr, gdxinterface::TgdxValues &Values, int &DimFrst) override;
+        int gdxDataReadStr(gxdefs::TgdxStrIndex &KeyStr, gxdefs::TgdxValues &Values, int &DimFrst) override;
 
         int gdxDataReadDone() override;
 
@@ -38,6 +38,12 @@ namespace xpwrap {
         int gdxAddAlias(const std::string &Id1, const std::string &Id2) override;
 
         int gdxAddSetText(const std::string &Txt, int &TxtNr) override;
+
+        int gdxDataErrorCount() override;
+
+        int gdxDataErrorRecord(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) override;
+
+        int gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) override;
     };
 
 }
