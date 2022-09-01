@@ -709,9 +709,6 @@ namespace gxfile {
             }
         }
         bool AllocOk{true};
-        int FIDim{}; // First invalid dimension
-
-        bool AddNew{}, AddError{}, BadError{};
 
         if(utils::in(newmode, fr_raw_data, fr_str_data, fr_slice))
             res = NrRecs;
@@ -721,10 +718,10 @@ namespace gxfile {
                 res = NrRecs;
                 newmode = fr_mapr_data;
             } else {
-                FIDim = FCurrentDim;
+                int FIDim = FCurrentDim; // First invalid dimension
                 TgdxValues Avals;
                 int AFDim;
-                AddNew = AddError = BadError = false;
+                bool AddNew{}, AddError{}, BadError{};
                 while(DoRead(Avals, AFDim)) {
                     if(FIDim < AFDim) AFDim = FIDim;
                     FIDim = FCurrentDim;
@@ -791,7 +788,7 @@ namespace gxfile {
         int64_t exponent {i & expoMask};
         if(exponent == expoMask) {
             int64_t mantiassa {i & mantMask};
-            return mantiassa ? DBL_NAN : (i & signMask ? DBL_NINF : DBL_PINF);
+            return mantiassa ? DBL_NAN : ((i & signMask) ? DBL_NINF : DBL_PINF);
         }
         return DBL_FINITE;
     }
@@ -1204,7 +1201,7 @@ namespace gxfile {
             return true;
         }
 
-        if (SyNr < 1 && SyNr > NameList.size()) return badLookup();
+        if (SyNr <= 0 || SyNr > NameList.size()) return badLookup();
         
         auto maybeNameAndSym = symbolWithIndex(SyNr);
         if (maybeNameAndSym) {
