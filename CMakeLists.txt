@@ -48,7 +48,7 @@ set(common
 		utils.h utils.cpp
 		gxfile.h gxfile.cpp
 		gdxinterface.h
-		xpwrap.cpp xpwrap.h kvbuffers.h gxdefs.cpp gxdefs.h)
+		xpwrap.cpp xpwrap.h kvbuffers.h gxdefs.cpp gxdefs.h gdlib/datastorage.cpp gdlib/datastorage.h)
 
 add_executable(gdxnativetest
 		${common}
