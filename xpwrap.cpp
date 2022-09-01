@@ -116,4 +116,92 @@ namespace xpwrap {
                                       int UserInfo) {
         return ::gdxDataWriteRawStart(pgx, SyId.c_str(), ExplTxt.c_str(), Dimen, Typ, UserInfo);
     }
+
+    int GDXFile::gdxErrorCount() {
+        return 0;
+    }
+
+    int GDXFile::gdxErrorStr(int ErrNr, std::string &ErrMsg) {
+        return 0;
+    }
+
+    int GDXFile::gdxGetElemText(int TxtNr, std::string &Txt, int &Node) {
+        return 0;
+    }
+
+    int GDXFile::gdxGetLastError() {
+        return 0;
+    }
+
+    int GDXFile::gdxGetSpecialValues(gxdefs::TgdxSVals &Avals) {
+        return 0;
+    }
+
+    int GDXFile::gdxSetSpecialValues(const gxdefs::TgdxSVals &AVals) {
+        return 0;
+    }
+
+    int GDXFile::gdxSymbolGetDomain(int SyNr, gxdefs::TgdxUELIndex &DomainSyNrs) {
+        return 0;
+    }
+
+    int GDXFile::gdxSymbolGetDomainX(int SyNr, gxdefs::TgdxStrIndex &DomainIDs) {
+        return 0;
+    }
+
+    int GDXFile::gdxSymbolDim(int SyNr) {
+        return 0;
+    }
+
+    int GDXFile::gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) {
+        return 0;
+    }
+
+    int GDXFile::gdxSymbolSetDomain(const gxdefs::TgdxStrIndex &DomainIDs) {
+        return 0;
+    }
+
+    int GDXFile::gdxSymbolSetDomainX(int SyNr, const gxdefs::TgdxStrIndex &DomainIDs) {
+        return 0;
+    }
+
+    int GDXFile::gdxSystemInfo(int &SyCnt, int &UelCnt) {
+        return 0;
+    }
+
+    int GDXFile::gdxUELRegisterDone() {
+        return 0;
+    }
+
+    int GDXFile::gdxUELRegisterRaw(const std::string &Uel) {
+        return 0;
+    }
+
+    int GDXFile::gdxUELRegisterRawStart() {
+        return 0;
+    }
+
+    int GDXFile::gdxUELRegisterStr(const std::string &Uel, int &UelNr) {
+        return 0;
+    }
+
+    int GDXFile::gdxUELRegisterStrStart() {
+        return 0;
+    }
+
+    int GDXFile::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
+        return 0;
+    }
+
+    int GDXFile::gdxUMUelInfo(int &UelCnt, int &HighMap) {
+        return 0;
+    }
+
+    int GDXFile::gdxCurrentDim() {
+        return 0;
+    }
+
+    int GDXFile::gdxRenameUEL(const std::string &OldName, const std::string &NewName) {
+        return 0;
+    }
 }

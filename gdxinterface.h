@@ -5,10 +5,6 @@
 #include "gxdefs.h"
 
 namespace gdxinterface {
-    /*const int MaxDim = 20;
-    using TgdxValues = std::array<double, 5>;
-    using TgdxStrIndex = std::array<std::string, MaxDim>;*/
-
     class GDXInterface {
     public:
         virtual ~GDXInterface() = default;
@@ -46,6 +42,39 @@ namespace gdxinterface {
 
         virtual int gdxDataWriteRaw(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) = 0;
         virtual int gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ, int UserInfo) = 0;
+
+        virtual int gdxErrorCount() = 0;
+        virtual int gdxErrorStr(int ErrNr, std::string &ErrMsg) = 0;
+
+        virtual int gdxGetElemText(int TxtNr, std::string &Txt, int &Node) = 0;
+        virtual int gdxGetLastError() = 0;
+
+        virtual int gdxGetSpecialValues(gxdefs::TgdxSVals &Avals) = 0;
+        virtual int gdxSetSpecialValues(const gxdefs::TgdxSVals &AVals) = 0;
+
+        virtual int gdxSymbolGetDomain(int SyNr, gxdefs::TgdxUELIndex &DomainSyNrs) = 0;
+        virtual int gdxSymbolGetDomainX(int SyNr, gxdefs::TgdxStrIndex &DomainIDs) = 0;
+
+        virtual int gdxSymbolDim(int SyNr) = 0;
+
+        virtual int gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) = 0;
+
+        virtual int gdxSymbolSetDomain(const gxdefs::TgdxStrIndex &DomainIDs) = 0;
+        virtual int gdxSymbolSetDomainX(int SyNr, const gxdefs::TgdxStrIndex &DomainIDs) = 0;
+
+        virtual int gdxSystemInfo(int &SyCnt, int &UelCnt) = 0;
+
+        virtual int gdxUELRegisterDone() = 0;
+        virtual int gdxUELRegisterRaw(const std::string &Uel) = 0;
+        virtual int gdxUELRegisterRawStart() = 0;
+        virtual int gdxUELRegisterStr(const std::string &Uel, int &UelNr) = 0;
+        virtual int gdxUELRegisterStrStart() = 0;
+
+        virtual int gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) = 0;
+        virtual int gdxUMUelInfo(int &UelCnt, int &HighMap) = 0;
+
+        virtual int gdxCurrentDim() = 0;
+        virtual int gdxRenameUEL(const std::string &OldName, const std::string &NewName) = 0;
     };
 
 }

@@ -293,6 +293,48 @@ namespace gxfile {
 
         int gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
+
+        int gdxErrorCount() override;
+
+        int gdxGetElemText(int TxtNr, std::string &Txt, int &Node) override;
+
+        int gdxGetLastError() override;
+
+        int gdxGetSpecialValues(gxdefs::TgdxSVals &Avals) override;
+
+        int gdxSetSpecialValues(const gxdefs::TgdxSVals &AVals) override;
+
+        int gdxSymbolGetDomain(int SyNr, gxdefs::TgdxUELIndex &DomainSyNrs) override;
+
+        int gdxSymbolGetDomainX(int SyNr, gxdefs::TgdxStrIndex &DomainIDs) override;
+
+        int gdxSymbolDim(int SyNr) override;
+
+        int gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) override;
+
+        int gdxSymbolSetDomain(const gxdefs::TgdxStrIndex &DomainIDs) override;
+
+        int gdxSymbolSetDomainX(int SyNr, const gxdefs::TgdxStrIndex &DomainIDs) override;
+
+        int gdxSystemInfo(int &SyCnt, int &UelCnt) override;
+
+        int gdxUELRegisterDone() override;
+
+        int gdxUELRegisterRaw(const std::string &Uel) override;
+
+        int gdxUELRegisterRawStart() override;
+
+        int gdxUELRegisterStr(const std::string &Uel, int &UelNr) override;
+
+        int gdxUELRegisterStrStart() override;
+
+        int gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) override;
+
+        int gdxUMUelInfo(int &UelCnt, int &HighMap) override;
+
+        int gdxCurrentDim() override;
+
+        int gdxRenameUEL(const std::string &OldName, const std::string &NewName) override;
     };
 
     extern std::string DLLLoadPath;

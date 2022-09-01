@@ -1531,6 +1531,90 @@ namespace gxfile {
         return true;
     }
 
+    int TGXFileObj::gdxErrorCount() {
+        return 0;
+    }
+
+    int TGXFileObj::gdxGetElemText(int TxtNr, std::string &Txt, int &Node) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxGetLastError() {
+        return 0;
+    }
+
+    int TGXFileObj::gdxGetSpecialValues(TgdxSVals &Avals) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxSetSpecialValues(const TgdxSVals &AVals) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbolGetDomain(int SyNr, TgdxUELIndex &DomainSyNrs) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbolGetDomainX(int SyNr, TgdxStrIndex &DomainIDs) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbolDim(int SyNr) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbolSetDomain(const TgdxStrIndex &DomainIDs) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbolSetDomainX(int SyNr, const TgdxStrIndex &DomainIDs) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxSystemInfo(int &SyCnt, int &UelCnt) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxUELRegisterDone() {
+        return 0;
+    }
+
+    int TGXFileObj::gdxUELRegisterRaw(const std::string &Uel) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxUELRegisterRawStart() {
+        return 0;
+    }
+
+    int TGXFileObj::gdxUELRegisterStr(const std::string &Uel, int &UelNr) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxUELRegisterStrStart() {
+        return 0;
+    }
+
+    int TGXFileObj::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxUMUelInfo(int &UelCnt, int &HighMap) {
+        return 0;
+    }
+
+    int TGXFileObj::gdxCurrentDim() {
+        return 0;
+    }
+
+    int TGXFileObj::gdxRenameUEL(const std::string &OldName, const std::string &NewName) {
+        return 0;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();
