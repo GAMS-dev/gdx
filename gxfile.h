@@ -125,11 +125,12 @@ namespace gxfile {
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
 
     class TUELTable {
-        std::map<int, int> UsrUel2Ent;
         std::vector<std::string> uelNames;
         // ...
 
     public:
+        std::map<int, int> UsrUel2Ent;
+
         void clear();
 
         int size() const;

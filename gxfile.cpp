@@ -1160,9 +1160,33 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxDataReadDone() {
-        STUBWARN();
-        // ...
-        return 0;
+        TgxModeSet AllowedMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data, fr_str_data,fr_slice};
+        SortList.clear();
+        CurSyPtr = nullptr;
+        if(!MajorCheckMode("DataReadDone", AllowedMode)) {
+            fmode = fr_init;
+            return false;
+        }
+        if(fmode == fr_slice) {
+            for(int D{}; D<MaxDim; D++) {
+                SliceIndxs[D].clear();
+                SliceRevMap[D].clear();
+            }
+        }
+        if(NrMappedAdded) {
+            int HighestIndex = UELTable.UsrUel2Ent.rbegin()->first;
+            for(int N{HighestIndex}; N >= HighestIndex - NrMappedAdded + 1; N--) {
+                assert(N >= 1 && "Wrong entry number");
+                int EN {UELTable.UsrUel2Ent[N]};
+                /*auto d {UELTable[EN]};
+                assert(d == -1 || d == N && "Mapped already");
+                UELTable[EN] = N;*/
+                // FIXME: Get mapped reading done fixed!
+            }
+            NrMappedAdded = 0;
+        }
+        fmode = fr_init;
+        return true;
     }
 
     int TGXFileObj::gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) {
