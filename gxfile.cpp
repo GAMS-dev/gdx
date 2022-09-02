@@ -1722,11 +1722,29 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxSymbolDim(int SyNr) {
-        return 0;
+        if (!SyNr) return 1;
+        return NameList.empty() || SyNr < 1 || SyNr > NameList.size() ? -1 : (*symbolWithIndex(SyNr)).second->SDim;
     }
 
     int TGXFileObj::gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) {
-        return 0;
+        if (!SyNr) {
+            RecCnt = UelCntOrig;
+            UserInfo = 0;
+            ExplTxt = "Universe";
+            return true;
+        }
+        else if (NameList.empty() || SyNr < 1 || SyNr > NameList.size()) {
+            RecCnt = UserInfo = 0;
+            ExplTxt.clear();
+            return false;
+        }
+        else {
+            const auto obj = (*symbolWithIndex(SyNr)).second;
+            RecCnt = !obj->SDim ? 1 : obj->SDataCount; // scalar trick
+            UserInfo = obj->SUserInfo;
+            ExplTxt = obj->SExplTxt;
+            return true;
+        }
     }
 
     int TGXFileObj::gdxSymbolSetDomain(const TgdxStrIndex &DomainIDs) {
