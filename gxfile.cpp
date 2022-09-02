@@ -1662,7 +1662,32 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxSetSpecialValues(const TgdxSVals &AVals) {
-        return 0;
+        TIntlValueMapDbl tmpDbl{ intlValueMapDbl };
+
+        tmpDbl[vm_valund] = AVals[sv_valund];
+        tmpDbl[vm_valna] = AVals[sv_valna];
+        tmpDbl[vm_valpin] = AVals[sv_valpin];
+        tmpDbl[vm_valmin] = AVals[sv_valmin];
+        tmpDbl[vm_valeps] = AVals[sv_valeps];
+
+        TIntlValueMapI64 tmpI64;
+        copyIntlMapDblToI64(tmpDbl, tmpI64);
+
+        // check for duplicates using the int64 version of the map
+        const TgdxIntlValTyp stopper = vm_valeps;
+        for (int iv1{ vm_valund }; iv1 <= stopper; iv1++) {
+            for (int iv2{ iv1+1 }; iv2 <= stopper; iv2++) {
+                if (tmpI64[iv1] == tmpI64[iv2]) {
+                    ReportError(ERR_DUPLICATESPECVAL);
+                    return false;
+                }
+            }
+        }
+        
+        intlValueMapDbl = tmpDbl;
+        readIntlValueMapDbl = intlValueMapDbl;
+        intlValueMapI64 = tmpI64;
+        return true;
     }
 
     int TGXFileObj::gdxSymbolGetDomain(int SyNr, TgdxUELIndex &DomainSyNrs) {
