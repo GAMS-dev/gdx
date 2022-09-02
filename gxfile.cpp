@@ -1691,7 +1691,11 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxSymbolGetDomain(int SyNr, TgdxUELIndex &DomainSyNrs) {
-        return 0;
+        if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
+        PgdxSymbRecord SyPtr{ (*symbolWithIndex(SyNr)).second };
+        for (int D{}; D < SyPtr->SDim; D++)
+            DomainSyNrs[D] = SyPtr->SDomSymbols.empty() || SyPtr->SDomSymbols[D] == 0 ? 0 : SyPtr->SDomSymbols[D];
+        return true;
     }
 
     int TGXFileObj::gdxSymbolGetDomainX(int SyNr, TgdxStrIndex &DomainIDs) {
