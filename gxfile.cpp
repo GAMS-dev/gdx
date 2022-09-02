@@ -811,8 +811,9 @@ namespace gxfile {
                         }
                     }
                     // FIXME: SortList.StartRead();
-                    res = SortList.size();
+                    res = (int)SortList.size();
                 } catch(std::exception &e) {
+                    std::cout << "Exception: " << e.what() << std::endl;
                     AllocOk = false;
                 }
             }
@@ -1748,50 +1749,99 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxSymbolSetDomain(const TgdxStrIndex &DomainIDs) {
+        // ...
+        STUBWARN();
         return 0;
     }
 
     int TGXFileObj::gdxSymbolSetDomainX(int SyNr, const TgdxStrIndex &DomainIDs) {
+        // ...
+        STUBWARN();
         return 0;
     }
 
     int TGXFileObj::gdxSystemInfo(int &SyCnt, int &UelCnt) {
-        return 0;
+        UelCnt = (int)UELTable.size();
+        SyCnt = (int)NameList.size();
+        return true;
     }
 
     int TGXFileObj::gdxUELRegisterDone() {
-        return 0;
+        TgxModeSet AllowedModes{ f_raw_elem,f_map_elem,f_str_elem };
+        if (!MajorCheckMode("UELRegisterDone", AllowedModes)) return false;
+        fmode = fmode_AftReg;
+        return true;
     }
 
     int TGXFileObj::gdxUELRegisterRaw(const std::string &Uel) {
-        return 0;
+        TgxModeSet AllowedModes{ f_raw_elem };
+        if (TraceLevel >= trl_all || !utils::in(fmode, AllowedModes) && CheckMode("UELRegisterRaw", AllowedModes))
+            return false;
+        std::string SV = utils::trimRight(Uel);
+        if (ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
+        UELTable.AddObject(SV, -1); // should about existing mapping?
+        return true;
     }
 
     int TGXFileObj::gdxUELRegisterRawStart() {
-        return 0;
+        TgxModeSet AllowedModes { fw_init };
+        if (!MajorCheckMode("UELRegisterRawStart", AllowedModes)) return false;
+        fmode_AftReg = fw_init;
+        fmode = f_raw_elem;
+        return true;
     }
 
     int TGXFileObj::gdxUELRegisterStr(const std::string &Uel, int &UelNr) {
-        return 0;
+        const TgxModeSet AllowedModes{ f_str_elem };
+        if ((TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) && CheckMode("UELRegisterStr", AllowedModes))
+            return false;
+        std::string SV{ utils::trimRight(Uel) };
+        if (ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
+        UelNr = UELTable.AddUsrNew(SV);
+        return true;
     }
 
     int TGXFileObj::gdxUELRegisterStrStart() {
-        return 0;
+        TgxModeSet AllowedModes{ fr_init, fw_init };
+        if (!MajorCheckMode("UELRegisterStrStart", AllowedModes)) return false;
+        fmode_AftReg = fmode == fw_init ? fw_init : fr_init;
+        fmode = f_str_elem;
+        return true;
     }
 
     int TGXFileObj::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
-        return 0;
+        if (!UELTable.size() || UelNr < 1 || UelNr > UELTable.size()) {
+            Uel = UELTable[UelNr];
+            //UelMap = UELTable.GetUserMap
+            // FIXME: Step through interactive debugger in order to figure out how UELTable is actually used in Delphi
+            return true;
+        }
+        else {
+            Uel = BADUEL_PREFIX + std::to_string(UelNr);
+            UelMap = -1;
+            return false;
+        }
     }
 
     int TGXFileObj::gdxUMUelInfo(int &UelCnt, int &HighMap) {
-        return 0;
+        if (!UELTable.size()) {
+            UelCnt = HighMap = 0;
+            return false;
+        }
+        else {
+            UelCnt = UELTable.size();
+            HighMap = UELTable.UsrUel2Ent.rbegin()->first; // highest index
+            return true;
+        }
     }
 
     int TGXFileObj::gdxCurrentDim() {
-        return 0;
+        return FCurrentDim;
     }
 
     int TGXFileObj::gdxRenameUEL(const std::string &OldName, const std::string &NewName) {
+        // ...
+        STUBWARN();
         return 0;
     }
 

@@ -41,7 +41,7 @@ namespace gdlib::gmsdata {
         }
 
         int size() const {
-            return keyset.size();
+            return (int)keyset.size();
         }
 
         std::map<IndexKeys, ValueFields>::iterator begin() {

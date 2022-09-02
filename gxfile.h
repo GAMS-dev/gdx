@@ -165,6 +165,13 @@ namespace gxfile {
             ResetMapToUserStatus();
             return maxKey+1;
         }
+
+        int AddUsrNew(const std::string& s) {
+            // ...
+            // FIXME: Implement correctly!
+            ResetMapToUserStatus();
+            return 0;
+        }
     };
 
     struct TAcronym {
