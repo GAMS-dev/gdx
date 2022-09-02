@@ -1,6 +1,7 @@
 #include "xpwrap.h"
 #include "expertapi/gdxcc.h"
 #include <cassert>
+#include <cstring>
 
 namespace xpwrap {
     class CharBuf {
