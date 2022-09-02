@@ -996,10 +996,10 @@ namespace gxfile {
         if(B > DeltaForRead) { // relative change in last dimension
             if (B == 255) return false;
             AFDim = FCurrentDim;
-            if(FCurrentDim > 0) LastElem[FCurrentDim] += B - DeltaForRead;
+            if(FCurrentDim > 0) LastElem[FCurrentDim-1] += B - DeltaForRead;
         } else {
             AFDim = B;
-            for(int D{AFDim}; D <=FCurrentDim; D++) {
+            for(int D{AFDim-1}; D <FCurrentDim; D++) {
                 switch(ElemType[D]) {
                     case sz_integer: LastElem[D] = FFile->ReadInteger() + MinElem[D]; break;
                     case sz_word: LastElem[D] = FFile->ReadWord() + MinElem[D]; break;
@@ -1237,7 +1237,7 @@ namespace gxfile {
         else {
             for (int D{}; D < FCurrentDim; D++) {
                 int LED{ LastElem[D] };
-                KeyStr[D] = LED >= 1 && LED <= UELTable.size() ? UELTable[LED] : BADUEL_PREFIX + std::to_string(LED);
+                KeyStr[D] = LED >= 1 && LED <= UELTable.size() ? UELTable[LED-1] : BADUEL_PREFIX + std::to_string(LED);
             }
             return true;
         }
