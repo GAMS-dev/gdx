@@ -24,7 +24,7 @@ namespace xpwrap {
         std::array<std::array<char, 256>, 20> bufContents{};
         std::array<char*, 20> bufPtrs{};
     public:
-        StrIndexBuffers(const gxdefs::TgdxStrIndex *strIndex = nullptr) {
+        explicit StrIndexBuffers(const gxdefs::TgdxStrIndex *strIndex = nullptr) {
             for (int i{}; i < bufPtrs.size(); i++) {
                 bufPtrs[i] = bufContents[i].data();
                 if (strIndex) {
@@ -66,9 +66,10 @@ namespace xpwrap {
         return ::gdxDataWriteDone(pgx);
     }
 
-    GDXFile::GDXFile() {
-        CharBuf msgBuf;
+    GDXFile::GDXFile(std::string &ErrMsg) {
+        static CharBuf msgBuf;
         assert(::gdxCreate(&pgx, msgBuf.get(), msgBuf.size()));
+        ErrMsg = msgBuf.str();
     }
 
     GDXFile::~GDXFile() {
@@ -241,7 +242,7 @@ namespace xpwrap {
     }
 
     int GDXFile::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
-        CharBuf uelBuf;
+        static CharBuf uelBuf;
         int rc{ ::gdxUMUelGet(pgx, UelNr, uelBuf.get(), &UelMap)};
         Uel = uelBuf;
         return rc;

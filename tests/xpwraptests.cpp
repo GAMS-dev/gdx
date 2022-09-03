@@ -15,12 +15,14 @@ using namespace xpwrap;
 namespace tests::xpwraptests {
     TEST_SUITE_BEGIN("expert level wrapper api");
 
+    const std::string fn {"xpwraptest.gdx"};
+
     TEST_CASE("Test writing and reading demand data for gamslib/trnsport to/from GDX") {
-        GDXFile pgx;
+        std::string ErrMsg;
+        GDXFile pgx{ErrMsg};
 
         // Write data
         int ErrNr{};
-        const std::string fn {"xpwraptest.gdx"};
         REQUIRE(pgx.gdxOpenWrite(fn, "xptests" , ErrNr));
         REQUIRE_EQ(0, ErrNr);
         REQUIRE(pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0));
@@ -62,6 +64,8 @@ namespace tests::xpwraptests {
 
         std::filesystem::remove(fn);
     }
+
+
 
     TEST_SUITE_END();
 }

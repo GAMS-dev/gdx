@@ -10,7 +10,7 @@ namespace xpwrap {
     class GDXFile : public gdxinterface::GDXInterface {
         gdxHandle_t pgx {};
     public:
-        GDXFile();
+        explicit GDXFile(std::string &ErrMsg);
         ~GDXFile() override;
 
         int gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
