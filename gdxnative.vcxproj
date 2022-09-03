@@ -52,6 +52,7 @@
     <ClCompile Include="simplegdx\tgx.cpp" />
     <ClCompile Include="simplegdx\twostream.cpp" />
     <ClCompile Include="tests\doctestmain.cpp" />
+    <ClCompile Include="tests\gdxinterfacetests.cpp" />
     <ClCompile Include="tests\gxfiletests.cpp" />
     <ClCompile Include="tests\tgxtests.cpp" />
     <ClCompile Include="tests\xptests.cpp" />
