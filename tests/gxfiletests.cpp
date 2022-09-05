@@ -11,32 +11,29 @@ namespace tests::gxfiletests {
 
     const std::string fn {"mytest.gdx"};
 
-    TEST_CASE("Test creating a simple gdx file with gxfile port") {
-        {
-            std::string msg;
-            TGXFileObj pgx{msg};
-            int ErrNr;
-            pgx.gdxOpenWrite(fn, "TGXFileObj", ErrNr);
-            pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0);
-            auto writeRec = [&pgx](const std::string &s, double v) {
-                static std::array<std::string, 20> keys{};
-                static std::array<double, 5> values{};
-                keys.front() = s;
-                values.front() = v;
-                pgx.gdxDataWriteStr(keys, values);
-            };
-            writeRec("New-York"s, 324.0);
-            writeRec("Chicago"s, 299.0);
-            writeRec("Topeka"s, 274.0);
-            pgx.gdxDataWriteDone();
-            pgx.gdxClose();
-        }
-        //std::filesystem::remove(fn);
+    void writeFile() {
+        std::string msg;
+        TGXFileObj pgx{ msg };
+        int ErrNr;
+        pgx.gdxOpenWrite(fn, "TGXFileObj", ErrNr);
+        pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0);
+        auto writeRec = [&pgx](const std::string& s, double v) {
+            static std::array<std::string, 20> keys{};
+            static std::array<double, 5> values{};
+            keys.front() = s;
+            values.front() = v;
+            pgx.gdxDataWriteStr(keys, values);
+        };
+        writeRec("New-York"s, 324.0);
+        writeRec("Chicago"s, 299.0);
+        writeRec("Topeka"s, 274.0);
+        pgx.gdxDataWriteDone();
+        pgx.gdxClose();
     }
 
-    TEST_CASE("Test reading a simple gdx file with gxfile port") {
+    void readFile() {
         std::string msg;
-        TGXFileObj pgx{msg};
+        TGXFileObj pgx{ msg };
 
         int ErrNr{};
         REQUIRE(pgx.gdxOpenRead(fn, ErrNr));
@@ -65,7 +62,7 @@ namespace tests::gxfiletests {
 
         gxdefs::TgdxStrIndex Indx;
         gxdefs::TgdxValues Values;
-        for(int N{}; pgx.gdxDataReadStr(Indx, Values, N);) {
+        for (int N{}; pgx.gdxDataReadStr(Indx, Values, N);) {
             /*if (0 == Values[global::gmsspecs::vallevel]) continue;
             for (int D{}; D < Dim; D++)
                 std::cout << (D ? '.' : ' ') << Indx[D];
@@ -75,6 +72,12 @@ namespace tests::gxfiletests {
 
         REQUIRE(pgx.gdxDataReadDone());
         REQUIRE_FALSE(pgx.gdxClose());
+    }
+
+    TEST_CASE("Test creating and reading a simple gdx file with gxfile port") {
+        writeFile();
+        readFile();
+        std::filesystem::remove(fn);
     }
 
     TEST_SUITE_END();

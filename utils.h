@@ -349,4 +349,13 @@ namespace utils {
         std::fill_n(arr.begin() + lbIncl, ubIncl - lbIncl + 1, value);
     }
 
+    struct BinaryDiffMismatch {
+        BinaryDiffMismatch(uint64_t offset, uint8_t lhs, uint8_t rhs);
+
+        uint64_t offset;
+        uint8_t lhs, rhs;
+    };
+
+    std::optional<std::list<BinaryDiffMismatch>> binaryFileDiff(const std::string& filename1, const std::string& filename2, int countLimit = -1);
+
 }

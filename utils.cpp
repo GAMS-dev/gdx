@@ -405,6 +405,26 @@ namespace utils {
         return utils::in(s, "1"s, "true"s, "on"s, "yes"s);
     }
 
+    std::optional<std::list<BinaryDiffMismatch>> binaryFileDiff(const std::string& filename1, const std::string& filename2, int countLimit)
+    {
+        if (countLimit == -1) countLimit = std::numeric_limits<int>::max();
+        std::ifstream f1{ filename1, std::ios::binary }, f2 { filename1, std::ios::binary };
+        std::list<BinaryDiffMismatch> mismatches{};
+        char c1, c2;
+        uint64_t offset{};
+        while (!f1.eof() && !f2.eof()) {
+            f1.get(c1);
+            f2.get(c2);
+            if (c1 != c2) {
+                mismatches.emplace_back(offset, c1, c2);
+                if (mismatches.size() >= countLimit)
+                    break;
+            }
+            offset++;
+        }
+        return mismatches.empty() ? std::nullopt : std::make_optional(mismatches);
+    }
+
     StringBuffer::StringBuffer(int size) : s(size, '\0'), bufferSize {size} {}
 
     char *StringBuffer::getPtr() { return &s[0]; }
@@ -415,4 +435,7 @@ namespace utils {
     }
 
     int StringBuffer::getBufferSize() const { return bufferSize; }
+
+    BinaryDiffMismatch::BinaryDiffMismatch(uint64_t offset, uint8_t lhs, uint8_t rhs) : offset(offset), lhs(lhs),
+                                                                                        rhs(rhs) {}
 }

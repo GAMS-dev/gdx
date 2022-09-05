@@ -14,7 +14,7 @@ namespace tests::tgxtests {
     const std::string testfn {"tgxtest.gdx"};
 
     void writeFileWithTGX() {
-        GAMSDataExchange gdx {testfn, "TGX", false};
+        std::unique_ptr<GAMSDataExchange> gdx{ std::make_unique<GAMSDataExchange>(testfn, "TGX", false) };
 
         SymbolRaw sym;
         sym.name = "Demand";
@@ -24,26 +24,26 @@ namespace tests::tgxtests {
 
         // Data section
         int minKey{1}, maxKey{3};
-        REQUIRE(gdx.WriteRecordHeader(sym, &minKey, &maxKey) >= 0);
+        REQUIRE(gdx->WriteRecordHeader(sym, &minKey, &maxKey) >= 0);
 
         auto writeRec = [&sym, &gdx](int32_t key, double val) {
             static std::array<double, 5> vals {};
             vals[0] = val;
-            REQUIRE(gdx.WriteRecord(sym, &key, vals.data()));
+            REQUIRE(gdx->WriteRecord(sym, &key, vals.data()));
         };
         writeRec(1, 324.0);
         writeRec(2, 299.0);
         writeRec(3, 274.0);
 
         // Symbol section
-        REQUIRE_NE(-1, gdx.WriteSymbolHeader(1));
-        REQUIRE(gdx.WriteSymbol(sym));
+        REQUIRE_NE(-1, gdx->WriteSymbolHeader(1));
+        REQUIRE(gdx->WriteSymbol(sym));
 
         // UEL section
-        REQUIRE(gdx.WriteUELHeader(3) >= 0);
-        REQUIRE(gdx.WriteUEL("New-York"));
-        REQUIRE(gdx.WriteUEL("Chicago"));
-        REQUIRE(gdx.WriteUEL("Topeka"));
+        REQUIRE(gdx->WriteUELHeader(3) >= 0);
+        REQUIRE(gdx->WriteUEL("New-York"));
+        REQUIRE(gdx->WriteUEL("Chicago"));
+        REQUIRE(gdx->WriteUEL("Topeka"));
     }
 
     void checkFileWithGDXCC() {
@@ -56,7 +56,7 @@ namespace tests::tgxtests {
         REQUIRE(std::filesystem::exists(testfn));
         std::array<char, 256> msgBuf {};
         gdxHandle_t pgx {};
-        REQUIRE(gdxCreate(&pgx, msgBuf.data(), msgBuf.size()));
+        REQUIRE(gdxCreate(&pgx, msgBuf.data(), (int)msgBuf.size()));
         REQUIRE_EQ('\0', msgBuf.front());
 
         int ErrNr{};
