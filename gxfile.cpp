@@ -1824,10 +1824,29 @@ namespace gxfile {
         return res;
     }
 
-    int TGXFileObj::gdxSymbolSetDomainX(int SyNr, const TgdxStrIndex &DomainIDs) {
-        // ...
-        STUBWARN();
-        return 0;
+    int TGXFileObj::gdxSymbolSetDomainX(int SyNr, const TgdxStrIndex& DomainIDs) {
+        // check for write or append only
+        if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
+        PgdxSymbRecord SyPtr = (*symbolWithIndex(SyNr)).second;
+        if (SyPtr->SDim > 0) {
+            if (SyPtr->SDomStrings.empty()) {
+                SyPtr->SDomStrings.resize(SyPtr->SDim + 1);
+            }
+            for (int D{}; D < SyPtr->SDim; D++) {
+                std::string S{ DomainIDs[D] };
+                if (S.empty() || S == "*") SyPtr->SDomStrings[D] = 0;
+                else if (!IsGoodIdent(S)) {
+                    SyPtr->SDomStrings[D] = 0;
+                }
+                else {
+                    SyPtr->SDomStrings[D] = utils::indexOf(DomainStrList, S);
+                    if (SyPtr->SDomStrings[D] <= -1)
+                        DomainStrList.push_back(S);
+                    SyPtr->SDomStrings[D] = (int)DomainStrList.size();
+                }
+            }
+        }
+        return true;
     }
 
     int TGXFileObj::gdxSystemInfo(int &SyCnt, int &UelCnt) {
