@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "gdlib/gmsstrm.h"
 #include "gdlib/gmsglob.h"
+#include "gdlib/runner.h"
 #include "global/modhead.h"
 #include "global/gmsspecs.h"
 #include "palxxx/gdlaudit.h"
@@ -150,9 +151,14 @@ namespace gxfile {
         std::string Comp = Conv == "V5" ? ""s : (!GetEnvCompressFlag() ? "U" : "C");
         if(utils::sameText(Conv+Comp, "V7"+MyComp)) return 0;
 
-        // ...
-        STUBWARN();
-        return 0;
+        gdlib::runner::TRunner R {};
+        R.SetExecutable(DLLLoadPath.empty() ? "gdxcopy" : DLLLoadPath + rtl::sysutils_p3::PathDelim + "gdxcopy");
+        R.ParamsAdd("-" + Conv + Comp);
+        R.ParamsAdd("-Replace");
+        R.ParamsAdd(fn);
+        int res{ R.StartAndWait() };
+        if(!res && R.GetProgRC()) res = ERR_GDXCOPY - R.GetProgRC();
+        return res;
     }
 
     static std::string MakeGoodExplText(const std::string &s) {
