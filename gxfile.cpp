@@ -1775,9 +1775,53 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxSymbolSetDomain(const TgdxStrIndex &DomainIDs) {
-        // ...
-        STUBWARN();
-        return 0;
+        int res{ false }, SyNr;
+        TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
+        if (!MajorCheckMode("SymbolSetDomain", AllowedModes) || !CurSyPtr) return res;
+        assert(!CurSyPtr->SDomSymbols.empty() && "SymbolSetDomain");
+        CurSyPtr->SDomSymbols.resize(CurSyPtr->SDim + 1);
+        for (int D{}; D < CurSyPtr->SDim; D++) {
+            bool domap = true;
+            int DomSy;
+            if (DomainIDs[D] == "*") DomSy = 0;
+            else {
+                DomSy = NameList[DomainIDs[D]]->SSyNr;
+                if (DomSy <= -1) {
+                    ReportError(ERR_UNKNOWNDOMAIN);
+                    DomSy = -1;
+                    res = false;
+                }
+            }
+            if (DomSy > 0) {
+                SyNr = DomSy;
+                do {
+                    const auto &obj = (*symbolWithIndex(SyNr)).second;
+                    if (obj->SDataType == dt_set) break;
+                    if (obj->SDataType == dt_alias) {
+                        SyNr = obj->SUserInfo;
+                        if (SyNr > 0) continue;
+                        domap = false;
+                        break;
+                    }
+                    ReportError(ERR_ALIASSETEXPECTED);
+                    res = false;
+                    DomSy = 0;
+                    break;
+                } while (true);
+            }
+            CurSyPtr->SDomSymbols[D] = DomSy;
+            if (domap && DomSy > 0) {
+                // this is the case for set i(i)
+                if (CurSyPtr->SDim != 1 || CurSyPtr != (*symbolWithIndex(DomSy)).second)
+                    WrBitMaps[D] = ((*symbolWithIndex(SyNr)).second)->SSetBitMap;
+            }
+        }
+        switch (fmode) {
+        case fw_dom_raw: fmode = fw_raw_data; break;
+        case fw_dom_map: fmode = fw_map_data; break;
+        case fw_dom_str: fmode = fw_str_data; break;
+        }
+        return res;
     }
 
     int TGXFileObj::gdxSymbolSetDomainX(int SyNr, const TgdxStrIndex &DomainIDs) {
