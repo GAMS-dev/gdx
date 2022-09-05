@@ -1810,10 +1810,11 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
-        if (!UELTable.size() || UelNr < 1 || UelNr > UELTable.size()) {
-            Uel = UELTable[UelNr];
+        if (UELTable.size() && UelNr >= 1 && UelNr <= UELTable.size()) {
+            Uel = UELTable[UelNr-1];
             //UelMap = UELTable.GetUserMap
             // FIXME: Step through interactive debugger in order to figure out how UELTable is actually used in Delphi
+            UelMap = UELTable.UsrUel2Ent.empty() ? -1 : 0;
             return true;
         }
         else {
@@ -1830,7 +1831,7 @@ namespace gxfile {
         }
         else {
             UelCnt = UELTable.size();
-            HighMap = UELTable.UsrUel2Ent.rbegin()->first; // highest index
+            HighMap = UELTable.UsrUel2Ent.empty() ? 0 : UELTable.UsrUel2Ent.rbegin()->first; // highest index
             return true;
         }
     }
