@@ -172,6 +172,28 @@ namespace gxfile {
             ResetMapToUserStatus();
             return 0;
         }
+
+        TUELUserMapStatus GetMapToUserStatus() {
+            if(FMapToUserStatus == map_unknown) {
+                int LV {-1};
+                bool C {true};
+                FMapToUserStatus = map_sortgrow;
+                for(int N{}; N<size(); N++) {
+                    int V = GetUserMap(N);
+                    if(V < 0) C = false;
+                    else if(V > LV) {
+                        LV = V;
+                        if(!C) FMapToUserStatus = map_sorted;
+                    } else {
+                        FMapToUserStatus = map_unsorted;
+                        break;
+                    }
+                }
+                if(FMapToUserStatus == map_sortgrow && C)
+                    FMapToUserStatus = map_sortfull;
+            }
+            return FMapToUserStatus;
+        }
     };
 
     struct TAcronym {

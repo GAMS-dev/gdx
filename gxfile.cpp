@@ -1098,9 +1098,28 @@ namespace gxfile {
     }
 
     bool TGXFileObj::ResultWillBeSorted(const gxdefs::TgdxUELIndex &ADomainNrs) {
-        STUBWARN();
-        // ...
-        return false;
+        for(int D{}; D<FCurrentDim; D++) {
+            switch(ADomainNrs[D]) {
+                case DOMC_UNMAPPED: continue;
+                case DOMC_EXPAND:
+                    if(UELTable.GetMapToUserStatus() == map_unsorted) return false;
+                    if(!D) {
+                        if(UELTable.GetMapToUserStatus() >= map_sortgrow) continue;
+                        else return false;
+                    } else if(UELTable.GetMapToUserStatus() == map_sortfull) continue;
+                    else return false;
+                    break;
+                case DOMC_STRICT:
+                    if(UELTable.GetMapToUserStatus() == map_unsorted) return false;
+                    break;
+                default:
+                    if(UELTable.GetMapToUserStatus() >= map_sorted) continue;
+                    TDFilter *PFilter = FilterList.FindFilter(ADomainNrs[D]);
+                    if(!PFilter->FiltSorted) return false;
+                    break;
+            }
+        }
+        return true;
     }
 
     void TGXFileObj::GetDefaultRecord(TgdxValues &Avals) {
