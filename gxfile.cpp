@@ -1387,7 +1387,8 @@ namespace gxfile {
         NameList.clear();
         AcronymList.clear();
         FilterList.clear();
-        for(int N{1}; N<=NrElem; N++) {
+        const int NrElemsOfSym = NrElem;
+        for(int N{1}; N<=NrElemsOfSym; N++) {
             std::string S {FFile->ReadString()};
             CurSyPtr = new TgdxSymbRecord {};
             CurSyPtr->SPosition = VersionRead <= 5 ? FFile->ReadInteger() : FFile->ReadInt64();
