@@ -2,6 +2,7 @@
 #include "../gxfile.h"
 #include "../xpwrap.h"
 #include <iostream>
+#include <filesystem>
 
 using namespace std::literals::string_literals;
 
@@ -87,7 +88,7 @@ namespace tests::xp_example1 {
 
         system("gamslib trnsport");
         // FIXME: Actually load data from GDX file by modifying trnsport src here
-        system("gams trnsport gdx=result");
+        system("gams trnsport gdx=result lo=0 o=lf");
 
         PGX = SetupGDXObject(implType);
         REQUIRE(PGX->gdxOpenRead("result.gdx", ErrNr));
@@ -132,10 +133,16 @@ namespace tests::xp_example1 {
         PGX->gdxDataReadDone();
 
         TeardownGDXObject(&PGX);
+
+        std::array filesToDelete{
+            "demanddata.gdx"s, "result.gdx"s, "trnsport.gms"s, "lf"s
+        };
+        for (const auto fn : filesToDelete)
+            std::filesystem::remove(fn);
     }
 
     TEST_CASE("xp_example1_main_wrapped") {
-        //runXpExample1Main(GDXImplType::wrapped);
+        runXpExample1Main(GDXImplType::wrapped);
     }
 
     TEST_CASE("xp_example1_main_ported") {

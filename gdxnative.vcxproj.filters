@@ -136,6 +136,9 @@
     <ClCompile Include="tests\gdxinterfacetests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="tests\xp_example1.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">

@@ -970,7 +970,7 @@ namespace gxfile {
     }
 
     bool TGXFileObj::DoRead(TgdxValues &AVals, int &AFDim) {
-        const static auto maybeRemap = [&](int DV, double v) -> double {
+        const auto maybeRemap = [&](int DV, double v) -> double {
             return v >= Zvalacr ? AcronymRemap(v) : v;
         };
 

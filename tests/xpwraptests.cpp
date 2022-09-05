@@ -17,50 +17,59 @@ namespace tests::xpwraptests {
 
     const std::string fn {"xpwraptest.gdx"};
 
+    const std::array<std::pair<std::string, double>, 3> exampleData {{
+        {"New-York"s, 324.0},
+        {"Chicago"s, 299.0},
+        {"Topeka"s, 274.0}
+    }};
+
     TEST_CASE("Test writing and reading demand data for gamslib/trnsport to/from GDX") {
         std::string ErrMsg;
-        GDXFile pgx{ErrMsg};
-
-        // Write data
         int ErrNr{};
-        REQUIRE(pgx.gdxOpenWrite(fn, "xptests" , ErrNr));
-        REQUIRE_EQ(0, ErrNr);
-        REQUIRE(pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0));
-        std::array<std::pair<std::string, double>, 3> exampleData {{
-                                                                           {"New-York"s, 324.0},
-                                                                           {"Chicago"s, 299.0},
-                                                                           {"Topeka"s, 274.0}
-                                                                   }};
         gxdefs::TgdxStrIndex keys;
         gxdefs::TgdxValues  vals;
-        for(const auto &[key, value] : exampleData) {
-            keys[0] = key;
-            vals[0] = value;
-            pgx.gdxDataWriteStr( keys, vals);
+
+        // Write data
+        {
+            GDXFile pgx{ ErrMsg };
+            REQUIRE(ErrMsg.empty());
+            REQUIRE(pgx.gdxOpenWrite(fn, "xptests", ErrNr));
+            REQUIRE_EQ(0, ErrNr);
+            REQUIRE(pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0));
+            
+            for (const auto& [key, value] : exampleData) {
+                keys[0] = key;
+                vals[0] = value;
+                pgx.gdxDataWriteStr(keys, vals);
+            }
+            REQUIRE(pgx.gdxDataWriteDone());
+            pgx.gdxClose();
         }
-        REQUIRE(pgx.gdxDataWriteDone());
-        pgx.gdxClose();
 
         REQUIRE(std::filesystem::exists(fn));
 
         // Read data
-        REQUIRE(pgx.gdxOpenRead(fn, ErrNr));
-        REQUIRE_EQ(0, ErrNr);
-        int nrRecs{};
-        REQUIRE(pgx.gdxDataReadStrStart(1, nrRecs));
+        {
+            GDXFile pgx{ ErrMsg };
+            REQUIRE(ErrMsg.empty());
+            REQUIRE(pgx.gdxOpenRead(fn, ErrNr));
+            REQUIRE_EQ(0, ErrNr);
+            int nrRecs{};
+            REQUIRE(pgx.gdxDataReadStrStart(1, nrRecs));
 
-        gxdefs::TgdxStrIndex index{};
-        gxdefs::TgdxValues values{};
-        int dimFrst{};
+            gxdefs::TgdxStrIndex index{};
+            gxdefs::TgdxValues values{};
+            int dimFrst{};
 
-        for(int i{}; i<nrRecs; i++) {
-            pgx.gdxDataReadStr(index, values, dimFrst);
-            REQUIRE_EQ(index[0], exampleData[i].first);
-            REQUIRE(vals[global::gmsspecs::vallevel] - exampleData[i].second < 0.001);
+            for (int i{}; i < nrRecs; i++) {
+                pgx.gdxDataReadStr(index, values, dimFrst);
+                REQUIRE_EQ(index[0], exampleData[i].first);
+                REQUIRE(vals[global::gmsspecs::vallevel] - exampleData[i].second < 0.001);
+            }
+            REQUIRE(pgx.gdxDataReadDone());
+
+            pgx.gdxClose();
         }
-        REQUIRE(pgx.gdxDataReadDone());
-
-        pgx.gdxClose();
 
         std::filesystem::remove(fn);
     }

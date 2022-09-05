@@ -83,6 +83,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ("New-York", uel);
             REQUIRE_EQ(-1, uelMap);
         });
+        for (const auto& fn : filenames)
+            std::filesystem::remove(fn);
     }
 
     TEST_SUITE_END();

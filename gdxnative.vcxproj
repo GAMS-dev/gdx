@@ -57,6 +57,7 @@
     <ClCompile Include="tests\tgxtests.cpp" />
     <ClCompile Include="tests\xptests.cpp" />
     <ClCompile Include="tests\xpwraptests.cpp" />
+    <ClCompile Include="tests\xp_example1.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="xpwrap.cpp" />
   </ItemGroup>
