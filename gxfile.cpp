@@ -1795,7 +1795,7 @@ namespace gxfile {
             if (DomSy > 0) {
                 SyNr = DomSy;
                 do {
-                    const auto &obj = (*symbolWithIndex(SyNr)).second;
+                    const auto *obj = (*symbolWithIndex(SyNr)).second;
                     if (obj->SDataType == dt_set) break;
                     if (obj->SDataType == dt_alias) {
                         SyNr = obj->SUserInfo;
@@ -1820,6 +1820,7 @@ namespace gxfile {
         case fw_dom_raw: fmode = fw_raw_data; break;
         case fw_dom_map: fmode = fw_map_data; break;
         case fw_dom_str: fmode = fw_str_data; break;
+        default: break;
         }
         return res;
     }
@@ -1833,11 +1834,8 @@ namespace gxfile {
                 SyPtr->SDomStrings.resize(SyPtr->SDim + 1);
             }
             for (int D{}; D < SyPtr->SDim; D++) {
-                std::string S{ DomainIDs[D] };
-                if (S.empty() || S == "*") SyPtr->SDomStrings[D] = 0;
-                else if (!IsGoodIdent(S)) {
-                    SyPtr->SDomStrings[D] = 0;
-                }
+                const std::string &S { DomainIDs[D] };
+                if (S.empty() || S == "*" || !IsGoodIdent(S)) SyPtr->SDomStrings[D] = 0;
                 else {
                     SyPtr->SDomStrings[D] = utils::indexOf(DomainStrList, S);
                     if (SyPtr->SDomStrings[D] <= -1)

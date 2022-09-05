@@ -87,6 +87,37 @@ namespace tests::gdxinterfacetests {
             std::filesystem::remove(fn);
     }
 
+    TEST_CASE("Test write and read record raw") {
+        std::string f1{"rwrecordraw_wrapper.gdx"},
+                    f2{"rwrecordraw_port.gdx"};
+        gxdefs::TgdxUELIndex keys{};
+        gxdefs::TgdxValues values{};
+        testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
+            pgx.gdxUELRegisterRawStart();
+            pgx.gdxUELRegisterRaw("TheOnlyUEL");
+            pgx.gdxUELRegisterDone();
+            pgx.gdxDataWriteRawStart("mysym", "This is my symbol!", 1, global::gmsspecs::gms_dt_par, 0);
+            keys[0] = 1;
+            values[global::gmsspecs::vallevel] = 3.141;
+            pgx.gdxDataWriteRaw(keys, values);
+            pgx.gdxDataWriteDone();
+        });
+        testReads(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
+            std::string uel;
+            int uelMap;
+            pgx.gdxUMUelGet(1, uel, uelMap);
+            REQUIRE_EQ("TheOnlyUEL", uel);
+            int NrRecs;
+            pgx.gdxDataReadRawStart(1, NrRecs);
+            REQUIRE_EQ(1, NrRecs);
+            int dimFrst;
+            pgx.gdxDataReadRaw(keys, values, dimFrst);
+            pgx.gdxDataReadDone();
+            REQUIRE_EQ(1, keys[0]);
+            REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
+        });
+    }
+
     TEST_SUITE_END();
 
 }
