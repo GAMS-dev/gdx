@@ -2252,9 +2252,30 @@ namespace gxfile {
     //   gdxDataWriteMapStart, gdxDataWriteDone
     // Description:
     int TGXFileObj::gdxDataWriteMap(const TgdxUELIndex &KeyInt, const TgdxValues &Values) {
-        // ...
-        STUBWARN();
-        return 0;
+        const TgxModeSet AllowedModes {fw_map_data};
+        TIndex  Keys;
+        if(fmode == fw_dom_map)
+            fmode = fw_map_data;
+        if(TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) {
+            if(!CheckMode("DataWriteMap", AllowedModes)) return false;
+            std::cout << "   Index =";
+            for(int D{}; D<FCurrentDim; D++) {
+                std::cout << " " << std::to_string(KeyInt[D]);
+                if(D+1 < FCurrentDim) std::cout << ",";
+            }
+        }
+        for(int D{}; D<FCurrentDim; D++) {
+            int KD = UELTable.GetUserMap(KeyInt[D]);
+            if(KD < 0) {
+                ReportError(ERR_BADELEMENTINDEX);
+                return false;
+            }
+            Keys[D] = KD;
+            if(KD < MinElem[D]) MinElem[D] = KD;
+            if(KD > MaxElem[D]) MaxElem[D] = KD;
+        }
+        SortList->AddItem(Keys, Values);
+        return true;
     }
 
     void TUELTable::clear() {
