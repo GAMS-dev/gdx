@@ -2358,7 +2358,7 @@ namespace gxfile {
             DimFrst = 0;
             return true;
         }
-        if(fmode = fr_map_data) {
+        if(fmode == fr_map_data) {
             DimFrst = 0;
             if(!ReadPtr) return false;
             auto first = (*SortList->begin());
@@ -2384,17 +2384,49 @@ namespace gxfile {
         if(FIDim < DimFrst) DimFrst = FIDim;
         FIDim = FCurrentDim;
         if(DimFrst > 0) {
-            for(int D{DimFrst}; D<FCurrentDim; D++) {
+            bool loopDone{};
+            for(int D{DimFrst}; D<FCurrentDim && !loopDone; D++) {
                 const auto &obj = DomainList[D];
                 if(LastElem[D] < 0) {
                     ReportError(ERR_BADELEMENTINDEX);
                     BadError = true;
                     break;
                 }
+                int V;
                 switch(obj.DAction) {
                     case dm_unmapped:
+                        KeyInt[D] = LastElem[D];
                         break;
                     case dm_filter:
+                        V = UELTable.GetUserMap(LastElem[D]);
+                        if(obj.DFilter->InFilter(V)) KeyInt[D] = V;
+                        else {
+                            AddError = true;
+                            FIDim = D;
+                            loopDone = true;
+                        }
+                        break;
+                    case dm_strict:
+                        V = UELTable.GetUserMap(LastElem[D]);
+                        if(V >= 0) KeyInt[D] = V;
+                        else {
+                            AddError = true;
+                            FIDim = D;
+                            loopDone = true;
+                        }
+                        break;
+                    case dm_expand: // no filter, allow growth of domain
+                        {
+                            int EN = LastElem[D];
+                            V = UELTable.GetUserMap(EN);
+                            if (V >= 0) KeyInt[D] = V;
+                            else {
+                                KeyInt[D] = -EN;
+                                AddNew = true;
+                            }
+                        }
+                        break;
+                    default:
                         break;
                 }
             }
