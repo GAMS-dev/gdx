@@ -97,6 +97,15 @@ namespace xpwrap {
         int gdxCurrentDim() override;
 
         int gdxRenameUEL(const std::string &OldName, const std::string &NewName) override;
+
+        int gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) override;
+
+        int gdxGetUEL(int uelNr, std::string &Uel) override;
+
+        int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+                                 int UserInfo) override;
+
+        int gdxDataWriteMap(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) override;
     };
 
 }

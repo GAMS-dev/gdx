@@ -11,6 +11,7 @@
 #include "global/gmsspecs.h"
 #include "gxdefs.h"
 #include "gdlib/gmsdata.h"
+#include "gdlib/datastorage.h"
 #include <cstring>
 
 namespace gdlib::gmsstrm {
@@ -139,6 +140,7 @@ namespace gxfile {
         int MemoryUsed();
         void clear();
         int &operator[](int index);
+        bool empty() const;
     };
 
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
@@ -149,7 +151,7 @@ namespace gxfile {
         TUELUserMapStatus FMapToUserStatus;
 
     public:
-        std::map<int, int> UsrUel2Ent; // from user uelnr to table entry
+        TIntegerMapping UsrUel2Ent; // from user uelnr to table entry
 
         void clear();
 
@@ -162,57 +164,19 @@ namespace gxfile {
 
         int AddObject(const std::string &id, int mapping);
 
-        std::string operator[](int index) {
-            return uelNames[index];
-        }
+        std::string operator[](int index);
 
-        int GetUserMap(int i) const {
-            return UsrUel2Ent.at(i);
-        }
+        int GetUserMap(int i) const;
 
-        void ResetMapToUserStatus() {
-            FMapToUserStatus = map_unknown;
-        }
+        void ResetMapToUserStatus();
 
-        int NewUsrUel(int EN) {
-            auto maxKey = (*UsrUel2Ent.rbegin()).first;
-            UsrUel2Ent[maxKey+1] = EN;
-            ResetMapToUserStatus();
-            return maxKey+1;
-        }
+        int NewUsrUel(int EN);
 
-        int AddUsrNew(const std::string& s) {
-            // ...
-            // FIXME: Implement correctly!
-            ResetMapToUserStatus();
-            return 0;
-        }
+        int AddUsrNew(const std::string& s);
 
-        TUELUserMapStatus GetMapToUserStatus() {
-            if(FMapToUserStatus == map_unknown) {
-                int LV {-1};
-                bool C {true};
-                FMapToUserStatus = map_sortgrow;
-                for(int N{}; N<size(); N++) {
-                    int V = GetUserMap(N);
-                    if(V < 0) C = false;
-                    else if(V > LV) {
-                        LV = V;
-                        if(!C) FMapToUserStatus = map_sorted;
-                    } else {
-                        FMapToUserStatus = map_unsorted;
-                        break;
-                    }
-                }
-                if(FMapToUserStatus == map_sortgrow && C)
-                    FMapToUserStatus = map_sortfull;
-            }
-            return FMapToUserStatus;
-        }
+        TUELUserMapStatus GetMapToUserStatus();
 
-        void RenameEntry(int N, const std::string &s) {
-            uelNames[N-1] = s;
-        }
+        void RenameEntry(int N, const std::string &s);
     };
 
     struct TAcronym {
@@ -251,7 +215,8 @@ namespace gxfile {
         std::map<std::string, PgdxSymbRecord, strCompCaseInsensitive> NameList;
         std::vector<std::string> DomainStrList;
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
-        std::map<global::gmsspecs::TIndex, gxdefs::TgdxValues> SortList;
+        //std::map<global::gmsspecs::TIndex, gxdefs::TgdxValues> SortList;
+        std::unique_ptr<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>> SortList;
         gdlib::gmsdata::TTblGamsData ErrorList;
         PgdxSymbRecord CurSyPtr{};
         int ErrCnt{}, ErrCntTotal{};
@@ -407,6 +372,15 @@ namespace gxfile {
         int gdxCurrentDim() override;
 
         int gdxRenameUEL(const std::string &OldName, const std::string &NewName) override;
+
+        int gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) override;
+
+        int gdxGetUEL(int uelNr, std::string &Uel) override;
+
+        int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+                                 int UserInfo) override;
+
+        int gdxDataWriteMap(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) override;
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from

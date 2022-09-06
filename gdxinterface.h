@@ -15,6 +15,7 @@ namespace gdxinterface {
         virtual int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) = 0;
 
         virtual int gdxOpenRead(const std::string &FileName, int &ErrNr) = 0;
+        virtual int gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) = 0;
 
         virtual int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) = 0;
         virtual int gdxDataWriteStr(const gxdefs::TgdxStrIndex &KeyStr, const gxdefs::TgdxValues &Values) = 0;
@@ -43,6 +44,10 @@ namespace gdxinterface {
         virtual int gdxDataWriteRaw(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) = 0;
         virtual int gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ, int UserInfo) = 0;
 
+        virtual int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ, int UserInfo) = 0;
+        virtual int gdxDataWriteMap(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) = 0;
+
+
         virtual int gdxErrorCount() = 0;
         virtual int gdxErrorStr(int ErrNr, std::string &ErrMsg) = 0;
 
@@ -69,6 +74,8 @@ namespace gdxinterface {
         virtual int gdxUELRegisterRawStart() = 0;
         virtual int gdxUELRegisterStr(const std::string &Uel, int &UelNr) = 0;
         virtual int gdxUELRegisterStrStart() = 0;
+
+        virtual int gdxGetUEL(int uelNr, std::string &Uel) = 0;
 
         virtual int gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) = 0;
         virtual int gdxUMUelInfo(int &UelCnt, int &HighMap) = 0;

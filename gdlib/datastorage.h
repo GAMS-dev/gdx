@@ -2,13 +2,14 @@
 
 #include <vector>
 #include "../global/modhead.h"
+#include "../global/gmsspecs.h"
 #include <limits>
 
 namespace gdlib::datastorage {
 
     template<typename  T>
     class TLinkedData {
-        std::vector<std::pair<std::vector<int>, T>> data;
+        std::vector<std::pair<global::gmsspecs::TIndex, T>> data;
         int FMinKey, FMaxKey, FDimension, FKeySize, FTotalSize, FDataSize;
     public:
         TLinkedData(int ADimension, int ADataSize) :
@@ -21,6 +22,26 @@ namespace gdlib::datastorage {
         }
 
         ~TLinkedData() = default;
+
+        int size() const { return data.size(); }
+
+        auto begin() {
+            return data.begin();
+        }
+
+        auto end() {
+            return data.end();
+        }
+
+        void clear() {
+            data.clear();
+        }
+
+        T &operator[](const global::gmsspecs::TIndex &index) {
+            for(int i{}; i<data.size(); i++)
+                if(data[i].first == index) return data[i].second;
+            return data.front().second;
+        }
 
         void Clear() {
             data.clear();

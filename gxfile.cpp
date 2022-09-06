@@ -228,10 +228,58 @@ namespace gxfile {
         return s.empty() || s == "N" || s == "0" ? 0 : 1;
     }
 
+    // Brief:
+    //   Open a new gdx file for output; uses the environment variable GDXCOMPRESS to set compression argument for gdxOpenWriteEx
+    // Arguments:
+    //   FileName:  File name of the gdx file to be created
+    //   Producer:  Name of program that creates the gdx file
+    //   ErrNr: Returns an error code or zero if there is no error
+    // Returns:
+    //   Returns non-zero if the file can be opened; zero otherwise
+    // Description:
+    //   See gdxOpenWriteEx
+    // See Also:
+    //   gdxOpenRead, gdxOpenWriteEx, Destroy
     int TGXFileObj::gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) {
         return gdxOpenWriteEx(FileName, Producer, GetEnvCompressFlag(), ErrNr);
     }
 
+    // Brief:
+    //   Create a gdx file for writing
+    // Arguments:
+    //   FileName:  File name of the gdx file to be created
+    //   Producer:  Name of program that creates the gdx file
+    //   Compr: Zero for no compression; non-zero uses compression if available
+    //          Important! when writing compressed, set the AutoConvert flag to zero
+    //          so the file is not uncompressed after the Close; see gdxAutoConvert
+    //   ErrNr: Returns an error code or zero if there is no error
+    // Returns:
+    //   Returns non-zero if the file can be opened; zero otherwise
+    // Description:
+    //   Open a new gdx file for output. If a file extension is not
+    //   supplied, the extension '.gdx' will be used. The return code is
+    //   a system dependent I/O error.
+    // See Also:
+    //   gdxOpenRead, gdxOpenWrite, gdxAutoConvert, Destroy
+    // Example:
+    // <CODE>
+    //   var
+    //      ErrNr: integer;
+    //      PGX  : PGXFile;
+    //      Msg  : ShortString;
+    //   begin
+    //   if not gdxGetReady(Msg)
+    //   then
+    //      begin
+    //      WriteLn('Cannot load GDX library, msg: ', Msg);
+    //      exit;
+    //      end;
+    //   gdxOpenWriteEx(PGX,'c:\\mydata\\file1.gdx','Examples', 1, ErrCode);
+    //   gdxAutoConvert(PGX, 0);
+    //   if ErrCode <> 0
+    //   then
+    //      [ ... ]
+    // </CODE>
     int TGXFileObj::gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) {
         if(fmode != f_not_open) {
             ErrNr = ERR_FILEALREADYOPEN;
@@ -333,7 +381,7 @@ namespace gxfile {
                 if(KD > MaxElem[D]) MaxElem[D] = KD;
             }
         }
-        SortList[LastElem] = Values;
+        (*SortList)[LastElem] = Values;
         return true;
     }
 
@@ -348,13 +396,13 @@ namespace gxfile {
         const TgxModeSet AllowedModes {fw_raw_data,fw_map_data,fw_str_data, fw_dom_raw, fw_dom_map, fw_dom_str};
         if(!MajorCheckMode("DataWriteDone"s, AllowedModes)) return false;
         if(!utils::in(fmode, fw_raw_data, fw_dom_raw)) {
-            InitDoWrite(static_cast<int>(SortList.size()));
-            for(const auto &[keys, values] : SortList) {
+            InitDoWrite(static_cast<int>(SortList->size()));
+            for(const auto &[keys, values] : *SortList) {
                 /*TIndex AElements;
                 gxdefs::TgdxValues AVals;*/
                 DoWrite(keys, values);
             }
-            SortList.clear();
+            SortList->clear();
         }
         FFile->WriteByte(255); // end of data
         NextWritePosition = FFile->GetPosition();
@@ -379,7 +427,7 @@ namespace gxfile {
     //   gdxOpenRead, gdxOpenWrite
     int TGXFileObj::gdxClose() {
         std::string fnConv;
-        if(utils::in(fmode, fw_raw_data, fw_map_data, fw_str_data))
+        if(utils::in(fmode, fw_raw_data, fw_map_data, fw_str_data)) // unfinishd write
             gdxDataWriteDone();
         if(fmode == fw_init) {
             fnConv = FFile->GetFileName();
@@ -531,7 +579,7 @@ namespace gxfile {
 
         CurSyPtr = nullptr;
         ErrorList.clear();
-        SortList.clear();
+        SortList->clear();
 
         if(!MajorCheckMode(Caller, AllowedModes)) return false;
 
@@ -544,7 +592,7 @@ namespace gxfile {
             ErrorCondition(AType >= 0 && AType <= dt_equ, ERR_BADDATATYPE)) return false;
         CurSyPtr = new TgdxSymbRecord{};
         auto &obj = CurSyPtr;
-        obj->SPosition = CurSyPtr->SDataCount = CurSyPtr->SErrors = 0;
+        obj->SPosition = CurSyPtr->SDataCount = CurSyPtr->SErrors = 0; // Position
         obj->SDim = ADim;
         obj->SDataType = static_cast<TgdxDataType>(AType);
         obj->SUserInfo = AUserInfo;
@@ -558,6 +606,10 @@ namespace gxfile {
         CurSyPtr->SSyNr = static_cast<int>(NameList.size());
         NameList[AName] = CurSyPtr;
         FCurrentDim = ADim;
+        // old case; we never write V6
+        // V = 0..Dim which dimension changed
+        // V = Dim+1 .. 254 change in last dimension = V - Dim
+        // 255 is EOF
         DeltaForWrite = 255 - (VERSION <= 6 ? MaxDimV148 : FCurrentDim) - 1;
 
         DataSize = gxdefs::DataTypSize[AType];
@@ -643,7 +695,7 @@ namespace gxfile {
         TIntegerMapping ExpndList;
         ErrorList.clear();
         CurSyPtr = nullptr;
-        SortList.clear();
+        SortList->clear();
 
         const TgxModeSet AllowedModes{ fr_init };
 
@@ -826,11 +878,11 @@ namespace gxfile {
                                 }
                                 AddNew = false;
                             }
-                            SortList[AElements] = Avals;
+                            (*SortList)[AElements] = Avals;
                         }
                     }
-                    // FIXME: SortList.StartRead();
-                    res = (int)SortList.size();
+                    // FIXME: SortList->StartRead();
+                    res = (int)SortList->size();
                 } catch(std::exception &e) {
                     std::cout << "Exception: " << e.what() << std::endl;
                     AllocOk = false;
@@ -844,7 +896,7 @@ namespace gxfile {
             return res;
         } else {
             SetError(ERR_OUT_OF_MEMORY);
-            SortList.clear();
+            SortList->clear();
             fmode = fr_init;
             return -1;
         }
@@ -1257,6 +1309,33 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Open a gdx file for reading
+    // Arguments:
+    //   FileName: file name of the gdx file to be opened
+    //   ErrNr: Returns an error code or zero if there is no error
+    // Returns:
+    //   Returns non-zero if the file can be opened; zero otherwise
+    // See Also:
+    //   gdxOpenWrite, Destroy, gdxGetLastError
+    // Description:
+    //   Open an existing gdx file for input. If a file extension is not
+    //   supplied, the extension '.gdx' will be used. The return code is
+    //   a system dependent I/O error. If the file was found, but is not
+    //   a valid gdx file, the function GetLastError can be used to handle
+    //   these type of errors.
+    // Example:
+    // <CODE>
+    //   var
+    //      ErrNr: integer;
+    //      PGX  : PGXFile;
+    //   begin
+    //   gdxOpenRead(PGX,'c:\\mydata\\file1.gdx', ErrNr);
+    //   if ErrNr <> 0
+    //   then
+    //      begin
+    //      [...]
+    // </CODE>
     int TGXFileObj::gdxOpenRead(const std::string &FileName, int &ErrNr) {
         return gdxOpenReadXX(FileName, fmOpenRead, 0, ErrNr);
     }
@@ -1267,6 +1346,20 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Find symbol by name
+    // Arguments:
+    //   SyId: Name of the symbol
+    //   SyNr: Symbol number
+    // Returns:
+    //   Non-zero if the symbol is found, zero otherwise.
+    // Description:
+    //   Search for a symbol by name; the search is not case sensitive.
+    //   When the symbol is found, SyNr contains the symbol number and the
+    //   function returns a non-zero integer. When the symbol is not found, the function
+    //   returns zero.
+    // See Also:
+    //   gdxSymbolInfo, gdxSymbolInfoX
     int TGXFileObj::gdxFindSymbol(const std::string &SyId, int &SyNr) {
         if (SyId == "*") {
             SyNr = 0;
@@ -1297,7 +1390,7 @@ namespace gxfile {
 
     int TGXFileObj::gdxDataReadDone() {
         TgxModeSet AllowedMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data, fr_str_data,fr_slice};
-        SortList.clear();
+        SortList->clear();
         CurSyPtr = nullptr;
         if(!MajorCheckMode("DataReadDone", AllowedMode)) {
             fmode = fr_init;
@@ -1310,7 +1403,7 @@ namespace gxfile {
             }
         }
         if(NrMappedAdded) {
-            int HighestIndex = UELTable.UsrUel2Ent.rbegin()->first;
+            int HighestIndex = UELTable.UsrUel2Ent.GetHighestIndex();
             for(int N{HighestIndex}; N >= HighestIndex - NrMappedAdded + 1; N--) {
                 assert(N >= 1 && "Wrong entry number");
                 int EN {UELTable.UsrUel2Ent[N]};
@@ -1325,6 +1418,17 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //  Returns information about a symbol
+    // Arguments:
+    //   SyNr: The symbol number (range 0..NrSymbols); return universe info when SyNr = 0
+    //   SyId: Name of the symbol
+    //   Dimen: Dimension of the symbol
+    //   Typ: Symbol type
+    // Returns:
+    //   Zero if the symbol number is not in the correct range, non-zero otherwise
+    // See Also:
+    //   gdxSystemInfo, gdxSymbolInfoX, gdxSymbolDim, gdxFindSymbol
     int TGXFileObj::gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) {
         static auto badLookup = [&]() {
             SyId.clear();
@@ -1498,7 +1602,7 @@ namespace gxfile {
             for (int N{}; N < NrElem; N++) {
                 SetTextList.push_back(FFile->ReadString());
                 int TextNum{ static_cast<int>(SetTextList.size()) };
-                if (TextNum != N) {
+                if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
                     MapSetText.resize(NrElem);
                     // TODO: Could this be replaced by std::iota?
                     for (int D{}; D < N; D++)
@@ -1658,16 +1762,50 @@ namespace gxfile {
         return false;
     }
 
+    // Brief:
+    //   Start writing a new symbol in raw mode
+    // Arguments:
+    //   SyId: Name of the symbol
+    //   ExplTxt: Explanatory text for the symbol
+    //   Dimen: Dimension of the symbol
+    //   Typ: Type of the symbol
+    //   UserInfo: GAMS follows the following conventions:
+    //<TABLE>
+    //Type           Value(s)
+    //-------------  -------------------------------------------------------
+    // Aliased Set   The symbol number of the aliased set, or zero for
+    //                 the universe
+    // Set           Zero
+    // Parameter     Zero
+    // Variable      The variable type: binary=1, integer=2, positive=3,
+    //                 negative=4, free=5, sos1=6, sos2=7, semicontinous=8,
+    //                 semiinteger=9
+    // Equation      The equation type: eque=53, equg=54, equl=55, equn=56,
+    //                 equx=57, equc=58, equb=59
+    //</TABLE>
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Description:
+    //
+    // See Also:
+    //   gdxDataWriteRaw, gdxDataWriteDone
     int TGXFileObj::gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
                                          int UserInfo) {
         if(!PrepareSymbolWrite("DataWriteRawStart", SyId, ExplTxt, Dimen, Typ, UserInfo)) return false;
-        std::fill_n(MinElem.begin(), FCurrentDim-1, 0);
+        // we overwrite the initialization
+        std::fill_n(MinElem.begin(), FCurrentDim-1, 0); // no assumptions about the range for a uel
         std::fill_n(MaxElem.begin(), FCurrentDim-1, std::numeric_limits<int>::max());
         InitDoWrite(-1);
         fmode = fw_dom_raw;
         return true;
     }
 
+    // Brief:
+    //  Returns the number of errors
+    // Returns:
+    //  Total number of errors encountered
+    // See Also:
+    //   gdxGetLastError
     int TGXFileObj::gdxErrorCount() {
         return ErrCntTotal;
     }
@@ -1690,6 +1828,17 @@ namespace gxfile {
         return false;
     }
 
+    // Brief:
+    //  Return the last error
+    // Returns:
+    //  The error number, or zero if there was no error
+    // Description:
+    //  When an error is encountered, an error code is stored which can
+    //  be retrieved with this function. If subsequent errors occur before
+    //  this function is called, the first error code will be maintained.
+    //  Calling this function will clear the last error stored.
+    // See Also:
+    //  gdxErrorCount
     int TGXFileObj::gdxGetLastError() {
         if(!FFile) {
             int le{LastError};
@@ -1775,11 +1924,31 @@ namespace gxfile {
         return 0;
     }
 
+    // Brief:
+    //  Returns Dimension of a symbol
+    // Arguments:
+    //   SyNr: The symbol number (range 0..NrSymbols); return universe info when SyNr = 0
+    // Returns:
+    //   -1 if the symbol number is not in the correct range, the symbol dimension otherwise
+    // See Also:
+    //   gdxSymbolInfo, gdxSymbolInfoX, gdxFindSymbol
     int TGXFileObj::gdxSymbolDim(int SyNr) {
         if (!SyNr) return 1;
         return NameList.empty() || SyNr < 1 || SyNr > NameList.size() ? -1 : (*symbolWithIndex(SyNr)).second->SDim;
     }
 
+    // Brief:
+    //  Returns additional information about a symbol
+    // Arguments:
+    //   SyNr: The symbol number (range 0..NrSymbols); return universe info when SyNr = 0
+    //   RecCnt: Total number of records stored (unmapped); for the universe (SyNr = 0) this is the
+    //      number of entries when the gdx file was openened for reading.
+    //   UserInfo: User field value; see gdxDataWriteRawStart for more information
+    //   ExplTxt: Explanatory text for the symbol
+    // Returns:
+    //   Zero if the symbol number is not in the correct range, non-zero otherwise
+    // See Also:
+    //   gdxSystemInfo, gdxSymbolInfo, gdxFindSymbol
     int TGXFileObj::gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) {
         if (!SyNr) {
             RecCnt = UelCntOrig;
@@ -1874,6 +2043,13 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Returns the number of symbols and unique elements
+    // Arguments:
+    //   SyCnt: Number of symbols available in the gdx file
+    //   UelCnt: Number of unique elements stored in the gdx file
+    // Returns:
+    //   Returns a non-zero value
     int TGXFileObj::gdxSystemInfo(int &SyCnt, int &UelCnt) {
         UelCnt = (int)UELTable.size();
         SyCnt = (int)NameList.size();
@@ -1924,7 +2100,7 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
-        if (UELTable.size() && UelNr >= 1 && UelNr <= UELTable.size()) {
+        if (!UELTable.empty() && UelNr >= 1 && UelNr <= UELTable.size()) {
             Uel = UELTable[UelNr-1];
             //UelMap = UELTable.GetUserMap
             // FIXME: Step through interactive debugger in order to figure out how UELTable is actually used in Delphi
@@ -1939,13 +2115,13 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxUMUelInfo(int &UelCnt, int &HighMap) {
-        if (!UELTable.size()) {
+        if (UELTable.empty()) {
             UelCnt = HighMap = 0;
             return false;
         }
         else {
             UelCnt = UELTable.size();
-            HighMap = UELTable.UsrUel2Ent.empty() ? 0 : UELTable.UsrUel2Ent.rbegin()->first; // highest index
+            HighMap = UELTable.UsrUel2Ent.empty() ? 0 : UELTable.UsrUel2Ent.GetHighestIndex(); // highest index
             return true;
         }
     }
@@ -1966,6 +2142,96 @@ namespace gxfile {
         else if(UELTable.IndexOf(S) >= 0)
             return 3;
         UELTable.RenameEntry(N, S);
+        return 0;
+    }
+
+    // Brief:
+    //   Open a gdx file for reading
+    // Arguments:
+    //   FileName: file name of the gdx file to be opened
+    //   ReadMode: bitmap skip reading sections: 0-bit: string (1 skip reading string)
+    //   ErrNr: Returns an error code or zero if there is no error
+    // Returns:
+    //   Returns non-zero if the file can be opened; zero otherwise
+    // See Also:
+    //   gdxOpenWrite, Destroy, gdxGetLastError
+    // Description:
+    //   Open an existing gdx file for input. If a file extension is not
+    //   supplied, the extension '.gdx' will be used. The return code is
+    //   a system dependent I/O error. If the file was found, but is not
+    //   a valid gdx file, the function GetLastError can be used to handle
+    //   these type of errors.
+    // Example:
+    // <CODE>
+    //   var
+    //      ErrNr: integer;
+    //      PGX  : PGXFile;
+    //   begin
+    //   gdxOpenRead(PGX,'c:\\mydata\\file1.gdx', ErrNr);
+    //   if ErrNr <> 0
+    //   then
+    //      begin
+    //      [...]
+    // </CODE>
+    int TGXFileObj::gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) {
+        return gdxOpenReadXX(FileName, fmOpenRead, ReadMode, ErrNr);
+    }
+
+    // Brief:
+    //  Get the string for a unique element using a mapped index
+    // Arguments:
+    //   UelNr: Index number in user space (1..NrUserElem)
+    //   Uel: String for the unique element
+    // Returns:
+    //  Return non-zero if the index is in a valid range, zero otherwise
+    // Description:
+    //  Retrieve the string for a unique element based on a mapped index number.
+    // See Also:
+    //   gdxUMUelGet
+    int TGXFileObj::gdxGetUEL(int uelNr, std::string &Uel) {
+        if(UELTable.empty()) {
+            Uel.clear();
+            return false;
+        }
+        int EN = UELTable.UsrUel2Ent[uelNr];
+        Uel = EN >= 1 ? UELTable[EN] : BADUEL_PREFIX + std::to_string(uelNr);
+        return EN >= 1;
+    }
+
+    // Brief:
+    //   Start writing a new symbol in mapped mode
+    // Arguments:
+    //   SyId: Name of the symbol
+    //   ExplTxt: Explanatory text for the symbol
+    //   Dimen: Dimension of the symbol
+    //   Type: Type of the symbol
+    //   UserInfo: See gdxDataWriteRawStart for more information
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Description:
+    // See Also:
+    //   gdxDataWriteMap, gdxDataWriteDone
+    int TGXFileObj::gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+                                         int UserInfo) {
+        if(!PrepareSymbolWrite("DataWriteMapStart", SyId, ExplTxt, Dimen, Typ, UserInfo)) return false;
+        SortList = std::make_unique<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
+        fmode = fw_dom_map;
+        return true;
+    }
+
+    // Brief:
+    //   Write a data element in mapped mode
+    // Arguments:
+    //   KeyInt: The index for this element using mapped values
+    //   Values: The values for this element
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxDataWriteMapStart, gdxDataWriteDone
+    // Description:
+    int TGXFileObj::gdxDataWriteMap(const TgdxUELIndex &KeyInt, const TgdxValues &Values) {
+        // ...
+        STUBWARN();
         return 0;
     }
 
@@ -1993,6 +2259,58 @@ namespace gxfile {
 
     bool TUELTable::empty() const {
         return !size();
+    }
+
+    std::string TUELTable::operator[](int index) {
+        return uelNames[index];
+    }
+
+    int TUELTable::GetUserMap(int i) const {
+        return UsrUel2Ent.GetMapping(i);
+    }
+
+    void TUELTable::ResetMapToUserStatus() {
+        FMapToUserStatus = map_unknown;
+    }
+
+    int TUELTable::NewUsrUel(int EN) {
+        auto maxKey = UsrUel2Ent.GetHighestIndex();
+        UsrUel2Ent[maxKey+1] = EN;
+        ResetMapToUserStatus();
+        return maxKey+1;
+    }
+
+    int TUELTable::AddUsrNew(const std::string &s) {
+        // ...
+        // FIXME: Implement correctly!
+        ResetMapToUserStatus();
+        return 0;
+    }
+
+    TUELUserMapStatus TUELTable::GetMapToUserStatus() {
+        if(FMapToUserStatus == map_unknown) {
+            int LV {-1};
+            bool C {true};
+            FMapToUserStatus = map_sortgrow;
+            for(int N{}; N<size(); N++) {
+                int V = GetUserMap(N);
+                if(V < 0) C = false;
+                else if(V > LV) {
+                    LV = V;
+                    if(!C) FMapToUserStatus = map_sorted;
+                } else {
+                    FMapToUserStatus = map_unsorted;
+                    break;
+                }
+            }
+            if(FMapToUserStatus == map_sortgrow && C)
+                FMapToUserStatus = map_sortfull;
+        }
+        return FMapToUserStatus;
+    }
+
+    void TUELTable::RenameEntry(int N, const std::string &s) {
+        uelNames[N-1] = s;
     }
 
     void initialization() {
@@ -2047,7 +2365,7 @@ namespace gxfile {
     void TIntegerMapping::SetMapping(int F, int T) {
         if(F >= Map.size()) {
             Map.resize(F + 1);
-            assert(F+1 < FMAXCAPACITY);
+            assert(F+1 < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
         }
         Map[F] = T;
         if(F > FHighestIndex)
@@ -2066,12 +2384,16 @@ namespace gxfile {
     int &TIntegerMapping::operator[](int index) {
         if(index >= Map.size()) {
             Map.resize(index+1);
-            assert(index+1 < FMAXCAPACITY);
+            assert(index+1 < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
         }
         return Map[index];
     }
 
     int TIntegerMapping::MemoryUsed() {
         return static_cast<int>(Map.size() * sizeof(int));
+    }
+
+    bool TIntegerMapping::empty() const {
+        return Map.empty();
     }
 }

@@ -264,4 +264,25 @@ namespace xpwrap {
     int GDXFile::gdxRenameUEL(const std::string &OldName, const std::string &NewName) {
         return ::gdxRenameUEL(pgx, OldName.c_str(), NewName.c_str());
     }
+
+    int GDXFile::gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) {
+        return ::gdxOpenReadEx(pgx, FileName.c_str(), ReadMode, &ErrNr);
+    }
+
+    int GDXFile::gdxGetUEL(int uelNr, std::string &Uel) {
+        CharBuf uelBuf{};
+        int rc{::gdxGetUEL(pgx, uelNr, uelBuf.get())};
+        Uel = uelBuf;
+        return rc;
+    }
+
+    int GDXFile::gdxDataWriteMapStart(const std::string &SyId,
+                                      const std::string &ExplTxt,
+                                      int Dimen, int Typ, int UserInfo) {
+        return ::gdxDataWriteMapStart(pgx, SyId.c_str(), ExplTxt.c_str(), Dimen, Typ, UserInfo);
+    }
+
+    int GDXFile::gdxDataWriteMap(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) {
+        return ::gdxDataWriteMap(pgx, KeyInt.data(), Values.data());
+    }
 }
