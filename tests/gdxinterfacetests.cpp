@@ -129,6 +129,8 @@ namespace tests::gdxinterfacetests {
         gxdefs::TgdxUELIndex  keys{};
         gxdefs::TgdxValues values{};
         testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
+            int uelCnt, highMap;
+            pgx.gdxUMUelInfo(uelCnt, highMap);
             pgx.gdxUELRegisterMapStart();
             pgx.gdxUELRegisterMap(3, "TheOnlyUEL");
             pgx.gdxUELRegisterDone();
@@ -141,7 +143,7 @@ namespace tests::gdxinterfacetests {
         testReads(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
             std::string uel;
             int uelMap;
-            pgx.gdxUMUelGet(3, uel, uelMap);
+            pgx.gdxUMUelGet(1, uel, uelMap);
             REQUIRE_EQ("TheOnlyUEL", uel);
             int NrRecs;
             pgx.gdxDataReadMapStart(1, NrRecs);
