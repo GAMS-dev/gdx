@@ -156,6 +156,58 @@ namespace tests::gdxinterfacetests {
         });
     }
 
+    TEST_CASE("Test reading/extracting data from gamslib/trnsport example") {
+        const std::array expectedSymbolNames {
+            "a"s, "b"s, "c"s,
+            "cost"s, "d"s, "demand"s,
+            "f"s, "i"s, "j"s, "supply"s,
+            "x"s, "z"s
+        };
+        const std::array expectedUels {
+            "seattle"s, "san-diego"s, "new-york"s, "chicago"s, "topeka"s
+        };
+        const std::string   model = "trnsport"s,
+                            model_fn = model + ".gms"s,
+                            fnpf = "trans_data"s,
+                            gdxfn = fnpf+".gdx"s;
+        std::system(("gamslib "s+model).c_str());
+        REQUIRE(std::filesystem::exists(model_fn));
+        std::system(("gams trnsport gdx="s + fnpf).c_str());
+        std::filesystem::remove(model_fn);
+        REQUIRE(std::filesystem::exists(gdxfn));
+        testReads(gdxfn, gdxfn, [&](gdxinterface::GDXInterface &pgx) {
+            int numSymbols, numUels;
+            pgx.gdxSystemInfo(numSymbols, numUels);
+            std::list<std::string> uelsSeen {}, symbolsSeen {};
+            for(int i{1}; i<=numUels; i++) {
+                std::string uel;
+                int uelMap;
+                REQUIRE(pgx.gdxUMUelGet(i, uel, uelMap));
+                REQUIRE(!uel.empty());
+                uelsSeen.push_back(uel);
+            }
+            REQUIRE_EQ(expectedUels.size(), uelsSeen.size());
+            for(const auto &uel : expectedUels)
+                REQUIRE(std::find(uelsSeen.begin(), uelsSeen.end(), uel) != uelsSeen.end());
+
+            for(int i{1}; i<=numSymbols; i++) {
+                std::string name;
+                int dim, typ;
+                REQUIRE(pgx.gdxSymbolInfo(i, name, dim, typ));
+                REQUIRE(dim >= 0);
+                REQUIRE(typ >= 0);
+                REQUIRE(!name.empty());
+                symbolsSeen.push_back(name);
+            }
+            REQUIRE_EQ(expectedSymbolNames.size(), symbolsSeen.size());
+            for(const auto &expName : expectedSymbolNames)
+                REQUIRE(std::find(symbolsSeen.begin(), symbolsSeen.end(), expName) != symbolsSeen.end());
+
+            // TODO: Read records!!!
+        });
+        std::filesystem::remove(gdxfn);
+    }
+
     TEST_SUITE_END();
 
 }
