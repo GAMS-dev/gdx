@@ -1663,6 +1663,20 @@ namespace gxfile {
         return it == NameList.end() ? std::nullopt : std::make_optional(*it);
     }
 
+    // Summary:
+    //   Add an alias for a set to the symbol table
+    // Arguments:
+    //    AName1: set identifier
+    //    AName2: set identifier
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Description:
+    //    One of the two identifiers has to be a known set, an alias or * (universe);
+    //    the other identifier is used as the new alias for the given set.
+    //    The function gdxSymbolInfoX can be used to retrieve the set or alias
+    //       associated with the identifier; it is returned as the UserInfo parameter.
+    // See Also:
+    //   gdxSymbolSetDomain
     int TGXFileObj::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
         if(!MajorCheckMode("AddAlias", AnyWriteMode)) return false;
         int SyNr1 = Id1 == "*" ? std::numeric_limits<int>::max() : NameList[Id1]->SSyNr;
