@@ -1928,8 +1928,17 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxRenameUEL(const std::string &OldName, const std::string &NewName) {
-        // ...
-        STUBWARN();
+        if(UELTable.empty())
+            return -1;
+        std::string S{utils::trimRight(NewName)};
+        if(!GoodUELString(S))
+            return ERR_BADUELSTR;
+        int N{UELTable.IndexOf(utils::trimRight(OldName))};
+        if(N < 0)
+            return 2;
+        else if(UELTable.IndexOf(S) >= 0)
+            return 3;
+        UELTable.RenameEntry(N, S);
         return 0;
     }
 
@@ -1953,6 +1962,10 @@ namespace gxfile {
     int TUELTable::AddObject(const std::string &id, int mapping) {
         uelNames.push_back(id);
         return static_cast<int>(uelNames.size()) - 1;
+    }
+
+    bool TUELTable::empty() const {
+        return !size();
     }
 
     void initialization() {

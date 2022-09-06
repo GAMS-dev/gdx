@@ -140,6 +140,7 @@ namespace gxfile {
         void clear();
 
         int size() const;
+        bool empty() const;
 
         const std::vector<std::string> &getNames();
 
@@ -193,6 +194,10 @@ namespace gxfile {
                     FMapToUserStatus = map_sortfull;
             }
             return FMapToUserStatus;
+        }
+
+        void RenameEntry(int N, const std::string &s) {
+            uelNames[N-1] = s;
         }
     };
 
