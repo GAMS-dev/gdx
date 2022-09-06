@@ -285,4 +285,20 @@ namespace xpwrap {
     int GDXFile::gdxDataWriteMap(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) {
         return ::gdxDataWriteMap(pgx, KeyInt.data(), Values.data());
     }
+
+    int GDXFile::gdxUELRegisterMapStart() {
+        return ::gdxUELRegisterMapStart(pgx);
+    }
+
+    int GDXFile::gdxUELRegisterMap(int UMap, const std::string &Uel) {
+        return ::gdxUELRegisterMap(pgx, UMap, Uel.c_str());
+    }
+
+    int GDXFile::gdxDataReadMapStart(int SyNr, int &NrRecs) {
+        return ::gdxDataReadMapStart(pgx, SyNr, &NrRecs);
+    }
+
+    int GDXFile::gdxDataReadMap(int RecNr, gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) {
+        return ::gdxDataReadMap(pgx, RecNr, KeyInt.data(), Values.data(), &DimFrst);
+    }
 }

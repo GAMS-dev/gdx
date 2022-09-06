@@ -13,6 +13,8 @@ namespace tests::gdxinterfacetests {
     void testWriteOp(const std::string &fn,
                      const std::function<void(gdxinterface::GDXInterface&)> &cb,
                      bool cleanup = false) {
+        if(fn.empty()) return;
+
         {
             std::string ErrMsg;
             T pgx{ErrMsg};
@@ -29,6 +31,8 @@ namespace tests::gdxinterfacetests {
     void testReadOp(const std::string &fn,
                     const std::function<void(gdxinterface::GDXInterface&)> &cb,
                     bool cleanup = false) {
+        if(fn.empty()) return;
+
         {
             std::string ErrMsg;
             T pgx{ErrMsg};
@@ -53,16 +57,17 @@ namespace tests::gdxinterfacetests {
                             const std::function<void(gdxinterface::GDXInterface&)> &cb) {
         testWriteOp<xpwrap::GDXFile>(filename1, cb);
         testWriteOp<gxfile::TGXFileObj>(filename2, cb);
-        auto maybeMismatches = utils::binaryFileDiff(filename1, filename2);
-        if (maybeMismatches) {
-            for (const auto& mm : *maybeMismatches)
-                std::cout   << "Mismatch at offset " << mm.offset << " with "
-                            << filename1 << " = " << mm.lhs << " and "
-                            << filename2 <<"= " << mm.rhs << "\n";
-            std::cout << std::endl;
+        if(!filename1.empty() && !filename2.empty()) {
+            auto maybeMismatches = utils::binaryFileDiff(filename1, filename2);
+            if (maybeMismatches) {
+                for (const auto &mm: *maybeMismatches)
+                    std::cout << "Mismatch at offset " << mm.offset << " with "
+                              << filename1 << " = " << mm.lhs << " and "
+                              << filename2 << "= " << mm.rhs << "\n";
+                std::cout << std::endl;
+            } else std::cout << "No mismatches found!" << std::endl;
+            REQUIRE_FALSE(maybeMismatches);
         }
-        else std::cout << "No mismatches found!" << std::endl;
-        REQUIRE_FALSE(maybeMismatches);
     }
 
     TEST_CASE("Test adding uels") {
@@ -114,6 +119,37 @@ namespace tests::gdxinterfacetests {
             pgx.gdxDataReadRaw(keys, values, dimFrst);
             pgx.gdxDataReadDone();
             REQUIRE_EQ(1, keys[0]);
+            REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
+        });
+    }
+
+    TEST_CASE("Test write and read record mapped") {
+        std::string f1{"rwrecordmapped_wrapper.gdx"},
+                f2/*{"rwrecordmapped_port.gdx"}*/;
+        gxdefs::TgdxUELIndex  keys{};
+        gxdefs::TgdxValues values{};
+        testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
+            pgx.gdxUELRegisterMapStart();
+            pgx.gdxUELRegisterMap(3, "TheOnlyUEL");
+            pgx.gdxUELRegisterDone();
+            pgx.gdxDataWriteMapStart("mysym", "This is my symbol!", 1, global::gmsspecs::gms_dt_par, 0);
+            keys[0] = 3;
+            values[global::gmsspecs::vallevel] = 3.141;
+            pgx.gdxDataWriteMap(keys, values);
+            pgx.gdxDataWriteDone();
+        });
+        testReads(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
+            std::string uel;
+            int uelMap;
+            pgx.gdxUMUelGet(3, uel, uelMap);
+            REQUIRE_EQ("TheOnlyUEL", uel);
+            int NrRecs;
+            pgx.gdxDataReadMapStart(1, NrRecs);
+            REQUIRE_EQ(1, NrRecs);
+            int dimFrst;
+            pgx.gdxDataReadMap(1, keys, values, dimFrst);
+            pgx.gdxDataReadDone();
+            REQUIRE_EQ(3, keys[0]);
             REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
         });
     }

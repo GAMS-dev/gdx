@@ -106,6 +106,14 @@ namespace xpwrap {
                                  int UserInfo) override;
 
         int gdxDataWriteMap(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) override;
+
+        int gdxUELRegisterMapStart() override;
+
+        int gdxUELRegisterMap(int UMap, const std::string &Uel) override;
+
+        int gdxDataReadMapStart(int SyNr, int &NrRecs) override;
+
+        int gdxDataReadMap(int RecNr, gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) override;
     };
 
 }

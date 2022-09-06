@@ -2278,6 +2278,184 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Start registering unique elements in mapped mode
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxUELRegisterMap, gdxUELRegisterDone
+    // Description:
+    int TGXFileObj::gdxUELRegisterMapStart() {
+        TgxModeSet AllowedModes {fr_init, fw_init};
+        if(!MajorCheckMode("UELRegisterMapStart", AllowedModes)) return false;
+        fmode_AftReg = fmode == fw_init ? fw_init : fr_init;
+        fmode = f_map_elem;
+        return true;
+    }
+
+    // Brief:
+    //   Register an unique elements in mapped mode
+    // Arguments:
+    //   UMap: User index number to be assigned to the unique element
+    //   Uel: String for unique element
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxUELRegisterMapStart, gdxUELRegisterDone
+    // Description:
+    //  Register a unique element in mapped space; UMap is the user assigned
+    //  index for the element. Registering an element a second time is not considered
+    //  an error as long as the same UMap is used. Assigning different elements
+    //  with the same UMap value is an error.
+    //   A unique element
+    //   must follow the GAMS rules when it contains quote characters.
+    int TGXFileObj::gdxUELRegisterMap(int UMap, const std::string &Uel) {
+        TgxModeSet AllowedModes {f_map_elem};
+        std::string SV {utils::trimRight(Uel)};
+        if(TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) {
+            if(!CheckMode("UELRegisterMap", AllowedModes)) return false;
+            std::cout << "   Enter UEL: " << SV << " with number " << UMap << "\n";
+        }
+        if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR) ||
+                ErrorCondition(UELTable.AddUsrIndxNew(SV, UMap) >= 0, ERR_UELCONFLICT)) return false;
+        return true;
+    }
+
+    // Brief:
+    //   Initialize the reading of a symbol in mapped mode
+    // Arguments:
+    //   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
+    //   NrRecs: The number of records available for reading
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxDataReadMap, gdxDataReadRawStart, gdxDataReadStrStart, gdxDataReadDone
+    int TGXFileObj::gdxDataReadMapStart(int SyNr, int &NrRecs) {
+        TgdxUELIndex XDomains;
+        std::fill_n(XDomains.begin(), MaxDim, DOMC_STRICT);
+        NrRecs = PrepareSymbolRead("DataReadMapStart", SyNr, XDomains, fr_map_data);
+        return NrRecs >= 0;
+    }
+
+    // Brief:
+    //   Read the next record in mapped mode
+    // Arguments:
+    //   RecNr: Ignored (left in for backward compatibility)
+    //   KeyInt: The index of the record
+    //   Values: The data of the record
+    //   DimFrst: The first index position in KeyInt that changed
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxDataReadMapStart, gdxDataReadFilteredStart, gdxDataReadDone
+    // Description:
+    int TGXFileObj::gdxDataReadMap(int RecNr, TgdxUELIndex &KeyInt, TgdxValues &Values, int &DimFrst) {
+        TgxModeSet AllowedModes{fr_map_data, fr_mapr_data};
+        if((TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadMap", AllowedModes)) return false;
+        if(CurSyPtr && CurSyPtr->SScalarFrst) {
+            CurSyPtr->SScalarFrst = false;
+            GetDefaultRecord(Values);
+            DimFrst = 0;
+            return true;
+        }
+        if(fmode = fr_map_data) {
+            DimFrst = 0;
+            if(!ReadPtr) return false;
+            auto first = (*SortList->begin());
+            KeyInt = first.first;
+            Values = first.second;
+            // checking mapped values
+            for(int D{}; D<FCurrentDim; D++) {
+                if(KeyInt[D] != PrevElem[D]) {
+                    PrevElem[D] = KeyInt[D];
+                    if(!DimFrst) DimFrst = D;
+                }
+            }
+            return true;
+        }
+
+        assert(fmode == fr_mapr_data && "fr_mapr_data expected");
+
+        bool AddNew{}, AddError{}, BadError{};
+        int FIDim {FCurrentDim};
+
+    again:
+        if(!DoRead(Values, DimFrst)) return false;
+        if(FIDim < DimFrst) DimFrst = FIDim;
+        FIDim = FCurrentDim;
+        if(DimFrst > 0) {
+            for(int D{DimFrst}; D<FCurrentDim; D++) {
+                const auto &obj = DomainList[D];
+                if(LastElem[D] < 0) {
+                    ReportError(ERR_BADELEMENTINDEX);
+                    BadError = true;
+                    break;
+                }
+                switch(obj.DAction) {
+                    case dm_unmapped:
+                        break;
+                    case dm_filter:
+                        break;
+                }
+            }
+        }
+
+        if(BadError) return false;
+        else if(AddError) {
+            for(int D{}; D<FCurrentDim; D++) {
+                if(LastElem[D] < 0) {
+                    ReportError(ERR_BADELEMENTINDEX);
+                    return false;
+                }
+                int V;
+                switch(DomainList[D].DAction) {
+                    case dm_filter:
+                        V = UELTable.GetUserMap(LastElem[D]);
+                        if(!DomainList[D].DFilter->InFilter(V))
+                            LastElem[D] = -LastElem[D];
+                        break;
+                    case dm_strict:
+                        V = UELTable.GetUserMap(LastElem[D]);
+                        if(V < 0)
+                            LastElem[D] = -LastElem[D];
+                        break;
+                    default:
+                        break;
+                }
+            }
+            AddToErrorListDomErrs(LastElem, Values); // unmapped
+            for(int D{}; D<FCurrentDim; D++)
+                if(LastElem[D] < 0) LastElem[D] = -LastElem[D];
+            AddError = false;
+            goto again;
+        }
+
+        if(AddNew) {
+            for(int D{}; D<FCurrentDim; D++) {
+                int EN = KeyInt[D];
+                if(EN < 0) {
+                    int V = UELTable.NewUsrUel(-EN);
+                    KeyInt[D] = V;
+                    NrMappedAdded++;
+                    // look for same mapping to be issued
+                    for(int D2{D+1}; D2<FCurrentDim; D2++)
+                        if(KeyInt[D2] == EN) KeyInt[D2] = V;
+                }
+            }
+        }
+
+        // with all filtered we lost track of AFDIM
+        DimFrst = 0;
+        for(int D{}; D<FCurrentDim; D++) {
+            if(PrevElem[D] != KeyInt[D]) {
+                PrevElem[D] = KeyInt[D];
+                if(!DimFrst) DimFrst = D;
+            }
+        }
+
+        return true;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();
@@ -2354,6 +2532,15 @@ namespace gxfile {
 
     void TUELTable::RenameEntry(int N, const std::string &s) {
         uelNames[N-1] = s;
+    }
+
+    int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
+        int EN {AddObject(s, -1)};
+        std::string res {uelNames[EN]};
+        STUBWARN();
+        // ...
+        ResetMapToUserStatus();
+        return -1;
     }
 
     void initialization() {

@@ -145,6 +145,7 @@ namespace gxfile {
 
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
 
+    // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     class TUELTable {
         std::vector<std::string> uelNames;
         // ...
@@ -173,6 +174,8 @@ namespace gxfile {
         int NewUsrUel(int EN);
 
         int AddUsrNew(const std::string& s);
+
+        int AddUsrIndxNew(const std::string &s, int UelNr);
 
         TUELUserMapStatus GetMapToUserStatus();
 
@@ -292,6 +295,10 @@ namespace gxfile {
         int gdxDataWriteStr(const gxdefs::TgdxStrIndex &KeyStr, const gxdefs::TgdxValues &Values) override;
         int gdxDataWriteDone() override;
 
+        int gdxUELRegisterMapStart() override;
+
+        int gdxUELRegisterMap(int UMap, const std::string &Uel) override;
+
         int gdxClose() override;
 
         int gdxResetSpecialValues();
@@ -381,6 +388,10 @@ namespace gxfile {
                                  int UserInfo) override;
 
         int gdxDataWriteMap(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) override;
+
+        int gdxDataReadMapStart(int SyNr, int &NrRecs) override;
+
+        int gdxDataReadMap(int RecNr, gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) override;
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from

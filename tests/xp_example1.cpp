@@ -137,7 +137,7 @@ namespace tests::xp_example1 {
         std::array filesToDelete{
             "demanddata.gdx"s, "result.gdx"s, "trnsport.gms"s, "lf"s
         };
-        for (const auto fn : filesToDelete)
+        for (const auto& fn : filesToDelete)
             std::filesystem::remove(fn);
     }
 
