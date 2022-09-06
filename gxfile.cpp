@@ -2045,8 +2045,10 @@ namespace gxfile {
     }
 
     void TIntegerMapping::SetMapping(int F, int T) {
-        if(F >= Map.size())
-            Map.resize(F+1);
+        if(F >= Map.size()) {
+            Map.resize(F + 1);
+            assert(F+1 < FMAXCAPACITY);
+        }
         Map[F] = T;
         if(F > FHighestIndex)
             FHighestIndex = F;
@@ -2062,7 +2064,10 @@ namespace gxfile {
     }
 
     int &TIntegerMapping::operator[](int index) {
-        if(index >= Map.size()) Map.resize(index+1);
+        if(index >= Map.size()) {
+            Map.resize(index+1);
+            assert(index+1 < FMAXCAPACITY);
+        }
         return Map[index];
     }
 
