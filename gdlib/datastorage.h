@@ -37,11 +37,19 @@ namespace gdlib::datastorage {
             data.clear();
         }
 
-        T &operator[](const global::gmsspecs::TIndex &index) {
-            for(int i{}; i<data.size(); i++)
-                if(data[i].first == index) return data[i].second;
-            return data.front().second;
-        }
+        /*T &operator[](const global::gmsspecs::TIndex &index) {
+            for(int i{}; i<data.size(); i++) {
+                bool match{true};
+                for (int d{}; d < FDimension; d++) {
+                    if (data[i].first[d] != index[d]) {
+                        match = false;
+                        break;
+                    }
+                }
+                if(match) return data[i].first;
+            }
+            data.emplace_back(std::make_pair());
+        }*/
 
         void Clear() {
             data.clear();
@@ -49,14 +57,14 @@ namespace gdlib::datastorage {
             FMinKey = std::numeric_limits<int>::max();
         }
 
-        T &AddItem(const std::vector<int> &AKey, const T &AData) {
-            data.push_back(AKey, AData);
+        T &AddItem(const global::gmsspecs::TIndex &AKey, const T &AData) {
+            data.push_back(std::make_pair(AKey, AData));
             for(int D{}; D<FDimension; D++) {
                 int Key {AKey[D]};
                 if(Key > FMaxKey) FMaxKey = Key;
                 if(Key < FMinKey) FMinKey = Key;
             }
-            return data.back();
+            return data.back().second;
         }
 
         void Sort(const std::vector<int> &AMap) {

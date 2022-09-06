@@ -338,6 +338,7 @@ namespace gxfile {
         if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
         /*for (int D{}; D < FCurrentDim; D++)
             LastStrElem[D] = (char)0xFF;*/
+        SortList = std::make_unique<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
         fmode = fw_dom_str;
         return true;
     }
@@ -381,7 +382,7 @@ namespace gxfile {
                 if(KD > MaxElem[D]) MaxElem[D] = KD;
             }
         }
-        (*SortList)[LastElem] = Values;
+        SortList->AddItem(LastElem, Values);
         return true;
     }
 
@@ -579,7 +580,7 @@ namespace gxfile {
 
         CurSyPtr = nullptr;
         ErrorList.clear();
-        SortList->clear();
+        if(SortList) SortList->clear();
 
         if(!MajorCheckMode(Caller, AllowedModes)) return false;
 
@@ -695,7 +696,7 @@ namespace gxfile {
         TIntegerMapping ExpndList;
         ErrorList.clear();
         CurSyPtr = nullptr;
-        SortList->clear();
+        if(SortList) SortList->clear();
 
         const TgxModeSet AllowedModes{ fr_init };
 
@@ -878,7 +879,7 @@ namespace gxfile {
                                 }
                                 AddNew = false;
                             }
-                            (*SortList)[AElements] = Avals;
+                            SortList->AddItem(AElements, Avals);
                         }
                     }
                     // FIXME: SortList->StartRead();
@@ -1390,7 +1391,7 @@ namespace gxfile {
 
     int TGXFileObj::gdxDataReadDone() {
         TgxModeSet AllowedMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data, fr_str_data,fr_slice};
-        SortList->clear();
+        if(SortList) SortList->clear();
         CurSyPtr = nullptr;
         if(!MajorCheckMode("DataReadDone", AllowedMode)) {
             fmode = fr_init;
@@ -2130,6 +2131,13 @@ namespace gxfile {
         return FCurrentDim;
     }
 
+    // Brief:
+    //   Rename UEL OldName to NewName
+    // Arguments:
+    //   OldName: Name of an existing UEL
+    //   NewName: New name for the UEL
+    // Returns:
+    //   Zero if the renaming was possible; non-zero is an error indicator
     int TGXFileObj::gdxRenameUEL(const std::string &OldName, const std::string &NewName) {
         if(UELTable.empty())
             return -1;
