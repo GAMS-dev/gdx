@@ -80,5 +80,18 @@ namespace tests::gxfiletests {
         std::filesystem::remove(fn);
     }
 
+    TEST_CASE("Test integer mapping") {
+        TIntegerMapping mapping;
+        REQUIRE_FALSE(mapping.GetHighestIndex());
+        mapping[3] = 5;
+        REQUIRE_EQ(5, mapping[3]);
+        const int memused = mapping.MemoryUsed();
+        REQUIRE(memused > 0);
+        mapping.clear();
+        REQUIRE(mapping.MemoryUsed() < memused);
+        mapping.SetMapping(3, 5);
+        REQUIRE_EQ(5, mapping[3]);
+    }
+
     TEST_SUITE_END();
 }

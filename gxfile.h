@@ -1,5 +1,8 @@
 #pragma once
 
+// Description:
+//  This unit defines the GDX Object as a C++ object.
+
 #include "gdxinterface.h"
 #include <memory>
 #include <map>
@@ -69,10 +72,11 @@ namespace gxfile {
         bool SSetText;
         std::string SExplTxt;
         bool SIsCompressed;
-        std::vector<int> SDomSymbols, SDomStrings;
+        std::vector<int> SDomSymbols, // real domain info
+                         SDomStrings; //relaxed domain info
         std::vector<std::string> SCommentsList;
-        bool SScalarFrst;
-        std::vector<bool> SSetBitMap;
+        bool SScalarFrst; // not stored
+        std::vector<bool> SSetBitMap; // for 1-dim sets only
     };
     using PgdxSymbRecord = TgdxSymbRecord*;
 
@@ -123,8 +127,18 @@ namespace gxfile {
         sz_integer
     };
 
-    class TIntegerMapping : public std::map<int, int> {
-        // ...
+    class TIntegerMapping {
+        // FMAXCAPACITY == number of index positions required to store [0..high(integer)]
+        int64_t FMAXCAPACITY {std::numeric_limits<int>::max() + static_cast<int64_t>(1)};
+        int FHighestIndex{};
+        std::vector<int> Map{};
+    public:
+        int GetHighestIndex() const;
+        void SetMapping(int F, int T);
+        int GetMapping(int F) const;
+        int MemoryUsed();
+        void clear();
+        int &operator[](int index);
     };
 
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
@@ -135,7 +149,7 @@ namespace gxfile {
         TUELUserMapStatus FMapToUserStatus;
 
     public:
-        std::map<int, int> UsrUel2Ent;
+        std::map<int, int> UsrUel2Ent; // from user uelnr to table entry
 
         void clear();
 
@@ -219,6 +233,8 @@ namespace gxfile {
     using TIntlValueMapDbl = std::array<double, 11>;
     using TIntlValueMapI64 = std::array<int64_t, 11>;
 
+    // Description:
+    //    Class for reading and writing gdx files
     class TGXFileObj : public gdxinterface::GDXInterface {
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
         TgxFileMode fmode {f_not_open}, fmode_AftReg {f_not_open};
@@ -259,14 +275,15 @@ namespace gxfile {
         int SliceSyNr{};
         gxdefs::TgdxStrIndex SliceElems;
         void *ReadPtr{};
-        bool DoUncompress{}, CompressOut{};
-        int DeltaForWrite{};
-        int DeltaForRead{};
-        double Zvalacr{};
+        bool    DoUncompress{}, // when reading
+                CompressOut{}; // when writing
+        int DeltaForWrite{}; // delta for last dimension or first changed dimension
+        int DeltaForRead{}; // first position indicating change
+        double Zvalacr{}; // tricky
         TAcronymList AcronymList;
         std::array<std::vector<bool>, global::gmsspecs::MaxDim> WrBitMaps;
         bool ReadUniverse{};
-        int UniverseNr{}, UelCntOrig{};
+        int UniverseNr{}, UelCntOrig{}; // original uel count when we open the file
         int AutoConvert{1};
         int NextAutoAcronym{};
         bool AppendActive{};
@@ -392,6 +409,6 @@ namespace gxfile {
         int gdxRenameUEL(const std::string &OldName, const std::string &NewName) override;
     };
 
-    extern std::string DLLLoadPath;
+    extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from
 
 }

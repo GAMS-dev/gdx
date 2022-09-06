@@ -20,8 +20,16 @@ using namespace gdlib::gmsglob;
 
 namespace gxfile {
 
-    const int   VERSION = 7,
-                gdxHeaderNr = 123;
+    //version = 5 has 32 bit offsets and no compression
+    //version = 6 introduced compression
+    //version 7 introduces:
+    //      acronyms
+    //      longer symbol names
+    //      aliases
+    //later without bumping version
+    //      relaxed domains
+    const int   VERSION = 7, //--file version
+                gdxHeaderNr = 123; //--patterns to recognize
     const std::string gdxHeaderId = "GAMSGDX";
 
     const int   MARK_BOI = 19510624;
@@ -161,6 +169,9 @@ namespace gxfile {
         return res;
     }
 
+    // If both single and double quotes appear in the string, replace
+    // each quote by the first quote seen
+    // Replace control character with a question mark
     static std::string MakeGoodExplText(const std::string &s) {
         char q {'\0'};
         std::string res;
@@ -198,6 +209,7 @@ namespace gxfile {
         int64_t i64;
     };
 
+    // for double input x, return the bits as i64
     int64_t dblToI64(double x) {
         TI64Rec i64Rec {x};
         return i64Rec.i64;
@@ -212,6 +224,7 @@ namespace gxfile {
     int GetEnvCompressFlag() {
         std::string s{ rtl::sysutils_p3::QueryEnvironmentVariable(strGDXCOMPRESS) };
         s = utils::uppercase(s.substr(0, 1));
+        // Note: the default is disabled
         return s.empty() || s == "N" || s == "0" ? 0 : 1;
     }
 
@@ -859,6 +872,9 @@ namespace gxfile {
         }
     }
 
+    /* we have to make these mask "constants" vars since we cannot
+    * have large constants on input
+    */
     bool HAVE_MEM;
     int64_t signMask, expoMask, mantMask;
 
@@ -873,6 +889,17 @@ namespace gxfile {
         "NaN"s, "negative infinity"s, "positive infinity"s, "finite"s
     };
 
+    /* Assume the IEEE double looks like
+            * s eeeeeeeeeee mmm....mmm
+            * ^                        signbit
+    *   ^^^^^^^^^^^            11 bits in the exponent
+    *               ^^^^^^^^^^ 52 bits in the mantissa
+    * Possible values include:
+    *  1. +/-    INF: exp=all ones, mant=0
+                                         *  2.        Nan: exp=all ones, mant nonzero
+    *  3.  otherwise: finite
+    */
+    // for double input x, return the bits (in i) and the class of x
     TDblClass dblInfo(double x, int64_t &i) {
         TI64Rec i64Rec{};
         i64Rec.x = x;
@@ -2012,4 +2039,34 @@ namespace gxfile {
     }
 
     UNIT_INIT_FINI();
+
+    int TIntegerMapping::GetHighestIndex() const {
+        return FHighestIndex;
+    }
+
+    void TIntegerMapping::SetMapping(int F, int T) {
+        if(F >= Map.size())
+            Map.resize(F+1);
+        Map[F] = T;
+        if(F > FHighestIndex)
+            FHighestIndex = F;
+    }
+
+    int TIntegerMapping::GetMapping(int F) const {
+        return F >= 0 && F < Map.size() ? Map[F] : -1;
+    }
+
+    void TIntegerMapping::clear() {
+        Map.clear();
+        FHighestIndex = 0;
+    }
+
+    int &TIntegerMapping::operator[](int index) {
+        if(index >= Map.size()) Map.resize(index+1);
+        return Map[index];
+    }
+
+    int TIntegerMapping::MemoryUsed() {
+        return static_cast<int>(Map.size() * sizeof(int));
+    }
 }
