@@ -2117,9 +2117,7 @@ namespace gxfile {
     int TGXFileObj::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
         if (!UELTable.empty() && UelNr >= 1 && UelNr <= UELTable.size()) {
             Uel = UELTable[UelNr-1];
-            //UelMap = UELTable.GetUserMap
-            // FIXME: Step through interactive debugger in order to figure out how UELTable is actually used in Delphi
-            UelMap = UELTable.UsrUel2Ent.empty() ? -1 : 0;
+            UelMap = UELTable.UsrUel2Ent.empty() ? -1 : UELTable.UsrUel2Ent.GetReverseMapping(UelNr);
             return true;
         }
         else {
@@ -2265,7 +2263,7 @@ namespace gxfile {
             }
         }
         for(int D{}; D<FCurrentDim; D++) {
-            int KD = UELTable.GetUserMap(KeyInt[D]);
+            int KD = UELTable.UsrUel2Ent[KeyInt[D]];
             if(KD < 0) {
                 ReportError(ERR_BADELEMENTINDEX);
                 return false;
@@ -2481,7 +2479,7 @@ namespace gxfile {
         for(int D{}; D<FCurrentDim; D++) {
             if(PrevElem[D] != KeyInt[D]) {
                 PrevElem[D] = KeyInt[D];
-                if(!DimFrst) DimFrst = D;
+                if(!DimFrst) DimFrst = D+1;
             }
         }
 
@@ -2506,9 +2504,13 @@ namespace gxfile {
     }
 
     int TUELTable::AddObject(const std::string &id, int mapping) {
-        uelNames.push_back(id);
-        nameToNum[id] = mapping;
-        return static_cast<int>(uelNames.size());
+        int ix = utils::indexOf(uelNames, id);
+        if (ix == -1) {
+            uelNames.push_back(id);
+            nameToNum[id] = mapping;
+            return static_cast<int>(uelNames.size());
+        }
+        return ix+1;
     }
 
     bool TUELTable::empty() const {
@@ -2520,7 +2522,7 @@ namespace gxfile {
     }
 
     int TUELTable::GetUserMap(int i) const {
-        return UsrUel2Ent.GetMapping(i);
+        return UsrUel2Ent.GetReverseMapping(i);
     }
 
     void TUELTable::ResetMapToUserStatus() {
@@ -2663,5 +2665,13 @@ namespace gxfile {
 
     bool TIntegerMapping::empty() const {
         return Map.empty();
+    }
+
+    int TIntegerMapping::GetReverseMapping(int T) const {
+        for (int i{}; i < Map.size(); i++) {
+            if (Map[i] == T)
+                return i;
+        }
+        return -1;
     }
 }

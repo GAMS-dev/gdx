@@ -123,6 +123,7 @@ namespace tests::gdxinterfacetests {
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
             REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE_EQ(-1, uelMap);
             int NrRecs;
             REQUIRE(pgx.gdxDataReadRawStart(1, NrRecs));
             REQUIRE_EQ(1, NrRecs);
@@ -142,7 +143,7 @@ namespace tests::gdxinterfacetests {
         gxdefs::TgdxValues values{};
         testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
             REQUIRE(pgx.gdxDataWriteStrStart("mysym", "This is my symbol!", 1, global::gmsspecs::gms_dt_par, 0));
-            keyNames[0] = "TheOnlyUel";
+            keyNames[0] = "TheOnlyUEL";
             values[global::gmsspecs::vallevel] = 3.141;
             REQUIRE(pgx.gdxDataWriteStr(keyNames, values));
             REQUIRE(pgx.gdxDataWriteDone());
@@ -154,7 +155,7 @@ namespace tests::gdxinterfacetests {
             int dimFrst;
             REQUIRE(pgx.gdxDataReadStr(keyNames, values, dimFrst));
             REQUIRE(pgx.gdxDataReadDone());
-            REQUIRE_EQ("TheOnlyUel", keyNames[0]);
+            REQUIRE_EQ("TheOnlyUEL", keyNames[0]);
             REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
         });
         for (const auto& fn : {f1, f2})
@@ -162,7 +163,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test write and read record mapped") {
-        std::string f1{"rwrecordmapped_wrapper.gdx"}, f2{"rwrecordmapped_port.gdx"};
+        std::string f1{ "rwrecordmapped_wrapper.gdx" }, f2 {"rwrecordmapped_port.gdx"};
         gxdefs::TgdxUELIndex  keys{};
         gxdefs::TgdxValues values{};
         testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
