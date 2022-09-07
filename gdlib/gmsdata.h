@@ -26,37 +26,13 @@ namespace gdlib::gmsdata {
         std::map<IndexKeys, ValueFields> mapping;
         std::vector<IndexKeys> keyset;
     public:
-		void GetRecord(int N, IndexKeys & Inx, ValueFields & Vals) {
-            Inx = keyset[N];
-            Vals = mapping[Inx];
-		}
-
-        ValueFields &operator[](const IndexKeys &Key) {
-            if (std::find(keyset.begin(), keyset.end(), Key) == keyset.end())
-                keyset.push_back(Key);
-            return mapping[Key];
-        }
-
-        void clear() {
-            keyset.clear();
-            mapping.clear();
-        }
-
-        int size() const {
-            return (int)keyset.size();
-        }
-
-        std::map<IndexKeys, ValueFields>::iterator begin() {
-            return mapping.begin();
-        }
-
-        std::map<IndexKeys, ValueFields>::iterator end() {
-            return mapping.end();
-        }
-
-        bool empty() const {
-            return keyset.empty();
-        }
+		void GetRecord(int N, IndexKeys & Inx, ValueFields & Vals);
+        ValueFields &operator[](const IndexKeys &Key);
+        void clear();
+        int size() const;
+        std::map<IndexKeys, ValueFields>::iterator begin();
+        std::map<IndexKeys, ValueFields>::iterator end();
+        bool empty() const;
 	};
 
 }
