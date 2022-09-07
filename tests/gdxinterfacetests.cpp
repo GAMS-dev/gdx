@@ -71,7 +71,12 @@ namespace tests::gdxinterfacetests {
                     }
                 }
                 std::cout << std::endl;
-                system(("python gdxtoyaml/main.py "s + filename1 + " "s + filename2).c_str());
+#ifdef __APPLE__
+                const std::string pythonInterpreter {"python3"};
+#else
+                const std::string pythonInterpreter {"python"};
+#endif
+                system((pythonInterpreter + " gdxtoyaml/main.py "s + filename1 + " "s + filename2).c_str());
             } else std::cout << "No mismatches found between " << filename1 << " and " << filename2 << std::endl;
             REQUIRE_FALSE(maybeMismatches);
         }
@@ -100,8 +105,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test write and read record raw") {
-        std::string f1{"rwrecordraw_wrapper.gdx"},
-                    f2{"rwrecordraw_port.gdx"};
+        std::string f1{"rwrecordraw_wrapper.gdx"}, f2{"rwrecordraw_port.gdx"};
         gxdefs::TgdxUELIndex keys{};
         gxdefs::TgdxValues values{};
         testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
@@ -132,9 +136,33 @@ namespace tests::gdxinterfacetests {
             std::filesystem::remove(fn);
     }
 
+    TEST_CASE("Test write and read record in string mode") {
+        std::string f1{"rwrecordstr_wrapper.gdx"}, f2{"rwrecordstr_port.gdx"};
+        gxdefs::TgdxStrIndex keyNames{};
+        gxdefs::TgdxValues values{};
+        testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
+            REQUIRE(pgx.gdxDataWriteStrStart("mysym", "This is my symbol!", 1, global::gmsspecs::gms_dt_par, 0));
+            keyNames[0] = "TheOnlyUel";
+            values[global::gmsspecs::vallevel] = 3.141;
+            REQUIRE(pgx.gdxDataWriteStr(keyNames, values));
+            REQUIRE(pgx.gdxDataWriteDone());
+        });
+        testReads(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
+            int NrRecs;
+            REQUIRE(pgx.gdxDataReadStrStart(1, NrRecs));
+            REQUIRE_EQ(1, NrRecs);
+            int dimFrst;
+            REQUIRE(pgx.gdxDataReadStr(keyNames, values, dimFrst));
+            REQUIRE(pgx.gdxDataReadDone());
+            REQUIRE_EQ("TheOnlyUel", keyNames[0]);
+            REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
+        });
+        for (const auto& fn : {f1, f2})
+            std::filesystem::remove(fn);
+    }
+
     TEST_CASE("Test write and read record mapped") {
-        std::string f1{"rwrecordmapped_wrapper.gdx"},
-                f2{"rwrecordmapped_port.gdx"};
+        std::string f1{"rwrecordmapped_wrapper.gdx"}, f2{"rwrecordmapped_port.gdx"};
         gxdefs::TgdxUELIndex  keys{};
         gxdefs::TgdxValues values{};
         testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
