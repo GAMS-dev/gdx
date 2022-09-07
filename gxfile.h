@@ -148,6 +148,7 @@ namespace gxfile {
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     class TUELTable {
         std::vector<std::string> uelNames;
+        std::map<std::string, int> nameToNum;
         // ...
         TUELUserMapStatus FMapToUserStatus;
 

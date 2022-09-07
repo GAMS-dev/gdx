@@ -23,7 +23,7 @@ namespace gdlib::datastorage {
 
         ~TLinkedData() = default;
 
-        int size() const { return data.size(); }
+        int size() const { return (int)data.size(); }
 
         auto begin() {
             return data.begin();

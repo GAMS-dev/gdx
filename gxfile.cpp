@@ -2130,7 +2130,7 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxUMUelInfo(int &UelCnt, int &HighMap) {
-        if (UELTable.empty()) {
+        if (!FFile) { // AS: Use FFile != nullptr as proxy for checking open has been called before
             UelCnt = HighMap = 0;
             return false;
         }
@@ -2317,7 +2317,7 @@ namespace gxfile {
             std::cout << "   Enter UEL: " << SV << " with number " << UMap << "\n";
         }
         if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR) ||
-                ErrorCondition(UELTable.AddUsrIndxNew(SV, UMap) >= 0, ERR_UELCONFLICT)) return false;
+            ErrorCondition(UELTable.AddUsrIndxNew(SV, UMap) >= 0, ERR_UELCONFLICT)) return false;
         return true;
     }
 
@@ -2332,7 +2332,7 @@ namespace gxfile {
     //   gdxDataReadMap, gdxDataReadRawStart, gdxDataReadStrStart, gdxDataReadDone
     int TGXFileObj::gdxDataReadMapStart(int SyNr, int &NrRecs) {
         TgdxUELIndex XDomains;
-        std::fill_n(XDomains.begin(), MaxDim, DOMC_STRICT);
+        std::fill(XDomains.begin(), XDomains.end(), DOMC_STRICT);
         NrRecs = PrepareSymbolRead("DataReadMapStart", SyNr, XDomains, fr_map_data);
         return NrRecs >= 0;
     }
@@ -2507,7 +2507,8 @@ namespace gxfile {
 
     int TUELTable::AddObject(const std::string &id, int mapping) {
         uelNames.push_back(id);
-        return static_cast<int>(uelNames.size()) - 1;
+        nameToNum[id] = mapping;
+        return static_cast<int>(uelNames.size());
     }
 
     bool TUELTable::empty() const {
@@ -2568,11 +2569,16 @@ namespace gxfile {
 
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
         int EN {AddObject(s, -1)};
-        std::string res {uelNames[EN]};
-        STUBWARN();
-        // ...
+        int res {nameToNum[uelNames[EN-1]]};
+        if (res < 0) {
+            res = UelNr;
+            nameToNum[s] = res;
+            UsrUel2Ent[res] = EN;
+        }
+        else if (res != UelNr)
+            res = -1;
         ResetMapToUserStatus();
-        return -1;
+        return res;
     }
 
     void initialization() {
