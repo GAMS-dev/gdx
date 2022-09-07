@@ -408,7 +408,7 @@ namespace utils {
     std::optional<std::list<BinaryDiffMismatch>> binaryFileDiff(const std::string& filename1, const std::string& filename2, int countLimit)
     {
         if (countLimit == -1) countLimit = std::numeric_limits<int>::max();
-        std::ifstream f1{ filename1, std::ios::binary }, f2 { filename1, std::ios::binary };
+        std::ifstream f1{ filename1, std::ios::binary }, f2 { filename2, std::ios::binary };
         std::list<BinaryDiffMismatch> mismatches{};
         char c1, c2;
         uint64_t offset{};

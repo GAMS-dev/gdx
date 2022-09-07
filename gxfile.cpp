@@ -1808,8 +1808,8 @@ namespace gxfile {
                                          int UserInfo) {
         if(!PrepareSymbolWrite("DataWriteRawStart", SyId, ExplTxt, Dimen, Typ, UserInfo)) return false;
         // we overwrite the initialization
-        std::fill_n(MinElem.begin(), FCurrentDim-1, 0); // no assumptions about the range for a uel
-        std::fill_n(MaxElem.begin(), FCurrentDim-1, std::numeric_limits<int>::max());
+        std::fill_n(MinElem.begin(), FCurrentDim, 0); // no assumptions about the range for a uel
+        std::fill_n(MaxElem.begin(), FCurrentDim, std::numeric_limits<int>::max());
         InitDoWrite(-1);
         fmode = fw_dom_raw;
         return true;

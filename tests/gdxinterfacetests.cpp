@@ -60,12 +60,19 @@ namespace tests::gdxinterfacetests {
         if(!filename1.empty() && !filename2.empty()) {
             auto maybeMismatches = utils::binaryFileDiff(filename1, filename2);
             if (maybeMismatches) {
-                for (const auto &mm: *maybeMismatches)
-                    std::cout << "Mismatch at offset " << mm.offset << " with "
-                              << filename1 << " = " << mm.lhs << " and "
-                              << filename2 << "= " << mm.rhs << "\n";
+                std::cout << "Found " << maybeMismatches->size() << " mismatches between " << filename1 << " and " << filename2 << "\n";
+                const int truncCnt{ 10 };
+                int cnt{};
+                for (const auto& mm : *maybeMismatches) {
+                    std::cout << "#" << mm.offset << ": " << (int)mm.lhs << " != " << (int)mm.rhs << "\n";
+                    if (cnt++ >= truncCnt) {
+                        std::cout << "Trunacting results after " << truncCnt << " entries." << "\n";
+                        break;
+                    }
+                }
                 std::cout << std::endl;
-            } else std::cout << "No mismatches found!" << std::endl;
+                system(("python gdxtoyaml/main.py "s + filename1 + " "s + filename2).c_str());
+            } else std::cout << "No mismatches found between " << filename1 << " and " << filename2 << std::endl;
             REQUIRE_FALSE(maybeMismatches);
         }
     }
@@ -121,6 +128,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(1, keys[0]);
             REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
         });
+        for (const auto& fn : {f1, f2})
+            std::filesystem::remove(fn);
     }
 
     TEST_CASE("Test write and read record mapped") {
@@ -140,7 +149,7 @@ namespace tests::gdxinterfacetests {
             pgx.gdxDataWriteMap(keys, values);
             pgx.gdxDataWriteDone();
         });
-        testReads(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
+        testReads(f1, f2, [&](gdxinterface::GDXInterface& pgx) {
             std::string uel;
             int uelMap;
             pgx.gdxUMUelGet(1, uel, uelMap);
@@ -154,6 +163,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(3, keys[0]);
             REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
         });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
     }
 
     TEST_CASE("Test reading/extracting data from gamslib/trnsport example") {
