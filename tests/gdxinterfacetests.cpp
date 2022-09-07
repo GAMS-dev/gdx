@@ -178,6 +178,8 @@ namespace tests::gdxinterfacetests {
             values[global::gmsspecs::vallevel] = 3.141;
             REQUIRE(pgx.gdxDataWriteMap(keys, values));
             REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE_EQ(0, pgx.gdxErrorCount());
+            REQUIRE_EQ(0, pgx.gdxDataErrorCount());
         });
         testReads(f1, f2, [&](gdxinterface::GDXInterface& pgx) {
             std::string uel;
