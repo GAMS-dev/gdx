@@ -125,7 +125,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test write and read record mapped") {
         std::string f1{"rwrecordmapped_wrapper.gdx"},
-                f2/*{"rwrecordmapped_port.gdx"}*/;
+                f2{"rwrecordmapped_port.gdx"};
         gxdefs::TgdxUELIndex  keys{};
         gxdefs::TgdxValues values{};
         testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
