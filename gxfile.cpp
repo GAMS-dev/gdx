@@ -370,12 +370,12 @@ namespace gxfile {
         for(int D{}; D<FCurrentDim; D++) {
             std::string SV {utils::trimRight(KeyStr[D])};
             if(SV != LastStrElem[D]) {
-                int KD {UELTable.IndexOf(SV)};
-                if(KD == -1) {
+                // 0=not found, >=1 found
+                int KD {UELTable.IndexOf(SV)+1};
+                if(!KD) {
                     if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
                     KD = UELTable.AddObject(SV, -1);
                 }
-                KD++; // increment here to match Delphi behavior
                 LastElem[D] = KD;
                 LastStrElem[D] = SV;
                 if(KD < MinElem[D]) MinElem[D] = KD;
