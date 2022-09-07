@@ -2537,10 +2537,15 @@ namespace gxfile {
     }
 
     int TUELTable::AddUsrNew(const std::string &s) {
-        // ...
-        // FIXME: Implement correctly!
+        int EN{ AddObject(s, -1) };
+        int res{ nameToNum[uelNames[EN - 1]] };
+        if (res < 0) {
+            res = UsrUel2Ent.GetHighestIndex() + 1;
+            nameToNum[uelNames[EN-1]] = res;
+            UsrUel2Ent[res] = EN;
+        }
         ResetMapToUserStatus();
-        return 0;
+        return res;
     }
 
     TUELUserMapStatus TUELTable::GetMapToUserStatus() {

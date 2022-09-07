@@ -82,7 +82,7 @@ namespace tests::gdxinterfacetests {
         }
     }
 
-    TEST_CASE("Test adding uels") {
+    TEST_CASE("Test adding uels (raw mode)") {
         std::array filenames{ "uel_wrapper.gdx"s, "uel_port.gdx"s };
         auto [f1, f2] = filenames;
         testMatchingWrites(f1, f2, [](gdxinterface::GDXInterface &pgx) {
@@ -98,6 +98,30 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(1, uelCnt);
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
             REQUIRE_EQ("New-York", uel);
+            REQUIRE_EQ(-1, uelMap);
+        });
+        for (const auto& fn : filenames)
+            std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test adding uels (string mode)") {
+        std::array filenames{ "uel_str_wrapper.gdx"s, "uel_str_port.gdx"s };
+        auto [f1, f2] = filenames;
+        testMatchingWrites(f1, f2, [](gdxinterface::GDXInterface& pgx) {
+            REQUIRE(pgx.gdxUELRegisterStrStart());
+            int uelNr;
+            REQUIRE(pgx.gdxUELRegisterStr("TheOnlyUEL", uelNr));
+            REQUIRE_EQ(1, uelNr);
+            REQUIRE(pgx.gdxUELRegisterDone());
+        });
+        testReads(f1, f2, [](gdxinterface::GDXInterface& pgx) {
+            int uelCnt, highMap, uelMap;
+            std::string uel;
+            REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
+            REQUIRE_EQ(0, highMap);
+            REQUIRE_EQ(1, uelCnt);
+            REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
+            REQUIRE_EQ("TheOnlyUEL", uel);
             REQUIRE_EQ(-1, uelMap);
         });
         for (const auto& fn : filenames)
@@ -201,7 +225,6 @@ namespace tests::gdxinterfacetests {
 
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));            
             REQUIRE_EQ("TheOnlyUEL", uel);
-            // FIXME: UEL MAP VALUE INCORRECT WITH PORT!!!
             REQUIRE_EQ(3, uelMap);
 
             int NrRecs;
