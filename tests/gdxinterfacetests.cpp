@@ -198,12 +198,29 @@ namespace tests::gdxinterfacetests {
                 REQUIRE(typ >= 0);
                 REQUIRE(!name.empty());
                 symbolsSeen.push_back(name);
+
+                std::string explanatoryText;
+                int userInfo, numRecords;
+                REQUIRE(pgx.gdxSymbolInfoX(i, numRecords, userInfo, explanatoryText));
+                if(numRecords) {
+                    int numRecords2;
+                    REQUIRE(pgx.gdxDataReadStrStart(i, numRecords2));
+                    REQUIRE_EQ(numRecords, numRecords2);
+                    gxdefs::TgdxStrIndex keyNames;
+                    gxdefs::TgdxValues values;
+                    int dimFirst;
+                    for(int j{}; j<numRecords; j++) {
+                        REQUIRE(pgx.gdxDataReadStr(keyNames, values, dimFirst));
+                        REQUIRE(dimFirst >= 0);
+                        for(int d{}; d<dim; d++)
+                            REQUIRE(!keyNames[d].empty());
+                    }
+                    REQUIRE(pgx.gdxDataReadDone());
+                }
             }
             REQUIRE_EQ(expectedSymbolNames.size(), symbolsSeen.size());
             for(const auto &expName : expectedSymbolNames)
                 REQUIRE(std::find(symbolsSeen.begin(), symbolsSeen.end(), expName) != symbolsSeen.end());
-
-            // TODO: Read records!!!
         });
         std::filesystem::remove(gdxfn);
     }
