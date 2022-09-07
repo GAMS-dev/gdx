@@ -140,6 +140,8 @@ namespace tests::gdxinterfacetests {
         testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
             int uelCnt, highMap;
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
+            REQUIRE_EQ(0, uelCnt);
+            REQUIRE_EQ(0, highMap);
             REQUIRE(pgx.gdxUELRegisterMapStart());
             REQUIRE(pgx.gdxUELRegisterMap(3, "TheOnlyUEL"));
             REQUIRE(pgx.gdxUELRegisterDone());
@@ -152,16 +154,22 @@ namespace tests::gdxinterfacetests {
         testReads(f1, f2, [&](gdxinterface::GDXInterface& pgx) {
             std::string uel;
             int uelMap;
-            pgx.gdxUMUelGet(1, uel, uelMap);
+            REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
             REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE_EQ(-1, uelMap);
             int NrRecs;
-            pgx.gdxDataReadMapStart(1, NrRecs);
+            REQUIRE(pgx.gdxDataReadMapStart(1, NrRecs));
             REQUIRE_EQ(1, NrRecs);
             int dimFrst;
-            pgx.gdxDataReadMap(1, keys, values, dimFrst);
-            pgx.gdxDataReadDone();
+
+            // FIXME: Why is there a data error here?
+            REQUIRE_FALSE(pgx.gdxDataReadMap(1, keys, values, dimFrst));
+            REQUIRE_EQ(1, pgx.gdxDataErrorCount());
+
             REQUIRE_EQ(3, keys[0]);
             REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
+            REQUIRE_EQ(1, dimFrst);
+            REQUIRE(pgx.gdxDataReadDone());
         });
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);

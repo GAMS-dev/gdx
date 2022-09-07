@@ -2368,7 +2368,7 @@ namespace gxfile {
             for(int D{}; D<FCurrentDim; D++) {
                 if(KeyInt[D] != PrevElem[D]) {
                     PrevElem[D] = KeyInt[D];
-                    if(!DimFrst) DimFrst = D;
+                    if(!DimFrst) DimFrst = D+1;
                 }
             }
             return true;
@@ -2385,7 +2385,7 @@ namespace gxfile {
         FIDim = FCurrentDim;
         if(DimFrst > 0) {
             bool loopDone{};
-            for(int D{DimFrst}; D<FCurrentDim && !loopDone; D++) {
+            for(int D{DimFrst-1}; D<FCurrentDim && !loopDone; D++) {
                 const auto &obj = DomainList[D];
                 if(LastElem[D] < 0) {
                     ReportError(ERR_BADELEMENTINDEX);
@@ -2411,7 +2411,7 @@ namespace gxfile {
                         if(V >= 0) KeyInt[D] = V;
                         else {
                             AddError = true;
-                            FIDim = D;
+                            FIDim = D+1;
                             loopDone = true;
                         }
                         break;

@@ -32,6 +32,8 @@ namespace gdlib::gmsdata {
 		}
 
         ValueFields &operator[](const IndexKeys &Key) {
+            if (std::find(keyset.begin(), keyset.end(), Key) == keyset.end())
+                keyset.push_back(Key);
             return mapping[Key];
         }
 
