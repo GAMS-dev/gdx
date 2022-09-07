@@ -99,6 +99,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
             REQUIRE_EQ("New-York", uel);
             REQUIRE_EQ(-1, uelMap);
+            REQUIRE_FALSE(pgx.gdxGetUEL(1, uel));
+            REQUIRE_NE("New-York", uel);
         });
         for (const auto& fn : filenames)
             std::filesystem::remove(fn);
@@ -123,6 +125,46 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
             REQUIRE_EQ("TheOnlyUEL", uel);
             REQUIRE_EQ(-1, uelMap);
+            REQUIRE_FALSE(pgx.gdxGetUEL(1, uel));
+            REQUIRE_NE("TheOnlyUEL", uel);
+        });
+        for (const auto& fn : filenames)
+            std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test adding uels (mapped mode)") {
+        std::array filenames{ "uel_mapped_wrapper.gdx"s, "uel_mapped_port.gdx"s };
+        auto [f1, f2] = filenames;
+        testMatchingWrites(f1, f2, [](gdxinterface::GDXInterface& pgx) {
+            REQUIRE(pgx.gdxUELRegisterMapStart());
+            REQUIRE(pgx.gdxUELRegisterMap(3, "TheOnlyUEL"));
+            REQUIRE(pgx.gdxUELRegisterDone());
+        });
+        testReads(f1, f2, [](gdxinterface::GDXInterface& pgx) {
+            int uelCnt, highMap, uelMap;
+            std::string uel;
+
+            REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
+            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE_EQ(-1, uelMap);
+            REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
+            REQUIRE_EQ(0, highMap);
+            REQUIRE_EQ(1, uelCnt);
+
+            REQUIRE(pgx.gdxUELRegisterMapStart());
+            REQUIRE(pgx.gdxUELRegisterMap(3, "TheOnlyUEL"));
+            REQUIRE(pgx.gdxUELRegisterDone());
+
+            REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
+            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE_EQ(3, uelMap);
+
+            REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
+            REQUIRE_EQ(3, highMap);
+            REQUIRE_EQ(1, uelCnt);
+            
+            REQUIRE(pgx.gdxGetUEL(3, uel));
+            REQUIRE_EQ("TheOnlyUEL", uel);
         });
         for (const auto& fn : filenames)
             std::filesystem::remove(fn);

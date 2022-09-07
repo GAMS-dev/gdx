@@ -2134,7 +2134,7 @@ namespace gxfile {
         }
         else {
             UelCnt = UELTable.size();
-            HighMap = UELTable.UsrUel2Ent.empty() ? 0 : UELTable.UsrUel2Ent.GetHighestIndex(); // highest index
+            HighMap = UELTable.UsrUel2Ent.GetHighestIndex(); // highest index
             return true;
         }
     }
@@ -2634,7 +2634,7 @@ namespace gxfile {
     UNIT_INIT_FINI();
 
     int TIntegerMapping::GetHighestIndex() const {
-        return FHighestIndex;
+        return std::max<int>(0, static_cast<int>(Map.size()) - 1);
     }
 
     void TIntegerMapping::SetMapping(int F, int T) {
@@ -2643,8 +2643,6 @@ namespace gxfile {
             assert(F+1 < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
         }
         Map[F] = T;
-        if(F > FHighestIndex)
-            FHighestIndex = F;
     }
 
     int TIntegerMapping::GetMapping(int F) const {
@@ -2653,7 +2651,6 @@ namespace gxfile {
 
     void TIntegerMapping::clear() {
         Map.clear();
-        FHighestIndex = 0;
     }
 
     int &TIntegerMapping::operator[](int index) {

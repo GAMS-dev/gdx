@@ -131,7 +131,6 @@ namespace gxfile {
     class TIntegerMapping {
         // FMAXCAPACITY == number of index positions required to store [0..high(integer)]
         int64_t FMAXCAPACITY {std::numeric_limits<int>::max() + static_cast<int64_t>(1)};
-        int FHighestIndex{};
         std::vector<int> Map{};
     public:
         int GetHighestIndex() const;
