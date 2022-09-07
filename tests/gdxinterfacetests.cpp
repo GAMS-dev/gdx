@@ -173,6 +173,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUELRegisterMapStart());
             REQUIRE(pgx.gdxUELRegisterMap(3, "TheOnlyUEL"));
             REQUIRE(pgx.gdxUELRegisterDone());
+            std::string uel;
+            REQUIRE(pgx.gdxGetUEL(3, uel));
+            REQUIRE_EQ("TheOnlyUEL", uel);
             REQUIRE(pgx.gdxDataWriteMapStart("mysym", "This is my symbol!", 1, global::gmsspecs::gms_dt_par, 0));
             keys[0] = 3;
             values[global::gmsspecs::vallevel] = 3.141;
@@ -187,14 +190,26 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
             REQUIRE_EQ("TheOnlyUEL", uel);
             REQUIRE_EQ(-1, uelMap);
+
+            REQUIRE(pgx.gdxUELRegisterMapStart());
+            REQUIRE(pgx.gdxUELRegisterMap(3, "TheOnlyUEL"));
+            REQUIRE(pgx.gdxUELRegisterDone());
+
+            REQUIRE(pgx.gdxGetUEL(3, uel));
+            REQUIRE_EQ("TheOnlyUEL", uel);
+
+            REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));            
+            REQUIRE_EQ("TheOnlyUEL", uel);
+            // FIXME: UEL MAP VALUE INCORRECT WITH PORT!!!
+            REQUIRE_EQ(3, uelMap);
+
             int NrRecs;
             REQUIRE(pgx.gdxDataReadMapStart(1, NrRecs));
             REQUIRE_EQ(1, NrRecs);
             int dimFrst;
 
-            // FIXME: Why is there a data error here?
-            REQUIRE_FALSE(pgx.gdxDataReadMap(1, keys, values, dimFrst));
-            REQUIRE_EQ(1, pgx.gdxDataErrorCount());
+            REQUIRE(pgx.gdxDataReadMap(1, keys, values, dimFrst));
+            REQUIRE_EQ(0, pgx.gdxDataErrorCount());
 
             REQUIRE_EQ(3, keys[0]);
             REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);

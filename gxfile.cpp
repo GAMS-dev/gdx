@@ -2216,7 +2216,7 @@ namespace gxfile {
             return false;
         }
         int EN = UELTable.UsrUel2Ent[uelNr];
-        Uel = EN >= 1 ? UELTable[EN] : BADUEL_PREFIX + std::to_string(uelNr);
+        Uel = EN >= 1 ? UELTable[EN-1] : BADUEL_PREFIX + std::to_string(uelNr);
         return EN >= 1;
     }
 
