@@ -24,6 +24,12 @@ namespace gdlib::gmsstrm {
 #endif
 
 namespace gxfile {
+    class NullBuffer : public std::streambuf {
+    public:
+        int overflow(int c) { return c; }
+    };
+    extern NullBuffer null_buffer;
+
     const std::string   BADUEL_PREFIX = "?L__",
                         BADStr_PREFIX = "?Str__",
                         strGDXCOMPRESS = "GDXCOMPRESS",

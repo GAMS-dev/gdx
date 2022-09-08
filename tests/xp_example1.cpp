@@ -9,16 +9,18 @@ using namespace std::literals::string_literals;
 namespace tests::xp_example1 {
     TEST_SUITE_BEGIN("gxfile");
 
+    static std::ostream mycout {&gxfile::null_buffer};
+
     void ReportIOError(int N, const std::string &msg) {
-        std::cout << "**** Fatal I/O Error = " << N << " when calling " << msg << "\n";
+        mycout << "**** Fatal I/O Error = " << N << " when calling " << msg << "\n";
         // exit(1)
     }
 
     void ReportGDXError(gdxinterface::GDXInterface &PGX) {
         std::string S;
-        std::cout << "**** Fatal GDX Error\n";
+        mycout << "**** Fatal GDX Error\n";
         REQUIRE(PGX.gdxErrorStr(PGX.gdxGetLastError(), S));
-        std::cout << "**** " << S << "\n";
+        mycout << "**** " << S << "\n";
         // exit(1);
     }
 
@@ -43,7 +45,7 @@ namespace tests::xp_example1 {
             static_cast<gdxinterface::GDXInterface *>(new gxfile::TGXFileObj{Msg}) :
             static_cast<gdxinterface::GDXInterface *>(new xpwrap::GDXFile {Msg}) };
         if(!Msg.empty()) {
-            std::cout   << "**** Could not load GDX library\n"
+            mycout   << "**** Could not load GDX library\n"
                         << "**** " << Msg << "\n";
             // exit(1)
         }
@@ -83,12 +85,14 @@ namespace tests::xp_example1 {
         if(!res)
             ReportGDXError(*PGX);
         REQUIRE(res);
-        std::cout << "Demand data written by xp_example1\n";
+        mycout << "Demand data written by xp_example1\n";
         TeardownGDXObject(&PGX);
 
-        system("gamslib trnsport");
+        system("gamslib trnsport > gamslibLog.txt");
         // FIXME: Actually load data from GDX file by modifying trnsport src here
-        system("gams trnsport gdx=result lo=0 o=lf");
+        system("gams trnsport gdx=result lo=0 o=lf > gamsLog.txt");
+        std::filesystem::remove("gamslibLog.txt");
+        std::filesystem::remove("gamsLog.txt");
 
         PGX = SetupGDXObject(implType);
         REQUIRE(PGX->gdxOpenRead("result.gdx", ErrNr));
@@ -96,14 +100,14 @@ namespace tests::xp_example1 {
         REQUIRE_EQ(0, ErrNr);
         std::string Msg, Producer;
         REQUIRE(PGX->gdxFileVersion(Msg, Producer));
-        std::cout <<    "GDX file written using version " << Msg <<
+        mycout <<    "GDX file written using version " << Msg <<
                   "\nGDX file written by " << Producer << "\n";
 
         int VarNr;
         res = PGX->gdxFindSymbol("x", VarNr);
         REQUIRE(res);
         if(!res) {
-            std::cout << "Could not find variable X\n";
+            mycout << "Could not find variable X\n";
             //exit(1);
         }
 
@@ -113,7 +117,7 @@ namespace tests::xp_example1 {
         REQUIRE_EQ(2, Dim);
         REQUIRE_EQ(global::gmsspecs::dt_var, VarTyp);
         if(Dim != 2 || VarTyp != global::gmsspecs::dt_var) {
-            std::cout << "**** X is not a two dimensional variable: " << Dim << ":" << VarTyp << "\n";
+            mycout << "**** X is not a two dimensional variable: " << Dim << ":" << VarTyp << "\n";
             // exit(1);
         }
 
@@ -126,10 +130,10 @@ namespace tests::xp_example1 {
         while(PGX->gdxDataReadStr(Indx, Values, N)) {
             if(0.0 == Values[global::gmsspecs::vallevel]) continue;
             for(int D{}; D<Dim; D++)
-                std::cout << (D ? '.':' ') << Indx[D];
-            printf(" = %7.2f\n", Values[global::gmsspecs::vallevel]);
+                mycout << (D ? '.':' ') << Indx[D];
+            //printf(" = %7.2f\n", Values[global::gmsspecs::vallevel]);
         }
-        std::cout << "All solution values shown\n";
+        mycout << "All solution values shown\n";
         PGX->gdxDataReadDone();
 
         TeardownGDXObject(&PGX);

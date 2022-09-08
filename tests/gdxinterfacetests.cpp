@@ -9,6 +9,8 @@ using namespace std::literals::string_literals;
 namespace tests::gdxinterfacetests {
     TEST_SUITE_BEGIN("GDX interface tests");
 
+    static std::ostream mycout {&gxfile::null_buffer};
+
     template<typename T>
     void testWriteOp(const std::string &fn,
                      const std::function<void(gdxinterface::GDXInterface&)> &cb,
@@ -60,24 +62,24 @@ namespace tests::gdxinterfacetests {
         if(!filename1.empty() && !filename2.empty()) {
             auto maybeMismatches = utils::binaryFileDiff(filename1, filename2);
             if (maybeMismatches) {
-                std::cout << "Found " << maybeMismatches->size() << " mismatches between " << filename1 << " and " << filename2 << "\n";
+                mycout << "Found " << maybeMismatches->size() << " mismatches between " << filename1 << " and " << filename2 << "\n";
                 const int truncCnt{ 10 };
                 int cnt{};
                 for (const auto& mm : *maybeMismatches) {
-                    std::cout << "#" << mm.offset << ": " << (int)mm.lhs << " != " << (int)mm.rhs << "\n";
+                    mycout << "#" << mm.offset << ": " << (int)mm.lhs << " != " << (int)mm.rhs << "\n";
                     if (cnt++ >= truncCnt) {
-                        std::cout << "Truncating results after " << truncCnt << " entries." << "\n";
+                        mycout << "Truncating results after " << truncCnt << " entries." << "\n";
                         break;
                     }
                 }
-                std::cout << std::endl;
+                mycout << std::endl;
 #ifdef __APPLE__
                 const std::string pythonInterpreter {"python3"};
 #else
                 const std::string pythonInterpreter {"python"};
 #endif
                 system((pythonInterpreter + " gdxtoyaml/main.py "s + filename1 + " "s + filename2).c_str());
-            } else std::cout << "No mismatches found between " << filename1 << " and " << filename2 << std::endl;
+            } else mycout << "No mismatches found between " << filename1 << " and " << filename2 << std::endl;
             REQUIRE_FALSE(maybeMismatches);
         }
     }
@@ -300,9 +302,11 @@ namespace tests::gdxinterfacetests {
                             model_fn = model + ".gms"s,
                             fnpf = "trans_data"s,
                             gdxfn = fnpf+".gdx"s;
-        std::system(("gamslib "s+model).c_str());
+        std::system(("gamslib "s+model+" > gamslibLog.txt"s).c_str());
+        std::filesystem::remove("gamslibLog.txt");
         REQUIRE(std::filesystem::exists(model_fn));
-        std::system(("gams trnsport gdx="s + fnpf + " lo=0 o=lf").c_str());
+        std::system(("gams trnsport gdx="s + fnpf + " lo=0 o=lf > trnsportLog.txt").c_str());
+        std::filesystem::remove("trnsportLog.txt");
         std::filesystem::remove(model_fn);
         std::filesystem::remove("lf");
         REQUIRE(std::filesystem::exists(gdxfn));

@@ -9,6 +9,8 @@ using namespace std::literals::string_literals;
 namespace tests::gxfiletests {
     TEST_SUITE_BEGIN("gxfile");
 
+    static std::ostream mycout {&gxfile::null_buffer};
+
     const std::string fn {"mytest.gdx"};
 
     void writeFile() {
@@ -42,8 +44,8 @@ namespace tests::gxfiletests {
         std::string Producer;
         REQUIRE(pgx.gdxFileVersion(msg, Producer));
 
-        std::cout << "GDX file written using version: " << msg << '\n';
-        std::cout << "GDX file written by: " << Producer << '\n';
+        mycout << "GDX file written using version: " << msg << '\n';
+        mycout << "GDX file written by: " << Producer << '\n';
 
         int SyNr{};
         REQUIRE(pgx.gdxFindSymbol("demand", SyNr));
@@ -58,16 +60,16 @@ namespace tests::gxfiletests {
         REQUIRE(pgx.gdxDataReadStrStart(SyNr, NrRecs));
         //if (!pgx.gdxDataReadStrStart(SyNr,NrRecs)) ReportGDXError(PGX);
 
-        std::cout << "Parameter demand has " << std::to_string(NrRecs) << " records\n";
+        mycout << "Parameter demand has " << std::to_string(NrRecs) << " records\n";
 
         gxdefs::TgdxStrIndex Indx;
         gxdefs::TgdxValues Values;
         for (int N{}; pgx.gdxDataReadStr(Indx, Values, N);) {
             /*if (0 == Values[global::gmsspecs::vallevel]) continue;
             for (int D{}; D < Dim; D++)
-                std::cout << (D ? '.' : ' ') << Indx[D];
-            std::cout << " = %7.2f\n" << Values[global::gmsspecs::vallevel] << '\n';*/
-            std::cout << "Key=" << Indx.front() << ", Value=" << Values[global::gmsspecs::vallevel] << "\n";
+                mycout << (D ? '.' : ' ') << Indx[D];
+            mycout << " = %7.2f\n" << Values[global::gmsspecs::vallevel] << '\n';*/
+            mycout << "Key=" << Indx.front() << ", Value=" << Values[global::gmsspecs::vallevel] << "\n";
         }
 
         REQUIRE(pgx.gdxDataReadDone());

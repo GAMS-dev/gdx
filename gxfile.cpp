@@ -20,6 +20,8 @@ using namespace gdlib::gmsglob;
 
 namespace gxfile {
 
+    NullBuffer null_buffer;
+
     //version = 5 has 32 bit offsets and no compression
     //version = 6 introduced compression
     //version 7 introduces:
