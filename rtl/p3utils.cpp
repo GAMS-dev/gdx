@@ -266,7 +266,8 @@ namespace rtl::p3utils {
                 break;
         }
         h->open(fName, itsMode);
-        return h->bad() ? 1 : 0;
+        bool f = h->fail();
+        return f && !std::filesystem::exists(fName) ? 2 : f;
     }
 
     int p3FileClose(Tp3FileHandle h)

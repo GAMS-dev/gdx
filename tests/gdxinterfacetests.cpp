@@ -20,24 +20,41 @@ namespace tests::gdxinterfacetests {
         return builders;
     }
 
-    TEST_CASE("Simple setup and teardown of a GDX object") {
+    void basicTest(const std::function<void(gdxinterface::GDXInterface&)> &cb) {
         for(const auto &builder : getBuilders()) {
             gdxinterface::GDXInterface *pgx = builder();
+            cb(*pgx);
             delete pgx;
         }
     }
 
+    TEST_CASE("Simple setup and teardown of a GDX object") {
+        basicTest([](gdxinterface::GDXInterface &pgx) {
+            REQUIRE_EQ(0, pgx.gdxErrorCount());
+        });
+    }
+
     TEST_CASE("Just create a file") {
         const std::string fn {"create.gdx"};
-        for(const auto &builder : getBuilders()) {
-            gdxinterface::GDXInterface *pgx = builder();
+        basicTest([&](gdxinterface::GDXInterface &pgx) {
+            REQUIRE_EQ(0, pgx.gdxErrorCount());
             int ErrNr;
-            REQUIRE(pgx->gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
             REQUIRE(std::filesystem::exists(fn));
-            pgx->gdxClose();
-            delete pgx;
-            std::filesystem::remove(fn);
-        }
+            pgx.gdxClose();
+        });
+        std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test trying to open a file for reading that does not exist") {
+        basicTest([&](gdxinterface::GDXInterface &pgx) {
+            int ErrNr;
+            REQUIRE_FALSE(pgx.gdxOpenRead("doesNotExist", ErrNr));
+            REQUIRE_EQ(2, ErrNr);
+            std::string errMsg;
+            REQUIRE(pgx.gdxErrorStr(ErrNr, errMsg));
+            REQUIRE_EQ("No such file or directory", errMsg);
+        });
     }
 
     template<typename T>
