@@ -54,7 +54,33 @@ namespace tests::gdxinterfacetests {
             std::string errMsg;
             REQUIRE(pgx.gdxErrorStr(ErrNr, errMsg));
             REQUIRE_EQ("No such file or directory", errMsg);
+            pgx.gdxClose();
         });
+    }
+
+    TEST_CASE("Test renaming an UEL") {
+        std::string fn{"rename_uel.gdx"};
+        basicTest([&](gdxinterface::GDXInterface &pgx) {
+            int ErrNr;
+            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
+
+            REQUIRE(pgx.gdxUELRegisterStrStart());
+            int uelNr;
+            REQUIRE(pgx.gdxUELRegisterStr("myuel", uelNr));
+            REQUIRE(pgx.gdxUELRegisterDone());
+
+            std::string queriedUel;
+            int uelMap;
+            REQUIRE(pgx.gdxUMUelGet(1, queriedUel, uelMap));
+            REQUIRE_EQ("myuel", queriedUel);
+
+            pgx.gdxRenameUEL("myuel", "newname");
+            REQUIRE(pgx.gdxUMUelGet(1, queriedUel, uelMap));
+            REQUIRE_EQ("newname", queriedUel);
+
+            pgx.gdxClose();
+        });
+        std::filesystem::remove(fn);
     }
 
     template<typename T>

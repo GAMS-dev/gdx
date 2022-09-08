@@ -518,7 +518,7 @@ namespace gxfile {
                 FFile->WriteInt64(offset);
         }
 
-        int res{FFile->GetLastIOResult()};
+        int res{FFile ? FFile->GetLastIOResult() : 1};
 
         // Many free operations. Some not necessary anymore due to RAII pattern (out of scope -> destroy)
 
@@ -2572,8 +2572,13 @@ namespace gxfile {
         return FMapToUserStatus;
     }
 
+    // FIXME: How does this affect the ordering / sort list?
+    // Should renaming change the index?
     void TUELTable::RenameEntry(int N, const std::string &s) {
-        uelNames[N-1] = s;
+        std::string oldName = uelNames[N];
+        uelNames[N] = s;
+        nameToNum.erase(oldName);
+        nameToNum[s] = N+1;
     }
 
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
