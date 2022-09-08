@@ -158,7 +158,7 @@ namespace tests::gdxinterfacetests {
                     }
                 }
                 mycout << std::endl;
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__linux__)
                 const std::string pythonInterpreter {"python3"};
 #else
                 const std::string pythonInterpreter {"python"};
@@ -373,6 +373,43 @@ namespace tests::gdxinterfacetests {
             std::filesystem::remove(fn);
     }
 
+    TEST_CASE("Test writing with set/get domain") {
+        const std::string f1 {"setgetdomain_wrap.gdx"}, f2{"setgetdomain_port.gdx"};
+        testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
+            int numSyms, numUels;
+            REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
+            REQUIRE_EQ(0, numSyms);
+
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "", 1, global::gmsspecs::dt_set, 0));
+            REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
+            REQUIRE_EQ(1, numSyms);
+
+            REQUIRE(pgx.gdxDataWriteStrStart("j", "", 1, global::gmsspecs::dt_set, 0));
+            REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
+            REQUIRE_EQ(2, numSyms);
+
+            REQUIRE(pgx.gdxDataWriteStrStart("newd", "Same domain as d", 2, global::gmsspecs::dt_par, 0));
+            REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
+            REQUIRE_EQ(3, numSyms);
+
+            int newSymNr;
+            REQUIRE(pgx.gdxFindSymbol("newd", newSymNr));
+            REQUIRE_EQ(3, newSymNr);
+            gxdefs::TgdxStrIndex newSymDomainNames{"i", "j"}, domainIds;
+
+            // FIXME: Why is set domain causing a mismatch here?
+            //REQUIRE(pgx.gdxSymbolSetDomainX(newSymNr, newSymDomainNames));
+            /*REQUIRE(pgx.gdxSymbolGetDomainX(newSymNr, domainIds));
+            REQUIRE_EQ("i", domainIds[0]);
+            REQUIRE_EQ("j", domainIds[1]);*/
+        });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
+    }
+
     TEST_CASE("Test reading/extracting data from gamslib/trnsport example") {
         const std::array expectedSymbolNames {
             "a"s, "b"s, "c"s,
@@ -459,7 +496,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(2, domainSyNrs[1]);
 
             gxdefs::TgdxStrIndex domainIds;
-            pgx.gdxSymbolGetDomainX(5, domainIds);
+            REQUIRE(pgx.gdxSymbolGetDomainX(5, domainIds));
             REQUIRE_EQ("i", domainIds[0]);
             REQUIRE_EQ("j", domainIds[1]);
         });

@@ -606,7 +606,7 @@ namespace gxfile {
         obj->SDomSymbols.clear();
         obj->SDomStrings.clear();
 
-        CurSyPtr->SSyNr = static_cast<int>(NameList.size());
+        CurSyPtr->SSyNr = static_cast<int>(NameList.size()+1); // +1 for universe
         NameList[AName] = CurSyPtr;
         FCurrentDim = ADim;
         // old case; we never write V6
@@ -1710,6 +1710,19 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Register a string in the string table
+    // Arguments:
+    //   Txt: The string to be registered
+    //   TxtNr: The index number assigned to this string
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //  gdxGetElemText, gdxSetTextNodeNr
+    // Description:
+    //  Register a string in the string table and return the integer number assigned to this string.
+    //  The integer value can be used to set the associated text of a set element.
+    //  The string must follow the GAMS syntax rules for explanatory text.
     int TGXFileObj::gdxAddSetText(const std::string &Txt, int &TxtNr) {
         if(SetTextList.empty() || TraceLevel >= trl_all && !CheckMode("AddSetText", {}))
             return false;
@@ -1827,6 +1840,40 @@ namespace gxfile {
         return ErrCntTotal;
     }
 
+    // Brief:
+    //   Retrieve the string and node number for an entry in the string table
+    // Arguments:
+    //   TxtNr: String table index
+    //   Txt: Text found for the entry
+    //   Node: Node number found for the entry
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxAddSetText, gdxSetTextNodeNr
+    // Description:
+    //   Retrieve a string based on the string table index. When writing to a gdx file,
+    //   this index is the value returned by calling gdxAddSetText. When reading a gdx file,
+    //   the index is returned as the level value when reading a set.
+    //   The Node number can be used as an index in a string table in the user space;
+    //   the value is set by calling SetTextNodeNr. If the Node number was never assigned,
+    //   it will be returned as zero.
+    //   Example:
+    // <CODE>
+    // [assumes we are reading using strings ...]
+    // while gdxDataReadStr(PGX, Uels, Vals) <> 0
+    // do begin
+    //    for D := 1 to Dim
+    //    do Write(Uels[D], '  ');
+    //    indx := Round(Vals[vallevel]);
+    //    if indx > 0
+    //    then
+    //       begin
+    //       gdxGetElemText(indx, S, N);
+    //       Write('txt = ', S, ' Node = ', N);
+    //       end;
+    //    WriteLn;
+    //    end
+    // </CODE>
     int TGXFileObj::gdxGetElemText(int TxtNr, std::string &Txt, int &Node) {
         Node = 0;
         if(SetTextList.empty()) {
@@ -1921,13 +1968,12 @@ namespace gxfile {
     int TGXFileObj::gdxSymbolGetDomainX(int SyNr, TgdxStrIndex &DomainIDs) {
         if (ErrorCondition(!NameList.empty() && SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return 0;
         PgdxSymbRecord SyPtr{ (*symbolWithIndex(SyNr)).second };
-        
-        for (int D{}; D < SyPtr->SDim; D++)
-            DomainIDs[D] = "*";
+
+        std::fill_n(DomainIDs.begin(), SyPtr->SDim, "*");
 
         if (!SyPtr->SDomStrings.empty()) {
             for (int D{}; D<SyPtr->SDim; D++)
-                DomainIDs[D] = DomainStrList[SyPtr->SDomStrings[D]];
+                DomainIDs[D] = DomainStrList[SyPtr->SDomStrings[D]-1];
             return 2;
         }
         else if (SyPtr->SDomSymbols.empty())
