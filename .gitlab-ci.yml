@@ -80,7 +80,7 @@ build-leg:
 
 test-leg:
   stage: test
-  when: on_success
+  when: manual
   tags: [linux]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
