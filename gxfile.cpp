@@ -336,6 +336,19 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Start writing a new symbol in string mode
+    // Arguments:
+    //   SyId: Name of the symbol
+    //   ExplTxt: Explanatory text for the symbol
+    //   Dimen: Dimension of the symbol
+    //   Typ: Type of the symbol
+    //   UserInfo: See gdxDataWriteRawStart for more information
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Description:
+    // See Also:
+    //   gdxDataWriteStr, gdxDataWriteDone
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) {
         if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
         /*for (int D{}; D < FCurrentDim; D++)
@@ -555,6 +568,14 @@ namespace gxfile {
         }
     }
 
+    // Brief:
+    //   Reset the internal values for special values
+    // Returns:
+    //   Always non-zero
+    // See Also:
+    //   gdxSetSpecialValues, gdxGetSpecialValues
+    // Description:
+    //
     int TGXFileObj::gdxResetSpecialValues() {
         intlValueMapDbl[vm_valund] = valund;
         intlValueMapDbl[vm_valna ] = valna;
@@ -1305,6 +1326,17 @@ namespace gxfile {
         {ERR_CANNOT_RENAME        , "GDXCOPY: Cannot rename file"s}
     };
 
+    // Summary:
+    //   Returns the text for a given error number
+    // Arguments:
+    //    N: Error number
+    //    S: Contains error text after return
+    // Return Value:
+    //   Always returns non-zero
+    // Description:
+    //
+    // See Also:
+    //   gdxGetLastError
     int TGXFileObj::gdxErrorStr(int ErrNr, std::string &ErrMsg) {
         const auto it = errorCodeToStr.find(ErrNr);
         if(it == errorCodeToStr.end()) ErrMsg = rtl::sysutils_p3::SysErrorMessage(ErrNr);
@@ -1343,6 +1375,17 @@ namespace gxfile {
         return gdxOpenReadXX(FileName, fmOpenRead, 0, ErrNr);
     }
 
+    // Brief:
+    //   Return strings for file version and file producer
+    // Arguments:
+    //   FileStr: Version string
+    //   ProduceStr: Producer string
+    // Returns:
+    //   Always non-zero
+    // See Also:
+    //   gdxOpenWrite, gdxOpenWriteEx
+    // Description:
+    //
     int TGXFileObj::gdxFileVersion(std::string &FileStr, std::string &ProduceStr) {
         FileStr = FileSystemID;
         ProduceStr = FProducer;
@@ -1374,6 +1417,20 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Read the next record in string mode
+    // Arguments:
+    //   KeyStr: The index of the record as strings for the unique elements
+    //   Values: The data of the record
+    //   DimFrst: The first index position in KeyStr that changed
+    // Returns:
+    //   Non-zero if the operation is possible; return zero if the operation is not
+    //   possible or if there is no more data
+    // See Also:
+    //   gdxDataReadStrStart, gdxDataReadDone
+    // Description:
+    //   Read the next record using strings for the unique elements. The
+    //   reading should be initialized by calling DataReadStrStart
     int TGXFileObj::gdxDataReadStr(TgdxStrIndex &KeyStr, TgdxValues &Values, int &DimFrst) {
         const TgxModeSet AllowedModes{ fr_str_data };
         if ((TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) && CheckMode("DataReadStr", AllowedModes))
@@ -1391,6 +1448,13 @@ namespace gxfile {
         }
     }
 
+    // Brief:
+    //   Finish reading of a symbol in any mode(raw, mapped, string)
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxDataReadRawStart, gdxDataReadMapStart, gdxDataReadStrStart
+    // Description:
     int TGXFileObj::gdxDataReadDone() {
         TgxModeSet AllowedMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data, fr_str_data,fr_slice};
         if(SortList) SortList->clear();
@@ -1462,6 +1526,28 @@ namespace gxfile {
         return badLookup();
     }
 
+    // Brief:
+    //   Initialize the reading of a symbol in string mode
+    // Arguments:
+    //   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
+    //   NrRecs: The number of records available for reading
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxDataReadStr, gdxDataReadRawStart, gdxDataReadMapStart, gdxDataReadDone
+    // Description:
+    //   Reading data using strings is the simplest way to read data.
+    //   Every record read using DataReadStr will return the strings
+    //   for the unique elements. Internal mapping is not affected by
+    //   this function.
+    // Example:
+    //   if DataReadStrStart(PGX,1,NrRecs)
+    //   then
+    //      begin
+    //      while DataReadStr(PGX,Uels,Vals)
+    //      do [...]
+    //      DataReadDone(PGX)
+    //      end;
     int TGXFileObj::gdxDataReadStrStart(int SyNr, int &NrRecs) {
         TgdxUELIndex XDomains;
         XDomains.fill(DOMC_UNMAPPED);
@@ -1731,6 +1817,21 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   The number of error records
+    // Returns:
+    //   The number of error records available.
+    // See Also:
+    //   gdxDataErrorRecord
+    // Description:
+    //   After a write operation is finished (gdxDataWriteDone), the data
+    //   is sorted and written to the gdx file. If there are duplicate records,
+    //   the first record is written to the file and the duplicates are
+    //   added to the error list.
+    //   <P>
+    //   When reading data using a filtered read operation, data records that were
+    //   filtered out because an index is not in the user index space or not in a
+    //   filter are added the error list.
     int TGXFileObj::gdxDataErrorCount()
     {
         return static_cast<int>(ErrorList.size());
