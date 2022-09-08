@@ -1,7 +1,9 @@
-.idea/
-cmake-build-debug/
-x64/
-.vs/
-build/
-gdxnative.vcxproj.user
 /stubwarnings.txt
+/gdxnative.vcxproj.user
+/.idea/
+/.vs/
+/build/
+/x64/
+/cmake-build-debug-coverage/
+/cmake-build-release/
+/cmake-build-debug/
