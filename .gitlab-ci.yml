@@ -47,7 +47,7 @@ install-gamsdist-leg:
   stage: install-gams
   when: on_success
   tags: [linux]
-  dependencies: []
+  needs: [fetch-ci-scripts]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
