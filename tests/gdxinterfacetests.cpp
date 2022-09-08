@@ -11,6 +11,35 @@ namespace tests::gdxinterfacetests {
 
     static std::ostream mycout {&gxfile::null_buffer};
 
+    auto getBuilders() {
+        static std::string ErrMsg;
+        std::list<std::function<gdxinterface::GDXInterface*()>> builders {
+                [&]() { return new xpwrap::GDXFile{ErrMsg}; },
+                [&]() { return new gxfile::TGXFileObj{ErrMsg}; }
+        };
+        return builders;
+    }
+
+    TEST_CASE("Simple setup and teardown of a GDX object") {
+        for(const auto &builder : getBuilders()) {
+            gdxinterface::GDXInterface *pgx = builder();
+            delete pgx;
+        }
+    }
+
+    TEST_CASE("Just create a file") {
+        const std::string fn {"create.gdx"};
+        for(const auto &builder : getBuilders()) {
+            gdxinterface::GDXInterface *pgx = builder();
+            int ErrNr;
+            REQUIRE(pgx->gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
+            REQUIRE(std::filesystem::exists(fn));
+            pgx->gdxClose();
+            delete pgx;
+            std::filesystem::remove(fn);
+        }
+    }
+
     template<typename T>
     void testWriteOp(const std::string &fn,
                      const std::function<void(gdxinterface::GDXInterface&)> &cb,
@@ -21,7 +50,7 @@ namespace tests::gdxinterfacetests {
             std::string ErrMsg;
             T pgx{ErrMsg};
             int ErrNr;
-            REQUIRE(pgx.gdxOpenWrite(fn, "xpwraptest", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
             cb(pgx);
             pgx.gdxClose();
         }

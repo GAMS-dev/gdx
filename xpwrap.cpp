@@ -1,5 +1,6 @@
 #include "xpwrap.h"
 #include "expertapi/gdxcc.h"
+#include <iostream>
 #include <cassert>
 #include <cstring>
 
@@ -73,12 +74,23 @@ namespace xpwrap {
 
     GDXFile::GDXFile(std::string &ErrMsg) {
         CharBuf msgBuf{};
-        assert(::gdxCreate(&pgx, msgBuf.get(), msgBuf.size()));
+        if (!::gdxLibraryLoaded()) {
+            if (!::gdxGetReady(msgBuf.get(), msgBuf.size())) {
+                std::cout << "Loading DLL failed!" << std::endl;
+                exit(1);
+            }
+        }
+        if (!::gdxCreate(&pgx, msgBuf.get(), msgBuf.size())) {
+            std::cout << "Unable to create GDX object" << std::endl;
+            exit(1);
+        }
         ErrMsg = msgBuf.str();
     }
 
     GDXFile::~GDXFile() {
-        ::gdxFree(&pgx);
+        if (pgx)
+            ::gdxFree(&pgx);
+        ::gdxLibraryUnload();
     }
 
     int GDXFile::gdxClose() {
