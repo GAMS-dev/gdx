@@ -1930,7 +1930,7 @@ namespace gxfile {
                 DomainIDs[D] = DomainStrList[SyPtr->SDomStrings[D]];
             return 2;
         }
-        else if (!SyPtr->SDomSymbols.empty())
+        else if (SyPtr->SDomSymbols.empty())
             return 1;
         else {
             for (int D{}; D < SyPtr->SDim; D++)
@@ -2141,8 +2141,18 @@ namespace gxfile {
         }
     }
 
+    // Summary:
+    //   Returns the dimension of the current active symbol
+    // Arguments:
+    // Return Value:
+    //   Dimension of current active symbol
+    // Description:
+    //    When reading or writing data, the dimension of the current active symbol
+    //    is sometimes needed to convert arguments from strings to pchars etc.
+    // See Also:
+    //
     int TGXFileObj::gdxCurrentDim() {
-        return FCurrentDim;
+        return FCurrentDim; //need to do more checks here
     }
 
     // Brief:

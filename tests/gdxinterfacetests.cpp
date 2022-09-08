@@ -83,6 +83,19 @@ namespace tests::gdxinterfacetests {
         std::filesystem::remove(fn);
     }
 
+    TEST_CASE("Test get current active symbol dimension") {
+        std::string fn{"sym_dim.gdx"};
+        basicTest([&](gdxinterface::GDXInterface &pgx) {
+            int ErrNr;
+            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
+            REQUIRE(pgx.gdxDataWriteRawStart("mysym", "Some explanatory text.", 2, global::gmsspecs::gms_dt_par, 0));
+            REQUIRE_EQ(2, pgx.gdxCurrentDim());
+            REQUIRE(pgx.gdxDataWriteDone());
+            pgx.gdxClose();
+        });
+        std::filesystem::remove(fn);
+    }
+
     template<typename T>
     void testWriteOp(const std::string &fn,
                      const std::function<void(gdxinterface::GDXInterface&)> &cb,
@@ -428,6 +441,27 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(expectedSymbolNames.size(), symbolsSeen.size());
             for(const auto &expName : expectedSymbolNames)
                 REQUIRE(std::find(symbolsSeen.begin(), symbolsSeen.end(), expName) != symbolsSeen.end());
+
+            int symNr;
+            REQUIRE(pgx.gdxFindSymbol("i", symNr));
+            REQUIRE_EQ(1, symNr);
+            REQUIRE_EQ(1, pgx.gdxSymbolDim(1));
+
+            // d(i,j) is symbol 5
+            REQUIRE(pgx.gdxFindSymbol("d", symNr));
+            REQUIRE_EQ(5, symNr);
+            gxdefs::TgdxUELIndex domainSyNrs;
+            REQUIRE(pgx.gdxSymbolGetDomain(5, domainSyNrs));
+            REQUIRE_EQ(2, pgx.gdxSymbolDim(5));
+            // first domain of d(i,j) is i (symbol 1)
+            REQUIRE_EQ(1, domainSyNrs[0]);
+            // second domain of d(i,j) is j (symbol 2)
+            REQUIRE_EQ(2, domainSyNrs[1]);
+
+            gxdefs::TgdxStrIndex domainIds;
+            pgx.gdxSymbolGetDomainX(5, domainIds);
+            REQUIRE_EQ("i", domainIds[0]);
+            REQUIRE_EQ("j", domainIds[1]);
         });
         std::filesystem::remove(gdxfn);
     }
