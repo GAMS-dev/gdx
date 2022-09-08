@@ -88,10 +88,10 @@ namespace tests::xp_example1 {
         mycout << "Demand data written by xp_example1\n";
         TeardownGDXObject(&PGX);
 
-        system("gamslib trnsport");// > gamslibLog.txt");
+        system("gamslib trnsport > gamslibLog.txt");
         // FIXME: Actually load data from GDX file by modifying trnsport src here
         system("gams trnsport gdx=result lo=0 o=lf");// > gamsLog.txt");
-        //std::filesystem::remove("gamslibLog.txt");
+        std::filesystem::remove("gamslibLog.txt");
         //std::filesystem::remove("gamsLog.txt");
 
         PGX = SetupGDXObject(implType);

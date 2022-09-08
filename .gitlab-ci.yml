@@ -81,7 +81,7 @@ build-leg:
 
 test-leg:
   stage: test
-  when: manual
+  when: on_success
   tags: [linux]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
@@ -90,13 +90,13 @@ test-leg:
   script:
     - GAMS_PATH=$(pwd)/gamsdist
     - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ./gdxnativetest --reporters=junit > doctest_results_linux.xml
-    - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
+#    - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
   coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
     name: unittest-results-linux
     paths: [doctest_results_linux.xml]
     reports:
       junit: doctest_results_linux.xml
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: coverage.xml
