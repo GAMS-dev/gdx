@@ -315,6 +315,26 @@ namespace tests::gdxinterfacetests {
             std::filesystem::remove(fn);
     }
 
+    TEST_CASE("Test getting special values") {
+        gxdefs::TgdxSVals specialValuesFromWrap, specialValuesFromPort;
+        std::string ErrMsg;
+        {
+            xpwrap::GDXFile pgx{ErrMsg};
+            REQUIRE(pgx.gdxGetSpecialValues(specialValuesFromWrap));
+        }
+        {
+            gxfile::TGXFileObj pgx{ErrMsg};
+            REQUIRE(pgx.gdxGetSpecialValues(specialValuesFromPort));
+        }
+        for(int i{}; i<specialValuesFromPort.size(); i++) {
+            REQUIRE_EQ(specialValuesFromWrap[i], specialValuesFromPort[i]);
+        }
+    }
+
+    TEST_CASE("Test setting special values") {
+
+    }
+
     TEST_CASE("Test write and read record mapped") {
         std::string f1{ "rwrecordmapped_wrapper.gdx" }, f2 {"rwrecordmapped_port.gdx"};
         gxdefs::TgdxUELIndex  keys{};

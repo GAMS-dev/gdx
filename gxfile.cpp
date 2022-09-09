@@ -1855,6 +1855,16 @@ namespace gxfile {
         return static_cast<int>(ErrorList.size());
     }
 
+    // Brief:
+    //   Retrieve an error record
+    // Arguments:
+    //   RecNr: The number of the record to be retrieved, range = 1..NrErrorRecords
+    //   KeyInt: Index for the record
+    //   Values: Values for the record
+    // Returns:
+    //   Non-zero if the record number is valid, zero otherwise
+    // See Also:
+    //   gdxDataErrorCount
     int TGXFileObj::gdxDataErrorRecord(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values)
     {
         int res{ gdxDataErrorRecordX(RecNr, KeyInt, Values) };
@@ -1866,6 +1876,16 @@ namespace gxfile {
         return res;
     }
 
+    // Brief:
+    //   Retrieve an error record
+    // Arguments:
+    //   RecNr: The number of the record to be retrieved, range = 1..NrErrorRecords
+    //   KeyInt: Index for the record, negative uel indicates domain violation for filtered/strict read
+    //   Values: Values for the record
+    // Returns:
+    //   Non-zero if the record number is valid, zero otherwise
+    // See Also:
+    //   gdxDataErrorCount
     int TGXFileObj::gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values)
     {
         TgxModeSet AllowedModes{ fr_init,fw_init,fr_map_data, fr_mapr_data, fw_raw_data, fw_map_data,fw_str_data };
@@ -1885,6 +1905,17 @@ namespace gxfile {
         return false;
     }
 
+    // Brief:
+    //   Read the next record in raw mode
+    // Arguments:
+    //   KeyInt: The index of the record
+    //   Values: The data of the record
+    //   DimFrst: The first index position in KeyInt that changed
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxDataReadRawStart, gdxDataReadDone
+    // Description:
     int TGXFileObj::gdxDataReadRaw(TgdxUELIndex &KeyInt, TgdxValues &Values, int &DimFrst) {
         TgxModeSet  AllowedModes{fr_raw_data};
         if((TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadRaw", AllowedModes)) return false;
@@ -1896,6 +1927,15 @@ namespace gxfile {
         return false;
     }
 
+    // Brief:
+    //   Initialize the reading of a symbol in raw mode
+    // Arguments:
+    //   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
+    //   NrRecs: The number of records available for reading
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxDataReadRaw, gdxDataReadMapStart, gdxDataReadStrStart, gdxDataReadDone
     int TGXFileObj::gdxDataReadRawStart(int SyNr, int &NrRecs) {
         TgdxUELIndex XDomains;
         XDomains.fill(DOMC_UNMAPPED);
@@ -1903,6 +1943,24 @@ namespace gxfile {
         return NrRecs >= 0;
     }
 
+    // Brief:
+    //   Write a data element in raw mode
+    // Arguments:
+    //   KeyInt: The index for this element
+    //   Values: The values for this element
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Description:
+    //   When writing data in raw mode, the index space used is based on the
+    //   internal index space. The indices used are in the range 1..NrUels but this is not enforced.
+    //   Before we can write in raw mode, the unique elements (strings) should
+    //   be registered first.
+    //   <P>
+    //   When writing raw, it assumed that the records are written in sorted order and
+    //   that there are no duplicate records. Records that are not in sorted order or are
+    //   duplicates will be added to the error list (see DataErrorCount and DataErrorRecord)
+    // See Also:
+    //   gdxDataWriteRawStart, gdxDataWriteDone
     int TGXFileObj::gdxDataWriteRaw(const TgdxUELIndex &KeyInt, const TgdxValues &Values) {
         TgxModeSet AllowedModes {fw_raw_data};
         if(fmode == fw_dom_raw) fmode = fw_raw_data;
@@ -2037,6 +2095,16 @@ namespace gxfile {
         }
     }
 
+    // Brief:
+    //   Retrieve the internal values for special values
+    // Arguments:
+    //   AVals: array of special values used for Eps, +Inf, -Inf, NA and Undef
+    // Returns:
+    //   Always non-zero
+    // See Also:
+    //  gdxResetSpecialValues, gdxSetSpecialValues
+    // Description:
+    //
     int TGXFileObj::gdxGetSpecialValues(TgdxSVals &AVals) {
         AVals[sv_valund] = intlValueMapDbl[vm_valund] ;
         AVals[sv_valna ] = intlValueMapDbl[vm_valna ] ;
@@ -2047,6 +2115,19 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Set the internal values for special values
+    // Arguments:
+    //   AVals: array of special values to be used for Eps, +Inf, -Inf, NA and Undef
+    //          Note that the values have to be unique
+    // Returns:
+    //   Non-zero if all values specified are unique, zero otherwise
+    // Note: Before calling this function, initialize the array of special values
+    //   by calling gdxGetSpecialValues first
+    // See Also:
+    //   gdxSetReadSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
+    // Description:
+    //
     int TGXFileObj::gdxSetSpecialValues(const TgdxSVals &AVals) {
         TIntlValueMapDbl tmpDbl{ intlValueMapDbl };
 
@@ -2076,6 +2157,17 @@ namespace gxfile {
         return true;
     }
 
+    // Summary:
+    //   Retrieve the domain of a symbol
+    // Arguments:
+    //   SyNr: The index number of the symbol, range 1..NrSymbols
+    //   DomainSyNrs: array returning the set identifiers or *;
+    //   DomainSyNrs[D] will contain the index number of the one dimensional
+    //   set or alias used as the domain for index position D. A value of zero represents the universe ( * )
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxSymbolSetDomain, gdxSymbolGetDomainX
     int TGXFileObj::gdxSymbolGetDomain(int SyNr, TgdxUELIndex &DomainSyNrs) {
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
         PgdxSymbRecord SyPtr{ (*symbolWithIndex(SyNr)).second };
@@ -2084,6 +2176,20 @@ namespace gxfile {
         return true;
     }
 
+    // Summary:
+    //   Retrieve the domain of a symbol (using relaxed or domain information)
+    // Arguments:
+    //   SyNr: The index number of the symbol, range 1..NrSymbols
+    //   DomainIDs[D] will contain the strings as they were stored with the call
+    //   gdxSymbolSetDomainX. If gdxSymbolSetDomainX was never called, but gdxSymbolSetDomain
+    //   was called, that information will be used instead.
+    // Returns:
+    //   0: If operation was not possible (Bad SyNr)
+    //   1: No domain information was available
+    //   2: Data used was defined using gdxSymbolSetDomainX
+    //   3: Data used was defined using gdxSymbolSetDomain
+    // See Also:
+    //   gdxSymbolSetDomainX, gdxSymbolSetDomain
     int TGXFileObj::gdxSymbolGetDomainX(int SyNr, TgdxStrIndex &DomainIDs) {
         if (ErrorCondition(!NameList.empty() && SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return 0;
         PgdxSymbRecord SyPtr{ (*symbolWithIndex(SyNr)).second };
@@ -2152,6 +2258,23 @@ namespace gxfile {
         }
     }
 
+    // Summary:
+    //   Define the domain of a symbol
+    // Arguments:
+    //   DomainIDs: array of identifers or *
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Description:
+    //   This function defines the domain for the symbol for which a write
+    //     data operation just started using DataWriteRawStart, DataWriteMapStart or
+    //     DataWriteStrStart. At this point the symbol and dimension is known,
+    //     but no data has been written yet.
+    //   Each identifier will be checked to be a one dimensional set or an alias.
+    //   When a domain is specified, write operations will be domain checked; records
+    //   violating the domain will be added the the internal error list (see DataErrorCount
+    //   and DataErrorRecord.)
+    // See Also:
+    //   gdxSymbolGetDomain
     int TGXFileObj::gdxSymbolSetDomain(const TgdxStrIndex &DomainIDs) {
         int res{ false }, SyNr;
         TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
@@ -2203,6 +2326,20 @@ namespace gxfile {
         return res;
     }
 
+    // Summary:
+    //   Define the domain of a symbol (relaxed version)
+    // Arguments:
+    //   DomainIDs: array of identifers or *
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Description:
+    //   This function defines the relaxed domain information for the symbol SyNr.
+    //   The identifiers will NOT be checked to be known one-dimensional sets, and
+    //   no domain checking will be performed. This function can be called during or after
+    //   the write operation.
+    //   If domain checking is needed, use gdxSymbolSetDomain
+    // See Also:
+    //   gdxSymbolSetDomain, gdxSymbolGetDomainX
     int TGXFileObj::gdxSymbolSetDomainX(int SyNr, const TgdxStrIndex& DomainIDs) {
         // check for write or append only
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
@@ -2238,6 +2375,12 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Finish registration of unique elements
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxUELRegisterRawStart, gdxUELRegisterMapStart, gdxUELRegisterStrStart
     int TGXFileObj::gdxUELRegisterDone() {
         TgxModeSet AllowedModes{ f_raw_elem,f_map_elem,f_str_elem };
         if (!MajorCheckMode("UELRegisterDone", AllowedModes)) return false;
@@ -2245,6 +2388,18 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Register an unique elements in raw mode
+    // Arguments:
+    //   Uel: String for unique element
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxUELRegisterMap, gdxUELRegisterDone
+    // Description:
+    //  The unique element is registered in raw mode, i.e. the internally
+    //  assigned integer index is determined by the system
+    //  Can only be used while writing to a gdx file
     int TGXFileObj::gdxUELRegisterRaw(const std::string &Uel) {
         TgxModeSet AllowedModes{ f_raw_elem };
         if (TraceLevel >= trl_all || !utils::in(fmode, AllowedModes) && CheckMode("UELRegisterRaw", AllowedModes))
@@ -2255,6 +2410,12 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Start registering unique elements in raw mode
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxUELRegisterRaw, gdxUELRegisterDone
     int TGXFileObj::gdxUELRegisterRawStart() {
         TgxModeSet AllowedModes { fw_init };
         if (!MajorCheckMode("UELRegisterRawStart", AllowedModes)) return false;
@@ -2263,6 +2424,20 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Register a unique element in string mode
+    // Arguments:
+    //   Uel: String for unique element
+    //   UelNr: Index number assigned to this unique element in user space
+    // Returns:
+    //   Non-zero if the element was registered, zero otherwise.
+    // Description:
+    //  The unique element is registered in user mapped space. The returned
+    //  index is the next higher value. Registering an element a second time
+    //  is not considered an error and the same index position will be returned.
+    //   A unique element must follow the GAMS rules when it contains quote characters.
+    // See Also:
+    //   gdxUELRegisterStrStart, gdxUELRegisterDone
     int TGXFileObj::gdxUELRegisterStr(const std::string &Uel, int &UelNr) {
         const TgxModeSet AllowedModes{ f_str_elem };
         if ((TraceLevel >= trl_all || !utils::in(fmode, AllowedModes)) && CheckMode("UELRegisterStr", AllowedModes))
@@ -2273,6 +2448,13 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Start registering unique elements in string mode
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxUELRegisterStr, gdxUELRegisterDone
+    // Description:
     int TGXFileObj::gdxUELRegisterStrStart() {
         TgxModeSet AllowedModes{ fr_init, fw_init };
         if (!MajorCheckMode("UELRegisterStrStart", AllowedModes)) return false;
@@ -2281,6 +2463,18 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Get a unique element using an unmapped index
+    // Arguments:
+    //   UelNr: Element number (unmapped) in the range 1..NrElem
+    //   Uel: String for unique element
+    //   UelMap: User mapping for this element or -1 if element was never mapped
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxUMUelInfo, gdxGetUEL
+    // Description:
+    //
     int TGXFileObj::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
         if (!UELTable.empty() && UelNr >= 1 && UelNr <= UELTable.size()) {
             Uel = UELTable[UelNr-1];
@@ -2294,6 +2488,16 @@ namespace gxfile {
         }
     }
 
+    // Brief:
+    //   Return information about the unique elements
+    // Arguments:
+    //   UelCnt: Total number of unique elements (uels in gdx file + new registered uels)
+    //   HighMap: Highest user mapping index used
+    // Returns:
+    //   Always returns non-zero
+    // See Also:
+    //  gdxUMUelGet
+    // Description:
     int TGXFileObj::gdxUMUelInfo(int &UelCnt, int &HighMap) {
         if (!FFile) { // AS: Use FFile != nullptr as proxy for checking open has been called before
             UelCnt = HighMap = 0;
