@@ -352,8 +352,9 @@ namespace tests::gdxinterfacetests {
             const std::array<int, 4> randomOrder { 8, 10, 1, 3 };
 
             REQUIRE(pgx.gdxUELRegisterMapStart());
-            for(const auto &[ix, name] : userUelMapping)
-                REQUIRE(pgx.gdxUELRegisterMap(ix, name));
+            for(const auto &pair : userUelMapping) {
+                REQUIRE(pgx.gdxUELRegisterMap(pair.first, pair.second));
+            }
             REQUIRE(pgx.gdxUELRegisterDone());
 
             REQUIRE(pgx.gdxDataWriteMapStart("mysym", "This is my symbol!", 1, global::gmsspecs::gms_dt_par, 0));
