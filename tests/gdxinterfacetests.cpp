@@ -327,7 +327,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxGetSpecialValues(specialValuesFromPort));
         }
         for(int i{}; i<specialValuesFromPort.size(); i++) {
-            REQUIRE_EQ(specialValuesFromWrap[i], specialValuesFromPort[i]);
+            const double eps = 0.001;
+            REQUIRE(specialValuesFromWrap[i] - specialValuesFromPort[i] < eps);
         }
     }
 
