@@ -4,6 +4,8 @@
 #include "../global/modhead.h"
 #include "../global/gmsspecs.h"
 #include <limits>
+#include <algorithm>
+#include <optional>
 
 namespace gdlib::datastorage {
 
@@ -67,21 +69,32 @@ namespace gdlib::datastorage {
             return data.back().second;
         }
 
-        void Sort(const std::vector<int> &AMap) {
+        void Sort() {
+            std::sort(data.begin(), data.end(), [&](const std::pair<global::gmsspecs::TIndex, T>& p1, const std::pair<global::gmsspecs::TIndex, T>& p2) {
+                for (int D{}; D < FDimension; D++) {
+                    if (p1.first[D] >= p2.first[D]) return false;
+                }
+                return true;
+                //return p1.first < p2.first;
+            });
+        }
 
+        void SortDelphiStyle(const std::optional<std::vector<int>> &AMap = std::nullopt) {
             auto IsSorted = [&]() {
                 int KD{};
-                std::vector<int> *PrevKey{};
-                for(const auto &[keys, obj] : data) {
+                const global::gmsspecs::TIndex * PrevKey{};
+                for(const std::pair<global::gmsspecs::TIndex, T> &pair : data) {
+                    const global::gmsspecs::TIndex &keys = pair.first;
                     if(PrevKey) {
                         for (int D{}; D < FDimension; D++) {
-                            KD = keys[D] - PrevKey[D];
+                            KD = keys[D] - (*PrevKey)[D];
                             if (KD) break;
                         }
                         if (KD < 0) return false;
                     }
-                    PrevKey = keys;
+                    PrevKey = &keys;
                 }
+                return true;
             };
 
             if(data.empty() || IsSorted()) return;
@@ -92,8 +105,9 @@ namespace gdlib::datastorage {
             for(int Key{}; Key < FMaxKey - KeyBase; Key++) {
                 Head[Key] = nullptr;
                 for(int D{FDimension-1}; D >= 0; D--) {
-                    for(const auto &[keys, obj] : data) {
-                        Key = (AMap.empty() ? keys[D] : keys[AMap[D]]) - KeyBase;
+                    for(const std::pair<global::gmsspecs::TIndex, T>& pair : data) {
+                        const global::gmsspecs::TIndex& keys = pair.first;
+                        Key = (!AMap ? keys[D] : keys[(*AMap)[D]]) - KeyBase;
                     }
                     /*for(int Key{FMaxKey}; Key >= 0; Key--) {
                         // ...

@@ -30,6 +30,7 @@ namespace tests::xp_example1 {
     void WriteData(gdxinterface::GDXInterface &PGX,
                    const std::string &s,
                    double V) {
+        Indx[0] = s;
         Values[global::gmsspecs::vallevel] = V;
         PGX.gdxDataWriteStr(Indx, Values);
     }

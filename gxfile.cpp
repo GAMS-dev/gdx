@@ -414,9 +414,8 @@ namespace gxfile {
         if(!MajorCheckMode("DataWriteDone"s, AllowedModes)) return false;
         if(!utils::in(fmode, fw_raw_data, fw_dom_raw)) {
             InitDoWrite(static_cast<int>(SortList->size()));
+            SortList->Sort();
             for(const auto &[keys, values] : *SortList) {
-                /*TIndex AElements;
-                gxdefs::TgdxValues AVals;*/
                 DoWrite(keys, values);
             }
             SortList->clear();

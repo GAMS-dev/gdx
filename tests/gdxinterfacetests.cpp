@@ -337,8 +337,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test writing mapped records out of order") {
-        // FIXME: This test is not working yet for the ported GDX object!
-        std::string f1{ "mapped_outoforder_wrapper.gdx" }, f2; // {"mapped_outoforder_port.gdx"};
+        std::string f1{ "mapped_outoforder_wrapper.gdx" }, f2 {"mapped_outoforder_port.gdx"};
         gxdefs::TgdxUELIndex  keys{};
         gxdefs::TgdxValues values{};
         testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
@@ -368,6 +367,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             REQUIRE_EQ(0, pgx.gdxDataErrorCount());
         });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
     }
 
     TEST_CASE("Test write and read record mapped") {
