@@ -1767,8 +1767,11 @@ namespace gxfile {
     //   gdxSymbolSetDomain
     int TGXFileObj::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
         if(!MajorCheckMode("AddAlias", AnyWriteMode)) return false;
-        int SyNr1 = Id1 == "*" ? std::numeric_limits<int>::max() : NameList[Id1]->SSyNr;
-        int SyNr2 = Id2 == "*" ? std::numeric_limits<int>::max() : NameList[Id2]->SSyNr;
+        auto symbolNameToIndex = [&](const std::string &name) {
+            auto it = NameList.find(name);
+            return name == "*" ? std::numeric_limits<int>::max() : it == NameList.end() ? -1 : it->second->SSyNr;
+        };
+        int SyNr1 { symbolNameToIndex(Id1) }, SyNr2 { symbolNameToIndex(Id2) };
         if(ErrorCondition((SyNr1 >= 0) != (SyNr2 >= 0), ERR_ALIASSETEXPECTED)) return false;
         int SyNr;
         std::string AName;

@@ -410,6 +410,35 @@ namespace tests::gdxinterfacetests {
             std::filesystem::remove(fn);
     }
 
+    TEST_CASE("Test adding a set alias") {
+        const std::string f1 {"addalias_wrap.gdx"}, f2 {"addalias_port.gdx"};
+        testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "A set", 1, global::gmsspecs::dt_set, 0));
+            REQUIRE(pgx.gdxDataWriteDone());
+            int numSymbols, numUels, symbolCountBefore;
+            REQUIRE(pgx.gdxSystemInfo(symbolCountBefore, numUels));
+            REQUIRE_EQ(1, symbolCountBefore);
+            REQUIRE(pgx.gdxAddAlias("i", "aliasI"));
+            REQUIRE(pgx.gdxSystemInfo(numSymbols, numUels));
+            REQUIRE_EQ(symbolCountBefore + 1, numSymbols);
+            int aliasIx;
+            REQUIRE(pgx.gdxFindSymbol("aliasI", aliasIx));
+            REQUIRE_EQ(2, aliasIx);
+            int numRecords, userInfo, dim, typ;
+            std::string explText, symbolName;
+            REQUIRE(pgx.gdxSymbolInfoX(2, numRecords, userInfo, explText));
+            REQUIRE(pgx.gdxSymbolInfo(2, symbolName, dim, typ));
+            REQUIRE_EQ(0, numRecords);
+            REQUIRE_EQ(1, userInfo); // symbol index of "i"
+            REQUIRE_EQ("Aliased with i", explText);
+            REQUIRE_EQ("aliasI", symbolName);
+            REQUIRE_EQ(1, dim);
+            REQUIRE_EQ(global::gmsspecs::dt_alias, typ);
+        });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
+    }
+
     TEST_CASE("Test reading/extracting data from gamslib/trnsport example") {
         const std::array expectedSymbolNames {
             "a"s, "b"s, "c"s,
