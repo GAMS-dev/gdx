@@ -310,6 +310,7 @@ namespace gxfile {
         TraceLevel = trl_none;
         InitErrors();
         NameList.clear();
+        NameListOrdered.clear();
         UELTable.clear();
         AcronymList.clear();
         FilterList.clear();
@@ -452,7 +453,8 @@ namespace gxfile {
             int64_t SymbPos = NextWritePosition;
             FFile->WriteString(MARK_SYMB);
             FFile->WriteInteger(static_cast<int>(NameList.size()));
-            for(const auto &[name, PSy] : NameList) {
+            for(const auto &name : NameListOrdered) {
+                const auto &PSy = NameList[name];
                 FFile->WriteString(name);
                 FFile->WriteInt64(PSy->SPosition);
                 FFile->WriteInteger(PSy->SDim);
@@ -510,7 +512,8 @@ namespace gxfile {
                 FFile->WriteString(DomStr);
             FFile->WriteString(MARK_DOMS);
             int ix{};
-            for(const auto &[name, PSy] : NameList) {
+            for(const auto &name : NameListOrdered) {
+                const auto &PSy = NameList[name];
                 if(!PSy->SDomStrings.empty()) {
                     FFile->WriteInteger(ix);
                     for(const auto &i : PSy->SDomStrings)
@@ -627,8 +630,9 @@ namespace gxfile {
         obj->SDomSymbols.clear();
         obj->SDomStrings.clear();
 
-        CurSyPtr->SSyNr = static_cast<int>(NameList.size()+1); // +1 for universe
+        CurSyPtr->SSyNr = static_cast<int>(NameListOrdered.size()+1); // +1 for universe
         NameList[AName] = CurSyPtr;
+        NameListOrdered.push_back(AName);
         FCurrentDim = ADim;
         // old case; we never write V6
         // V = 0..Dim which dimension changed
@@ -1411,9 +1415,13 @@ namespace gxfile {
             SyNr = 0;
             return true;
         }
-        const auto it = NameList.find(SyId);
-        if (it == NameList.end()) return false;
-        SyNr = (*it).second->SSyNr;
+        // FIXME: This is slow (linear), use RB-tree instead
+        const auto it = std::find_if(NameListOrdered.begin(), NameListOrdered.end(), [&](const std::string &name) {
+           return  utils::sameText(SyId, name);
+        });
+        if(it == NameListOrdered.end()) return false;
+        //SyNr = (*it).second->SSyNr;
+        SyNr = static_cast<int>(std::distance(NameListOrdered.begin(), it) + 1);
         return true;
     }
 
@@ -1630,6 +1638,7 @@ namespace gxfile {
         if(ErrorCondition(FFile->ReadString() == MARK_SYMB, ERR_OPEN_SYMBOLMARKER1)) return FileErrorNr();
         int NrElem {FFile->ReadInteger()};
         NameList.clear();
+        NameListOrdered.clear();
         AcronymList.clear();
         FilterList.clear();
         const int NrElemsOfSym = NrElem;
@@ -1661,7 +1670,8 @@ namespace gxfile {
             CurSyPtr->SSetBitMap.clear();
             CurSyPtr->SDomStrings.clear();
             NameList[S] = CurSyPtr;
-            CurSyPtr->SSyNr = static_cast<int>(NameList.size());
+            NameListOrdered.push_back(S);
+            CurSyPtr->SSyNr = static_cast<int>(NameListOrdered.size());
         }
 
         // reading UEL table
@@ -1745,10 +1755,13 @@ namespace gxfile {
 
     std::optional<std::pair<const std::string, PgdxSymbRecord>> TGXFileObj::symbolWithIndex(int index) {
         // FIXME: This is super slow. How to get both by name and by index lookups with good time complexity?
-        auto it = std::find_if(NameList.begin(), NameList.end(), [&index](const auto &pair) {
+        /*auto it = std::find_if(NameList.begin(), NameList.end(), [&index](const auto &pair) {
             return pair.second->SSyNr == index;
         });
-        return it == NameList.end() ? std::nullopt : std::make_optional(*it);
+        return it == NameList.end() ? std::nullopt : std::make_optional(*it);*/
+        if(index < 1 || index > NameList.size()) return std::nullopt;
+        std::string name = NameListOrdered[index-1];
+        return std::make_optional(std::make_pair(name, NameList[name]));
     }
 
     // Summary:
@@ -1768,8 +1781,8 @@ namespace gxfile {
     int TGXFileObj::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
         if(!MajorCheckMode("AddAlias", AnyWriteMode)) return false;
         auto symbolNameToIndex = [&](const std::string &name) {
-            auto it = NameList.find(name);
-            return name == "*" ? std::numeric_limits<int>::max() : it == NameList.end() ? -1 : it->second->SSyNr;
+            // FIXME: A lookup through NameList map would be faster *but* SSyNr is not set correctly for alias objects in memory!
+            return name == "*" ? std::numeric_limits<int>::max() : utils::indexOf(NameListOrdered, name, -2) + 1;
         };
         int SyNr1 { symbolNameToIndex(Id1) }, SyNr2 { symbolNameToIndex(Id2) };
         if(ErrorCondition((SyNr1 >= 0) != (SyNr2 >= 0), ERR_ALIASSETEXPECTED)) return false;
@@ -1795,7 +1808,9 @@ namespace gxfile {
             SyPtr->SDim = symbolWithIndex(SyNr)->second->SDim;
             SyPtr->SExplTxt = "Aliased with "s + symbolWithIndex(SyNr)->first;
         }
+        // TODO: Also the Delphi source does not set SSyNr here correctly, what to do?
         NameList[AName] = SyPtr;
+        NameListOrdered.push_back(AName);
         return true;
     }
 

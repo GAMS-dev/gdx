@@ -223,6 +223,8 @@ namespace gxfile {
         int DataSize{};
         global::gmsspecs::tvarvaltype LastDataField;
         std::map<std::string, PgdxSymbRecord, strCompCaseInsensitive> NameList;
+        // symbol names in order of insertion, needed since SSyNr is not set correctly for alias (in add alias)
+        std::vector<std::string> NameListOrdered;
         std::vector<std::string> DomainStrList;
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
         //std::map<global::gmsspecs::TIndex, gxdefs::TgdxValues> SortList;
