@@ -9,7 +9,7 @@ using namespace std::literals::string_literals;
 namespace tests::gdxinterfacetests {
     TEST_SUITE_BEGIN("GDX interface tests");
 
-    static std::ostream mycout {&gxfile::null_buffer};
+    static std::ostream &mycout = std::cout; // {&gxfile::null_buffer};
 
     auto getBuilders() {
         static std::string ErrMsg;
@@ -141,10 +141,11 @@ namespace tests::gdxinterfacetests {
 
     void testMatchingWrites(const std::string &filename1,
                             const std::string &filename2,
-                            const std::function<void(gdxinterface::GDXInterface&)> &cb) {
+                            const std::function<void(gdxinterface::GDXInterface&)> &cb,
+                            bool skipDiffing = false) {
         testWriteOp<xpwrap::GDXFile>(filename1, cb);
         testWriteOp<gxfile::TGXFileObj>(filename2, cb);
-        if(!filename1.empty() && !filename2.empty()) {
+        if(!filename1.empty() && !filename2.empty() && !skipDiffing) {
             auto maybeMismatches = utils::binaryFileDiff(filename1, filename2);
             if (maybeMismatches) {
                 mycout << "Found " << maybeMismatches->size() << " mismatches between " << filename1 << " and " << filename2 << "\n";
@@ -430,7 +431,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test writing with set/get domain") {
-        const std::string f1 {"setgetdomain_wrap.gdx"}, f2{"setgetdomain_port.gdx"};
+        const std::string f1 {"setgetdomain_wrap.gdx"}, f2 {"setgetdomain_port.gdx"};
         testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface &pgx) {
             int numSyms, numUels;
             REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
@@ -457,10 +458,10 @@ namespace tests::gdxinterfacetests {
             gxdefs::TgdxStrIndex newSymDomainNames{"i", "j"}, domainIds;
 
             // FIXME: Why is set domain causing a mismatch here?
-            //REQUIRE(pgx.gdxSymbolSetDomainX(newSymNr, newSymDomainNames));
-            /*REQUIRE(pgx.gdxSymbolGetDomainX(newSymNr, domainIds));
+            REQUIRE(pgx.gdxSymbolSetDomainX(newSymNr, newSymDomainNames));
+            REQUIRE(pgx.gdxSymbolGetDomainX(newSymNr, domainIds));
             REQUIRE_EQ("i", domainIds[0]);
-            REQUIRE_EQ("j", domainIds[1]);*/
+            REQUIRE_EQ("j", domainIds[1]);
         });
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);

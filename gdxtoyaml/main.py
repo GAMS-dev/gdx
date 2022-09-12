@@ -112,17 +112,16 @@ def read_gdx(fn):
         domains['midsep'] = read_string()
 
         def dim_of_sym(index):
-            return int(syms['symbols'][index]['dim'])
+            return int(syms['symbols'][index - 1]['dim'])
 
-        def read_controlled_sym():
+        domains['controlled_syms'] = []
+        while True:
             sym_index = read_int()
-            return dict(sym_index=sym_index,
-                        dom_indices=[read_int() for _ in range(dim_of_sym(sym_index))])
-
-        if num_domains > 0:
-            domains['controlled_syms'] = {read_controlled_sym() for _ in range(num_domains)}
-
-        domains['check_minus_one'] = read_int()
+            # -1 marks end of controlled symbol list
+            if sym_index <= 0:
+                break
+            csym = dict(sym_index=sym_index, dom_indices=[read_int() for _ in range(dim_of_sym(sym_index))])
+            domains['controlled_syms'].append(csym)
         domains['foot'] = read_string()
 
         data = {}

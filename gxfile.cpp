@@ -510,7 +510,7 @@ namespace gxfile {
             for(const auto &DomStr : DomainStrList)
                 FFile->WriteString(DomStr);
             FFile->WriteString(MARK_DOMS);
-            int ix{};
+            int ix{1};
             for(const auto &name : NameListOrdered) {
                 const auto &PSy = NameList[name];
                 if(!PSy->SDomStrings.empty()) {
@@ -2344,17 +2344,17 @@ namespace gxfile {
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
         PgdxSymbRecord SyPtr = (*symbolWithIndex(SyNr)).second;
         if (SyPtr->SDim > 0) {
-            if (SyPtr->SDomStrings.empty()) {
-                SyPtr->SDomStrings.resize(SyPtr->SDim + 1);
-            }
+            if (SyPtr->SDomStrings.empty())
+                SyPtr->SDomStrings.resize(SyPtr->SDim);
             for (int D{}; D < SyPtr->SDim; D++) {
                 const std::string &S { DomainIDs[D] };
                 if (S.empty() || S == "*" || !IsGoodIdent(S)) SyPtr->SDomStrings[D] = 0;
                 else {
                     SyPtr->SDomStrings[D] = utils::indexOf(DomainStrList, S);
-                    if (SyPtr->SDomStrings[D] <= -1)
+                    if (SyPtr->SDomStrings[D] <= -1) {
                         DomainStrList.push_back(S);
-                    SyPtr->SDomStrings[D] = (int)DomainStrList.size();
+                        SyPtr->SDomStrings[D] = (int) DomainStrList.size();
+                    }
                 }
             }
         }
