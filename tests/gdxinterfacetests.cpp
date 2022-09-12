@@ -335,7 +335,14 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test setting special values") {
-        // TODO: Implement me!
+        basicTest([&](gdxinterface::GDXInterface &pgx) {
+            gxdefs::TgdxSVals moddedSpecVals, queriedSpecVals;
+            pgx.gdxGetSpecialValues(moddedSpecVals);
+            moddedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin] = 0.0;
+            pgx.gdxSetSpecialValues(moddedSpecVals);
+            pgx.gdxGetSpecialValues(queriedSpecVals);
+            REQUIRE_EQ(0.0, queriedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin]);
+        });
     }
 
     TEST_CASE("Test writing mapped records out of order") {
