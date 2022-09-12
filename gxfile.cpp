@@ -1830,7 +1830,7 @@ namespace gxfile {
         if(SetTextList.empty() || TraceLevel >= trl_all && !CheckMode("AddSetText", {}))
             return false;
         SetTextList.emplace_back(MakeGoodExplText(Txt));
-        TxtNr = static_cast<int>(SetTextList.size());
+        TxtNr = static_cast<int>(SetTextList.size()-1);
         return true;
     }
 
@@ -2062,7 +2062,7 @@ namespace gxfile {
             Txt = BADStr_PREFIX + std::to_string(TxtNr);
         } else {
             Txt = SetTextList[TxtNr];
-            //FIXME: Node = ???
+            Node = 0;
             return true;
         }
         return false;

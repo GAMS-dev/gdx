@@ -525,6 +525,31 @@ namespace tests::gdxinterfacetests {
             std::filesystem::remove(fn);
     }
 
+    TEST_CASE("Test creating and querying element text for sets") {
+        const std::string f1{ "elemtxt_wrap.gdx" }, f2{ "elemtxt_port.gdx" };
+        testMatchingWrites(f1, f2, [&](gdxinterface::GDXInterface& pgx) {
+            REQUIRE(pgx.gdxUELRegisterRawStart());
+            REQUIRE(pgx.gdxUELRegisterRaw("onlyuel"));
+            REQUIRE(pgx.gdxUELRegisterDone());
+            REQUIRE(pgx.gdxDataWriteRawStart("i", "expl", 1, global::gmsspecs::gms_dt_set, 0));
+            gxdefs::TgdxUELIndex keys;
+            gxdefs::TgdxValues values;
+            keys[0] = 1;
+            values[global::gmsspecs::tvarvaltype::vallevel] = 1;
+            REQUIRE(pgx.gdxDataWriteRaw(keys, values));
+            REQUIRE(pgx.gdxDataWriteDone());
+            int txtNr;
+            REQUIRE(pgx.gdxAddSetText("set text", txtNr));
+            int elemNode;
+            std::string elemTxt;
+            REQUIRE(pgx.gdxGetElemText(txtNr, elemTxt, elemNode));
+            REQUIRE_EQ("set text", elemTxt);
+            REQUIRE_EQ(0, elemNode);
+        });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
+    }
+
     TEST_CASE("Test reading/extracting data from gamslib/trnsport example") {
         const std::array expectedSymbolNames {
             "a"s, "b"s, "c"s,
