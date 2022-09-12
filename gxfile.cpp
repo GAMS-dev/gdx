@@ -2270,7 +2270,7 @@ namespace gxfile {
     //     but no data has been written yet.
     //   Each identifier will be checked to be a one dimensional set or an alias.
     //   When a domain is specified, write operations will be domain checked; records
-    //   violating the domain will be added the the internal error list (see DataErrorCount
+    //   violating the domain will be added to the internal error list (see DataErrorCount
     //   and DataErrorRecord.)
     // See Also:
     //   gdxSymbolGetDomain
@@ -2278,7 +2278,7 @@ namespace gxfile {
         int res{ false }, SyNr;
         TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
         if (!MajorCheckMode("SymbolSetDomain", AllowedModes) || !CurSyPtr) return res;
-        assert(!CurSyPtr->SDomSymbols.empty() && "SymbolSetDomain");
+        assert(CurSyPtr->SDomSymbols.empty() && "SymbolSetDomain");
         CurSyPtr->SDomSymbols.resize(CurSyPtr->SDim + 1);
         for (int D{}; D < CurSyPtr->SDim; D++) {
             bool domap = true;
