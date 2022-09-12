@@ -550,6 +550,39 @@ namespace tests::gdxinterfacetests {
             std::filesystem::remove(fn);
     }
 
+    TEST_CASE("Test invalid raw writing error processing") {
+        const std::string fn {"tmpfile.gdx"s};
+        gxdefs::TgdxUELIndex keys;
+        gxdefs::TgdxValues values;
+        basicTest([&](gdxinterface::GDXInterface& pgx) {
+            if(std::filesystem::exists(fn))
+                std::filesystem::remove(fn);
+            int errNr;
+            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errNr));
+            REQUIRE(pgx.gdxUELRegisterRawStart());
+            REQUIRE(pgx.gdxUELRegisterRaw("onlyuel1"));
+            REQUIRE(pgx.gdxUELRegisterRaw("onlyuel2"));
+            REQUIRE(pgx.gdxUELRegisterRaw("onlyuel3"));
+            REQUIRE(pgx.gdxUELRegisterDone());
+            REQUIRE(pgx.gdxDataWriteRawStart("i", "expl", 1, global::gmsspecs::gms_dt_set, 0));
+            keys[0] = 3;
+            REQUIRE(pgx.gdxDataWriteRaw(keys, values));
+            keys[0] = 1;
+            REQUIRE_FALSE(pgx.gdxDataWriteRaw(keys, values));
+            REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE_EQ(1, pgx.gdxErrorCount());
+            REQUIRE_EQ(1, pgx.gdxDataErrorCount());
+            REQUIRE(pgx.gdxDataErrorRecord(1, keys, values));
+            REQUIRE_EQ(1, keys.front());
+            int ec = pgx.gdxGetLastError();
+            std::string errMsg;
+            REQUIRE(pgx.gdxErrorStr(ec, errMsg));
+            REQUIRE_EQ("Data not sorted when writing raw", errMsg);
+            pgx.gdxClose();
+        });
+        std::filesystem::remove(fn);
+    }
+
     TEST_CASE("Test reading/extracting data from gamslib/trnsport example") {
         const std::array expectedSymbolNames {
             "a"s, "b"s, "c"s,

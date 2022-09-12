@@ -1892,7 +1892,7 @@ namespace gxfile {
             return false;
 
         if (!ErrorList.empty()) {
-            if (RecNr < 1 || RecNr >= ErrorList.size()) {
+            if (RecNr < 1 || RecNr > ErrorList.size()) {
                 ReportError(ERR_BADERRORRECORD);
             }
             else {
