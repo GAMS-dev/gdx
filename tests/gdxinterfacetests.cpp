@@ -581,6 +581,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(1, pgx.gdxDataErrorCount());
             REQUIRE(pgx.gdxDataErrorRecord(1, keys, values));
             REQUIRE_EQ(1, keys.front());
+            REQUIRE(pgx.gdxDataErrorRecordX(1, keys, values));
+            REQUIRE_EQ(1, keys.front());
             int ec = pgx.gdxGetLastError();
             std::string errMsg;
             REQUIRE(pgx.gdxErrorStr(ec, errMsg));
