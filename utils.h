@@ -358,4 +358,11 @@ namespace utils {
 
     std::optional<std::list<BinaryDiffMismatch>> binaryFileDiff(const std::string& filename1, const std::string& filename2, int countLimit = -1);
 
+    template<class T, int size>
+    std::array<T, size> arrayWithValue(T v) {
+        std::array<T, size> res;
+        res.fill(v);
+        return res;
+    }
+
 }

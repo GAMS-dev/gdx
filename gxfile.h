@@ -241,7 +241,7 @@ namespace gxfile {
         bool StoreDomainSets{true};
         TIntlValueMapDbl intlValueMapDbl, readIntlValueMapDbl;
         TIntlValueMapI64  intlValueMapI64;
-        enum { trl_none, trl_errors, trl_some, trl_all } TraceLevel;
+        enum class TraceLevels { trl_none, trl_errors, trl_some, trl_all } TraceLevel;
         std::string TraceStr;
         int VersionRead{};
         std::string FProducer, FProducer2, FileSystemID;
@@ -266,6 +266,8 @@ namespace gxfile {
         int AutoConvert{1};
         int NextAutoAcronym{};
         bool AppendActive{};
+
+        const TraceLevels defaultTraceLevel {TraceLevels::trl_none};
 
         bool PrepareSymbolWrite(const std::string &Caller, const std::string &AName, const std::string &AText, int ADim,
                                 int AType, int AUserInfo);
@@ -403,6 +405,8 @@ namespace gxfile {
         int gdxDataReadMapStart(int SyNr, int &NrRecs) override;
 
         int gdxDataReadMap(int RecNr, gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) override;
+
+        void SetTraceLevel(TraceLevels tl);
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from
