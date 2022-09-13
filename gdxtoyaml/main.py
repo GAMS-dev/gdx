@@ -1,13 +1,46 @@
+import copy
 import os
 import struct
 import yaml
 import sys
+
+sz_integer = 0
+sz_byte = 1
+sz_word = 2
+
+vm_valund = 0
+vm_valna = 1
+vm_valpin = 2
+vm_valmin = 3
+vm_valeps = 4
+vm_zero = 5
+vm_one = 6
+vm_mone = 7
+vm_half = 8
+vm_two = 9
+vm_normal = 10
+
+data_type_sizes = [1, 1, 5, 5, 0]
+
+
+def get_integer_size(n):
+    if n <= 0:
+        return sz_integer
+    elif n <= 255:
+        return sz_byte
+    elif n <= 65535:
+        return sz_word
+    else:
+        return sz_integer
 
 
 def read_gdx(fn):
     with open(fn, 'rb') as fp:
         def read_byte():
             return ord(fp.read(1))
+
+        def read_word():
+            return struct.unpack('H', fp.read(2))[0]
 
         def read_string():
             length = ord(fp.read(1))
@@ -30,9 +63,7 @@ def read_gdx(fn):
 
         header['example_double'] = read_dbl()
 
-        gdx_sig = {}
-        gdx_sig['gdx_header_nr'] = read_byte()
-        gdx_sig['gdx_header_id'] = read_string()
+        gdx_sig = {'gdx_header_nr': read_byte(), 'gdx_header_id': read_string()}
         gdx_sig['version'] = version = read_int()
         gdx_sig['compressed'] = read_int()
 
@@ -76,8 +107,7 @@ def read_gdx(fn):
             return sym
 
         fp.seek(index_pos['symbols_pos'])
-        syms = {}
-        syms['head'] = read_string()
+        syms = {'head': read_string()}
         syms['num_symbols'] = nsyms = read_int()
         syms['symbols'] = [read_symbol() for _ in range(nsyms)]
         syms['foot'] = read_string()
@@ -125,27 +155,47 @@ def read_gdx(fn):
         domains['foot'] = read_string()
 
         data = {}
-        for sym_name, data_offs in sym_to_data_offs.items():
+        for sym_index, (sym_name, data_offs) in enumerate(sym_to_data_offs.items()):
             fp.seek(data_offs)
             data_block = dict(head=read_string())
             data[sym_name] = data_block
-            data_block['dim'] = read_byte()
-            data_block['num_records'] = num_records = read_int()
-            data_block['min_uel'] = read_int()
-            data_block['max_uel'] = read_int()
+            data_block['dim'] = sdim = read_byte()
+            data_block['ignored_record_count'] = read_int()
+            data_block['min_uel'], data_block['max_uel'], elem_type = [], [], []
 
-            # FIXME: Correctly treat key for scalar, small change in last dim and general change
-            def read_record(ix):
-                rec = dict(key=read_byte())
-                if ix == 0:  # for now assume first is general change and afterwards small change
-                    rec['key2'] = read_byte()
-                rec['value_type'] = read_byte()
-                if rec['value_type'] == 10:
-                    rec['value'] = read_dbl()
-                return rec
+            for d in range(sdim):
+                min_elem, max_elem = read_int(), read_int()
+                data_block['min_uel'].append(min_elem)
+                data_block['max_uel'].append(max_elem)
+                elem_type.append(get_integer_size(max_elem - min_elem + 1))
 
-            data_block['records'] = [read_record(ix) for ix in range(num_records)]
-            data_block['end_of_data_marker'] = read_byte()  # should be 255
+            elem_type_to_read_func = {
+                sz_integer: read_int,
+                sz_byte: read_byte,
+                sz_word: read_word
+            }
+
+            data_block['records'] = []
+            while True:
+                b = read_byte()
+                record = {}
+                if b > sdim:
+                    if b == 255: break
+                    if sdim > 0:
+                        mod_keys = copy.copy(data_block['records'][-1]['keys'])
+                        mod_keys[sdim-1] += b-sdim
+                        record['keys'] = mod_keys
+                else:
+                    record['keys'] = [ elem_type_to_read_func[elem_type[d]]() + data_block['min_uel'][d] for d in range(sdim - b + 1) ]
+
+                record['values'] = []
+                for dv in range(data_type_sizes[syms['symbols'][sym_index]['type']]):
+                    bsv = read_byte()
+                    record['values'].append(0 if bsv != vm_normal else read_dbl())
+
+                data_block['records'].append(record)
+
+            data_block['end_of_data_marker'] = b # should be 255
 
         obj = dict(header=header,
                    gdx_signature=gdx_sig,
