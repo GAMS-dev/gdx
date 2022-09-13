@@ -318,7 +318,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test getting special values") {
-        gxdefs::TgdxSVals specialValuesFromWrap, specialValuesFromPort;
+        gxdefs::TgdxSVals specialValuesFromWrap{}, specialValuesFromPort{};
         std::string ErrMsg;
         {
             xpwrap::GDXFile pgx{ErrMsg};
@@ -560,8 +560,8 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test invalid raw writing error processing") {
         const std::string fn {"tmpfile.gdx"s};
-        gxdefs::TgdxUELIndex keys;
-        gxdefs::TgdxValues values;
+        gxdefs::TgdxUELIndex keys{};
+        gxdefs::TgdxValues values{};
         basicTest([&](gdxinterface::GDXInterface& pgx) {
             if(std::filesystem::exists(fn))
                 std::filesystem::remove(fn);

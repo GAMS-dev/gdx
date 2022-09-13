@@ -36,6 +36,8 @@ set(common
 		gdlib/xcompress.h gdlib/xcompress.cpp
 		gdlib/gmsglob.h gdlib/gmsglob.cpp
 		gdlib/gmsdata.h gdlib/gmsdata.cpp
+		gdlib/datastorage.cpp gdlib/datastorage.h
+		gdlib/runner.cpp gdlib/runner.h
 
 		expertapi/gdxcc.h expertapi/gdxcc.c
 		expertapi/gclgms.h expertapi/gclgms.c
@@ -46,15 +48,25 @@ set(common
 		simplegdx/twostream.h simplegdx/twostream.cpp
 		simplegdx/mistream.h simplegdx/mistream.cpp
 
+		gdxinterface.h
+		kvbuffers.h
 		utils.h utils.cpp
 		gxfile.h gxfile.cpp
-		gdxinterface.h
-		xpwrap.cpp xpwrap.h kvbuffers.h gxdefs.cpp gxdefs.h gdlib/datastorage.cpp gdlib/datastorage.h tests/gdxinterfacetests.cpp tests/xp_example1.cpp gdlib/runner.cpp gdlib/runner.h)
+		xpwrap.cpp xpwrap.h
+		gxdefs.cpp gxdefs.h
+)
 
-add_executable(gdxnativetest
-		${common}
+set(tests
 		tests/xptests.cpp
 		tests/doctestmain.cpp
 		tests/gxfiletests.cpp
-		tests/xpwraptests.cpp tests/tgxtests.cpp)
-target_link_libraries(gdxnativetest ${mylibs})
+		tests/xpwraptests.cpp
+		tests/tgxtests.cpp
+		tests/gdxinterfacetests.cpp
+		tests/xp_example1.cpp
+)
+
+add_library(gdxnativeshared STATIC ${common})
+
+add_executable(gdxnativetest ${tests})
+target_link_libraries(gdxnativetest gdxnativeshared ${mylibs})
