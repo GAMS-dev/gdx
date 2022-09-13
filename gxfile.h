@@ -26,7 +26,7 @@ namespace gdlib::gmsstrm {
 namespace gxfile {
     class NullBuffer : public std::streambuf {
     public:
-        int overflow(int c) { return c; }
+        int overflow(int c) override { return c; }
     };
     extern NullBuffer null_buffer;
 
@@ -153,13 +153,13 @@ namespace gxfile {
 
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     class TUELTable {
-        std::vector<std::string> uelNames;
-        std::map<std::string, int> nameToNum;
+        std::vector<std::string> uelNames {};
+        std::map<std::string, int> nameToNum {};
         // ...
-        TUELUserMapStatus FMapToUserStatus;
+        TUELUserMapStatus FMapToUserStatus {};
 
     public:
-        TIntegerMapping UsrUel2Ent; // from user uelnr to table entry
+        TIntegerMapping UsrUel2Ent {}; // from user uelnr to table entry
 
         void clear();
 
@@ -175,6 +175,8 @@ namespace gxfile {
         std::string operator[](int index);
 
         int GetUserMap(int i) const;
+
+        void SetUserMap(int EN, int N);
 
         void ResetMapToUserStatus();
 
@@ -251,7 +253,7 @@ namespace gxfile {
         std::array<TIntegerMapping, global::gmsspecs::MaxDim> SliceIndxs, SliceRevMap;
         int SliceSyNr{};
         gxdefs::TgdxStrIndex SliceElems;
-        void *ReadPtr{};
+        //void *ReadPtr{};
         bool    DoUncompress{}, // when reading
                 CompressOut{}; // when writing
         int DeltaForWrite{}; // delta for last dimension or first changed dimension

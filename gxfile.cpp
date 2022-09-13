@@ -305,7 +305,7 @@ namespace gxfile {
         fComprLev = Compr;
         CompressOut = Compr > 0;
         fmode = f_not_open;
-        ReadPtr = nullptr;
+        //ReadPtr = nullptr;
         MajContext = "OpenWrite";
         TraceLevel = trl_none;
         InitErrors();
@@ -536,10 +536,6 @@ namespace gxfile {
         int res{FFile ? FFile->GetLastIOResult() : 1};
 
         // Many free operations. Some not necessary anymore due to RAII pattern (out of scope -> destroy)
-
-        // ...
-        STUBWARN();
-
         for(const auto &[name, psy] : NameList)
             delete psy;
 
@@ -908,7 +904,7 @@ namespace gxfile {
                             SortList->AddItem(AElements, Avals);
                         }
                     }
-                    // FIXME: SortList->StartRead();
+                    SortList->Sort();
                     res = (int)SortList->size();
                 } catch(std::exception &e) {
                     std::cout << "Exception: " << e.what() << std::endl;
@@ -1419,6 +1415,7 @@ namespace gxfile {
            return  utils::sameText(SyId, name);
         });
         if(it == NameListOrdered.end()) return false;
+        // FIXME: The symbol number cannot be trusted because it is not set correctly for set alias (also in Delphi)
         //SyNr = (*it).second->SSyNr;
         SyNr = static_cast<int>(std::distance(NameListOrdered.begin(), it) + 1);
         return true;
@@ -1480,11 +1477,10 @@ namespace gxfile {
             int HighestIndex = UELTable.UsrUel2Ent.GetHighestIndex();
             for(int N{HighestIndex}; N >= HighestIndex - NrMappedAdded + 1; N--) {
                 assert(N >= 1 && "Wrong entry number");
-                int EN {UELTable.UsrUel2Ent[N]};
-                /*auto d {UELTable[EN]};
+                int EN {UELTable.UsrUel2Ent[N]}, // nr in ueltable
+                    d {UELTable.GetUserMap(EN)};
                 assert(d == -1 || d == N && "Mapped already");
-                UELTable[EN] = N;*/
-                // FIXME: Get mapped reading done fixed!
+                UELTable.SetUserMap(EN, N); // map to user entry
             }
             NrMappedAdded = 0;
         }
@@ -1522,11 +1518,10 @@ namespace gxfile {
         
         auto maybeNameAndSym = symbolWithIndex(SyNr);
         if (maybeNameAndSym) {
-            // TODO: Use destructuring of the pair here
-            auto nameAndSym = *maybeNameAndSym;
-            SyId = nameAndSym.first;
-            Dim = nameAndSym.second->SDim;
-            Typ = nameAndSym.second->SDataType;
+            auto &[name, sym] = *maybeNameAndSym;
+            SyId = name;
+            Dim = sym->SDim;
+            Typ = sym->SDataType;
             return true;
         }
 
@@ -1570,7 +1565,7 @@ namespace gxfile {
         MajContext = "OpenRead"s;
         TraceLevel = trl_none;
         fmode = f_not_open;
-        ReadPtr = nullptr;
+        //ReadPtr = nullptr;
         InitErrors();
 
         auto FileErrorNr = [&]() {
@@ -1727,8 +1722,8 @@ namespace gxfile {
             FFile->SetPosition(DomStrPos);
             if(ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER1)) return FileErrorNr();
             DomainStrList.resize(FFile->ReadInteger());
-            for (int i = 0; i < DomainStrList.size(); i++)
-                DomainStrList[i] = FFile->ReadString();
+            for (auto & i : DomainStrList)
+                i = FFile->ReadString();
             if (ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER2)) return FileErrorNr();
             while (true) {
                 int SyNr = FFile->ReadInteger();
@@ -1753,11 +1748,6 @@ namespace gxfile {
     }
 
     std::optional<std::pair<const std::string, PgdxSymbRecord>> TGXFileObj::symbolWithIndex(int index) {
-        // FIXME: This is super slow. How to get both by name and by index lookups with good time complexity?
-        /*auto it = std::find_if(NameList.begin(), NameList.end(), [&index](const auto &pair) {
-            return pair.second->SSyNr == index;
-        });
-        return it == NameList.end() ? std::nullopt : std::make_optional(*it);*/
         if(index < 1 || index > NameList.size()) return std::nullopt;
         std::string name = NameListOrdered[index-1];
         return std::make_optional(std::make_pair(name, NameList[name]));
@@ -2738,7 +2728,7 @@ namespace gxfile {
         }
         if(fmode == fr_map_data) {
             DimFrst = 0;
-            if(!ReadPtr) return false;
+            //if(!ReadPtr) return false;
             auto first = (*SortList->begin());
             KeyInt = first.first;
             Values = first.second;
@@ -2902,7 +2892,12 @@ namespace gxfile {
     }
 
     int TUELTable::GetUserMap(int i) const {
-        return UsrUel2Ent.GetReverseMapping(i);
+        //return UsrUel2Ent.GetReverseMapping(i);
+        return nameToNum.at(uelNames[i-1]);
+    }
+
+    void TUELTable::SetUserMap(int EN, int N) {
+        nameToNum[uelNames[EN-1]] = N;
     }
 
     void TUELTable::ResetMapToUserStatus() {
@@ -2933,7 +2928,7 @@ namespace gxfile {
             int LV {-1};
             bool C {true};
             FMapToUserStatus = map_sortgrow;
-            for(int N{}; N<size(); N++) {
+            for(int N{1}; N<=size(); N++) {
                 int V = GetUserMap(N);
                 if(V < 0) C = false;
                 else if(V > LV) {

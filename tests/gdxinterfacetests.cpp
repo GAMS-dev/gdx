@@ -441,6 +441,7 @@ namespace tests::gdxinterfacetests {
     void domainSetGetTestSetupPrefix(gdxinterface::GDXInterface &pgx) {
         int numSyms, numUels;
         REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
+        REQUIRE_EQ(0, numUels);
         REQUIRE_EQ(0, numSyms);
 
         REQUIRE(pgx.gdxDataWriteStrStart("i", "", 1, global::gmsspecs::dt_set, 0));
