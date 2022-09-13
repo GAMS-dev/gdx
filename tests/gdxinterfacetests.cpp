@@ -140,6 +140,16 @@ namespace tests::gdxinterfacetests {
         testReadOp<gxfile::TGXFileObj>(filename2, cb);
     }
 
+    void runGdxToYamlScript(const std::string &filename1 = ""s, const std::string &filename2 = ""s) {
+#if defined(__APPLE__) || defined(__linux__)
+        const std::string pythonInterpreter {"python3"};
+#else
+        const std::string pythonInterpreter {"python"};
+#endif
+        std::string f2 = filename2.empty() ? ""s : " "s + filename2;
+        system((pythonInterpreter + " gdxtoyaml/main.py "s + filename1 + f2).c_str());
+    }
+
     void testMatchingWrites(const std::string &filename1,
                             const std::string &filename2,
                             const std::function<void(gdxinterface::GDXInterface&)> &cb,
@@ -160,12 +170,7 @@ namespace tests::gdxinterfacetests {
                     }
                 }
                 mycout << std::endl;
-#if defined(__APPLE__) || defined(__linux__)
-                const std::string pythonInterpreter {"python3"};
-#else
-                const std::string pythonInterpreter {"python"};
-#endif
-                system((pythonInterpreter + " gdxtoyaml/main.py "s + filename1 + " "s + filename2).c_str());
+                runGdxToYamlScript(filename1, filename2);
             } else mycout << "No mismatches found between " << filename1 << " and " << filename2 << std::endl;
             REQUIRE_FALSE(maybeMismatches);
         }
