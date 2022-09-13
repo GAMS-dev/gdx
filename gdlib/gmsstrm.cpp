@@ -689,7 +689,7 @@ namespace gdlib::gmsstrm {
     {
         if (FileIsOpen) {
             FS->close();
-            SetLastIOResult(FS->bad() ? 1 : 0);
+            SetLastIOResult(!FS->good() ? 1 : 0);
         }
     }
 

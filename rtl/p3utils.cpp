@@ -255,15 +255,15 @@ namespace rtl::p3utils {
     {
         std::ios::openmode itsMode{ std::ios::binary };
         switch (mode) {
-            case p3OpenRead:
-                itsMode |= std::ios::in;
-                break;
-            case p3OpenWrite:
-                itsMode |= std::ios::out;
-                break;
-            case p3OpenReadWrite:
-                itsMode |= std::ios::in | std::ios::out;
-                break;
+        case p3OpenRead:
+            itsMode |= std::ios::in;
+            break;
+        case p3OpenWrite:
+            itsMode |= std::ios::out;
+            break;
+        case p3OpenReadWrite:
+            itsMode |= std::ios::in | std::ios::out;
+            break;
         }
         h->open(fName, itsMode);
         bool f = h->fail();
@@ -372,7 +372,7 @@ namespace rtl::p3utils {
                 } while(k <= bufLen);
             } else {
                 std::string prefix{"/etc/xdg"},
-                        suffix {((isDataLoc || isAppConfigLoc) && !appName.empty() ? "/"s + appName : ""s)};
+                            suffix {((isDataLoc || isAppConfigLoc) && !appName.empty() ? "/"s + appName : ""s)};
                 if(isDataLoc) {
                     prefix = "/usr/local/share";
                     locNames.emplace_back(prefix + suffix);
@@ -473,16 +473,16 @@ namespace rtl::p3utils {
 
     const int MAXDIGITS = 17; // at most this many decimal digits from a double
     const std::array<double, MAXDIGITS+1> tenPow = {
-            1e00, 1e01, 1e02, 1e03, 1e04, 1e05, 1e06, 1e07, 1e08, 1e09,
-            1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17
+        1e00, 1e01, 1e02, 1e03, 1e04, 1e05, 1e06, 1e07, 1e08, 1e09,
+        1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17
     };
     const int MINTWOS = 4;
     const int MAXTWOS = 8;
     const std::array<int, MAXTWOS-MINTWOS+1> twoPow = {
-            16, 32, 64, 128, 256
+        16, 32, 64, 128, 256
     };
     const std::array<double, MAXTWOS-MINTWOS+1> tenTwoPow = {
-            1e16, 1e32, 1e64, 1e128, 1e256
+        1e16, 1e32, 1e64, 1e128, 1e256
     };
 
     bool delphiGetDecDigits(double y, int mode, int nDigits, std::string& digits, int& decPos, int& minusCnt)
@@ -510,7 +510,7 @@ namespace rtl::p3utils {
     // i64 is assumed to contain a positive int < 1e17
     std::string getDigits(int64_t i64) {
         const int   M = 100000000,
-                LOGM = 8;
+                    LOGM = 8;
         std::string res;
         auto i = static_cast<int>(i64);
         if (i == i64) return std::to_string(i);
@@ -613,7 +613,7 @@ namespace rtl::p3utils {
         return false;
 #else
         std::string s { dir.empty() ? ExcludeTrailingPathDelimiter((ExtractFilePath(ParamStrZero()))) : dir },
-                ldPath = loadPathVarName();
+                    ldPath = loadPathVarName();
         if(ldPath.empty()) return true;
         const char *tptr {getenv(ldPath.c_str())};
         return setEnvironmentVariableUnix(ldPath, s + (tptr ? ""s + rtl::sysutils_p3::PathSep + tptr : ""s));
@@ -666,7 +666,7 @@ namespace rtl::p3utils {
 
     bool p3GetFirstMACAddress(std::string &mac) {
 #if defined(__linux__)
-        {
+{
    struct ifreq ifr;
    struct ifconf ifc;
    char buf[1024];
@@ -710,7 +710,7 @@ namespace rtl::p3utils {
    return false;
 } /* if __linux__ */
 #elif defined(__APPLE__)
-        {
+{
   char prevName[IF_NAMESIZE];
   int mib[6];
   int sock;
@@ -776,7 +776,7 @@ namespace rtl::p3utils {
   return false;
 } /* if __APPLE__ */
 #elif defined(_WIN32)
-        ULONG bufSiz, prevBufSiz;
+  ULONG bufSiz, prevBufSiz;
   ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
   prevBufSiz = bufSiz = 4096;
   int nTries = 0, maxTries = 3;
