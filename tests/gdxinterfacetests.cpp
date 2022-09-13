@@ -667,6 +667,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(1, symNr);
             REQUIRE_EQ(1, pgx.gdxSymbolDim(1));
 
+            REQUIRE(pgx.gdxFindSymbol("*", symNr));
+            REQUIRE_EQ(0, symNr);
+
             // d(i,j) is symbol 5
             REQUIRE(pgx.gdxFindSymbol("d", symNr));
             REQUIRE_EQ(5, symNr);
@@ -684,6 +687,61 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ("j", domainIds[1]);
         });
         std::filesystem::remove(gdxfn);
+    }
+
+    TEST_CASE("Tests related to universe") {
+        basicTest([](gdxinterface::GDXInterface &pgx) {
+            int errNr;
+            auto fn = "universe_tests.gdx"s;
+            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errNr));
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "A set", 1, global::gmsspecs::dt_set, 0));
+            gxdefs::TgdxStrIndex keys{};
+            gxdefs::TgdxValues vals{};
+            for(int i=1; i<=8; i++) {
+                keys[0] = "uel_" + std::to_string(i);
+                REQUIRE(pgx.gdxDataWriteStr(keys, vals));
+            }
+            REQUIRE(pgx.gdxDataWriteDone());
+
+            int symNr;
+            REQUIRE(pgx.gdxFindSymbol("*", symNr));
+            REQUIRE_EQ(0, symNr);
+
+            std::string symName;
+            int dim, typ;
+            REQUIRE(pgx.gdxSymbolInfo(0, symName, dim, typ));
+            REQUIRE_EQ("*", symName);
+            REQUIRE_EQ(1, dim);
+            REQUIRE_EQ(global::gmsspecs::dt_set, typ);
+
+            int recCnt, userInfo;
+            std::string explText;
+            REQUIRE(pgx.gdxSymbolInfoX(0, recCnt, userInfo, explText));
+            REQUIRE_EQ(0, recCnt);
+            REQUIRE_EQ(0, userInfo);
+            REQUIRE_EQ("Universe", explText);
+
+            pgx.gdxClose();
+
+            REQUIRE(pgx.gdxOpenRead(fn, errNr));
+
+            REQUIRE(pgx.gdxSymbolInfoX(0, recCnt, userInfo, explText));
+            REQUIRE(pgx.gdxFindSymbol("*", symNr));
+            REQUIRE_EQ(8, recCnt);
+
+            REQUIRE(pgx.gdxDataReadStrStart(0, recCnt));
+            int dimFirst;
+            REQUIRE_EQ(8, recCnt);
+            for(int i=1; i<=recCnt; i++) {
+                REQUIRE(pgx.gdxDataReadStr(keys, vals, dimFirst));
+                REQUIRE_EQ("uel_"+std::to_string(i), keys.front());
+            }
+            REQUIRE(pgx.gdxDataReadDone());
+
+            pgx.gdxClose();
+
+            std::filesystem::remove(fn);
+        });
     }
 
     TEST_SUITE_END();

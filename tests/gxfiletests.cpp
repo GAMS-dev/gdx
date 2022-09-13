@@ -95,5 +95,22 @@ namespace tests::gxfiletests {
         REQUIRE_EQ(5, mapping[3]);
     }
 
+    TEST_CASE("Test function for making a good explanatory text") {
+        REQUIRE_EQ("x", MakeGoodExplText("x"));
+        REQUIRE_EQ("Das hier ist ein Test?", MakeGoodExplText("Das hier ist ein Test\r"));
+        REQUIRE_EQ("Ein \"gemischter\" \"Text\"!", MakeGoodExplText("Ein \"gemischter\" 'Text'!"));
+    }
+
+    TEST_CASE("Test checking whether an identifier is well-formed (good)") {
+        REQUIRE_FALSE(IsGoodIdent(""));
+        REQUIRE_FALSE(IsGoodIdent(std::string(100, ' ')));
+        REQUIRE_FALSE(IsGoodIdent(" abc"));
+        REQUIRE_FALSE(IsGoodIdent("A!"));
+
+        REQUIRE(IsGoodIdent("x"));
+        REQUIRE(IsGoodIdent("abc_123"));
+        REQUIRE(IsGoodIdent("a1"));
+    }
+
     TEST_SUITE_END();
 }

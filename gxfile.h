@@ -407,4 +407,7 @@ namespace gxfile {
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from
 
+    std::string MakeGoodExplText(const std::string &s);
+    bool IsGoodIdent(const std::string &S);
+
 }

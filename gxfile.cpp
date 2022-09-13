@@ -174,7 +174,7 @@ namespace gxfile {
     // If both single and double quotes appear in the string, replace
     // each quote by the first quote seen
     // Replace control character with a question mark
-    static std::string MakeGoodExplText(const std::string &s) {
+    std::string MakeGoodExplText(const std::string &s) {
         char q {'\0'};
         std::string res;
         res.reserve(s.length());
@@ -190,7 +190,7 @@ namespace gxfile {
         return res;
     }
 
-    static bool IsGoodIdent(const std::string &S) {
+    bool IsGoodIdent(const std::string &S) {
         if(!S.empty() && S.length() <= MaxNameLen && isalpha(S.front())) {
             for(int n{1}; n<S.length(); n++)
                 if(!isalnum(S[n]) && S[n] != '_') return false;
@@ -539,6 +539,7 @@ namespace gxfile {
         for(const auto &[name, psy] : NameList)
             delete psy;
 
+        FFile = nullptr;
         fmode = f_not_open;
         fstatus = stat_notopen;
 
@@ -653,10 +654,7 @@ namespace gxfile {
     bool TGXFileObj::MajorCheckMode(const std::string &Routine, const TgxModeSet &MS) {
         MajContext = Routine;
         LastRepError = ERR_NOERROR;
-        if((TraceLevel >= trl_some || !utils::in(fmode, MS)) && !CheckMode(Routine, MS)) {
-            return false;
-        }
-        return true;
+        return !((TraceLevel >= trl_some || !utils::in(fmode, MS)) && !CheckMode(Routine, MS));
     }
 
     void TGXFileObj::WriteTrace(const std::string &s) {
@@ -664,10 +662,9 @@ namespace gxfile {
     }
 
     bool TGXFileObj::IsGoodNewSymbol(const std::string &s) {
-        if( ErrorCondition(NameList.find(s) == NameList.end(), ERR_DUPLICATESYMBOL) ||
-            ErrorCondition(utils::indexOf<TAcronym>(AcronymList, [&s](auto acro) { return acro.AcrName == s; }) == -1, ERR_DUPLICATESYMBOL) ||
-            ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT)) return false;
-        return true;
+        return !(ErrorCondition(NameList.find(s) == NameList.end(), ERR_DUPLICATESYMBOL) ||
+                 ErrorCondition(utils::indexOf<TAcronym>(AcronymList, [&s](auto acro) { return acro.AcrName == s; }) == -1, ERR_DUPLICATESYMBOL) ||
+                 ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT));
     }
 
     bool TGXFileObj::ErrorCondition(bool cnd, int N) {
@@ -981,8 +978,8 @@ namespace gxfile {
         i = i64Rec.i64;
         int64_t exponent {i & expoMask};
         if(exponent == expoMask) {
-            int64_t mantiassa {i & mantMask};
-            return mantiassa ? DBL_NAN : ((i & signMask) ? DBL_NINF : DBL_PINF);
+            int64_t mantissa {i & mantMask};
+            return mantissa ? DBL_NAN : ((i & signMask) ? DBL_NINF : DBL_PINF);
         }
         return DBL_FINITE;
     }
