@@ -486,4 +486,55 @@ namespace gdlib::strutilx {
         return res;
     }
 
+    /**
+     * PORTING NOTES FROM ANDRE
+     * Pascal/Delphi convention: 1 byte is size/length/charcount, then character bytes, then quote byte END
+     * C/C++ convention here: raw character bytes, null terminator \0, quote char after that
+     * Doing the quote char after the terminator keeps strlen etc working
+     **/
+
+    // In-place conversion of C string (0 terminated suffix) to Pascal/Delphi string (size byte prefix)
+    // Returns 1 iff. the C string exceeds maximum short string length of 255 characters
+    int strConvCtoDelphi(char *cstr) {
+        const auto len = strlen(cstr);
+        if(len > std::numeric_limits<uint8_t>::max()) {
+            cstr[0] = 0;
+            strcpy(&cstr[1], "Error: Maximum short string length is 255 characters!");
+            return strlen(&cstr[1]);
+        }
+        memmove(cstr+1, cstr, len);
+        cstr[0] = static_cast<uint8_t>(len);
+        return 0;
+    }
+
+    // In-place conversion of Pascal/Delphi string (size byte prefix) to C string (0 terminated suffix)
+    void strConvDelphiToC(char *delphistr) {
+        const auto len = static_cast<uint8_t>(delphistr[0]);
+        memmove(delphistr, delphistr+1, len);
+        delphistr[len] = '\0';
+    }
+
+    // Value-copy conversion of Pascal/Delphi string (size byte prefix) to C++ standard library (STL) string
+    std::string strConvDelphiToCpp(const char *delphistr) {
+        std::array<char, 256> buffer{};
+        const auto len = static_cast<uint8_t>(delphistr[0]);
+        for(int i=0; i<len; i++)
+            buffer[i] = delphistr[i+1];
+        buffer[len] = '\0';
+        return std::string {buffer.data()};
+    }
+
+    // Convert C++ standard library string to Delphi short string
+    int strConvCppToDelphi(const std::string &s, char *delphistr) {
+        if(s.length() > std::numeric_limits<uint8_t>::max()) {
+            const std::string errorMessage {"Error: Maximum short string length is 255 characters!"s};
+            memcpy(&delphistr[1], errorMessage.c_str(), errorMessage.length()+1);
+            return static_cast<int>(errorMessage.length());
+        }
+        const auto l = static_cast<uint8_t>(s.length());
+        delphistr[0] = static_cast<char>(l);
+        memcpy(&delphistr[1], s.c_str(), l);
+        return 0;
+    }
+
 }

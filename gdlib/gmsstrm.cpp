@@ -399,10 +399,10 @@ namespace gdlib::gmsstrm {
     }
 
     void TBinaryTextFileIO::WriteString(const std::string &s) {
+        static std::array<char, 256> buf {};
         if(Paranoid) ParWrite(rw_string);
-        char len = (char)s.length();
-        FS->write(&len, 1);
-        FS->write(s.data(), (std::streamsize)s.length());
+        strConvCppToDelphi(s, buf.data());
+        FS->write(buf.data(), s.length()+1);
     }
 
     void TBinaryTextFileIO::SetCompression(bool V) {
@@ -514,12 +514,10 @@ namespace gdlib::gmsstrm {
     }
 
     void TXStreamDelphi::WriteString(const std::string &s) {
+        static std::array<char, 256> buf{};
         if (Paranoid) ParWrite(rw_string);
-        const auto l = s.length();
-        std::vector<char> buf(l+1);
-        buf[0] = (char)l;
-        memcpy(buf.data()+1, s.c_str(), l);
-        Write(buf.data(), l+1);
+        strConvCppToDelphi(s, buf.data());
+        Write(buf.data(), s.length()+1);
     }
 
     void TXStreamDelphi::WriteDouble(double x) {

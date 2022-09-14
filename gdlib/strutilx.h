@@ -68,4 +68,9 @@ namespace gdlib::strutilx{
 
     std::string ExtractShortPathNameExcept(const std::string &FileName);
 
+    int strConvCtoDelphi(char* cstr);
+    void strConvDelphiToC(char* delphistr);
+    std::string strConvDelphiToCpp(const char* delphistr);
+    int strConvCppToDelphi(const std::string &s, char *delphistr);
+
 }
