@@ -16,6 +16,20 @@ static PyMethodDef methods[] = {
         {NULL, NULL, 0, NULL}
 };
 
+typedef struct {
+    PyObject_HEAD;
+    //void *pgx;
+} GDXObject;
+
+static PyTypeObject GDXDataStorage = {
+        PyVarObject_HEAD_INIT(NULL, 0)
+        .tp_name = "pygdx.GDXDataStorage",
+        .tp_doc = PyDoc_STR("A GDX object"),
+        .tp_basicsize = sizeof(GDXObject),
+        .tp_itemsize = 0,
+        .tp_flags = Py_TPFLAGS_DEFAULT,
+        .tp_new = PyType_GenericNew
+};
 
 static struct PyModuleDef pygdxmodule = {
         PyModuleDef_HEAD_INIT,
@@ -26,5 +40,18 @@ static struct PyModuleDef pygdxmodule = {
 };
 
 PyMODINIT_FUNC PyInit_pygdx(void) {
-    return PyModule_Create(&pygdxmodule);
+    PyObject *po;
+    if(PyType_Ready(&GDXDataStorage) < 0) return NULL;
+
+    po = PyModule_Create(&pygdxmodule);
+    if(!po) return NULL;
+
+    Py_INCREF(&GDXDataStorage);
+    if(PyModule_AddObject(po, "GDXDataStorage", (PyObject *)&GDXDataStorage) < 0) {
+        Py_DECREF(&GDXDataStorage);
+        Py_DECREF(po);
+        return NULL;
+    }
+
+    return po;
 }

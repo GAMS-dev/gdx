@@ -6,6 +6,7 @@ gams_sysdir = '/home/andre/gamsdist'
 cwd = os.getcwd()
 build_dir = '../cmake-build-debug/'
 build_with_cmake = True
+py_cmd = 'python' if os.path.exists('/usr/bin/python') else 'python3'
 
 
 def query_so_path():
@@ -40,14 +41,14 @@ def prepare():
     # Use distutils.core setup instead of CMake
     if not os.path.exists('pygdx.so'):
         if not os.path.exists('build'):
-            os.system('python setup.py build')
+            os.system(f'{py_cmd} setup.py build')
         shutil.copy(query_so_path(), 'pygdx.so')
     if not os.path.exists('libgdxcwrap.so'):
         shutil.copy(build_dir + 'libgdxcwrap.so', 'libgdxcwrap.so')
 
 
 def run():
-    os.system(f'LD_LIBRARY_PATH={cwd}:{gams_sysdir} python test.py')
+    os.system(f'LD_LIBRARY_PATH={cwd}:{gams_sysdir} {py_cmd} test.py')
 
 
 if __name__ == '__main__':
