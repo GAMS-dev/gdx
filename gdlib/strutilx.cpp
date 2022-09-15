@@ -480,7 +480,7 @@ namespace gdlib::strutilx {
     std::string ExtractShortPathNameExcept(const std::string &FileName) {
         std::string res {rtl::sysutils_p3::ExtractShortPathName(FileName)};
         for(char c : res) {
-            if(c >= 128) throw std::runtime_error("Problem extracting short path, result contains extended ASCII codes: "s + res + " (maybe 8.3 form is disabled)"s);
+            if(static_cast<unsigned char>(c) >= 128) throw std::runtime_error("Problem extracting short path, result contains extended ASCII codes: "s + res + " (maybe 8.3 form is disabled)"s);
             if(c == ' ') throw std::runtime_error("Problem extracting short path, result contains spaces: "s + res + " (maybe 8.3 form is disabled)"s);
         }
         return res;

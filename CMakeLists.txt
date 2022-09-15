@@ -68,5 +68,8 @@ set(tests
 
 add_library(gdxnativeshared STATIC ${common})
 
+add_library(gdxcwrap SHARED ${common} pygdx/cwrap.h pygdx/cwrap.cpp)
+#target_include_directories(gdxcwrap PUBLIC /usr/include/python3.10)
+
 add_executable(gdxnativetest ${tests})
 target_link_libraries(gdxnativetest gdxnativeshared ${mylibs})
