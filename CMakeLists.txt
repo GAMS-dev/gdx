@@ -80,3 +80,5 @@ endif()
 
 add_executable(gdxnativetest ${tests})
 target_link_libraries(gdxnativetest gdxnativeshared ${mylibs})
+
+add_executable(unicode pygdx/unicode.cpp)
