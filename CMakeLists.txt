@@ -69,6 +69,7 @@ set(tests
 add_library(gdxnativeshared STATIC ${common})
 
 add_library(gdxcwrap SHARED ${common} pygdx/cwrap.h pygdx/cwrap.cpp)
+set_property(TARGET gdxcwrap PROPERTY POSITION_INDEPENDENT_CODE ON)
 #target_include_directories(gdxcwrap PUBLIC /usr/include/python3.10)
 
 add_executable(gdxnativetest ${tests})
