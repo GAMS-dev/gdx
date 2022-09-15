@@ -4,7 +4,8 @@ import sys
 
 gams_sysdir = '/home/andre/gamsdist'
 cwd = os.getcwd()
-cwrap_dir = '../cmake-build-debug/'
+build_dir = '../cmake-build-debug/'
+build_with_cmake = True
 
 
 def query_so_path():
@@ -23,15 +24,26 @@ def cleanup():
     for fn in os.listdir('.'):
         if fn.endswith('.so'):
             os.remove(fn)
+    if os.path.isfile('stubwarnings.txt'):
+        os.remove('stubwarnings.txt')
 
 
 def prepare():
+    if build_with_cmake:
+        if not os.path.isfile('pygdx.so'):
+            src_path = f'{build_dir}libpygdx.so'
+            if not os.path.isfile(src_path):
+                os.system('cmake --build .. --target pygdx')
+            shutil.copy(src_path, 'pygdx.so')
+        return
+
+    # Use distutils.core setup instead of CMake
     if not os.path.exists('pygdx.so'):
         if not os.path.exists('build'):
             os.system('python setup.py build')
         shutil.copy(query_so_path(), 'pygdx.so')
     if not os.path.exists('libgdxcwrap.so'):
-        shutil.copy(cwrap_dir + 'libgdxcwrap.so', 'libgdxcwrap.so')
+        shutil.copy(build_dir + 'libgdxcwrap.so', 'libgdxcwrap.so')
 
 
 def run():

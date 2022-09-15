@@ -70,7 +70,11 @@ add_library(gdxnativeshared STATIC ${common})
 
 add_library(gdxcwrap SHARED ${common} pygdx/cwrap.h pygdx/cwrap.cpp)
 set_property(TARGET gdxcwrap PROPERTY POSITION_INDEPENDENT_CODE ON)
-#target_include_directories(gdxcwrap PUBLIC /usr/include/python3.10)
+
+add_library(pygdx SHARED pygdx/pygdx.c)
+set_property(TARGET pygdx PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_include_directories(pygdx PUBLIC /usr/include/python3.10)
+target_link_libraries(pygdx gdxcwrap)
 
 add_executable(gdxnativetest ${tests})
 target_link_libraries(gdxnativetest gdxnativeshared ${mylibs})
