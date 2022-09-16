@@ -86,10 +86,36 @@ static PyObject *close_file(GDXObject *self, PyObject *args, PyObject *kwds) {
     return Py_None;
 }
 
+static PyObject *create_set1d(GDXObject *self, PyObject *args, PyObject *kwds) {
+    const char *name;
+    PyObject *elems = NULL;
+    if(!PyArg_ParseTuple(args, "sO", &name, &elems))
+        return NULL;
+    const long numElems = PyList_Size(elems);
+    printf("Got list with %ld elements...\n", numElems);
+    char **elemBuffers = (char **)malloc((numElems+1) * sizeof(char *));
+    elemBuffers[numElems] = NULL;
+    for(int i=0; i<numElems; i++) {
+        PyObject *elem = PyList_GetItem(elems, i);
+        const char *s = PyUnicode_AsUTF8(elem);
+        printf("Element no. %d is %s\n", i+1, s);
+        const unsigned long len = strlen(s);
+        char *elemBuffer = (char *)malloc(sizeof(char)*(len+1));
+        memcpy(elemBuffer, s, sizeof(char)*(len+1));
+        elemBuffers[i] = elemBuffer;
+    }
+    int num_elems_added = gdx_set1d(self->pgx, name, (const char **)elemBuffers);
+    for(int i=0; i<numElems; i++)
+        free(elemBuffers[i]);
+    free(elemBuffers);
+    return PyLong_FromLong(num_elems_added);
+}
+
 static PyMethodDef GDXObject_methods[] = {
         //{"dumpfile", (PyCFunction)dumpfile, METH_NOARGS, "Dump some gdx file"},
         {"open_write", (PyCFunction)open_write, METH_VARARGS, "Open new gdx file for writing"},
         {"open_read", (PyCFunction)open_read, METH_VARARGS, "Open new gdx file for reading"},
+        {"set1D", (PyCFunction)create_set1d, METH_VARARGS, "Create a one dimensional set by supplying element UELs as list"},
         {"close", (PyCFunction)close_file, METH_VARARGS, "Close gdx file"},
         {NULL} // sentinel
 };

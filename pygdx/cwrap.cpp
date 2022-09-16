@@ -35,6 +35,20 @@ void gdx_close(void *pgx) {
     static_cast<TGXFileObj *>(pgx)->gdxClose();
 }
 
+int gdx_set1d(void *pgx, const char *name, const char **elems) {
+    auto obj = static_cast<TGXFileObj *>(pgx);
+    obj->gdxDataWriteStrStart(name, "A 1D set", 1, global::gmsspecs::dt_set, 0);
+    gxdefs::TgdxStrIndex keyStrs {};
+    gxdefs::TgdxValues values {};
+    int i;
+    for(i=0; elems[i]; i++) {
+        keyStrs[0].assign(elems[i]);
+        obj->gdxDataWriteStr(keyStrs, values);
+    }
+    obj->gdxDataWriteDone();
+    return i;
+}
+
 int create_gdx_file(const char *filename) {
     std::string ErrMsg;
     gxfile::TGXFileObj gdx{ErrMsg};
