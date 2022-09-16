@@ -65,6 +65,22 @@ static PyObject *open_write(GDXObject *self, PyObject *args, PyObject *kwds) {
     return PyLong_FromLong(rc);
 }
 
+static PyObject *GDXError;
+
+static PyObject *open_read(GDXObject *self, PyObject *args, PyObject *kwds) {
+    int ec, rc;
+    const char *filename;
+    if(!PyArg_ParseTuple(args, "s", &filename))
+        return NULL;
+    rc = gdx_open_read(self->pgx, filename, &ec);
+    if(!rc) {
+        GDXError = PyErr_NewException("gdx.error", NULL, NULL);
+        PyErr_SetString(GDXError, "Unable to open file!");
+        return NULL;
+    }
+    return PyLong_FromLong(rc);
+}
+
 static PyObject *close_file(GDXObject *self, PyObject *args, PyObject *kwds) {
     gdx_close(self->pgx);
     return Py_None;
@@ -73,6 +89,7 @@ static PyObject *close_file(GDXObject *self, PyObject *args, PyObject *kwds) {
 static PyMethodDef GDXObject_methods[] = {
         //{"dumpfile", (PyCFunction)dumpfile, METH_NOARGS, "Dump some gdx file"},
         {"open_write", (PyCFunction)open_write, METH_VARARGS, "Open new gdx file for writing"},
+        {"open_read", (PyCFunction)open_read, METH_VARARGS, "Open new gdx file for reading"},
         {"close", (PyCFunction)close_file, METH_VARARGS, "Close gdx file"},
         {NULL} // sentinel
 };
@@ -105,6 +122,15 @@ PyMODINIT_FUNC PyInit_pygdx(void) {
 
     po = PyModule_Create(&pygdxmodule);
     if(!po) return NULL;
+
+    GDXError = PyErr_NewException("gdx.error", NULL, NULL);
+    Py_XINCREF(GDXError);
+    if(PyModule_AddObject(po, "error", GDXError) < 0) {
+        Py_XDECREF(GDXError);
+        Py_CLEAR(GDXError);
+        Py_DECREF(po);
+        return NULL;
+    }
 
     Py_INCREF(&GDXDataStorage);
     if(PyModule_AddObject(po, "GDXDataStorage", (PyObject *)&GDXDataStorage) < 0) {

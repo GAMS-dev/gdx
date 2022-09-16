@@ -27,6 +27,10 @@ int gdx_open_write(void *pgx, const char *filename, int *ec) {
     return static_cast<TGXFileObj *>(pgx)->gdxOpenWrite(filename, "gdxnative", *ec);
 }
 
+int gdx_open_read(void *pgx, const char *filename, int *ec) {
+    return static_cast<TGXFileObj *>(pgx)->gdxOpenRead(filename, *ec);
+}
+
 void gdx_close(void *pgx) {
     static_cast<TGXFileObj *>(pgx)->gdxClose();
 }
