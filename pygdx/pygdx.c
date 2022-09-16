@@ -26,7 +26,12 @@ typedef struct {
 static PyObject *GDXObject_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     GDXObject *self = (GDXObject *)type->tp_alloc(type, 0);
     if(self) {
-        self->pgx = NULL;
+        const int bufSize = 256;
+        char buf[bufSize];
+        self->pgx = gdx_create(buf, bufSize);
+        if(buf[0] != '\0') {
+            // TODO: Throw python runtime error/exception here!
+        }
     }
     return (PyObject *)self;
 }
@@ -36,7 +41,7 @@ static int GDXObject_init(GDXObject *self, PyObject *args, PyObject *kwds) {
 }
 
 static void GDXObject_dealloc(GDXObject *self) {
-    //if(self->pgx) free(self->pgx);
+    if(self->pgx) gdx_destroy(&self->pgx);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
@@ -50,8 +55,25 @@ static PyObject *dumpfile(GDXObject *self, PyObject *Py_UNUSED(ignored)) {
     return PyUnicode_FromString("Wrote gdx file!");
 }
 
+// TODO: Add error handling -> throw Python exception on not-ok error/return codes
+static PyObject *open_write(GDXObject *self, PyObject *args, PyObject *kwds) {
+    int ec, rc;
+    const char *filename;
+    if(!PyArg_ParseTuple(args, "s", &filename))
+        return NULL;
+    rc = gdx_open_write(self->pgx, filename, &ec);
+    return PyLong_FromLong(rc);
+}
+
+static PyObject *close_file(GDXObject *self, PyObject *args, PyObject *kwds) {
+    gdx_close(self->pgx);
+    return Py_None;
+}
+
 static PyMethodDef GDXObject_methods[] = {
-        {"dumpfile", (PyCFunction)dumpfile, METH_NOARGS, "Dump some gdx file"},
+        //{"dumpfile", (PyCFunction)dumpfile, METH_NOARGS, "Dump some gdx file"},
+        {"open_write", (PyCFunction)open_write, METH_VARARGS, "Open new gdx file for writing"},
+        {"close", (PyCFunction)close_file, METH_VARARGS, "Close gdx file"},
         {NULL} // sentinel
 };
 

@@ -52,8 +52,9 @@ def run():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] == 'clean':
+    args = sys.argv[1:]
+    if any('clean' in arg for arg in args):
         cleanup()
-    else:
+    if any('run' in arg for arg in args):
         prepare()
         run()
