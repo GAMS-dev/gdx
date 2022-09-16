@@ -7,4 +7,5 @@ if os.path.isfile('test.gdx'):
     print('File has been created. SUCCESS!')
     os.remove('test.gdx')
 obj = pygdx.GDXDataStorage()
+print(obj.dumpfile())
 print(obj)
