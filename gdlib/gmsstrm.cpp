@@ -514,37 +514,61 @@ namespace gdlib::gmsstrm {
     }
 
     void TXStreamDelphi::WriteString(const std::string &s) {
+        static int cnt{};
         static std::array<char, 256> buf{};
+        if(fstext)
+            *fstext << "WriteString@" << GetPosition() << "#" << ++cnt << ": " << s << "\n";
         if (Paranoid) ParWrite(rw_string);
         strConvCppToDelphi(s, buf.data());
         Write(buf.data(), s.length()+1);
     }
 
     void TXStreamDelphi::WriteDouble(double x) {
+        static int cnt {};
+        if (fstext)
+            *fstext << "WriteDouble@"<< GetPosition()  << "#" << ++cnt << ": " << utils::asdelphifmt(x, 12) << '\n';
         WriteValue(rw_double, x);
     }
 
     void TXStreamDelphi::WriteInteger(int n) {
+        static int cnt {};
+        if (fstext)
+            *fstext << "WriteInteger@"<< GetPosition() << "#" << ++cnt << ": " << n << '\n';
         WriteValue(rw_integer, n);
     }
 
     void TXStreamDelphi::WriteInt64(int64_t N) {
+        static int cnt{};
+        if (fstext)
+            *fstext << "WriteInt64@"<< GetPosition() << "#"<< ++cnt << ": " << N << '\n';
         WriteValue(rw_int64, N);
     }
 
     void TXStreamDelphi::WriteByte(uint8_t b) {
+        static int cnt{};
+        if(fstext)
+            *fstext << "WriteByte@" << GetPosition() << "#" << ++cnt << ": " << std::to_string(b) << '\n';
         WriteValue(rw_byte, b);
     }
 
     void TXStreamDelphi::WriteWord(uint16_t W) {
+        static int cnt{};
+        if (fstext)
+            *fstext << "WriteWord@" << GetPosition() << "#" << ++cnt << ": " << W << '\n';
         WriteValue(rw_word, W);
     }
 
     void TXStreamDelphi::WriteBool(bool B) {
+        static int cnt{};
+        if (fstext)
+            *fstext << "WriteBool@" << GetPosition() << "#" << ++cnt << ": " << (B ? "True" : "False") << '\n';
         WriteValue(rw_bool, B);
     }
 
     void TXStreamDelphi::WriteChar(char C) {
+        static int cnt {};
+        if (fstext)
+            *fstext << "WriteChar@" << GetPosition() << "#" << ++cnt << ": " << C << '\n';
         WriteValue(rw_char, C);
     }
 
@@ -603,6 +627,9 @@ namespace gdlib::gmsstrm {
         }
     }
 
+    void TXStreamDelphi::ActiveWriteOpTextDumping(const std::string &dumpFilename) {
+        fstext = std::make_unique<std::ofstream>(dumpFilename);
+    }
 
     void TXFileStreamDelphi::SetLastIOResult(int V) {
         if(!FLastIOResult) FLastIOResult = V;

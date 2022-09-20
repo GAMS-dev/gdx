@@ -365,4 +365,6 @@ namespace utils {
         return res;
     }
 
+    std::string asdelphifmt(double v, int precision = 8);;
+
 }

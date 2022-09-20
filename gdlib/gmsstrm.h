@@ -91,6 +91,7 @@ namespace gdlib::gmsstrm {
      * Defines the base class for a stream. Only to be used for defining derived objects.
      */
     class TXStreamDelphi {
+        std::unique_ptr<std::ofstream> fstext {};
     protected:
         void ParWrite(RWType T);
         void ParCheck(RWType T);
@@ -136,6 +137,8 @@ namespace gdlib::gmsstrm {
         bool ReadBool();
         char ReadChar();
         void ReadPChar(char *P, int &L);
+
+        void ActiveWriteOpTextDumping(const std::string &dumpFilename);
     };
 
     class TXFileStreamDelphi : public TXStreamDelphi {

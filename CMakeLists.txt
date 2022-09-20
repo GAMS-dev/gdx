@@ -54,6 +54,7 @@ set(common
 		gxfile.h gxfile.cpp
 		xpwrap.cpp xpwrap.h
 		gxdefs.cpp gxdefs.h
+		yaml.h yaml.cpp
 )
 
 set(tests

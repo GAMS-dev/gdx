@@ -8,6 +8,7 @@
 #include "global/gmsspecs.h"
 #include "palxxx/gdlaudit.h"
 #include "global/unit.h"
+#include "yaml.h"
 
 #include <cassert>
 
@@ -301,6 +302,16 @@ namespace gxfile {
             return false;
         }
 
+        if(writeAsText) {
+            const std::string FileNameText = utils::replaceSubstrs(FileName, ".gdx", ".txt");
+            FFile->ActiveWriteOpTextDumping(FileNameText);
+        }
+
+        const std::string FileNameYML = utils::replaceSubstrs(FileName, ".gdx", ".yaml");
+        YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
+        YFile->AddKey("gdxfile");
+        YFile->IncIndentLevel();
+
         Compr &= (FFile->GetCanCompress() ? 1 : 0);
         fComprLev = Compr;
         CompressOut = Compr > 0;
@@ -334,6 +345,15 @@ namespace gxfile {
         NextWritePosition = FFile->GetPosition();
         fmode = fw_init;
         DomainStrList.clear();
+
+        YFile->AddKeyItem("metadata");
+        YFile->IncIndentLevel();
+        YFile->AddKeyValue("gdxHeaderNr", gdxHeaderNr);
+        YFile->AddKeyValue("gdxHeaderId", gdxHeaderId);
+        YFile->AddKeyValue("VersionRead", VersionRead);
+        // ...
+        YFile->DecIndentLevel();
+
         return true;
     }
 
@@ -2852,6 +2872,12 @@ namespace gxfile {
 
     void TGXFileObj::SetTraceLevel(TGXFileObj::TraceLevels tl) {
         TraceLevel = tl;
+    }
+
+    void TGXFileObj::SetWriteModes(bool asYAML, bool asText) {
+        this->writeAsYAML = asYAML;
+        this->writeAsText = asText;
+
     }
 
     void TUELTable::clear() {

@@ -23,6 +23,10 @@ namespace gdlib::gmsstrm {
 #define strncasecmp _strnicmp
 #endif
 
+namespace yaml {
+    class TYAMLFile;
+}
+
 namespace gxfile {
     class NullBuffer : public std::streambuf {
     public:
@@ -212,6 +216,8 @@ namespace gxfile {
     // Description:
     //    Class for reading and writing gdx files
     class TGXFileObj : public gdxinterface::GDXInterface {
+        std::unique_ptr<yaml::TYAMLFile> YFile;
+        bool writeAsYAML{}, writeAsText{};
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
         TgxFileMode fmode {f_not_open}, fmode_AftReg {f_not_open};
         enum {stat_notopen, stat_read, stat_write} fstatus;
@@ -407,6 +413,8 @@ namespace gxfile {
         int gdxDataReadMap(int RecNr, gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) override;
 
         void SetTraceLevel(TraceLevels tl);
+
+        void SetWriteModes(bool asYAML, bool asText);
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from

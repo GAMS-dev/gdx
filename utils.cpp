@@ -425,6 +425,15 @@ namespace utils {
         return mismatches.empty() ? std::nullopt : std::make_optional(mismatches);
     }
 
+    std::string asdelphifmt(double v, int precision) {
+        std::stringstream ss;
+        ss.precision(precision);
+        ss << v;
+        std::string s{ replaceSubstrs(replaceSubstrs(ss.str(), "+", ""), "-0", "-")};
+        replaceChar('e', 'E', s);
+        return s;
+    }
+
     StringBuffer::StringBuffer(int size) : s(size, '\0'), bufferSize {size} {}
 
     char *StringBuffer::getPtr() { return &s[0]; }
