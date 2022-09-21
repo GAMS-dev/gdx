@@ -65,6 +65,7 @@ set(tests
 		tests/tgxtests.cpp
 		tests/gdxinterfacetests.cpp
 		tests/xp_example1.cpp
+		tests/serializetests.cpp
 )
 
 add_library(gdxnativeshared STATIC ${common})
