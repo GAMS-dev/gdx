@@ -307,11 +307,6 @@ namespace gxfile {
             FFile->ActiveWriteOpTextDumping(FileNameText);
         }
 
-        const std::string FileNameYML = utils::replaceSubstrs(FileName, ".gdx", ".yaml");
-        YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
-        YFile->AddKey("gdxfile");
-        YFile->IncIndentLevel();
-
         Compr &= (FFile->GetCanCompress() ? 1 : 0);
         fComprLev = Compr;
         CompressOut = Compr > 0;
@@ -346,13 +341,21 @@ namespace gxfile {
         fmode = fw_init;
         DomainStrList.clear();
 
-        YFile->AddKeyItem("metadata");
-        YFile->IncIndentLevel();
-        YFile->AddKeyValue("gdxHeaderNr", gdxHeaderNr);
-        YFile->AddKeyValue("gdxHeaderId", gdxHeaderId);
-        YFile->AddKeyValue("VersionRead", VersionRead);
-        // ...
-        YFile->DecIndentLevel();
+        const std::string FileNameYML = utils::replaceSubstrs(FileName, ".gdx", ".yaml");
+        YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
+        if(writeAsYAML) {
+            YFile->AddKey("gdxfile");
+            YFile->IncIndentLevel();
+            YFile->AddKeyItem("metadata");
+            YFile->IncIndentLevel();
+            YFile->AddKeyValue("gdx_header_nr", gdxHeaderNr);
+            YFile->AddKeyValue("gdx_header_id", gdxHeaderId);
+            YFile->AddKeyValue("version_read", VersionRead);
+            YFile->AddKeyValue("compression", Compr);
+            YFile->AddKeyValue("filesystem_id", FileSystemID);
+            YFile->AddKeyValue("producer", FProducer);
+            YFile->DecIndentLevel();
+        }
 
         return true;
     }
@@ -472,6 +475,9 @@ namespace gxfile {
             int64_t SymbPos = NextWritePosition;
             FFile->WriteString(MARK_SYMB);
             FFile->WriteInteger(static_cast<int>(NameList.size()));
+            YFile->AddKeyItem("symbols");
+            YFile->IncIndentLevel();
+            YFile->AddKeyValue("num_symbols", static_cast<int>(NameList.size()));
             for(const auto &name : NameListOrdered) {
                 const auto &PSy = NameList[name];
                 FFile->WriteString(name);
@@ -484,6 +490,20 @@ namespace gxfile {
                 FFile->WriteByte(PSy->SSetText);
                 FFile->WriteString(PSy->SExplTxt);
                 FFile->WriteByte(PSy->SIsCompressed);
+
+                if(writeAsYAML) {
+                    YFile->AddKeyValue("name", name);
+                    YFile->AddKeyValue("position", static_cast<int>(PSy->SPosition));
+                    YFile->AddKeyValue("dim", PSy->SDim);
+                    YFile->AddKeyValue("type", PSy->SDataType);
+                    YFile->AddKeyValue("user_info", PSy->SUserInfo);
+                    YFile->AddKeyValue("num_records", PSy->SDataCount);
+                    YFile->AddKeyValue("error_count", PSy->SErrors);
+                    YFile->AddKeyValue("set_text", PSy->SSetText);
+                    YFile->AddKeyValue("explanatory_text", PSy->SExplTxt);
+                    YFile->AddKeyValue("compressed", PSy->SIsCompressed);
+                }
+
                 FFile->WriteByte(PSy->SDomSymbols.empty() ? 0 : 1);
                 if(!PSy->SDomSymbols.empty()) {
                     for(int D{}; D<PSy->SDim; D++)
@@ -495,6 +515,7 @@ namespace gxfile {
                     FFile->WriteString(PSy->SCommentsList[Cnt]);
             }
             FFile->WriteString(MARK_SYMB);
+            YFile->DecIndentLevel();
 
             auto SetTextPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
