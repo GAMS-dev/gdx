@@ -477,7 +477,6 @@ namespace gxfile {
             FFile->WriteInteger(static_cast<int>(NameList.size()));
             YFile->AddKeyItem("symbols");
             YFile->IncIndentLevel();
-            YFile->AddKeyValue("num_symbols", static_cast<int>(NameList.size()));
             for(const auto &name : NameListOrdered) {
                 const auto &PSy = NameList[name];
                 FFile->WriteString(name);
@@ -492,7 +491,8 @@ namespace gxfile {
                 FFile->WriteByte(PSy->SIsCompressed);
 
                 if(writeAsYAML) {
-                    YFile->AddKeyValue("name", name);
+                    YFile->AddKey(name);
+                    YFile->IncIndentLevel();
                     YFile->AddKeyValue("position", static_cast<int>(PSy->SPosition));
                     YFile->AddKeyValue("dim", PSy->SDim);
                     YFile->AddKeyValue("type", PSy->SDataType);
@@ -519,7 +519,6 @@ namespace gxfile {
 
                 int CommCnt {static_cast<int>(PSy->SCommentsList.size())};
                 FFile->WriteInteger(CommCnt);
-                YFile->AddKeyValue("num_comments", CommCnt);
                 if(CommCnt) {
                     YFile->AddKeyItem("comments");
                     YFile->IncIndentLevel();
@@ -529,6 +528,8 @@ namespace gxfile {
                     }
                     YFile->DecIndentLevel();
                 }
+
+                if(writeAsYAML) YFile->DecIndentLevel();
             }
             FFile->WriteString(MARK_SYMB);
             YFile->DecIndentLevel();
@@ -539,15 +540,11 @@ namespace gxfile {
             YFile->AddKeyItem("set_texts");
             YFile->IncIndentLevel();
             FFile->WriteInteger(static_cast<int>(SetTextList.size()));
-            YFile->AddKeyValue("set_text_count", static_cast<int>(SetTextList.size()));
             if(!SetTextList.empty()) {
-                YFile->AddKeyItem("set_text_items");
-                YFile->IncIndentLevel();
                 for (const auto &SetText: SetTextList) {
                     FFile->WriteString(SetText);
                     YFile->AddItem(SetText);
                 }
-                YFile->DecIndentLevel();
             }
             FFile->WriteString(MARK_SETT);
             YFile->DecIndentLevel();
@@ -555,18 +552,14 @@ namespace gxfile {
             auto UELPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_UEL);
-            YFile->AddKeyItem("uel_table");
+            YFile->AddKeyItem("uels");
             YFile->IncIndentLevel();
             FFile->WriteInteger(UELTable.size());
-            YFile->AddKeyValue("num_uels", UELTable.size());
             if(!UELTable.empty()) {
-                YFile->AddKeyItem("uels");
-                YFile->IncIndentLevel();
                 for (const auto &uelName: UELTable.getNames()) {
                     FFile->WriteString(uelName);
                     YFile->AddItem(uelName);
                 }
-                YFile->DecIndentLevel();
             }
             FFile->WriteString(MARK_UEL);
             YFile->DecIndentLevel();
@@ -574,33 +567,52 @@ namespace gxfile {
             auto AcronymPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_ACRO);
+            YFile->AddKeyItem("acronyms");
+            YFile->IncIndentLevel();
             FFile->WriteInteger(static_cast<int>(AcronymList.size()));
             for(const auto &acro : AcronymList) {
-                FFile->WriteString(acro.AcrName.empty() ? "UnknownACRO" + std::to_string(acro.AcrMap) : acro.AcrName);
+                const auto acroName = acro.AcrName.empty() ? "UnknownACRO" + std::to_string(acro.AcrMap) : acro.AcrName;
+                FFile->WriteString(acroName);
                 FFile->WriteString(acro.AcrText);
                 FFile->WriteInteger(acro.AcrMap);
+                YFile->AddKeyValue(acroName, "{text:"s +  acro.AcrText + ", map:"s + std::to_string(acro.AcrMap) + "}"s);
             }
             FFile->WriteString(MARK_ACRO);
+            YFile->DecIndentLevel();
 
             auto DomStrPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_DOMS);
             FFile->WriteInteger(static_cast<int>(DomainStrList.size()));
-            for(const auto &DomStr : DomainStrList)
+            YFile->AddKeyItem("domain_strings");
+            YFile->IncIndentLevel();
+            for(const auto &DomStr : DomainStrList) {
                 FFile->WriteString(DomStr);
+                YFile->AddItem(DomStr);
+            }
             FFile->WriteString(MARK_DOMS);
+            YFile->DecIndentLevel();
+
+            YFile->AddKeyItem("symbol_domains");
+            YFile->IncIndentLevel();
             int ix{1};
             for(const auto &name : NameListOrdered) {
                 const auto &PSy = NameList[name];
                 if(!PSy->SDomStrings.empty()) {
+                    YFile->AddKeyItem(name);
+                    YFile->IncIndentLevel();
                     FFile->WriteInteger(ix);
-                    for(const auto &i : PSy->SDomStrings)
+                    for(const auto &i : PSy->SDomStrings) {
                         FFile->WriteInteger(i);
+                        YFile->AddItem(std::to_string(i));
+                    }
+                    YFile->DecIndentLevel();
                 }
                 ix++;
             }
             FFile->WriteInteger(-1);
             FFile->WriteString(MARK_DOMS);
+            YFile->DecIndentLevel();
 
             // This must be at the very end!!!
             FFile->SetPosition(MajorIndexPosition);
@@ -608,8 +620,15 @@ namespace gxfile {
             FFile->WriteInteger(MARK_BOI);
             // Note that we have room for 10 indices; if we need more, create an overflow link in the 10th position.
             const std::array<int64_t, 6> offsets = {SymbPos, UELPos, SetTextPos, AcronymPos, NextWritePosition, DomStrPos};
+            const std::array offsetNames = {"symbol_table"s, "uel_table"s, "set_texts"s, "acronyms"s, "next_write"s, "domain_strs"s };
             for(int64_t offset : offsets)
                 FFile->WriteInt64(offset);
+
+            YFile->AddKeyItem("section_offsets");
+            YFile->IncIndentLevel();
+            for(int i{}; i<offsets.size(); i++)
+                YFile->AddKeyValue(offsetNames[i], (int)offsets[i]);
+            YFile->DecIndentLevel();
         }
 
         int res{FFile ? FFile->GetLastIOResult() : 1};
@@ -1020,6 +1039,19 @@ namespace gxfile {
             ElemType[D] = GetIntegerSize(MaxElem[D] - MinElem[D] + 1);
             FFile->WriteInteger(MinElem[D]);
             FFile->WriteInteger(MaxElem[D]);
+        }
+
+        if(writeAsYAML) {
+            YFile->AddKeyItem("sym_write_header");
+            YFile->IncIndentLevel();
+            YFile->AddKeyValue("symbol_index", CurSyPtr->SSyNr);
+            YFile->AddKeyValue("dim", FCurrentDim);
+            YFile->AddKeyValue("nr_recs", NrRecs);
+            for (int D{}; D < FCurrentDim; D++) {
+                YFile->AddKeyValue("min_elem_" + std::to_string(D), MinElem[D]);
+                YFile->AddKeyValue("max_elem_" + std::to_string(D), MaxElem[D]);
+            }
+            YFile->DecIndentLevel();
         }
     }
 
