@@ -36,7 +36,7 @@ namespace yaml {
     void TYAMLFile::AddItem(const std::string &s) {
         if(!active) return;
         WrIndent();
-        fp << "- " << s << std::endl; // actually endl should flush
+        fp << "- " << (s.empty() ? "\"\"" : s) << std::endl; // actually endl should flush
         if(alwaysFlush) fp.flush();
     }
 

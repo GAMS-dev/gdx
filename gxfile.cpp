@@ -504,15 +504,31 @@ namespace gxfile {
                     YFile->AddKeyValue("compressed", PSy->SIsCompressed);
                 }
 
+                YFile->AddKeyValue("has_domain_symbols", (PSy->SDomSymbols.empty() ? "no"s : "yes"s));
                 FFile->WriteByte(PSy->SDomSymbols.empty() ? 0 : 1);
+
                 if(!PSy->SDomSymbols.empty()) {
-                    for(int D{}; D<PSy->SDim; D++)
+                    YFile->AddKeyItem("domain_symbols");
+                    YFile->IncIndentLevel();
+                    for(int D{}; D<PSy->SDim; D++) {
                         FFile->WriteInteger(PSy->SDomSymbols[D]);
+                        YFile->AddItem(std::to_string(PSy->SDomSymbols[D]));
+                    }
+                    YFile->DecIndentLevel();
                 }
+
                 int CommCnt {static_cast<int>(PSy->SCommentsList.size())};
                 FFile->WriteInteger(CommCnt);
-                for(int Cnt{}; Cnt<CommCnt; Cnt++)
-                    FFile->WriteString(PSy->SCommentsList[Cnt]);
+                YFile->AddKeyValue("num_comments", CommCnt);
+                if(CommCnt) {
+                    YFile->AddKeyItem("comments");
+                    YFile->IncIndentLevel();
+                    for (int Cnt{}; Cnt < CommCnt; Cnt++) {
+                        FFile->WriteString(PSy->SCommentsList[Cnt]);
+                        YFile->AddItem(PSy->SCommentsList[Cnt]);
+                    }
+                    YFile->DecIndentLevel();
+                }
             }
             FFile->WriteString(MARK_SYMB);
             YFile->DecIndentLevel();
@@ -520,18 +536,40 @@ namespace gxfile {
             auto SetTextPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_SETT);
+            YFile->AddKeyItem("set_texts");
+            YFile->IncIndentLevel();
             FFile->WriteInteger(static_cast<int>(SetTextList.size()));
-            for(const auto &SetText : SetTextList)
-                FFile->WriteString(SetText);
+            YFile->AddKeyValue("set_text_count", static_cast<int>(SetTextList.size()));
+            if(!SetTextList.empty()) {
+                YFile->AddKeyItem("set_text_items");
+                YFile->IncIndentLevel();
+                for (const auto &SetText: SetTextList) {
+                    FFile->WriteString(SetText);
+                    YFile->AddItem(SetText);
+                }
+                YFile->DecIndentLevel();
+            }
             FFile->WriteString(MARK_SETT);
+            YFile->DecIndentLevel();
 
             auto UELPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_UEL);
+            YFile->AddKeyItem("uel_table");
+            YFile->IncIndentLevel();
             FFile->WriteInteger(UELTable.size());
-            for(const auto &uelName : UELTable.getNames())
-                FFile->WriteString(uelName);
+            YFile->AddKeyValue("num_uels", UELTable.size());
+            if(!UELTable.empty()) {
+                YFile->AddKeyItem("uels");
+                YFile->IncIndentLevel();
+                for (const auto &uelName: UELTable.getNames()) {
+                    FFile->WriteString(uelName);
+                    YFile->AddItem(uelName);
+                }
+                YFile->DecIndentLevel();
+            }
             FFile->WriteString(MARK_UEL);
+            YFile->DecIndentLevel();
 
             auto AcronymPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
