@@ -40,6 +40,10 @@ namespace tests::gdxinterfacetests {
         basicTest([&](gdxinterface::GDXInterface &pgx) {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             int ErrNr;
+            REQUIRE_FALSE(pgx.gdxOpenWrite(""s, "gdxinterfacetest", ErrNr));
+            std::string msg;
+            pgx.gdxErrorStr(pgx.gdxGetLastError(), msg);
+            REQUIRE_EQ("File name is empty", msg);
             REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
             REQUIRE(std::filesystem::exists(fn));
             pgx.gdxClose();
