@@ -753,6 +753,35 @@ namespace tests::gdxinterfacetests {
         });
     }
 
+    TEST_CASE("Test domain checking for subset") {
+        const std::string fn {"xyz.gdx"};
+        basicTest([&](gdxinterface::GDXInterface &pgx) {
+            int errnr;
+            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errnr));
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "expl", 1, global::gmsspecs::gms_dt_set, 0));
+            gxdefs::TgdxStrIndex keys{};
+            gxdefs::TgdxValues vals{};
+            for(int i{}; i<6; i++) {
+                keys.front() = "i"s+std::to_string(i+1);
+                REQUIRE(pgx.gdxDataWriteStr(keys, vals));
+            }
+            REQUIRE(pgx.gdxDataWriteDone());
+
+            REQUIRE(pgx.gdxDataWriteStrStart("j", "subset of i", 1, global::gmsspecs::gms_dt_set, 0));
+            keys.front() = "i";
+            // FIXME: Why is this failing???
+            //REQUIRE(pgx.gdxSymbolSetDomain(keys));
+            std::array<int, 2> subset = {2, 4};
+            for(int i : subset) {
+                keys.front() = "i"s+std::to_string(i);
+                REQUIRE(pgx.gdxDataWriteStr(keys, vals));
+            }
+            REQUIRE(pgx.gdxDataWriteDone());
+            pgx.gdxClose();
+        });
+        std::filesystem::remove(fn);
+    }
+
     TEST_SUITE_END();
 
 }

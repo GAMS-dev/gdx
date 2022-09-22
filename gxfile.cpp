@@ -466,7 +466,7 @@ namespace gxfile {
     //   gdxOpenRead, gdxOpenWrite
     int TGXFileObj::gdxClose() {
         std::string fnConv;
-        if(utils::in(fmode, fw_raw_data, fw_map_data, fw_str_data)) // unfinishd write
+        if(utils::in(fmode, fw_raw_data, fw_map_data, fw_str_data)) // unfinished write
             gdxDataWriteDone();
         if(fmode == fw_init) {
             fnConv = FFile->GetFileName();
