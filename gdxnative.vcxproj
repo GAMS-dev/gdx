@@ -60,6 +60,7 @@
     <ClCompile Include="tests\xp_example1.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="xpwrap.cpp" />
+    <ClCompile Include="yaml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="expertapi\gclgms.h" />
@@ -97,6 +98,7 @@
     <ClInclude Include="tests\doctest.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="xpwrap.h" />
+    <ClInclude Include="yaml.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

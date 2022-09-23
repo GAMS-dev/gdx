@@ -139,6 +139,9 @@
     <ClCompile Include="tests\xp_example1.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="yaml.cpp">
+      <Filter>root</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">
@@ -245,6 +248,9 @@
     </ClInclude>
     <ClInclude Include="gdlib\gmsdata.h">
       <Filter>gdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="yaml.h">
+      <Filter>root</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
