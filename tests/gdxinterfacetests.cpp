@@ -783,7 +783,7 @@ namespace tests::gdxinterfacetests {
             }
 
             // adding an uel not from superset should fail
-            keys.front() = "not_in_i";
+            keys.front() = "not_in_i"s;
             REQUIRE(pgx.gdxDataWriteStr(keys, vals));
 
             REQUIRE(pgx.gdxDataWriteDone());
@@ -798,10 +798,10 @@ namespace tests::gdxinterfacetests {
             std::array<int, 20> errRecKeys {};
             std::array<double, 5> errRecVals {};
             REQUIRE(pgx.gdxDataErrorRecord(1, errRecKeys, errRecVals));
-            std::string dupUelName;
+            std::string uelNotInSuperset;
             int uelMap;
-            REQUIRE(pgx.gdxUMUelGet(errRecKeys.front(), dupUelName, uelMap));
-            REQUIRE_EQ("not_in_i"s, dupUelName);
+            REQUIRE(pgx.gdxUMUelGet(errRecKeys.front(), uelNotInSuperset, uelMap));
+            REQUIRE_EQ("not_in_i"s, uelNotInSuperset);
             pgx.gdxClose();
         });
         std::filesystem::remove(fn);
@@ -825,11 +825,7 @@ namespace tests::gdxinterfacetests {
             std::string msg;
             pgx.gdxErrorStr(pgx.gdxGetLastError(), msg);
             REQUIRE_EQ("Duplicate keys", msg);
-
-
-
             pgx.gdxClose();
-
             std::filesystem::remove(fn);
         });
     }

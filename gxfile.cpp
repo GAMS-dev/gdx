@@ -1097,10 +1097,14 @@ namespace gxfile {
         return DBL_FINITE;
     }
 
+    inline bool accessBitMap(const std::vector<bool> &bmap, int index) {
+        return !(index < 0 || index >= bmap.size()) && bmap[index];
+    }
+
     bool TGXFileObj::DoWrite(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
         int FDim {FCurrentDim+1}, delta{};
         for(int D{}; D<FCurrentDim; D++) {
-            if(WrBitMaps[D] && !(*WrBitMaps[D])[AElements[D]]) {
+            if(WrBitMaps[D] && !accessBitMap(*WrBitMaps[D], AElements[D])) {
                 ReportError(ERR_DOMAINVIOLATION);
                 TgdxUELIndex  ErrorUELs;
                 for(int DD{}; DD<D-1; DD++)
@@ -1108,7 +1112,7 @@ namespace gxfile {
                 ErrorUELs[D] = -AElements[D];
                 // see if there are more domain violations
                 for(int DD{D+1}; DD < FCurrentDim; DD++) {
-                    bool neg {WrBitMaps[DD] && !(*WrBitMaps[DD])[AElements[DD]]};
+                    bool neg {WrBitMaps[DD] && !accessBitMap(*WrBitMaps[DD],AElements[DD])};
                     ErrorUELs[DD] = (neg ? -1 : 1) * AElements[DD];
                 }
                 AddToErrorListDomErrs(ErrorUELs, AVals);
