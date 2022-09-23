@@ -792,6 +792,16 @@ namespace tests::gdxinterfacetests {
             std::string msg;
             REQUIRE(pgx.gdxErrorStr(pgx.gdxGetLastError(), msg));
             REQUIRE_EQ("Domain violation"s, msg);
+
+            // check if error uels was correctly set (more specific domain violation details)
+            REQUIRE_EQ(1, pgx.gdxDataErrorCount());
+            std::array<int, 20> errRecKeys {};
+            std::array<double, 5> errRecVals {};
+            REQUIRE(pgx.gdxDataErrorRecord(1, errRecKeys, errRecVals));
+            std::string dupUelName;
+            int uelMap;
+            REQUIRE(pgx.gdxUMUelGet(errRecKeys.front(), dupUelName, uelMap));
+            REQUIRE_EQ("not_in_i"s, dupUelName);
             pgx.gdxClose();
         });
         std::filesystem::remove(fn);
