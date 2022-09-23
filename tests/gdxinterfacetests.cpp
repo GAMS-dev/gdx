@@ -501,10 +501,10 @@ namespace tests::gdxinterfacetests {
         testMatchingWrites(fns[2], fns[3], [&](gdxinterface::GDXInterface &pgx) {
             domainSetGetTestSetupPrefix(pgx);
             gxdefs::TgdxStrIndex newSymDomainNames{"i", "j"};
-            pgx.gdxSymbolSetDomain(newSymDomainNames);
+            REQUIRE(pgx.gdxSymbolSetDomain(newSymDomainNames));
             domainSetGetTestSetupSuffix(pgx);
             gxdefs::TgdxUELIndex domainSyNrs;
-            pgx.gdxSymbolGetDomain(3, domainSyNrs);
+            REQUIRE(pgx.gdxSymbolGetDomain(3, domainSyNrs));
             REQUIRE_EQ(1, domainSyNrs[0]);
             REQUIRE_EQ(2, domainSyNrs[1]);
         });
@@ -769,8 +769,7 @@ namespace tests::gdxinterfacetests {
 
             REQUIRE(pgx.gdxDataWriteStrStart("j", "subset of i", 1, global::gmsspecs::gms_dt_set, 0));
             keys.front() = "i";
-            // FIXME: Why is this failing???
-            //REQUIRE(pgx.gdxSymbolSetDomain(keys));
+            REQUIRE(pgx.gdxSymbolSetDomain(keys));
             std::array<int, 2> subset = {2, 4};
             for(int i : subset) {
                 keys.front() = "i"s+std::to_string(i);
