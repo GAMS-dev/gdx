@@ -9,6 +9,8 @@
 
 namespace gdlib::datastorage {
 
+    // TODO: Get rid of this (use standard library collection instead)
+    // implement radix sort in a general way for sequences/collections
     template<typename  T>
     class TLinkedData {
         std::vector<std::pair<global::gmsspecs::TIndex, T>> data;

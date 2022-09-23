@@ -723,6 +723,8 @@ namespace gxfile {
         obj->SCommentsList.clear();
         obj->SDomSymbols.clear();
         obj->SDomStrings.clear();
+        obj->SSetBitMap = utils::in((TgdxDataType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
+                std::make_optional<std::vector<bool>>() : std::nullopt;
 
         CurSyPtr->SSyNr = static_cast<int>(NameListOrdered.size()+1); // +1 for universe
         NameList[AName] = CurSyPtr;
@@ -742,7 +744,7 @@ namespace gxfile {
             LastElem[D] = INDEX_INITIAL;
             MinElem[D] = std::numeric_limits<int>::max();
             MaxElem[D] = 0;
-            WrBitMaps[D].clear();
+            WrBitMaps[D] = std::nullopt;
         }
 
         FFile->SetCompression(CurSyPtr->SIsCompressed);
@@ -1098,7 +1100,7 @@ namespace gxfile {
     bool TGXFileObj::DoWrite(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
         int FDim {FCurrentDim+1}, delta{};
         for(int D{}; D<FCurrentDim; D++) {
-            if(!WrBitMaps[D].empty() && !WrBitMaps[D][AElements[D]]) {
+            if(WrBitMaps[D] && !(*WrBitMaps[D])[AElements[D]]) {
                 ReportError(ERR_DOMAINVIOLATION);
                 TgdxUELIndex  ErrorUELs;
                 for(int DD{}; DD<D-1; DD++)
@@ -1106,7 +1108,7 @@ namespace gxfile {
                 ErrorUELs[D] = -AElements[D];
                 // see if there are more domain violations
                 for(int DD{D+1}; DD < FCurrentDim; DD++) {
-                    bool neg {!WrBitMaps[DD].empty() && !WrBitMaps[DD][AElements[DD]]};
+                    bool neg {WrBitMaps[DD] && !(*WrBitMaps[DD])[AElements[DD]]};
                     ErrorUELs[DD] = (neg ? -1 : 1) * AElements[DD];
                 }
                 AddToErrorListDomErrs(ErrorUELs, AVals);
@@ -1179,8 +1181,13 @@ namespace gxfile {
         DataCount++;
         if(utils::in(CurSyPtr->SDataType, dt_set, dt_alias)) {
             if(AVals[vallevel] != 0.0) CurSyPtr->SSetText = true;
-            if(FCurrentDim == 1 && !CurSyPtr->SSetBitMap.empty())
-                CurSyPtr->SSetBitMap[LastElem.front()] = true;
+            if(FCurrentDim == 1 && CurSyPtr->SSetBitMap) {
+                auto &ssbm = *CurSyPtr->SSetBitMap;
+                if(ssbm.size() <= LastElem.front())
+                    ssbm.push_back(true);
+                else
+                    ssbm[LastElem.front()] = true;
+            }
         }
         return true;
     }
@@ -1768,7 +1775,7 @@ namespace gxfile {
                     NrElem--;
                 }
             }
-            CurSyPtr->SSetBitMap.clear();
+            CurSyPtr->SSetBitMap = std::nullopt;
             CurSyPtr->SDomStrings.clear();
             NameList[S] = CurSyPtr;
             NameListOrdered.push_back(S);
@@ -2409,8 +2416,9 @@ namespace gxfile {
             CurSyPtr->SDomSymbols[D] = DomSy;
             if (domap && DomSy > 0) {
                 // this is the case for set i(i)
-                if (CurSyPtr->SDim != 1 || CurSyPtr != (*symbolWithIndex(DomSy)).second)
-                    WrBitMaps[D] = ((*symbolWithIndex(SyNr)).second)->SSetBitMap;
+                if (CurSyPtr->SDim != 1 || CurSyPtr != (*symbolWithIndex(DomSy)).second) {
+                    WrBitMaps[D] = (*((*symbolWithIndex(SyNr)).second)->SSetBitMap);
+                }
             }
         }
         switch (fmode) {

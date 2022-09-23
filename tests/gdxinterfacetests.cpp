@@ -41,12 +41,17 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             int ErrNr;
             REQUIRE_FALSE(pgx.gdxOpenWrite(""s, "gdxinterfacetest", ErrNr));
+            REQUIRE_NE(0, ErrNr);
+            // TODO: Why is this zero?
+            REQUIRE_EQ(0, pgx.gdxErrorCount());
             std::string msg;
-            pgx.gdxErrorStr(pgx.gdxGetLastError(), msg);
+            REQUIRE(pgx.gdxErrorStr(pgx.gdxGetLastError(), msg));
             REQUIRE_EQ("File name is empty", msg);
             REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
-            REQUIRE(std::filesystem::exists(fn));
+            REQUIRE_FALSE(ErrNr);
+            REQUIRE_EQ(0, pgx.gdxErrorCount());
             pgx.gdxClose();
+            REQUIRE(std::filesystem::exists(fn));
         });
         std::filesystem::remove(fn);
     }
@@ -769,16 +774,54 @@ namespace tests::gdxinterfacetests {
 
             REQUIRE(pgx.gdxDataWriteStrStart("j", "subset of i", 1, global::gmsspecs::gms_dt_set, 0));
             keys.front() = "i";
-            REQUIRE(pgx.gdxSymbolSetDomain(keys));
+            pgx.gdxSymbolSetDomain(keys);
+            //REQUIRE(pgx.gdxSymbolSetDomain(keys));
             std::array<int, 2> subset = {2, 4};
             for(int i : subset) {
                 keys.front() = "i"s+std::to_string(i);
                 REQUIRE(pgx.gdxDataWriteStr(keys, vals));
             }
+
+            // adding an uel not from superset should fail
+            keys.front() = "not_in_i";
+            REQUIRE(pgx.gdxDataWriteStr(keys, vals));
+
             REQUIRE(pgx.gdxDataWriteDone());
+
+            REQUIRE_EQ(1, pgx.gdxErrorCount());
+            std::string msg;
+            REQUIRE(pgx.gdxErrorStr(pgx.gdxGetLastError(), msg));
+            REQUIRE_EQ("Domain violation"s, msg);
             pgx.gdxClose();
         });
         std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test writing a duplicate uel in string mode") {
+        basicTest([](gdxinterface::GDXInterface &pgx) {
+            int errNr;
+            auto fn = "dup.gdx"s;
+            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errNr));
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "A set", 1, global::gmsspecs::dt_set, 0));
+            gxdefs::TgdxStrIndex keys{};
+            gxdefs::TgdxValues vals{};
+            for(int i=1; i<=8; i++) {
+                keys[0] = "uel_" + std::to_string(i);
+                REQUIRE(pgx.gdxDataWriteStr(keys, vals));
+            }
+            REQUIRE(pgx.gdxDataWriteStr(keys, vals));
+            REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE_EQ(1, pgx.gdxErrorCount());
+            std::string msg;
+            pgx.gdxErrorStr(pgx.gdxGetLastError(), msg);
+            REQUIRE_EQ("Duplicate keys", msg);
+
+
+
+            pgx.gdxClose();
+
+            std::filesystem::remove(fn);
+        });
     }
 
     TEST_SUITE_END();
