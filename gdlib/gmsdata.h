@@ -26,7 +26,7 @@ namespace gdlib::gmsdata {
         std::map<IndexKeys, ValueFields> mapping;
         std::vector<IndexKeys> keyset;
     public:
-		void GetRecord(int N, IndexKeys & Inx, ValueFields & Vals);
+		void GetRecord(int N, int * Inx, int InxCnt, double * Vals);
         ValueFields &operator[](const IndexKeys &Key);
         void clear();
         int size() const;

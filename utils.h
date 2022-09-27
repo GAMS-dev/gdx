@@ -365,6 +365,24 @@ namespace utils {
         return res;
     }
 
-    std::string asdelphifmt(double v, int precision = 8);;
+    std::string asdelphifmt(double v, int precision = 8);
+
+    template<typename T, int card>
+    std::array<T, card> asArray(const T* ptr) {
+        std::array<T, card> a{};
+        for (int i = 0; i < card; i++)
+            a[i] = ptr[i];
+        return a;
+    }
+
+    template<typename T, int card>
+    std::array<T, card> asArrayN(const T* ptr, int n) {
+        std::array<T, card> a{};
+        for (int i = 0; i < std::min<int>(n, card); i++)
+            a[i] = ptr[i];
+        return a;
+    }
+
+    void stocp(const std::string &s, char *cp);
 
 }

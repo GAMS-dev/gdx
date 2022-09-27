@@ -397,7 +397,7 @@ namespace gxfile {
     //   Writing using strings does not add the unique elements to the
     //   user mapped space.
     //   Each element string must follow the GAMS rules for unique elements.
-    int TGXFileObj::gdxDataWriteStr(const TgdxStrIndex &KeyStr, const TgdxValues &Values) {
+    int TGXFileObj::gdxDataWriteStr(const char **KeyStr, const double *Values) {
         const TgxModeSet AllowedModes {fw_str_data};
         if(fmode == fw_dom_str) fmode = fw_str_data;
         if(TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) {
@@ -421,7 +421,7 @@ namespace gxfile {
                 if(KD > MaxElem[D]) MaxElem[D] = KD;
             }
         }
-        SortList->AddItem(LastElem, Values);
+        SortList->AddItem(LastElem, utils::asArray<double, 5>( Values ));
         return true;
     }
 
@@ -439,7 +439,7 @@ namespace gxfile {
             InitDoWrite(static_cast<int>(SortList->size()));
             SortList->Sort();
             for(const auto &[keys, values] : *SortList) {
-                DoWrite(keys, values);
+                DoWrite(keys.data(), values.data());
             }
             SortList->clear();
         }
@@ -807,7 +807,7 @@ namespace gxfile {
         return false;
     }
 
-    int TGXFileObj::PrepareSymbolRead(const std::string& Caller, int SyNr, const gxdefs::TgdxUELIndex& ADomainNrs, TgxFileMode newmode) {
+    int TGXFileObj::PrepareSymbolRead(const std::string& Caller, int SyNr, const int *ADomainNrs, TgxFileMode newmode) {
         if (utils::in(fmode, fr_str_data, fr_map_data, fr_mapr_data, fr_raw_data))
             gdxDataReadDone();
         int res{-1};
@@ -915,7 +915,7 @@ namespace gxfile {
                     TIndex AElements{};
                     int AFDim, V;
                     bool AddNew{}, AddError{}, BadError{};
-                    while(DoRead(Avals, AFDim)) {
+                    while(DoRead(Avals.data(), AFDim)) {
                         if(FIDim < AFDim) AFDim = FIDim;
                         FIDim = FCurrentDim;
                         int D;
@@ -979,7 +979,7 @@ namespace gxfile {
                                 }
                             }
                             LastElem[FIDim] = -LastElem[FIDim];
-                            AddToErrorListDomErrs(LastElem, Avals); // unmapped
+                            AddToErrorListDomErrs(LastElem, Avals.data()); // unmapped
                             LastElem[FIDim] = -LastElem[FIDim];
                             AddError = false;
                         } else {
@@ -1101,93 +1101,96 @@ namespace gxfile {
         return !(index < 0 || index >= bmap.size()) && bmap[index];
     }
 
-    bool TGXFileObj::DoWrite(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
-        int FDim {FCurrentDim+1}, delta{};
-        for(int D{}; D<FCurrentDim; D++) {
-            if(WrBitMaps[D] && !accessBitMap(*WrBitMaps[D], AElements[D])) {
+    bool TGXFileObj::DoWrite(const int* AElements, const double* AVals)
+    {
+        int FDim{ FCurrentDim + 1 }, delta{};
+        for (int D{}; D < FCurrentDim; D++) {
+            if (WrBitMaps[D] && !accessBitMap(*WrBitMaps[D], AElements[D])) {
                 ReportError(ERR_DOMAINVIOLATION);
                 TgdxUELIndex  ErrorUELs;
-                for(int DD{}; DD<D-1; DD++)
+                for (int DD{}; DD < D - 1; DD++)
                     ErrorUELs[DD] = AElements[DD];
                 ErrorUELs[D] = -AElements[D];
                 // see if there are more domain violations
-                for(int DD{D+1}; DD < FCurrentDim; DD++) {
-                    bool neg {WrBitMaps[DD] && !accessBitMap(*WrBitMaps[DD],AElements[DD])};
+                for (int DD{ D + 1 }; DD < FCurrentDim; DD++) {
+                    bool neg{ WrBitMaps[DD] && !accessBitMap(*WrBitMaps[DD],AElements[DD]) };
                     ErrorUELs[DD] = (neg ? -1 : 1) * AElements[DD];
                 }
                 AddToErrorListDomErrs(ErrorUELs, AVals);
                 return false;
             }
         }
-        for(int D{}; D<FCurrentDim; D++) {
+        for (int D{}; D < FCurrentDim; D++) {
             delta = AElements[D] - LastElem[D];
-            if(delta) {
+            if (delta) {
                 FDim = D + 1; // plus one to match Delphi semantics
                 break;
             }
         }
-        if(FDim > FCurrentDim) {
-            if(FCurrentDim > 0 && DataCount >= 1) {
+        if (FDim > FCurrentDim) {
+            if (FCurrentDim > 0 && DataCount >= 1) {
                 ReportError(ERR_DATADUPLICATE);
                 AddToErrorList(AElements, AVals);
                 return false;
             }
             FFile->WriteByte(1); // keeps logic working for scalars
-        } else {
-            if(delta < 0) {
+        }
+        else {
+            if (delta < 0) {
                 ReportError(ERR_RAWNOTSORTED);
                 AddToErrorList(AElements, AVals);
                 return false;
             }
-            if(FDim == FCurrentDim && delta <= DeltaForWrite) { // small change in last dimension
+            if (FDim == FCurrentDim && delta <= DeltaForWrite) { // small change in last dimension
                 FFile->WriteByte(FCurrentDim + delta);
-                LastElem[FCurrentDim-1] = AElements[FCurrentDim-1];
-            } else { // general change
+                LastElem[FCurrentDim - 1] = AElements[FCurrentDim - 1];
+            }
+            else { // general change
                 FFile->WriteByte(FDim);
-                for(int D{FDim - 1}; D<FCurrentDim; D++) {
-                    int v{AElements[D]-MinElem[D]};
-                    switch(ElemType[D]) {
-                        case sz_integer: FFile->WriteInteger(v); break;
-                        case sz_word: FFile->WriteWord(v); break;
-                        case sz_byte: FFile->WriteByte(v); break;
+                for (int D{ FDim - 1 }; D < FCurrentDim; D++) {
+                    int v{ AElements[D] - MinElem[D] };
+                    switch (ElemType[D]) {
+                    case sz_integer: FFile->WriteInteger(v); break;
+                    case sz_word: FFile->WriteWord(v); break;
+                    case sz_byte: FFile->WriteByte(v); break;
                     }
                     LastElem[D] = AElements[D];
                 }
             }
         }
-        if(DataSize > 0) {
-            for(int DV{}; DV <= LastDataField; DV++) {
-                double X {AVals[DV]};
+        if (DataSize > 0) {
+            for (int DV{}; DV <= LastDataField; DV++) {
+                double X{ AVals[DV] };
                 int64_t i64;
-                TDblClass dClass {dblInfo(X, i64)};
-                int xv{vm_valund};
-                for(; xv < vm_normal; xv++)
-                    if(i64 == intlValueMapI64[xv]) break;
-                if(xv == vm_normal && dClass != DBL_FINITE) {
-                    switch(dClass) {
-                        case DBL_NINF: xv = vm_valmin; break;
-                        case DBL_PINF: xv = vm_valpin; break;
-                        case DBL_NAN: xv = vm_valna; break;
-                        default: break;
+                TDblClass dClass{ dblInfo(X, i64) };
+                int xv{ vm_valund };
+                for (; xv < vm_normal; xv++)
+                    if (i64 == intlValueMapI64[xv]) break;
+                if (xv == vm_normal && dClass != DBL_FINITE) {
+                    switch (dClass) {
+                    case DBL_NINF: xv = vm_valmin; break;
+                    case DBL_PINF: xv = vm_valpin; break;
+                    case DBL_NAN: xv = vm_valna; break;
+                    default: break;
                     }
                 }
                 FFile->WriteByte(xv);
-                if(xv == vm_normal) {
+                if (xv == vm_normal) {
                     FFile->WriteDouble(X);
-                    if(X >= Zvalacr) {
+                    if (X >= Zvalacr) {
                         int v = static_cast<int>(std::round(X / Zvalacr));
-                        int ix = utils::indexOf<TAcronym>(AcronymList, [&v](const TAcronym &acro) { return acro.AcrMap == v; });
-                        if(ix == -1) AcronymList.push_back(TAcronym{"", "", v, -1, false});
+                        int ix = utils::indexOf<TAcronym>(AcronymList, [&v](const TAcronym& acro) { return acro.AcrMap == v; });
+                        if (ix == -1) AcronymList.push_back(TAcronym{ "", "", v, -1, false });
                     }
                 }
             }
         }
         DataCount++;
-        if(utils::in(CurSyPtr->SDataType, dt_set, dt_alias)) {
-            if(AVals[vallevel] != 0.0) CurSyPtr->SSetText = true;
-            if(FCurrentDim == 1 && CurSyPtr->SSetBitMap) {
-                auto &ssbm = *CurSyPtr->SSetBitMap;
-                if(ssbm.size() <= LastElem.front())
+        if (utils::in(CurSyPtr->SDataType, dt_set, dt_alias)) {
+            if (AVals[vallevel] != 0.0) CurSyPtr->SSetText = true;
+            if (FCurrentDim == 1 && CurSyPtr->SSetBitMap) {
+                auto& ssbm = *CurSyPtr->SSetBitMap;
+                if (ssbm.size() <= LastElem.front())
                     ssbm.push_back(true);
                 else
                     ssbm[LastElem.front()] = true;
@@ -1196,7 +1199,7 @@ namespace gxfile {
         return true;
     }
 
-    bool TGXFileObj::DoRead(TgdxValues &AVals, int &AFDim) {
+    bool TGXFileObj::DoRead(double *AVals, int &AFDim) {
         const auto maybeRemap = [&](int DV, double v) -> double {
             return v >= Zvalacr ? AcronymRemap(v) : v;
         };
@@ -1291,7 +1294,7 @@ namespace gxfile {
         }
     }
 
-    void TGXFileObj::AddToErrorListDomErrs(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
+    void TGXFileObj::AddToErrorListDomErrs(const std::array<int, MaxDim> &AElements, const double * AVals) {
         if (ErrorList.size() >= 11) return;
 
         for (int D{}; D < FCurrentDim; D++) {
@@ -1305,20 +1308,20 @@ namespace gxfile {
                     }
                 }
                 if (!Found) {
-                    ErrorList[AElements] = AVals;
+                    ErrorList[AElements] = utils::asArray<double, 5>(AVals);
                     return;
                 }
             }
         }
     }
 
-    void TGXFileObj::AddToErrorList(const gxdefs::TgdxUELIndex &AElements, const TgdxValues &AVals) {
+    void TGXFileObj::AddToErrorList(const int *AElements, const double *AVals) {
         if (ErrorList.size() >= 11) // avoid storing too many errors
             return;
-        ErrorList[AElements] = AVals;
+        ErrorList[ utils::asArrayN<int, MaxDim>(AElements, FCurrentDim) ] = utils::asArray<double, 5>(AVals);
     }
 
-    bool TGXFileObj::ResultWillBeSorted(const gxdefs::TgdxUELIndex &ADomainNrs) {
+    bool TGXFileObj::ResultWillBeSorted(const int *ADomainNrs) {
         for(int D{}; D<FCurrentDim; D++) {
             switch(ADomainNrs[D]) {
                 case DOMC_UNMAPPED: continue;
@@ -1343,7 +1346,7 @@ namespace gxfile {
         return true;
     }
 
-    void TGXFileObj::GetDefaultRecord(TgdxValues &Avals) {
+    void TGXFileObj::GetDefaultRecord(double *Avals) {
         int ui{};
         switch (CurSyPtr->SDataType) {
         case dt_set:
@@ -1353,11 +1356,11 @@ namespace gxfile {
             break;
         case dt_var:
             ui = CurSyPtr->SUserInfo;
-            Avals = ui >= stypunknwn && ui <= stypsemiint ? defrecvar[ui] : defrecvar[stypunknwn];
+            memcpy(Avals, ui >= stypunknwn && ui <= stypsemiint ? defrecvar[ui].data() : defrecvar[stypunknwn].data(), sizeof(double)*5);
             break;
         case dt_equ:
             ui = CurSyPtr->SUserInfo;
-            Avals = ui >= ssyeque && ui <= ssyeque + (styequb + 1) ? defrecequ[ui] : defrecequ[ssyeque];
+            memcpy(Avals, ui >= ssyeque && ui <= ssyeque + (styequb + 1) ? defrecequ[ui].data() : defrecequ[ssyeque].data(), sizeof(double)*5);
             break;
         default:
             assert(false && "GetDefaultRecord-2");
@@ -1554,7 +1557,7 @@ namespace gxfile {
     // Description:
     //   Read the next record using strings for the unique elements. The
     //   reading should be initialized by calling DataReadStrStart
-    int TGXFileObj::gdxDataReadStr(TgdxStrIndex &KeyStr, TgdxValues &Values, int &DimFrst) {
+    int TGXFileObj::gdxDataReadStr(char **KeyStr, double *Values, int &DimFrst) {
         const TgxModeSet AllowedModes{ fr_str_data };
         if ((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadStr", AllowedModes))
             return false;
@@ -1565,7 +1568,8 @@ namespace gxfile {
         else {
             for (int D{}; D < FCurrentDim; D++) {
                 int LED{ LastElem[D] };
-                KeyStr[D] = LED >= 1 && LED <= UELTable.size() ? UELTable[LED-1] : BADUEL_PREFIX + std::to_string(LED);
+                std::string s {LED >= 1 && LED <= UELTable.size() ? UELTable[LED-1] : BADUEL_PREFIX + std::to_string(LED)};
+                memcpy(KeyStr[D], s.c_str(), sizeof(char)*(s.length()+1));
             }
             return true;
         }
@@ -1671,7 +1675,7 @@ namespace gxfile {
     //      end;
     int TGXFileObj::gdxDataReadStrStart(int SyNr, int &NrRecs) {
         NrRecs = PrepareSymbolRead("DataReadStrStart"s, SyNr,
-                                   utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED), fr_str_data);
+                                   utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED).data(), fr_str_data);
         return NrRecs >= 0;
     }
 
@@ -1972,11 +1976,11 @@ namespace gxfile {
     //   Non-zero if the record number is valid, zero otherwise
     // See Also:
     //   gdxDataErrorCount
-    int TGXFileObj::gdxDataErrorRecord(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values)
+    int TGXFileObj::gdxDataErrorRecord(int RecNr,  int * KeyInt,  double * Values)
     {
         int res{ gdxDataErrorRecordX(RecNr, KeyInt, Values) };
         if (res) {
-            for (int D{}; D < KeyInt.size(); D++) {
+            for (int D{}; D < FCurrentDim; D++) {
                 if (KeyInt[D] < 0) KeyInt[D] = -KeyInt[D];
             }
         }
@@ -1993,7 +1997,7 @@ namespace gxfile {
     //   Non-zero if the record number is valid, zero otherwise
     // See Also:
     //   gdxDataErrorCount
-    int TGXFileObj::gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values)
+    int TGXFileObj::gdxDataErrorRecordX(int RecNr, int * KeyInt,  double * Values)
     {
         TgxModeSet AllowedModes{ fr_init,fw_init,fr_map_data, fr_mapr_data, fw_raw_data, fw_map_data,fw_str_data };
         if ((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataErrorRecord", AllowedModes))
@@ -2004,7 +2008,7 @@ namespace gxfile {
                 ReportError(ERR_BADERRORRECORD);
             }
             else {
-                ErrorList.GetRecord(RecNr - 1, KeyInt, Values);
+                ErrorList.GetRecord(RecNr - 1, KeyInt, FCurrentDim, Values);
                 return true;
             }
         }
@@ -2023,12 +2027,13 @@ namespace gxfile {
     // See Also:
     //   gdxDataReadRawStart, gdxDataReadDone
     // Description:
-    int TGXFileObj::gdxDataReadRaw(TgdxUELIndex &KeyInt, TgdxValues &Values, int &DimFrst) {
+    int TGXFileObj::gdxDataReadRaw(int *KeyInt, double *Values, int &DimFrst) {
         TgxModeSet  AllowedModes{fr_raw_data};
         if((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadRaw", AllowedModes)) return false;
         if(!DoRead(Values, DimFrst)) gdxDataReadDone();
         else {
-            std::copy(LastElem.begin(), LastElem.begin()+FCurrentDim-1, KeyInt.begin());
+            //std::copy(LastElem.begin(), LastElem.begin()+FCurrentDim-1, KeyInt.begin());
+            memcpy(KeyInt, LastElem.data(), (FCurrentDim-1)*sizeof(int));
             return true;
         }
         return false;
@@ -2045,7 +2050,7 @@ namespace gxfile {
     //   gdxDataReadRaw, gdxDataReadMapStart, gdxDataReadStrStart, gdxDataReadDone
     int TGXFileObj::gdxDataReadRawStart(int SyNr, int &NrRecs) {
         NrRecs = PrepareSymbolRead("DataReadRawStart", SyNr,
-                                   utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED), fr_raw_data);
+                                   utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED).data(), fr_raw_data);
         return NrRecs >= 0;
     }
 
@@ -2067,11 +2072,12 @@ namespace gxfile {
     //   duplicates will be added to the error list (see DataErrorCount and DataErrorRecord)
     // See Also:
     //   gdxDataWriteRawStart, gdxDataWriteDone
-    int TGXFileObj::gdxDataWriteRaw(const TgdxUELIndex &KeyInt, const TgdxValues &Values) {
-        TgxModeSet AllowedModes {fw_raw_data};
-        if(fmode == fw_dom_raw) fmode = fw_raw_data;
-        if((TraceLevel >= TraceLevels::trl_some || !utils::in(fmode, AllowedModes)) && !CheckMode("DataWriteRaw", AllowedModes)) return false;
-        if(DoWrite(KeyInt, Values)) return true;
+    int TGXFileObj::gdxDataWriteRaw(const int* KeyInt, const double* Values)
+    {
+        TgxModeSet AllowedModes{ fw_raw_data };
+        if (fmode == fw_dom_raw) fmode = fw_raw_data;
+        if ((TraceLevel >= TraceLevels::trl_some || !utils::in(fmode, AllowedModes)) && !CheckMode("DataWriteRaw", AllowedModes)) return false;
+        if (DoWrite(KeyInt, Values)) return true;
         return false;
     }
 
@@ -2274,7 +2280,7 @@ namespace gxfile {
     //   Non-zero if the operation is possible, zero otherwise
     // See Also:
     //   gdxSymbolSetDomain, gdxSymbolGetDomainX
-    int TGXFileObj::gdxSymbolGetDomain(int SyNr, TgdxUELIndex &DomainSyNrs) {
+    int TGXFileObj::gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) {
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
         PgdxSymbRecord SyPtr{ (*symbolWithIndex(SyNr)).second };
         for (int D{}; D < SyPtr->SDim; D++)
@@ -2296,15 +2302,18 @@ namespace gxfile {
     //   3: Data used was defined using gdxSymbolSetDomain
     // See Also:
     //   gdxSymbolSetDomainX, gdxSymbolSetDomain
-    int TGXFileObj::gdxSymbolGetDomainX(int SyNr, TgdxStrIndex &DomainIDs) {
+    int TGXFileObj::gdxSymbolGetDomainX(int SyNr, char **DomainIDs) {
         if (ErrorCondition(!NameList.empty() && SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return 0;
         PgdxSymbRecord SyPtr{ (*symbolWithIndex(SyNr)).second };
 
-        std::fill_n(DomainIDs.begin(), SyPtr->SDim, "*");
+        for(int D{0}; D<SyPtr->SDim; D++) {
+            DomainIDs[D][0] = '*';
+            DomainIDs[D][1] = '\0';
+        }
 
         if (!SyPtr->SDomStrings.empty()) {
             for (int D{}; D<SyPtr->SDim; D++)
-                DomainIDs[D] = DomainStrList[SyPtr->SDomStrings[D]-1];
+                utils::stocp(DomainStrList[SyPtr->SDomStrings[D] - 1], DomainIDs[D]);
             return 2;
         }
         else if (SyPtr->SDomSymbols.empty())
@@ -2312,7 +2321,7 @@ namespace gxfile {
         else {
             for (int D{}; D < SyPtr->SDim; D++)
                 if (SyPtr->SDomSymbols[D])
-                    DomainIDs[D] = (*symbolWithIndex(SyPtr->SDomSymbols[D])).first;
+                    utils::stocp((*symbolWithIndex(SyPtr->SDomSymbols[D])).first, DomainIDs[D]);
             return 3;
         }
         return 0;
@@ -2381,7 +2390,7 @@ namespace gxfile {
     //   and DataErrorRecord.)
     // See Also:
     //   gdxSymbolGetDomain
-    int TGXFileObj::gdxSymbolSetDomain(const TgdxStrIndex &DomainIDs) {
+    int TGXFileObj::gdxSymbolSetDomain(const char **DomainIDs) {
         int res{ false }, SyNr;
         TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
         if (!MajorCheckMode("SymbolSetDomain", AllowedModes) || !CurSyPtr) return res;
@@ -2448,7 +2457,7 @@ namespace gxfile {
     //   If domain checking is needed, use gdxSymbolSetDomain
     // See Also:
     //   gdxSymbolSetDomain, gdxSymbolGetDomainX
-    int TGXFileObj::gdxSymbolSetDomainX(int SyNr, const TgdxStrIndex& DomainIDs) {
+    int TGXFileObj::gdxSymbolSetDomainX(int SyNr, const char **DomainIDs) {
         // check for write or append only
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
         PgdxSymbRecord SyPtr = (*symbolWithIndex(SyNr)).second;
@@ -2738,9 +2747,9 @@ namespace gxfile {
     // See Also:
     //   gdxDataWriteMapStart, gdxDataWriteDone
     // Description:
-    int TGXFileObj::gdxDataWriteMap(const TgdxUELIndex &KeyInt, const TgdxValues &Values) {
+    int TGXFileObj::gdxDataWriteMap(const int *KeyInt, const double *Values) {
         const TgxModeSet AllowedModes {fw_map_data};
-        TIndex  Keys;
+        TIndex Keys;
         if(fmode == fw_dom_map)
             fmode = fw_map_data;
         if(TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) {
@@ -2761,7 +2770,7 @@ namespace gxfile {
             if(KD < MinElem[D]) MinElem[D] = KD;
             if(KD > MaxElem[D]) MaxElem[D] = KD;
         }
-        SortList->AddItem(Keys, Values);
+        SortList->AddItem(Keys, utils::asArray<double, 5>(Values));
         return true;
     }
 
@@ -2819,7 +2828,7 @@ namespace gxfile {
     //   gdxDataReadMap, gdxDataReadRawStart, gdxDataReadStrStart, gdxDataReadDone
     int TGXFileObj::gdxDataReadMapStart(int SyNr, int &NrRecs) {
         auto XDomains = utils::arrayWithValue<int, MaxDim>(DOMC_STRICT);
-        NrRecs = PrepareSymbolRead("DataReadMapStart", SyNr, XDomains, fr_map_data);
+        NrRecs = PrepareSymbolRead("DataReadMapStart", SyNr, XDomains.data(), fr_map_data);
         return NrRecs >= 0;
     }
 
@@ -2835,7 +2844,7 @@ namespace gxfile {
     // See Also:
     //   gdxDataReadMapStart, gdxDataReadFilteredStart, gdxDataReadDone
     // Description:
-    int TGXFileObj::gdxDataReadMap(int RecNr, TgdxUELIndex &KeyInt, TgdxValues &Values, int &DimFrst) {
+    int TGXFileObj::gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst) {
         TgxModeSet AllowedModes{fr_map_data, fr_mapr_data};
         if((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadMap", AllowedModes)) return false;
         if(CurSyPtr && CurSyPtr->SScalarFrst) {
@@ -2848,8 +2857,8 @@ namespace gxfile {
             DimFrst = 0;
             //if(!ReadPtr) return false;
             auto first = (*SortList->begin());
-            KeyInt = first.first;
-            Values = first.second;
+            memcpy(KeyInt, first.first.data(), sizeof(int)*FCurrentDim);
+            memcpy(Values, first.second.data(), sizeof(double)*5);
             // checking mapped values
             for(int D{}; D<FCurrentDim; D++) {
                 if(KeyInt[D] != PrevElem[D]) {

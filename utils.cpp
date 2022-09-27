@@ -434,6 +434,10 @@ namespace utils {
         return s;
     }
 
+    void stocp(const std::string &s, char *cp) {
+        std::memcpy(cp, s.c_str(), s.length()+1);
+    }
+
     StringBuffer::StringBuffer(int size) : s(size, '\0'), bufferSize {size} {}
 
     char *StringBuffer::getPtr() { return &s[0]; }

@@ -1,12 +1,15 @@
 #include "gmsdata.h"
 #include <algorithm>
+#include <cstring>
+#include "../utils.h"
 
 namespace gdlib::gmsdata {
 
 
-    void TTblGamsData::GetRecord(int N, IndexKeys &Inx, ValueFields &Vals) {
-        Inx = keyset[N];
-        Vals = mapping[Inx];
+    void TTblGamsData::GetRecord(int N, int * Inx,  int InxCnt, double * Vals) {
+        const auto InxArr = keyset[N];
+        memcpy(Inx, InxArr.data(), InxCnt * sizeof(int));
+        memcpy(Vals, mapping[InxArr].data(), mapping[InxArr].size() * sizeof(double));
     }
 
     ValueFields &TTblGamsData::operator[](const IndexKeys &Key) {

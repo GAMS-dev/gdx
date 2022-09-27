@@ -48,7 +48,7 @@ set(common
 		simplegdx/twostream.h simplegdx/twostream.cpp
 		simplegdx/mistream.h simplegdx/mistream.cpp
 
-		gdxinterface.h
+		gdxinterface.h gdxinterface.cpp
 		kvbuffers.h
 		utils.h utils.cpp
 		gxfile.h gxfile.cpp

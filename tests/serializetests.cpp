@@ -29,7 +29,8 @@ namespace tests::serializetests {
         gxdefs::TgdxValues vals {};
         for(int i{}; i<5; i++) {
             keyStrs.front() = "i"s+std::to_string(i+1);
-            obj.gdxDataWriteStr(keyStrs, vals);
+            const char *keyptrs[] = {keyStrs.front().c_str()};
+            obj.gdxDataWriteStr(keyptrs, vals.data());
         }
         obj.gdxDataWriteDone();
         obj.gdxClose();

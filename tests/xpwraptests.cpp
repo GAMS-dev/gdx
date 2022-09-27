@@ -40,7 +40,8 @@ namespace tests::xpwraptests {
             for (const auto& [key, value] : exampleData) {
                 keys[0] = key;
                 vals[0] = value;
-                pgx.gdxDataWriteStr(keys, vals);
+                const char *keyptrs[1] = { key.c_str() };
+                pgx.gdxDataWriteStr(keyptrs, vals.data());
             }
             REQUIRE(pgx.gdxDataWriteDone());
             pgx.gdxClose();
@@ -57,12 +58,13 @@ namespace tests::xpwraptests {
             int nrRecs{};
             REQUIRE(pgx.gdxDataReadStrStart(1, nrRecs));
 
-            gxdefs::TgdxStrIndex index{};
+            std::array<char, 256> buf {};
+            char *index[] = { buf.data() };
             gxdefs::TgdxValues values{};
             int dimFrst{};
 
             for (int i{}; i < nrRecs; i++) {
-                pgx.gdxDataReadStr(index, values, dimFrst);
+                pgx.gdxDataReadStr(index, values.data(), dimFrst);
                 REQUIRE_EQ(index[0], exampleData[i].first);
                 REQUIRE(vals[global::gmsspecs::vallevel] - exampleData[i].second < 0.001);
             }
