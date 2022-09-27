@@ -39,9 +39,6 @@ set(common
 		gdlib/datastorage.cpp gdlib/datastorage.h
 		gdlib/runner.cpp gdlib/runner.h
 
-		expertapi/gdxcc.h expertapi/gdxcc.c
-		expertapi/gclgms.h expertapi/gclgms.c
-		expertapi/gcmt.h expertapi/gcmt.c
 		expertapi/palmcc.h expertapi/palmcc.c
 
 		simplegdx/tgx.h simplegdx/tgx.cpp
@@ -57,6 +54,13 @@ set(common
 		yaml.h yaml.cpp
 )
 
+set(common_legacy ${common}
+	expertapi/gdxcc.h expertapi/gdxcc.c
+	expertapi/gclgms.h expertapi/gclgms.c
+	expertapi/gcmt.h expertapi/gcmt.c)
+
+set(common_neo ${common} cwrap/cwrap.h cwrap/cwrap.cpp)
+
 set(tests
 		tests/xptests.cpp
 		tests/doctestmain.cpp
@@ -68,9 +72,7 @@ set(tests
 		tests/serializetests.cpp
 )
 
-add_library(gdxnativeshared STATIC ${common})
-
-add_library(gdxcwrap SHARED ${common} pygdx/cwrap.h pygdx/cwrap.cpp)
+add_library(gdxcwrap SHARED ${common_neo})
 set_property(TARGET gdxcwrap PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if(IS_DIRECTORY /usr/include/python3.10)
@@ -80,7 +82,8 @@ if(IS_DIRECTORY /usr/include/python3.10)
 	target_link_libraries(pygdx gdxcwrap)
 endif()
 
+add_library(gdxnativeshared STATIC ${common_legacy})
 add_executable(gdxnativetest ${tests})
 target_link_libraries(gdxnativetest gdxnativeshared ${mylibs})
 
-add_executable(unicode pygdx/unicode.cpp)
+#add_executable(unicode pygdx/unicode.cpp)

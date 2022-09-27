@@ -40,14 +40,14 @@ namespace tests::serializetests {
         commonFileCreation(TestType::TEXT);
         REQUIRE(std::filesystem::is_regular_file(text_fn));
         std::filesystem::remove(gdx_fn);
-        //std::filesystem::remove(text_fn);
+        std::filesystem::remove(text_fn);
     }
 
     TEST_CASE("YAML representation of GDX file data") {
         commonFileCreation(TestType::YAML);
         REQUIRE(std::filesystem::is_regular_file(yaml_fn));
         std::filesystem::remove(gdx_fn);
-        //std::filesystem::remove(yaml_fn);
+        std::filesystem::remove(yaml_fn);
     }
 
     TEST_SUITE_END();
