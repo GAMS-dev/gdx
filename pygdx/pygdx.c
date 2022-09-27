@@ -1,7 +1,7 @@
 #include <Python.h>
 #include <stddef.h>
 #include <structmember.h>
-#include "cwrap.h"
+#include "../cwrap/cwrap.h"
 
 static PyObject *method_create_gdx_file(PyObject *self, PyObject *args) {
     char *filename = NULL;
@@ -28,7 +28,7 @@ static PyObject *GDXObject_new(PyTypeObject *type, PyObject *args, PyObject *kwd
     if(self) {
         const int bufSize = 256;
         char buf[bufSize];
-        self->pgx = gdx_create(buf, bufSize);
+        self->pgx = gdxCreate(buf, bufSize);
         if(buf[0] != '\0') {
             // TODO: Throw python runtime error/exception here!
         }
@@ -41,7 +41,7 @@ static int GDXObject_init(GDXObject *self, PyObject *args, PyObject *kwds) {
 }
 
 static void GDXObject_dealloc(GDXObject *self) {
-    if(self->pgx) gdx_destroy(&self->pgx);
+    if(self->pgx) gdxDestroy(&self->pgx);
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
@@ -61,7 +61,7 @@ static PyObject *open_write(GDXObject *self, PyObject *args, PyObject *kwds) {
     const char *filename;
     if(!PyArg_ParseTuple(args, "s", &filename))
         return NULL;
-    rc = gdx_open_write(self->pgx, filename, &ec);
+    rc = gdxOpenWrite(self->pgx, filename, "pygdxnative", &ec);
     return PyLong_FromLong(rc);
 }
 
@@ -72,7 +72,7 @@ static PyObject *open_read(GDXObject *self, PyObject *args, PyObject *kwds) {
     const char *filename;
     if(!PyArg_ParseTuple(args, "s", &filename))
         return NULL;
-    rc = gdx_open_read(self->pgx, filename, &ec);
+    rc = gdxOpenRead(self->pgx, filename, &ec);
     if(!rc) {
         GDXError = PyErr_NewException("gdx.error", NULL, NULL);
         PyErr_SetString(GDXError, "Unable to open file!");
@@ -82,7 +82,7 @@ static PyObject *open_read(GDXObject *self, PyObject *args, PyObject *kwds) {
 }
 
 static PyObject *close_file(GDXObject *self, PyObject *args, PyObject *kwds) {
-    gdx_close(self->pgx);
+    gdxClose(self->pgx);
     return Py_None;
 }
 

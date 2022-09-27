@@ -2400,7 +2400,7 @@ namespace gxfile {
         for (int D{}; D < CurSyPtr->SDim; D++) {
             bool domap = true;
             int DomSy;
-            if (DomainIDs[D] == "*") DomSy = 0;
+            if (!std::strcmp(DomainIDs[D], "*")) DomSy = 0;
             else {
                 DomSy = NameList[DomainIDs[D]]->SSyNr;
                 if (DomSy <= -1) {
