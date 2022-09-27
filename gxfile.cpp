@@ -2993,6 +2993,122 @@ namespace gxfile {
 
     }
 
+    // Summary:
+    //   Number of entries in the acronym table
+    // Arguments:
+    // Returns:
+    //   The number of entries in the acronym table
+    // See Also:
+    //    gdxAcronymSetInfo, gdxAcronymSetInfo
+    int TGXFileObj::gdxAcronymCount() const {
+        return AcronymList.size();
+    }
+
+    // Summary:
+    //   Retrieve acronym information from the acronym table
+    // Arguments:
+    //   N: Index into acronym table; range from 1 to AcronymCount
+    //   AName: Name of the acronym
+    //   Txt: Explanatory text of the acronym
+    //   AIndx:  Index value of the acronym
+    // Returns:
+    //   Non-zero if the index into the acronym table is valid; false otherwise
+    // See Also:
+    //    gdxAcronymSetInfo, gdxAcronymCount
+    int TGXFileObj::gdxAcronymGetInfo(int N, std::string &AName, std::string &Txt, int &AIndx) const {
+        if(N < 1 || N > AcronymList.size()) {
+            AName.clear();
+            Txt.clear();
+            AIndx = 0;
+            return false;
+        }
+        auto acr = AcronymList[N-1];
+        AName = acr.AcrName;
+        Txt = acr.AcrText;
+        AIndx = acr.AcrMap;
+        return true;
+    }
+
+    // Summary:
+    //   Modify acronym information in the acronym table
+    // Arguments:
+    //   N: Index into acronym table; range from 1 to AcronymCount
+    //   AName: Name of the acronym
+    //   Txt: Explanatory text of the acronym
+    //   AIndx:  Index value of the acronym
+    // Return Value:
+    //   Non-zero if the index into the acronym table is valid; false otherwise
+    // See Also:
+    //   gdxAcronymGetInfo, gdxAcronymCount
+    // Description:
+    //   When writing a gdx file, this function is used to provide the name of an acronym;
+    //     in this case the Indx parameter must match.
+    //   When reading a gdx file, this function
+    //     is used to provide the acronym index, and the AName parameter must match.
+    int TGXFileObj::gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) {
+        STUBWARN();
+        return 0;
+    }
+
+    // Summary:
+    //   Returns the value of the NextAutoAcronym variable and sets the variable to nv
+    // Arguments:
+    //    nv: New value for NextAutoAcronym; a value of less than zero is ignored
+    // Return Value:
+    //    Previous value of NextAutoAcronym
+    // Description:
+    //    When we read from a gdx file and encounter an acronym that was not defined, we need to assign
+    //    a new index for that acronym. The variable NextAutoAcronym is used for this purpose and is
+    //    incremented for each new undefined acronym.
+    //    When NextAutoAcronym has a value of zero, the default, the value is ignored and the original
+    //    index as stored in the gdx file is used for the index.
+    int TGXFileObj::gdxAcronymNextNr(int nv) {
+        STUBWARN();
+        return 0;
+    }
+
+    // Summary:
+    //   Get information how acronym values are remapped
+    // Arguments:
+    //   N: Index into acronym table; range from 1 to AcronymCount
+    //   orgIndx: The Index used in the gdx file
+    //   newIndx: The Index returned when reading gdx data
+    //   autoIndex: non-zero if the newIndx was generated using the value of NextAutoAcronym
+    // Return Value:
+    //   Non-zero if the index into the acronym table is valid; false otherwise
+    // See Also:
+    //   gdxAcronymGetInfo, gdxAcronymCount, gdxAcronymNextNr
+    // Description:
+    //   When reading gdx data, we need to map indices for acronyms used in the gdx file to
+    //   indices used by the reading program. There is a problen when not all acronyms have been
+    //   registered before reading the gdx data. We need to map an udefined index we read to a new value.
+    //   The value of NextAutoAcronym is used for that.
+    //
+    int TGXFileObj::gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex) {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxFilterExists(int FilterNr) const {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxFilterRegisterStart(int FilterNr) {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxFilterRegister(int UelMap) {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxFilterRegisterDone() {
+        STUBWARN();
+        return 0;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();

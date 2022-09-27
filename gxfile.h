@@ -208,6 +208,7 @@ namespace gxfile {
         int FindEntry(int Map) const;
         int FindEntry(const std::string &Name) const;
         int AddEntry(const std::string &Name, const std::string &Text, int Map);
+
     };
 
     using TIntlValueMapDbl = std::array<double, 11>;
@@ -415,6 +416,25 @@ namespace gxfile {
         void SetTraceLevel(TraceLevels tl);
 
         void SetWriteModes(bool asYAML, bool asText);
+
+        // region Acronym handling
+        int gdxAcronymCount() const;
+        int gdxAcronymGetInfo(int N, std::string &AName, std::string &Txt, int &AIndx) const;
+        int gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx);
+        int gdxAcronymNextNr(int nv);
+        int gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex);
+        // endregion
+
+        // region Filter handling
+        int gdxFilterExists(int FilterNr) const;
+        int gdxFilterRegisterStart(int FilterNr);
+        int gdxFilterRegister(int UelMap);
+        int gdxFilterRegisterDone();
+        // endregion
+
+
+
+
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from
