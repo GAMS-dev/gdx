@@ -24,7 +24,7 @@ namespace tests::xp_example1 {
         // exit(1);
     }
 
-    static gxdefs::TgdxStrIndex Indx{};
+    static gdxinterface::StrIndexBuffers Indx {};
     static gxdefs::TgdxValues Values{};
 
     void WriteData(gdxinterface::GDXInterface &PGX,
@@ -32,7 +32,8 @@ namespace tests::xp_example1 {
                    double V) {
         Indx[0] = s;
         Values[global::gmsspecs::vallevel] = V;
-        PGX.gdxDataWriteStr(Indx, Values);
+        const char *keyptrs[] = {s.c_str()};
+        PGX.gdxDataWriteStr(keyptrs, Values.data());
     }
 
     enum class GDXImplType {
@@ -128,10 +129,10 @@ namespace tests::xp_example1 {
         if(!res) ReportGDXError(*PGX);
 
         int N;
-        while(PGX->gdxDataReadStr(Indx, Values, N)) {
+        while(PGX->gdxDataReadStr(Indx.ptrs(), Values.data(), N)) {
             if(0.0 == Values[global::gmsspecs::vallevel]) continue;
             for(int D{}; D<Dim; D++)
-                mycout << (D ? '.':' ') << Indx[D];
+                mycout << (D ? '.':' ') << Indx[D].str();
             //printf(" = %7.2f\n", Values[global::gmsspecs::vallevel]);
         }
         mycout << "All solution values shown\n";

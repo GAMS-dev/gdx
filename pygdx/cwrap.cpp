@@ -43,7 +43,7 @@ int gdx_set1d(void *pgx, const char *name, const char **elems) {
     int i;
     for(i=0; elems[i]; i++) {
         keyStrs[0].assign(elems[i]);
-        obj->gdxDataWriteStr(keyStrs, values);
+        obj->gdxDataWriteStr(&elems[i], values.data());
     }
     obj->gdxDataWriteDone();
     return i;
@@ -66,7 +66,9 @@ int create_gdx_file(const char *filename) {
     gxdefs::TgdxStrIndex keys{};
     for (int i{1}; i <= 5; i++) {
         keys[0] = "uel_" + std::to_string(i);
-        gdx.gdxDataWriteStr(keys, vals);
+        const char *keyptrs[1];
+        keyptrs[0] = keys[0].c_str();
+        gdx.gdxDataWriteStr(keyptrs, vals.data());
     }
     gdx.gdxDataWriteDone();
     gdx.gdxClose();

@@ -278,7 +278,7 @@ namespace gxfile {
         bool PrepareSymbolWrite(const std::string &Caller, const std::string &AName, const std::string &AText, int ADim,
                                 int AType, int AUserInfo);
 
-        int PrepareSymbolRead(const std::string &Caller, int SyNr, const gxdefs::TgdxUELIndex &ADomainNrs, TgxFileMode newmode);
+        int PrepareSymbolRead(const std::string &Caller, int SyNr, const int *ADomainNrs, TgxFileMode newmode);
 
         void InitErrors();
         void SetError(int N);
@@ -288,14 +288,14 @@ namespace gxfile {
         bool CheckMode(const std::string &Routine, const TgxModeSet &MS);
         void WriteTrace(const std::string &s);
         void InitDoWrite(int NrRecs);
-        bool DoWrite(const gxdefs::TgdxUELIndex &AElements, const gxdefs::TgdxValues &AVals);
-        bool DoRead(gxdefs::TgdxValues &AVals, int &AFDim);
-        void AddToErrorListDomErrs(const gxdefs::TgdxUELIndex &AElements, const gxdefs::TgdxValues &AVals);
-        void AddToErrorList(const gxdefs::TgdxUELIndex &AElements, const gxdefs::TgdxValues &AVals);
-        void GetDefaultRecord(gxdefs::TgdxValues &Avals);
+        bool DoWrite(const int *AElements, const double *AVals);
+        bool DoRead(double *AVals, int &AFDim);
+        void AddToErrorListDomErrs(const std::array<int, global::gmsspecs::MaxDim>& AElements, const double * AVals);
+        void AddToErrorList(const int *AElements, const double *AVals);
+        void GetDefaultRecord(double *Avals);
         double AcronymRemap(double V);
         bool IsGoodNewSymbol(const std::string &s);
-        bool ResultWillBeSorted(const gxdefs::TgdxUELIndex &ADomainNrs);
+        bool ResultWillBeSorted(const int *ADomainNrs);
 
         // ...
 
@@ -311,7 +311,7 @@ namespace gxfile {
         int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) override;
         int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
                                  int UserInfo) override;
-        int gdxDataWriteStr(const gxdefs::TgdxStrIndex &KeyStr, const gxdefs::TgdxValues &Values) override;
+        int gdxDataWriteStr(const char **KeyStr, const double *Values) override;
         int gdxDataWriteDone() override;
 
         int gdxUELRegisterMapStart() override;
@@ -330,7 +330,7 @@ namespace gxfile {
 
         int gdxFindSymbol(const std::string &SyId, int &SyNr) override;
 
-        int gdxDataReadStr(gxdefs::TgdxStrIndex &KeyStr, gxdefs::TgdxValues &Values, int &DimFrst) override;
+        int gdxDataReadStr(char **KeyStr, double *Values, int &DimFrst) override;
 
         int gdxDataReadDone() override;
 
@@ -344,15 +344,15 @@ namespace gxfile {
 
         int gdxDataErrorCount() override;
 
-        int gdxDataErrorRecord(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) override;
+        int gdxDataErrorRecord(int RecNr,  int *KeyInt, double * Values) override;
 
-        int gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) override;
+        int gdxDataErrorRecordX(int RecNr,  int *KeyInt,  double *Values) override;
 
-        int gdxDataReadRaw(gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) override;
+        int gdxDataReadRaw(int *KeyInt, double *Values, int &DimFrst) override;
 
         int gdxDataReadRawStart(int SyNr, int &NrRecs) override;
 
-        int gdxDataWriteRaw(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) override;
+        int gdxDataWriteRaw(const int* KeyInt, const double* Values) override;
 
         int gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
@@ -367,17 +367,17 @@ namespace gxfile {
 
         int gdxSetSpecialValues(const gxdefs::TgdxSVals &AVals) override;
 
-        int gdxSymbolGetDomain(int SyNr, gxdefs::TgdxUELIndex &DomainSyNrs) override;
+        int gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) override;
 
-        int gdxSymbolGetDomainX(int SyNr, gxdefs::TgdxStrIndex &DomainIDs) override;
+        int gdxSymbolGetDomainX(int SyNr, char **DomainIDs) override;
 
         int gdxSymbolDim(int SyNr) override;
 
         int gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) override;
 
-        int gdxSymbolSetDomain(const gxdefs::TgdxStrIndex &DomainIDs) override;
+        int gdxSymbolSetDomain(const char **DomainIDs) override;
 
-        int gdxSymbolSetDomainX(int SyNr, const gxdefs::TgdxStrIndex &DomainIDs) override;
+        int gdxSymbolSetDomainX(int SyNr, const char **DomainIDs) override;
 
         int gdxSystemInfo(int &SyCnt, int &UelCnt) override;
 
@@ -406,11 +406,11 @@ namespace gxfile {
         int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
 
-        int gdxDataWriteMap(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) override;
+        int gdxDataWriteMap(const int *KeyInt, const double *Values) override;
 
         int gdxDataReadMapStart(int SyNr, int &NrRecs) override;
 
-        int gdxDataReadMap(int RecNr, gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) override;
+        int gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst) override;
 
         void SetTraceLevel(TraceLevels tl);
 

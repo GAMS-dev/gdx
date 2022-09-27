@@ -16,7 +16,7 @@ namespace xpwrap {
         int gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
         int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) override;
         int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) override;
-        int gdxDataWriteStr(const gxdefs::TgdxStrIndex &KeyStr, const gxdefs::TgdxValues &Values) override;
+        int gdxDataWriteStr(const char **KeyStr, const double *Values) override;
         int gdxDataWriteDone() override;
 
         int gdxClose() override;
@@ -27,7 +27,7 @@ namespace xpwrap {
 
         int gdxFindSymbol(const std::string &SyId, int &SyNr) override;
 
-        int gdxDataReadStr(gxdefs::TgdxStrIndex &KeyStr, gxdefs::TgdxValues &Values, int &DimFrst) override;
+        int gdxDataReadStr(char **KeyStr, double *Values, int &DimFrst) override;
 
         int gdxDataReadDone() override;
 
@@ -41,15 +41,15 @@ namespace xpwrap {
 
         int gdxDataErrorCount() override;
 
-        int gdxDataErrorRecord(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) override;
+        int gdxDataErrorRecord(int RecNr, int * KeyInt, double * Values) override;
 
-        int gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) override;
+        int gdxDataErrorRecordX(int RecNr, int * KeyInt, double * Values) override;
 
-        int gdxDataReadRaw(gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) override;
+        int gdxDataReadRaw(int *KeyInt, double *Values, int &DimFrst) override;
 
         int gdxDataReadRawStart(int SyNr, int &NrRecs) override;
 
-        int gdxDataWriteRaw(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) override;
+        int gdxDataWriteRaw(const int *KeyInt, const double *Values) override;
 
         int gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
@@ -66,17 +66,17 @@ namespace xpwrap {
 
         int gdxSetSpecialValues(const gxdefs::TgdxSVals &AVals) override;
 
-        int gdxSymbolGetDomain(int SyNr, gxdefs::TgdxUELIndex &DomainSyNrs) override;
+        int gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) override;
 
-        int gdxSymbolGetDomainX(int SyNr, gxdefs::TgdxStrIndex &DomainIDs) override;
+        int gdxSymbolGetDomainX(int SyNr, char **DomainIDs) override;
 
         int gdxSymbolDim(int SyNr) override;
 
         int gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) override;
 
-        int gdxSymbolSetDomain(const gxdefs::TgdxStrIndex &DomainIDs) override;
+        int gdxSymbolSetDomain(const char **DomainIDs) override;
 
-        int gdxSymbolSetDomainX(int SyNr, const gxdefs::TgdxStrIndex &DomainIDs) override;
+        int gdxSymbolSetDomainX(int SyNr, const char **DomainIDs) override;
 
         int gdxSystemInfo(int &SyCnt, int &UelCnt) override;
 
@@ -105,7 +105,7 @@ namespace xpwrap {
         int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
 
-        int gdxDataWriteMap(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) override;
+        int gdxDataWriteMap(const int *KeyInt, const double *Values) override;
 
         int gdxUELRegisterMapStart() override;
 
@@ -113,7 +113,7 @@ namespace xpwrap {
 
         int gdxDataReadMapStart(int SyNr, int &NrRecs) override;
 
-        int gdxDataReadMap(int RecNr, gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) override;
+        int gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst) override;
     };
 
 }

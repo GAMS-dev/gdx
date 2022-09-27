@@ -24,7 +24,8 @@ namespace tests::gxfiletests {
             static std::array<double, 5> values{};
             keys.front() = s;
             values.front() = v;
-            pgx.gdxDataWriteStr(keys, values);
+            const char *keyptrs[] = { s.c_str() };
+            pgx.gdxDataWriteStr(keyptrs, values.data());
         };
         writeRec("New-York"s, 324.0);
         writeRec("Chicago"s, 299.0);
@@ -62,9 +63,16 @@ namespace tests::gxfiletests {
 
         mycout << "Parameter demand has " << std::to_string(NrRecs) << " records\n";
 
-        gxdefs::TgdxStrIndex Indx;
+        std::array<std::array<char, 256>, global::gmsspecs::MaxDim> bufs {};
+        std::array<char *, global::gmsspecs::MaxDim> Indx {};
+
+        gdxinterface::StrIndexBuffers sibufs {};
+
+        for(int i=0; i<Indx.size(); i++) {
+            Indx[i] = bufs[i].data();
+        }
         gxdefs::TgdxValues Values;
-        for (int N{}; pgx.gdxDataReadStr(Indx, Values, N);) {
+        for (int N{}; pgx.gdxDataReadStr(Indx.data(), Values.data(), N);) {
             /*if (0 == Values[global::gmsspecs::vallevel]) continue;
             for (int D{}; D < Dim; D++)
                 mycout << (D ? '.' : ' ') << Indx[D];

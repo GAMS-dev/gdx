@@ -4,53 +4,9 @@
 #include <cassert>
 #include <cstring>
 
+using namespace gdxinterface;
+
 namespace xpwrap {
-    class CharBuf {
-        std::array<char, 256> buf;
-
-    public:
-        char* get() { return buf.data(); }
-        std::string str() const {
-            return buf.data();
-        };
-
-        operator std::string() const {
-            return str();
-        }
-
-        int size() const { return (int)buf.size(); }
-    };
-
-    class StrIndexBuffers {
-        std::array<std::array<char, 256>, 20> bufContents{};
-        std::array<char*, 20> bufPtrs{};
-    public:
-        explicit StrIndexBuffers(const gxdefs::TgdxStrIndex *strIndex = nullptr) {
-            for (int i{}; i < bufPtrs.size(); i++) {
-                bufPtrs[i] = bufContents[i].data();
-                if (strIndex) {
-                    strcpy(bufPtrs[i], (*strIndex)[i].c_str());
-                }
-            }
-        }
-
-        char **ptrs() { return bufPtrs.data(); }
-        const char** cptrs() { return (const char **)bufPtrs.data(); }
-
-        gxdefs::TgdxStrIndex strs() const {
-            gxdefs::TgdxStrIndex res;
-            for (int i{}; i < res.size(); i++) {
-                res[i].assign(bufPtrs[i]);
-            }
-            return res;
-        }
-
-        void clear() {
-            for (int i{}; i < bufContents.size(); i++)
-                bufContents[i].fill(0);
-        }
-    };
-
     int GDXFile::gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) {
         return ::gdxOpenWrite(pgx, FileName.c_str(), Producer.c_str(), &ErrNr);
     }
@@ -63,9 +19,9 @@ namespace xpwrap {
         return ::gdxDataWriteStrStart(pgx, SyId.c_str(), ExplTxt.c_str(), Dim, Typ, UserInfo);
     }
 
-    int GDXFile::gdxDataWriteStr(const gxdefs::TgdxStrIndex &KeyStr, const gxdefs::TgdxValues &Values) {
-        StrIndexBuffers keys{ &KeyStr };
-        return ::gdxDataWriteStr(pgx, keys.cptrs(), Values.data());
+    int GDXFile::gdxDataWriteStr(const char **KeyStr, const double *Values) {
+        //StrIndexBuffers keys{ &KeyStr };
+        return ::gdxDataWriteStr(pgx, KeyStr, Values);
     }
 
     int GDXFile::gdxDataWriteDone() {
@@ -113,11 +69,8 @@ namespace xpwrap {
         return ::gdxFindSymbol(pgx, SyId.c_str(), &SyNr);
     }
 
-    int GDXFile::gdxDataReadStr(gxdefs::TgdxStrIndex &KeyStr, gxdefs::TgdxValues &Values, int &DimFrst) {
-        StrIndexBuffers keys{};
-        int rc {::gdxDataReadStr(pgx, keys.ptrs(), Values.data(), &DimFrst)};
-        KeyStr = keys.strs();
-        return rc;
+    int GDXFile::gdxDataReadStr(char **KeyStr, double *Values, int &DimFrst) {
+        return ::gdxDataReadStr(pgx, KeyStr, Values, &DimFrst);
     }
 
     int GDXFile::gdxDataReadDone() {
@@ -147,23 +100,23 @@ namespace xpwrap {
         return ::gdxDataErrorCount(pgx);
     }
 
-    int GDXFile::gdxDataErrorRecord(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) {
-        return ::gdxDataErrorRecord(pgx, RecNr, KeyInt.data(), Values.data());
+    int GDXFile::gdxDataErrorRecord(int RecNr, int * KeyInt, double * Values) {
+        return ::gdxDataErrorRecord(pgx, RecNr, KeyInt, Values);
     }
-    int GDXFile::gdxDataErrorRecordX(int RecNr, gxdefs::TgdxUELIndex& KeyInt, gxdefs::TgdxValues& Values) {
-        return ::gdxDataErrorRecordX(pgx, RecNr, KeyInt.data(), Values.data());
+    int GDXFile::gdxDataErrorRecordX(int RecNr, int * KeyInt, double * Values) {
+        return ::gdxDataErrorRecordX(pgx, RecNr, KeyInt, Values);
     }
 
-    int GDXFile::gdxDataReadRaw(gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) {
-        return ::gdxDataReadRaw(pgx, KeyInt.data(), Values.data(), &DimFrst);
+    int GDXFile::gdxDataReadRaw(int *KeyInt, double *Values, int &DimFrst) {
+        return ::gdxDataReadRaw(pgx, KeyInt, Values, &DimFrst);
     }
 
     int GDXFile::gdxDataReadRawStart(int SyNr, int &NrRecs) {
         return ::gdxDataReadRawStart(pgx, SyNr, &NrRecs);
     }
 
-    int GDXFile::gdxDataWriteRaw(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) {
-        return ::gdxDataWriteRaw(pgx, KeyInt.data(), Values.data());
+    int GDXFile::gdxDataWriteRaw(const int *KeyInt, const double *Values) {
+        return ::gdxDataWriteRaw(pgx, KeyInt, Values);
     }
 
     int GDXFile::gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
@@ -202,15 +155,12 @@ namespace xpwrap {
         return ::gdxSetSpecialValues(pgx, AVals.data());
     }
 
-    int GDXFile::gdxSymbolGetDomain(int SyNr, gxdefs::TgdxUELIndex &DomainSyNrs) {
-        return ::gdxSymbolGetDomain(pgx, SyNr, DomainSyNrs.data());
+    int GDXFile::gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) {
+        return ::gdxSymbolGetDomain(pgx, SyNr, DomainSyNrs);
     }
 
-    int GDXFile::gdxSymbolGetDomainX(int SyNr, gxdefs::TgdxStrIndex &DomainIDs) {
-        StrIndexBuffers domainIdBufs{};
-        int rc{ ::gdxSymbolGetDomainX(pgx, SyNr, domainIdBufs.ptrs()) };
-        DomainIDs = domainIdBufs.strs();
-        return rc;
+    int GDXFile::gdxSymbolGetDomainX(int SyNr, char **DomainIDs) {
+        return ::gdxSymbolGetDomainX(pgx, SyNr, DomainIDs);
     }
 
     int GDXFile::gdxSymbolDim(int SyNr) {
@@ -224,14 +174,12 @@ namespace xpwrap {
         return rc;
     }
 
-    int GDXFile::gdxSymbolSetDomain(const gxdefs::TgdxStrIndex &DomainIDs) {
-        StrIndexBuffers domainIdBufs{ &DomainIDs };
-        return ::gdxSymbolSetDomain(pgx, domainIdBufs.cptrs());
+    int GDXFile::gdxSymbolSetDomain(const char **DomainIDs) {
+        return ::gdxSymbolSetDomain(pgx, DomainIDs);
     }
 
-    int GDXFile::gdxSymbolSetDomainX(int SyNr, const gxdefs::TgdxStrIndex &DomainIDs) {
-        StrIndexBuffers domainIdBufs{ &DomainIDs };
-        return ::gdxSymbolSetDomainX(pgx, SyNr, domainIdBufs.cptrs());
+    int GDXFile::gdxSymbolSetDomainX(int SyNr, const char **DomainIDs) {
+        return ::gdxSymbolSetDomainX(pgx, SyNr, DomainIDs);
     }
 
     int GDXFile::gdxSystemInfo(int &SyCnt, int &UelCnt) {
@@ -294,8 +242,8 @@ namespace xpwrap {
         return ::gdxDataWriteMapStart(pgx, SyId.c_str(), ExplTxt.c_str(), Dimen, Typ, UserInfo);
     }
 
-    int GDXFile::gdxDataWriteMap(const gxdefs::TgdxUELIndex &KeyInt, const gxdefs::TgdxValues &Values) {
-        return ::gdxDataWriteMap(pgx, KeyInt.data(), Values.data());
+    int GDXFile::gdxDataWriteMap(const int *KeyInt, const double *Values) {
+        return ::gdxDataWriteMap(pgx, KeyInt, Values);
     }
 
     int GDXFile::gdxUELRegisterMapStart() {
@@ -310,7 +258,7 @@ namespace xpwrap {
         return ::gdxDataReadMapStart(pgx, SyNr, &NrRecs);
     }
 
-    int GDXFile::gdxDataReadMap(int RecNr, gxdefs::TgdxUELIndex &KeyInt, gxdefs::TgdxValues &Values, int &DimFrst) {
-        return ::gdxDataReadMap(pgx, RecNr, KeyInt.data(), Values.data(), &DimFrst);
+    int GDXFile::gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst) {
+        return ::gdxDataReadMap(pgx, RecNr, KeyInt, Values, &DimFrst);
     }
 }
