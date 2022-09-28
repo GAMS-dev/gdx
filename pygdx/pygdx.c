@@ -28,7 +28,7 @@ static PyObject *GDXObject_new(PyTypeObject *type, PyObject *args, PyObject *kwd
     if(self) {
         const int bufSize = 256;
         char buf[bufSize];
-        self->pgx = gdxCreate(buf, bufSize);
+        int rc = gdxCreate(self->pgx, buf, bufSize);
         if(buf[0] != '\0') {
             // TODO: Throw python runtime error/exception here!
         }

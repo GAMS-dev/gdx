@@ -8,7 +8,7 @@ using namespace gxfile;
 
 extern "C" {
 
-void *gdxCreate(char *errBuf, int bufSize) {
+int gdxCreate(void **pgdx, char *errBuf, int bufSize) {
     printf("create called\n");
     std::string ErrMsg;
     auto *pgx = new TGXFileObj {ErrMsg};
@@ -16,7 +16,8 @@ void *gdxCreate(char *errBuf, int bufSize) {
         memcpy(errBuf, ErrMsg.c_str(), std::min<int>((int)ErrMsg.length()+1, bufSize));
     else
         errBuf[0] = '\0';
-    return pgx;
+    *pgdx = pgx;
+    return true;
 }
 
 void gdxDestroy(void **pgx) {

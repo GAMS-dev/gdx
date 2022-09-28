@@ -3,6 +3,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if defined(_WIN32)
+# define GDX_CALLCONV __stdcall
+#else
+# define GDX_CALLCONV
+#endif
+
+    typedef char gdxStrIndex_t[20][256];
+
     int create_gdx_file(const char *filename);
 
     int gdxFree(void *pgdx);
@@ -10,7 +19,7 @@ extern "C" {
     int gdxLibraryLoaded();
     int gdxLibraryUnload();
 
-    void *gdxCreate(char *errBuf, int bufSize);
+    int gdxCreate(void **pgdx, char *errBuf, int bufSize);
     void gdxDestroy(void **pgx);
 
     int gdx_set1d(void *pgx, const char *name, const char **elems);
