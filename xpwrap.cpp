@@ -261,4 +261,44 @@ namespace xpwrap {
     int GDXFile::gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst) {
         return ::gdxDataReadMap(pgx, RecNr, KeyInt, Values, &DimFrst);
     }
+
+    int GDXFile::gdxAcronymCount() const {
+        return ::gdxAcronymCount(pgx);
+    }
+
+    int GDXFile::gdxAcronymGetInfo(int N, std::string &AName, std::string &Txt, int &AIndx) const {
+        CharBuf nameBuf{}, txtBuf{};
+        int rc{::gdxAcronymGetInfo(pgx, N, nameBuf.get(), txtBuf.get(), &AIndx)};
+        AName = nameBuf;
+        Txt = txtBuf;
+        return rc;
+    }
+
+    int GDXFile::gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) {
+        return ::gdxAcronymSetInfo(pgx, N, AName.c_str(), Txt.c_str(), AIndx);
+    }
+
+    int GDXFile::gdxAcronymNextNr(int nv) {
+        return ::gdxAcronymNextNr(pgx, nv);
+    }
+
+    int GDXFile::gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex) {
+        return ::gdxAcronymGetMapping(pgx, N, &orgIndx, &newIndx, &autoIndex);
+    }
+
+    int GDXFile::gdxFilterExists(int FilterNr) {
+        return ::gdxFilterExists(pgx, FilterNr);
+    }
+
+    int GDXFile::gdxFilterRegisterStart(int FilterNr) {
+        return ::gdxFilterRegisterStart(pgx, FilterNr);
+    }
+
+    int GDXFile::gdxFilterRegister(int UelMap) {
+        return ::gdxFilterRegister(pgx, UelMap);
+    }
+
+    int GDXFile::gdxFilterRegisterDone() {
+        return ::gdxFilterRegisterDone(pgx);
+    }
 }

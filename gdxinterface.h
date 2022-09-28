@@ -175,6 +175,18 @@ namespace gdxinterface {
 
         virtual int gdxCurrentDim() = 0;
         virtual int gdxRenameUEL(const std::string &OldName, const std::string &NewName) = 0;
+
+        // region deprecated functions
+        virtual int gdxAcronymCount() const = 0;
+        virtual int gdxAcronymGetInfo(int N, std::string &AName, std::string &Txt, int &AIndx) const = 0;
+        virtual int gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) = 0;
+        virtual int gdxAcronymNextNr(int nv) = 0;
+        virtual int gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex) = 0;
+        virtual int gdxFilterExists(int FilterNr) = 0;
+        virtual int gdxFilterRegisterStart(int FilterNr) = 0;
+        virtual int gdxFilterRegister(int UelMap) = 0;
+        virtual int gdxFilterRegisterDone() = 0;
+        // endregion
     };
 
 }

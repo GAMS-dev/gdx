@@ -428,18 +428,18 @@ namespace gxfile {
         void SetWriteModes(bool asYAML, bool asText);
 
         // region Acronym handling
-        int gdxAcronymCount() const;
-        int gdxAcronymGetInfo(int N, std::string &AName, std::string &Txt, int &AIndx) const;
-        int gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx);
-        int gdxAcronymNextNr(int nv);
-        int gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex);
+        int gdxAcronymCount() const override;
+        int gdxAcronymGetInfo(int N, std::string &AName, std::string &Txt, int &AIndx) const override;
+        int gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) override;
+        int gdxAcronymNextNr(int nv) override;
+        int gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex) override;
         // endregion
 
         // region Filter handling
-        int gdxFilterExists(int FilterNr);
-        int gdxFilterRegisterStart(int FilterNr);
-        int gdxFilterRegister(int UelMap);
-        int gdxFilterRegisterDone();
+        int gdxFilterExists(int FilterNr) override;
+        int gdxFilterRegisterStart(int FilterNr) override;
+        int gdxFilterRegister(int UelMap) override;
+        int gdxFilterRegisterDone() override;
         // endregion
     };
 

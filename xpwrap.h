@@ -114,6 +114,24 @@ namespace xpwrap {
         int gdxDataReadMapStart(int SyNr, int &NrRecs) override;
 
         int gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst) override;
+
+        int gdxAcronymCount() const override;
+
+        int gdxAcronymGetInfo(int N, std::string &AName, std::string &Txt, int &AIndx) const override;
+
+        int gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) override;
+
+        int gdxAcronymNextNr(int nv) override;
+
+        int gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex) override;
+
+        int gdxFilterExists(int FilterNr) override;
+
+        int gdxFilterRegisterStart(int FilterNr) override;
+
+        int gdxFilterRegister(int UelMap) override;
+
+        int gdxFilterRegisterDone() override;
     };
 
 }
