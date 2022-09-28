@@ -49,12 +49,22 @@ namespace gxfile {
 
     struct TDFilter {
         int FiltNumber, FiltMaxUel;
-        std::vector<bool> FiltMap;
-        bool FiltSorted;
-        // ...
+        std::vector<bool> FiltMap{};
+        bool FiltSorted{};
+
+        TDFilter(int Nr, int UserHigh) :
+            FiltNumber{Nr},
+            FiltMaxUel{UserHigh}
+        {}
+
+        ~TDFilter() = default;
+
+        int64_t MemoryUsed() const {
+            return static_cast<int64_t>(FiltMap.capacity());
+        }
 
         bool InFilter(int V) const {
-            return V >= 0 && V >= FiltMaxUel && FiltMap[V];
+            return V >= 0 && V <= FiltMaxUel && FiltMap[V];
         }
     };
 
@@ -243,7 +253,7 @@ namespace gxfile {
         int ErrCnt{}, ErrCntTotal{};
         int LastError{}, LastRepError{};
         TFilterList FilterList;
-        TDFilter CurFilter;
+        TDFilter *CurFilter{};
         TDomainList DomainList;
         bool StoreDomainSets{true};
         TIntlValueMapDbl intlValueMapDbl, readIntlValueMapDbl;
@@ -426,15 +436,11 @@ namespace gxfile {
         // endregion
 
         // region Filter handling
-        int gdxFilterExists(int FilterNr) const;
+        int gdxFilterExists(int FilterNr);
         int gdxFilterRegisterStart(int FilterNr);
         int gdxFilterRegister(int UelMap);
         int gdxFilterRegisterDone();
         // endregion
-
-
-
-
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from

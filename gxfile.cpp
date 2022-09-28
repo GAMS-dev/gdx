@@ -3046,8 +3046,31 @@ namespace gxfile {
     //   When reading a gdx file, this function
     //     is used to provide the acronym index, and the AName parameter must match.
     int TGXFileObj::gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) {
-        STUBWARN();
-        return 0;
+        auto MapIsUnique = [this](int Indx) {
+            return std::none_of(AcronymList.begin(), AcronymList.end(), [&](const TAcronym &acr) {
+                return acr.AcrReadMap == Indx;
+            });
+        };
+
+        if(TraceLevel >= TraceLevels::trl_some)
+            WriteTrace("AcronymSetInfo: "s + AName + " index = " + std::to_string(AIndx));
+
+        if(ErrorCondition(N >= 1 || N <= AcronymList.size(), ERR_BADACRONUMBER)) return false;
+        auto &obj = AcronymList[N-1];
+        if(utils::in(fmode, AnyWriteMode) || obj.AcrAutoGen) {
+            if(ErrorCondition(IsGoodNewSymbol(AName), ERR_BADACRONAME)) return false;
+            if(obj.AcrAutoGen) {
+                assert(obj.AcrReadMap == AIndx && "gdxAcronymSetInfo");
+                obj.AcrAutoGen = false;
+            }
+            else if(ErrorCondition(AIndx == obj.AcrMap, ERR_BADACROINDEX)) return false;
+
+        } else if(obj.AcrReadMap != AIndx) {
+            if(ErrorCondition(utils::sameText(AName, obj.AcrName), ERR_BADACRONAME) ||
+                ErrorCondition(MapIsUnique(AIndx), ERR_ACRODUPEMAP)) return false;
+            obj.AcrReadMap = AIndx;
+        }
+        return true;
     }
 
     // Summary:
@@ -3063,8 +3086,9 @@ namespace gxfile {
     //    When NextAutoAcronym has a value of zero, the default, the value is ignored and the original
     //    index as stored in the gdx file is used for the index.
     int TGXFileObj::gdxAcronymNextNr(int nv) {
-        STUBWARN();
-        return 0;
+        int res {NextAutoAcronym};
+        if(nv >= 0) NextAutoAcronym = nv;
+        return res;
     }
 
     // Summary:
@@ -3085,28 +3109,109 @@ namespace gxfile {
     //   The value of NextAutoAcronym is used for that.
     //
     int TGXFileObj::gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex) {
-        STUBWARN();
-        return 0;
+        if(TraceLevel >= TraceLevels::trl_some)
+            WriteTrace("AcronymGetMapping: N = "s + std::to_string(N));
+        if(ErrorCondition(N >= 1 || N <= AcronymList.size(), ERR_BADACRONUMBER)) return false;
+        auto &obj = AcronymList[N-1];
+        orgIndx = obj.AcrMap;
+        newIndx = obj.AcrReadMap;
+        autoIndex = obj.AcrAutoGen;
+        return true;
     }
 
-    int TGXFileObj::gdxFilterExists(int FilterNr) const {
-        STUBWARN();
-        return 0;
+    // Brief:
+    //   Check if there is a filter defined based on its number
+    // Arguments:
+    //   FilterNr: Filter number as used in FilterRegisterStart
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //  gdxFilterRegisterStart
+    // Description:
+    //
+    int TGXFileObj::gdxFilterExists(int FilterNr) {
+        if(!MajorCheckMode("FilterExists"s, AnyReadMode)) return false;
+        return FilterList.FindFilter(FilterNr) != nullptr;
     }
 
+    // Brief:
+    //   Define a unique element filter
+    // Arguments:
+    //   FilterNr: Filter number to be assigned
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //  gdxFilterRegister, gdxFilterRegisterDone, gdxDataReadFilteredStart
+    // Description:
+    //   Start the registration of a filter. A filter is used to map a number
+    //   of elements to a single integer; the filter number. A filter number
+    //   can later be used to specify a filter for an index postion when reading data.
     int TGXFileObj::gdxFilterRegisterStart(int FilterNr) {
-        STUBWARN();
-        return 0;
+        static const TgxModeSet AllowedModes {fr_init};
+        if(!MajorCheckMode("FilterRegisterStart"s, AllowedModes) ||
+            ErrorCondition(FilterNr >= 1, ERR_BAD_FILTER_NR)) return false;
+
+        FilterList.emplace_back(FilterNr, UELTable.UsrUel2Ent.GetHighestIndex());
+        CurFilter = &FilterList.back();
+        fmode = fr_filter;
+        return true;
     }
 
+    // Brief:
+    //   Add a unique element to the current filter definition
+    // Arguments:
+    //   UelMap: Unique element number in the user index space
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //  gdxFilterRegisterStart, gdxFilterRegisterDone
+    // Description:
+    //  Register a unique element as part of the current filter. The
+    //  function returns false if the index number is out of range of
+    //  valid user indices or the index was never mapped into the
+    //  user index space.
     int TGXFileObj::gdxFilterRegister(int UelMap) {
-        STUBWARN();
-        return 0;
+        static const TgxModeSet AllowedModes {fr_filter};
+        if(TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes) &&
+            !CheckMode("FilterRegister"s, AllowedModes)) return false;
+        auto &obj = *CurFilter;
+        if(ErrorCondition(UelMap >= 1 && UelMap <= obj.FiltMaxUel, ERR_BAD_FILTER_INDX)) return false;
+        int EN{UELTable.UsrUel2Ent[UelMap]};
+        if(EN >= 1) obj.FiltMap[UelMap] = true;
+        else {
+            ReportError(ERR_FILTER_UNMAPPED);
+            return false;
+        }
+        return true;
     }
 
+    // Brief:
+    //   Finish registration of unique elements for a filter
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //  gdxFilterRegisterStart, gdxFilterRegister
+    // Description:
+    //
     int TGXFileObj::gdxFilterRegisterDone() {
-        STUBWARN();
-        return 0;
+        static const TgxModeSet AllowedModes {fr_filter};
+        if(!MajorCheckMode("FilterRegisterDone"s, AllowedModes)) return false;
+        fmode = fr_init;
+        CurFilter->FiltSorted = true;
+        if(UELTable.GetMapToUserStatus() == map_unsorted) {
+            int LV {-1};
+            for(int N{1}; N<=UELTable.size(); N++) {
+                int V{UELTable.GetUserMap(N)};
+                if(!CurFilter->InFilter(V)) continue;
+                if(V <= LV) {
+                    CurFilter->FiltSorted = false;
+                    break;
+                }
+                LV = V;
+            }
+        }
+        CurFilter = nullptr;
+        return true;
     }
 
     void TUELTable::clear() {

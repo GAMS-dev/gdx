@@ -96,18 +96,19 @@ int gdxAcronymAdd(void *pgdx, const char *AName, const char *Txt, int AIndx) {
 }
 
 int gdxAcronymCount(void *pgdx) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymCount();
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymCount();
 }
 
 int gdxAcronymGetInfo(void *pgdx, int N, char *AName, char *Txt, int *AIndx) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymGetInfo(N, AName, Txt, AIndx);
-    return 0;
+    std::string sAName, sTxt;
+    int rc{ static_cast<TGXFileObj *>(pgdx)->gdxAcronymGetInfo(N, sAName, sTxt, *AIndx) };
+    utils::stocp(sAName, AName);
+    utils::stocp(sTxt, Txt);
+    return rc;
 }
 
 int gdxAcronymGetMapping(void *pgdx, int N, int *orgIndx, int *newIndx, int *autoIndex) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymGetMapping(N, orgIndx, newIndx, autoIndex);
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymGetMapping(N, *orgIndx, *newIndx, *autoIndex);
 }
 
 int gdxAcronymIndex(void *pgdx, double V) {
@@ -121,13 +122,11 @@ int gdxAcronymName(void *pgdx, double V, char *AName) {
 }
 
 int gdxAcronymNextNr(void *pgdx, int NV) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymNextNr(NV);
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymNextNr(NV);
 }
 
 int gdxAcronymSetInfo(void *pgdx, int N, const char *AName, const char *Txt, int AIndx) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymSetInfo(N, AName, Txt, AIndx);
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymSetInfo(N, AName, Txt, AIndx);
 }
 
 double gdxAcronymValue(void *pgdx, int AIndx) {
@@ -258,23 +257,19 @@ int gdxFileVersion(void *pgdx, char *FileStr, char *ProduceStr) {
 }
 
 int gdxFilterExists(void *pgdx, int FilterNr) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxFilterExists(FilterNr);
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxFilterExists(FilterNr);
 }
 
 int gdxFilterRegister(void *pgdx, int UelMap) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxFilterRegister(UelMap);
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxFilterRegister(UelMap);
 }
 
 int gdxFilterRegisterDone(void *pgdx) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxFilterRegisterDone();
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxFilterRegisterDone();
 }
 
 int gdxFilterRegisterStart(void *pgdx, int FilterNr) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxFilterRegisterStart(FilterNr);
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxFilterRegisterStart(FilterNr);
 }
 
 int gdxFindSymbol(void *pgdx, const char *SyId, int *SyNr) {
