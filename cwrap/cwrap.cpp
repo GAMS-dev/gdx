@@ -482,24 +482,26 @@ void gdxStoreDomainSetsSet(void *pgdx, int x) {
 }
 
 int gdxFree(void *pgdx) {
-    STUBWARN();
+    gdxDestroy(&pgdx);
     assert(!pgdx);
-    return 0;
+    return 1;
 }
 
 int gdxGetReady(char *msgBuf, int msgBufLen) {
     STUBWARN();
-    return 0;
+    assert(msgBufLen > 0);
+    msgBuf[0] = '\0';
+    return 1;
 }
 
 int gdxLibraryLoaded() {
     STUBWARN();
-    return 0;
+    return 1;
 }
 
 int gdxLibraryUnload() {
     STUBWARN();
-    return 0;
+    return 1;
 }
 
 }
