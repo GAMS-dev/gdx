@@ -5,6 +5,11 @@ extern "C" {
 #endif
     int create_gdx_file(const char *filename);
 
+    int gdxFree(void *pgdx);
+    int gdxGetReady(char *msgBuf, int msgBufLen);
+    int gdxLibraryLoaded();
+    int gdxLibraryUnload();
+
     void *gdxCreate(char *errBuf, int bufSize);
     void gdxDestroy(void **pgx);
 

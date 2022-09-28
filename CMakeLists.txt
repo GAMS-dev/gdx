@@ -40,6 +40,7 @@ set(common
 		gdlib/runner.cpp gdlib/runner.h
 
 		expertapi/palmcc.h expertapi/palmcc.c
+		expertapi/gcmt.h expertapi/gcmt.c
 
 		simplegdx/tgx.h simplegdx/tgx.cpp
 		simplegdx/twostream.h simplegdx/twostream.cpp
@@ -57,7 +58,7 @@ set(common
 set(common_legacy ${common}
 	expertapi/gdxcc.h expertapi/gdxcc.c
 	expertapi/gclgms.h expertapi/gclgms.c
-	expertapi/gcmt.h expertapi/gcmt.c)
+)
 
 set(common_neo ${common} cwrap/cwrap.h cwrap/cwrap.cpp)
 

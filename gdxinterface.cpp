@@ -1,4 +1,5 @@
 #include "gdxinterface.h"
+#include <vector>
 
 namespace gdxinterface {
 

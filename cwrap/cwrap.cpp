@@ -484,4 +484,31 @@ void gdxStoreDomainSetsSet(void *pgdx, int x) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxStoreDomainSetsSet(x);
 }
 
+int gdxFree(void *pgdx) {
+    STUBWARN();
+    assert(!pgdx);
+    return 0;
 }
+
+int gdxGetReady(char *msgBuf, int msgBufLen) {
+    STUBWARN();
+    return 0;
+}
+
+int gdxLibraryLoaded() {
+    STUBWARN();
+    return 0;
+}
+
+int gdxLibraryUnload() {
+    STUBWARN();
+    return 0;
+}
+
+}
+
+
+
+
+
+
