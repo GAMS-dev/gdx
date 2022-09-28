@@ -498,8 +498,9 @@ namespace gdlib::strutilx {
     int strConvCtoDelphi(char *cstr) {
         const auto len = strlen(cstr);
         if(len > std::numeric_limits<uint8_t>::max()) {
+            const std::string errMsg { "Error: Maximum short string length is 255 characters!"s };
             cstr[0] = 0;
-            strcpy(&cstr[1], "Error: Maximum short string length is 255 characters!");
+            memcpy(&cstr[1], errMsg.c_str(), errMsg.length() + 1);
             return strlen(&cstr[1]);
         }
         memmove(cstr+1, cstr, len);
