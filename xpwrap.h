@@ -132,6 +132,8 @@ namespace xpwrap {
         int gdxFilterRegister(int UelMap) override;
 
         int gdxFilterRegisterDone() override;
+
+        int gdxDataReadFilteredStart(int SyNr, const int *FilterAction, int &NrRecs) override;
     };
 
 }

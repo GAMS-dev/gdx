@@ -66,11 +66,18 @@ namespace gxfile {
         bool InFilter(int V) const {
             return V >= 0 && V <= FiltMaxUel && FiltMap[V];
         }
+
+        void SetFilter(int ix, bool v) {
+            if (ix < 0) return;
+            if (ix >= FiltMap.size()) FiltMap.resize(ix + 1);
+            FiltMap[ix] = v;
+        }
     };
 
     class TFilterList : public std::vector<TDFilter> {
     public:
         TDFilter *FindFilter(int Nr);
+        void AddFilter(const TDFilter& F);
     };
 
     enum TgdxDAction {
@@ -334,6 +341,7 @@ namespace gxfile {
         int gdxResetSpecialValues();
 
         int gdxErrorStr(int ErrNr, std::string &ErrMsg) override;
+        static int gdxErrorStrStatic(int ErrNr, std::string& ErrMsg);
 
         int gdxOpenRead(const std::string &FileName, int &ErrNr) override;
 
@@ -440,6 +448,7 @@ namespace gxfile {
         int gdxFilterRegisterStart(int FilterNr) override;
         int gdxFilterRegister(int UelMap) override;
         int gdxFilterRegisterDone() override;
+        int gdxDataReadFilteredStart(int SyNr, const int* FilterAction, int& NrRecs) override;
         // endregion
     };
 

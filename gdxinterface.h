@@ -186,6 +186,7 @@ namespace gdxinterface {
         virtual int gdxFilterRegisterStart(int FilterNr) = 0;
         virtual int gdxFilterRegister(int UelMap) = 0;
         virtual int gdxFilterRegisterDone() = 0;
+        virtual int gdxDataReadFilteredStart(int SyNr, const int *FilterAction, int &NrRecs) = 0;
         // endregion
     };
 

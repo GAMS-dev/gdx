@@ -301,4 +301,8 @@ namespace xpwrap {
     int GDXFile::gdxFilterRegisterDone() {
         return ::gdxFilterRegisterDone(pgx);
     }
+
+    int GDXFile::gdxDataReadFilteredStart(int SyNr, const int *FilterAction, int &NrRecs) {
+        return ::gdxDataReadFilteredStart(pgx, SyNr, FilterAction, &NrRecs);
+    }
 }

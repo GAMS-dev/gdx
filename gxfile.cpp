@@ -1459,8 +1459,12 @@ namespace gxfile {
     // See Also:
     //   gdxGetLastError
     int TGXFileObj::gdxErrorStr(int ErrNr, std::string &ErrMsg) {
+        return gdxErrorStrStatic(ErrNr, ErrMsg);
+    }
+
+    int TGXFileObj::gdxErrorStrStatic(int ErrNr, std::string& ErrMsg) {
         const auto it = errorCodeToStr.find(ErrNr);
-        if(it == errorCodeToStr.end()) ErrMsg = rtl::sysutils_p3::SysErrorMessage(ErrNr);
+        if (it == errorCodeToStr.end()) ErrMsg = rtl::sysutils_p3::SysErrorMessage(ErrNr);
         else ErrMsg = it->second;
         return true;
     }
@@ -1853,6 +1857,7 @@ namespace gxfile {
                 auto maybeNameAndSym = symbolWithIndex(SyNr);
                 if (maybeNameAndSym) {
                     auto sym = (*maybeNameAndSym).second;
+                    sym->SDomStrings.resize(sym->SDim + 1);
                     for (int D{}; D < sym->SDim; D++) {
                         sym->SDomStrings[D] = FFile->ReadInteger();
                     }
@@ -3151,7 +3156,7 @@ namespace gxfile {
         if(!MajorCheckMode("FilterRegisterStart"s, AllowedModes) ||
             ErrorCondition(FilterNr >= 1, ERR_BAD_FILTER_NR)) return false;
 
-        FilterList.emplace_back(FilterNr, UELTable.UsrUel2Ent.GetHighestIndex());
+        FilterList.AddFilter(TDFilter{ FilterNr, UELTable.UsrUel2Ent.GetHighestIndex() });
         CurFilter = &FilterList.back();
         fmode = fr_filter;
         return true;
@@ -3177,7 +3182,7 @@ namespace gxfile {
         auto &obj = *CurFilter;
         if(ErrorCondition(UelMap >= 1 && UelMap <= obj.FiltMaxUel, ERR_BAD_FILTER_INDX)) return false;
         int EN{UELTable.UsrUel2Ent[UelMap]};
-        if(EN >= 1) obj.FiltMap[UelMap] = true;
+        if (EN >= 1) obj.SetFilter(UelMap, true);
         else {
             ReportError(ERR_FILTER_UNMAPPED);
             return false;
@@ -3212,6 +3217,44 @@ namespace gxfile {
         }
         CurFilter = nullptr;
         return true;
+    }
+
+    // Brief:
+    //   Initialize the reading of a symbol in filtered mode
+    // Arguments:
+    //   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
+    //   FilterAction: Array of filter actions for each index position
+    //   NrRecs: The maximum number of records available for reading. The actual number of records may be
+    //      less when a filter is applied to the records read.
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxFilterRegisterStart, gdxDataReadMap, gdxDataReadRawStart, gdxDataReadStrStart, gdxDataReadDone
+    // Description:
+    //   Start reading data for a symbol in filtered mode. Each filter action
+    //   (1..Dimension) describes how each index should be treated when reading
+    //   a data record. When new unique elements are returned, they are added
+    //   to the user index space automatically. The actual reading of records
+    //   is done with DataReadMap.
+    //   <P>The action codes are as follows:
+    //   <TABLE>
+    //   Action code         Result
+    //   -----------         ------
+    //   DOMC_UNMAPPED       The index is not mapped into user space
+    //   DOMC_EXPAND         New unique elements encountered will be
+    //                         be mapped into the user space
+    //   DOMC_STRICT         If the unique element in this position does not map into
+    //                         user space, the record will not be available and
+    //                         is added to the error list instead
+    //   FilterNumber        If the unique element in this position does not map
+    //                         into user space or is not enabled in this filter,
+    //                         the record will not be available and is added to
+    //                         the error list instead
+    //   </TABLE>
+    int TGXFileObj::gdxDataReadFilteredStart(int SyNr, const int* FilterAction, int& NrRecs)
+    {
+        NrRecs = PrepareSymbolRead("DataReadStartFiltered"s, SyNr, FilterAction, fr_map_data);
+        return NrRecs >= 0;
     }
 
     void TUELTable::clear() {
@@ -3367,6 +3410,17 @@ namespace gxfile {
         const auto it = std::find_if(begin(), end(),
                                      [&Nr](const auto &f) { return f.FiltNumber == Nr; });
         return it == end() ? nullptr : &(*it);
+    }
+
+    void TFilterList::AddFilter(const TDFilter& F)
+    {
+        for (int N{}; N < size(); N++) {
+            if ((*this)[N].FiltNumber == F.FiltNumber) {
+                this->erase(this->begin() + N);
+                break;
+            }
+        }
+        this->push_back(F);
     }
 
     UNIT_INIT_FINI();
