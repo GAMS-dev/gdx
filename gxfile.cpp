@@ -803,7 +803,7 @@ namespace gxfile {
                 std::cout << fmode_str[M];
             }
         }
-        std::cout << "}" << std::endl;
+        std::cout << "}\n";
         return false;
     }
 
@@ -1004,7 +1004,7 @@ namespace gxfile {
                     SortList->Sort();
                     res = (int)SortList->size();
                 } catch(std::exception &e) {
-                    std::cout << "Exception: " << e.what() << std::endl;
+                    std::cout << "Exception: " << e.what() << "\n";
                     AllocOk = false;
                 }
             }
@@ -2716,7 +2716,7 @@ namespace gxfile {
             Uel.clear();
             return false;
         }
-        int EN = UELTable.UsrUel2Ent[uelNr];
+        int EN = UELTable.UsrUel2Ent.GetMapping(uelNr);
         Uel = EN >= 1 ? UELTable[EN-1] : BADUEL_PREFIX + std::to_string(uelNr);
         return EN >= 1;
     }
@@ -2902,7 +2902,7 @@ namespace gxfile {
                         if(obj.DFilter->InFilter(V)) KeyInt[D] = V;
                         else {
                             AddError = true;
-                            FIDim = D;
+                            FIDim = D+1;
                             loopDone = true;
                         }
                         break;
@@ -3306,10 +3306,10 @@ namespace gxfile {
     }
 
     int TUELTable::NewUsrUel(int EN) {
-        auto maxKey = UsrUel2Ent.GetHighestIndex();
-        UsrUel2Ent[maxKey+1] = EN;
+        auto maxKey = UsrUel2Ent.GetHighestIndex()+1;
+        UsrUel2Ent[maxKey] = EN;
         ResetMapToUserStatus();
-        return maxKey+1;
+        return maxKey;
     }
 
     int TUELTable::AddUsrNew(const std::string &s) {
