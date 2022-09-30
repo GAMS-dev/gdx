@@ -996,7 +996,7 @@ namespace gxfile {
                                         AElements[D] = ExpndList[-EN] = V;
                                         NrMappedAdded++;
                                         // look for same mapping to be issued
-                                        for(int D2{D+1}; D2 <= FCurrentDim; D2++) {
+                                        for(int D2{D+1}; D2 < FCurrentDim; D2++) {
                                             if(AElements[D2] == EN) AElements[D2] = V;
                                         }
                                     }
@@ -1723,7 +1723,7 @@ namespace gxfile {
         if( ErrorCondition(FFile->ReadByte() == gdxHeaderNr, ERR_OPEN_FILEHEADER) ||
             ErrorCondition(utils::sameText(FFile->ReadString(), gdxHeaderId), ERR_OPEN_FILEMARKER)) return FileErrorNr();
         VersionRead = FFile->ReadInteger();
-        if(ErrorCondition(VersionRead >= VERSION, ERR_OPEN_FILEVERSION)) return FileErrorNr();
+        if (ErrorCondition(VersionRead <= VERSION, ERR_OPEN_FILEVERSION)) return FileErrorNr();
 
         int Compr {VersionRead <= 5 ? 0 : FFile->ReadInteger()};
         DoUncompress = Compr > 0;
@@ -1809,7 +1809,7 @@ namespace gxfile {
             return FileErrorNr();
 
         NrElem = FFile->ReadInteger();
-        if (FileSystemID.substr(15, 4) == "2001") NrElem--;
+        if (utils::substr(FileSystemID, 15, 4) == "2001") NrElem--;
 
         while (UELTable.size() < NrElem) {
             UELTable.AddObject(FFile->ReadString(), -1);
@@ -3434,7 +3434,7 @@ namespace gxfile {
 
     void TIntegerMapping::SetMapping(int F, int T) {
         if(F >= Map.size()) {
-            Map.resize(F + 1);
+            Map.resize(F + 1, -1);
             assert(F+1 < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
         }
         Map[F] = T;
@@ -3450,7 +3450,7 @@ namespace gxfile {
 
     int &TIntegerMapping::operator[](int index) {
         if(index >= Map.size()) {
-            Map.resize(index+1);
+            Map.resize(index+1, -1);
             assert(index+1 < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
         }
         return Map[index];
