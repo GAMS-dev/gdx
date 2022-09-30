@@ -437,11 +437,11 @@ namespace gxfile {
         if(!MajorCheckMode("DataWriteDone"s, AllowedModes)) return false;
         if(!utils::in(fmode, fw_raw_data, fw_dom_raw)) {
             InitDoWrite(static_cast<int>(SortList->size()));
-            SortList->Sort();
+            SortList->StartRead(ReadPtr, nullptr);
             for(const auto &[keys, values] : *SortList) {
                 DoWrite(keys.data(), values.data());
             }
-            SortList->clear();
+            SortList = nullptr;
         }
         FFile->WriteByte(255); // end of data
         NextWritePosition = FFile->GetPosition();
@@ -504,15 +504,15 @@ namespace gxfile {
                     YFile->AddKeyValue("compressed", PSy->SIsCompressed);
                 }
 
-                YFile->AddKeyValue("has_domain_symbols", (PSy->SDomSymbols.empty() ? "no"s : "yes"s));
-                FFile->WriteByte(PSy->SDomSymbols.empty() ? 0 : 1);
+                YFile->AddKeyValue("has_domain_symbols", (PSy->SDomSymbols ? "yes"s : "no"s));
+                FFile->WriteByte(PSy->SDomSymbols ? 1 : 0);
 
-                if(!PSy->SDomSymbols.empty()) {
+                if(PSy->SDomSymbols) {
                     YFile->AddKeyItem("domain_symbols");
                     YFile->IncIndentLevel();
-                    for(int D{}; D<PSy->SDim; D++) {
-                        FFile->WriteInteger(PSy->SDomSymbols[D]);
-                        YFile->AddItem(std::to_string(PSy->SDomSymbols[D]));
+                    for(const auto &SDomSym : *PSy->SDomSymbols) {
+                        FFile->WriteInteger(SDomSym);
+                        YFile->AddItem(std::to_string(SDomSym));
                     }
                     YFile->DecIndentLevel();
                 }
@@ -598,11 +598,11 @@ namespace gxfile {
             int ix{1};
             for(const auto &name : NameListOrdered) {
                 const auto &PSy = NameList[name];
-                if(!PSy->SDomStrings.empty()) {
+                if(PSy->SDomStrings) {
                     YFile->AddKeyItem(name);
                     YFile->IncIndentLevel();
                     FFile->WriteInteger(ix);
-                    for(const auto &i : PSy->SDomStrings) {
+                    for(const auto &i : (*PSy->SDomStrings)) {
                         FFile->WriteInteger(i);
                         YFile->AddItem(std::to_string(i));
                     }
@@ -634,10 +634,12 @@ namespace gxfile {
         int res{FFile ? FFile->GetLastIOResult() : 1};
 
         // Many free operations. Some not necessary anymore due to RAII pattern (out of scope -> destroy)
-        for(const auto &[name, psy] : NameList)
+        for(const auto &[name, psy] : NameList) {
             delete psy;
+        }
 
         FFile = nullptr;
+        SortList = nullptr;
         fmode = f_not_open;
         fstatus = stat_notopen;
 
@@ -700,7 +702,7 @@ namespace gxfile {
 
         CurSyPtr = nullptr;
         ErrorList.clear();
-        if(SortList) SortList->clear();
+        SortList = nullptr;
 
         if(!MajorCheckMode(Caller, AllowedModes)) return false;
 
@@ -721,8 +723,8 @@ namespace gxfile {
         obj->SExplTxt = MakeGoodExplText(AText);
         obj->SIsCompressed = CompressOut && ADim > 0;
         obj->SCommentsList.clear();
-        obj->SDomSymbols.clear();
-        obj->SDomStrings.clear();
+        obj->SDomSymbols = nullptr;
+        obj->SDomStrings = nullptr;
         obj->SSetBitMap = utils::in((TgdxDataType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
                 std::make_optional<std::vector<bool>>() : std::nullopt;
 
@@ -815,7 +817,7 @@ namespace gxfile {
         TIntegerMapping ExpndList;
         ErrorList.clear();
         CurSyPtr = nullptr;
-        if(SortList) SortList->clear();
+        SortList = nullptr;
 
         const TgxModeSet AllowedModes{ fr_init };
 
@@ -906,10 +908,13 @@ namespace gxfile {
         else {
             assert(newmode == fr_map_data && "Expect to read mapped data");
             if(ResultWillBeSorted(ADomainNrs)) {
+                //WriteLn('Changing mapped read to raw read');
                 res = NrRecs;
                 newmode = fr_mapr_data;
             } else {
+                //WriteLn('Cannot do mapped read fast');
                 try {
+                    SortList = std::make_unique<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
                     int FIDim = FCurrentDim; // First invalid dimension
                     TgdxValues Avals;
                     TIndex AElements{};
@@ -919,7 +924,7 @@ namespace gxfile {
                         if(FIDim < AFDim) AFDim = FIDim;
                         FIDim = FCurrentDim;
                         int D;
-                        for(D=AFDim; D<=FCurrentDim; D++) {
+                        for(D=AFDim-1; D<FCurrentDim; D++) {
                             const auto &obj = DomainList[D];
                             if(LastElem[D] < 0) {
                                 ReportError(ERR_BADELEMENTINDEX);
@@ -950,7 +955,7 @@ namespace gxfile {
                                     break;
                                 case dm_expand: {
                                         int EN = LastElem[D];
-                                        V = ExpndList[EN];
+                                        V = ExpndList.GetMapping(EN);
                                         if(V >= 0) AElements[D] = V;
                                         else {
                                             V = UELTable.GetUserMap(EN);
@@ -1001,7 +1006,7 @@ namespace gxfile {
                             SortList->AddItem(AElements, Avals);
                         }
                     }
-                    SortList->Sort();
+                    SortList->StartRead(ReadPtr, nullptr);
                     res = (int)SortList->size();
                 } catch(std::exception &e) {
                     std::cout << "Exception: " << e.what() << "\n";
@@ -1016,7 +1021,7 @@ namespace gxfile {
             return res;
         } else {
             SetError(ERR_OUT_OF_MEMORY);
-            SortList->clear();
+            SortList = nullptr;
             fmode = fr_init;
             return -1;
         }
@@ -1191,9 +1196,8 @@ namespace gxfile {
             if (FCurrentDim == 1 && CurSyPtr->SSetBitMap) {
                 auto& ssbm = *CurSyPtr->SSetBitMap;
                 if (ssbm.size() <= LastElem.front())
-                    ssbm.push_back(true);
-                else
-                    ssbm[LastElem.front()] = true;
+                    ssbm.resize(LastElem.front()+1, false);
+                ssbm[LastElem.front()] = true;
             }
         }
         return true;
@@ -1588,7 +1592,7 @@ namespace gxfile {
     // Description:
     int TGXFileObj::gdxDataReadDone() {
         TgxModeSet AllowedMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data, fr_str_data,fr_slice};
-        if(SortList) SortList->clear();
+        SortList = nullptr;
         CurSyPtr = nullptr;
         if(!MajorCheckMode("DataReadDone", AllowedMode)) {
             fmode = fr_init;
@@ -1776,10 +1780,12 @@ namespace gxfile {
             CurSyPtr->SSetText = B;
             CurSyPtr->SExplTxt = FFile->ReadString();
             CurSyPtr->SIsCompressed = VersionRead > 5 && FFile->ReadByte();
+            CurSyPtr->SDomSymbols = nullptr;
             if(VersionRead >= 7) {
                 if(FFile->ReadByte()) {
-                    for(int D{}; D<CurSyPtr->SDim; D++)
-                        CurSyPtr->SDomSymbols.emplace_back(FFile->ReadInteger());
+                    CurSyPtr->SDomSymbols = std::make_unique<std::vector<int>>(CurSyPtr->SDim);
+                    for(auto &SDomSym : *CurSyPtr->SDomSymbols)
+                        SDomSym = FFile->ReadInteger();
                 }
                 NrElem = FFile->ReadInteger();
                 if(NrElem) {
@@ -1788,7 +1794,7 @@ namespace gxfile {
                 }
             }
             CurSyPtr->SSetBitMap = std::nullopt;
-            CurSyPtr->SDomStrings.clear();
+            CurSyPtr->SDomStrings = nullptr;
             NameList[S] = CurSyPtr;
             NameListOrdered.push_back(S);
             CurSyPtr->SSyNr = static_cast<int>(NameListOrdered.size());
@@ -1857,10 +1863,9 @@ namespace gxfile {
                 auto maybeNameAndSym = symbolWithIndex(SyNr);
                 if (maybeNameAndSym) {
                     auto sym = (*maybeNameAndSym).second;
-                    sym->SDomStrings.resize(sym->SDim + 1);
-                    for (int D{}; D < sym->SDim; D++) {
-                        sym->SDomStrings[D] = FFile->ReadInteger();
-                    }
+                    sym->SDomStrings = std::make_unique<std::vector<int>>(sym->SDim);
+                    for (auto &SDomString : *sym->SDomStrings)
+                        SDomString = FFile->ReadInteger();
                 }
             }
             if (ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER3)) return FileErrorNr();
@@ -2289,7 +2294,7 @@ namespace gxfile {
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
         PgdxSymbRecord SyPtr{ (*symbolWithIndex(SyNr)).second };
         for (int D{}; D < SyPtr->SDim; D++)
-            DomainSyNrs[D] = SyPtr->SDomSymbols.empty() || SyPtr->SDomSymbols[D] == 0 ? 0 : SyPtr->SDomSymbols[D];
+            DomainSyNrs[D] = !SyPtr->SDomSymbols || (*SyPtr->SDomSymbols)[D] == 0 ? 0 : (*SyPtr->SDomSymbols)[D];
         return true;
     }
 
@@ -2316,17 +2321,17 @@ namespace gxfile {
             DomainIDs[D][1] = '\0';
         }
 
-        if (!SyPtr->SDomStrings.empty()) {
+        if (SyPtr->SDomStrings) {
             for (int D{}; D<SyPtr->SDim; D++)
-                utils::stocp(DomainStrList[SyPtr->SDomStrings[D] - 1], DomainIDs[D]);
+                utils::stocp(DomainStrList[(*SyPtr->SDomStrings)[D] - 1], DomainIDs[D]);
             return 2;
         }
-        else if (SyPtr->SDomSymbols.empty())
+        else if (!SyPtr->SDomSymbols)
             return 1;
         else {
             for (int D{}; D < SyPtr->SDim; D++)
-                if (SyPtr->SDomSymbols[D])
-                    utils::stocp((*symbolWithIndex(SyPtr->SDomSymbols[D])).first, DomainIDs[D]);
+                if ((*SyPtr->SDomSymbols)[D])
+                    utils::stocp((*symbolWithIndex((*SyPtr->SDomSymbols)[D])).first, DomainIDs[D]);
             return 3;
         }
         return 0;
@@ -2400,8 +2405,8 @@ namespace gxfile {
         TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
         if (!MajorCheckMode("SymbolSetDomain", AllowedModes) || !CurSyPtr) return res;
         res = true;
-        assert(CurSyPtr->SDomSymbols.empty() && "SymbolSetDomain");
-        CurSyPtr->SDomSymbols.resize(CurSyPtr->SDim + 1);
+        assert(!CurSyPtr->SDomSymbols && "SymbolSetDomain");
+        CurSyPtr->SDomSymbols = std::make_unique<std::vector<int>>(CurSyPtr->SDim);
         for (int D{}; D < CurSyPtr->SDim; D++) {
             bool domap = true;
             int DomSy;
@@ -2431,7 +2436,7 @@ namespace gxfile {
                     break;
                 } while (true);
             }
-            CurSyPtr->SDomSymbols[D] = DomSy;
+            (*CurSyPtr->SDomSymbols)[D] = DomSy;
             if (domap && DomSy > 0) {
                 // this is the case for set i(i)
                 if (CurSyPtr->SDim != 1 || CurSyPtr != (*symbolWithIndex(DomSy)).second) {
@@ -2467,16 +2472,16 @@ namespace gxfile {
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
         PgdxSymbRecord SyPtr = (*symbolWithIndex(SyNr)).second;
         if (SyPtr->SDim > 0) {
-            if (SyPtr->SDomStrings.empty())
-                SyPtr->SDomStrings.resize(SyPtr->SDim);
+            if (!SyPtr->SDomStrings)
+                SyPtr->SDomStrings = std::make_unique<std::vector<int>>(SyPtr->SDim);
             for (int D{}; D < SyPtr->SDim; D++) {
                 const std::string &S { DomainIDs[D] };
-                if (S.empty() || S == "*" || !IsGoodIdent(S)) SyPtr->SDomStrings[D] = 0;
+                if (S.empty() || S == "*" || !IsGoodIdent(S)) (*SyPtr->SDomStrings)[D] = 0;
                 else {
-                    SyPtr->SDomStrings[D] = utils::indexOf(DomainStrList, S);
-                    if (SyPtr->SDomStrings[D] <= -1) {
+                    (*SyPtr->SDomStrings)[D] = utils::indexOf(DomainStrList, S);
+                    if ((*SyPtr->SDomStrings)[D] <= -1) {
                         DomainStrList.push_back(S);
-                        SyPtr->SDomStrings[D] = (int) DomainStrList.size();
+                        (*SyPtr->SDomStrings)[D] = (int) DomainStrList.size();
                     }
                 }
             }
@@ -2860,10 +2865,8 @@ namespace gxfile {
         }
         if(fmode == fr_map_data) {
             DimFrst = 0;
-            //if(!ReadPtr) return false;
-            auto first = (*SortList->begin());
-            memcpy(KeyInt, first.first.data(), sizeof(int)*FCurrentDim);
-            memcpy(Values, first.second.data(), sizeof(double)*5);
+            if (ReadPtr == -1) return false;
+            SortList->GetNextRecord(ReadPtr, KeyInt, Values, FCurrentDim);
             // checking mapped values
             for(int D{}; D<FCurrentDim; D++) {
                 if(KeyInt[D] != PrevElem[D]) {

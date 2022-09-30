@@ -14,7 +14,7 @@ extern "C" {
 
     int create_gdx_file(const char *filename);
 
-    int gdxFree(void *pgdx);
+    int gdxFree(void **pgdx);
     int gdxGetReady(char *msgBuf, int msgBufLen);
     int gdxLibraryLoaded();
     int gdxLibraryUnload();

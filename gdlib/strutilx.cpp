@@ -49,7 +49,7 @@ namespace gdlib::strutilx {
             return s.length() >= Width ? s : utils::strInflateWidth(N, Width, ' ');
         else {
             std::vector<char> outBuf(Width+1, ' ');
-            outBuf[Width] = '\0';
+            outBuf.back() = '\0';
             int j{Width-1};
             for(int i{}; i<s.length(); i++) {
                 if(i > 0 && i % 3 == 0)

@@ -71,14 +71,34 @@ namespace gdlib::datastorage {
             return data.back().second;
         }
 
-        void Sort() {
+        void Sort(const int *AMap = nullptr) {
+            // FIXME: Should this consider wildcards? =0?
             std::sort(data.begin(), data.end(), [&](const std::pair<global::gmsspecs::TIndex, T>& p1, const std::pair<global::gmsspecs::TIndex, T>& p2) {
                 for (int D{}; D < FDimension; D++) {
-                    if (p1.first[D] >= p2.first[D]) return false;
+                    if (p1.first[D] < p2.first[D]) return true;
+                    else if (p1.first[D] > p2.first[D]) return false;
                 }
-                return true;
-                //return p1.first < p2.first;
+                return false;
             });
+        }
+
+        bool StartRead(int &it, const int *AMap = nullptr) {
+            if (!data.empty()) {
+                Sort(AMap);
+                it = 0;
+                return true;
+            }
+            it = -1;
+            return false;
+        }
+
+        bool GetNextRecord(int &it, int *AKey, double *Data, int Count) {
+            if (it < 0) return false;
+            const auto& item = data[it++];
+            memcpy(AKey, item.first.data(), sizeof(int)*Count);
+            memcpy(Data, item.second.data(), sizeof(double)*item.second.size());
+            if (it >= data.size()) it = -1;
+            return true;
         }
 
         void SortDelphiStyle(const std::optional<std::vector<int>> &AMap = std::nullopt) {

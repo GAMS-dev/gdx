@@ -64,7 +64,7 @@ namespace gxfile {
         }
 
         bool InFilter(int V) const {
-            return V >= 0 && V <= FiltMaxUel && FiltMap[V];
+            return V >= 0 && V <= FiltMaxUel && V < FiltMap.size() && FiltMap[V];
         }
 
         void SetFilter(int ix, bool v) {
@@ -100,9 +100,10 @@ namespace gxfile {
         bool SSetText;
         std::string SExplTxt;
         bool SIsCompressed;
-        std::vector<int> SDomSymbols, // real domain info
-                         SDomStrings; //relaxed domain info
-        std::vector<std::string> SCommentsList;
+        // TODO: Maybe also use std::optional here instead of std::unique_ptr
+        std::unique_ptr<std::vector<int>> SDomSymbols, // real domain info
+                                          SDomStrings; //relaxed domain info
+        std::vector<std::string> SCommentsList; // TODO: should this also become an optional entry?
         bool SScalarFrst; // not stored
         std::optional<std::vector<bool>> SSetBitMap; // for 1-dim sets only
     };
@@ -255,6 +256,7 @@ namespace gxfile {
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
         //std::map<global::gmsspecs::TIndex, gxdefs::TgdxValues> SortList;
         std::unique_ptr<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>> SortList;
+        int ReadPtr;
         gdlib::gmsdata::TTblGamsData ErrorList;
         PgdxSymbRecord CurSyPtr{};
         int ErrCnt{}, ErrCntTotal{};

@@ -9,7 +9,6 @@ using namespace gxfile;
 extern "C" {
 
 int gdxCreate(void **pgdx, char *errBuf, int bufSize) {
-    printf("create called\n");
     std::string ErrMsg;
     auto *pgx = new TGXFileObj {ErrMsg};
     if(!ErrMsg.empty())
@@ -21,7 +20,6 @@ int gdxCreate(void **pgdx, char *errBuf, int bufSize) {
 }
 
 void gdxDestroy(void **pgx) {
-    printf("destroy called\n");
     delete (TGXFileObj *)*pgx;
     *pgx = nullptr;
 }
@@ -56,12 +54,12 @@ int create_gdx_file(const char *filename) {
     std::string ErrMsg;
     gxfile::TGXFileObj gdx{ErrMsg};
     if (!ErrMsg.empty()) {
-        std::cout << "Unable to create GDX object. Error message:\n" << ErrMsg << std::endl;
+        std::cout << "Unable to create GDX object. Error message:\n" << ErrMsg << '\n';
         return 1;
     }
     int ErrNr;
     if (!gdx.gdxOpenWrite(filename, "cwrap", ErrNr)) {
-        std::cout << "Error opening " << filename << " for writing. Error code = " << ErrNr << std::endl;
+        std::cout << "Error opening " << filename << " for writing. Error code = " << ErrNr << '\n';
         return 1;
     }
     gdx.gdxDataWriteStrStart("i", "A simple set", 1, global::gmsspecs::dt_set, 0);
@@ -165,8 +163,7 @@ int gdxDataReadDone(void *pgdx) {
 }
 
 int gdxDataReadFilteredStart(void *pgdx, int SyNr, const int FilterAction[], int *NrRecs) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxDataReadFilteredStart(SyNr, FilterAction, NrRecs);
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadFilteredStart(SyNr, FilterAction, *NrRecs);
 }
 
 int gdxDataReadMap(void *pgdx, int RecNr, int KeyInt[], double Values[], int *DimFrst) {
@@ -239,7 +236,9 @@ int gdxErrorCount(void *pgdx) {
 
 int gdxErrorStr(void *pgdx, int ErrNr, char *ErrMsg) {
     std::string sErrMsg;
-    int rc = static_cast<TGXFileObj *>(pgdx)->gdxErrorStr(ErrNr, sErrMsg);
+    int rc;
+    if (pgdx) rc = static_cast<TGXFileObj*>(pgdx)->gdxErrorStr(ErrNr, sErrMsg);
+    else rc = TGXFileObj::gdxErrorStrStatic(ErrNr, sErrMsg);
     utils::stocp(sErrMsg, ErrMsg);
     return rc;
 }
@@ -481,9 +480,8 @@ void gdxStoreDomainSetsSet(void *pgdx, int x) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxStoreDomainSetsSet(x);
 }
 
-int gdxFree(void *pgdx) {
-    gdxDestroy(&pgdx);
-    assert(!pgdx);
+int gdxFree(void **pgdx) {
+    gdxDestroy(pgdx);
     return 1;
 }
 
