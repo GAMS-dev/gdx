@@ -176,7 +176,7 @@ namespace gxfile {
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     class TUELTable {
         std::vector<std::string> uelNames {};
-        std::map<std::string, int> nameToNum {};
+        std::map<std::string, int, strCompCaseInsensitive> nameToNum {};
         // ...
         TUELUserMapStatus FMapToUserStatus {};
 
@@ -232,6 +232,14 @@ namespace gxfile {
     using TIntlValueMapDbl = std::array<double, 11>;
     using TIntlValueMapI64 = std::array<int64_t, 11>;
 
+    class TSetTextList : public std::vector<std::string> {
+    public:
+        std::map<std::string, int, strCompCaseInsensitive> strToNodeNr;
+        bool mapContains(const std::string& s);
+    };
+
+    using TDomainIndexProc_t = void(*)(int RawIndex, int MappedIndex, void* Uptr);
+
     // Description:
     //    Class for reading and writing gdx files
     class TGXFileObj : public gdxinterface::GDXInterface {
@@ -242,7 +250,7 @@ namespace gxfile {
         enum {stat_notopen, stat_read, stat_write} fstatus;
         int fComprLev{};
         TUELTable UELTable;
-        std::vector<std::string> SetTextList;
+        std::unique_ptr<TSetTextList> SetTextList {};
         std::vector<int> MapSetText;
         int FCurrentDim{};
         global::gmsspecs::TIndex LastElem, PrevElem, MinElem, MaxElem;
@@ -452,6 +460,9 @@ namespace gxfile {
         int gdxFilterRegisterDone() override;
         int gdxDataReadFilteredStart(int SyNr, const int* FilterAction, int& NrRecs) override;
         // endregion
+
+        int gdxSetTextNodeNr(int TxtNr, int Node);
+        int gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int& NrElem, void* UPtr);
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from

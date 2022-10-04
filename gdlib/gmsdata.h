@@ -33,6 +33,7 @@ namespace gdlib::gmsdata {
         std::map<IndexKeys, ValueFields>::iterator begin();
         std::map<IndexKeys, ValueFields>::iterator end();
         bool empty() const;
+		void sort();
 	};
 
 }

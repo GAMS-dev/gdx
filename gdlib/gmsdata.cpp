@@ -38,4 +38,9 @@ namespace gdlib::gmsdata {
     bool TTblGamsData::empty() const {
         return keyset.empty();
     }
+
+    void TTblGamsData::sort()
+    {
+        std::sort(keyset.begin(), keyset.end());
+    }
 }

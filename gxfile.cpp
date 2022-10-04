@@ -334,8 +334,8 @@ namespace gxfile {
         // Reserve some space for positions
         MajorIndexPosition = FFile->GetPosition();
         for(int N{1}; N<=10; N++) FFile->WriteInt64(0);
-        SetTextList.clear();
-        SetTextList.emplace_back(""s);
+        SetTextList = std::make_unique<TSetTextList>();
+        SetTextList->emplace_back(""s);
         gdxResetSpecialValues();
         NextWritePosition = FFile->GetPosition();
         fmode = fw_init;
@@ -539,9 +539,9 @@ namespace gxfile {
             FFile->WriteString(MARK_SETT);
             YFile->AddKeyItem("set_texts");
             YFile->IncIndentLevel();
-            FFile->WriteInteger(static_cast<int>(SetTextList.size()));
-            if(!SetTextList.empty()) {
-                for (const auto &SetText: SetTextList) {
+            FFile->WriteInteger(static_cast<int>(SetTextList ? SetTextList->size() : 0));
+            if(SetTextList) {
+                for (const auto &SetText: *SetTextList) {
                     FFile->WriteString(SetText);
                     YFile->AddItem(SetText);
                 }
@@ -640,6 +640,7 @@ namespace gxfile {
 
         FFile = nullptr;
         SortList = nullptr;
+        MapSetText.clear();
         fmode = f_not_open;
         fstatus = stat_notopen;
 
@@ -765,7 +766,7 @@ namespace gxfile {
 
     bool TGXFileObj::IsGoodNewSymbol(const std::string &s) {
         return !(ErrorCondition(NameList.find(s) == NameList.end(), ERR_DUPLICATESYMBOL) ||
-                 ErrorCondition(utils::indexOf<TAcronym>(AcronymList, [&s](auto acro) { return acro.AcrName == s; }) == -1, ERR_DUPLICATESYMBOL) ||
+                 ErrorCondition(utils::indexOf<TAcronym>(AcronymList, [&s](auto acro) { return utils::sameText(acro.AcrName, s); }) == -1, ERR_DUPLICATESYMBOL) ||
                  ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT));
     }
 
@@ -1251,7 +1252,7 @@ namespace gxfile {
             if(!MapSetText.empty() && AVals[vallevel] != 0.0 && CurSyPtr->SDataType == gms_dt_set) { // remap settext number
                 double X {AVals[vallevel]};
                 int D {static_cast<int>(std::round(X))};
-                if(std::abs(X-D) < 1e-12 && D >= 0 && D < SetTextList.size())
+                if(std::abs(X-D) < 1e-12 && D >= 0 && D < SetTextList->size())
                     AVals[vallevel] = MapSetText[D];
             }
         }
@@ -1608,7 +1609,7 @@ namespace gxfile {
             int HighestIndex = UELTable.UsrUel2Ent.GetHighestIndex();
             for(int N{HighestIndex}; N >= HighestIndex - NrMappedAdded + 1; N--) {
                 assert(N >= 1 && "Wrong entry number");
-                int EN {UELTable.UsrUel2Ent[N]}, // nr in ueltable
+                int EN {UELTable.UsrUel2Ent.GetMapping(N)}, // nr in ueltable
                     d {UELTable.GetUserMap(EN)};
                 assert(d == -1 || d == N && "Mapped already");
                 UELTable.SetUserMap(EN, N); // map to user entry
@@ -1820,13 +1821,13 @@ namespace gxfile {
         if (ReadMode % 2 == 0) { // reading text table
             FFile->SetCompression(DoUncompress);
             FFile->SetPosition(SetTextPos);
-            SetTextList.clear();
+            SetTextList = std::make_unique<TSetTextList>();
             if(ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1)) return FileErrorNr();
             NrElem = FFile->ReadInteger();
-            SetTextList.reserve(NrElem);
+            SetTextList->reserve(NrElem);
             for (int N{}; N < NrElem; N++) {
-                SetTextList.push_back(FFile->ReadString());
-                int TextNum{ static_cast<int>(SetTextList.size()) };
+                SetTextList->push_back(FFile->ReadString());
+                int TextNum{ static_cast<int>(SetTextList->size()-1) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
                     MapSetText.resize(NrElem);
                     // TODO: Could this be replaced by std::iota?
@@ -1949,10 +1950,10 @@ namespace gxfile {
     //  The integer value can be used to set the associated text of a set element.
     //  The string must follow the GAMS syntax rules for explanatory text.
     int TGXFileObj::gdxAddSetText(const std::string &Txt, int &TxtNr) {
-        if(SetTextList.empty() || TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText", {}))
+        if(!SetTextList || TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText", {}))
             return false;
-        SetTextList.emplace_back(MakeGoodExplText(Txt));
-        TxtNr = static_cast<int>(SetTextList.size()-1);
+        SetTextList->emplace_back(MakeGoodExplText(Txt));
+        TxtNr = static_cast<int>(SetTextList->size()-1);
         return true;
     }
 
@@ -2175,17 +2176,17 @@ namespace gxfile {
     // </CODE>
     int TGXFileObj::gdxGetElemText(int TxtNr, std::string &Txt, int &Node) {
         Node = 0;
-        if(SetTextList.empty()) {
+        if(!SetTextList) {
             Txt.clear();
             return false;
         }
         if(TraceLevel >= TraceLevels::trl_all && !CheckMode("GetElemText", {}))
             return false;
-        if(TxtNr < 0 || TxtNr >= SetTextList.size()) {
+        if(TxtNr < 0 || TxtNr >= SetTextList->size()) {
             Txt = BADStr_PREFIX + std::to_string(TxtNr);
         } else {
-            Txt = SetTextList[TxtNr];
-            Node = 0;
+            Txt = (*SetTextList)[TxtNr];
+            Node = SetTextList->mapContains(Txt) ? SetTextList->strToNodeNr[Txt] : 0;
             return true;
         }
         return false;
@@ -2771,7 +2772,7 @@ namespace gxfile {
             }
         }
         for(int D{}; D<FCurrentDim; D++) {
-            int KD = UELTable.UsrUel2Ent[KeyInt[D]];
+            int KD = UELTable.UsrUel2Ent.GetMapping(KeyInt[D]);
             if(KD < 0) {
                 ReportError(ERR_BADELEMENTINDEX);
                 return false;
@@ -3184,7 +3185,7 @@ namespace gxfile {
             !CheckMode("FilterRegister"s, AllowedModes)) return false;
         auto &obj = *CurFilter;
         if(ErrorCondition(UelMap >= 1 && UelMap <= obj.FiltMaxUel, ERR_BAD_FILTER_INDX)) return false;
-        int EN{UELTable.UsrUel2Ent[UelMap]};
+        int EN{UELTable.UsrUel2Ent.GetMapping(UelMap)};
         if (EN >= 1) obj.SetFilter(UelMap, true);
         else {
             ReportError(ERR_FILTER_UNMAPPED);
@@ -3260,6 +3261,133 @@ namespace gxfile {
         return NrRecs >= 0;
     }
 
+    // Brief:
+    //   Set the Node number for an entry in the string table
+    // Arguments:
+    //   TxtNr: Index number of the entry to be modified
+    //   Node: The new Node value for the entry
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //  gdxAddSetText, gdxGetElemText
+    // Description:
+    //  After registering a string with AddSetText, we can assign
+    //  a node number for later retrieval. The node number is any
+    //  integer which is stored without further restrictions.
+    int TGXFileObj::gdxSetTextNodeNr(int TxtNr, int Node)
+    {
+        if (!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("SetTextNodeNr", {}))) return false;
+        auto& obj = *SetTextList;
+        if (TxtNr >= 0 && TxtNr < obj.size() && !obj.mapContains(obj[TxtNr])) {
+            obj.strToNodeNr[obj[TxtNr]] = Node;
+            return true;
+        }
+        return false;
+    }
+
+    // Brief:
+    //   Get the unique elements for a given dimension of a given symbol
+    // Arguments:
+    //   SyNr: The index number of the symbol, range 1..NrSymbols
+    //   DimPos:  The dimension to use, range 1..dim
+    //   FilterNr: Number of a previously registered filter or the value DOMC_EXPAND if no filter is wanted
+    //   DP: Callback procedure which will be called once for each available element (can be nil)
+    //   NrElem: Number of unique elements found
+    //   UPtr: User pointer; will be passed to the callback procedure
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Description:
+    //   Using the data of a symbol, get the unique elements for a given index position. To achieve this,
+    //   the symbols data is read and a tally is kept for the elements in the given index position. When a filter
+    //   is specified, records that have elements in the specified index position that are outside the filter will
+    //   be added to the list of DataErrorRecords. See gdxDataErrorRecord
+    // See Also:
+    //   gdxDataErrorCount gdxDataErrorRecord
+    // Example:
+    // <CODE>
+    //   var
+    //      T0 : Cardinal;
+    //      Cnt: integer;
+    //
+    //   procedure DataDomainCB(RawNr, MappedNr: integer; UPtr: pointer); stdcall;
+    //   begin
+    //   Write(RawNr, ' (', MappedNr, ')');
+    //   end;
+    //
+    //   T0 := GetTickCount();
+    //   gdxGetDomainElements(PGX, 1, 1, DOMC_EXPAND, nil, cnt);
+    //   WriteLn('Domain count only = ',cnt ,' ', GetTickCount - T0, ' ms');
+    //   T0 := GetTickCount();
+    //   gdxGetDomainElements(PGX, 1, 1, DOMC_EXPAND, DataDomainCB, cnt);
+    //   WriteLn('Get domain count = ',cnt ,' ', GetTickCount - T0, ' ms');
+    //   T0 := GetTickCount();
+    //   gdxGetDomainElements(PGX, 1, 1, 7, DataDomainCB, cnt);
+    //   WriteLn('Using filter 7; number of records in error list = ', gdxDataErrorCount(PGX) );
+    // </CODE>
+    int TGXFileObj::gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int& NrElem, void* UPtr)
+    {
+        if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
+        int Dim{ (*symbolWithIndex(SyNr)).second->SDim };
+        if (!Dim || ErrorCondition(DimPos >= 1 && DimPos <= Dim, ERR_BADDIMENSION)) return false;
+        TDFilter *DFilter = FilterNr == DOMC_EXPAND ? nullptr : FilterList.FindFilter(FilterNr);
+        if (FilterNr != DOMC_EXPAND && !DFilter) {
+            ReportError(ERR_UNKNOWNFILTER);
+            return false;
+        }
+
+        TIntegerMapping DomainIndxs;
+
+        //-- Note: PrepareSymbolRead checks for the correct status
+        TIndex XDomains;
+        XDomains.fill(DOMC_UNMAPPED);
+
+        // Following call also clears ErrorList
+        PrepareSymbolRead("gdxGetDomain"s, SyNr, XDomains.data(), fr_raw_data);
+        int AFDim;
+        tvarreca AVals;
+        while (DoRead(AVals.data(), AFDim)) {
+            int RawNr{ LastElem[DimPos-1] };
+            if (DFilter) {
+                int MapNr{ UELTable.GetUserMap(RawNr) };
+                if (!DFilter->InFilter(MapNr)) {
+                    //Register this record as a domain error (negative value indicates domain violation)
+                    LastElem[DimPos - 1] = -LastElem[DimPos - 1];
+                    AddToErrorListDomErrs(LastElem, AVals.data());    //unmapped
+                    LastElem[DimPos - 1] = -LastElem[DimPos - 1];
+                    //do not mark this element
+                    continue;
+                }
+            }
+            DomainIndxs.SetMapping(RawNr, 1);
+        }
+        gdxDataReadDone();
+        NrElem = 0;
+        TIndex Index;
+        if (!DP) { // we only count
+            for (int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++)
+                // N-1?
+                if (DomainIndxs[N] == 1) NrElem++;
+        }
+        else { //should we have an option to return indices in Raw order or in Mapped order?
+            gdlib::gmsdata::TTblGamsData SortL;
+            std::array<double, 5> vf{};
+            for (int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++) {
+                if (DomainIndxs[N] == 1) {
+                    NrElem++;
+                    Index.front() = UELTable.NewUsrUel(N);
+                    vf.front() = N;
+                    SortL[Index] = vf;
+                }
+            }
+            SortL.sort();
+            for (int N{}; N < SortL.size(); N++) {
+                SortL.GetRecord(N, Index.data(), Index.size(), vf.data());
+                DP(static_cast<int>(vf.front()), Index.front(), UPtr);
+            }
+        }
+        return NrElem >= 0;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();
@@ -3274,11 +3402,13 @@ namespace gxfile {
     }
 
     int TUELTable::IndexOf(const std::string &s) const {
-        return utils::indexOf(uelNames, s);
+        return utils::indexOf<std::string>(uelNames, [&s](const std::string& other) {
+            return utils::sameText(s, other);
+        });
     }
 
     int TUELTable::AddObject(const std::string &id, int mapping) {
-        int ix = utils::indexOf(uelNames, id);
+        int ix = IndexOf(id);
         if (ix == -1) {
             uelNames.push_back(id);
             nameToNum[id] = mapping;
@@ -3296,7 +3426,6 @@ namespace gxfile {
     }
 
     int TUELTable::GetUserMap(int i) const {
-        //return UsrUel2Ent.GetReverseMapping(i);
         return nameToNum.at(uelNames[i-1]);
     }
 
@@ -3309,10 +3438,14 @@ namespace gxfile {
     }
 
     int TUELTable::NewUsrUel(int EN) {
-        auto maxKey = UsrUel2Ent.GetHighestIndex()+1;
-        UsrUel2Ent[maxKey] = EN;
+        int res = GetUserMap(EN);
+        if (res < 0) {
+            res = UsrUel2Ent.GetHighestIndex() + 1;
+            SetUserMap(EN, res);
+            UsrUel2Ent[res] = EN;
+        }
         ResetMapToUserStatus();
-        return maxKey;
+        return res;
     }
 
     int TUELTable::AddUsrNew(const std::string &s) {
@@ -3320,7 +3453,7 @@ namespace gxfile {
         int res{ nameToNum[uelNames[EN - 1]] };
         if (res < 0) {
             res = UsrUel2Ent.GetHighestIndex() + 1;
-            nameToNum[uelNames[EN-1]] = res;
+            SetUserMap(EN, res);
             UsrUel2Ent[res] = EN;
         }
         ResetMapToUserStatus();
@@ -3470,5 +3603,11 @@ namespace gxfile {
                 return i;
         }
         return -1;
+    }
+
+    bool TSetTextList::mapContains(const std::string& s) {
+        return std::any_of(strToNodeNr.begin(), strToNodeNr.end(), [&s](const auto &pair) {
+            return utils::sameText(s, pair.first);
+        });
     }
 }
