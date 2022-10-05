@@ -239,6 +239,7 @@ namespace gxfile {
     };
 
     using TDomainIndexProc_t = void(*)(int RawIndex, int MappedIndex, void* Uptr);
+    using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
 
     // Description:
     //    Class for reading and writing gdx files
@@ -472,6 +473,24 @@ namespace gxfile {
 
         int gdxGetDLLVersion(std::string &V) const;
         int gdxFileInfo(int &FileVer, int &ComprLev) const;
+
+        int gdxDataReadSliceStart(int SyNr, int* ElemCounts);
+        int gdxDataReadSlice(const char** UelFilterStr, int& Dimen, TDataStoreProc_t DP);
+        int gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr);
+        int64_t gdxGetMemoryUsed();
+        int gdxMapValue(double D, int& sv);
+        int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr);
+        int gdxSetHasText(int SyNr);
+        int gdxSetReadSpecialValues(const std::array<double, 7>& AVals);
+        int gdxSymbIndxMaxLength(int SyNr, int** LengthInfo);
+        int gdxSymbMaxLength();
+        int gdxSymbolAddComment(int SyNr, const std::string& Txt);
+        int gdxSymbolGetComment(int SyNr, int N, std::string& Txt);
+        int gdxUELMaxLength();
+        int gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap);
+        int gdxStoreDomainSets();
+        int gdxStoreDomainSetsSet(int x);
+
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from

@@ -3552,6 +3552,102 @@ namespace gxfile {
         return true;
     }
 
+    int TGXFileObj::gdxDataReadSliceStart(int SyNr, int* ElemCounts)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxDataReadSlice(const char** UelFilterStr, int& Dimen, TDataStoreProc_t DP)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int64_t TGXFileObj::gdxGetMemoryUsed()
+    {
+        STUBWARN();
+        return int64_t();
+    }
+
+    int TGXFileObj::gdxMapValue(double D, int& sv)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxSetHasText(int SyNr)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxSetReadSpecialValues(const std::array<double, 7>& AVals)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbIndxMaxLength(int SyNr, int** LengthInfo)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbMaxLength()
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbolAddComment(int SyNr, const std::string& Txt)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxSymbolGetComment(int SyNr, int N, std::string& Txt)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxUELMaxLength()
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap)
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxStoreDomainSets()
+    {
+        STUBWARN();
+        return 0;
+    }
+
+    int TGXFileObj::gdxStoreDomainSetsSet(int x)
+    {
+        STUBWARN();
+        return 0;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();
