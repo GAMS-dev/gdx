@@ -342,8 +342,7 @@ int gdxSetSpecialValues(void *pgdx, const double AVals[]) {
 }
 
 int gdxSetTextNodeNr(void *pgdx, int TxtNr, int Node) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxSetTextNodeNr(TxtNr, Node);
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxSetTextNodeNr(TxtNr, Node);
 }
 
 int gdxSetTraceLevel(void *pgdx, int N, const char *s) {
@@ -459,8 +458,7 @@ int gdxUMUelInfo(void *pgdx, int *UelCnt, int *HighMap) {
 }
 
 int gdxGetDomainElements(void *pgdx, int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int *NrElem, void *Uptr) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxGetDomainElements(SyNr, DimPos, FilterNr, DP, NrElem, Uptr);
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxGetDomainElements(SyNr, DimPos, FilterNr, DP, *NrElem, Uptr);
 }
 
 int gdxCurrentDim(void *pgdx) {
