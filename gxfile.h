@@ -463,6 +463,15 @@ namespace gxfile {
 
         int gdxSetTextNodeNr(int TxtNr, int Node);
         int gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int& NrElem, void* UPtr);
+        int gdxSetTraceLevel(int N, const std::string &s);
+        int gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx);
+        int gdxAcronymIndex(double V) const;
+        int gdxAcronymName(double V, std::string &AName);
+        double gdxAcronymValue(int AIndx) const;
+        int gdxAutoConvert(int nv);
+
+        int gdxGetDLLVersion(std::string &V) const;
+        int gdxFileInfo(int &FileVer, int &ComprLev) const;
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from

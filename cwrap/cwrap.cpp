@@ -90,9 +90,7 @@ int gdxDataWriteRaw(void *pgdx, const int *KeyInt, const double *Values) {
 
 
 int gdxAcronymAdd(void *pgdx, const char *AName, const char *Txt, int AIndx) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymAdd(AName, Txt, AIndx);
-    STUBWARN();
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymAdd(AName, Txt, AIndx);
 }
 
 int gdxAcronymCount(void *pgdx) {
@@ -112,15 +110,14 @@ int gdxAcronymGetMapping(void *pgdx, int N, int *orgIndx, int *newIndx, int *aut
 }
 
 int gdxAcronymIndex(void *pgdx, double V) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymIndex(V);
-    STUBWARN();
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymIndex(V);
 }
 
 int gdxAcronymName(void *pgdx, double V, char *AName) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymName(V, AName);
-    STUBWARN();
-    return 0;
+    std::string sAName;
+    int rc{static_cast<TGXFileObj *>(pgdx)->gdxAcronymName(V, sAName)};
+    utils::stocp(sAName, AName);
+    return rc;
 }
 
 int gdxAcronymNextNr(void *pgdx, int NV) {
@@ -132,9 +129,7 @@ int gdxAcronymSetInfo(void *pgdx, int N, const char *AName, const char *Txt, int
 }
 
 double gdxAcronymValue(void *pgdx, int AIndx) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymValue(AIndx);
-    STUBWARN();
-    return 0.0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymValue(AIndx);
 }
 
 int gdxAddAlias(void *pgdx, const char *Id1, const char *Id2) {
@@ -146,9 +141,7 @@ int gdxAddSetText(void *pgdx, const char *Txt, int *TxtNr) {
 }
 
 int gdxAutoConvert(void *pgdx, int NV) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxAutoConvert(NV);
-    STUBWARN();
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxAutoConvert(NV);
 }
 
 int gdxDataErrorCount(void *pgdx) {
@@ -234,9 +227,10 @@ int gdxDataWriteStr(void *pgdx, const char *KeyStr[], const double Values[]) {
 }
 
 int gdxGetDLLVersion(void *pgdx, char *V) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxGetDLLVersion(V);
-    STUBWARN();
-    return 0;
+    std::string sV;
+    int rc{ static_cast<TGXFileObj *>(pgdx)->gdxGetDLLVersion(sV) };
+    utils::stocp(sV, V);
+    return rc;
 }
 
 int gdxErrorCount(void *pgdx) {
@@ -253,9 +247,7 @@ int gdxErrorStr(void *pgdx, int ErrNr, char *ErrMsg) {
 }
 
 int gdxFileInfo(void *pgdx, int *FileVer, int *ComprLev) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxFileInfo(FileVer, ComprLev);
-    STUBWARN();
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxFileInfo(*FileVer, *ComprLev);
 }
 
 int gdxFileVersion(void *pgdx, char *FileStr, char *ProduceStr) {
@@ -361,9 +353,7 @@ int gdxSetTextNodeNr(void *pgdx, int TxtNr, int Node) {
 }
 
 int gdxSetTraceLevel(void *pgdx, int N, const char *s) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxSetTraceLevel(N, s);
-    STUBWARN();
-    return 0;
+    return static_cast<TGXFileObj *>(pgdx)->gdxSetTraceLevel(N, s);
 }
 
 int gdxSymbIndxMaxLength(void *pgdx, int SyNr, int LengthInfo[]) {

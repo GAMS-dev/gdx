@@ -3388,6 +3388,170 @@ namespace gxfile {
         return NrElem >= 0;
     }
 
+    // Brief:
+    //   Set the amount of trace (debug) information generated
+    // Arguments:
+    //   N: Tracing level  N <= 0 no tracing  N >= 3 maximum tracing
+    //   S: A string to be included in the trace output
+    // Returns:
+    //   Always non-zero
+    // Description:
+    //
+    int TGXFileObj::gdxSetTraceLevel(int N, const std::string &s) {
+        if(N <= 0) TraceLevel = TraceLevels::trl_none;
+        else {
+            switch(N) {
+                case 1: TraceLevel = TraceLevels::trl_errors; break;
+                case 2: TraceLevel = TraceLevels::trl_some; break;
+                default: TraceLevel = TraceLevels::trl_all; break;
+            }
+            TraceStr = s;
+        }
+        //!! GetStdHandle(STD_OUTPUT_HANDLE) <> INVALID_HANDLE_VALUE;
+        if(TraceLevel > TraceLevels::trl_errors) {
+            std::cout << std::endl;
+            WriteTrace("Tracing at level "s + std::to_string((int)TraceLevel));
+        }
+        return true;
+    }
+
+    // Summary:
+    //   Add a new acronym entry
+    // Arguments:
+    //   AName: Name of the acronym
+    //   Txt: Explanatory text of the acronym
+    //   AIndx:  Index value of the acronym
+    // Return Value:
+    //    0 If the entry is not added because of a duplicate name using the same value fo the indx
+    //   -1 If the entry is not added because of a duplicate name using a different value for the indx
+    //   Otherwise the index into the acronym table (1..gdxAcronymCount)
+    // See Also:
+    //   gdxAcronymGetInfo, gdxAcronymCount
+    // Description:
+    //   This function can be used to add entries before data is written. When entries
+    //   are added implicitly use gdxAcronymSetInfo to update the table.
+    //
+    int TGXFileObj::gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) {
+        for(int N{}; N<AcronymList.size(); N++) {
+            auto &obj = AcronymList[N];
+            if(utils::sameText(obj.AcrName, AName)) {
+                if(ErrorCondition(obj.AcrMap = AIndx, ERR_ACROBADADDITION)) -1;
+                return N;
+            }
+            if(ErrorCondition(obj.AcrMap != AIndx, ERR_ACROBADADDITION)) return -1;
+        }
+        int res{AcronymList.AddEntry(AName, Txt, AIndx)};
+        AcronymList[res].AcrReadMap = AIndx;
+        res++;  // one based for the user
+        return res;
+    }
+
+    // Summary:
+    //   Get index value of an acronym
+    // Arguments:
+    //   V: Input value possibly representing an acronym
+    // Returns:
+    //   Index of acronym value V; zero if V does not represent an acronym
+    // See Also:
+    //    gdxAcronymValue
+    int TGXFileObj::gdxAcronymIndex(double V) const {
+        return V < Zvalacr ? 0 : static_cast<int>(std::round(V / Zvalacr));
+    }
+
+    // Summary:
+    //   Find the name of an acronym value
+    // Arguments:
+    //   V: Input value possibly containing an acronym
+    //   AName: Name of acronym value or the empty string
+    // Returns:
+    //   Return non-zero if a name for the acronym is defined. Return
+    //   zero if V does not represent an acronym value or a name
+    //   is not defined. An unnamed acronym value will return a string
+    //   of the form UnknownAcronymNNN; were NNN is the index of the acronym.
+    // See Also:
+    //    gdxAcronymIndex
+    int TGXFileObj::gdxAcronymName(double V, std::string &AName) {
+        int Indx {gdxAcronymIndex(V)};
+        //not an acronym
+        if(Indx <= 0) AName.clear();
+        else {
+            int N {AcronymList.FindEntry(Indx)};
+            AName = N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : AcronymList[N].AcrName;
+            return true;
+        }
+        return false;
+    }
+
+    // Summary:
+    //   Create an acronym value based on the index
+    // Arguments:
+    //   AIndx: Index value; should be greater than zero
+    // Returns:
+    //   The calculated acronym value; zero if Indx is not positive
+    // See Also:
+    //    gdxAcronymIndex
+    double TGXFileObj::gdxAcronymValue(int AIndx) const {
+        return AIndx <= 0 ? 0.0 : Zvalacr * AIndx;
+    }
+
+    // Summary:
+    //   Returns the value of the AutoConvert variable and sets the variable to nv
+    // Arguments:
+    //    nv: New value for AutoConvert
+    // Return Value:
+    //    Previous value of AutoConvert
+    // Description:
+    //    When we close a new gdx file, we look at the value of AutoConvert; if AutoConvert
+    //    is non-zero, we look at the GDXCOMPRESS and GDXCONVERT environment variables to determine if
+    //    conversion to an older file format is desired. We needed this logic so gdxcopy.exe
+    //    can disable automatic file conversion.
+    int TGXFileObj::gdxAutoConvert(int nv) {
+        int res{AutoConvert};
+        AutoConvert = nv;
+        return res;
+    }
+
+    // Summary:
+    //   Returns a version descriptor of the library
+    // Arguments:
+    //    V: Contains version string after return
+    // Returns:
+    //   Always returns non-zero
+    // Description:
+    //
+    // See Also:
+    int TGXFileObj::gdxGetDLLVersion(std::string &V) const {
+        V = palxxx::gdlaudit::gdlGetAuditLine();
+        return true;
+    }
+
+    // Summary:
+    //   Returns file format number and compression level used
+    // Arguments:
+    //    FileVer: File format number or zero if the file is not open
+    //    ComprLev: Compression used; 0= no compression, 1=zlib
+    // Returns:
+    //   Always returns non-zero
+    // Description:
+    //
+    // See Also:
+    int TGXFileObj::gdxFileInfo(int &FileVer, int &ComprLev) const {
+        switch(fstatus) {
+            case stat_notopen:
+                FileVer = ComprLev = 0;
+                break;
+            case stat_read:
+                FileVer = VersionRead;
+                ComprLev = fComprLev;
+                break;
+            case stat_write:
+                FileVer = VERSION;
+                ComprLev = fComprLev;
+                break;
+        }
+        return true;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();
