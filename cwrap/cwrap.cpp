@@ -91,6 +91,7 @@ int gdxDataWriteRaw(void *pgdx, const int *KeyInt, const double *Values) {
 
 int gdxAcronymAdd(void *pgdx, const char *AName, const char *Txt, int AIndx) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymAdd(AName, Txt, AIndx);
+    STUBWARN();
     return 0;
 }
 
@@ -112,11 +113,13 @@ int gdxAcronymGetMapping(void *pgdx, int N, int *orgIndx, int *newIndx, int *aut
 
 int gdxAcronymIndex(void *pgdx, double V) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymIndex(V);
+    STUBWARN();
     return 0;
 }
 
 int gdxAcronymName(void *pgdx, double V, char *AName) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymName(V, AName);
+    STUBWARN();
     return 0;
 }
 
@@ -130,6 +133,7 @@ int gdxAcronymSetInfo(void *pgdx, int N, const char *AName, const char *Txt, int
 
 double gdxAcronymValue(void *pgdx, int AIndx) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxAcronymValue(AIndx);
+    STUBWARN();
     return 0.0;
 }
 
@@ -143,6 +147,7 @@ int gdxAddSetText(void *pgdx, const char *Txt, int *TxtNr) {
 
 int gdxAutoConvert(void *pgdx, int NV) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxAutoConvert(NV);
+    STUBWARN();
     return 0;
 }
 
@@ -184,11 +189,13 @@ int gdxDataReadRawStart(void *pgdx, int SyNr, int *NrRecs) {
 
 int gdxDataReadSlice(void *pgdx, const char *UelFilterStr[], int *Dimen, TDataStoreProc_t DP) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxDataReadSlice(UelFilterStr, Dimen, DP);
+    STUBWARN();
     return 0;
 }
 
 int gdxDataReadSliceStart(void *pgdx, int SyNr, int ElemCounts[]) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxDataReadSliceStart(SyNr, ElemCounts);
+    STUBWARN();
     return 0;
 }
 
@@ -202,6 +209,7 @@ int gdxDataReadStrStart(void *pgdx, int SyNr, int *NrRecs) {
 
 int gdxDataSliceUELS(void *pgdx, const int SliceKeyInt[], char *KeyStr[]) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxDataSliceUELS(SliceKeyInt, KeyStr);
+    STUBWARN();
     return 0;
 }
 
@@ -227,6 +235,7 @@ int gdxDataWriteStr(void *pgdx, const char *KeyStr[], const double Values[]) {
 
 int gdxGetDLLVersion(void *pgdx, char *V) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxGetDLLVersion(V);
+    STUBWARN();
     return 0;
 }
 
@@ -245,6 +254,7 @@ int gdxErrorStr(void *pgdx, int ErrNr, char *ErrMsg) {
 
 int gdxFileInfo(void *pgdx, int *FileVer, int *ComprLev) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxFileInfo(FileVer, ComprLev);
+    STUBWARN();
     return 0;
 }
 
@@ -289,6 +299,7 @@ int gdxGetLastError(void *pgdx) {
 
 int gdxGetMemoryUsed(void *pgdx) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxGetMemoryUsed();
+    STUBWARN();
     return 0;
 }
 
@@ -309,11 +320,13 @@ int gdxGetUEL(void *pgdx, int UelNr, char *Uel) {
 
 int gdxMapValue(void *pgdx, double D, int *sv) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxMapValue(D, sv);
+    STUBWARN();
     return 0;
 }
 
 int gdxOpenAppend(void *pgdx, const char *FileName, const char *Producer, int *ErrNr) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxOpenAppend(FileName, Producer, ErrNr);
+    STUBWARN();
     return 0;
 }
 
@@ -327,11 +340,13 @@ int gdxResetSpecialValues(void *pgdx) {
 
 int gdxSetHasText(void *pgdx, int SyNr) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxSetHasText(SyNr);
+    STUBWARN();
     return 0;
 }
 
 int gdxSetReadSpecialValues(void *pgdx, const double AVals[]) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxSetReadSpecialValues(AVals);
+    STUBWARN();
     return 0;
 }
 
@@ -347,26 +362,31 @@ int gdxSetTextNodeNr(void *pgdx, int TxtNr, int Node) {
 
 int gdxSetTraceLevel(void *pgdx, int N, const char *s) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxSetTraceLevel(N, s);
+    STUBWARN();
     return 0;
 }
 
 int gdxSymbIndxMaxLength(void *pgdx, int SyNr, int LengthInfo[]) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxSymbIndxMaxLength(SyNr, LengthInfo);
+    STUBWARN();
     return 0;
 }
 
 int gdxSymbMaxLength(void *pgdx) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxSymbMaxLength();
+    STUBWARN();
     return 0;
 }
 
 int gdxSymbolAddComment(void *pgdx, int SyNr, const char *Txt) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxSymbolAddComment(SyNr, Txt);
+    STUBWARN();
     return 0;
 }
 
 int gdxSymbolGetComment(void *pgdx, int SyNr, int N, char *Txt) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxSymbolGetComment(SyNr, N, Txt);
+    STUBWARN();
     return 0;
 }
 
@@ -410,6 +430,7 @@ int gdxSystemInfo(void *pgdx, int *SyCnt, int *UelCnt) {
 
 int gdxUELMaxLength(void *pgdx) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxUELMaxLength();
+    STUBWARN();
     return 0;
 }
 
@@ -443,6 +464,7 @@ int gdxUELRegisterStrStart(void *pgdx) {
 
 int gdxUMFindUEL(void *pgdx, const char *Uel, int *UelNr, int *UelMap) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxUMFindUEL(Uel, UelNr, UelMap);
+    STUBWARN();
     return 0;
 }
 
@@ -471,11 +493,13 @@ int gdxRenameUEL(void *pgdx, const char *OldName, const char *NewName) {
 
 int gdxStoreDomainSets(void *pgdx) {
     //return static_cast<TGXFileObj *>(pgdx)->gdxStoreDomainSets();
+    STUBWARN();
     return 0;
 }
 
 void gdxStoreDomainSetsSet(void *pgdx, int x) {
-    //return static_cast<TGXFileObj *>(pgdx)->gdxStoreDomainSetsSet(x);
+    //static_cast<TGXFileObj *>(pgdx)->gdxStoreDomainSetsSet(x);
+    STUBWARN();
 }
 
 int gdxFree(void **pgdx) {
