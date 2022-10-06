@@ -385,4 +385,13 @@ namespace utils {
 
     void stocp(const std::string &s, char *cp);
 
+    template<typename A, typename B>
+    A reduce(const std::vector<B> &elems, A initial, const std::function<A(A,B)> combine) {
+        A acc {initial};
+        for(const auto &elem : elems) {
+            acc = combine(acc, elem);
+        }
+        return acc;
+    }
+
 }

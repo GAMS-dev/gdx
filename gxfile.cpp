@@ -3436,7 +3436,7 @@ namespace gxfile {
         for(int N{}; N<AcronymList.size(); N++) {
             auto &obj = AcronymList[N];
             if(utils::sameText(obj.AcrName, AName)) {
-                if(ErrorCondition(obj.AcrMap = AIndx, ERR_ACROBADADDITION)) -1;
+                if(ErrorCondition(obj.AcrMap = AIndx, ERR_ACROBADADDITION)) return -1;
                 return N;
             }
             if(ErrorCondition(obj.AcrMap != AIndx, ERR_ACROBADADDITION)) return -1;
@@ -3863,7 +3863,7 @@ namespace gxfile {
     // Returns:
     //   The length of the longest symbol name
     int TGXFileObj::gdxSymbMaxLength() {
-        return std::reduce(NameListOrdered.begin(), NameListOrdered.end(), 0,
+        return utils::reduce<int, std::string>(NameListOrdered, 0,
             [](int acc, const std::string& symbolName) {
                 return std::max<int>(acc, (int)symbolName.length());
             }
@@ -3884,7 +3884,7 @@ namespace gxfile {
         if (!MajorCheckMode("SymbolAddComment"s, AnyWriteMode)) return false;
         PgdxSymbRecord SyPtr;
         if (SyNr <= 0) SyPtr = CurSyPtr;
-        else SyPtr = !NameList.empty() && SyNr >= 1 && SyNr <= NameList.size() ? NameList[NameListOrdered[SyNr]] : nullptr;
+        else SyPtr = !NameList.empty() && SyNr <= NameList.size() ? NameList[NameListOrdered[SyNr]] : nullptr;
         if (!SyPtr) {
             ReportError(ERR_NOSYMBOLFORCOMMENT);
             return false;
@@ -4059,7 +4059,7 @@ namespace gxfile {
     }
 
     int TUELTable::GetMaxUELLength() const {
-        return std::reduce(uelNames.begin(), uelNames.end(), 0, [](int acc, const std::string& uelName) {
+        return utils::reduce<int, std::string>(uelNames, 0, [](int acc, const std::string& uelName) {
             return std::max<int>((int)uelName.length(), acc);
         });
     }
