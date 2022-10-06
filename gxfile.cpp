@@ -11,6 +11,7 @@
 #include "yaml.h"
 
 #include <cassert>
+#include <numeric>
 
 using namespace gdxinterface;
 using namespace gdlib::gmsstrm;
@@ -3010,7 +3011,7 @@ namespace gxfile {
     // See Also:
     //    gdxAcronymSetInfo, gdxAcronymSetInfo
     int TGXFileObj::gdxAcronymCount() const {
-        return AcronymList.size();
+        return static_cast<int>(AcronymList.size());
     }
 
     // Summary:
@@ -3381,7 +3382,7 @@ namespace gxfile {
             }
             SortL.sort();
             for (int N{}; N < SortL.size(); N++) {
-                SortL.GetRecord(N, Index.data(), Index.size(), vf.data());
+                SortL.GetRecord(N, Index.data(), (int)Index.size(), vf.data());
                 DP(static_cast<int>(vf.front()), Index.front(), UPtr);
             }
         }
@@ -3552,100 +3553,406 @@ namespace gxfile {
         return true;
     }
 
+    // Brief:
+    //   Prepare for the reading of a slice of data from a data set
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Arguments:
+    //   SyNr: Symbol number to read, range 1..NrSymbols
+    //   ElemCounts: Array of integers, each position indicating the number of
+    //             unique indices in that position
+    // See Also:
+    //   gdxDataReadSlice, gdxDataReadDone
+    // Description:
+    //   Prepare for the reading of a slice of data. The actual read of the data
+    //   is done by calling gdxDataReadSlice. When finished reading, call gdxDataReadDone.
     int TGXFileObj::gdxDataReadSliceStart(int SyNr, int* ElemCounts)
     {
+        //-- Note: PrepareSymbolRead checks for the correct status
+        TgdxUELIndex XDomains;
+        XDomains.fill(DOMC_UNMAPPED);
+        SliceSyNr = SyNr;
+        PrepareSymbolRead("DataReadSliceStart"s, SliceSyNr, XDomains.data(), fr_raw_data);
+
+        memset(ElemCounts, 0, sizeof(int) * MaxDim);
+
+        TgdxValues Values;
+        int FDim;
+        while (DoRead(Values.data(), FDim))
+            for (int D{ 1 }; D <= FCurrentDim; D++)
+                SliceIndxs[D].SetMapping(LastElem[D], 1);
+
+        gdxDataReadDone();
+
+        for (int D{ 1 }; D <= FCurrentDim; D++) {
+            auto& obj = SliceIndxs[D];
+            int Cnt{};
+            for (int N{}; N <= obj.GetHighestIndex(); N++) {
+                if (obj.GetMapping(N) >= 0) {
+                    obj.SetMapping(N, Cnt); // we keep it zero based
+                    SliceRevMap[D].SetMapping(Cnt, N);
+                    Cnt++;
+                }
+            }
+            ElemCounts[D] = Cnt;
+        }
+        fmode = fr_slice;
+        return true;
+    }
+
+    // Brief:
+    //   Read a slice of data from a data set
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Arguments:
+    //   UelFilterStr: Each index can be fixed by setting the string for the unique
+    //                  element. Set an index position to the empty string in order
+    //                  not to fix that position.
+    //   Dimen: The dimension of the index space; this is the number of index positions
+    //         that is not fixed.
+    //   DP: Callback procedure which will be called for each available data item
+    // See Also:
+    //   gdxDataReadSliceStart, gdxDataSliceUELS, gdxDataReadDone
+    // Description:
+    //   Read a slice of data, by fixing zero or more index positions in the data.
+    //   When a data element is available, the callback procedure DP is called with the
+    //   current index and the values. The indices used in the index vary from zero to
+    //   the highest value minus one for that index position. This function can be called
+    //   multiple times.
+    int TGXFileObj::gdxDataReadSlice(const char** UelFilterStr, int& Dimen, TDataStoreProc_t DP) {
+        if (!MajorCheckMode("DataReadSlice", { fr_slice }))
+            return false;
+        bool GoodIndx {true};
+        Dimen = 0;
+        TgdxUELIndex ElemNrs;
+        for (int D{ 1 }; D <= FCurrentDim; D++) {
+            SliceElems[D] = UelFilterStr[D];
+            if (!strlen(UelFilterStr[D])) {
+                ElemNrs[D] = -1;
+                Dimen++;
+            }
+            else {
+                ElemNrs[D] = UELTable.IndexOf(UelFilterStr[D]);
+                if (ElemNrs[D] < 0) GoodIndx = false;
+            }
+        }
+        fmode = fr_init;
+        if (!GoodIndx) return false;
+        TgdxUELIndex XDomains;
+        XDomains.fill(DOMC_UNMAPPED);
+        PrepareSymbolRead("DataReadSlice"s, SliceSyNr, XDomains.data(), fr_slice);
+        TgdxValues Values;
+        TgdxUELIndex HisIndx;
+        int FDim;
+        while (DoRead(Values.data(), FDim)) {
+            GoodIndx = true;
+            int HisDim = 0;
+            for (int D{ 1 }; D <= FCurrentDim; D++) {
+                if (ElemNrs[D] == -1) {
+                    HisDim++;
+                    HisIndx[HisDim] = SliceIndxs[D].GetMapping(LastElem[D]);
+                }
+                else if(ElemNrs[D] != LastElem[D])
+                    GoodIndx = false;
+            }
+            if (GoodIndx) DP(HisIndx.data(), Values.data());
+        }
+        return true;
+    }
+
+    // Brief:
+    //   Map a slice index in to the corresponding unique elements
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Arguments:
+    //   SliceKeyInt: The slice index to be mapped to strings.
+    //   KeyStr: Array of strings containg the unique elements
+    // See Also:
+    //   gdxDataReadSliceStart, gdxDataReadDone
+    // Description:
+    //   After calling DataReadSliceStart, each index position is mapped from 0 to N(d)-1.
+    //   This function maps this index space back in to unique elements represented as
+    //   strings.
+    int TGXFileObj::gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr) {
+        if (!MajorCheckMode("DataSliceUELS"s, { fr_slice })) return false;
+        int HisDim{};
+        for (int D{ 1 }; D <= FCurrentDim; D++) {
+            if (!SliceElems[D].empty()) strcpy(KeyStr[D], SliceElems[D].c_str());
+            else {
+                HisDim++;
+                int N = SliceRevMap[D].GetMapping(SliceKeyInt[HisDim]);
+                if (N < 0) strcpy(KeyStr[D], "?");
+                else memcpy(KeyStr[D], UELTable[N].c_str(), UELTable[N].length() + 1);
+            }
+        }
+        return true;
+    }
+
+    // Brief:
+    //   Return the number of bytes used by the data objects
+    // Arguments:
+    //   None
+    // Returns:
+    //   The number of bytes used by the data objects
+    int64_t TGXFileObj::gdxGetMemoryUsed() {
         STUBWARN();
         return 0;
     }
 
-    int TGXFileObj::gdxDataReadSlice(const char** UelFilterStr, int& Dimen, TDataStoreProc_t DP)
-    {
-        STUBWARN();
-        return 0;
-    }
-
-    int TGXFileObj::gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr)
-    {
-        STUBWARN();
-        return 0;
-    }
-
-    int64_t TGXFileObj::gdxGetMemoryUsed()
-    {
-        STUBWARN();
-        return int64_t();
-    }
-
+    // Brief:
+    //   Classify a value as a potential special value
+    // Arguments:
+    //   D: Value to classify
+    //   sv: Classification
+    // Returns:
+    //   Returns non-zero if D is a special value, zero otherwise
+    // See Also:
+    //  gdxGetSpecialValues, gdxSetSpecialValues
+    // Description:
+    //
     int TGXFileObj::gdxMapValue(double D, int& sv)
     {
-        STUBWARN();
-        return 0;
+        int64_t i64 = dblToI64(D);
+        if (i64 == intlValueMapI64[vm_valund]) sv = sv_valund;
+        else if (i64 == intlValueMapI64[vm_valna]) sv = sv_valna;
+        else if (i64 == intlValueMapI64[vm_valpin]) sv = sv_valpin;
+        else if (i64 == intlValueMapI64[vm_valmin]) sv = sv_valmin;
+        else if (i64 == intlValueMapI64[vm_valeps]) sv = sv_valeps;
+        else {
+            sv = sv_normal;
+            return false;
+        }
+        return true;
     }
 
-    int TGXFileObj::gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr)
-    {
-        STUBWARN();
-        return 0;
+    // Brief:
+    //   Open an existing gdx file for output
+    // Arguments:
+    //   FileName:  File name of the gdx file to be created
+    //   Producer:  Name of program that appends to the gdx file
+    //   ErrNr: Returns an error code or zero if there is no error
+    // Returns:
+    //   Returns non-zero if the file can be opened; zero otherwise
+    // See Also:
+    //   gdxOpenRead, gdxOpenWrite, gdxOpenWriteEx
+    // Description:
+    //   Open an existing gdx file for output. If a file extension is not
+    //   supplied, the extension '.gdx' will be used. The return code is
+    //   a system dependent I/O error.
+    //   When appending to a gdx file, the symbol table, uel table etc will be read
+    //   and the whole setup will be treated as if all symbols were just written to
+    //   the gdx file. Replacing a symbol is not allowed; it will generate a duplicate
+    //   symbol error.
+    // Example:
+    // <CODE>
+    //   var
+    //      ErrNr: integer;
+    //      PGX  : PGXFile;
+    //      Msg  : ShortString;
+    //   begin
+    //   if not gdxGetReady(Msg)
+    //   then
+    //      begin
+    //      WriteLn('Cannot load GDX library, msg: ', Msg);
+    //      exit;
+    //      end;
+    //   gdxOpenAppend(PGX,'c:\\mydata\\file1.gdx','Examples', ErrCode);
+    //   if ErrCode <> 0
+    //   then
+    //      [ ... ]
+    // </CODE>
+    int TGXFileObj::gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr) {
+        FProducer2 = Producer;
+        AppendActive = true;
+        int res{ gdxOpenReadXX(FileName, fmOpenReadWrite, 0, ErrNr) };
+        if (!res || ErrNr != 0) return res;
+        if (VersionRead < 7) {
+            ReportError(ERR_FILETOOLDFORAPPEND);
+            gdxClose();
+            return res;
+        }
+        fmode = fw_init;
+        fstatus = stat_write;
+        FFile->SetPosition(NextWritePosition);
+        CompressOut = DoUncompress;
+        return res;
     }
 
-    int TGXFileObj::gdxSetHasText(int SyNr)
-    {
-        STUBWARN();
-        return 0;
+    // Brief:
+    //   Test if any of the elements of the set has an associated text
+    // Arguments:
+    //   SyNr: Set Symbol number (1..NrSymbols)
+    // Returns:
+    //   Non-zero if the Set contains at least one element that has associated text,
+    //     zero otherwise
+    // See Also:
+    //   gdxSystemInfo, gdxSymbolInfo
+    // Description:
+    //
+    int TGXFileObj::gdxSetHasText(int SyNr) {
+        return !NameList.empty() && SyNr >= 1 && SyNr <= NameList.size() && NameList[NameListOrdered[SyNr]]->SSetText;
     }
 
-    int TGXFileObj::gdxSetReadSpecialValues(const std::array<double, 7>& AVals)
-    {
-        STUBWARN();
-        return 0;
+    // Brief:
+    //   Set the internal values for special values when reading a gdx file
+    // Arguments:
+    //   AVals: array of special values to be used for Eps, +Inf, -Inf, NA and Undef
+    //          Note that the values do not have to be unique
+    // Returns:
+    //   Always non-zero
+    // Note: Before calling this function, initialize the array of special values
+    //   by calling gdxGetSpecialValues first
+    // See Also:
+    //  gdxSetSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
+    // Description:
+    //
+    int TGXFileObj::gdxSetReadSpecialValues(const std::array<double, 7>& AVals) {
+        readIntlValueMapDbl[vm_valund] = AVals[sv_valund];
+        readIntlValueMapDbl[vm_valna] = AVals[sv_valna];
+        readIntlValueMapDbl[vm_valpin] = AVals[sv_valpin];
+        readIntlValueMapDbl[vm_valmin] = AVals[sv_valmin];
+        readIntlValueMapDbl[vm_valeps] = AVals[sv_valeps];
+        return true;
     }
 
-    int TGXFileObj::gdxSymbIndxMaxLength(int SyNr, int** LengthInfo)
-    {
-        STUBWARN();
-        return 0;
+    // Summary:
+    //   Returns the length of the longest UEL used for every index position for a given symbol
+    // Arguments:
+    //   SyNr: Symbol number
+    //   LengthInfo: The longest length for each index position
+    // Returns:
+    //   The length of the longest UEL found in the data
+    // See also:
+    //   gdxUELMaxLength
+    int TGXFileObj::gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) {
+        TgxModeSet AllowedModes{ fr_init };
+        memset(LengthInfo, 0, MaxDim * sizeof(int));
+
+        int NrRecs;
+        if ((TraceLevel >= TraceLevels::trl_some || !utils::in(fmode, AllowedModes))
+            && !CheckMode("SymbIndxMaxLength", AllowedModes)
+            || SyNr < 0 || SyNr > NameListOrdered.size() || !gdxDataReadRawStart(SyNr, NrRecs))
+            return 0;
+
+        int res{};
+        if (FCurrentDim > 0) {
+            int UELTableCount = UELTable.size(); // local copy for speed
+            TgdxValues AVals;
+            int AFDim;
+            while (DoRead(AVals.data(), AFDim)) {
+                for (int D{}; D <= FCurrentDim; D++) {
+                    int UEL = LastElem[D];
+                    if (UEL >= 1 && UEL <= UELTableCount) {
+                        auto L = static_cast<int>(UELTable[UEL].length());
+                        if (L > LengthInfo[D]) LengthInfo[D] = L;
+                    }
+                }
+            }
+            for (int D{ 1 }; D <= FCurrentDim; D++) {
+                if (LengthInfo[D] > res)
+                    res = LengthInfo[D];
+            }
+        }
+        gdxDataReadDone();
+        return res;
     }
 
-    int TGXFileObj::gdxSymbMaxLength()
-    {
-        STUBWARN();
-        return 0;
+    // Summary:
+    //   Returns the length of the longest symbol name
+    // Arguments:
+    // Returns:
+    //   The length of the longest symbol name
+    int TGXFileObj::gdxSymbMaxLength() {
+        return std::reduce(NameListOrdered.begin(), NameListOrdered.end(), 0,
+            [](int acc, const std::string& symbolName) {
+                return std::max<int>(acc, (int)symbolName.length());
+            }
+        );
     }
 
+    // Summary:
+    //   Add a line of comment text for a symbol
+    // Arguments:
+    //   SyNr: The symbol number (range 1..NrSymbols); if SyNr <= 0 the current symbol being written
+    //   Txt: String to add
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxSymbolGetComment
     int TGXFileObj::gdxSymbolAddComment(int SyNr, const std::string& Txt)
     {
-        STUBWARN();
-        return 0;
+        if (!MajorCheckMode("SymbolAddComment"s, AnyWriteMode)) return false;
+        PgdxSymbRecord SyPtr;
+        if (SyNr <= 0) SyPtr = CurSyPtr;
+        else SyPtr = !NameList.empty() && SyNr >= 1 && SyNr <= NameList.size() ? NameList[NameListOrdered[SyNr]] : nullptr;
+        if (!SyPtr) {
+            ReportError(ERR_NOSYMBOLFORCOMMENT);
+            return false;
+        }
+        SyPtr->SCommentsList.push_back(Txt);
+        return true;
     }
 
-    int TGXFileObj::gdxSymbolGetComment(int SyNr, int N, std::string& Txt)
-    {
-        STUBWARN();
-        return 0;
+    // Summary:
+    //   Retrieve a line of comment text for a symbol
+    // Arguments:
+    //   SyNr: The symbol number (range 1..NrSymbols)
+    //   N: Line number (1..Count)
+    //   Txt: String containing the line requested
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxSymbolAddComment
+    int TGXFileObj::gdxSymbolGetComment(int SyNr, int N, std::string& Txt) {
+        if (!NameList.empty() && SyNr >= 1 && SyNr <= NameList.size()) {
+            const auto obj = NameList[NameListOrdered[SyNr]];
+            if (!obj->SCommentsList.empty() && N >= 1 && N <= obj->SCommentsList.size()) {
+                Txt = obj->SCommentsList[N - 1];
+                return true;
+            }
+        }
+        Txt.clear();
+        return false;
     }
 
-    int TGXFileObj::gdxUELMaxLength()
-    {
-        STUBWARN();
-        return 0;
+    // Summary:
+    //   Returns the length of the longest UEL name
+    // Arguments:
+    // Returns:
+    //   The length of the longest UEL name
+    // See also:
+    //   gdxSymbIndxMaxLength
+    int TGXFileObj::gdxUELMaxLength() {
+        return UELTable.GetMaxUELLength();
     }
 
-    int TGXFileObj::gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap)
-    {
-        STUBWARN();
-        return 0;
+    // Brief:
+    //   Search for unique element by its string
+    // Arguments:
+    //   Uel: String to be searched
+    //   UelNr: Internal unique element number or -1 if not found
+    //   UelMap: User mapping for the element or -1 if not found or
+    //         the element was never mapped
+    // Returns:
+    //   Non-zero if the element was found, zero otherwise
+    int TGXFileObj::gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap) {
+        UelMap = -1;
+        if (UELTable.empty()) {
+            UelNr = -1;
+            return false;
+        }
+        UelNr = UELTable.IndexOf(utils::trimRight(Uel));
+        if (UelNr < 0) return false;
+        UelMap = UELTable.GetUserMap(UelNr);
+        return true;
     }
 
-    int TGXFileObj::gdxStoreDomainSets()
-    {
-        STUBWARN();
-        return 0;
+    int TGXFileObj::gdxStoreDomainSets() {
+        return StoreDomainSets;
     }
 
-    int TGXFileObj::gdxStoreDomainSetsSet(int x)
-    {
-        STUBWARN();
-        return 0;
+    void TGXFileObj::gdxStoreDomainSetsSet(int x) {
+        StoreDomainSets = x;
     }
 
     void TUELTable::clear() {
@@ -3749,6 +4056,12 @@ namespace gxfile {
         uelNames[N] = s;
         nameToNum.erase(oldName);
         nameToNum[s] = N+1;
+    }
+
+    int TUELTable::GetMaxUELLength() const {
+        return std::reduce(uelNames.begin(), uelNames.end(), 0, [](int acc, const std::string& uelName) {
+            return std::max<int>((int)uelName.length(), acc);
+        });
     }
 
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {

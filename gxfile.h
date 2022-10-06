@@ -211,6 +211,8 @@ namespace gxfile {
         TUELUserMapStatus GetMapToUserStatus();
 
         void RenameEntry(int N, const std::string &s);
+
+        int GetMaxUELLength() const;
     };
 
     struct TAcronym {
@@ -482,14 +484,14 @@ namespace gxfile {
         int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr);
         int gdxSetHasText(int SyNr);
         int gdxSetReadSpecialValues(const std::array<double, 7>& AVals);
-        int gdxSymbIndxMaxLength(int SyNr, int** LengthInfo);
+        int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo);
         int gdxSymbMaxLength();
         int gdxSymbolAddComment(int SyNr, const std::string& Txt);
         int gdxSymbolGetComment(int SyNr, int N, std::string& Txt);
         int gdxUELMaxLength();
         int gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap);
         int gdxStoreDomainSets();
-        int gdxStoreDomainSetsSet(int x);
+        void gdxStoreDomainSetsSet(int x);
 
     };
 

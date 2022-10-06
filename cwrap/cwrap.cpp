@@ -344,7 +344,7 @@ int gdxSetTraceLevel(void *pgdx, int N, const char *s) {
 }
 
 int gdxSymbIndxMaxLength(void *pgdx, int SyNr, int LengthInfo[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSymbIndxMaxLength(SyNr, (int **)LengthInfo);
+    return static_cast<TGXFileObj *>(pgdx)->gdxSymbIndxMaxLength(SyNr, LengthInfo);
 }
 
 int gdxSymbMaxLength(void *pgdx) {
