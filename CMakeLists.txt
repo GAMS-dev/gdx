@@ -73,14 +73,14 @@ set(tests
 		tests/serializetests.cpp
 )
 
-add_library(gdxcwrap SHARED ${common_neo})
-set_property(TARGET gdxcwrap PROPERTY POSITION_INDEPENDENT_CODE ON)
+add_library(gdxcclib SHARED ${common_neo})
+set_property(TARGET gdxcclib PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if(IS_DIRECTORY /usr/include/python3.10)
 	add_library(pygdx SHARED pygdx/pygdx.c)
 	set_property(TARGET pygdx PROPERTY POSITION_INDEPENDENT_CODE ON)
 	target_include_directories(pygdx PUBLIC /usr/include/python3.10)
-	target_link_libraries(pygdx gdxcwrap)
+	target_link_libraries(pygdx gdxcclib)
 endif()
 
 add_library(gdxnativeshared STATIC ${common_legacy})
