@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(gdxnative)
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_SHARED_LIBRARY_PREFIX "")
+#set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
@@ -75,14 +75,14 @@ set(tests
 		tests/serializetests.cpp
 )
 
-add_library(gdxcclib SHARED ${common_neo})
-set_property(TARGET gdxcclib PROPERTY POSITION_INDEPENDENT_CODE ON)
+add_library(gdxcclib64 SHARED ${common_neo})
+set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if(IS_DIRECTORY /usr/include/python3.10)
 	add_library(pygdx SHARED pygdx/pygdx.c)
 	set_property(TARGET pygdx PROPERTY POSITION_INDEPENDENT_CODE ON)
 	target_include_directories(pygdx PUBLIC /usr/include/python3.10)
-	target_link_libraries(pygdx gdxcclib)
+	target_link_libraries(pygdx gdxcclib64)
 endif()
 
 add_library(gdxnativeshared STATIC ${common_legacy})
