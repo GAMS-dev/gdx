@@ -14,6 +14,10 @@ exts = [ext for name, ext in type_ext]
 exclusion_substrs = ['test', 'inc', 'cmake']
 
 
+def no_extension(fn):
+    return fn if '.' not in fn else fn[0:fn.rfind('.')]
+
+
 def recursive_collect(root='.'):
     file_lists = {name: [] for name, ext in type_ext}
 
@@ -26,7 +30,7 @@ def recursive_collect(root='.'):
                 for name, ext in type_ext:
                     if fn.endswith(ext):
                         pflen = len(root + os.sep)
-                        ffn_stem = ffn[pflen:]
+                        ffn_stem = no_extension(ffn[pflen:])
                         file_lists[name].append(ffn_stem)
                         break
             elif os.path.isdir(ffn):
