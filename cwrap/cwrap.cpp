@@ -8,36 +8,36 @@ using namespace gxfile;
 
 extern "C" {
 
-int gdxCreate(void **pgdx, char *errBuf, int bufSize) {
+int gdxCreate(TGXFileRec_t **pgdx, char *errBuf, int bufSize) {
     std::string ErrMsg;
     auto *pgx = new TGXFileObj {ErrMsg};
     if(!ErrMsg.empty())
         memcpy(errBuf, ErrMsg.c_str(), std::min<int>((int)ErrMsg.length()+1, bufSize));
     else
         errBuf[0] = '\0';
-    *pgdx = pgx;
+    *pgdx = reinterpret_cast<TGXFileRec_t *>(pgx);
     return true;
 }
 
-void gdxDestroy(void **pgx) {
+void gdxDestroy(TGXFileRec_t **pgx) {
     delete (TGXFileObj *)*pgx;
     *pgx = nullptr;
 }
 
-int gdxOpenWrite(void *pgx, const char *filename, const char *producer, int *ec) {
-    return static_cast<TGXFileObj *>(pgx)->gdxOpenWrite(filename, producer, *ec);
+int gdxOpenWrite(TGXFileRec_t *pgx, const char *filename, const char *producer, int *ec) {
+    return reinterpret_cast<TGXFileObj *>(pgx)->gdxOpenWrite(filename, producer, *ec);
 }
 
-int gdxOpenRead(void *pgx, const char *filename, int *ec) {
-    return static_cast<TGXFileObj *>(pgx)->gdxOpenRead(filename, *ec);
+int gdxOpenRead(TGXFileRec_t *pgx, const char *filename, int *ec) {
+    return reinterpret_cast<TGXFileObj *>(pgx)->gdxOpenRead(filename, *ec);
 }
 
-int gdxClose(void *pgx) {
-    return static_cast<TGXFileObj *>(pgx)->gdxClose();
+int gdxClose(TGXFileRec_t *pgx) {
+    return reinterpret_cast<TGXFileObj *>(pgx)->gdxClose();
 }
 
-int gdx_set1d(void *pgx, const char *name, const char **elems) {
-    auto obj = static_cast<TGXFileObj *>(pgx);
+int gdx_set1d(TGXFileRec_t *pgx, const char *name, const char **elems) {
+    auto obj = reinterpret_cast<TGXFileObj *>(pgx);
     obj->gdxDataWriteStrStart(name, "A 1D set", 1, global::gmsspecs::dt_set, 0);
     gxdefs::TgdxStrIndex keyStrs {};
     gxdefs::TgdxValues values {};
@@ -76,398 +76,398 @@ int create_gdx_file(const char *filename) {
     return 0;
 }
 
-int gdxOpenWriteEx(void *pgdx, const char *FileName, const char *Producer, int Compr, int *ErrNr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxOpenWriteEx(FileName, Producer, Compr, *ErrNr);
+int gdxOpenWriteEx(TGXFileRec_t *pgdx, const char *FileName, const char *Producer, int Compr, int *ErrNr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxOpenWriteEx(FileName, Producer, Compr, *ErrNr);
 }
 
-int gdxDataWriteStrStart(void *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataWriteStrStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
+int gdxDataWriteStrStart(TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataWriteStrStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
 }
 
-int gdxDataWriteRaw(void *pgdx, const int *KeyInt, const double *Values) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataWriteRaw(KeyInt, Values);
+int gdxDataWriteRaw(TGXFileRec_t *pgdx, const int *KeyInt, const double *Values) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataWriteRaw(KeyInt, Values);
 }
 
 
-int gdxAcronymAdd(void *pgdx, const char *AName, const char *Txt, int AIndx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymAdd(AName, Txt, AIndx);
+int gdxAcronymAdd(TGXFileRec_t *pgdx, const char *AName, const char *Txt, int AIndx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymAdd(AName, Txt, AIndx);
 }
 
-int gdxAcronymCount(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymCount();
+int gdxAcronymCount(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymCount();
 }
 
-int gdxAcronymGetInfo(void *pgdx, int N, char *AName, char *Txt, int *AIndx) {
+int gdxAcronymGetInfo(TGXFileRec_t *pgdx, int N, char *AName, char *Txt, int *AIndx) {
     std::string sAName, sTxt;
-    int rc{ static_cast<TGXFileObj *>(pgdx)->gdxAcronymGetInfo(N, sAName, sTxt, *AIndx) };
+    int rc{ reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymGetInfo(N, sAName, sTxt, *AIndx) };
     utils::stocp(sAName, AName);
     utils::stocp(sTxt, Txt);
     return rc;
 }
 
-int gdxAcronymGetMapping(void *pgdx, int N, int *orgIndx, int *newIndx, int *autoIndex) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymGetMapping(N, *orgIndx, *newIndx, *autoIndex);
+int gdxAcronymGetMapping(TGXFileRec_t *pgdx, int N, int *orgIndx, int *newIndx, int *autoIndex) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymGetMapping(N, *orgIndx, *newIndx, *autoIndex);
 }
 
-int gdxAcronymIndex(void *pgdx, double V) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymIndex(V);
+int gdxAcronymIndex(TGXFileRec_t *pgdx, double V) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymIndex(V);
 }
 
-int gdxAcronymName(void *pgdx, double V, char *AName) {
+int gdxAcronymName(TGXFileRec_t *pgdx, double V, char *AName) {
     std::string sAName;
-    int rc{static_cast<TGXFileObj *>(pgdx)->gdxAcronymName(V, sAName)};
+    int rc{reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymName(V, sAName)};
     utils::stocp(sAName, AName);
     return rc;
 }
 
-int gdxAcronymNextNr(void *pgdx, int NV) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymNextNr(NV);
+int gdxAcronymNextNr(TGXFileRec_t *pgdx, int NV) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymNextNr(NV);
 }
 
-int gdxAcronymSetInfo(void *pgdx, int N, const char *AName, const char *Txt, int AIndx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymSetInfo(N, AName, Txt, AIndx);
+int gdxAcronymSetInfo(TGXFileRec_t *pgdx, int N, const char *AName, const char *Txt, int AIndx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymSetInfo(N, AName, Txt, AIndx);
 }
 
-double gdxAcronymValue(void *pgdx, int AIndx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxAcronymValue(AIndx);
+double gdxAcronymValue(TGXFileRec_t *pgdx, int AIndx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymValue(AIndx);
 }
 
-int gdxAddAlias(void *pgdx, const char *Id1, const char *Id2) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxAddAlias(Id1, Id2);
+int gdxAddAlias(TGXFileRec_t *pgdx, const char *Id1, const char *Id2) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAddAlias(Id1, Id2);
 }
 
-int gdxAddSetText(void *pgdx, const char *Txt, int *TxtNr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxAddSetText(Txt, *TxtNr);
+int gdxAddSetText(TGXFileRec_t *pgdx, const char *Txt, int *TxtNr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAddSetText(Txt, *TxtNr);
 }
 
-int gdxAutoConvert(void *pgdx, int NV) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxAutoConvert(NV);
+int gdxAutoConvert(TGXFileRec_t *pgdx, int NV) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAutoConvert(NV);
 }
 
-int gdxDataErrorCount(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataErrorCount();
+int gdxDataErrorCount(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataErrorCount();
 }
 
-int gdxDataErrorRecord(void *pgdx, int RecNr, int KeyInt[], double Values[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataErrorRecord(RecNr, KeyInt, Values);
+int gdxDataErrorRecord(TGXFileRec_t *pgdx, int RecNr, int KeyInt[], double Values[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataErrorRecord(RecNr, KeyInt, Values);
 }
 
-int gdxDataErrorRecordX(void *pgdx, int RecNr, int KeyInt[], double Values[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataErrorRecordX(RecNr, KeyInt, Values);
+int gdxDataErrorRecordX(TGXFileRec_t *pgdx, int RecNr, int KeyInt[], double Values[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataErrorRecordX(RecNr, KeyInt, Values);
 }
 
-int gdxDataReadDone(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadDone();
+int gdxDataReadDone(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadDone();
 }
 
-int gdxDataReadFilteredStart(void *pgdx, int SyNr, const int FilterAction[], int *NrRecs) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadFilteredStart(SyNr, FilterAction, *NrRecs);
+int gdxDataReadFilteredStart(TGXFileRec_t *pgdx, int SyNr, const int FilterAction[], int *NrRecs) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadFilteredStart(SyNr, FilterAction, *NrRecs);
 }
 
-int gdxDataReadMap(void *pgdx, int RecNr, int KeyInt[], double Values[], int *DimFrst) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadMap(RecNr, KeyInt, Values, *DimFrst);
+int gdxDataReadMap(TGXFileRec_t *pgdx, int RecNr, int KeyInt[], double Values[], int *DimFrst) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadMap(RecNr, KeyInt, Values, *DimFrst);
 }
 
-int gdxDataReadMapStart(void *pgdx, int SyNr, int *NrRecs) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadMapStart(SyNr, *NrRecs);
+int gdxDataReadMapStart(TGXFileRec_t *pgdx, int SyNr, int *NrRecs) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadMapStart(SyNr, *NrRecs);
 }
 
-int gdxDataReadRaw(void *pgdx, int KeyInt[], double Values[], int *DimFrst) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadRaw(KeyInt, Values, *DimFrst);
+int gdxDataReadRaw(TGXFileRec_t *pgdx, int KeyInt[], double Values[], int *DimFrst) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadRaw(KeyInt, Values, *DimFrst);
 }
 
-int gdxDataReadRawStart(void *pgdx, int SyNr, int *NrRecs) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadRawStart(SyNr, *NrRecs);
+int gdxDataReadRawStart(TGXFileRec_t *pgdx, int SyNr, int *NrRecs) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadRawStart(SyNr, *NrRecs);
 }
 
-int gdxDataReadSlice(void *pgdx, const char *UelFilterStr[], int *Dimen, TDataStoreProc_t DP) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadSlice(UelFilterStr, *Dimen, DP);
+int gdxDataReadSlice(TGXFileRec_t *pgdx, const char *UelFilterStr[], int *Dimen, TDataStoreProc_t DP) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadSlice(UelFilterStr, *Dimen, DP);
 }
 
-int gdxDataReadSliceStart(void *pgdx, int SyNr, int ElemCounts[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadSliceStart(SyNr, ElemCounts);
+int gdxDataReadSliceStart(TGXFileRec_t *pgdx, int SyNr, int ElemCounts[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadSliceStart(SyNr, ElemCounts);
 }
 
-int gdxDataReadStr(void *pgdx, char *KeyStr[], double Values[], int *DimFrst) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadStr(KeyStr, Values, *DimFrst);
+int gdxDataReadStr(TGXFileRec_t *pgdx, char *KeyStr[], double Values[], int *DimFrst) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadStr(KeyStr, Values, *DimFrst);
 }
 
-int gdxDataReadStrStart(void *pgdx, int SyNr, int *NrRecs) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataReadStrStart(SyNr, *NrRecs);
+int gdxDataReadStrStart(TGXFileRec_t *pgdx, int SyNr, int *NrRecs) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadStrStart(SyNr, *NrRecs);
 }
 
-int gdxDataSliceUELS(void *pgdx, const int SliceKeyInt[], char *KeyStr[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataSliceUELS(SliceKeyInt, KeyStr);
+int gdxDataSliceUELS(TGXFileRec_t *pgdx, const int SliceKeyInt[], char *KeyStr[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataSliceUELS(SliceKeyInt, KeyStr);
 }
 
-int gdxDataWriteDone(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataWriteDone();
+int gdxDataWriteDone(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataWriteDone();
 }
 
-int gdxDataWriteMap(void *pgdx, const int KeyInt[], const double Values[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataWriteMap(KeyInt, Values);
+int gdxDataWriteMap(TGXFileRec_t *pgdx, const int KeyInt[], const double Values[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataWriteMap(KeyInt, Values);
 }
 
-int gdxDataWriteMapStart(void *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataWriteMapStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
+int gdxDataWriteMapStart(TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataWriteMapStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
 }
 
-int gdxDataWriteRawStart(void *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataWriteRawStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
+int gdxDataWriteRawStart(TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataWriteRawStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
 }
 
-int gdxDataWriteStr(void *pgdx, const char *KeyStr[], const double Values[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxDataWriteStr(KeyStr, Values);
+int gdxDataWriteStr(TGXFileRec_t *pgdx, const char *KeyStr[], const double Values[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataWriteStr(KeyStr, Values);
 }
 
-int gdxGetDLLVersion(void *pgdx, char *V) {
+int gdxGetDLLVersion(TGXFileRec_t *pgdx, char *V) {
     std::string sV;
-    int rc{ static_cast<TGXFileObj *>(pgdx)->gdxGetDLLVersion(sV) };
+    int rc{ reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetDLLVersion(sV) };
     utils::stocp(sV, V);
     return rc;
 }
 
-int gdxErrorCount(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxErrorCount();
+int gdxErrorCount(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxErrorCount();
 }
 
-int gdxErrorStr(void *pgdx, int ErrNr, char *ErrMsg) {
+int gdxErrorStr(TGXFileRec_t *pgdx, int ErrNr, char *ErrMsg) {
     std::string sErrMsg;
     int rc;
-    if (pgdx) rc = static_cast<TGXFileObj*>(pgdx)->gdxErrorStr(ErrNr, sErrMsg);
+    if (pgdx) rc = reinterpret_cast<TGXFileObj*>(pgdx)->gdxErrorStr(ErrNr, sErrMsg);
     else rc = TGXFileObj::gdxErrorStrStatic(ErrNr, sErrMsg);
     utils::stocp(sErrMsg, ErrMsg);
     return rc;
 }
 
-int gdxFileInfo(void *pgdx, int *FileVer, int *ComprLev) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxFileInfo(*FileVer, *ComprLev);
+int gdxFileInfo(TGXFileRec_t *pgdx, int *FileVer, int *ComprLev) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxFileInfo(*FileVer, *ComprLev);
 }
 
-int gdxFileVersion(void *pgdx, char *FileStr, char *ProduceStr) {
+int gdxFileVersion(TGXFileRec_t *pgdx, char *FileStr, char *ProduceStr) {
     std::string sFileStr, sProduceStr;
-    int rc{ static_cast<TGXFileObj *>(pgdx)->gdxFileVersion(sFileStr, sProduceStr) };
+    int rc{ reinterpret_cast<TGXFileObj *>(pgdx)->gdxFileVersion(sFileStr, sProduceStr) };
     utils::stocp(sFileStr, FileStr);
     utils::stocp(sProduceStr, ProduceStr);
     return rc;
 }
 
-int gdxFilterExists(void *pgdx, int FilterNr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxFilterExists(FilterNr);
+int gdxFilterExists(TGXFileRec_t *pgdx, int FilterNr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxFilterExists(FilterNr);
 }
 
-int gdxFilterRegister(void *pgdx, int UelMap) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxFilterRegister(UelMap);
+int gdxFilterRegister(TGXFileRec_t *pgdx, int UelMap) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxFilterRegister(UelMap);
 }
 
-int gdxFilterRegisterDone(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxFilterRegisterDone();
+int gdxFilterRegisterDone(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxFilterRegisterDone();
 }
 
-int gdxFilterRegisterStart(void *pgdx, int FilterNr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxFilterRegisterStart(FilterNr);
+int gdxFilterRegisterStart(TGXFileRec_t *pgdx, int FilterNr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxFilterRegisterStart(FilterNr);
 }
 
-int gdxFindSymbol(void *pgdx, const char *SyId, int *SyNr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxFindSymbol(SyId, *SyNr);
+int gdxFindSymbol(TGXFileRec_t *pgdx, const char *SyId, int *SyNr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxFindSymbol(SyId, *SyNr);
 }
 
-int gdxGetElemText(void *pgdx, int TxtNr, char *Txt, int *Node) {
+int gdxGetElemText(TGXFileRec_t *pgdx, int TxtNr, char *Txt, int *Node) {
     std::string sTxt;
-    int rc = static_cast<TGXFileObj *>(pgdx)->gdxGetElemText(TxtNr, sTxt, *Node);
+    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetElemText(TxtNr, sTxt, *Node);
     utils::stocp(sTxt, Txt);
     return rc;
 }
 
-int gdxGetLastError(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxGetLastError();
+int gdxGetLastError(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetLastError();
 }
 
-int gdxGetMemoryUsed(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxGetMemoryUsed();
+int gdxGetMemoryUsed(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetMemoryUsed();
 }
 
-int gdxGetSpecialValues(void *pgdx, double AVals[]) {
+int gdxGetSpecialValues(TGXFileRec_t *pgdx, double AVals[]) {
     std::array<double, 7> cppAVals{};
-    int rc = static_cast<TGXFileObj *>(pgdx)->gdxGetSpecialValues(cppAVals);
+    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetSpecialValues(cppAVals);
     for(int i=0; i<cppAVals.size(); i++)
         AVals[i] = cppAVals[i];
     return rc;
 }
 
-int gdxGetUEL(void *pgdx, int UelNr, char *Uel) {
+int gdxGetUEL(TGXFileRec_t *pgdx, int UelNr, char *Uel) {
     std::string sUel;
-    int rc = static_cast<TGXFileObj *>(pgdx)->gdxGetUEL(UelNr, sUel);
+    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetUEL(UelNr, sUel);
     utils::stocp(sUel, Uel);
     return rc;
 }
 
-int gdxMapValue(void *pgdx, double D, int *sv) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxMapValue(D, *sv);
+int gdxMapValue(TGXFileRec_t *pgdx, double D, int *sv) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxMapValue(D, *sv);
 }
 
-int gdxOpenAppend(void *pgdx, const char *FileName, const char *Producer, int *ErrNr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxOpenAppend(FileName, Producer, *ErrNr);
+int gdxOpenAppend(TGXFileRec_t *pgdx, const char *FileName, const char *Producer, int *ErrNr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxOpenAppend(FileName, Producer, *ErrNr);
 }
 
-int gdxOpenReadEx(void *pgdx, const char *FileName, int ReadMode, int *ErrNr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxOpenReadEx(FileName, ReadMode, *ErrNr);
+int gdxOpenReadEx(TGXFileRec_t *pgdx, const char *FileName, int ReadMode, int *ErrNr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxOpenReadEx(FileName, ReadMode, *ErrNr);
 }
 
-int gdxResetSpecialValues(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxResetSpecialValues();
+int gdxResetSpecialValues(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxResetSpecialValues();
 }
 
-int gdxSetHasText(void *pgdx, int SyNr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSetHasText(SyNr);
+int gdxSetHasText(TGXFileRec_t *pgdx, int SyNr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetHasText(SyNr);
 }
 
-int gdxSetReadSpecialValues(void *pgdx, const double AVals[]) {
+int gdxSetReadSpecialValues(TGXFileRec_t *pgdx, const double AVals[]) {
     std::array<double, 7> cppAVals {};
-    int rc{ static_cast<TGXFileObj *>(pgdx)->gdxSetReadSpecialValues(cppAVals) };
-    std::memcpy((void *)AVals, cppAVals.data(), cppAVals.size());
+    int rc{ reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetReadSpecialValues(cppAVals) };
+    std::memcpy((TGXFileRec_t *)AVals, cppAVals.data(), cppAVals.size());
     return rc;
 }
 
-int gdxSetSpecialValues(void *pgdx, const double AVals[]) {
+int gdxSetSpecialValues(TGXFileRec_t *pgdx, const double AVals[]) {
     std::array<double, 7> cppAVals {};
     std::memcpy(cppAVals.data(), AVals, cppAVals.size()*sizeof(double));
-    return static_cast<TGXFileObj *>(pgdx)->gdxSetSpecialValues(cppAVals);
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetSpecialValues(cppAVals);
 }
 
-int gdxSetTextNodeNr(void *pgdx, int TxtNr, int Node) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSetTextNodeNr(TxtNr, Node);
+int gdxSetTextNodeNr(TGXFileRec_t *pgdx, int TxtNr, int Node) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetTextNodeNr(TxtNr, Node);
 }
 
-int gdxSetTraceLevel(void *pgdx, int N, const char *s) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSetTraceLevel(N, s);
+int gdxSetTraceLevel(TGXFileRec_t *pgdx, int N, const char *s) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetTraceLevel(N, s);
 }
 
-int gdxSymbIndxMaxLength(void *pgdx, int SyNr, int LengthInfo[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSymbIndxMaxLength(SyNr, LengthInfo);
+int gdxSymbIndxMaxLength(TGXFileRec_t *pgdx, int SyNr, int LengthInfo[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbIndxMaxLength(SyNr, LengthInfo);
 }
 
-int gdxSymbMaxLength(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSymbMaxLength();
+int gdxSymbMaxLength(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbMaxLength();
 }
 
-int gdxSymbolAddComment(void *pgdx, int SyNr, const char *Txt) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSymbolAddComment(SyNr, Txt);
+int gdxSymbolAddComment(TGXFileRec_t *pgdx, int SyNr, const char *Txt) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolAddComment(SyNr, Txt);
 }
 
-int gdxSymbolGetComment(void *pgdx, int SyNr, int N, char *Txt) {
+int gdxSymbolGetComment(TGXFileRec_t *pgdx, int SyNr, int N, char *Txt) {
     std::string sTxt;
-    int rc{ static_cast<TGXFileObj *>(pgdx)->gdxSymbolGetComment(SyNr, N, sTxt) };
+    int rc{ reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolGetComment(SyNr, N, sTxt) };
     utils::stocp(sTxt, Txt);
     return rc;
 }
 
-int gdxSymbolGetDomain(void *pgdx, int SyNr, int DomainSyNrs[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSymbolGetDomain(SyNr, DomainSyNrs);
+int gdxSymbolGetDomain(TGXFileRec_t *pgdx, int SyNr, int DomainSyNrs[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolGetDomain(SyNr, DomainSyNrs);
 }
 
-int gdxSymbolGetDomainX(void *pgdx, int SyNr, char *DomainIDs[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSymbolGetDomainX(SyNr, DomainIDs);
+int gdxSymbolGetDomainX(TGXFileRec_t *pgdx, int SyNr, char *DomainIDs[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolGetDomainX(SyNr, DomainIDs);
 }
 
-int gdxSymbolDim(void *pgdx, int SyNr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSymbolDim(SyNr);
+int gdxSymbolDim(TGXFileRec_t *pgdx, int SyNr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolDim(SyNr);
 }
 
-int gdxSymbolInfo(void *pgdx, int SyNr, char *SyId, int *Dimen, int *Typ) {
+int gdxSymbolInfo(TGXFileRec_t *pgdx, int SyNr, char *SyId, int *Dimen, int *Typ) {
     std::string sSyId;
-    int rc = static_cast<TGXFileObj *>(pgdx)->gdxSymbolInfo(SyNr, sSyId, *Dimen, *Typ);
+    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolInfo(SyNr, sSyId, *Dimen, *Typ);
     utils::stocp(sSyId, SyId);
     return rc;
 }
 
-int gdxSymbolInfoX(void *pgdx, int SyNr, int *RecCnt, int *UserInfo, char *ExplTxt) {
+int gdxSymbolInfoX(TGXFileRec_t *pgdx, int SyNr, int *RecCnt, int *UserInfo, char *ExplTxt) {
     std::string sExplTxt;
-    int rc = static_cast<TGXFileObj *>(pgdx)->gdxSymbolInfoX(SyNr, *RecCnt, *UserInfo, sExplTxt);
+    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolInfoX(SyNr, *RecCnt, *UserInfo, sExplTxt);
     utils::stocp(sExplTxt, ExplTxt);
     return rc;
 }
 
-int gdxSymbolSetDomain(void *pgdx, const char *DomainIDs[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSymbolSetDomain(DomainIDs);
+int gdxSymbolSetDomain(TGXFileRec_t *pgdx, const char *DomainIDs[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolSetDomain(DomainIDs);
 }
 
-int gdxSymbolSetDomainX(void *pgdx, int SyNr, const char *DomainIDs[]) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSymbolSetDomainX(SyNr, DomainIDs);
+int gdxSymbolSetDomainX(TGXFileRec_t *pgdx, int SyNr, const char *DomainIDs[]) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolSetDomainX(SyNr, DomainIDs);
 }
 
-int gdxSystemInfo(void *pgdx, int *SyCnt, int *UelCnt) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxSystemInfo(*SyCnt, *UelCnt);
+int gdxSystemInfo(TGXFileRec_t *pgdx, int *SyCnt, int *UelCnt) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSystemInfo(*SyCnt, *UelCnt);
 }
 
-int gdxUELMaxLength(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxUELMaxLength();
+int gdxUELMaxLength(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUELMaxLength();
 }
 
-int gdxUELRegisterDone(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxUELRegisterDone();
+int gdxUELRegisterDone(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUELRegisterDone();
 }
 
-int gdxUELRegisterMap(void *pgdx, int UMap, const char *Uel) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxUELRegisterMap(UMap, Uel);
+int gdxUELRegisterMap(TGXFileRec_t *pgdx, int UMap, const char *Uel) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUELRegisterMap(UMap, Uel);
 }
 
-int gdxUELRegisterMapStart(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxUELRegisterMapStart();
+int gdxUELRegisterMapStart(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUELRegisterMapStart();
 }
 
-int gdxUELRegisterRaw(void *pgdx, const char *Uel) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxUELRegisterRaw(Uel);
+int gdxUELRegisterRaw(TGXFileRec_t *pgdx, const char *Uel) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUELRegisterRaw(Uel);
 }
 
-int gdxUELRegisterRawStart(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxUELRegisterRawStart();
+int gdxUELRegisterRawStart(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUELRegisterRawStart();
 }
 
-int gdxUELRegisterStr(void *pgdx, const char *Uel, int *UelNr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxUELRegisterStr(Uel, *UelNr);
+int gdxUELRegisterStr(TGXFileRec_t *pgdx, const char *Uel, int *UelNr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUELRegisterStr(Uel, *UelNr);
 }
 
-int gdxUELRegisterStrStart(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxUELRegisterStrStart();
+int gdxUELRegisterStrStart(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUELRegisterStrStart();
 }
 
-int gdxUMFindUEL(void *pgdx, const char *Uel, int *UelNr, int *UelMap) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxUMFindUEL(Uel, *UelNr, *UelMap);
+int gdxUMFindUEL(TGXFileRec_t *pgdx, const char *Uel, int *UelNr, int *UelMap) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUMFindUEL(Uel, *UelNr, *UelMap);
 }
 
-int gdxUMUelGet(void *pgdx, int UelNr, char *Uel, int *UelMap) {
+int gdxUMUelGet(TGXFileRec_t *pgdx, int UelNr, char *Uel, int *UelMap) {
     std::string sUel;
-    int rc = static_cast<TGXFileObj *>(pgdx)->gdxUMUelGet(UelNr, sUel, *UelMap);
+    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxUMUelGet(UelNr, sUel, *UelMap);
     utils::stocp(sUel, Uel);
     return rc;
 }
 
-int gdxUMUelInfo(void *pgdx, int *UelCnt, int *HighMap) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxUMUelInfo(*UelCnt, *HighMap);
+int gdxUMUelInfo(TGXFileRec_t *pgdx, int *UelCnt, int *HighMap) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUMUelInfo(*UelCnt, *HighMap);
 }
 
-int gdxGetDomainElements(void *pgdx, int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int *NrElem, void *Uptr) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxGetDomainElements(SyNr, DimPos, FilterNr, DP, *NrElem, Uptr);
+int gdxGetDomainElements(TGXFileRec_t *pgdx, int SyNr, int DimPos, int FilterNr, ::TDomainIndexProc_t DP, int *NrElem, TGXFileRec_t *Uptr) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetDomainElements(SyNr, DimPos, FilterNr, (gxfile::TDomainIndexProc_t)DP, *NrElem, Uptr);
 }
 
-int gdxCurrentDim(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxCurrentDim();
+int gdxCurrentDim(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxCurrentDim();
 }
 
-int gdxRenameUEL(void *pgdx, const char *OldName, const char *NewName) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxRenameUEL(OldName, NewName);
+int gdxRenameUEL(TGXFileRec_t *pgdx, const char *OldName, const char *NewName) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxRenameUEL(OldName, NewName);
 }
 
-int gdxStoreDomainSets(void *pgdx) {
-    return static_cast<TGXFileObj *>(pgdx)->gdxStoreDomainSets();
+int gdxStoreDomainSets(TGXFileRec_t *pgdx) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxStoreDomainSets();
 }
 
-void gdxStoreDomainSetsSet(void *pgdx, int x) {
-    static_cast<TGXFileObj *>(pgdx)->gdxStoreDomainSetsSet(x);
+void gdxStoreDomainSetsSet(TGXFileRec_t *pgdx, int x) {
+    reinterpret_cast<TGXFileObj *>(pgdx)->gdxStoreDomainSetsSet(x);
 }
 
-int gdxFree(void **pgdx) {
+int gdxFree(TGXFileRec_t **pgdx) {
     gdxDestroy(pgdx);
     return 1;
 }
@@ -489,7 +489,14 @@ int gdxLibraryUnload() {
     return 1;
 }
 
+void gdxCreateD(TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen) {
+    // FIXME: Take system directory into account!
+    gdxCreate(pgdx, msgBuf, msgBufLen);
 }
+
+}
+
+
 
 
 
