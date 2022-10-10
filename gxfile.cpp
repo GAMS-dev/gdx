@@ -3339,8 +3339,7 @@ namespace gxfile {
         TIntegerMapping DomainIndxs;
 
         //-- Note: PrepareSymbolRead checks for the correct status
-        TIndex XDomains;
-        XDomains.fill(DOMC_UNMAPPED);
+        TIndex XDomains = utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED);
 
         // Following call also clears ErrorList
         PrepareSymbolRead("gdxGetDomain"s, SyNr, XDomains.data(), fr_raw_data);
@@ -3569,8 +3568,7 @@ namespace gxfile {
     int TGXFileObj::gdxDataReadSliceStart(int SyNr, int* ElemCounts)
     {
         //-- Note: PrepareSymbolRead checks for the correct status
-        TgdxUELIndex XDomains;
-        XDomains.fill(DOMC_UNMAPPED);
+        TgdxUELIndex XDomains = utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED);
         SliceSyNr = SyNr;
         PrepareSymbolRead("DataReadSliceStart"s, SliceSyNr, XDomains.data(), fr_raw_data);
 
@@ -3638,8 +3636,7 @@ namespace gxfile {
         }
         fmode = fr_init;
         if (!GoodIndx) return false;
-        TgdxUELIndex XDomains;
-        XDomains.fill(DOMC_UNMAPPED);
+        TgdxUELIndex XDomains = utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED);
         PrepareSymbolRead("DataReadSlice"s, SliceSyNr, XDomains.data(), fr_slice);
         TgdxValues Values;
         TgdxUELIndex HisIndx;
@@ -3953,6 +3950,107 @@ namespace gxfile {
 
     void TGXFileObj::gdxStoreDomainSetsSet(int x) {
         StoreDomainSets = x;
+    }
+
+    // Brief:
+    //   Read a symbol in Raw mode while applying a filter using a callback procedure
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // Arguments:
+    //   UelFilterStr: Each index can be fixed by setting the string for the unique
+    //                  element. Set an index position to the empty string in order
+    //                  not to fix that position.
+    //   DP: Callback procedure which will be called for each available data item
+    // See Also:
+    //   gdxDataReadRawFast, gdxDataReadSliceStart, gdxDataSliceUELS, gdxDataReadDone,
+    // Description:
+    //   Read a slice of data, by fixing zero or more index positions in the data.
+    //   When a data element is available, the callback procedure DP is called with the
+    //   current index (as raw numbers) and the values.
+    // Example:
+    // <CODE>
+    // function DPCallBack(const Indx: TgdxUELIndex; const Vals: TgdxValues; Uptr: Pointer): integer; stdcall;
+    // var
+    //    s: ShortString;
+    //    UelMap: integer;
+    // begin
+    // Result := 1;
+    // gdxUMUelGet(Uptr, Indx[2], s, UelMap);
+    // WriteLn(s, ' ', Vals[vallevel]);
+    // end;
+    //
+    // var
+    //    pgx  : PGXFile;
+    //    Msg  : ShortString;
+    //    ErrNr: integer;
+    //    IndxS: TgdxStrIndex;
+    //
+    // IndxS[1] := 'i200'; IndxS[2] := '';
+    // gdxDataReadRawFastFilt(pgx, 1, IndxS, DPCallBack);
+    // </CODE>
+    int TGXFileObj::gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP) {
+        bool res{};
+        // -- Note: PrepareSymbolRead checks for the correct status
+        int NrRecs { PrepareSymbolRead("gdxDataReadRawFastFilt", SyNr,
+                                       utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED).data(),
+                                       fr_raw_data) };
+        if(NrRecs >= 0) {
+            bool GoodIndx = true;
+            int FiltDim {};
+            TgdxUELIndex ElemDim, ElemNrs;
+            for(int D{}; D<FCurrentDim; D++) {
+                if(strlen(UelFilterStr[D])) {
+                    FiltDim++;
+                    ElemDim[FiltDim] = D+1;
+                    ElemNrs[FiltDim] = UELTable.IndexOf(UelFilterStr[D]);
+                    if(ElemNrs[FiltDim] < 0) GoodIndx = false;
+                }
+            }
+            if(GoodIndx) {
+                TgdxValues Values;
+                int AFDim;
+                while(DoRead(Values.data(), AFDim)) {
+                    GoodIndx = true;
+                    for(int D{1}; D<=FiltDim; D++) {
+                        if(LastElem[ElemDim[D]] != ElemNrs[D]) {
+                            GoodIndx = false;
+                            break;
+                        }
+                    }
+                    // FIXME: Actual call here needed?
+                    if(GoodIndx && false/* && !gdxDataReadRawFastFilt_DP_FC(LastElem, Values, this)*/) {
+                        break;
+                    }
+                }
+                res = true;
+            }
+        }
+        gdxDataReadDone();
+        return res;
+    }
+
+    // Brief:
+    //   Read a symbol in Raw mode using a callback procedure
+    // Arguments:
+    //   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
+    //   DP: Procedure that will be called for each data record
+    //   NrRecs: The number of records available for reading
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxDataReadRaw, gdxDataReadMapStart, gdxDataReadStrStart, gdxDataReadDone, gdxDataReadRawFastFilt
+    // Description:
+    //   Use a callback function to read a symbol in raw mode. Using a callback procedure
+    //   to read the data is faster because we no longer have to check the context for each
+    //   call to read a record.
+    int TGXFileObj::gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs) {
+        NrRecs = PrepareSymbolRead("gdxDataReadRawFast"s, SyNr, utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED).data(), fr_raw_data);
+        tvarreca AVals;
+        int AFDim;
+        while(DoRead(AVals.data(), AFDim))
+            DP(LastElem.data(), AVals.data());
+        gdxDataReadDone();
+        return NrRecs >= 0;
     }
 
     void TUELTable::clear() {

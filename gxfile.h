@@ -242,6 +242,7 @@ namespace gxfile {
 
     using TDomainIndexProc_t = void(*)(int RawIndex, int MappedIndex, void* Uptr);
     using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
+    using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
 
     // Description:
     //    Class for reading and writing gdx files
@@ -492,6 +493,9 @@ namespace gxfile {
         int gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap);
         int gdxStoreDomainSets();
         void gdxStoreDomainSetsSet(int x);
+
+        int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP);
+        int gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs);
 
     };
 
