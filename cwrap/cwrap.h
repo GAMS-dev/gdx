@@ -19,6 +19,8 @@ extern "C" {
     typedef int (*TDataStoreFiltProc_F_t) (const int Indx[], const double Vals[], long long *Uptr);
     typedef void (*TDomainIndexProc_F_t) (int *RawIndex, int *MappedIndex, TGXFileRec_t *Uptr);
 
+    typedef long long INT64;
+
     int create_gdx_file(const char *filename);
 
     int gdxFree(TGXFileRec_t **pgdx);
@@ -121,6 +123,9 @@ extern "C" {
     int gdxRenameUEL(TGXFileRec_t *pgdx, const char *OldName, const char *NewName);
     int gdxStoreDomainSets(TGXFileRec_t *pgdx);
     void gdxStoreDomainSetsSet(TGXFileRec_t *pgdx, int x);
+
+    int gdxDataReadRawFast(TGXFileRec_t *TGXFile, int SyNr, TDataStoreProc_t DP, int *NrRecs);
+    int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char *UelFilterStr[], TDataStoreFiltProc_t DP);
 
 #ifdef __cplusplus
 }

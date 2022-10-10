@@ -494,7 +494,21 @@ void gdxCreateD(TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBu
     gdxCreate(pgdx, msgBuf, msgBufLen);
 }
 
+int gdxDataReadRawFast(TGXFileRec_t *TGXFile, int SyNr, TDataStoreProc_t DP, int *NrRecs) {
+    STUBWARN();
+    // FIXME: Implement!
+    return 0;
 }
+
+int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP) {
+    STUBWARN();
+    // FIXME: Implement!
+    return 0;
+}
+
+}
+
+
 
 
 
