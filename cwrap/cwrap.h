@@ -24,7 +24,7 @@ extern "C" {
 
     int gdx_set1d(void *pgx, const char *name, const char **elems);
 
-    typedef void TGXFileRec_t;
+    typedef struct TGXFileRec TGXFileRec_t;
 
     typedef void (*TDataStoreProc_t) (const int Indx[], const double Vals[]);
     typedef int (*TDataStoreFiltProc_t) (const int Indx[], const double Vals[], void *Uptr);
