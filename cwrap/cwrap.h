@@ -13,11 +13,11 @@ extern "C" {
     typedef char gdxStrIndex_t[20][256];
     typedef struct TGXFileRec TGXFileRec_t;
 
-    typedef void (*TDataStoreProc_t) (const int Indx[], const double Vals[]);
-    typedef int (*TDataStoreFiltProc_t) (const int Indx[], const double Vals[], TGXFileRec_t *Uptr);
-    typedef void (*TDomainIndexProc_t) (int RawIndex, int MappedIndex, TGXFileRec_t *Uptr);
-    typedef int (*TDataStoreFiltProc_F_t) (const int Indx[], const double Vals[], long long *Uptr);
-    typedef void (*TDomainIndexProc_F_t) (int *RawIndex, int *MappedIndex, TGXFileRec_t *Uptr);
+    typedef void (GDX_CALLCONV *TDataStoreProc_t) (const int Indx[], const double Vals[]);
+    typedef int (GDX_CALLCONV *TDataStoreFiltProc_t) (const int Indx[], const double Vals[], void *Uptr);
+    typedef void (GDX_CALLCONV *TDomainIndexProc_t) (int RawIndex, int MappedIndex, void *Uptr);
+    typedef int (GDX_CALLCONV *TDataStoreFiltProc_F_t) (const int Indx[], const double Vals[], long long *Uptr);
+    typedef void (GDX_CALLCONV *TDomainIndexProc_F_t) (int *RawIndex, int *MappedIndex, void *Uptr);
 
     typedef long long INT64;
 
