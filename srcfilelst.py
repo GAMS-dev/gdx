@@ -31,7 +31,8 @@ def recursive_collect(root='.'):
                     if fn.endswith(ext):
                         pflen = len(root + os.sep)
                         ffn_stem = no_extension(ffn[pflen:])
-                        file_lists[name].append(ffn_stem)
+                        fn_stem = no_extension(fn)
+                        file_lists[name].append(fn_stem)
                         break
             elif os.path.isdir(ffn):
                 collect(ffn)
@@ -40,12 +41,8 @@ def recursive_collect(root='.'):
     return file_lists
 
 
-def add_prefix(dct, prefix):
-    return {k: [prefix + elem for elem in v] for k, v in dct.items()}
-
-
 def main():
-    for name, lst in add_prefix(recursive_collect(), 'gdxnative' + os.sep).items():
+    for name, lst in recursive_collect().items():
         print(f'{name.ljust(11)}= {" ".join(lst)}')
 
 

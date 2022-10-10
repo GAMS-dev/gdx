@@ -24,9 +24,13 @@ extern "C" {
 
     int gdx_set1d(void *pgx, const char *name, const char **elems);
 
+    typedef void TGXFileRec_t;
+
     typedef void (*TDataStoreProc_t) (const int Indx[], const double Vals[]);
     typedef int (*TDataStoreFiltProc_t) (const int Indx[], const double Vals[], void *Uptr);
     typedef void (*TDomainIndexProc_t) (int RawIndex, int MappedIndex, void *Uptr);
+    typedef int (*TDataStoreFiltProc_F_t) (const int Indx[], const double Vals[], long long *Uptr);
+    typedef void (*TDomainIndexProc_F_t) (int *RawIndex, int *MappedIndex, void *Uptr);
 
     int gdxAcronymAdd(void *pgdx, const char *AName, const char *Txt, int AIndx);
     int gdxAcronymCount(void *pgdx);
