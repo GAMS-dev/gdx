@@ -3919,7 +3919,7 @@ namespace gxfile {
     //   gdxSymbolAddComment
     int TGXFileObj::gdxSymbolGetComment(int SyNr, int N, std::string& Txt) {
         if (!NameList.empty() && SyNr >= 1 && SyNr <= NameList.size()) {
-            const auto obj = NameList[NameListOrdered[SyNr]];
+            const auto obj = NameList[NameListOrdered[SyNr-1]];
             if (!obj->SCommentsList.empty() && N >= 1 && N <= obj->SCommentsList.size()) {
                 Txt = obj->SCommentsList[N - 1];
                 return true;
