@@ -2052,7 +2052,15 @@ namespace gxfile {
         if(!DoRead(Values, DimFrst)) gdxDataReadDone();
         else {
             //std::copy(LastElem.begin(), LastElem.begin()+FCurrentDim-1, KeyInt.begin());
-            memcpy(KeyInt, LastElem.data(), (FCurrentDim-1)*sizeof(int));
+            memcpy(KeyInt, LastElem.data(), FCurrentDim*sizeof(int));
+
+            if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
+                std::cout << "DataReadRaw index: ";
+                for(int D{}; D<FCurrentDim; D++)
+                    std::cout << std::to_string(KeyInt[D]) << (D+1 < FCurrentDim ? "," : "");
+                std::cout << '\n';
+            }
+
             return true;
         }
         return false;
