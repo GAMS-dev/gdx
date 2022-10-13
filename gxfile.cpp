@@ -1110,6 +1110,13 @@ namespace gxfile {
 
     bool TGXFileObj::DoWrite(const int* AElements, const double* AVals)
     {
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
+            std::cout << "DoWrite index: ";
+            for(int D{}; D<FCurrentDim; D++)
+                std::cout << std::to_string(AElements[D]) << (D+1 < FCurrentDim ? "," : "");
+            std::cout << '\n';
+        }
+
         int FDim{ FCurrentDim + 1 }, delta{};
         for (int D{}; D < FCurrentDim; D++) {
             if (WrBitMaps[D] && !accessBitMap(*WrBitMaps[D], AElements[D])) {
@@ -2531,6 +2538,8 @@ namespace gxfile {
     //  Can only be used while writing to a gdx file
     int TGXFileObj::gdxUELRegisterRaw(const std::string &Uel) {
         TgxModeSet AllowedModes{ f_raw_elem };
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
+            std::cout << "Uel=" << Uel << '\n';
         if ((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("UELRegisterRaw", AllowedModes))
             return false;
         std::string SV = utils::trimRight(Uel);

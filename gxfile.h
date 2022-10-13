@@ -306,6 +306,7 @@ namespace gxfile {
         bool AppendActive{};
 
         const TraceLevels defaultTraceLevel {TraceLevels::trl_none};
+        const bool verboseTrace {false};
 
         bool PrepareSymbolWrite(const std::string &Caller, const std::string &AName, const std::string &AText, int ADim,
                                 int AType, int AUserInfo);
