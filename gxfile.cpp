@@ -2340,7 +2340,8 @@ namespace gxfile {
 
         if (SyPtr->SDomStrings) {
             for (int D{}; D<SyPtr->SDim; D++)
-                utils::stocp(DomainStrList[(*SyPtr->SDomStrings)[D] - 1], DomainIDs[D]);
+                if((*SyPtr->SDomStrings)[D])
+                    utils::stocp(DomainStrList[(*SyPtr->SDomStrings)[D] - 1], DomainIDs[D]);
             return 2;
         }
         else if (!SyPtr->SDomSymbols)
