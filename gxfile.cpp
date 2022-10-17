@@ -1194,7 +1194,7 @@ namespace gxfile {
                     if (X >= Zvalacr) {
                         int v = static_cast<int>(std::round(X / Zvalacr));
                         int ix = utils::indexOf<TAcronym>(AcronymList, [&v](const TAcronym& acro) { return acro.AcrMap == v; });
-                        if (ix == -1) AcronymList.push_back(TAcronym{ "", "", v, -1, false });
+                        if (ix == -1) AcronymList.push_back(TAcronym{ "", "", v });
                     }
                 }
             }
@@ -4216,10 +4216,7 @@ namespace gxfile {
     }
 
     int TAcronymList::AddEntry(const std::string &Name, const std::string &Text, int Map) {
-        TAcronym acr {};
-        acr.AcrName = Name;
-        acr.AcrText = Text;
-        acr.AcrMap = Map;
+        TAcronym acr {Name, Text, Map};
         emplace_back(acr);
         return static_cast<int>(size())-1;
     }

@@ -215,12 +215,18 @@ namespace gxfile {
         int GetMaxUELLength() const;
     };
 
-    struct TAcronym {
-        std::string AcrName, AcrText;
-        int AcrMap, AcrReadMap;
-        bool AcrAutoGen;
+    std::string MakeGoodExplText(const std::string& s);
 
-        // ...
+    struct TAcronym {
+        std::string AcrName{}, AcrText{};
+        int AcrMap{}, AcrReadMap{};
+        bool AcrAutoGen{};
+
+        TAcronym(const std::string& Name, const std::string& Text, int Map)
+            : AcrName{ Name }, AcrText{ MakeGoodExplText(Text) }, AcrMap{ Map }, AcrReadMap{ -1 }, AcrAutoGen{} {
+        }
+
+        TAcronym() {}
     };
 
     class TAcronymList : public std::vector<TAcronym> {
