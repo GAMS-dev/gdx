@@ -2886,7 +2886,7 @@ namespace gxfile {
         if(fmode == fr_map_data) {
             DimFrst = 0;
             if (ReadPtr == -1) return false;
-            SortList->GetNextRecord(ReadPtr, KeyInt, Values, FCurrentDim);
+            SortList->GetNextRecord(ReadPtr, KeyInt, Values);
             // checking mapped values
             for(int D{}; D<FCurrentDim; D++) {
                 if(KeyInt[D] != PrevElem[D]) {

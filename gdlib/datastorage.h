@@ -92,10 +92,10 @@ namespace gdlib::datastorage {
             return false;
         }
 
-        bool GetNextRecord(int &it, int *AKey, double *Data, int Count) {
-            if (it < 0) return false;
+        bool GetNextRecord(int &it, int *AKey, double *Data) {
+            if (it < 0 || it >= data.size()) return false;
             const auto& item = data[it++];
-            memcpy(AKey, item.first.data(), sizeof(int)*Count);
+            memcpy(AKey, item.first.data(), FKeySize);
             memcpy(Data, item.second.data(), sizeof(double)*item.second.size());
             if (it >= data.size()) it = -1;
             return true;
