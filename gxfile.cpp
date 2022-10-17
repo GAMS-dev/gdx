@@ -3093,6 +3093,9 @@ namespace gxfile {
             }
             else if(ErrorCondition(AIndx == obj.AcrMap, ERR_BADACROINDEX)) return false;
 
+            obj.AcrName = AName;
+            obj.AcrText = MakeGoodExplText(Txt);
+
         } else if(obj.AcrReadMap != AIndx) {
             if(ErrorCondition(utils::sameText(AName, obj.AcrName), ERR_BADACRONAME) ||
                 ErrorCondition(MapIsUnique(AIndx), ERR_ACRODUPEMAP)) return false;
