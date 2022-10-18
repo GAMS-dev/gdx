@@ -161,8 +161,8 @@ namespace rtl::p3utils {
         int ok = GetProcessMemoryInfo (GetCurrentProcess( ), &info, sizeof(info));
         if (!ok)
             return false;  /* failure */
-        rss = (int64_t) info.PagefileUsage;
-        vss = (int64_t) info.WorkingSetSize;
+        rss = (int64_t) info.WorkingSetSize;
+        vss = (int64_t) info.PagefileUsage;
         return true; /* success */
 #elif defined(__linux)
         size_t sz;
