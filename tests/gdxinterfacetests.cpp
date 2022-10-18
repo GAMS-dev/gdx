@@ -368,37 +368,39 @@ namespace tests::gdxinterfacetests {
         });
     }
 
-    TEST_CASE("Test writing mapped records out of order") {
-        std::string f1{ "mapped_outoforder_wrapper.gdx" }, f2 {"mapped_outoforder_port.gdx"};
+    void writeMappedRecordsOutOfOrder(GDXInterface &pgx) {
+        // very irregular user uel nr -> uel name mapping
+        const std::map<int, std::string> userUelMapping {
+                {3, "z"},
+                {8, "a"},
+                {1, "y"},
+                {10, "b"}
+        };
+        // also weird record write ordering
+        const std::array<int, 4> randomOrder { 8, 10, 1, 3 };
+
+        REQUIRE(pgx.gdxUELRegisterMapStart());
+        for(const auto &pair : userUelMapping) {
+            REQUIRE(pgx.gdxUELRegisterMap(pair.first, pair.second));
+        }
+        REQUIRE(pgx.gdxUELRegisterDone());
+
+        REQUIRE(pgx.gdxDataWriteMapStart("irregularSym", "So out of order!", 1, global::gmsspecs::gms_dt_par, 0));
         int key;
         gxdefs::TgdxValues values{};
-        testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
-            // very irregular user uel nr -> uel name mapping
-            const std::map<int, std::string> userUelMapping {
-                    {3, "z"},
-                    {8, "a"},
-                    {1, "y"},
-                    {10, "b"}
-            };
-            // also weird record write ordering
-            const std::array<int, 4> randomOrder { 8, 10, 1, 3 };
+        for(const auto ix : randomOrder) {
+            key = ix;
+            values[global::gmsspecs::vallevel] = 3.141 * ix;
+            REQUIRE(pgx.gdxDataWriteMap(&key, values.data()));
+        }
+        REQUIRE(pgx.gdxDataWriteDone());
+        REQUIRE_EQ(0, pgx.gdxErrorCount());
+        REQUIRE_EQ(0, pgx.gdxDataErrorCount());
+    }
 
-            REQUIRE(pgx.gdxUELRegisterMapStart());
-            for(const auto &pair : userUelMapping) {
-                REQUIRE(pgx.gdxUELRegisterMap(pair.first, pair.second));
-            }
-            REQUIRE(pgx.gdxUELRegisterDone());
-
-            REQUIRE(pgx.gdxDataWriteMapStart("mysym", "This is my symbol!", 1, global::gmsspecs::gms_dt_par, 0));
-            for(const auto ix : randomOrder) {
-                key = ix;
-                values[global::gmsspecs::vallevel] = 3.141;
-                REQUIRE(pgx.gdxDataWriteMap(&key, values.data()));
-            }
-            REQUIRE(pgx.gdxDataWriteDone());
-            REQUIRE_EQ(0, pgx.gdxErrorCount());
-            REQUIRE_EQ(0, pgx.gdxDataErrorCount());
-        });
+    TEST_CASE("Test writing mapped records out of order") {
+        std::string f1{ "mapped_outoforder_wrapper.gdx" }, f2 {"mapped_outoforder_port.gdx"};
+        testMatchingWrites(f1, f2, writeMappedRecordsOutOfOrder);
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);
     }
@@ -423,6 +425,9 @@ namespace tests::gdxinterfacetests {
             values[global::gmsspecs::vallevel] = 3.141;
             REQUIRE(pgx.gdxDataWriteMap(&key, values.data()));
             REQUIRE(pgx.gdxDataWriteDone());
+
+            writeMappedRecordsOutOfOrder(pgx);
+
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             REQUIRE_EQ(0, pgx.gdxDataErrorCount());
         });
@@ -455,6 +460,14 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(3, key);
             REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
             REQUIRE_EQ(1, dimFrst);
+            REQUIRE(pgx.gdxDataReadDone());
+
+            REQUIRE(pgx.gdxDataReadMapStart(2, NrRecs));
+            REQUIRE_EQ(4, NrRecs);
+            std::array<int, 20> keys;
+            //bool res = pgx.gdxDataReadMap(8, keys.data(), values.data(), dimFrst); //);
+            pgx.gdxDataErrorRecord(0, keys.data(), values.data());
+            REQUIRE_EQ(0, pgx.gdxDataErrorCount());
             REQUIRE(pgx.gdxDataReadDone());
         });
         for (const auto& fn : { f1, f2 })
