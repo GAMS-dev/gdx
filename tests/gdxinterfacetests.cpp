@@ -287,6 +287,9 @@ namespace tests::gdxinterfacetests {
             values[global::gmsspecs::vallevel] = 3.141;
             REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
             REQUIRE(pgx.gdxDataWriteDone());
+
+            REQUIRE(pgx.gdxDataWriteRawStart("myscalar", "This is a scalar!", 0, global::gmsspecs::gms_dt_par, 0));
+            REQUIRE(pgx.gdxDataWriteDone());
         });
         testReads(f1, f2, [&](GDXInterface &pgx) {
             std::string uel;
@@ -302,6 +305,10 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataReadDone());
             REQUIRE_EQ(1, key);
             REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
+
+            REQUIRE(pgx.gdxDataReadRawStart(2, NrRecs));
+            REQUIRE_EQ(1, NrRecs);
+            REQUIRE(pgx.gdxDataReadDone());
         });
         for (const auto& fn : {f1, f2})
             std::filesystem::remove(fn);
