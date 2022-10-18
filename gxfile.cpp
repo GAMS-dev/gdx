@@ -312,7 +312,7 @@ namespace gxfile {
         fComprLev = Compr;
         CompressOut = Compr > 0;
         fmode = f_not_open;
-        //ReadPtr = nullptr;
+        ReadPtr = -1;
         MajContext = "OpenWrite";
         TraceLevel = defaultTraceLevel;
         InitErrors();
@@ -1704,7 +1704,7 @@ namespace gxfile {
         MajContext = "OpenRead"s;
         TraceLevel = defaultTraceLevel;
         fmode = f_not_open;
-        //ReadPtr = nullptr;
+        ReadPtr = -1;
         InitErrors();
 
         auto FileErrorNr = [&]() {
