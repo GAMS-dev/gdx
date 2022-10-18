@@ -415,18 +415,27 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(0, uelCnt);
             REQUIRE_EQ(0, highMap);
             REQUIRE(pgx.gdxUELRegisterMapStart());
-            REQUIRE(pgx.gdxUELRegisterMap(3, "TheOnlyUEL"));
+            REQUIRE(pgx.gdxUELRegisterMap(3, "First"));
+            REQUIRE(pgx.gdxUELRegisterMap(4, "Second"));
+            REQUIRE(pgx.gdxUELRegisterMap(5, "Third"));
+            REQUIRE(pgx.gdxUELRegisterMap(2, "Fourth"));
             REQUIRE(pgx.gdxUELRegisterDone());
             std::string uel;
             REQUIRE(pgx.gdxGetUEL(3, uel));
-            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE_EQ("First", uel);
             REQUIRE(pgx.gdxDataWriteMapStart("mysym", "This is my symbol!", 1, global::gmsspecs::gms_dt_par, 0));
             key = 3;
             values[global::gmsspecs::vallevel] = 3.141;
             REQUIRE(pgx.gdxDataWriteMap(&key, values.data()));
             REQUIRE(pgx.gdxDataWriteDone());
 
-            writeMappedRecordsOutOfOrder(pgx);
+            REQUIRE(pgx.gdxDataWriteMapStart("mysym2", "This is my symbol2!", 1, global::gmsspecs::gms_dt_par, 0));
+            std::array<int, 4> expKey { 3, 4, 5, 2 };
+            for(int i : expKey)
+                REQUIRE(pgx.gdxDataWriteMap(&i, values.data()));
+            REQUIRE(pgx.gdxDataWriteDone());
+
+            //writeMappedRecordsOutOfOrder(pgx);
 
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             REQUIRE_EQ(0, pgx.gdxDataErrorCount());
@@ -435,28 +444,29 @@ namespace tests::gdxinterfacetests {
             std::string uel;
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE_EQ("First", uel);
             REQUIRE_EQ(-1, uelMap);
 
             REQUIRE(pgx.gdxUELRegisterMapStart());
-            REQUIRE(pgx.gdxUELRegisterMap(3, "TheOnlyUEL"));
+            REQUIRE(pgx.gdxUELRegisterMap(3, "First"));
+            REQUIRE(pgx.gdxUELRegisterMap(4, "Second"));
+            REQUIRE(pgx.gdxUELRegisterMap(5, "Third"));
+            REQUIRE(pgx.gdxUELRegisterMap(2, "Fourth"));
             REQUIRE(pgx.gdxUELRegisterDone());
 
             REQUIRE(pgx.gdxGetUEL(3, uel));
-            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE_EQ("First", uel);
 
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));            
-            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE_EQ("First", uel);
             REQUIRE_EQ(3, uelMap);
 
             int NrRecs;
             REQUIRE(pgx.gdxDataReadMapStart(1, NrRecs));
             REQUIRE_EQ(1, NrRecs);
             int dimFrst;
-
             REQUIRE(pgx.gdxDataReadMap(1, &key, values.data(), dimFrst));
             REQUIRE_EQ(0, pgx.gdxDataErrorCount());
-
             REQUIRE_EQ(3, key);
             REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
             REQUIRE_EQ(1, dimFrst);
@@ -464,9 +474,13 @@ namespace tests::gdxinterfacetests {
 
             REQUIRE(pgx.gdxDataReadMapStart(2, NrRecs));
             REQUIRE_EQ(4, NrRecs);
-            std::array<int, 20> keys;
-            //bool res = pgx.gdxDataReadMap(8, keys.data(), values.data(), dimFrst); //);
-            pgx.gdxDataErrorRecord(0, keys.data(), values.data());
+            // unordered mapped write comes out ordered
+            std::array<int, 4> expKey { 2, 3, 4, 5 };
+            for(int i{1}; i<=expKey.size(); i++) {
+                REQUIRE(pgx.gdxDataReadMap(i, &key, values.data(), dimFrst));
+                REQUIRE_EQ(expKey[i-1], key);
+            }
+            pgx.gdxDataErrorRecord(0, &key, values.data());
             REQUIRE_EQ(0, pgx.gdxDataErrorCount());
             REQUIRE(pgx.gdxDataReadDone());
         });
