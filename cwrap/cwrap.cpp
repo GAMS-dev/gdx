@@ -447,7 +447,7 @@ int gdxUMUelInfo(TGXFileRec_t *pgdx, int *UelCnt, int *HighMap) {
     return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUMUelInfo(*UelCnt, *HighMap);
 }
 
-int gdxGetDomainElements(TGXFileRec_t *pgdx, int SyNr, int DimPos, int FilterNr, ::TDomainIndexProc_t DP, int *NrElem, TGXFileRec_t *Uptr) {
+int gdxGetDomainElements(TGXFileRec_t *pgdx, int SyNr, int DimPos, int FilterNr, ::TDomainIndexProc_t DP, int *NrElem, void *Uptr) {
     return reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetDomainElements(SyNr, DimPos, FilterNr, (gxfile::TDomainIndexProc_t)DP, *NrElem, Uptr);
 }
 

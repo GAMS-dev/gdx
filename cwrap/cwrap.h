@@ -118,7 +118,7 @@ extern "C" {
     int gdxUMFindUEL(TGXFileRec_t *pgdx, const char *Uel, int *UelNr, int *UelMap);
     int gdxUMUelGet(TGXFileRec_t *pgdx, int UelNr, char *Uel, int *UelMap);
     int gdxUMUelInfo(TGXFileRec_t *pgdx, int *UelCnt, int *HighMap);
-    int gdxGetDomainElements(TGXFileRec_t *pgdx, int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int *NrElem, TGXFileRec_t *Uptr);
+    int gdxGetDomainElements(TGXFileRec_t *pgdx, int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int *NrElem, void *Uptr);
     int gdxCurrentDim(TGXFileRec_t *pgdx);
     int gdxRenameUEL(TGXFileRec_t *pgdx, const char *OldName, const char *NewName);
     int gdxStoreDomainSets(TGXFileRec_t *pgdx);
