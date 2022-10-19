@@ -3,7 +3,7 @@
 #include <fstream>
 
 #ifndef STUBWARN
-#define STUBWARN()  if(global::modhead::stubofs.is_open()) {\
+#define STUBWARN()  if(false && global::modhead::stubofs.is_open()) {\
 						global::modhead::stubofs << "WARNING: Calling stub method " << __FUNCTION__ << " in line " << __LINE__ << " of file "  << __FILE__ << ":" << __LINE__ << std::endl; \
 						global::modhead::stubofs.flush(); }
 
