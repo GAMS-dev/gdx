@@ -2404,7 +2404,7 @@ namespace gxfile {
     // Summary:
     //   Define the domain of a symbol
     // Arguments:
-    //   DomainIDs: array of identifers or *
+    //   DomainIDs: array of identifiers or *
     // Returns:
     //   Non-zero if the operation is possible, zero otherwise
     // Description:
@@ -2419,14 +2419,14 @@ namespace gxfile {
     // See Also:
     //   gdxSymbolGetDomain
     int TGXFileObj::gdxSymbolSetDomain(const char **DomainIDs) {
-        int res{ false }, SyNr;
+        int res{ false };
         TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
         if (!MajorCheckMode("SymbolSetDomain", AllowedModes) || !CurSyPtr) return res;
         res = true;
         assert(!CurSyPtr->SDomSymbols && "SymbolSetDomain");
         CurSyPtr->SDomSymbols = std::make_unique<std::vector<int>>(CurSyPtr->SDim);
         for (int D{}; D < CurSyPtr->SDim; D++) {
-            bool domap = true;
+            bool domap {true};
             int DomSy;
             if (!std::strcmp(DomainIDs[D], "*")) DomSy = 0;
             else {
@@ -2437,6 +2437,7 @@ namespace gxfile {
                     res = false;
                 }
             }
+            int SyNr;
             if (DomSy > 0) {
                 SyNr = DomSy;
                 do {
