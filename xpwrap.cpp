@@ -322,6 +322,17 @@ namespace xpwrap {
     }
 
     double GDXFile::gdxAcronymValue(int AIndx) const {
-        return ::d_gdxAcronymValue(pgx, AIndx);
+        return ::gdxAcronymValue(pgx, AIndx);
+    }
+
+    int GDXFile::gdxSymbolAddComment(int SyNr, const std::string &Txt) {
+        return ::gdxSymbolAddComment(pgx, SyNr, Txt.c_str());
+    }
+
+    int GDXFile::gdxSymbolGetComment(int SyNr, int N, std::string &Txt) {
+        CharBuf TxtBuf{};
+        int rc{::gdxSymbolGetComment(pgx, SyNr, N, TxtBuf.get())};
+        Txt = TxtBuf;
+        return rc;
     }
 }

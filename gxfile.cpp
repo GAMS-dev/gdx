@@ -3809,7 +3809,7 @@ namespace gxfile {
     // Description:
     //
     int TGXFileObj::gdxSetHasText(int SyNr) {
-        return !NameList.empty() && SyNr >= 1 && SyNr <= NameList.size() && NameList[NameListOrdered[SyNr]]->SSetText;
+        return !NameList.empty() && SyNr >= 1 && SyNr <= NameList.size() && NameList[NameListOrdered[SyNr-1]]->SSetText;
     }
 
     // Brief:
@@ -3903,7 +3903,7 @@ namespace gxfile {
         if (!MajorCheckMode("SymbolAddComment"s, AnyWriteMode)) return false;
         PgdxSymbRecord SyPtr;
         if (SyNr <= 0) SyPtr = CurSyPtr;
-        else SyPtr = !NameList.empty() && SyNr <= NameList.size() ? NameList[NameListOrdered[SyNr]] : nullptr;
+        else SyPtr = !NameList.empty() && SyNr <= NameList.size() ? NameList[NameListOrdered[SyNr-1]] : nullptr;
         if (!SyPtr) {
             ReportError(ERR_NOSYMBOLFORCOMMENT);
             return false;

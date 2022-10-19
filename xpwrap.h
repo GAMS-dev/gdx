@@ -142,6 +142,10 @@ namespace xpwrap {
         int gdxAcronymName(double V, std::string &AName) override;
 
         double gdxAcronymValue(int AIndx) const override;
+
+        int gdxSymbolAddComment(int SyNr, const std::string &Txt) override;
+
+        int gdxSymbolGetComment(int SyNr, int N, std::string &Txt) override;
     };
 
 }

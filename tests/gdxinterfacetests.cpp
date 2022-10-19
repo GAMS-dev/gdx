@@ -891,6 +891,20 @@ namespace tests::gdxinterfacetests {
         });
     }
 
+    TEST_CASE("Test comments addition and querying") {
+        std::array filenames{ "comments_wrapper.gdx"s, "comments_port.gdx"s };
+        auto [f1, f2] = filenames;
+        testMatchingWrites(f1, f2, [](GDXInterface &pgx) {
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "expl text", 1, global::gmsspecs::gms_dt_set, 0));
+            REQUIRE(pgx.gdxDataWriteDone());
+            const auto commentStrExp {"A fancy comment!"s};
+            REQUIRE(pgx.gdxSymbolAddComment(1, commentStrExp));
+            std::string commentStrGot;
+            REQUIRE(pgx.gdxSymbolGetComment(1, 1, commentStrGot));
+            REQUIRE_EQ(commentStrExp, commentStrGot);
+        });
+    }
+
     TEST_SUITE_END();
 
 }
