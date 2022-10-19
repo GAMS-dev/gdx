@@ -876,6 +876,21 @@ namespace tests::gdxinterfacetests {
         });
     }
 
+    TEST_CASE("Test acronym facilities") {
+        std::array filenames{ "acronyms_wrapper.gdx"s, "acronyms_port.gdx"s };
+        auto [f1, f2] = filenames;
+        testMatchingWrites(f1, f2, [](GDXInterface &pgx) {
+            REQUIRE_EQ(0, pgx.gdxAcronymCount());
+            REQUIRE(pgx.gdxAcronymAdd("myacr"s, "my acronym"s, 23));
+            std::string acroName, acroText;
+            int acroIndex;
+            REQUIRE(pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex));
+            REQUIRE_EQ("myacr"s, acroName);
+            REQUIRE_EQ("my acronym"s, acroText);
+            REQUIRE_EQ(23, acroIndex);
+        });
+    }
+
     TEST_SUITE_END();
 
 }

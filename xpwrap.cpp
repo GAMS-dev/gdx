@@ -305,4 +305,23 @@ namespace xpwrap {
     int GDXFile::gdxDataReadFilteredStart(int SyNr, const int *FilterAction, int &NrRecs) {
         return ::gdxDataReadFilteredStart(pgx, SyNr, FilterAction, &NrRecs);
     }
+
+    int GDXFile::gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) {
+        return ::gdxAcronymAdd(pgx, AName.c_str(), Txt.c_str(), AIndx);
+    }
+
+    int GDXFile::gdxAcronymIndex(double V) const {
+        return ::gdxAcronymIndex(pgx, V);
+    }
+
+    int GDXFile::gdxAcronymName(double V, std::string &AName) {
+        CharBuf ANameBuf{};
+        int rc {::gdxAcronymName(pgx, V, ANameBuf.get())};
+        AName = ANameBuf;
+        return rc;
+    }
+
+    double GDXFile::gdxAcronymValue(int AIndx) const {
+        return ::d_gdxAcronymValue(pgx, AIndx);
+    }
 }
