@@ -6,6 +6,7 @@
 #include "gdxinterface.h"
 #include <memory>
 #include <map>
+#include <utility>
 #include <vector>
 #include <optional>
 #include "global/gmsspecs.h"
@@ -178,7 +179,7 @@ namespace gxfile {
         std::vector<std::string> uelNames {};
         std::map<std::string, int, strCompCaseInsensitive> nameToNum {};
         // ...
-        TUELUserMapStatus FMapToUserStatus {};
+        TUELUserMapStatus FMapToUserStatus {map_unknown};
 
     public:
         TIntegerMapping UsrUel2Ent {}; // from user uelnr to table entry
@@ -222,11 +223,11 @@ namespace gxfile {
         int AcrMap{}, AcrReadMap{};
         bool AcrAutoGen{};
 
-        TAcronym(const std::string& Name, const std::string& Text, int Map)
-            : AcrName{ Name }, AcrText{ MakeGoodExplText(Text) }, AcrMap{ Map }, AcrReadMap{ -1 }, AcrAutoGen{} {
+        TAcronym(std::string Name, const std::string& Text, int Map)
+            : AcrName{std::move( Name )}, AcrText{ MakeGoodExplText(Text) }, AcrMap{ Map }, AcrReadMap{ -1 }, AcrAutoGen{} {
         }
 
-        TAcronym() {}
+        TAcronym() = default;
     };
 
     class TAcronymList : public std::vector<TAcronym> {
@@ -259,7 +260,7 @@ namespace gxfile {
         TgxFileMode fmode {f_not_open}, fmode_AftReg {f_not_open};
         enum {stat_notopen, stat_read, stat_write} fstatus;
         int fComprLev{};
-        TUELTable UELTable;
+        std::unique_ptr<TUELTable> UELTable;
         std::unique_ptr<TSetTextList> SetTextList {};
         std::vector<int> MapSetText;
         int FCurrentDim{};

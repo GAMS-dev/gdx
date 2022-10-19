@@ -318,7 +318,7 @@ namespace gxfile {
         InitErrors();
         NameList.clear();
         NameListOrdered.clear();
-        UELTable.clear();
+        UELTable = std::make_unique<TUELTable>();
         AcronymList.clear();
         FilterList.clear();
         FFile->WriteByte(gdxHeaderNr);
@@ -411,10 +411,10 @@ namespace gxfile {
             std::string SV {utils::trimRight(KeyStr[D])};
             if(SV != LastStrElem[D]) {
                 // 0=not found, >=1 found
-                int KD {UELTable.IndexOf(SV)+1};
+                int KD {UELTable->IndexOf(SV)+1};
                 if(!KD) {
                     if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
-                    KD = UELTable.AddObject(SV, -1);
+                    KD = UELTable->AddObject(SV, -1);
                 }
                 LastElem[D] = KD;
                 LastStrElem[D] = SV;
@@ -555,9 +555,9 @@ namespace gxfile {
             FFile->WriteString(MARK_UEL);
             YFile->AddKeyItem("uels");
             YFile->IncIndentLevel();
-            FFile->WriteInteger(UELTable.size());
-            if(!UELTable.empty()) {
-                for (const auto &uelName: UELTable.getNames()) {
+            FFile->WriteInteger(UELTable ? UELTable->size() : 0);
+            if(UELTable) {
+                for (const auto &uelName: UELTable->getNames()) {
                     FFile->WriteString(uelName);
                     YFile->AddItem(uelName);
                 }
@@ -938,7 +938,7 @@ namespace gxfile {
                                     AElements[D] = LastElem[D];
                                     break;
                                 case dm_filter:
-                                    V = UELTable.GetUserMap(LastElem[D]);
+                                    V = UELTable->GetUserMap(LastElem[D]);
                                     if(obj.DFilter->InFilter(V))
                                         AElements[D] = V;
                                     else {
@@ -948,7 +948,7 @@ namespace gxfile {
                                     }
                                     break;
                                 case dm_strict:
-                                    V = UELTable.GetUserMap(LastElem[D]);
+                                    V = UELTable->GetUserMap(LastElem[D]);
                                     if(V >= 0) AElements[D] = V;
                                     else {
                                         AddError = true;
@@ -960,7 +960,7 @@ namespace gxfile {
                                         V = ExpndList.GetMapping(EN);
                                         if(V >= 0) AElements[D] = V;
                                         else {
-                                            V = UELTable.GetUserMap(EN);
+                                            V = UELTable->GetUserMap(EN);
                                             if(V >= 0)
                                                 AElements[D] = ExpndList[EN] = V;
                                             else {
@@ -994,7 +994,7 @@ namespace gxfile {
                                 for(D=0; D<FCurrentDim; D++) {
                                     int EN = AElements[D];
                                     if(EN < 0) {
-                                        V = UELTable.NewUsrUel(-EN);
+                                        V = UELTable->NewUsrUel(-EN);
                                         AElements[D] = ExpndList[-EN] = V;
                                         NrMappedAdded++;
                                         // look for same mapping to be issued
@@ -1339,18 +1339,18 @@ namespace gxfile {
             switch(ADomainNrs[D]) {
                 case DOMC_UNMAPPED: continue;
                 case DOMC_EXPAND:
-                    if(UELTable.GetMapToUserStatus() == map_unsorted) return false;
+                    if(UELTable->GetMapToUserStatus() == map_unsorted) return false;
                     if(!D) {
-                        if(UELTable.GetMapToUserStatus() >= map_sortgrow) continue;
+                        if(UELTable->GetMapToUserStatus() >= map_sortgrow) continue;
                         else return false;
-                    } else if(UELTable.GetMapToUserStatus() == map_sortfull) continue;
+                    } else if(UELTable->GetMapToUserStatus() == map_sortfull) continue;
                     else return false;
                     break;
                 case DOMC_STRICT:
-                    if(UELTable.GetMapToUserStatus() == map_unsorted) return false;
+                    if(UELTable->GetMapToUserStatus() == map_unsorted) return false;
                     break;
                 default:
-                    if(UELTable.GetMapToUserStatus() >= map_sorted) continue;
+                    if(UELTable->GetMapToUserStatus() >= map_sorted) continue;
                     TDFilter *PFilter = FilterList.FindFilter(ADomainNrs[D]);
                     if(!PFilter->FiltSorted) return false;
                     break;
@@ -1585,7 +1585,7 @@ namespace gxfile {
         else {
             for (int D{}; D < FCurrentDim; D++) {
                 int LED{ LastElem[D] };
-                std::string s {LED >= 1 && LED <= UELTable.size() ? UELTable[LED-1] : BADUEL_PREFIX + std::to_string(LED)};
+                std::string s {LED >= 1 && LED <= (UELTable ? UELTable->size() : 0) ? (*UELTable)[LED-1] : BADUEL_PREFIX + std::to_string(LED)};
                 memcpy(KeyStr[D], s.c_str(), sizeof(char)*(s.length()+1));
             }
             return true;
@@ -1614,13 +1614,13 @@ namespace gxfile {
             }
         }
         if(NrMappedAdded) {
-            int HighestIndex = UELTable.UsrUel2Ent.GetHighestIndex();
+            int HighestIndex = UELTable->UsrUel2Ent.GetHighestIndex();
             for(int N{HighestIndex}; N >= HighestIndex - NrMappedAdded + 1; N--) {
                 assert(N >= 1 && "Wrong entry number");
-                int EN {UELTable.UsrUel2Ent.GetMapping(N)}, // nr in ueltable
-                    d {UELTable.GetUserMap(EN)};
+                int EN {UELTable->UsrUel2Ent.GetMapping(N)}, // nr in ueltable
+                    d {UELTable->GetUserMap(EN)};
                 assert(d == -1 || d == N && "Mapped already");
-                UELTable.SetUserMap(EN, N); // map to user entry
+                UELTable->SetUserMap(EN, N); // map to user entry
             }
             NrMappedAdded = 0;
         }
@@ -1812,18 +1812,19 @@ namespace gxfile {
         // reading UEL table
         FFile->SetCompression(DoUncompress);
         FFile->SetPosition(UELPos);
-        UELTable.clear();
+        UELTable = std::make_unique<TUELTable>();
 
         if (ErrorCondition(FFile->ReadString() == MARK_UEL, ERR_OPEN_UELMARKER1))
             return FileErrorNr();
 
         NrElem = FFile->ReadInteger();
+        //bug for pre 2002
         if (utils::substr(FileSystemID, 15, 4) == "2001") NrElem--;
 
-        while (UELTable.size() < NrElem) {
-            UELTable.AddObject(FFile->ReadString(), -1);
+        while (UELTable->size() < NrElem) {
+            UELTable->AddObject(FFile->ReadString(), -1);
         }
-        UelCntOrig = UELTable.size(); // needed when reading universe
+        UelCntOrig = UELTable->size(); // needed when reading universe
 
         if (ErrorCondition(FFile->ReadString() == MARK_UEL, ERR_OPEN_UELMARKER2)) return FileErrorNr();
         if (ReadMode % 2 == 0) { // reading text table
@@ -2516,7 +2517,7 @@ namespace gxfile {
     // Returns:
     //   Returns a non-zero value
     int TGXFileObj::gdxSystemInfo(int &SyCnt, int &UelCnt) {
-        UelCnt = (int)UELTable.size();
+        UelCnt = UELTable ? (int)UELTable->size() : 0;
         SyCnt = (int)NameList.size();
         return true;
     }
@@ -2554,7 +2555,7 @@ namespace gxfile {
             return false;
         std::string SV = utils::trimRight(Uel);
         if (ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
-        UELTable.AddObject(SV, -1); // should about existing mapping?
+        UELTable->AddObject(SV, -1); // should about existing mapping?
         return true;
     }
 
@@ -2592,7 +2593,7 @@ namespace gxfile {
             return false;
         std::string SV{ utils::trimRight(Uel) };
         if (ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
-        UelNr = UELTable.AddUsrNew(SV);
+        UelNr = UELTable->AddUsrNew(SV);
         return true;
     }
 
@@ -2624,9 +2625,9 @@ namespace gxfile {
     // Description:
     //
     int TGXFileObj::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
-        if (!UELTable.empty() && UelNr >= 1 && UelNr <= UELTable.size()) {
-            Uel = UELTable[UelNr-1];
-            UelMap = UELTable.UsrUel2Ent.empty() ? -1 : UELTable.UsrUel2Ent.GetReverseMapping(UelNr);
+        if (UELTable && UelNr >= 1 && UelNr <= UELTable->size()) {
+            Uel = (*UELTable)[UelNr-1];
+            UelMap = UELTable->UsrUel2Ent.empty() ? -1 : UELTable->UsrUel2Ent.GetReverseMapping(UelNr);
             return true;
         }
         else {
@@ -2652,8 +2653,8 @@ namespace gxfile {
             return false;
         }
         else {
-            UelCnt = UELTable.size();
-            HighMap = UELTable.UsrUel2Ent.GetHighestIndex(); // highest index
+            UelCnt = UELTable ? UELTable->size() : 0;
+            HighMap = UELTable->UsrUel2Ent.GetHighestIndex(); // highest index
             return true;
         }
     }
@@ -2680,17 +2681,16 @@ namespace gxfile {
     // Returns:
     //   Zero if the renaming was possible; non-zero is an error indicator
     int TGXFileObj::gdxRenameUEL(const std::string &OldName, const std::string &NewName) {
-        if(UELTable.empty())
-            return -1;
+        if(!UELTable) return -1;
         std::string S{utils::trimRight(NewName)};
         if(!GoodUELString(S))
             return ERR_BADUELSTR;
-        int N{UELTable.IndexOf(utils::trimRight(OldName))};
+        int N{UELTable->IndexOf(utils::trimRight(OldName))};
         if(N < 0)
             return 2;
-        else if(UELTable.IndexOf(S) >= 0)
+        else if(UELTable->IndexOf(S) >= 0)
             return 3;
-        UELTable.RenameEntry(N, S);
+        UELTable->RenameEntry(N, S);
         return 0;
     }
 
@@ -2738,12 +2738,12 @@ namespace gxfile {
     // See Also:
     //   gdxUMUelGet
     int TGXFileObj::gdxGetUEL(int uelNr, std::string &Uel) {
-        if(UELTable.empty()) {
+        if(!UELTable) {
             Uel.clear();
             return false;
         }
-        int EN = UELTable.UsrUel2Ent.GetMapping(uelNr);
-        Uel = EN >= 1 ? UELTable[EN-1] : BADUEL_PREFIX + std::to_string(uelNr);
+        int EN = UELTable->UsrUel2Ent.GetMapping(uelNr);
+        Uel = EN >= 1 ? (*UELTable)[EN-1] : BADUEL_PREFIX + std::to_string(uelNr);
         return EN >= 1;
     }
 
@@ -2792,7 +2792,7 @@ namespace gxfile {
             }
         }
         for(int D{}; D<FCurrentDim; D++) {
-            int KD = UELTable.UsrUel2Ent.GetMapping(KeyInt[D]);
+            int KD = UELTable->UsrUel2Ent.GetMapping(KeyInt[D]);
             if(KD < 0) {
                 ReportError(ERR_BADELEMENTINDEX);
                 return false;
@@ -2844,7 +2844,7 @@ namespace gxfile {
             std::cout << "   Enter UEL: " << SV << " with number " << UMap << "\n";
         }
         if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR) ||
-            ErrorCondition(UELTable.AddUsrIndxNew(SV, UMap) >= 0, ERR_UELCONFLICT)) return false;
+            ErrorCondition(UELTable->AddUsrIndxNew(SV, UMap) >= 0, ERR_UELCONFLICT)) return false;
         return true;
     }
 
@@ -2922,7 +2922,7 @@ namespace gxfile {
                         KeyInt[D] = LastElem[D];
                         break;
                     case dm_filter:
-                        V = UELTable.GetUserMap(LastElem[D]);
+                        V = UELTable->GetUserMap(LastElem[D]);
                         if(obj.DFilter->InFilter(V)) KeyInt[D] = V;
                         else {
                             AddError = true;
@@ -2931,7 +2931,7 @@ namespace gxfile {
                         }
                         break;
                     case dm_strict:
-                        V = UELTable.GetUserMap(LastElem[D]);
+                        V = UELTable->GetUserMap(LastElem[D]);
                         if(V >= 0) KeyInt[D] = V;
                         else {
                             AddError = true;
@@ -2942,7 +2942,7 @@ namespace gxfile {
                     case dm_expand: // no filter, allow growth of domain
                         {
                             int EN = LastElem[D];
-                            V = UELTable.GetUserMap(EN);
+                            V = UELTable->GetUserMap(EN);
                             if (V >= 0) KeyInt[D] = V;
                             else {
                                 KeyInt[D] = -EN;
@@ -2966,12 +2966,12 @@ namespace gxfile {
                 int V;
                 switch(DomainList[D].DAction) {
                     case dm_filter:
-                        V = UELTable.GetUserMap(LastElem[D]);
+                        V = UELTable->GetUserMap(LastElem[D]);
                         if(!DomainList[D].DFilter->InFilter(V))
                             LastElem[D] = -LastElem[D];
                         break;
                     case dm_strict:
-                        V = UELTable.GetUserMap(LastElem[D]);
+                        V = UELTable->GetUserMap(LastElem[D]);
                         if(V < 0)
                             LastElem[D] = -LastElem[D];
                         break;
@@ -2990,7 +2990,7 @@ namespace gxfile {
             for(int D{}; D<FCurrentDim; D++) {
                 int EN = KeyInt[D];
                 if(EN < 0) {
-                    int V = UELTable.NewUsrUel(-EN);
+                    int V = UELTable->NewUsrUel(-EN);
                     KeyInt[D] = V;
                     NrMappedAdded++;
                     // look for same mapping to be issued
@@ -3183,7 +3183,7 @@ namespace gxfile {
         if(!MajorCheckMode("FilterRegisterStart"s, AllowedModes) ||
             ErrorCondition(FilterNr >= 1, ERR_BAD_FILTER_NR)) return false;
 
-        FilterList.AddFilter(TDFilter{ FilterNr, UELTable.UsrUel2Ent.GetHighestIndex() });
+        FilterList.AddFilter(TDFilter{ FilterNr, UELTable->UsrUel2Ent.GetHighestIndex() });
         CurFilter = &FilterList.back();
         fmode = fr_filter;
         return true;
@@ -3208,7 +3208,7 @@ namespace gxfile {
             !CheckMode("FilterRegister"s, AllowedModes)) return false;
         auto &obj = *CurFilter;
         if(ErrorCondition(UelMap >= 1 && UelMap <= obj.FiltMaxUel, ERR_BAD_FILTER_INDX)) return false;
-        int EN{UELTable.UsrUel2Ent.GetMapping(UelMap)};
+        int EN{UELTable->UsrUel2Ent.GetMapping(UelMap)};
         if (EN >= 1) obj.SetFilter(UelMap, true);
         else {
             ReportError(ERR_FILTER_UNMAPPED);
@@ -3230,10 +3230,10 @@ namespace gxfile {
         if(!MajorCheckMode("FilterRegisterDone"s, AllowedModes)) return false;
         fmode = fr_init;
         CurFilter->FiltSorted = true;
-        if(UELTable.GetMapToUserStatus() == map_unsorted) {
+        if(UELTable && UELTable->GetMapToUserStatus() == map_unsorted) {
             int LV {-1};
-            for(int N{1}; N<=UELTable.size(); N++) {
-                int V{UELTable.GetUserMap(N)};
+            for(int N{1}; N<=UELTable->size(); N++) {
+                int V{UELTable->GetUserMap(N)};
                 if(!CurFilter->InFilter(V)) continue;
                 if(V <= LV) {
                     CurFilter->FiltSorted = false;
@@ -3370,7 +3370,7 @@ namespace gxfile {
         while (DoRead(AVals.data(), AFDim)) {
             int RawNr{ LastElem[DimPos-1] };
             if (DFilter) {
-                int MapNr{ UELTable.GetUserMap(RawNr) };
+                int MapNr{ UELTable->GetUserMap(RawNr) };
                 if (!DFilter->InFilter(MapNr)) {
                     //Register this record as a domain error (negative value indicates domain violation)
                     LastElem[DimPos - 1] = -LastElem[DimPos - 1];
@@ -3396,7 +3396,7 @@ namespace gxfile {
             for (int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++) {
                 if (DomainIndxs[N] == 1) {
                     NrElem++;
-                    Index.front() = UELTable.NewUsrUel(N);
+                    Index.front() = UELTable->NewUsrUel(N);
                     vf.front() = N;
                     SortL[Index] = vf;
                 }
@@ -3652,7 +3652,7 @@ namespace gxfile {
                 Dimen++;
             }
             else {
-                ElemNrs[D] = UELTable.IndexOf(UelFilterStr[D]);
+                ElemNrs[D] = UELTable->IndexOf(UelFilterStr[D]);
                 if (ElemNrs[D] < 0) GoodIndx = false;
             }
         }
@@ -3701,7 +3701,7 @@ namespace gxfile {
                 HisDim++;
                 int N = SliceRevMap[D].GetMapping(SliceKeyInt[HisDim]);
                 if (N < 0) strcpy(KeyStr[D], "?");
-                else memcpy(KeyStr[D], UELTable[N].c_str(), UELTable[N].length() + 1);
+                else memcpy(KeyStr[D], (*UELTable)[N].c_str(), (*UELTable)[N].length() + 1);
             }
         }
         return true;
@@ -3855,14 +3855,14 @@ namespace gxfile {
 
         int res{};
         if (FCurrentDim > 0) {
-            int UELTableCount = UELTable.size(); // local copy for speed
+            int UELTableCount = UELTable ? UELTable->size() : 0; // local copy for speed
             TgdxValues AVals;
             int AFDim;
             while (DoRead(AVals.data(), AFDim)) {
                 for (int D{}; D <= FCurrentDim; D++) {
                     int UEL = LastElem[D];
                     if (UEL >= 1 && UEL <= UELTableCount) {
-                        auto L = static_cast<int>(UELTable[UEL].length());
+                        auto L = static_cast<int>((*UELTable)[UEL].length());
                         if (L > LengthInfo[D]) LengthInfo[D] = L;
                     }
                 }
@@ -3942,7 +3942,7 @@ namespace gxfile {
     // See also:
     //   gdxSymbIndxMaxLength
     int TGXFileObj::gdxUELMaxLength() {
-        return UELTable.GetMaxUELLength();
+        return UELTable->GetMaxUELLength();
     }
 
     // Brief:
@@ -3956,13 +3956,13 @@ namespace gxfile {
     //   Non-zero if the element was found, zero otherwise
     int TGXFileObj::gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap) {
         UelMap = -1;
-        if (UELTable.empty()) {
+        if (!UELTable) {
             UelNr = -1;
             return false;
         }
-        UelNr = UELTable.IndexOf(utils::trimRight(Uel));
+        UelNr = UELTable->IndexOf(utils::trimRight(Uel));
         if (UelNr < 0) return false;
-        UelMap = UELTable.GetUserMap(UelNr);
+        UelMap = UELTable->GetUserMap(UelNr);
         return true;
     }
 
@@ -4024,7 +4024,7 @@ namespace gxfile {
                 if(strlen(UelFilterStr[D])) {
                     FiltDim++;
                     ElemDim[FiltDim] = D+1;
-                    ElemNrs[FiltDim] = UELTable.IndexOf(UelFilterStr[D]);
+                    ElemNrs[FiltDim] = UELTable->IndexOf(UelFilterStr[D]);
                     if(ElemNrs[FiltDim] < 0) GoodIndx = false;
                 }
             }
