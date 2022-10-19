@@ -376,8 +376,8 @@ namespace gxfile {
     //   gdxDataWriteStr, gdxDataWriteDone
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) {
         if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
-        /*for (int D{}; D < FCurrentDim; D++)
-            LastStrElem[D] = (char)0xFF;*/
+        for (int D{}; D < FCurrentDim; D++)
+            LastStrElem[D].clear();
         SortList = std::make_unique<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
         fmode = fw_dom_str;
         return true;
