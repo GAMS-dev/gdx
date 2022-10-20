@@ -666,6 +666,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteDone());
             int txtNr;
             REQUIRE(pgx.gdxAddSetText("set text", txtNr));
+            REQUIRE_EQ(1, txtNr);
             int elemNode;
             std::string elemTxt;
             REQUIRE(pgx.gdxGetElemText(txtNr, elemTxt, elemNode));
@@ -954,6 +955,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ("my acronym"s, acroText);
             REQUIRE_EQ(23, acroIndex);
         });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
     }
 
     TEST_CASE("Test comments addition and querying") {
@@ -968,6 +971,42 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxSymbolGetComment(1, 1, commentStrGot));
             REQUIRE_EQ(commentStrExp, commentStrGot);
         });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test writing and reading set element texts more exhaustively") {
+        std::string f1{ "setelemtxt_wr_wrapper.gdx" },
+                    f2 {"setelemtxt_wr_port.gdx"};
+        // no set text
+        testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
+            REQUIRE(pgx.gdxUELRegisterRawStart());
+            REQUIRE(pgx.gdxUELRegisterRaw("seattle"s));
+            REQUIRE(pgx.gdxUELRegisterDone());
+
+            pgx.gdxDataWriteRawStart("i", "cities", 1, global::gmsspecs::dt_set, 0);
+            gxdefs::TgdxValues vals {};
+            vals[global::gmsspecs::tvarvaltype::vallevel] = 3.141;
+            int key {1};
+            pgx.gdxDataWriteRaw(&key, vals.data());
+            pgx.gdxDataWriteDone();
+        });
+        testReads(f1, f2, [&](GDXInterface& pgx) {
+            std::string txt;
+            int node;
+            REQUIRE(pgx.gdxGetElemText(0, txt, node));
+            int hi {std::numeric_limits<int>::max()};
+            REQUIRE_FALSE(pgx.gdxGetElemText(hi, txt, node));
+            REQUIRE_FALSE(pgx.gdxGetElemText(1, txt, node));
+        });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
+        /*testReads("concat.gdx"s, "concat.gdx"s, [&](GDXInterface& pgx) {
+            std::string txt;
+            int node;
+            int rc {pgx.gdxGetElemText(1, txt, node)};
+            std::cout << std::endl;
+        });*/
     }
 
     TEST_SUITE_END();

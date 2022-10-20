@@ -641,6 +641,7 @@ namespace gxfile {
 
         FFile = nullptr;
         SortList = nullptr;
+        SetTextList = nullptr;
         MapSetText.clear();
         fmode = f_not_open;
         fstatus = stat_notopen;
@@ -2201,12 +2202,12 @@ namespace gxfile {
             return false;
         if(TxtNr < 0 || TxtNr >= SetTextList->size()) {
             Txt = BADStr_PREFIX + std::to_string(TxtNr);
+            return false;
         } else {
             Txt = (*SetTextList)[TxtNr];
             Node = SetTextList->mapContains(Txt) ? SetTextList->strToNodeNr[Txt] : 0;
             return true;
         }
-        return false;
     }
 
     // Brief:

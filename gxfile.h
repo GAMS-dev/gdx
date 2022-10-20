@@ -495,8 +495,8 @@ namespace gxfile {
         int gdxSetReadSpecialValues(const std::array<double, 7>& AVals);
         int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo);
         int gdxSymbMaxLength();
-        int gdxSymbolAddComment(int SyNr, const std::string& Txt);
-        int gdxSymbolGetComment(int SyNr, int N, std::string& Txt);
+        int gdxSymbolAddComment(int SyNr, const std::string& Txt) override;
+        int gdxSymbolGetComment(int SyNr, int N, std::string& Txt) override;
         int gdxUELMaxLength();
         int gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap);
         int gdxStoreDomainSets();
