@@ -2535,27 +2535,9 @@ namespace gxfile {
                 const std::string &S { DomainIDs[D] };
                 if (S.empty() || S == "*" || !IsGoodIdent(S)) (*SyPtr->SDomStrings)[D] = 0;
                 else {
-                    /*(*SyPtr->SDomStrings)[D] = utils::indexOf<std::string>(*DomainStrList, [&](const auto &domStr) {
-                        return utils::sameText(domStr, S);
-                    }) + 1; // one-based
-                    if((*SyPtr->SDomStrings)[D] <= 0) {
-                        DomainStrList->push_back(S);
-                        (*SyPtr->SDomStrings)[D] = (int)DomainStrList->size();
-                    }*/
-
-                    /*int ix = utils::indexOf<std::string>(*DomainStrList, [&](const auto &domStr) {
-                        return utils::sameText(domStr, S);
-                    });
-                    (*SyPtr->SDomStrings)[D] = ix == -1 ? -1 : ix+1; // one-based
-                    if ((*SyPtr->SDomStrings)[D] <= 0) {
-                        DomainStrList->push_back(S);
-                        (*SyPtr->SDomStrings)[D] = (int) DomainStrList->size();
-                    }*/
-
-                    // FIXME: Handling is not correct here, but the fixed version causes even bigger issues!
                     (*SyPtr->SDomStrings)[D] = utils::indexOf<std::string>(*DomainStrList, [&](const auto &domStr) {
                         return utils::sameText(domStr, S);
-                    }) + 1;
+                    }) + 1; // one based
                     if ((*SyPtr->SDomStrings)[D] <= 0) {
                         DomainStrList->push_back(S);
                         (*SyPtr->SDomStrings)[D] = (int) DomainStrList->size();
