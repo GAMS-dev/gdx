@@ -2352,8 +2352,8 @@ namespace gxfile {
 
         if (SyPtr->SDomStrings) {
             for (int D{}; D<SyPtr->SDim; D++)
-                if((*SyPtr->SDomStrings)[D] != -1)
-                    utils::stocp((*DomainStrList)[(*SyPtr->SDomStrings)[D]], DomainIDs[D]);
+                if((*SyPtr->SDomStrings)[D])
+                    utils::stocp((*DomainStrList)[(*SyPtr->SDomStrings)[D]-1], DomainIDs[D]);
             res = 2;
         }
         else if (!SyPtr->SDomSymbols)
@@ -2533,7 +2533,7 @@ namespace gxfile {
                 SyPtr->SDomStrings = std::make_unique<std::vector<int>>(SyPtr->SDim);
             for (int D{}; D < SyPtr->SDim; D++) {
                 const std::string &S { DomainIDs[D] };
-                if (S.empty() || S == "*" || !IsGoodIdent(S)) (*SyPtr->SDomStrings)[D] = -1;
+                if (S.empty() || S == "*" || !IsGoodIdent(S)) (*SyPtr->SDomStrings)[D] = 0;
                 else {
                     /*(*SyPtr->SDomStrings)[D] = utils::indexOf<std::string>(*DomainStrList, [&](const auto &domStr) {
                         return utils::sameText(domStr, S);
@@ -2555,8 +2555,8 @@ namespace gxfile {
                     // FIXME: Handling is not correct here, but the fixed version causes even bigger issues!
                     (*SyPtr->SDomStrings)[D] = utils::indexOf<std::string>(*DomainStrList, [&](const auto &domStr) {
                         return utils::sameText(domStr, S);
-                    });
-                    if ((*SyPtr->SDomStrings)[D] <= -1) {
+                    }) + 1;
+                    if ((*SyPtr->SDomStrings)[D] <= 0) {
                         DomainStrList->push_back(S);
                         (*SyPtr->SDomStrings)[D] = (int) DomainStrList->size();
                     }
