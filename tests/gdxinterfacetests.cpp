@@ -585,13 +585,25 @@ namespace tests::gdxinterfacetests {
     }
 
     void testSetGetDomainX(GDXInterface &pgx) {
-        gxdefs::TgdxStrIndex newSymDomainNames{"i", "j"};
+        gxdefs::TgdxStrIndex newSymDomainNames{"i", "i"};
         StrIndexBuffers sib {&newSymDomainNames};
         REQUIRE(pgx.gdxSymbolSetDomainX(3, sib.cptrs()));
         StrIndexBuffers domainIds {};
         REQUIRE(pgx.gdxSymbolGetDomainX(3, domainIds.ptrs()));
         REQUIRE_EQ("i"s, domainIds[0].str());
-        REQUIRE_EQ("j"s, domainIds[1].str());
+        REQUIRE_EQ("i"s, domainIds[1].str());
+    }
+
+    void testSetGetDomain(GDXInterface &pgx) {
+        domainSetGetTestSetupPrefix(pgx);
+        gxdefs::TgdxStrIndex newSymDomainNames{"i", "i"};
+        StrIndexBuffers sib {&newSymDomainNames};
+        REQUIRE(pgx.gdxSymbolSetDomain(sib.cptrs()));
+        domainSetGetTestSetupSuffix(pgx);
+        std::array<int, 2> domainSyNrs {};
+        REQUIRE(pgx.gdxSymbolGetDomain(3, domainSyNrs.data()));
+        REQUIRE_EQ(1, domainSyNrs[0]);
+        REQUIRE_EQ(1, domainSyNrs[1]);
     }
 
     TEST_CASE("Test writing with set/get domain normal and variant") {
@@ -607,16 +619,16 @@ namespace tests::gdxinterfacetests {
             domainSetGetTestSetupSuffix(pgx);
             testSetGetDomainX(pgx);
         });
+
+        testReads(fns[0], fns[1], [&](GDXInterface &pgx) {
+            StrIndexBuffers domainIds {};
+            REQUIRE(pgx.gdxSymbolGetDomainX(3, domainIds.ptrs()));
+            REQUIRE_EQ("i"s, domainIds[0].str());
+            REQUIRE_EQ("i"s, domainIds[1].str());
+        });
+
         testMatchingWrites(fns[2], fns[3], [&](GDXInterface &pgx) {
-            domainSetGetTestSetupPrefix(pgx);
-            gxdefs::TgdxStrIndex newSymDomainNames{"i", "j"};
-            StrIndexBuffers sib {&newSymDomainNames};
-            REQUIRE(pgx.gdxSymbolSetDomain(sib.cptrs()));
-            domainSetGetTestSetupSuffix(pgx);
-            std::array<int, 2> domainSyNrs {};
-            REQUIRE(pgx.gdxSymbolGetDomain(3, domainSyNrs.data()));
-            REQUIRE_EQ(1, domainSyNrs[0]);
-            REQUIRE_EQ(2, domainSyNrs[1]);
+            testSetGetDomain(pgx);
         });
 
         for (const auto &fn: fns)
