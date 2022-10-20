@@ -2525,11 +2525,12 @@ namespace gxfile {
                 const std::string &S { DomainIDs[D] };
                 if (S.empty() || S == "*" || !IsGoodIdent(S)) (*SyPtr->SDomStrings)[D] = 0;
                 else {
-                    (*SyPtr->SDomStrings)[D] = utils::indexOf(DomainStrList, S) + 1;
-                    if ((*SyPtr->SDomStrings)[D] <= 0) {
+                    int ix = utils::indexOf(DomainStrList, S);
+                    if(ix == -1) {
                         DomainStrList.push_back(S);
-                        (*SyPtr->SDomStrings)[D] = (int) DomainStrList.size();
+                        ix = (int)DomainStrList.size() - 1;
                     }
+                    (*SyPtr->SDomStrings)[D] = ix + 1;
                 }
             }
         }
