@@ -3,6 +3,7 @@
 #include "../xpwrap.h"
 #include "../gxfile.h"
 #include "../utils.h"
+#include <cassert>
 
 using namespace std::literals::string_literals;
 using namespace gdxinterface;
@@ -573,45 +574,55 @@ namespace tests::gdxinterfacetests {
         REQUIRE(pgx.gdxDataWriteStrStart("newd", "Same domain as d", 2, global::gmsspecs::dt_par, 0));
     }
 
-    void domainSetGetTestSetupSuffix(GDXInterface &pgx) {
-        int numSyms, numUels;
-        REQUIRE(pgx.gdxDataWriteDone());
-        REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
-        REQUIRE_EQ(3, numSyms);
+    void commonSetGetDomainTests(const std::vector<std::string> &domainNames,
+                                 const std::vector<int> &domainIndices) {
 
-        int newSymNr;
-        REQUIRE(pgx.gdxFindSymbol("newd", newSymNr));
-        REQUIRE_EQ(3, newSymNr);
-    }
+        assert(domainNames.size() == 2);
+        assert(domainIndices.size() == 2);
 
-    void testSetGetDomainX(GDXInterface &pgx) {
-        gxdefs::TgdxStrIndex newSymDomainNames{"i", "j"};
-        StrIndexBuffers sib {&newSymDomainNames};
-        REQUIRE(pgx.gdxSymbolSetDomainX(3, sib.cptrs()));
-        StrIndexBuffers domainIds {};
-        REQUIRE(pgx.gdxSymbolGetDomainX(3, domainIds.ptrs()));
-        REQUIRE_EQ("i"s, domainIds[0].str());
-        REQUIRE_EQ("j"s, domainIds[1].str());
-    }
-
-    void testSetGetDomain(GDXInterface &pgx) {
-        domainSetGetTestSetupPrefix(pgx);
-        gxdefs::TgdxStrIndex newSymDomainNames{"i", "j"};
-        StrIndexBuffers sib {&newSymDomainNames};
-        REQUIRE(pgx.gdxSymbolSetDomain(sib.cptrs()));
-        domainSetGetTestSetupSuffix(pgx);
-        std::array<int, 2> domainSyNrs {};
-        REQUIRE(pgx.gdxSymbolGetDomain(3, domainSyNrs.data()));
-        REQUIRE_EQ(1, domainSyNrs[0]);
-        REQUIRE_EQ(2, domainSyNrs[1]);
-    }
-
-    TEST_CASE("Test writing with set/get domain normal and variant") {
         const std::array<std::string, 4> fns {
                 "setgetdomainx_wrap.gdx"s,
                 "setgetdomainx_port.gdx"s,
                 "setgetdomain_wrap.gdx"s,
                 "setgetdomain_port.gdx"s,
+        };
+
+        gxdefs::TgdxStrIndex newSymDomainNames {};
+        std::array<int, 2> newSymDomainIndices {};
+        for(int i{}; i<domainNames.size(); i++) {
+            newSymDomainNames[i] = domainNames[i];
+            newSymDomainIndices[i] = domainIndices[i];
+        }
+
+        auto domainSetGetTestSetupSuffix = [](GDXInterface &pgx) {
+            int numSyms, numUels;
+            REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
+            REQUIRE_EQ(3, numSyms);
+
+            int newSymNr;
+            REQUIRE(pgx.gdxFindSymbol("newd", newSymNr));
+            REQUIRE_EQ(3, newSymNr);
+        };
+
+        auto testSetGetDomainX = [&](GDXInterface &pgx) {
+            StrIndexBuffers sib {&newSymDomainNames};
+            REQUIRE(pgx.gdxSymbolSetDomainX(3, sib.cptrs()));
+            StrIndexBuffers domainIds {};
+            REQUIRE(pgx.gdxSymbolGetDomainX(3, domainIds.ptrs()));
+            REQUIRE_EQ(newSymDomainNames.front(), domainIds[0].str());
+            REQUIRE_EQ(newSymDomainNames[1], domainIds[1].str());
+        };
+
+        auto testSetGetDomain = [&](GDXInterface &pgx) {
+            domainSetGetTestSetupPrefix(pgx);
+            StrIndexBuffers sib {&newSymDomainNames};
+            REQUIRE(pgx.gdxSymbolSetDomain(sib.cptrs()));
+            domainSetGetTestSetupSuffix(pgx);
+            std::array<int, 2> domainSyNrs {};
+            REQUIRE(pgx.gdxSymbolGetDomain(3, domainSyNrs.data()));
+            REQUIRE_EQ(newSymDomainIndices[0], domainSyNrs[0]);
+            REQUIRE_EQ(newSymDomainIndices[1], domainSyNrs[1]);
         };
 
         testMatchingWrites(fns[0], fns[1], [&](GDXInterface &pgx) {
@@ -623,8 +634,8 @@ namespace tests::gdxinterfacetests {
         testReads(fns[0], fns[1], [&](GDXInterface &pgx) {
             StrIndexBuffers domainIds {};
             REQUIRE(pgx.gdxSymbolGetDomainX(3, domainIds.ptrs()));
-            REQUIRE_EQ("i"s, domainIds[0].str());
-            REQUIRE_EQ("j"s, domainIds[1].str());
+            REQUIRE_EQ(newSymDomainNames[0], domainIds[0].str());
+            REQUIRE_EQ(newSymDomainNames[1], domainIds[1].str());
         });
 
         testMatchingWrites(fns[2], fns[3], [&](GDXInterface &pgx) {
@@ -633,6 +644,11 @@ namespace tests::gdxinterfacetests {
 
         for (const auto &fn: fns)
             std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test writing with set/get domain normal and variant") {
+        commonSetGetDomainTests({"i", "j"}, {1, 2});
+        commonSetGetDomainTests({"i", "i"}, {1, 1});
     }
 
     TEST_CASE("Test adding a set alias") {
