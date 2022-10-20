@@ -134,10 +134,11 @@ namespace tests::gdxinterfacetests {
         {
             std::string ErrMsg;
             T pgx{ErrMsg};
-            int ErrNr;
-            pgx.gdxOpenRead(fn, ErrNr);
+            int ErrNr, rc;
+            rc = pgx.gdxOpenRead(fn, ErrNr);
+            REQUIRE(rc);
             cb(pgx);
-            pgx.gdxClose();
+            rc = pgx.gdxClose();
         }
         if(cleanup)
             std::filesystem::remove(fn);
@@ -1005,6 +1006,15 @@ namespace tests::gdxinterfacetests {
             std::string txt;
             int node;
             REQUIRE_FALSE(pgx.gdxGetElemText(1, txt, node));
+            StrIndexBuffers domainIds;
+            std::string syid;
+            int dim, typ;
+            int sycnt, uelcnt;
+            pgx.gdxSystemInfo(sycnt, uelcnt);
+            int rc = pgx.gdxSymbolInfo(2, syid, dim, typ);
+            rc = pgx.gdxSymbolGetDomainX(2, domainIds.ptrs());
+            for(int i=0; i<pgx.gdxSymbolDim(2); i++)
+                REQUIRE(!domainIds[i].empty());
         });*/
     }
 
