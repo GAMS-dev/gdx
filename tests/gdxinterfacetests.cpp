@@ -1004,8 +1004,7 @@ namespace tests::gdxinterfacetests {
         /*testReads("concat.gdx"s, "concat.gdx"s, [&](GDXInterface& pgx) {
             std::string txt;
             int node;
-            int rc {pgx.gdxGetElemText(1, txt, node)};
-            std::cout << std::endl;
+            REQUIRE_FALSE(pgx.gdxGetElemText(1, txt, node));
         });*/
     }
 

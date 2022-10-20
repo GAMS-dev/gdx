@@ -336,7 +336,7 @@ namespace gxfile {
         MajorIndexPosition = FFile->GetPosition();
         for(int N{1}; N<=10; N++) FFile->WriteInt64(0);
         SetTextList = std::make_unique<TSetTextList>();
-        SetTextList->emplace_back(""s);
+        SetTextList->Add(""s);
         gdxResetSpecialValues();
         NextWritePosition = FFile->GetPosition();
         fmode = fw_init;
@@ -1836,8 +1836,7 @@ namespace gxfile {
             NrElem = FFile->ReadInteger();
             SetTextList->reserve(NrElem);
             for (int N{}; N < NrElem; N++) {
-                SetTextList->push_back(FFile->ReadString());
-                int TextNum{ static_cast<int>(SetTextList->size()-1) };
+                int TextNum{ SetTextList->Add(FFile->ReadString()) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
                     MapSetText.resize(NrElem);
                     // TODO: Could this be replaced by std::iota?
@@ -1962,8 +1961,7 @@ namespace gxfile {
     int TGXFileObj::gdxAddSetText(const std::string &Txt, int &TxtNr) {
         if(!SetTextList || TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText", {}))
             return false;
-        SetTextList->emplace_back(MakeGoodExplText(Txt));
-        TxtNr = static_cast<int>(SetTextList->size()-1);
+        TxtNr = SetTextList->Add(MakeGoodExplText(Txt));
         return true;
     }
 
@@ -4300,5 +4298,13 @@ namespace gxfile {
         return std::any_of(strToNodeNr.begin(), strToNodeNr.end(), [&s](const auto &pair) {
             return utils::sameText(s, pair.first);
         });
+    }
+
+    int TSetTextList::Add(const std::string &s) {
+        for(int i{}; i<size(); i++)
+            if(utils::sameText((*this)[i], s))
+                return i;
+        emplace_back(s);
+        return static_cast<int>(size()-1);
     }
 }

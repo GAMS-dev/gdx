@@ -245,6 +245,7 @@ namespace gxfile {
     public:
         std::map<std::string, int, strCompCaseInsensitive> strToNodeNr;
         bool mapContains(const std::string& s);
+        int Add(const std::string &s);
     };
 
     using TDomainIndexProc_t = void(*)(int RawIndex, int MappedIndex, void* Uptr);
