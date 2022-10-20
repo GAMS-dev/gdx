@@ -2422,6 +2422,13 @@ namespace gxfile {
         int res{ false };
         TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
         if (!MajorCheckMode("SymbolSetDomain", AllowedModes) || !CurSyPtr) return res;
+
+        if(verboseTrace && TraceLevel == TraceLevels::trl_all) {
+            std::cout << "SetDomain" << std::endl;
+            for(int D{}; D < CurSyPtr->SDim; D++)
+                std::cout << "DomainID[" << D << "]=" << DomainIDs[D] << std::endl;
+        }
+
         res = true;
         assert(!CurSyPtr->SDomSymbols && "SymbolSetDomain");
         CurSyPtr->SDomSymbols = std::make_unique<std::vector<int>>(CurSyPtr->SDim);
@@ -2490,6 +2497,13 @@ namespace gxfile {
         // check for write or append only
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
         PgdxSymbRecord SyPtr = (*symbolWithIndex(SyNr)).second;
+
+        if(verboseTrace && TraceLevel == TraceLevels::trl_all) {
+            std::cout << "SetDomainX SyNr=" << SyNr << std::endl;
+            for(int D{}; D < SyPtr->SDim; D++)
+                std::cout << "DomainID[" << D << "]=" << DomainIDs[D] << std::endl;
+        }
+
         if (SyPtr->SDim > 0) {
             if (!SyPtr->SDomStrings)
                 SyPtr->SDomStrings = std::make_unique<std::vector<int>>(SyPtr->SDim);
