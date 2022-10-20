@@ -2333,26 +2333,40 @@ namespace gxfile {
         if (ErrorCondition(!NameList.empty() && SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return 0;
         PgdxSymbRecord SyPtr{ (*symbolWithIndex(SyNr)).second };
 
-        for(int D{0}; D<SyPtr->SDim; D++) {
+        for(int D{}; D<SyPtr->SDim; D++) {
             DomainIDs[D][0] = '*';
             DomainIDs[D][1] = '\0';
         }
+
+        int res{};
 
         if (SyPtr->SDomStrings) {
             for (int D{}; D<SyPtr->SDim; D++)
                 if((*SyPtr->SDomStrings)[D])
                     utils::stocp(DomainStrList[(*SyPtr->SDomStrings)[D] - 1], DomainIDs[D]);
-            return 2;
+            res = 2;
         }
         else if (!SyPtr->SDomSymbols)
-            return 1;
+            res = 1;
         else {
             for (int D{}; D < SyPtr->SDim; D++)
                 if ((*SyPtr->SDomSymbols)[D])
                     utils::stocp((*symbolWithIndex((*SyPtr->SDomSymbols)[D])).first, DomainIDs[D]);
-            return 3;
+            res = 3;
         }
-        return 0;
+
+        if(verboseTrace && TraceLevel == TraceLevels::trl_all && utils::in(res, 2, 3)) {
+            std::cout << "GetDomain SyNr=" << SyNr << std::endl;
+            for (int D{}; D < SyPtr->SDim; D++) {
+                if(res == 2)
+                    std::cout << "SDomStrings[" << D << "]=" << (*SyPtr->SDomStrings)[D] << std::endl;
+                else if(res == 3)
+                    std::cout << "SDomSymbols[" << D << "]=" << (*SyPtr->SDomSymbols)[D] << std::endl;
+                std::cout << "DomainIDs[" << D << "]=" << DomainIDs[D] << std::endl;
+            }
+        }
+
+        return res;
     }
 
     // Brief:
