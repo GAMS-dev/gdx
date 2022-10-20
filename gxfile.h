@@ -272,7 +272,7 @@ namespace gxfile {
         std::map<std::string, PgdxSymbRecord, strCompCaseInsensitive> NameList;
         // symbol names in order of insertion, needed since SSyNr is not set correctly for alias (in add alias)
         std::vector<std::string> NameListOrdered;
-        std::vector<std::string> DomainStrList;
+        std::unique_ptr<std::vector<std::string>> DomainStrList;
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
         //std::map<global::gmsspecs::TIndex, gxdefs::TgdxValues> SortList;
         std::unique_ptr<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>> SortList;
@@ -419,7 +419,7 @@ namespace gxfile {
 
         int gdxSymbolSetDomain(const char **DomainIDs) override;
 
-        int gdxSymbolSetDomainX(int SyNr, const char **DomainIDs) override;
+        int gdxSymbolSetDomainX(int domStr, const char **DomainIDs) override;
 
         int gdxSystemInfo(int &SyCnt, int &UelCnt) override;
 

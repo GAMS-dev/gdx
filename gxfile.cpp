@@ -340,7 +340,7 @@ namespace gxfile {
         gdxResetSpecialValues();
         NextWritePosition = FFile->GetPosition();
         fmode = fw_init;
-        DomainStrList.clear();
+        DomainStrList = std::make_unique<std::vector<std::string>>();
 
         const std::string FileNameYML = utils::replaceSubstrs(FileName, ".gdx", ".yaml");
         YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
@@ -584,12 +584,14 @@ namespace gxfile {
             auto DomStrPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_DOMS);
-            FFile->WriteInteger(static_cast<int>(DomainStrList.size()));
+            FFile->WriteInteger(DomainStrList ? static_cast<int>(DomainStrList->size()) : 0);
             YFile->AddKeyItem("domain_strings");
             YFile->IncIndentLevel();
-            for(const auto &DomStr : DomainStrList) {
-                FFile->WriteString(DomStr);
-                YFile->AddItem(DomStr);
+            if(DomainStrList) {
+                for (const auto &DomStr: *DomainStrList) {
+                    FFile->WriteString(DomStr);
+                    YFile->AddItem(DomStr);
+                }
             }
             FFile->WriteString(MARK_DOMS);
             YFile->DecIndentLevel();
@@ -640,9 +642,16 @@ namespace gxfile {
         }
 
         FFile = nullptr;
-        SortList = nullptr;
         SetTextList = nullptr;
+        UELTable = nullptr;
+        SortList = nullptr;
+        DomainStrList = nullptr;
+
+        ErrorList.clear();
+        FilterList.clear();
+        AcronymList.clear();
         MapSetText.clear();
+
         fmode = f_not_open;
         fstatus = stat_notopen;
 
@@ -1859,12 +1868,13 @@ namespace gxfile {
             }
         }
 
+        DomainStrList = std::make_unique<std::vector<std::string>>();
         if (VersionRead >= 7 && DomStrPos) {
             FFile->SetCompression(DoUncompress);
             FFile->SetPosition(DomStrPos);
             if(ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER1)) return FileErrorNr();
-            DomainStrList.resize(FFile->ReadInteger());
-            for (auto & i : DomainStrList)
+            DomainStrList->resize(FFile->ReadInteger());
+            for (auto & i : *DomainStrList)
                 i = FFile->ReadString();
             if (ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER2)) return FileErrorNr();
             while (true) {
@@ -2343,7 +2353,7 @@ namespace gxfile {
         if (SyPtr->SDomStrings) {
             for (int D{}; D<SyPtr->SDim; D++)
                 if((*SyPtr->SDomStrings)[D])
-                    utils::stocp(DomainStrList[(*SyPtr->SDomStrings)[D] - 1], DomainIDs[D]);
+                    utils::stocp((*DomainStrList)[(*SyPtr->SDomStrings)[D] - 1], DomainIDs[D]);
             res = 2;
         }
         else if (!SyPtr->SDomSymbols)
@@ -2525,10 +2535,12 @@ namespace gxfile {
                 const std::string &S { DomainIDs[D] };
                 if (S.empty() || S == "*" || !IsGoodIdent(S)) (*SyPtr->SDomStrings)[D] = 0;
                 else {
-                    (*SyPtr->SDomStrings)[D] = utils::indexOf(DomainStrList, S) + 1; // one-based
+                    (*SyPtr->SDomStrings)[D] = utils::indexOf<std::string>(*DomainStrList, [&](const auto &domStr) {
+                        return utils::sameText(domStr, S);
+                    }) + 1; // one-based
                     if((*SyPtr->SDomStrings)[D] <= 0) {
-                        DomainStrList.push_back(S);
-                        (*SyPtr->SDomStrings)[D] = (int)DomainStrList.size();
+                        DomainStrList->push_back(S);
+                        (*SyPtr->SDomStrings)[D] = (int)DomainStrList->size();
                     }
                     // FIXME: Handling is not correct here, but the fixed version causes even bigger issues!
                     /*(*SyPtr->SDomStrings)[D] = utils::indexOf(DomainStrList, S);
