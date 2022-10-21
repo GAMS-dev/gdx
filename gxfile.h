@@ -343,6 +343,7 @@ namespace gxfile {
         int gdxOpenReadXX(const std::string &Afn, int filemode, int ReadMode, int &ErrNr);
 
         std::optional<std::pair<const std::string, PgdxSymbRecord>> symbolWithIndex(int index);
+        int symbolNameToIndex(const std::string &name);
 
     public:
         explicit TGXFileObj(std::string &ErrMsg);

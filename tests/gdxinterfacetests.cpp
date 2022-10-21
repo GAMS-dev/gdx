@@ -193,6 +193,7 @@ namespace tests::gdxinterfacetests {
         auto [f1, f2] = filenames;
         testMatchingWrites(f1, f2, [](GDXInterface &pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
+            REQUIRE(pgx.gdxUELRegisterRaw(""));
             REQUIRE(pgx.gdxUELRegisterRaw("New-York"));
             REQUIRE(pgx.gdxUELRegisterDone());
         });
@@ -201,11 +202,14 @@ namespace tests::gdxinterfacetests {
             std::string uel;
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
             REQUIRE_EQ(0, highMap);
-            REQUIRE_EQ(1, uelCnt);
+            REQUIRE_EQ(2, uelCnt);
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
+            REQUIRE(uel.empty());
+            REQUIRE_EQ(-1, uelMap);
+            REQUIRE(pgx.gdxUMUelGet(2, uel, uelMap));
             REQUIRE_EQ("New-York", uel);
             REQUIRE_EQ(-1, uelMap);
-            REQUIRE_FALSE(pgx.gdxGetUEL(1, uel));
+            REQUIRE_FALSE(pgx.gdxGetUEL(2, uel));
             REQUIRE_NE("New-York", uel);
         });
         for (const auto& fn : filenames)
@@ -580,8 +584,11 @@ namespace tests::gdxinterfacetests {
 
         REQUIRE(pgx.gdxDataWriteStrStart("j", "", 1, global::gmsspecs::dt_set, 0));
         REQUIRE(pgx.gdxDataWriteDone());
+
+        REQUIRE(pgx.gdxAddAlias("k", "i"));
+
         REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
-        REQUIRE_EQ(2, numSyms);
+        REQUIRE_EQ(3, numSyms);
 
         REQUIRE(pgx.gdxDataWriteStrStart("newd", "Same domain as d", 2, global::gmsspecs::dt_par, 0));
     }
@@ -610,18 +617,18 @@ namespace tests::gdxinterfacetests {
             int numSyms, numUels;
             REQUIRE(pgx.gdxDataWriteDone());
             REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
-            REQUIRE_EQ(3, numSyms);
+            REQUIRE_EQ(4, numSyms);
 
             int newSymNr;
             REQUIRE(pgx.gdxFindSymbol("newd", newSymNr));
-            REQUIRE_EQ(3, newSymNr);
+            REQUIRE_EQ(4, newSymNr);
         };
 
         auto testSetGetDomainX = [&](GDXInterface &pgx) {
             StrIndexBuffers sib {&newSymDomainNames};
-            REQUIRE(pgx.gdxSymbolSetDomainX(3, sib.cptrs()));
+            REQUIRE(pgx.gdxSymbolSetDomainX(4, sib.cptrs()));
             StrIndexBuffers domainIds {};
-            REQUIRE(pgx.gdxSymbolGetDomainX(3, domainIds.ptrs()));
+            REQUIRE(pgx.gdxSymbolGetDomainX(4, domainIds.ptrs()));
             REQUIRE_EQ(newSymDomainNames.front(), domainIds[0].str());
             REQUIRE_EQ(newSymDomainNames[1], domainIds[1].str());
         };
@@ -632,7 +639,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxSymbolSetDomain(sib.cptrs()));
             domainSetGetTestSetupSuffix(pgx);
             std::array<int, 2> domainSyNrs {};
-            REQUIRE(pgx.gdxSymbolGetDomain(3, domainSyNrs.data()));
+            REQUIRE(pgx.gdxSymbolGetDomain(4, domainSyNrs.data()));
             REQUIRE_EQ(newSymDomainIndices[0], domainSyNrs[0]);
             REQUIRE_EQ(newSymDomainIndices[1], domainSyNrs[1]);
         };
@@ -645,7 +652,7 @@ namespace tests::gdxinterfacetests {
 
         testReads(fns[0], fns[1], [&](GDXInterface &pgx) {
             StrIndexBuffers domainIds {};
-            REQUIRE(pgx.gdxSymbolGetDomainX(3, domainIds.ptrs()));
+            REQUIRE(pgx.gdxSymbolGetDomainX(4, domainIds.ptrs()));
             REQUIRE_EQ(newSymDomainNames[0], domainIds[0].str());
             REQUIRE_EQ(newSymDomainNames[1], domainIds[1].str());
         });
@@ -661,6 +668,7 @@ namespace tests::gdxinterfacetests {
     TEST_CASE("Test writing with set/get domain normal and variant") {
         commonSetGetDomainTests({"i", "j"}, {1, 2});
         commonSetGetDomainTests({"i", "i"}, {1, 1});
+        commonSetGetDomainTests({"i", "k"}, {1, 3});
     }
 
     TEST_CASE("Test adding a set alias") {

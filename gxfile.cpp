@@ -1920,11 +1920,8 @@ namespace gxfile {
     //   gdxSymbolSetDomain
     int TGXFileObj::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
         if(!MajorCheckMode("AddAlias", AnyWriteMode)) return false;
-        auto symbolNameToIndex = [&](const std::string &name) {
-            // FIXME: A lookup through NameList map would be faster *but* SSyNr is not set correctly for alias objects in memory!
-            return name == "*" ? std::numeric_limits<int>::max() : utils::indexOf(NameListOrdered, name, -2) + 1;
-        };
-        int SyNr1 { symbolNameToIndex(Id1) }, SyNr2 { symbolNameToIndex(Id2) };
+        int SyNr1 { Id1 == "*" ? std::numeric_limits<int>::max() : symbolNameToIndex(Id1) };
+        int SyNr2 { Id2 == "*" ? std::numeric_limits<int>::max() : symbolNameToIndex(Id2) };
         if(ErrorCondition((SyNr1 >= 0) != (SyNr2 >= 0), ERR_ALIASSETEXPECTED)) return false;
         int SyNr;
         std::string AName;
@@ -2460,7 +2457,10 @@ namespace gxfile {
             int DomSy;
             if (!std::strcmp(DomainIDs[D], "*")) DomSy = 0;
             else {
-                DomSy = NameList[DomainIDs[D]]->SSyNr;
+                // Since SSyNr of alias symbol objects is 0
+                // so symbol number of alias can only be deduced by looking at position in NameListOrdered
+                // which is ordered by order of symbol insertion
+                DomSy = symbolNameToIndex(DomainIDs[D])/*  NameList[DomainIDs[D]]->SSyNr*/;
                 if (DomSy <= -1) {
                     ReportError(ERR_UNKNOWNDOMAIN);
                     DomSy = -1;
@@ -4111,6 +4111,13 @@ namespace gxfile {
             DP(LastElem.data(), AVals.data());
         gdxDataReadDone();
         return NrRecs >= 0;
+    }
+
+    int TGXFileObj::symbolNameToIndex(const std::string &name) {
+        if(name == "*"s) return 0;
+        // FIXME: A lookup through NameList map would be faster *but* SSyNr is not set correctly for alias objects in memory!
+        int ix = utils::indexOf(NameListOrdered, name);
+        return ix == -1 ? -1 : ix + 1;
     }
 
     void TUELTable::clear() {
