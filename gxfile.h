@@ -266,7 +266,7 @@ namespace gxfile {
         std::vector<int> MapSetText;
         int FCurrentDim{};
         global::gmsspecs::TIndex LastElem, PrevElem, MinElem, MaxElem;
-        std::array<std::string, global::gmsspecs::MaxDim> LastStrElem;
+        std::array<std::optional<std::string>, global::gmsspecs::MaxDim> LastStrElem;
         int DataSize{};
         global::gmsspecs::tvarvaltype LastDataField;
         std::map<std::string, PgdxSymbRecord, strCompCaseInsensitive> NameList;

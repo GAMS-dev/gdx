@@ -376,8 +376,7 @@ namespace gxfile {
     //   gdxDataWriteStr, gdxDataWriteDone
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) {
         if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
-        for (int D{}; D < FCurrentDim; D++)
-            LastStrElem[D].clear();
+        LastStrElem.fill(std::nullopt);
         SortList = std::make_unique<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
         fmode = fw_dom_str;
         return true;
@@ -409,7 +408,7 @@ namespace gxfile {
         }
         for(int D{}; D<FCurrentDim; D++) {
             std::string SV {utils::trimRight(KeyStr[D])};
-            if(SV != LastStrElem[D]) {
+            if(!LastStrElem[D] || SV != (*LastStrElem[D])) {
                 // 0=not found, >=1 found
                 int KD {UELTable->IndexOf(SV)+1};
                 if(!KD) {
@@ -417,7 +416,7 @@ namespace gxfile {
                     KD = UELTable->AddObject(SV, -1);
                 }
                 LastElem[D] = KD;
-                LastStrElem[D] = SV;
+                LastStrElem[D] = std::make_optional<std::string>(SV);
                 if(KD < MinElem[D]) MinElem[D] = KD;
                 if(KD > MaxElem[D]) MaxElem[D] = KD;
             }

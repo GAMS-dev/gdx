@@ -322,21 +322,33 @@ namespace tests::gdxinterfacetests {
         gxdefs::TgdxValues values{};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
             REQUIRE(pgx.gdxDataWriteStrStart("mysym", "This is my symbol!", 1, global::gmsspecs::gms_dt_par, 0));
-            keyNames[0] = "TheOnlyUEL"s;
             values[global::gmsspecs::vallevel] = 3.141;
+
+            char empty = '\0';
+            const char *emptyPtr = &empty;
+            REQUIRE(pgx.gdxDataWriteStr(&emptyPtr, values.data()));
+
+            keyNames[0] = "TheOnlyUEL"s;
             const char *keyptrs[] = {keyNames[0].c_str()};
             REQUIRE(pgx.gdxDataWriteStr(keyptrs, values.data()));
+
             REQUIRE(pgx.gdxDataWriteDone());
         });
         testReads(f1, f2, [&](GDXInterface &pgx) {
             int NrRecs;
             REQUIRE(pgx.gdxDataReadStrStart(1, NrRecs));
-            REQUIRE_EQ(1, NrRecs);
+            REQUIRE_EQ(2, NrRecs);
+
             int dimFrst;
             REQUIRE(pgx.gdxDataReadStr(keyNames.ptrs(), values.data(), dimFrst));
-            REQUIRE(pgx.gdxDataReadDone());
+            REQUIRE(keyNames[0].str().empty());
+            REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
+
+            REQUIRE(pgx.gdxDataReadStr(keyNames.ptrs(), values.data(), dimFrst));
             REQUIRE_EQ("TheOnlyUEL"s, keyNames[0].str());
             REQUIRE_EQ(3.141, values[global::gmsspecs::vallevel]);
+
+            REQUIRE(pgx.gdxDataReadDone());
         });
         for (const auto& fn : {f1, f2})
             std::filesystem::remove(fn);
