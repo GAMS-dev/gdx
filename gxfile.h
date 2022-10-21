@@ -419,7 +419,7 @@ namespace gxfile {
 
         int gdxSymbolSetDomain(const char **DomainIDs) override;
 
-        int gdxSymbolSetDomainX(int domStr, const char **DomainIDs) override;
+        int gdxSymbolSetDomainX(int SyNr, const char **DomainIDs) override;
 
         int gdxSystemInfo(int &SyCnt, int &UelCnt) override;
 
