@@ -739,7 +739,7 @@ namespace gxfile {
         obj->SSetBitMap = utils::in((TgdxDataType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
                 std::make_optional<std::vector<bool>>() : std::nullopt;
 
-        CurSyPtr->SSyNr = static_cast<int>(NameListOrdered.size()+1); // +1 for universe
+        CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = static_cast<int>(NameListOrdered.size()+1); // +1 for universe
         NameList[AName] = CurSyPtr;
         NameListOrdered.push_back(AName);
         FCurrentDim = ADim;
@@ -1554,18 +1554,9 @@ namespace gxfile {
     // See Also:
     //   gdxSymbolInfo, gdxSymbolInfoX
     int TGXFileObj::gdxFindSymbol(const std::string &SyId, int &SyNr) {
-        if (SyId == "*") {
-            SyNr = 0;
-            return true;
-        }
-        // FIXME: This is slow (linear), use RB-tree instead
-        const auto it = std::find_if(NameListOrdered.begin(), NameListOrdered.end(), [&](const std::string &name) {
-           return  utils::sameText(SyId, name);
-        });
-        if(it == NameListOrdered.end()) return false;
-        // FIXME: The symbol number cannot be trusted because it is not set correctly for set alias (also in Delphi)
-        //SyNr = (*it).second->SSyNr;
-        SyNr = static_cast<int>(std::distance(NameListOrdered.begin(), it) + 1);
+        int ix = symbolNameToIndex(SyId);
+        if(ix == -1) return false;
+        SyNr = ix;
         return true;
     }
 
@@ -1815,7 +1806,7 @@ namespace gxfile {
             CurSyPtr->SDomStrings = nullptr;
             NameList[S] = CurSyPtr;
             NameListOrdered.push_back(S);
-            CurSyPtr->SSyNr = static_cast<int>(NameListOrdered.size());
+            CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = static_cast<int>(NameListOrdered.size());
         }
 
         // reading UEL table
@@ -1899,7 +1890,7 @@ namespace gxfile {
     }
 
     std::optional<std::pair<const std::string, PgdxSymbRecord>> TGXFileObj::symbolWithIndex(int index) {
-        if(index < 1 || index > NameList.size()) return std::nullopt;
+        if(index < 1 || index > NameListOrdered.size()) return std::nullopt;
         std::string name = NameListOrdered[index-1];
         return std::make_optional(std::make_pair(name, NameList[name]));
     }
@@ -1945,9 +1936,10 @@ namespace gxfile {
             SyPtr->SDim = symbolWithIndex(SyNr)->second->SDim;
             SyPtr->SExplTxt = "Aliased with "s + symbolWithIndex(SyNr)->first;
         }
-        // TODO: Also the Delphi source does not set SSyNr here correctly, what to do?
+        // TODO: Also the Delphi source does not set SSyNr here correctly, hence the helper field "SSyNrActual" is used
         NameList[AName] = SyPtr;
         NameListOrdered.push_back(AName);
+        SyPtr->SSyNrActual = static_cast<int>(NameListOrdered.size());
         return true;
     }
 
@@ -2458,9 +2450,8 @@ namespace gxfile {
             if (!std::strcmp(DomainIDs[D], "*")) DomSy = 0;
             else {
                 // Since SSyNr of alias symbol objects is 0
-                // so symbol number of alias can only be deduced by looking at position in NameListOrdered
-                // which is ordered by order of symbol insertion
-                DomSy = symbolNameToIndex(DomainIDs[D])/*  NameList[DomainIDs[D]]->SSyNr*/;
+                // so symbol number of alias is deduced by helper field SSyNrActual
+                DomSy = symbolNameToIndex(DomainIDs[D]);
                 if (DomSy <= -1) {
                     ReportError(ERR_UNKNOWNDOMAIN);
                     DomSy = -1;
@@ -4115,9 +4106,8 @@ namespace gxfile {
 
     int TGXFileObj::symbolNameToIndex(const std::string &name) {
         if(name == "*"s) return 0;
-        // FIXME: A lookup through NameList map would be faster *but* SSyNr is not set correctly for alias objects in memory!
-        int ix = utils::indexOf(NameListOrdered, name);
-        return ix == -1 ? -1 : ix + 1;
+        const auto it = NameList.find(name);
+        return it == NameList.end() ? -1 : it->second->SSyNrActual;
     }
 
     void TUELTable::clear() {
