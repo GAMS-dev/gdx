@@ -1554,10 +1554,8 @@ namespace gxfile {
     // See Also:
     //   gdxSymbolInfo, gdxSymbolInfoX
     int TGXFileObj::gdxFindSymbol(const std::string &SyId, int &SyNr) {
-        int ix = symbolNameToIndex(SyId);
-        if(ix == -1) return false;
-        SyNr = ix;
-        return true;
+        SyNr = symbolNameToIndex(SyId);
+        return SyNr != -1;
     }
 
     // Brief:
