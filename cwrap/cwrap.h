@@ -14,6 +14,7 @@ extern "C" {
     typedef struct TGXFileRec TGXFileRec_t;
 
     typedef void (GDX_CALLCONV *TDataStoreProc_t) (const int Indx[], const double Vals[]);
+    typedef void (GDX_CALLCONV *TDataStoreProc_F_t) (const int Indx[], const double Vals[]);
     typedef int (GDX_CALLCONV *TDataStoreFiltProc_t) (const int Indx[], const double Vals[], void *Uptr);
     typedef void (GDX_CALLCONV *TDomainIndexProc_t) (int RawIndex, int MappedIndex, void *Uptr);
     typedef int (GDX_CALLCONV *TDataStoreFiltProc_F_t) (const int Indx[], const double Vals[], long long *Uptr);
@@ -126,6 +127,8 @@ extern "C" {
 
     int gdxDataReadRawFast(TGXFileRec_t *TGXFile, int SyNr, TDataStoreProc_t DP, int *NrRecs);
     int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char *UelFilterStr[], TDataStoreFiltProc_t DP);
+
+    void setCallByRef(const char *FuncName, int cbrValue);
 
 #ifdef __cplusplus
 }

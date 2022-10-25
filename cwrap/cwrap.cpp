@@ -504,6 +504,11 @@ int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char **UelFilt
 
 }
 
+void setCallByRef(const char *FuncName, int cbrValue) {
+    // FIXME: Actually do something!
+    STUBWARN();
+}
+
 
 
 
