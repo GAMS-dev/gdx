@@ -1066,6 +1066,40 @@ namespace tests::gdxinterfacetests {
         });*/
     }
 
+    // FIXME: Why is this not failing?
+    TEST_CASE("Debug issue with SymbolSetDomain and write raw domain check uncovered by emp_oa_gams_jams test") {
+        std::string f1{ "domaincheck_wrapper.gdx" },
+                    f2 {"domaincheck_port.gdx"};
+        testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
+            pgx.gdxUELRegisterRawStart();
+            for(int i=0; i<50; i++)
+                pgx.gdxUELRegisterRaw(("uel_"s+std::to_string(i+1)).c_str());
+            pgx.gdxUELRegisterDone();
+
+            pgx.gdxDataWriteRawStart("j", "", 1, global::gmsspecs::dt_set, 0);
+            gxdefs::TgdxValues vals {};
+            vals[global::gmsspecs::tvarvaltype::vallevel] = 3.141;
+            int key;
+            for(key=17; key <= 32; key++)
+                pgx.gdxDataWriteRaw(&key, vals.data());
+            REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE(pgx.gdxDataWriteRawStart("jb", "", 1, global::gmsspecs::dt_set, 0));
+            gxdefs::TgdxStrIndex domainNames {};
+            domainNames.front() = "j";
+            StrIndexBuffers domainIds {&domainNames};
+            REQUIRE(pgx.gdxSymbolSetDomain(domainIds.cptrs()));
+            key = 17;
+            REQUIRE(pgx.gdxDataWriteRaw(&key, vals.data()));
+            REQUIRE(pgx.gdxDataWriteDone());
+            if(pgx.gdxErrorCount() > 0) {
+                int errNr = pgx.gdxGetLastError();
+                std::string errMsg;
+                pgx.gdxErrorStr(errNr, errMsg);
+                std::cout << errMsg << std::endl;
+            }
+        });
+    }
+
     TEST_SUITE_END();
 
 }
