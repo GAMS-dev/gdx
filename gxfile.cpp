@@ -285,6 +285,10 @@ namespace gxfile {
     //      [ ... ]
     // </CODE>
     int TGXFileObj::gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) {
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
+            std::cout << "gdxOpenWrite(" << FileName << ")" << std::endl;
+        }
+
         if(fmode != f_not_open) {
             ErrNr = ERR_FILEALREADYOPEN;
             return false;
@@ -409,9 +413,9 @@ namespace gxfile {
         for(int D{}; D<FCurrentDim; D++) {
             std::string SV {utils::trimRight(KeyStr[D])};
             if(!LastStrElem[D] || SV != (*LastStrElem[D])) {
-                // 0=not found, >=1 found
-                int KD {UELTable->IndexOf(SV)+1};
-                if(!KD) {
+                // -1=not found, >=1 found
+                int KD {UELTable->IndexOf(SV)};
+                if(KD == -1) {
                     if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
                     KD = UELTable->AddObject(SV, -1);
                 }
@@ -465,6 +469,9 @@ namespace gxfile {
     // See Also:
     //   gdxOpenRead, gdxOpenWrite
     int TGXFileObj::gdxClose() {
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
+            std::cout << "gdxClose(" << FFile->GetFileName() << ")" << std::endl;
+        }
         std::string fnConv;
         if(utils::in(fmode, fw_raw_data, fw_map_data, fw_str_data)) // unfinished write
             gdxDataWriteDone();
@@ -1704,6 +1711,10 @@ namespace gxfile {
         fmode = f_not_open;
         ReadPtr = -1;
         InitErrors();
+
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
+            std::cout << "gdxOpenRead(" << Afn << ")" << std::endl;
+        }
 
         auto FileErrorNr = [&]() {
             ErrNr = LastError;
@@ -4124,7 +4135,7 @@ namespace gxfile {
     int TUELTable::IndexOf(const std::string &s) const {
         return utils::indexOf<std::string>(uelNames, [&s](const std::string& other) {
             return utils::sameText(s, other);
-        });
+        }, -2) + 1; // not found -> -1, found -> 1..nuels
     }
 
     int TUELTable::AddObject(const std::string &id, int mapping) {
@@ -4134,7 +4145,7 @@ namespace gxfile {
             nameToNum[id] = mapping;
             return static_cast<int>(uelNames.size());
         }
-        return ix+1;
+        return ix;
     }
 
     bool TUELTable::empty() const {
@@ -4205,10 +4216,10 @@ namespace gxfile {
     // FIXME: How does this affect the ordering / sort list?
     // Should renaming change the index?
     void TUELTable::RenameEntry(int N, const std::string &s) {
-        std::string oldName = uelNames[N];
-        uelNames[N] = s;
+        std::string oldName = uelNames[N-1];
+        uelNames[N-1] = s;
         nameToNum.erase(oldName);
-        nameToNum[s] = N+1;
+        nameToNum[s] = N;
     }
 
     int TUELTable::GetMaxUELLength() const {
