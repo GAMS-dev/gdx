@@ -1066,7 +1066,6 @@ namespace tests::gdxinterfacetests {
         });*/
     }
 
-    // FIXME: Why is this not failing?
     TEST_CASE("Debug issue with SymbolSetDomain and write raw domain check uncovered by emp_oa_gams_jams test") {
         std::string f1{ "domaincheck_wrapper.gdx" },
                     f2 {"domaincheck_port.gdx"};
@@ -1099,6 +1098,34 @@ namespace tests::gdxinterfacetests {
                 std::cout << errMsg << std::endl;
             }
         });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test writing and reading some special value scalars") {
+        std::string f1{ "sv_scalars_wrapper.gdx" },
+                f2 {"sv_scalars_port.gdx"};
+        testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
+            gxdefs::TgdxValues vals {};
+            vals[global::gmsspecs::tvarvaltype::vallevel] = std::numeric_limits<double>::quiet_NaN();
+            REQUIRE(pgx.gdxDataWriteRawStart("undef", "", 0, global::gmsspecs::dt_par, 0));
+            REQUIRE(pgx.gdxDataWriteRaw(nullptr, vals.data()));
+            REQUIRE(pgx.gdxDataWriteDone());
+        });
+        testReads(f1, f2, [&](GDXInterface& pgx) {
+            //std::string txt;
+            //int node;
+            //REQUIRE(pgx.gdxGetElemText(1, txt, node));
+            int recCnt;
+            REQUIRE(pgx.gdxDataReadRawStart(1, recCnt));
+            int dimFirst;
+            gxdefs::TgdxValues vals {};
+            REQUIRE(pgx.gdxDataReadRaw(nullptr, vals.data(), dimFirst));
+            REQUIRE(pgx.gdxDataReadDone());
+            double undef = vals[global::gmsspecs::tvarvaltype::vallevel];
+        });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
     }
 
     TEST_SUITE_END();
