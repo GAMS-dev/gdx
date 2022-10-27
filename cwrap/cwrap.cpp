@@ -8,6 +8,9 @@ using namespace gxfile;
 
 extern "C" {
 
+gdxSetLoadPath_t gdxSetLoadPath = nullptr;
+gdxGetLoadPath_t gdxGetLoadPath = nullptr;
+
 int gdxCreate(TGXFileRec_t **pgdx, char *errBuf, int bufSize) {
     std::string ErrMsg;
     auto *pgx = new TGXFileObj {ErrMsg};

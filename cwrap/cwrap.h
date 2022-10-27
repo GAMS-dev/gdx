@@ -20,6 +20,11 @@ extern "C" {
     typedef int (GDX_CALLCONV *TDataStoreFiltProc_F_t) (const int Indx[], const double Vals[], long long *Uptr);
     typedef void (GDX_CALLCONV *TDomainIndexProc_F_t) (int *RawIndex, int *MappedIndex, void *Uptr);
 
+    typedef void (GDX_CALLCONV *gdxSetLoadPath_t) (const char *s);
+    typedef void (GDX_CALLCONV *gdxGetLoadPath_t) (char *s);
+    extern gdxSetLoadPath_t gdxSetLoadPath;
+    extern gdxGetLoadPath_t gdxGetLoadPath;
+
     typedef long long INT64;
 
     int create_gdx_file(const char *filename);
