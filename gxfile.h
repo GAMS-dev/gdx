@@ -108,7 +108,7 @@ namespace gxfile {
                                           SDomStrings; //relaxed domain info
         std::vector<std::string> SCommentsList; // TODO: should this also become an optional entry?
         bool SScalarFrst; // not stored
-        std::optional<std::vector<bool>> SSetBitMap; // for 1-dim sets only
+        std::unique_ptr<std::vector<bool>> SSetBitMap; // for 1-dim sets only
     };
     using PgdxSymbRecord = TgdxSymbRecord*;
 
@@ -308,7 +308,7 @@ namespace gxfile {
         int DeltaForRead{}; // first position indicating change
         double Zvalacr{}; // tricky
         TAcronymList AcronymList;
-        std::array<std::optional<std::vector<bool>>, global::gmsspecs::MaxDim> WrBitMaps;
+        std::array<std::vector<bool> *, global::gmsspecs::MaxDim> WrBitMaps;
         bool ReadUniverse{};
         int UniverseNr{}, UelCntOrig{}; // original uel count when we open the file
         int AutoConvert{1};

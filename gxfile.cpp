@@ -744,7 +744,7 @@ namespace gxfile {
         obj->SDomSymbols = nullptr;
         obj->SDomStrings = nullptr;
         obj->SSetBitMap = utils::in((TgdxDataType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
-                std::make_optional<std::vector<bool>>() : std::nullopt;
+                std::make_unique<std::vector<bool>>() : nullptr;
 
         CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = static_cast<int>(NameListOrdered.size()+1); // +1 for universe
         NameList[AName] = CurSyPtr;
@@ -764,7 +764,7 @@ namespace gxfile {
             LastElem[D] = INDEX_INITIAL;
             MinElem[D] = std::numeric_limits<int>::max();
             MaxElem[D] = 0;
-            WrBitMaps[D] = std::nullopt;
+            WrBitMaps[D] = nullptr;
         }
 
         FFile->SetCompression(CurSyPtr->SIsCompressed);
@@ -1811,7 +1811,7 @@ namespace gxfile {
                     NrElem--;
                 }
             }
-            CurSyPtr->SSetBitMap = std::nullopt;
+            CurSyPtr->SSetBitMap = nullptr;
             CurSyPtr->SDomStrings = nullptr;
             NameList[S] = CurSyPtr;
             NameListOrdered.push_back(S);
@@ -2489,7 +2489,8 @@ namespace gxfile {
             if (domap && DomSy > 0) {
                 // this is the case for set i(i)
                 if (CurSyPtr->SDim != 1 || CurSyPtr != (*symbolWithIndex(DomSy)).second) {
-                    WrBitMaps[D] = (*((*symbolWithIndex(SyNr)).second)->SSetBitMap);
+                    auto thesym = (*symbolWithIndex(SyNr)).second;
+                    WrBitMaps[D] = thesym->SSetBitMap ? thesym->SSetBitMap.get() : nullptr;
                 }
             }
         }

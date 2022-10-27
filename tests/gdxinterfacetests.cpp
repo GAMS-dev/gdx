@@ -1073,7 +1073,7 @@ namespace tests::gdxinterfacetests {
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
             pgx.gdxUELRegisterRawStart();
             for(int i=0; i<50; i++)
-                pgx.gdxUELRegisterRaw(("uel_"s+std::to_string(i+1)).c_str());
+                pgx.gdxUELRegisterRaw(("uel_"s+std::to_string(i+1)));
             pgx.gdxUELRegisterDone();
 
             pgx.gdxDataWriteRawStart("j", "", 1, global::gmsspecs::dt_set, 0);
