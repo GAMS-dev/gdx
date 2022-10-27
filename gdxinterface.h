@@ -193,6 +193,8 @@ namespace gdxinterface {
         virtual double gdxAcronymValue(int AIndx) const = 0;
         virtual int gdxSymbolAddComment(int SyNr, const std::string& Txt) = 0;
         virtual int gdxSymbolGetComment(int SyNr, int N, std::string& Txt) = 0;
+        virtual int gdxStoreDomainSets() = 0;
+        virtual void gdxStoreDomainSetsSet(int x) = 0;
         // endregion
     };
 

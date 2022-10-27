@@ -146,6 +146,10 @@ namespace xpwrap {
         int gdxSymbolAddComment(int SyNr, const std::string &Txt) override;
 
         int gdxSymbolGetComment(int SyNr, int N, std::string &Txt) override;
+
+        int gdxStoreDomainSets() override;
+
+        void gdxStoreDomainSetsSet(int x) override;
     };
 
 }

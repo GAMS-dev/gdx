@@ -335,4 +335,12 @@ namespace xpwrap {
         Txt = TxtBuf;
         return rc;
     }
+
+    int GDXFile::gdxStoreDomainSets() {
+        return ::gdxStoreDomainSets(pgx);
+    }
+
+    void GDXFile::gdxStoreDomainSetsSet(int x) {
+        ::gdxStoreDomainSetsSet(pgx, x);
+    }
 }

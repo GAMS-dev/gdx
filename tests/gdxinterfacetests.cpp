@@ -1071,6 +1071,7 @@ namespace tests::gdxinterfacetests {
         std::string f1{ "domaincheck_wrapper.gdx" },
                     f2 {"domaincheck_port.gdx"};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
+            pgx.gdxStoreDomainSetsSet(false);
             pgx.gdxUELRegisterRawStart();
             for(int i=0; i<50; i++)
                 pgx.gdxUELRegisterRaw(("uel_"s+std::to_string(i+1)));

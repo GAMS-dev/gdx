@@ -503,8 +503,8 @@ namespace gxfile {
         int gdxSymbolGetComment(int SyNr, int N, std::string& Txt) override;
         int gdxUELMaxLength();
         int gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap);
-        int gdxStoreDomainSets();
-        void gdxStoreDomainSetsSet(int x);
+        int gdxStoreDomainSets() override;
+        void gdxStoreDomainSetsSet(int x) override;
 
         int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP);
         int gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs);
