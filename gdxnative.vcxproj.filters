@@ -142,6 +142,9 @@
     <ClCompile Include="yaml.cpp">
       <Filter>root</Filter>
     </ClCompile>
+    <ClCompile Include="gdlib\runner.cpp">
+      <Filter>gdlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">
@@ -251,6 +254,9 @@
     </ClInclude>
     <ClInclude Include="yaml.h">
       <Filter>root</Filter>
+    </ClInclude>
+    <ClInclude Include="gdlib\runner.h">
+      <Filter>gdlib</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

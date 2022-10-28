@@ -36,14 +36,26 @@ namespace gdlib::runner {
         TVisible FVisible;
         int FProgRC;
 
+        bool ErrorWhenRunning(const std::string &s);
+        void SetWorkDir(const std::string &v);
+        void SetInheritHandles(bool v);
+        void SetUseShell(bool v);
+        void CommandLineChanged();
+        int GetVerbose();
+        void SetVerbose(int v);
+        void SetVisible(TVisible v);
+
     public:
         explicit TRunner();
-
         ~TRunner() = default;
 
         void ParamsAdd(const std::string &v);
+        void ParamsClear();
+        int ParamsCount();
+        std::string CommandLine();
         void SetExecutable(const std::string &v);
         int StartAndWait();
+
 
         int GetProgRC() const;
     };
