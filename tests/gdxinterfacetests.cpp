@@ -3,6 +3,7 @@
 #include "../xpwrap.h"
 #include "../gxfile.h"
 #include "../utils.h"
+#include "../rtl/p3utils.h"
 #include <cassert>
 
 using namespace std::literals::string_literals;
@@ -1160,6 +1161,30 @@ namespace tests::gdxinterfacetests {
             std::filesystem::remove(getfn(cnt));
             cnt++;
         });
+    }
+
+    void testWithCompressConvert(bool compress = false, const std::string &convert = ""s) {
+        const std::string f1 {"conv_compr_wrap.gdx"}, f2 {"conv_compr_port.gdx"};
+        rtl::p3utils::P3SetEnv("GDXCOMPRESS", compress ? "1"s : "0"s);
+        rtl::p3utils::P3SetEnv("GDXCONVERT", convert);
+        testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
+            gxdefs::TgdxValues vals {};
+            REQUIRE(pgx.gdxDataWriteRawStart("undef", "", 0, global::gmsspecs::dt_par, 0));
+            REQUIRE(pgx.gdxDataWriteRaw(nullptr, vals.data()));
+            REQUIRE(pgx.gdxDataWriteDone());
+        });
+        for (const auto& fn : { f1, f2 })
+            std::filesystem::remove(fn);
+        rtl::p3utils::P3UnSetEnv("GDXCOMPRESS");
+        rtl::p3utils::P3UnSetEnv("GDXCONVERT");
+    }
+
+    TEST_CASE("Test convert and compress") {
+        testWithCompressConvert();
+        //testWithCompressConvert(false, "v5");
+        //testWithCompressConvert(true,  "v5");
+        testWithCompressConvert(false, "v7");
+        testWithCompressConvert(true,  "v7");
     }
 
     TEST_SUITE_END();
