@@ -705,6 +705,15 @@ namespace gxfile {
         intlValueMapDbl[vm_half] = 0.5;
         intlValueMapDbl[vm_two] = 2.0;
         readIntlValueMapDbl = intlValueMapDbl;
+
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
+            std::cout << "reset special vals, dump of readIntlValueMapDbl" << std::endl;
+            std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
+            std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
+            for(int i=0; i<svNames.size(); i++)
+                std::cout << svNames[i] << "=" << readIntlValueMapDbl[svIndices[i]] << std::endl;
+        }
+
         copyIntlMapDblToI64(intlValueMapDbl, intlValueMapI64);
         Zvalacr = valacr;
         return true;

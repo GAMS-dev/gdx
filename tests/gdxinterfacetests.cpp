@@ -1107,7 +1107,7 @@ namespace tests::gdxinterfacetests {
                 f2 {"sv_scalars_port.gdx"};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
             gxdefs::TgdxValues vals {};
-            vals[global::gmsspecs::tvarvaltype::vallevel] = std::numeric_limits<double>::quiet_NaN();
+            vals[global::gmsspecs::tvarvaltype::vallevel] = 1e+300;
             REQUIRE(pgx.gdxDataWriteRawStart("undef", "", 0, global::gmsspecs::dt_par, 0));
             REQUIRE(pgx.gdxDataWriteRaw(nullptr, vals.data()));
             REQUIRE(pgx.gdxDataWriteDone());
@@ -1120,9 +1120,10 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataReadRawStart(1, recCnt));
             int dimFirst;
             gxdefs::TgdxValues vals {};
-            REQUIRE(pgx.gdxDataReadRaw(nullptr, vals.data(), dimFirst));
+            pgx.gdxDataReadRaw(nullptr, vals.data(), dimFirst);
             REQUIRE(pgx.gdxDataReadDone());
             double undef = vals[global::gmsspecs::tvarvaltype::vallevel];
+            REQUIRE(1e+300 - undef < 0.1);
         });
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);
