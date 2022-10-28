@@ -327,9 +327,8 @@ int gdxSetHasText(TGXFileRec_t *pgdx, int SyNr) {
 
 int gdxSetReadSpecialValues(TGXFileRec_t *pgdx, const double AVals[]) {
     std::array<double, 7> cppAVals {};
-    int rc{ reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetReadSpecialValues(cppAVals) };
-    std::memcpy((TGXFileRec_t *)AVals, cppAVals.data(), cppAVals.size());
-    return rc;
+    std::memcpy(cppAVals.data(), AVals, cppAVals.size()*sizeof(double));
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetReadSpecialValues(cppAVals);
 }
 
 int gdxSetSpecialValues(TGXFileRec_t *pgdx, const double AVals[]) {

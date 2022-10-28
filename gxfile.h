@@ -123,7 +123,8 @@ namespace gxfile {
         vm_mone   ,
         vm_half   ,
         vm_two    ,
-        vm_normal
+        vm_normal ,
+        vm_count
     };
 
     enum TgxFileMode {
@@ -240,8 +241,8 @@ namespace gxfile {
 
     };
 
-    using TIntlValueMapDbl = std::array<double, 11>;
-    using TIntlValueMapI64 = std::array<int64_t, 11>;
+    using TIntlValueMapDbl = std::array<double, vm_count>;
+    using TIntlValueMapI64 = std::array<int64_t, vm_count>;
 
     class TSetTextList : public std::vector<std::string> {
     public:
