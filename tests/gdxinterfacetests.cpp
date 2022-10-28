@@ -23,8 +23,10 @@ namespace tests::gdxinterfacetests {
         return builders;
     }
 
-    void basicTest(const std::function<void(GDXInterface&)> &cb) {
+    void basicTest(const std::function<void(GDXInterface&)> &cb, int ub = -1) {
+        int i {};
         for(const auto &builder : getBuilders()) {
+            if(ub != -1 && i++ >= ub) break;
             GDXInterface *pgx = builder();
             cb(*pgx);
             delete pgx;
@@ -1127,6 +1129,37 @@ namespace tests::gdxinterfacetests {
         });
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test open append to rename a single uel") {
+        const std::array infixes {"wrap"s, "port"s};
+        auto getfn = [&](int i) {
+            return "append_"s + infixes[i] + "_rename.gdx"s;
+        };
+        const std::string prod {"gdxinterfacetest"s};
+        int errNr, cnt {};
+        basicTest([&](GDXInterface &pgx) {
+            pgx.gdxOpenWrite(getfn(cnt), prod, errNr);
+            pgx.gdxUELRegisterRawStart();
+            pgx.gdxUELRegisterRaw("a"s);
+            pgx.gdxUELRegisterDone();
+            pgx.gdxClose();
+            pgx.gdxOpenAppend(getfn(cnt), prod, errNr);
+            pgx.gdxRenameUEL("a"s, "b");
+            pgx.gdxClose();
+            cnt++;
+        });
+        cnt = 0;
+        basicTest([&](GDXInterface &pgx) {
+            pgx.gdxOpenRead(getfn(cnt), errNr);
+            int uelMap;
+            std::string uelStr;
+            pgx.gdxUMUelGet(1, uelStr, uelMap);
+            REQUIRE_EQ("b"s, uelStr);
+            pgx.gdxClose();
+            std::filesystem::remove(getfn(cnt));
+            cnt++;
+        });
     }
 
     TEST_SUITE_END();

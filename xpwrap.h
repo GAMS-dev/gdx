@@ -150,6 +150,8 @@ namespace xpwrap {
         int gdxStoreDomainSets() override;
 
         void gdxStoreDomainSetsSet(int x) override;
+
+        int gdxOpenAppend(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
     };
 
 }

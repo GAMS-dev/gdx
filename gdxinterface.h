@@ -195,6 +195,7 @@ namespace gdxinterface {
         virtual int gdxSymbolGetComment(int SyNr, int N, std::string& Txt) = 0;
         virtual int gdxStoreDomainSets() = 0;
         virtual void gdxStoreDomainSetsSet(int x) = 0;
+        virtual int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr) = 0;
         // endregion
     };
 

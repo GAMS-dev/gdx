@@ -343,4 +343,8 @@ namespace xpwrap {
     void GDXFile::gdxStoreDomainSetsSet(int x) {
         ::gdxStoreDomainSetsSet(pgx, x);
     }
+
+    int GDXFile::gdxOpenAppend(const std::string &FileName, const std::string &Producer, int &ErrNr) {
+        return ::gdxOpenAppend(pgx, FileName.c_str(), Producer.c_str(), &ErrNr);
+    }
 }
