@@ -878,6 +878,12 @@ namespace gxfile {
             if (DataSize > 0) LastDataField = static_cast<tvarvaltype>(DataSize - 1);
             NrRecs = CurSyPtr->SDataCount;
         }
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_some) {
+            std::string ts {"Symbol = "s + std::to_string(SyNr)};
+            if(CurSyPtr)
+                ts += ", Dim = "s + std::to_string(CurSyPtr->SDim);
+            WriteTrace(ts);
+        }
         DeltaForRead = VersionRead <= 6 ? MaxDimV148 : FCurrentDim;
         for(int D{}; D<FCurrentDim; D++) {
             auto &obj = DomainList[D];
