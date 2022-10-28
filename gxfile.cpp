@@ -1751,6 +1751,8 @@ namespace gxfile {
             return FileNoGood();
         }
         FFile = std::make_unique<TMiBufferedStreamDelphi>(Afn, filemode, DLLLoadPath);
+        const std::string FileNameYML = utils::replaceSubstrs(Afn, ".gdx", ".yaml");
+        YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
         ErrNr = FFile->GetLastIOResult();
         if(ErrNr) return FileNoGood();
         if(FFile->GoodByteOrder()) {
