@@ -315,8 +315,13 @@ namespace gxfile {
         int NextAutoAcronym{};
         bool AppendActive{};
 
+#ifndef VERBOSE_TRACE
         const TraceLevels defaultTraceLevel {TraceLevels::trl_none};
         const bool verboseTrace {false};
+#else
+        const TraceLevels defaultTraceLevel {TraceLevels::trl_all};
+        const bool verboseTrace {true};
+#endif
 
         bool PrepareSymbolWrite(const std::string &Caller, const std::string &AName, const std::string &AText, int ADim,
                                 int AType, int AUserInfo);

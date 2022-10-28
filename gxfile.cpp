@@ -1214,6 +1214,8 @@ namespace gxfile {
                     }
                 }
             }
+            if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
+                std::cout << "level=" << AVals[vallevel] << std::endl;
         }
         DataCount++;
         if (utils::in(CurSyPtr->SDataType, dt_set, dt_alias)) {
@@ -1279,6 +1281,8 @@ namespace gxfile {
                 if(std::abs(X-D) < 1e-12 && D >= 0 && D < SetTextList->size())
                     AVals[vallevel] = MapSetText[D];
             }
+            if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
+                std::cout << "level=" << AVals[vallevel] << std::endl;
         }
         return true;
     }
@@ -2258,6 +2262,14 @@ namespace gxfile {
         AVals[sv_valmin] = intlValueMapDbl[vm_valmin] ;
         AVals[sv_valeps] = intlValueMapDbl[vm_valeps] ;
         AVals[sv_acronym] = Zvalacr;
+
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
+            std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
+            std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
+            for(int i=0; i<svNames.size(); i++)
+                std::cout << svNames[i] << "=" << AVals[svIndices[i]] << std::endl;
+        }
+
         return true;
     }
 
@@ -2282,6 +2294,13 @@ namespace gxfile {
         tmpDbl[vm_valpin] = AVals[sv_valpin];
         tmpDbl[vm_valmin] = AVals[sv_valmin];
         tmpDbl[vm_valeps] = AVals[sv_valeps];
+
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
+            std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
+            std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
+            for(int i=0; i<svNames.size(); i++)
+                std::cout << svNames[i] << "=" << AVals[svIndices[i]] << std::endl;
+        }
 
         TIntlValueMapI64 tmpI64;
         copyIntlMapDblToI64(tmpDbl, tmpI64);
