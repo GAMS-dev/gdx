@@ -13,11 +13,15 @@ namespace gdlib::runner {
         vis_hide, vis_minimized, vis_normal
     };
 
+    class TRunner;
+
     class TMsgHandler {
         int FVerbose;
         std::string FMsgPfx;
 
     public:
+        friend class TRunner;
+
         TMsgHandler(const std::string &MsgPfx);
         void ErrorMessage(int ec, const std::string &s);
         void LogMessage(const std::string &s);
@@ -37,13 +41,7 @@ namespace gdlib::runner {
         int FProgRC;
 
         bool ErrorWhenRunning(const std::string &s);
-        void SetWorkDir(const std::string &v);
-        void SetInheritHandles(bool v);
-        void SetUseShell(bool v);
         void CommandLineChanged();
-        int GetVerbose();
-        void SetVerbose(int v);
-        void SetVisible(TVisible v);
 
     public:
         explicit TRunner();
@@ -53,9 +51,27 @@ namespace gdlib::runner {
         void ParamsClear();
         int ParamsCount();
         std::string CommandLine();
-        void SetExecutable(const std::string &v);
         int StartAndWait();
 
+        void SetExecutable(const std::string &v);
+        std::string GetExecutable();
+
+        bool IsRunning() const;
+
+        std::string GetWorkDir() const;
+        void SetWorkDir(const std::string &v);
+
+        void SetInheritHandles(bool v);
+        bool GetInheritHandles() const;
+
+        void SetUseShell(bool v);
+        bool GetUseShell() const;
+
+        int GetVerbose();
+        void SetVerbose(int v);
+
+        void SetVisible(TVisible v);
+        TVisible GetVisible() const;
 
         int GetProgRC() const;
     };
