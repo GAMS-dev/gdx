@@ -1181,8 +1181,8 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test convert and compress") {
         testWithCompressConvert();
-        //testWithCompressConvert(false, "v5");
-        //testWithCompressConvert(true,  "v5");
+        testWithCompressConvert(false, "v5");
+        testWithCompressConvert(true,  "v5");
         testWithCompressConvert(false, "v7");
         testWithCompressConvert(true,  "v7");
     }

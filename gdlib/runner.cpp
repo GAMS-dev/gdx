@@ -84,11 +84,10 @@ namespace gdlib::runner {
             FMsgHandler.ErrorMessage(EC_Process_Active, "Cannot start an active process"s);
             return EC_Process_Active;
         }
-        if (FCommandLine.empty()) {
+        if (CommandLine().empty()) {
             FMsgHandler.ErrorMessage(EC_Empty_CMD_Line, "No Command Line specified"s);
             return EC_Empty_CMD_Line;
         }
-        int res{};
         if (FUseShell) {
             FMsgHandler.DebugMessage("Use shell: "s + FCommandLine);
             return rtl::p3process::P3SystemP(FCommandLine, FProgRC);
