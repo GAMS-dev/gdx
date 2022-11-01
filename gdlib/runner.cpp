@@ -1,4 +1,7 @@
 #include "runner.h"
+#include "../utils.h"
+
+using namespace std::literals::string_literals;
 
 namespace gdlib::runner {
 
@@ -22,9 +25,17 @@ namespace gdlib::runner {
 
     }
 
-    void TRunner::ParamsAdd(const std::string &v) {}
+    void TRunner::ParamsAdd(const std::string &v) {
+        if (ErrorWhenRunning("ParamsA")) return;
+        FParams.push_back(v);
+        CommandLineChanged();
+    }
 
-    void TRunner::ParamsClear() {}
+    void TRunner::ParamsClear() {
+        if (ErrorWhenRunning("ParamsClear")) return;
+        FParams.clear();
+        CommandLineChanged();
+    }
 
     void TRunner::SetExecutable(const std::string &v) {}
 
@@ -37,10 +48,16 @@ namespace gdlib::runner {
     }
 
     int TRunner::ParamsCount() {
-        return FParams.size();
+        return static_cast<int>(FParams.size());
     }
 
     std::string TRunner::CommandLine() {
+        if (!FCommandLine.empty()) return FCommandLine;
+        const char Q{ '\"' };
+        FCommandLine = utils::quoteWhitespace(FExecutable, Q);
+        for (const auto& param : FParams)
+            FCommandLine += ' ' + utils::quoteWhitespace(param, Q);
+
         return FCommandLine;
     }
 
