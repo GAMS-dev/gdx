@@ -47,6 +47,7 @@
     <ClCompile Include="rtl\math_p3.cpp" />
     <ClCompile Include="rtl\p3library.cpp" />
     <ClCompile Include="rtl\p3platform.cpp" />
+    <ClCompile Include="rtl\p3process.cpp" />
     <ClCompile Include="rtl\p3utils.cpp" />
     <ClCompile Include="rtl\sysutils_p3.cpp" />
     <ClCompile Include="simplegdx\mistream.cpp" />
@@ -92,6 +93,7 @@
     <ClInclude Include="rtl\math_p3.h" />
     <ClInclude Include="rtl\p3library.h" />
     <ClInclude Include="rtl\p3platform.h" />
+    <ClInclude Include="rtl\p3process.h" />
     <ClInclude Include="rtl\p3utils.h" />
     <ClInclude Include="rtl\sysutils_p3.h" />
     <ClInclude Include="simplegdx\mistream.h" />

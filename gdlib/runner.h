@@ -45,7 +45,7 @@ namespace gdlib::runner {
 
     public:
         explicit TRunner();
-        ~TRunner() = default;
+        ~TRunner();
 
         void ParamsAdd(const std::string &v);
         void ParamsClear();

@@ -145,6 +145,9 @@
     <ClCompile Include="gdlib\runner.cpp">
       <Filter>gdlib</Filter>
     </ClCompile>
+    <ClCompile Include="rtl\p3process.cpp">
+      <Filter>rtl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">
@@ -257,6 +260,9 @@
     </ClInclude>
     <ClInclude Include="gdlib\runner.h">
       <Filter>gdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="rtl\p3process.h">
+      <Filter>rtl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

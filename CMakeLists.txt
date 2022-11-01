@@ -29,6 +29,7 @@ set(common
 		rtl/p3platform.h rtl/p3platform.cpp
 		rtl/p3library.h rtl/p3library.cpp
 		rtl/math_p3.h rtl/math_p3.cpp
+		rtl/p3process.h rtl/p3process.cpp
 
 		palxxx/gdlaudit.h palxxx/gdlaudit.cpp
 		palxxx/paldoorg.h palxxx/paldoorg.cpp
