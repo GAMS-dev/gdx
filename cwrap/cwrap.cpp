@@ -8,8 +8,17 @@ using namespace gxfile;
 
 extern "C" {
 
-gdxSetLoadPath_t gdxSetLoadPath = nullptr;
-gdxGetLoadPath_t gdxGetLoadPath = nullptr;
+void GDX_CALLCONV doSetLoadPath(const char *s) {
+    DLLLoadPath.assign(s);
+}
+
+void GDX_CALLCONV doGetLoadPath(char *s) {
+    assert(DLLLoadPath.size() < 256);
+    memcpy(s, DLLLoadPath.c_str(), DLLLoadPath.size());
+}
+
+gdxSetLoadPath_t gdxSetLoadPath = doSetLoadPath;
+gdxGetLoadPath_t gdxGetLoadPath = doGetLoadPath;
 
 int gdxCreate(TGXFileRec_t **pgdx, char *errBuf, int bufSize) {
     std::string ErrMsg;
@@ -492,7 +501,8 @@ int gdxLibraryUnload() {
 }
 
 void gdxCreateD(TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen) {
-    // FIXME: Take system directory into account!
+    // FIXME: Is this correct?
+    doSetLoadPath(sysDir);
     gdxCreate(pgdx, msgBuf, msgBufLen);
 }
 
@@ -504,19 +514,9 @@ int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char **UelFilt
     return reinterpret_cast<TGXFileObj *>(TGXFile)->gdxDataReadRawFastFilt(SyNr, UelFilterStr, DP);
 }
 
-}
-
 void setCallByRef(const char *FuncName, int cbrValue) {
     // FIXME: Actually do something!
     STUBWARN();
 }
 
-
-
-
-
-
-
-
-
-
+}
