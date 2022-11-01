@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <filesystem>
+#include <fstream>
 #include <cassert>
 #include <cstring>
 #include "../utils.h"

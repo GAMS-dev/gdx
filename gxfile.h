@@ -500,7 +500,7 @@ namespace gxfile {
         int gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr);
         int64_t gdxGetMemoryUsed();
         int gdxMapValue(double D, int& sv);
-        int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr);
+        int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr) override;
         int gdxSetHasText(int SyNr);
         int gdxSetReadSpecialValues(const std::array<double, 7>& AVals);
         int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo);
