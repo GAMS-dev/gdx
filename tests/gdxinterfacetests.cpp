@@ -764,6 +764,22 @@ namespace tests::gdxinterfacetests {
         std::filesystem::remove(fn);
     }
 
+    std::string acquireGDXforModel(const std::string &model) {
+        const std::string   model_fn = model + ".gms"s,
+                            log_fn = model + "Log.txt"s,
+                            fnpf = "model_data"s,
+                            gdxfn = fnpf+".gdx"s;
+        std::system(("gamslib "s + model + " > gamslibLog.txt"s).c_str());
+        std::filesystem::remove("gamslibLog.txt");
+        REQUIRE(std::filesystem::exists(model_fn));
+        std::system(("gams " + model_fn + " gdx="s + fnpf + " lo=0 o=lf > " + log_fn).c_str());
+        std::filesystem::remove(log_fn);
+        std::filesystem::remove(model_fn);
+        std::filesystem::remove("lf");
+        REQUIRE(std::filesystem::exists(gdxfn));
+        return gdxfn;
+    }
+
     TEST_CASE("Test reading/extracting data from gamslib/trnsport example") {
         const std::array expectedSymbolNames {
             "a"s, "b"s, "c"s,
@@ -774,18 +790,7 @@ namespace tests::gdxinterfacetests {
         const std::array expectedUels {
             "seattle"s, "san-diego"s, "new-york"s, "chicago"s, "topeka"s
         };
-        const std::string   model = "trnsport"s,
-                            model_fn = model + ".gms"s,
-                            fnpf = "trans_data"s,
-                            gdxfn = fnpf+".gdx"s;
-        std::system(("gamslib "s+model+" > gamslibLog.txt"s).c_str());
-        std::filesystem::remove("gamslibLog.txt");
-        REQUIRE(std::filesystem::exists(model_fn));
-        std::system(("gams trnsport gdx="s + fnpf + " lo=0 o=lf > trnsportLog.txt").c_str());
-        std::filesystem::remove("trnsportLog.txt");
-        std::filesystem::remove(model_fn);
-        std::filesystem::remove("lf");
-        REQUIRE(std::filesystem::exists(gdxfn));
+        const std::string gdxfn = acquireGDXforModel("trnsport"s);
         testReads(gdxfn, gdxfn, [&](GDXInterface &pgx) {
             int numSymbols, numUels;
             pgx.gdxSystemInfo(numSymbols, numUels);
@@ -1185,6 +1190,18 @@ namespace tests::gdxinterfacetests {
         testWithCompressConvert(true,  "v5");
         testWithCompressConvert(false, "v7");
         testWithCompressConvert(true,  "v7");
+    }
+
+    TEST_CASE("Test symbol index max UEL length") {
+        const std::string gdxfn = acquireGDXforModel("trnsport");
+        testReads(gdxfn, gdxfn, [&](GDXInterface &pgx) {
+            std::array<int, global::gmsspecs::MaxDim> lengthInfo {};
+            int maxUelLen = pgx.gdxSymbIndxMaxLength(7, lengthInfo.data()); // c
+            REQUIRE_EQ(9, maxUelLen); // len(san-diego)=9
+            REQUIRE_EQ(9, lengthInfo[0]); // san-diego
+            REQUIRE_EQ(8, lengthInfo[1]); // new-york
+        });
+        std::filesystem::remove(gdxfn);
     }
 
     TEST_SUITE_END();

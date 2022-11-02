@@ -3952,18 +3952,17 @@ namespace gxfile {
             TgdxValues AVals;
             int AFDim;
             while (DoRead(AVals.data(), AFDim)) {
-                for (int D{}; D <= FCurrentDim; D++) {
+                for (int D{}; D < FCurrentDim; D++) {
                     int UEL = LastElem[D];
                     if (UEL >= 1 && UEL <= UELTableCount) {
-                        auto L = static_cast<int>((*UELTable)[UEL].length());
+                        auto L = static_cast<int>((*UELTable)[UEL-1].length());
                         if (L > LengthInfo[D]) LengthInfo[D] = L;
                     }
                 }
             }
-            for (int D{ 1 }; D <= FCurrentDim; D++) {
+            for (int D{}; D < FCurrentDim; D++)
                 if (LengthInfo[D] > res)
                     res = LengthInfo[D];
-            }
         }
         gdxDataReadDone();
         return res;

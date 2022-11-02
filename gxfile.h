@@ -503,7 +503,7 @@ namespace gxfile {
         int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr) override;
         int gdxSetHasText(int SyNr);
         int gdxSetReadSpecialValues(const std::array<double, 7>& AVals);
-        int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo);
+        int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) override;
         int gdxSymbMaxLength();
         int gdxSymbolAddComment(int SyNr, const std::string& Txt) override;
         int gdxSymbolGetComment(int SyNr, int N, std::string& Txt) override;
