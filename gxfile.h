@@ -507,7 +507,7 @@ namespace gxfile {
         int gdxSymbMaxLength();
         int gdxSymbolAddComment(int SyNr, const std::string& Txt) override;
         int gdxSymbolGetComment(int SyNr, int N, std::string& Txt) override;
-        int gdxUELMaxLength();
+        int gdxUELMaxLength() override;
         int gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap);
         int gdxStoreDomainSets() override;
         void gdxStoreDomainSetsSet(int x) override;

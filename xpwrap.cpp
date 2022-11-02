@@ -351,4 +351,8 @@ namespace xpwrap {
     int GDXFile::gdxSymbIndxMaxLength(int SyNr, int *LengthInfo) {
         return ::gdxSymbIndxMaxLength(pgx, SyNr, LengthInfo);
     }
+
+    int GDXFile::gdxUELMaxLength() {
+        return ::gdxUELMaxLength(pgx);
+    }
 }

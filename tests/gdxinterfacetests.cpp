@@ -214,6 +214,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(-1, uelMap);
             REQUIRE_FALSE(pgx.gdxGetUEL(2, uel));
             REQUIRE_NE("New-York", uel);
+            REQUIRE_FALSE(pgx.gdxUMUelGet(23, uel, uelMap));
+            REQUIRE_EQ("?L__23"s, uel);
+            REQUIRE_EQ(-1, uelMap);
         });
         for (const auto& fn : filenames)
             std::filesystem::remove(fn);
@@ -1200,6 +1203,14 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(9, maxUelLen); // len(san-diego)=9
             REQUIRE_EQ(9, lengthInfo[0]); // san-diego
             REQUIRE_EQ(8, lengthInfo[1]); // new-york
+        });
+        std::filesystem::remove(gdxfn);
+    }
+
+    TEST_CASE("Test UEL table get max uel length") {
+        const std::string gdxfn = acquireGDXforModel("trnsport");
+        testReads(gdxfn, gdxfn, [&](GDXInterface &pgx) {
+            REQUIRE_EQ(9, pgx.gdxUELMaxLength());
         });
         std::filesystem::remove(gdxfn);
     }

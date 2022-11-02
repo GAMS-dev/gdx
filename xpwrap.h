@@ -154,6 +154,8 @@ namespace xpwrap {
         int gdxOpenAppend(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
 
         int gdxSymbIndxMaxLength(int SyNr, int *LengthInfo) override;
+
+        int gdxUELMaxLength() override;
     };
 
 }

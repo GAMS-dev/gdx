@@ -197,6 +197,7 @@ namespace gdxinterface {
         virtual void gdxStoreDomainSetsSet(int x) = 0;
         virtual int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr) = 0;
         virtual int gdxSymbIndxMaxLength(int SyNr, int *LengthInfo) = 0;
+        virtual int gdxUELMaxLength() = 0;
         // endregion
     };
 
