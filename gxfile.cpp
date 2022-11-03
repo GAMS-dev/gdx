@@ -1664,32 +1664,28 @@ namespace gxfile {
     // See Also:
     //   gdxSystemInfo, gdxSymbolInfoX, gdxSymbolDim, gdxFindSymbol
     int TGXFileObj::gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) {
-        static auto badLookup = [&]() {
-            SyId.clear();
-            Dim = -1;
-            Typ = dt_set;
-            return false;
-        };
-
         if (!SyNr) {
-            SyId = "*";
+            SyId = "*"s;
             Dim = 1;
             Typ = dt_set;
             return true;
         }
 
-        if (SyNr <= 0 || SyNr > NameList.size()) return badLookup();
-        
-        auto maybeNameAndSym = symbolWithIndex(SyNr);
-        if (maybeNameAndSym) {
-            auto &[name, sym] = *maybeNameAndSym;
-            SyId = name;
-            Dim = sym->SDim;
-            Typ = sym->SDataType;
-            return true;
+        if (!NameList.empty() && SyNr > 0 && SyNr <= NameList.size()) {
+            auto maybeNameAndSym = symbolWithIndex(SyNr);
+            if (maybeNameAndSym) {
+                auto &[name, sym] = *maybeNameAndSym;
+                SyId = name;
+                Dim = sym->SDim;
+                Typ = sym->SDataType;
+                return true;
+            }
         }
 
-        return badLookup();
+        SyId.clear();
+        Dim = -1;
+        Typ = dt_set;
+        return false;
     }
 
     // Brief:
