@@ -1,7 +1,7 @@
 std::array<std::array<std::string, 2>, maxPlatforms> platformKeysAndTexts = {
     std::array<std::string, 2> {"WEX"s,"x86 64bit MS Windows"s},
     {"LEX"s,"x86 64bit Linux"s},
-    {"DEX"s,"x86 64bit macOS"s},
+    {"DEX"s,"x86 64bit Mac OS X"s},
     {"GEN"s,"Generic platforms"s}
 };
 
@@ -174,7 +174,7 @@ const std::array<std::string, maxSolverNames> solverNamesKeyS = {
 const std::array<std::string, maxPlatforms> platformsTexts2 = {
     "x86 64bit MS Windows"s,
     "x86 64bit Linux"s,
-    "x86 64bit macOS"s,
+    "x86 64bit Mac OS X"s,
     "Generic platforms"s
 };
 
