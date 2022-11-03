@@ -56,7 +56,7 @@ namespace gdlib::gmsstrm {
         std::array<uint8_t, 8> orig{}, flip{};
         int n{std::min(sz-1, 7)};
         memcpy(orig.data(), (const char *)psrc, n+1);
-        for(int k{}; k<n; k++)
+        for(int k{}; k<=n; k++)
             flip[k] = orig[n-k];
         memcpy((char *)pdest, flip.data(), n+1);
     }

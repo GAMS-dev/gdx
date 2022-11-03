@@ -1228,6 +1228,16 @@ namespace tests::gdxinterfacetests {
         });
     }
 
+    /*TEST_CASE("Test reading old GDX file") {
+        const std::string fn {R"(C:\Users\aschn\Desktop\leg_qa_GDX2_gams\gdx\20.6\taix.gdx)"};
+        testReads(fn, fn, [&](GDXInterface &pgx) {
+            int symbolCount, uelCount;
+            REQUIRE(pgx.gdxSystemInfo(symbolCount, uelCount));
+            REQUIRE_EQ(5, uelCount);
+            REQUIRE_EQ(12, symbolCount);
+        });
+    }*/
+
     TEST_CASE("Test filter") {
         testReadModelGDX("trnsport"s, [&](GDXInterface &pgx) {
             int nrRecs, dimFirst;

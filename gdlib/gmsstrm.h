@@ -251,7 +251,7 @@ namespace gdlib::gmsstrm {
                 order_type = 0;
                 if(v1 != patConstant) {
                     order_type = 1;
-                    reverseBytesMax8(&v1, &v2, sizeof(uint16_t));
+                    reverseBytesMax8(&v1, &v2, sizeof(T));
                     if(v2 != patConstant) order_type = PAT_BAD_ORDER;
                 }
             }
