@@ -768,10 +768,10 @@ namespace tests::gdxinterfacetests {
     }
 
     std::string acquireGDXforModel(const std::string &model) {
-        const std::string   model_fn = model + ".gms"s,
-                            log_fn = model + "Log.txt"s,
-                            fnpf = "model_data"s,
-                            gdxfn = fnpf+".gdx"s;
+        std::string model_fn = model + ".gms"s; // non-const so we get automatic move
+        const std::string log_fn = model + "Log.txt"s,
+                          fnpf = "model_data"s,
+                          gdxfn = fnpf+".gdx"s;
         std::system(("gamslib "s + model + " > gamslibLog.txt"s).c_str());
         std::filesystem::remove("gamslibLog.txt");
         REQUIRE(std::filesystem::exists(model_fn));
@@ -781,6 +781,12 @@ namespace tests::gdxinterfacetests {
         std::filesystem::remove("lf");
         REQUIRE(std::filesystem::exists(gdxfn));
         return gdxfn;
+    }
+
+    void testReadModelGDX(const std::string &model, const std::function<void(GDXInterface&)> &func) {
+        const std::string gdxfn = acquireGDXforModel(model);
+        testReads(gdxfn, gdxfn, func);
+        std::filesystem::remove(gdxfn);
     }
 
     TEST_CASE("Test reading/extracting data from gamslib/trnsport example") {
@@ -1196,23 +1202,30 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test symbol index max UEL length") {
-        const std::string gdxfn = acquireGDXforModel("trnsport");
-        testReads(gdxfn, gdxfn, [&](GDXInterface &pgx) {
+        testReadModelGDX("trnsport"s, [&](GDXInterface &pgx) {
             std::array<int, global::gmsspecs::MaxDim> lengthInfo {};
             int maxUelLen = pgx.gdxSymbIndxMaxLength(7, lengthInfo.data()); // c
             REQUIRE_EQ(9, maxUelLen); // len(san-diego)=9
             REQUIRE_EQ(9, lengthInfo[0]); // san-diego
             REQUIRE_EQ(8, lengthInfo[1]); // new-york
         });
-        std::filesystem::remove(gdxfn);
     }
 
     TEST_CASE("Test UEL table get max uel length") {
-        const std::string gdxfn = acquireGDXforModel("trnsport");
-        testReads(gdxfn, gdxfn, [&](GDXInterface &pgx) {
+        testReadModelGDX("trnsport"s, [&](GDXInterface &pgx) {
             REQUIRE_EQ(9, pgx.gdxUELMaxLength());
         });
-        std::filesystem::remove(gdxfn);
+    }
+
+    TEST_CASE("Test symbol info out of range") {
+        testReadModelGDX("trnsport"s, [&](GDXInterface &pgx) {
+            std::string symId;
+            int dim, typ;
+            REQUIRE_FALSE(pgx.gdxSymbolInfo(99, symId, dim, typ));
+            REQUIRE(symId.empty());
+            REQUIRE_EQ(-1, dim);
+            REQUIRE_EQ(global::gmsspecs::dt_set, typ);
+        });
     }
 
     TEST_SUITE_END();
