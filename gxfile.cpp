@@ -3257,7 +3257,7 @@ namespace gxfile {
     // Description:
     //   Start the registration of a filter. A filter is used to map a number
     //   of elements to a single integer; the filter number. A filter number
-    //   can later be used to specify a filter for an index postion when reading data.
+    //   can later be used to specify a filter for an index position when reading data.
     int TGXFileObj::gdxFilterRegisterStart(int FilterNr) {
         static const TgxModeSet AllowedModes {fr_init};
         if(!MajorCheckMode("FilterRegisterStart"s, AllowedModes) ||

@@ -768,10 +768,10 @@ namespace tests::gdxinterfacetests {
     }
 
     std::string acquireGDXforModel(const std::string &model) {
-        std::string model_fn = model + ".gms"s; // non-const so we get automatic move
-        const std::string log_fn = model + "Log.txt"s,
-                          fnpf = "model_data"s,
-                          gdxfn = fnpf+".gdx"s;
+        const std::string model_fn = model + ".gms"s,
+                          log_fn = model + "Log.txt"s,
+                          fnpf = "model_data"s;
+        std::string gdxfn = fnpf+".gdx"s; // non-const so we get automatic move
         std::system(("gamslib "s + model + " > gamslibLog.txt"s).c_str());
         std::filesystem::remove("gamslibLog.txt");
         REQUIRE(std::filesystem::exists(model_fn));
@@ -1225,6 +1225,34 @@ namespace tests::gdxinterfacetests {
             REQUIRE(symId.empty());
             REQUIRE_EQ(-1, dim);
             REQUIRE_EQ(global::gmsspecs::dt_set, typ);
+        });
+    }
+
+    TEST_CASE("Test filter") {
+        testReadModelGDX("trnsport"s, [&](GDXInterface &pgx) {
+            int nrRecs, dimFirst;
+            // uels: seattle 1, san-diego 2, new-york 3, chicago 4, topeka 5
+            std::array<int, 2> filterAction { gxdefs::DOMC_EXPAND, gxdefs::DOMC_EXPAND },
+                               keys { 3, 1 }; // new-york, seattle
+            std::array<double, global::gmsspecs::MaxDim> values {};
+
+            REQUIRE(pgx.gdxDataReadFilteredStart(5, filterAction.data(), nrRecs)); // symbol 'd'
+            REQUIRE_EQ(6, nrRecs);
+            REQUIRE(pgx.gdxDataReadMap(1, keys.data(), values.data(), dimFirst));
+            REQUIRE(pgx.gdxDataReadDone());
+
+            REQUIRE_FALSE(pgx.gdxFilterExists(1));
+            REQUIRE(pgx.gdxFilterRegisterStart(1));
+            REQUIRE(pgx.gdxFilterRegister(1)); // seattle
+            REQUIRE(pgx.gdxFilterRegister(3)); // new-york
+            REQUIRE(pgx.gdxFilterRegisterDone());
+            REQUIRE(pgx.gdxFilterExists(1));
+
+            filterAction[0] = filterAction[1] = 1;
+            REQUIRE(pgx.gdxDataReadFilteredStart(5, filterAction.data(), nrRecs)); // symbol 'd'
+            REQUIRE_EQ(6, nrRecs);
+            REQUIRE(pgx.gdxDataReadMap(1, keys.data(), values.data(), dimFirst));
+            REQUIRE(pgx.gdxDataReadDone());
         });
     }
 
