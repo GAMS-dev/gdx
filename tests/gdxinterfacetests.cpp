@@ -907,6 +907,11 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(0, userInfo);
             REQUIRE_EQ("Universe", explText);
 
+            REQUIRE_FALSE(pgx.gdxSymbolInfoX(999, recCnt, userInfo, explText));
+            REQUIRE_EQ(0, recCnt);
+            REQUIRE_EQ(0, userInfo);
+            REQUIRE(explText.empty());
+
             pgx.gdxClose();
 
             REQUIRE(pgx.gdxOpenRead(fn, errNr));
@@ -1020,6 +1025,17 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ("myacr"s, acroName);
             REQUIRE_EQ("my acronym"s, acroText);
             REQUIRE_EQ(23, acroIndex);
+
+            REQUIRE(pgx.gdxAcronymSetInfo(1, "myacr_mod"s, "my acronym_mod"s, 23));
+            REQUIRE(pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex));
+            REQUIRE_EQ("myacr_mod"s, acroName);
+            REQUIRE_EQ("my acronym_mod"s, acroText);
+            REQUIRE_EQ(23, acroIndex);
+
+            REQUIRE_FALSE(pgx.gdxAcronymGetInfo(999, acroName, acroText, acroIndex));
+            REQUIRE(acroName.empty());
+            REQUIRE(acroText.empty());
+            REQUIRE_EQ(0, acroIndex);
         });
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);
@@ -1195,8 +1211,10 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test convert and compress") {
         testWithCompressConvert();
+#ifndef __APPLE__
         testWithCompressConvert(false, "v5");
         testWithCompressConvert(true,  "v5");
+#endif
         testWithCompressConvert(false, "v7");
         testWithCompressConvert(true,  "v7");
     }

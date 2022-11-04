@@ -120,5 +120,16 @@ namespace tests::gxfiletests {
         REQUIRE(IsGoodIdent("a1"));
     }
 
+    TEST_CASE("Test check mode (indirectly)") {
+        std::string errMsg;
+        TGXFileObj gdx{errMsg};
+        int errNr;
+        const std::string tmpfn {"tmp.gdx"};
+        REQUIRE(gdx.gdxOpenWrite(tmpfn, "gxfiletest", errNr));
+        REQUIRE_FALSE(gdx.gdxDataWriteRaw(nullptr, nullptr));
+        gdx.gdxClose();
+        std::filesystem::remove(tmpfn);
+    }
+
     TEST_SUITE_END();
 }
