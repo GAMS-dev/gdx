@@ -22,8 +22,8 @@ extern "C" {
 
     typedef void (GDX_CALLCONV *gdxSetLoadPath_t) (const char *s);
     typedef void (GDX_CALLCONV *gdxGetLoadPath_t) (char *s);
-    extern gdxSetLoadPath_t gdxSetLoadPath;
-    extern gdxGetLoadPath_t gdxGetLoadPath;
+    extern gdxSetLoadPath_t gdxSetLoadPath, C__gdxSetLoadPath;
+    extern gdxGetLoadPath_t gdxGetLoadPath, C__gdxGetLoadPath;
 
     typedef long long INT64;
 
