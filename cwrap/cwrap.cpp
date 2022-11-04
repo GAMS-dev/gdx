@@ -17,8 +17,8 @@ void GDX_CALLCONV doGetLoadPath(char *s) {
     memcpy(s, DLLLoadPath.c_str(), DLLLoadPath.size());
 }
 
-gdxSetLoadPath_t gdxSetLoadPath = doSetLoadPath, C__gdxSetLoadPath = doSetLoadPath;
-gdxGetLoadPath_t gdxGetLoadPath = doGetLoadPath, C__gdxGetLoadPath = doGetLoadPath;
+gdxSetLoadPath_t gdxSetLoadPath = doSetLoadPath;
+gdxGetLoadPath_t gdxGetLoadPath = doGetLoadPath;
 
 int gdxCreate(TGXFileRec_t **pgdx, char *errBuf, int bufSize) {
     std::string ErrMsg;
