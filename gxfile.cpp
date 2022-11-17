@@ -4172,6 +4172,8 @@ namespace gxfile {
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         uelNames.clear();
+        nameToIndex.clear();
+        nameToNum.clear();
     }
 
     int TUELTable::size() const {
@@ -4183,15 +4185,21 @@ namespace gxfile {
     }
 
     int TUELTable::IndexOf(const std::string &s) const {
-        return utils::indexOf<std::string>(uelNames, [&s](const std::string& other) {
+        try {
+            return nameToIndex.at(s);
+        } catch (const std::out_of_range& e) {
+            return -1;
+        }
+        /*return utils::indexOf<std::string>(uelNames, [&s](const std::string& other) {
             return utils::sameText(s, other);
-        }, -2) + 1; // not found -> -1, found -> 1..nuels
+        }, -2) + 1; // not found -> -1, found -> 1..nuels*/
     }
 
     int TUELTable::AddObject(const std::string &id, int mapping) {
         int ix = IndexOf(id);
         if (ix == -1) {
             uelNames.push_back(id);
+            nameToIndex[id] = uelNames.size();
             nameToNum[id] = mapping;
             return static_cast<int>(uelNames.size());
         }
@@ -4267,9 +4275,11 @@ namespace gxfile {
     // Should renaming change the index?
     void TUELTable::RenameEntry(int N, const std::string &s) {
         std::string oldName = uelNames[N-1];
-        uelNames[N-1] = s;
+        nameToNum[s] = nameToNum[oldName];
         nameToNum.erase(oldName);
-        nameToNum[s] = N;
+        nameToIndex[s] = N;
+        nameToIndex.erase(oldName);
+        uelNames[N-1] = s;
     }
 
     int TUELTable::GetMaxUELLength() const {

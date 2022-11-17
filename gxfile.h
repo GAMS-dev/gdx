@@ -194,8 +194,9 @@ namespace gxfile {
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     class TUELTable {
         std::vector<std::string> uelNames {};
-        std::map<std::string, int, strCompCaseInsensitive> nameToNum {};
-        //std::unordered_map<std::string, int, caseInsensitiveHasher, caseInsensitiveStrEquality> nameToNum {};
+        //std::map<std::string, int, strCompCaseInsensitive> nameToNum {};
+        std::unordered_map<std::string, int, caseInsensitiveHasher, caseInsensitiveStrEquality> nameToNum {};
+        std::unordered_map<std::string, int, caseInsensitiveHasher, caseInsensitiveStrEquality> nameToIndex {};
         
         // ...
         TUELUserMapStatus FMapToUserStatus {map_unknown};
