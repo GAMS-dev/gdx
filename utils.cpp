@@ -438,13 +438,6 @@ namespace utils {
         std::memcpy(cp, s.c_str(), s.length()+1);
     }
 
-    int hashStringCaseInsensitive(const std::string &s, int hashTableSize) {
-        int res{};
-        for(char c : s)
-            res = 211 * res + std::toupper(c);
-        return res & 0x7fffffff % hashTableSize;
-    }
-
     StringBuffer::StringBuffer(int size) : s(size, '\0'), bufferSize {size} {}
 
     char *StringBuffer::getPtr() { return &s[0]; }

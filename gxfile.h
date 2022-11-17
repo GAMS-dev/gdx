@@ -50,18 +50,6 @@ namespace gxfile {
         }
     };
 
-    struct caseInsensitiveHasher {
-        size_t operator()(const std::string& input) const {
-            return utils::hashStringCaseInsensitive(input, 100000);
-        }
-    };
-
-    struct caseInsensitiveStrEquality {
-        bool operator() (const std::string& s1, const std::string& s2) const {
-            return utils::sameText(s1, s2);
-        }
-    };
-
     struct TDFilter {
         int FiltNumber, FiltMaxUel;
         std::vector<bool> FiltMap{};
@@ -194,9 +182,7 @@ namespace gxfile {
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     class TUELTable {
         std::vector<std::string> uelNames {};
-        //std::map<std::string, int, strCompCaseInsensitive> nameToNum {};
-        std::unordered_map<std::string, int, caseInsensitiveHasher, caseInsensitiveStrEquality> nameToNum {};
-        std::unordered_map<std::string, int, caseInsensitiveHasher, caseInsensitiveStrEquality> nameToIndex {};
+        std::unordered_map<std::string, int> nameToNum {}, nameToIndex {};
         
         // ...
         TUELUserMapStatus FMapToUserStatus {map_unknown};
