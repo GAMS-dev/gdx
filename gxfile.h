@@ -15,6 +15,8 @@
 #include "gdlib/datastorage.h"
 #include <cstring>
 
+#include "utils.h"
+
 namespace gdlib::gmsstrm {
     class TMiBufferedStreamDelphi;
 }
@@ -45,6 +47,18 @@ namespace gxfile {
     struct strCompCaseInsensitive {
         bool operator() (const std::string& lhs, const std::string& rhs) const {
             return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
+        }
+    };
+
+    struct caseInsensitiveHasher {
+        size_t operator()(const std::string& input) const {
+            return utils::hashStringCaseInsensitive(input, 100000);
+        }
+    };
+
+    struct caseInsensitiveStrEquality {
+        bool operator() (const std::string& s1, const std::string& s2) const {
+            return utils::sameText(s1, s2);
         }
     };
 
@@ -181,6 +195,8 @@ namespace gxfile {
     class TUELTable {
         std::vector<std::string> uelNames {};
         std::map<std::string, int, strCompCaseInsensitive> nameToNum {};
+        //std::unordered_map<std::string, int, caseInsensitiveHasher, caseInsensitiveStrEquality> nameToNum {};
+        
         // ...
         TUELUserMapStatus FMapToUserStatus {map_unknown};
 

@@ -394,4 +394,6 @@ namespace utils {
         return acc;
     }
 
+    int hashStringCaseInsensitive(const std::string &s, int hashTableSize);
+
 }
