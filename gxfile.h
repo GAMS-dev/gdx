@@ -17,6 +17,9 @@
 
 #include "utils.h"
 
+#include "sparsehash/dense_hash_map"
+#include "ankerl/unordered_dense.h"
+
 namespace gdlib::gmsstrm {
     class TMiBufferedStreamDelphi;
 }
@@ -31,6 +34,10 @@ namespace yaml {
 }
 
 namespace gxfile {
+
+    template<typename K, typename V>
+    using umaptype = /*google::dense_hash_map<K,V>*/ /*std::unordered_map<K,V>*/ ankerl::unordered_dense::map<K,V>;
+
     class NullBuffer : public std::streambuf {
     public:
         int overflow(int c) override { return c; }
@@ -182,13 +189,18 @@ namespace gxfile {
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     class TUELTable {
         std::vector<std::string> uelNames {};
-        std::unordered_map<std::string, int> nameToNum {}, nameToIndex {};
+        umaptype<std::string, int> nameToNum {}, nameToIndex {};
         
         // ...
         TUELUserMapStatus FMapToUserStatus {map_unknown};
 
     public:
         TIntegerMapping UsrUel2Ent {}; // from user uelnr to table entry
+
+        TUELTable() {
+            //nameToNum.set_empty_key("");
+            //nameToIndex.set_empty_key("");
+        }
 
         void clear();
 

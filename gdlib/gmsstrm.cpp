@@ -920,7 +920,8 @@ namespace gdlib::gmsstrm {
             int UsrWriteCnt{}; // total number of bytes written
             while(Count > 0) {
                 auto NrBytes = std::min(Count, BufSize - NrWritten);
-                memcpy(&BufPtr[NrWritten], &UsrPtr[UsrWriteCnt], NrBytes);
+                if(NrBytes > 0)
+                    memcpy(&BufPtr[NrWritten], &UsrPtr[UsrWriteCnt], NrBytes);
                 NrWritten += NrBytes;
                 UsrWriteCnt += (int)NrBytes;
                 Count -= NrBytes;

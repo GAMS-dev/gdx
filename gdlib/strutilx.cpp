@@ -538,4 +538,46 @@ namespace gdlib::strutilx {
         return 0;
     }
 
+    bool PStrUEqual(const std::string &P1, const std::string &P2) {
+        if(P1.empty() || P2.empty()) return P1.empty() && P2.empty();
+        else {
+            auto L{P1.length()};
+            if(L != P2.length()) return false;
+            for(auto K{L-1}; K >= 0; K--) {
+                if(std::toupper(P1[K]) != std::toupper(P2[K]))
+                    return false;
+            }
+            return true;
+        }
+    }
+
+    inline int b2i(bool b) { return b ? 1 : 0; }
+
+    int PStrUCmp(const std::string &P1, const std::string &P2) {
+        return !P1.empty() && !P2.empty() ? StrUCmp(P1, P2) : b2i(!P1.empty()) - b2i(!P2.empty());
+    }
+
+    int StrUCmp(const std::string &S1, const std::string &S2) {
+        auto L = S1.length();
+        if(L > S2.length()) L = S2.length();
+        for(int K{}; K<L; K++) {
+            int d = std::toupper(S1[K]) - std::toupper(S2[K]);
+            if(d) return d;
+        }
+        return S1.length() - S2.length();
+    }
+
+    bool PStrEqual(const std::string &P1, const std::string &P2) {
+        if(P1.empty() || P2.empty()) return P1.empty() && P2.empty();
+        else {
+            auto L{P1.length()};
+            if(L != P2.length()) return false;
+            for(auto K{L-1}; K >= 0; K--) {
+                if(P1[K] != P2[K])
+                    return false;
+            }
+            return true;
+        }
+    }
+
 }

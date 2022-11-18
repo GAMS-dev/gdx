@@ -73,4 +73,9 @@ namespace gdlib::strutilx{
     std::string strConvDelphiToCpp(const char* delphistr);
     int strConvCppToDelphi(const std::string &s, char *delphistr);
 
+    bool PStrUEqual(const std::string &P1, const std::string &P2);
+    int PStrUCmp(const std::string &P1, const std::string &P2);
+    int StrUCmp(const std::string &S1, const std::string &S2);
+    bool PStrEqual(const std::string &P1, const std::string &P2);
+
 }

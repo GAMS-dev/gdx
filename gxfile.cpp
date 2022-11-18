@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <numeric>
+#include <unordered_map>
 
 using namespace gdxinterface;
 using namespace gdlib::gmsstrm;
@@ -4185,11 +4186,13 @@ namespace gxfile {
     }
 
     int TUELTable::IndexOf(const std::string &s) const {
-        try {
+        /*try {
             return nameToIndex.at(utils::lowercase(s));
         } catch (const std::out_of_range& e) {
             return -1;
-        }
+        }*/
+        const auto it = nameToIndex.find(utils::lowercase(s));
+        return it == nameToIndex.end() ? -1 : (*it).second;
         /*return utils::indexOf<std::string>(uelNames, [&s](const std::string& other) {
             return utils::sameText(s, other);
         }, -2) + 1; // not found -> -1, found -> 1..nuels*/
@@ -4216,7 +4219,8 @@ namespace gxfile {
     }
 
     int TUELTable::GetUserMap(int i) const {
-        return nameToNum.at(utils::lowercase(uelNames[i-1]));
+        //return nameToNum.at(utils::lowercase(uelNames[i-1]));
+        return (*nameToNum.find(utils::lowercase(uelNames[i-1]))).second;
     }
 
     void TUELTable::SetUserMap(int EN, int N) {
