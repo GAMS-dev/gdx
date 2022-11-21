@@ -4198,7 +4198,7 @@ namespace gxfile {
         return !size();
     }
 
-    umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>::iterator TUELTable::nth(int index) {
+    utablemaptype::iterator TUELTable::nth(int index) {
         auto it = nameToIndexNum.begin();
         std::advance(it, index);
         return it;

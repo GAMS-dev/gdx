@@ -1338,9 +1338,9 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test performance of legacy vs. new GDX object") {
-        // only tolerate on average 20% performance degradation at max!
+        // only tolerate on average 50% performance degradation at max!
         const double avgSlowdown = perfBenchmarkCppVsDelphi(true);
-        REQUIRE(avgSlowdown <= 1.2);
+        REQUIRE(avgSlowdown <= 1.5);
     }
 
     TEST_SUITE_END();

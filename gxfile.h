@@ -36,8 +36,8 @@ namespace yaml {
 namespace gxfile {
 
     template<typename K, typename V, typename H, typename E>
-    //using umaptype = google::dense_hash_map<K, V>;
-    //using umaptype = std::unordered_map<K,V>;
+    //using umaptype = google::dense_hash_map<K, V, H, E>;
+    //using umaptype = std::unordered_map<K,V, H, E>;
     using umaptype = ankerl::unordered_dense::map<K, V, H, E>;
 
     class NullBuffer : public std::streambuf {
@@ -210,8 +210,11 @@ namespace gxfile {
     };
 
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
+
+    using utablemaptype = umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>;
+
     class TUELTable {
-        umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality> nameToIndexNum{};
+        utablemaptype nameToIndexNum{};
         
         // ...
         TUELUserMapStatus FMapToUserStatus {map_unknown};
@@ -233,7 +236,7 @@ namespace gxfile {
         int AddObject(const std::string &id, int mapping);
 
         std::string operator[](int index);
-        umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>::iterator nth(int index);
+        utablemaptype::iterator nth(int index);
 
         int GetUserMap(int i);
 
