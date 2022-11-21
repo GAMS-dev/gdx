@@ -1284,12 +1284,12 @@ namespace tests::gdxinterfacetests {
         });
     }
 
-    TEST_CASE("Test performance of legacy vs. new GDX object") {
-        const int upto {1000};
+    double perfBenchmarkCppVsDelphi() {
+        const int upto {100000};
         int methodIx {};
         const std::array<std::string, 2> methodNames {
-            "xp-level wrap"s,
-            "C++ port"s
+                "xp-level wrap"s,
+                "C++ port"s
         };
         std::array<double, 2> elapsedTimes {};
         basicTest([&](GDXInterface &pgx) {
@@ -1306,16 +1306,31 @@ namespace tests::gdxinterfacetests {
             }
             pgx.gdxDataWriteDone();
             pgx.gdxClose();
+
+            pgx.gdxOpenRead(gdxFn, errNr);
+            int numRecs;
+            pgx.gdxDataReadStrStart(1, numRecs);
+            int dimFirst;
+            for (int i{}; i < upto; i++) {
+                pgx.gdxDataReadStr(sib.ptrs(), values.data(), dimFirst);
+            }
+            pgx.gdxDataReadDone();
+            pgx.gdxClose();
+
             elapsedTimes[methodIx] = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now()-start).count();
             /*std::cout <<    "Method " << std::to_string(methodIx+1) << " ("s << methodNames[methodIx] <<
-                            "): Time elapsed for entering set with "s << std::to_string(upto) << " elements: "s <<
-                            std::to_string(elapsedTimes[methodIx]) << " ms" << std::endl;*/
+                      "): Time elapsed for entering set with "s << std::to_string(upto) << " elements: "s <<
+                      std::to_string(elapsedTimes[methodIx]) << " ms" << std::endl;*/
             std::filesystem::remove(gdxFn);
             methodIx++;
         });
         // only tolerate 50% performance degradation at max!
         const double slowdown = elapsedTimes[1]/elapsedTimes[0];
-        //std::cout << "Slowdown from Delphi to C++ is "s << std::round((slowdown - 1.0)*100.0) << '%' << std::endl;
+        return slowdown;
+    }
+
+    TEST_CASE("Test performance of legacy vs. new GDX object") {
+        const double slowdown = perfBenchmarkCppVsDelphi();
         REQUIRE(slowdown <= 1.5);
     }
 
