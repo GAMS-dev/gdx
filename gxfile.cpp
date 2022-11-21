@@ -4185,24 +4185,15 @@ namespace gxfile {
     }
 
     int TUELTable::IndexOf(const std::string &s) const {
-        /*try {
-            return nameToIndex.at(utils::lowercase(s));
-        } catch (const std::out_of_range& e) {
-            return -1;
-        }*/
-        const auto it = nameToIndexNum.find(utils::lowercase(s));
+        const auto it = nameToIndexNum.find(s);
         return it == nameToIndexNum.end() ? -1 : (*it).second.index;
-        /*return utils::indexOf<std::string>(uelNames, [&s](const std::string& other) {
-            return utils::sameText(s, other);
-        }, -2) + 1; // not found -> -1, found -> 1..nuels*/
     }
 
     int TUELTable::AddObject(const std::string &id, int mapping) {
         int ix = IndexOf(id);
         if (ix == -1) {
             uelNames.push_back(id);
-            std::string lowerId = utils::lowercase(id);
-            nameToIndexNum[lowerId] = IndexNumPair {static_cast<int>(uelNames.size()), mapping};
+            nameToIndexNum[id] = IndexNumPair {static_cast<int>(uelNames.size()), mapping};
             return static_cast<int>(uelNames.size());
         }
         return ix;
@@ -4217,12 +4208,11 @@ namespace gxfile {
     }
 
     int TUELTable::GetUserMap(int i) const {
-        //return nameToNum.at(utils::lowercase(uelNames[i-1]));
-        return (*nameToIndexNum.find(utils::lowercase(uelNames[i-1]))).second.num;
+        return (*nameToIndexNum.find(uelNames[i-1])).second.num;
     }
 
     void TUELTable::SetUserMap(int EN, int N) {
-        nameToIndexNum[utils::lowercase(uelNames[EN-1])].num = N;
+        nameToIndexNum[uelNames[EN-1]].num = N;
     }
 
     void TUELTable::ResetMapToUserStatus() {
@@ -4242,7 +4232,7 @@ namespace gxfile {
 
     int TUELTable::AddUsrNew(const std::string &s) {
         int EN{ AddObject(s, -1) };
-        int res{ nameToIndexNum[utils::lowercase(uelNames[EN - 1])].num };
+        int res{ nameToIndexNum[uelNames[EN - 1]].num };
         if (res < 0) {
             res = UsrUel2Ent.GetHighestIndex() + 1;
             SetUserMap(EN, res);
@@ -4277,10 +4267,8 @@ namespace gxfile {
     // FIXME: How does this affect the ordering / sort list?
     // Should renaming change the index?
     void TUELTable::RenameEntry(int N, const std::string &s) {
-        std::string slc = utils::lowercase(s);
-        std::string oldNameLc = utils::lowercase(uelNames[N - 1]);
-        nameToIndexNum[slc] = nameToIndexNum[oldNameLc];
-        nameToIndexNum.erase(oldNameLc);
+        nameToIndexNum[s] = nameToIndexNum[uelNames[N - 1]];
+        nameToIndexNum.erase(uelNames[N - 1]);
         uelNames[N-1] = s;
     }
 
@@ -4292,10 +4280,10 @@ namespace gxfile {
 
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
         int EN {AddObject(s, -1)};
-        int res {nameToIndexNum[utils::lowercase(uelNames[EN-1])].num};
+        int res {nameToIndexNum[uelNames[EN-1]].num};
         if (res < 0) {
             res = UelNr;
-            nameToIndexNum[utils::lowercase(s)].num = res;
+            nameToIndexNum[s].num = res;
             UsrUel2Ent[res] = EN;
         }
         else if (res != UelNr)

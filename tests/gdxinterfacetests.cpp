@@ -1287,56 +1287,60 @@ namespace tests::gdxinterfacetests {
     }
 
     double perfBenchmarkCppVsDelphi(bool randomOrderInsert = true) {
-        const int upto {100000};
+        const int upto {1000};
         auto nums = std::make_unique<std::array<int, upto>>();
         std::iota(nums->begin(), nums->end(), 1);
         if(randomOrderInsert)
             std::shuffle(nums->begin(), nums->end(), std::default_random_engine(23));
-        int methodIx {};
         const std::array<std::string, 2> methodNames {
                 "xp-level wrap"s,
                 "C++ port"s
         };
         std::array<double, 2> elapsedTimes {};
-        basicTest([&](GDXInterface &pgx) {
-            int errNr;
-            const std::string gdxFn {"speed_test.gdx"s};
-            pgx.gdxOpenWrite(gdxFn, "gdxinterfacetest", errNr);
-            std::chrono::time_point start = std::chrono::high_resolution_clock::now();
-            pgx.gdxDataWriteStrStart("i"s, "a set"s, 1, global::gmsspecs::gms_dt_set, 0);
-            StrIndexBuffers sib;
-            std::array<double, global::gmsspecs::MaxDim> values {};
-            for(int n : *nums) {
-                sib[0] = "i"s + std::to_string(n);
-                pgx.gdxDataWriteStr(sib.cptrs(), values.data());
-            }
-            pgx.gdxDataWriteDone();
-            pgx.gdxClose();
+        const int ntries = 10;
+        std::array<double, ntries> slowdowns{};
+        for (int n{}; n < ntries; n++) {
+            int methodIx{};
+            basicTest([&](GDXInterface& pgx) {
+                int errNr;
+                const std::string gdxFn{ "speed_test.gdx"s };
+                pgx.gdxOpenWrite(gdxFn, "gdxinterfacetest", errNr);
+                std::chrono::time_point start = std::chrono::high_resolution_clock::now();
+                pgx.gdxDataWriteStrStart("i"s, "a set"s, 1, global::gmsspecs::gms_dt_set, 0);
+                StrIndexBuffers sib;
+                std::array<double, global::gmsspecs::MaxDim> values{};
+                for (int n : *nums) {
+                    sib[0] = "i"s + std::to_string(n);
+                    pgx.gdxDataWriteStr(sib.cptrs(), values.data());
+                }
+                pgx.gdxDataWriteDone();
+                pgx.gdxClose();
 
-            pgx.gdxOpenRead(gdxFn, errNr);
-            int numRecs;
-            pgx.gdxDataReadStrStart(1, numRecs);
-            int dimFirst;
-            for (int i{}; i < upto; i++)
-                pgx.gdxDataReadStr(sib.ptrs(), values.data(), dimFirst);
-            pgx.gdxDataReadDone();
-            pgx.gdxClose();
+                pgx.gdxOpenRead(gdxFn, errNr);
+                int numRecs;
+                pgx.gdxDataReadStrStart(1, numRecs);
+                int dimFirst;
+                for (int i{}; i < upto; i++)
+                    pgx.gdxDataReadStr(sib.ptrs(), values.data(), dimFirst);
+                pgx.gdxDataReadDone();
+                pgx.gdxClose();
 
-            elapsedTimes[methodIx] = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now()-start).count();
-            /*std::cout <<    "Method " << std::to_string(methodIx+1) << " ("s << methodNames[methodIx] <<
-                      "): Time elapsed for entering set with "s << std::to_string(upto) << " elements: "s <<
-                      std::to_string(elapsedTimes[methodIx]) << " ms" << std::endl;*/
-            std::filesystem::remove(gdxFn);
-            methodIx++;
-        });
-        // only tolerate 50% performance degradation at max!
-        const double slowdown = elapsedTimes[1]/elapsedTimes[0];
-        return slowdown;
+                elapsedTimes[methodIx] = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - start).count();
+                /*std::cout << "Method " << std::to_string(methodIx + 1) << " ("s << methodNames[methodIx] <<
+                    "): Time elapsed for entering set with "s << std::to_string(upto) << " elements: "s <<
+                    std::to_string(elapsedTimes[methodIx]) << " ms" << std::endl;*/
+                std::filesystem::remove(gdxFn);
+                methodIx++;
+            });
+            slowdowns[n] = elapsedTimes[1] / elapsedTimes[0];
+        }
+        return std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / ntries;
     }
 
     TEST_CASE("Test performance of legacy vs. new GDX object") {
-        const double slowdown = perfBenchmarkCppVsDelphi();
-        REQUIRE(slowdown <= 1.5);
+        // only tolerate on average 20% performance degradation at max!
+        const double avgSlowdown = perfBenchmarkCppVsDelphi(true);
+        REQUIRE(avgSlowdown <= 1.2);
     }
 
     TEST_SUITE_END();

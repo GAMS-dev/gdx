@@ -35,8 +35,10 @@ namespace yaml {
 
 namespace gxfile {
 
-    template<typename K, typename V>
-    using umaptype = /*google::dense_hash_map<K,V>*/ /*std::unordered_map<K,V>*/ ankerl::unordered_dense::map<K,V>;
+    template<typename K, typename V, typename H, typename E>
+    //using umaptype = google::dense_hash_map<K, V>;
+    //using umaptype = std::unordered_map<K,V>;
+    using umaptype = ankerl::unordered_dense::map<K, V, H, E>;
 
     class NullBuffer : public std::streambuf {
     public:
@@ -192,10 +194,25 @@ namespace gxfile {
         explicit IndexNumPair(int _index, int _num) : index(_index), num(_num) {}
     };
 
+    struct caseInsensitiveHasher {
+        size_t operator()(const std::string& input) const {
+            int res{};
+            for(char c : input)
+                res = 211 * res + std::toupper(c);
+            return res & 0x7fffffff;
+        }
+    };
+
+    struct caseInsensitiveStrEquality {
+        bool operator() (const std::string& s1, const std::string& s2) const {
+            return utils::sameText(s1, s2);
+        }
+    };
+
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     class TUELTable {
         std::vector<std::string> uelNames {};
-        umaptype<std::string, IndexNumPair> nameToIndexNum {};
+        umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality> nameToIndexNum{};
         
         // ...
         TUELUserMapStatus FMapToUserStatus {map_unknown};
@@ -204,8 +221,7 @@ namespace gxfile {
         TIntegerMapping UsrUel2Ent {}; // from user uelnr to table entry
 
         TUELTable() {
-            //nameToNum.set_empty_key("");
-            //nameToIndex.set_empty_key("");
+            //nameToIndexNum.set_empty_key("");
         }
 
         void clear();
