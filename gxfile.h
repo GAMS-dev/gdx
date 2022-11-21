@@ -186,10 +186,16 @@ namespace gxfile {
 
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
 
+    struct IndexNumPair {
+        int index, num;
+        IndexNumPair() : index{}, num{} {}
+        explicit IndexNumPair(int _index, int _num) : index(_index), num(_num) {}
+    };
+
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     class TUELTable {
         std::vector<std::string> uelNames {};
-        umaptype<std::string, int> nameToNum {}, nameToIndex {};
+        umaptype<std::string, IndexNumPair> nameToIndexNum {};
         
         // ...
         TUELUserMapStatus FMapToUserStatus {map_unknown};

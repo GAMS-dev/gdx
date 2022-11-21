@@ -1315,6 +1315,7 @@ namespace tests::gdxinterfacetests {
         });
         // only tolerate 50% performance degradation at max!
         const double slowdown = elapsedTimes[1]/elapsedTimes[0];
+        std::cout << "Slowdown from Delphi to C++ is "s << std::round((slowdown - 1.0)*100.0) << '%' << std::endl;
         REQUIRE(slowdown <= 1.5);
     }
 
