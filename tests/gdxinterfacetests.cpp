@@ -1257,7 +1257,7 @@ namespace tests::gdxinterfacetests {
     }*/
 
     TEST_CASE("Test filter") {
-        testReadModelGDX("trnsport"s, [&](GDXInterface &pgx) {
+        testReadModelGDX("trnsport"s, [](GDXInterface &pgx) {
             int nrRecs, dimFirst;
             // uels: seattle 1, san-diego 2, new-york 3, chicago 4, topeka 5
             std::array<int, 2> filterAction { gxdefs::DOMC_EXPAND, gxdefs::DOMC_EXPAND },
@@ -1282,6 +1282,40 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataReadMap(1, keys.data(), values.data(), dimFirst));
             REQUIRE(pgx.gdxDataReadDone());
         });
+    }
+
+    TEST_CASE("Test performance of legacy vs. new GDX object") {
+        const int upto {1000};
+        int methodIx {};
+        const std::array<std::string, 2> methodNames {
+            "xp-level wrap"s,
+            "C++ port"s
+        };
+        std::array<double, 2> elapsedTimes {};
+        basicTest([&](GDXInterface &pgx) {
+            int errNr;
+            const std::string gdxFn {"speed_test.gdx"s};
+            pgx.gdxOpenWrite(gdxFn, "gdxinterfacetest", errNr);
+            std::chrono::time_point start = std::chrono::high_resolution_clock::now();
+            pgx.gdxDataWriteStrStart("i"s, "a set"s, 1, global::gmsspecs::gms_dt_set, 0);
+            StrIndexBuffers sib;
+            std::array<double, global::gmsspecs::MaxDim> values {};
+            for(int i{}; i<upto; i++) {
+                sib[0] = "i"s + std::to_string(i+1);
+                pgx.gdxDataWriteStr(sib.cptrs(), values.data());
+            }
+            pgx.gdxDataWriteDone();
+            pgx.gdxClose();
+            elapsedTimes[methodIx] = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now()-start).count();
+            std::cout <<    "Method " << std::to_string(methodIx+1) << " ("s << methodNames[methodIx] <<
+                            "): Time elapsed for entering set with "s << std::to_string(upto) << " elements: "s <<
+                            std::to_string(elapsedTimes[methodIx]) << " ms" << std::endl;
+            std::filesystem::remove(gdxFn);
+            methodIx++;
+        });
+        // only tolerate 50% performance degradation at max!
+        const double slowdown = elapsedTimes[1]/elapsedTimes[0];
+        REQUIRE(slowdown <= 1.5);
     }
 
     TEST_SUITE_END();
