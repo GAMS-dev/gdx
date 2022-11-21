@@ -120,7 +120,8 @@ namespace tests::gxfiletests {
         REQUIRE(IsGoodIdent("a1"));
     }
 
-    TEST_CASE("Test check mode (indirectly)") {
+    // Temporarily disable to prevent stdout
+    /*TEST_CASE("Test check mode (indirectly)") {
         std::string errMsg;
         TGXFileObj gdx{errMsg};
         int errNr;
@@ -129,7 +130,7 @@ namespace tests::gxfiletests {
         REQUIRE_FALSE(gdx.gdxDataWriteRaw(nullptr, nullptr));
         gdx.gdxClose();
         std::filesystem::remove(tmpfn);
-    }
+    }*/
 
     TEST_SUITE_END();
 }

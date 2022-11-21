@@ -1307,15 +1307,15 @@ namespace tests::gdxinterfacetests {
             pgx.gdxDataWriteDone();
             pgx.gdxClose();
             elapsedTimes[methodIx] = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now()-start).count();
-            std::cout <<    "Method " << std::to_string(methodIx+1) << " ("s << methodNames[methodIx] <<
+            /*std::cout <<    "Method " << std::to_string(methodIx+1) << " ("s << methodNames[methodIx] <<
                             "): Time elapsed for entering set with "s << std::to_string(upto) << " elements: "s <<
-                            std::to_string(elapsedTimes[methodIx]) << " ms" << std::endl;
+                            std::to_string(elapsedTimes[methodIx]) << " ms" << std::endl;*/
             std::filesystem::remove(gdxFn);
             methodIx++;
         });
         // only tolerate 50% performance degradation at max!
         const double slowdown = elapsedTimes[1]/elapsedTimes[0];
-        std::cout << "Slowdown from Delphi to C++ is "s << std::round((slowdown - 1.0)*100.0) << '%' << std::endl;
+        //std::cout << "Slowdown from Delphi to C++ is "s << std::round((slowdown - 1.0)*100.0) << '%' << std::endl;
         REQUIRE(slowdown <= 1.5);
     }
 
