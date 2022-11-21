@@ -5,6 +5,8 @@
 #include "../utils.h"
 #include "../rtl/p3utils.h"
 #include <cassert>
+#include <numeric>
+#include <random>
 
 using namespace std::literals::string_literals;
 using namespace gdxinterface;
@@ -1284,8 +1286,12 @@ namespace tests::gdxinterfacetests {
         });
     }
 
-    double perfBenchmarkCppVsDelphi() {
+    double perfBenchmarkCppVsDelphi(bool randomOrderInsert = true) {
         const int upto {100000};
+        auto nums = std::make_unique<std::array<int, upto>>();
+        std::iota(nums->begin(), nums->end(), 1);
+        if(randomOrderInsert)
+            std::shuffle(nums->begin(), nums->end(), std::default_random_engine(23));
         int methodIx {};
         const std::array<std::string, 2> methodNames {
                 "xp-level wrap"s,
@@ -1300,8 +1306,8 @@ namespace tests::gdxinterfacetests {
             pgx.gdxDataWriteStrStart("i"s, "a set"s, 1, global::gmsspecs::gms_dt_set, 0);
             StrIndexBuffers sib;
             std::array<double, global::gmsspecs::MaxDim> values {};
-            for(int i{}; i<upto; i++) {
-                sib[0] = "i"s + std::to_string(i+1);
+            for(int n : *nums) {
+                sib[0] = "i"s + std::to_string(n);
                 pgx.gdxDataWriteStr(sib.cptrs(), values.data());
             }
             pgx.gdxDataWriteDone();
@@ -1311,9 +1317,8 @@ namespace tests::gdxinterfacetests {
             int numRecs;
             pgx.gdxDataReadStrStart(1, numRecs);
             int dimFirst;
-            for (int i{}; i < upto; i++) {
+            for (int i{}; i < upto; i++)
                 pgx.gdxDataReadStr(sib.ptrs(), values.data(), dimFirst);
-            }
             pgx.gdxDataReadDone();
             pgx.gdxClose();
 
