@@ -44,14 +44,14 @@ namespace utils {
 
     std::string uppercase(const std::string &s) {
         std::string out = s;
-        std::transform(s.begin(), s.end(), out.begin(), std::toupper);
+        std::transform(s.begin(), s.end(), out.begin(), ::toupper);
         return out;
     }
 
     std::string lowercase(const std::string& s) {
         if(s.empty()) return s;
         std::string out = s;
-        std::transform(s.begin(), s.end(), out.begin(), std::tolower);
+        std::transform(s.begin(), s.end(), out.begin(), ::tolower);
         return out;
     }
 
@@ -59,7 +59,7 @@ namespace utils {
         const auto l = a.length();
         if (b.length() != a.length()) return false;
         for (int i = 0; i < l; i++) {
-            if (std::tolower(a[i]) != std::tolower(b[i]))
+            if (::tolower(a[i]) != ::tolower(b[i]))
                 return false;
         }
         return true;

@@ -211,7 +211,6 @@ namespace gxfile {
 
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     class TUELTable {
-        std::vector<std::string> uelNames {};
         umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality> nameToIndexNum{};
         
         // ...
@@ -229,15 +228,14 @@ namespace gxfile {
         int size() const;
         bool empty() const;
 
-        const std::vector<std::string> &getNames();
-
         int IndexOf(const std::string &s) const;
 
         int AddObject(const std::string &id, int mapping);
 
         std::string operator[](int index);
+        umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>::iterator nth(int index);
 
-        int GetUserMap(int i) const;
+        int GetUserMap(int i);
 
         void SetUserMap(int EN, int N);
 

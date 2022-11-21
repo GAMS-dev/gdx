@@ -564,7 +564,8 @@ namespace gxfile {
             YFile->IncIndentLevel();
             FFile->WriteInteger(UELTable ? UELTable->size() : 0);
             if(UELTable) {
-                for (const auto &uelName: UELTable->getNames()) {
+                for(int i=0; i<UELTable->size(); i++) {
+                    const auto uelName = (*UELTable)[i];
                     FFile->WriteString(uelName);
                     YFile->AddItem(uelName);
                 }
@@ -4172,16 +4173,11 @@ namespace gxfile {
 
     void TUELTable::clear() {
         UsrUel2Ent.clear();
-        uelNames.clear();
         nameToIndexNum.clear();
     }
 
     int TUELTable::size() const {
-        return static_cast<int>(uelNames.size());
-    }
-
-    const std::vector<std::string> &TUELTable::getNames() {
-        return uelNames;
+        return static_cast<int>(nameToIndexNum.size());
     }
 
     int TUELTable::IndexOf(const std::string &s) const {
@@ -4192,9 +4188,8 @@ namespace gxfile {
     int TUELTable::AddObject(const std::string &id, int mapping) {
         int ix = IndexOf(id);
         if (ix == -1) {
-            uelNames.push_back(id);
-            nameToIndexNum[id] = IndexNumPair {static_cast<int>(uelNames.size()), mapping};
-            return static_cast<int>(uelNames.size());
+            ix = static_cast<int>(nameToIndexNum.size())+1;
+            nameToIndexNum[id] = IndexNumPair {ix, mapping};
         }
         return ix;
     }
@@ -4203,16 +4198,22 @@ namespace gxfile {
         return !size();
     }
 
-    std::string TUELTable::operator[](int index) {
-        return uelNames[index];
+    umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>::iterator TUELTable::nth(int index) {
+        auto it = nameToIndexNum.begin();
+        std::advance(it, index);
+        return it;
     }
 
-    int TUELTable::GetUserMap(int i) const {
-        return (*nameToIndexNum.find(uelNames[i-1])).second.num;
+    std::string TUELTable::operator[](int index) {
+        return nth(index)->first;
+    }
+
+    int TUELTable::GetUserMap(int i) {
+        return nth(i-1)->second.num;
     }
 
     void TUELTable::SetUserMap(int EN, int N) {
-        nameToIndexNum[uelNames[EN-1]].num = N;
+        nth(EN-1)->second.num = N;
     }
 
     void TUELTable::ResetMapToUserStatus() {
@@ -4232,7 +4233,7 @@ namespace gxfile {
 
     int TUELTable::AddUsrNew(const std::string &s) {
         int EN{ AddObject(s, -1) };
-        int res{ nameToIndexNum[uelNames[EN - 1]].num };
+        int res{ nth(EN-1)->second.num };
         if (res < 0) {
             res = UsrUel2Ent.GetHighestIndex() + 1;
             SetUserMap(EN, res);
@@ -4267,20 +4268,23 @@ namespace gxfile {
     // FIXME: How does this affect the ordering / sort list?
     // Should renaming change the index?
     void TUELTable::RenameEntry(int N, const std::string &s) {
-        nameToIndexNum[s] = nameToIndexNum[uelNames[N - 1]];
-        nameToIndexNum.erase(uelNames[N - 1]);
-        uelNames[N-1] = s;
+        auto old = nth(N-1);
+        auto oldPair = old->second;
+        nameToIndexNum.erase(old->first);
+        nameToIndexNum[s] = oldPair;
     }
 
     int TUELTable::GetMaxUELLength() const {
-        return utils::reduce<int, std::string>(uelNames, 0, [](int acc, const std::string& uelName) {
-            return std::max<int>((int)uelName.length(), acc);
-        });
+        int maxUelLength {};
+        for(auto &pair : nameToIndexNum) {
+            maxUelLength = std::max<int>((int)pair.first.length(), maxUelLength);
+        }
+        return maxUelLength;
     }
 
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
         int EN {AddObject(s, -1)};
-        int res {nameToIndexNum[uelNames[EN-1]].num};
+        int res {nth(EN-1)->second.num};
         if (res < 0) {
             res = UelNr;
             nameToIndexNum[s].num = res;
