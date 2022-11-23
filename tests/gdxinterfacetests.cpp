@@ -1286,7 +1286,16 @@ namespace tests::gdxinterfacetests {
         });
     }
 
-    double perfBenchmarkCppVsDelphi(bool randomOrderInsert = true) {
+    class AbstractWriteReadPair {
+    protected:
+        std::array<int, global::gmsspecs::MaxDim> keys{};
+        std::array<double, global::gmsspecs::valscale + 1> values{};
+    public:
+        virtual void write(GDXInterface &pgx, int count, const int *nums) = 0;
+        virtual void read(GDXInterface &pgx, int count, const int *nums) = 0;
+    };
+
+    double perfBenchmarkCppVsDelphi(AbstractWriteReadPair &pair, bool randomOrderInsert = true) {
         const int upto {1000};
         auto nums = std::make_unique<std::array<int, upto>>();
         std::iota(nums->begin(), nums->end(), 1);
@@ -1304,31 +1313,20 @@ namespace tests::gdxinterfacetests {
             basicTest([&](GDXInterface& pgx) {
                 int errNr;
                 const std::string gdxFn{ "speed_test.gdx"s };
-                pgx.gdxOpenWrite(gdxFn, "gdxinterfacetest", errNr);
+
                 std::chrono::time_point start = std::chrono::high_resolution_clock::now();
-                pgx.gdxDataWriteStrStart("i"s, "a set"s, 1, global::gmsspecs::gms_dt_set, 0);
-                StrIndexBuffers sib;
-                std::array<double, global::gmsspecs::MaxDim> values{};
-                for (int n : *nums) {
-                    sib[0] = "i"s + std::to_string(n);
-                    pgx.gdxDataWriteStr(sib.cptrs(), values.data());
-                }
-                pgx.gdxDataWriteDone();
+                pgx.gdxOpenWrite(gdxFn, "gdxinterfacetest", errNr);
+                pair.write(pgx, upto, nums->data());
                 pgx.gdxClose();
-
                 pgx.gdxOpenRead(gdxFn, errNr);
-                int numRecs;
-                pgx.gdxDataReadStrStart(1, numRecs);
-                int dimFirst;
-                for (int i{}; i < upto; i++)
-                    pgx.gdxDataReadStr(sib.ptrs(), values.data(), dimFirst);
-                pgx.gdxDataReadDone();
+                pair.read(pgx, upto, nums->data());
                 pgx.gdxClose();
-
                 elapsedTimes[methodIx] = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - start).count();
+
                 /*std::cout << "Method " << std::to_string(methodIx + 1) << " ("s << methodNames[methodIx] <<
                     "): Time elapsed for entering set with "s << std::to_string(upto) << " elements: "s <<
                     std::to_string(elapsedTimes[methodIx]) << " ms" << std::endl;*/
+
                 std::filesystem::remove(gdxFn);
                 methodIx++;
             });
@@ -1337,10 +1335,68 @@ namespace tests::gdxinterfacetests {
         return std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / ntries;
     }
 
-    TEST_CASE("Test performance of legacy vs. new GDX object") {
-        // only tolerate on average 50% performance degradation at max!
-        const double avgSlowdown = perfBenchmarkCppVsDelphi(true);
-        REQUIRE(avgSlowdown <= 1.5);
+    class WriteReadRawPair : public AbstractWriteReadPair {
+        void write(GDXInterface &pgx, int count, const int *nums) override {
+            pgx.gdxUELRegisterRawStart();
+            for (int i{}; i<count; i++)
+                REQUIRE(pgx.gdxUELRegisterRaw("i"s + std::to_string(nums[i])));
+            pgx.gdxUELRegisterDone();
+            REQUIRE(pgx.gdxDataWriteRawStart("i"s, "a set"s, 1, global::gmsspecs::gms_dt_set, 0));
+            for (int i{}; i<count; i++) {
+                keys.front() = i+1;
+                REQUIRE(pgx.gdxDataWriteRaw(keys.data(), values.data()));
+            }
+            pgx.gdxDataWriteDone();
+        }
+
+        void read(GDXInterface &pgx, int count, const int *nums) override {
+            int numRecs;
+            pgx.gdxDataReadRawStart(1, numRecs);
+            int dimFirst;
+            for (int i{}; i < count; i++)
+                pgx.gdxDataReadRaw(keys.data(), values.data(), dimFirst);
+            pgx.gdxDataReadDone();
+        }
+    };
+
+    class WriteReadStrPair : public AbstractWriteReadPair {
+        void write(GDXInterface &pgx, int count, const int *nums) override {
+            pgx.gdxDataWriteStrStart("i"s, "a set"s, 1, global::gmsspecs::gms_dt_set, 0);
+            StrIndexBuffers sib;
+            for (int i{}; i<count; i++) {
+                sib[0] = "i"s + std::to_string(nums[i]);
+                pgx.gdxDataWriteStr(sib.cptrs(), values.data());
+            }
+            pgx.gdxDataWriteDone();
+        }
+
+        void read(GDXInterface &pgx, int count, const int *nums) override {
+            int numRecs;
+            pgx.gdxDataReadStrStart(1, numRecs);
+            int dimFirst;
+            StrIndexBuffers sib;
+            for (int i{}; i < count; i++)
+                pgx.gdxDataReadStr(sib.ptrs(), values.data(), dimFirst);
+            pgx.gdxDataReadDone();
+        }
+    };
+
+    void enforceSlowdownLimit(AbstractWriteReadPair &pair, double limit) {
+        const double avgSlowdown = perfBenchmarkCppVsDelphi(pair, true);
+        REQUIRE(avgSlowdown <= limit);
+    }
+
+    TEST_CASE("Test performance of legacy vs. new GDX object: write in str mode") {
+        {
+            // only tolerate on average 10% performance degradation at max!
+            WriteReadRawPair wrrp;
+            enforceSlowdownLimit(wrrp, 1.1);
+        }
+        {
+            // only tolerate on average 10% performance degradation at max!
+            WriteReadStrPair wrsp;
+            enforceSlowdownLimit(wrsp, 1.1);
+        }
     }
 
     TEST_SUITE_END();
