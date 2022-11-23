@@ -4198,11 +4198,6 @@ namespace gxfile {
     }
 
     int TUELTable::AddObject(const std::string &id, int mapping) {
-        /*int ix = IndexOf(id);
-        if (ix == -1) {
-            ix = static_cast<int>(nameToIndexNum.size())+1;
-            nameToIndexNum[id] = IndexNumPair {ix, mapping};
-        }*/
         const auto &[it, wasNew] = nameToIndexNum.try_emplace(id, IndexNumPair{ 0, mapping });
         int ix;
         if (wasNew) (*it).second.index = ix = static_cast<int>(nameToIndexNum.size());
@@ -4306,10 +4301,10 @@ namespace gxfile {
 
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
         int EN {AddObject(s, -1)};
-        int res {nth(EN-1)->second.num};
+        auto& itsNum = nth(EN - 1)->second.num;
+        int res {itsNum};
         if (res < 0) {
-            res = UelNr;
-            nameToIndexNum[s].num = res;
+            itsNum = res = UelNr;
             UsrUel2Ent[res] = EN;
         }
         else if (res != UelNr)
