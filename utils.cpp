@@ -104,7 +104,7 @@ namespace utils {
     }
 
     std::string trimRight(const std::string& s) {
-        if(s.empty()) return s;
+        if(s.empty() || !isblank(s.back())) return s;
         const auto lastNonBlank = s.find_last_not_of(" \t");
         return s.substr(0, lastNonBlank+1);
     }

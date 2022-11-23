@@ -185,6 +185,7 @@ namespace gxfile {
         void clear();
         int &operator[](int index);
         bool empty() const;
+        void reserve(int n);
     };
 
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
@@ -231,6 +232,7 @@ namespace gxfile {
 
         TUELTable() {
             //nameToIndexNum.set_empty_key("");
+            Reserve(10000);
         }
 
         void clear();
@@ -261,6 +263,8 @@ namespace gxfile {
         void RenameEntry(int N, const std::string &s);
 
         int GetMaxUELLength() const;
+
+        void Reserve(int n);
     };
 
     std::string MakeGoodExplText(const std::string& s);

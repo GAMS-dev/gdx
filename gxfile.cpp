@@ -4299,6 +4299,11 @@ namespace gxfile {
         return maxUelLength;
     }
 
+    void TUELTable::Reserve(int n) {
+        UsrUel2Ent.reserve(n);
+        nameToIndexNum.reserve(n);
+    }
+
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
         int EN {AddObject(s, -1)};
         auto& itsNum = nth(EN - 1)->second.num;
@@ -4400,6 +4405,10 @@ namespace gxfile {
 
     bool TIntegerMapping::empty() const {
         return Map.empty();
+    }
+
+    void TIntegerMapping::reserve(int n) {
+        Map.reserve(n);
     }
 
     int TIntegerMapping::GetReverseMapping(int T) const {

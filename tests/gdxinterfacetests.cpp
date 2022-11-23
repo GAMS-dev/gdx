@@ -1296,7 +1296,7 @@ namespace tests::gdxinterfacetests {
     };
 
     double perfBenchmarkCppVsDelphi(AbstractWriteReadPair &pair, bool randomOrderInsert = true) {
-        const int upto {1000};
+        const int upto {10000};
         auto nums = std::make_unique<std::array<int, upto>>();
         std::iota(nums->begin(), nums->end(), 1);
         if(randomOrderInsert)
@@ -1383,10 +1383,11 @@ namespace tests::gdxinterfacetests {
 
     void enforceSlowdownLimit(AbstractWriteReadPair &pair, double limit) {
         const double avgSlowdown = perfBenchmarkCppVsDelphi(pair, true);
+        //std::cout << "slowdown = " << avgSlowdown << std::endl;
         REQUIRE(avgSlowdown <= limit);
     }
 
-    TEST_CASE("Test performance of legacy vs. new GDX object: write in str mode") {
+    TEST_CASE("Test performance of legacy vs. new GDX object") {
         {
             // only tolerate on average 10% performance degradation at max!
             WriteReadRawPair wrrp;
