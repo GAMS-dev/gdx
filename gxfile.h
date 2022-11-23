@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 #include <optional>
+#include <unordered_set>
 #include "global/gmsspecs.h"
 #include "gxdefs.h"
 #include "gdlib/gmsdata.h"
@@ -160,7 +161,7 @@ namespace gxfile {
         tgxfilemode_count
     };
 
-    using TgxModeSet = std::set<TgxFileMode>;
+    using TgxModeSet = std::unordered_set<TgxFileMode>;
 
     const TgxModeSet    AnyWriteMode {fw_init,fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data,fw_map_data,fw_str_data},
                         AnyReadMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data,fr_str_data};
@@ -209,6 +210,9 @@ namespace gxfile {
         }
     };
 
+    using caseSensitiveHasher = ankerl::unordered_dense::hash<std::string>;
+    using caseSensitiveStrEquality = std::equal_to<std::string>;
+
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
 
     using utablemaptype = umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>;
@@ -218,6 +222,9 @@ namespace gxfile {
         
         // ...
         TUELUserMapStatus FMapToUserStatus {map_unknown};
+
+        utablemaptype::iterator nth(int index);
+        utablemaptype::const_iterator cnth(int index) const;
 
     public:
         TIntegerMapping UsrUel2Ent {}; // from user uelnr to table entry
@@ -235,10 +242,9 @@ namespace gxfile {
 
         int AddObject(const std::string &id, int mapping);
 
-        std::string operator[](int index);
-        utablemaptype::iterator nth(int index);
+        std::string operator[](int index) const;
 
-        int GetUserMap(int i);
+        int GetUserMap(int i) const;
 
         void SetUserMap(int EN, int N);
 
@@ -371,7 +377,9 @@ namespace gxfile {
         void SetError(int N);
         void ReportError(int N);
         bool ErrorCondition(bool cnd, int N);
+        bool MajorCheckMode(const std::string& Routine, TgxFileMode m);
         bool MajorCheckMode(const std::string &Routine, const TgxModeSet &MS);
+        bool CheckMode(const std::string& Routine, TgxFileMode m);
         bool CheckMode(const std::string &Routine, const TgxModeSet &MS);
         void WriteTrace(const std::string &s);
         void InitDoWrite(int NrRecs);

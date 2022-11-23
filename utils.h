@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iterator>
 #include <initializer_list>
+#include <unordered_set>
 #include <list>
 #include <set>
 #include <string>
@@ -57,6 +58,11 @@ namespace utils {
 
     template<typename K, typename V>
     bool in(const K& val, const std::map<K, V>& m) {
+        return m.find(val) != m.end(); // C++20 starts offering contains method
+    }
+
+    template<typename K, typename V>
+    bool in(const K& val, const std::unordered_set<K, V>& m) {
         return m.find(val) != m.end(); // C++20 starts offering contains method
     }
 

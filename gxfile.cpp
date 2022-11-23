@@ -403,10 +403,9 @@ namespace gxfile {
     //   user mapped space.
     //   Each element string must follow the GAMS rules for unique elements.
     int TGXFileObj::gdxDataWriteStr(const char **KeyStr, const double *Values) {
-        const TgxModeSet AllowedModes {fw_str_data};
         if(fmode == fw_dom_str) fmode = fw_str_data;
-        if(TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) {
-            if(!CheckMode("DataWriteStr", AllowedModes)) return false;
+        if(TraceLevel >= TraceLevels::trl_all || fmode != fw_str_data) {
+            if(!CheckMode("DataWriteStr", fw_str_data)) return false;
             std::cout << "  Index =\n";
             for(int D{}; D<FCurrentDim; D++)
                 std::cout << " " << KeyStr[D] << (D+1 < FCurrentDim ? "," : "") << "\n";
@@ -438,7 +437,7 @@ namespace gxfile {
     //  gdxDataErrorCount, gdxDataWriteRawStart, gdxDataWriteMapStart, gdxDataWriteStrStart,
     // Description:
     int TGXFileObj::gdxDataWriteDone() {
-        const TgxModeSet AllowedModes {fw_raw_data,fw_map_data,fw_str_data, fw_dom_raw, fw_dom_map, fw_dom_str};
+        static const TgxModeSet AllowedModes {fw_raw_data,fw_map_data,fw_str_data, fw_dom_raw, fw_dom_map, fw_dom_str};
         if(!MajorCheckMode("DataWriteDone"s, AllowedModes)) return false;
         if(!utils::in(fmode, fw_raw_data, fw_dom_raw)) {
             InitDoWrite(static_cast<int>(SortList->size()));
@@ -727,13 +726,11 @@ namespace gxfile {
                                         int ADim,
                                         int AType,
                                         int AUserInfo) {
-        const TgxModeSet AllowedModes{fw_init};
-
         CurSyPtr = nullptr;
         ErrorList.clear();
         SortList = nullptr;
 
-        if(!MajorCheckMode(Caller, AllowedModes)) return false;
+        if(!MajorCheckMode(Caller, fw_init)) return false;
 
         if(TraceLevel >= TraceLevels::trl_some)
             WriteTrace("Symbol = "s + AName + ", Dim = "s + std::to_string(ADim));
@@ -782,6 +779,12 @@ namespace gxfile {
         return true;
     }
 
+    bool TGXFileObj::MajorCheckMode(const std::string& Routine, TgxFileMode m) {
+        MajContext = Routine;
+        LastRepError = ERR_NOERROR;
+        return !((TraceLevel >= TraceLevels::trl_some || fmode != m) && !CheckMode(Routine, m));
+    }
+
     bool TGXFileObj::MajorCheckMode(const std::string &Routine, const TgxModeSet &MS) {
         MajContext = Routine;
         LastRepError = ERR_NOERROR;
@@ -813,6 +816,29 @@ namespace gxfile {
         }
         SetError(N);
         LastRepError = N;
+    }
+
+    bool TGXFileObj::CheckMode(const std::string& Routine, TgxFileMode m) {
+        if (fmode == m) {
+            WriteTrace(Routine);
+            return true;
+        }
+        SetError(ERR_BADMODE);
+        std::cout << "**** Error: " << Routine << " called out of context\n";
+        if (!MajContext.empty() && !utils::sameText(MajContext, Routine))
+            std::cout << "     Previous major function called was " << MajContext << '\n';
+        std::cout << "     Current context = " << fmode_str[fmode] << '\n';
+        std::cout << "     Allowed = {";
+        bool f{ true };
+        for (int M{}; M < tgxfilemode_count; M++) {
+            if (static_cast<TgxFileMode>(M) == m) {
+                if (f) f = false;
+                else std::cout << ',';
+                std::cout << fmode_str[M];
+            }
+        }
+        std::cout << "}\n";
+        return false;
     }
 
     bool TGXFileObj::CheckMode(const std::string &Routine, const TgxModeSet &MS) {
@@ -848,9 +874,7 @@ namespace gxfile {
         CurSyPtr = nullptr;
         SortList = nullptr;
 
-        const TgxModeSet AllowedModes{ fr_init };
-
-        if (!MajorCheckMode(Caller, AllowedModes)) {
+        if (!MajorCheckMode(Caller, fr_init)) {
             fmode = fr_init;
             return -1;
         }
@@ -1601,8 +1625,7 @@ namespace gxfile {
     //   Read the next record using strings for the unique elements. The
     //   reading should be initialized by calling DataReadStrStart
     int TGXFileObj::gdxDataReadStr(char **KeyStr, double *Values, int &DimFrst) {
-        const TgxModeSet AllowedModes{ fr_str_data };
-        if ((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadStr", AllowedModes))
+        if ((TraceLevel >= TraceLevels::trl_all || fmode != fr_str_data) && !CheckMode("DataReadStr", fr_str_data))
             return false;
         if (!DoRead(Values, DimFrst)) {
             gdxDataReadDone();
@@ -1626,7 +1649,7 @@ namespace gxfile {
     //   gdxDataReadRawStart, gdxDataReadMapStart, gdxDataReadStrStart
     // Description:
     int TGXFileObj::gdxDataReadDone() {
-        TgxModeSet AllowedMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data, fr_str_data,fr_slice};
+        static const TgxModeSet AllowedMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data, fr_str_data,fr_slice};
         SortList = nullptr;
         CurSyPtr = nullptr;
         if(!MajorCheckMode("DataReadDone", AllowedMode)) {
@@ -2044,7 +2067,7 @@ namespace gxfile {
     //   gdxDataErrorCount
     int TGXFileObj::gdxDataErrorRecordX(int RecNr, int * KeyInt,  double * Values)
     {
-        TgxModeSet AllowedModes{ fr_init,fw_init,fr_map_data, fr_mapr_data, fw_raw_data, fw_map_data,fw_str_data };
+        static const TgxModeSet AllowedModes{ fr_init,fw_init,fr_map_data, fr_mapr_data, fw_raw_data, fw_map_data,fw_str_data };
         if ((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataErrorRecord", AllowedModes))
             return false;
 
@@ -2073,8 +2096,7 @@ namespace gxfile {
     //   gdxDataReadRawStart, gdxDataReadDone
     // Description:
     int TGXFileObj::gdxDataReadRaw(int *KeyInt, double *Values, int &DimFrst) {
-        TgxModeSet  AllowedModes{fr_raw_data};
-        if((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadRaw", AllowedModes)) return false;
+        if((TraceLevel >= TraceLevels::trl_all || fmode != fr_raw_data) && !CheckMode("DataReadRaw", fr_raw_data)) return false;
         if(!DoRead(Values, DimFrst)) gdxDataReadDone();
         else {
             //std::copy(LastElem.begin(), LastElem.begin()+FCurrentDim-1, KeyInt.begin());
@@ -2127,9 +2149,8 @@ namespace gxfile {
     //   gdxDataWriteRawStart, gdxDataWriteDone
     int TGXFileObj::gdxDataWriteRaw(const int* KeyInt, const double* Values)
     {
-        TgxModeSet AllowedModes{ fw_raw_data };
         if (fmode == fw_dom_raw) fmode = fw_raw_data;
-        if ((TraceLevel >= TraceLevels::trl_some || !utils::in(fmode, AllowedModes)) && !CheckMode("DataWriteRaw", AllowedModes)) return false;
+        if ((TraceLevel >= TraceLevels::trl_some || fmode != fw_raw_data) && !CheckMode("DataWriteRaw", fw_raw_data)) return false;
         if (DoWrite(KeyInt, Values)) return true;
         return false;
     }
@@ -2484,7 +2505,7 @@ namespace gxfile {
     //   gdxSymbolGetDomain
     int TGXFileObj::gdxSymbolSetDomain(const char **DomainIDs) {
         int res{ false };
-        TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
+        static const TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
         if (!MajorCheckMode("SymbolSetDomain", AllowedModes) || !CurSyPtr) return res;
 
         if(verboseTrace && TraceLevel == TraceLevels::trl_all) {
@@ -2611,7 +2632,7 @@ namespace gxfile {
     // See Also:
     //   gdxUELRegisterRawStart, gdxUELRegisterMapStart, gdxUELRegisterStrStart
     int TGXFileObj::gdxUELRegisterDone() {
-        TgxModeSet AllowedModes{ f_raw_elem,f_map_elem,f_str_elem };
+        static const TgxModeSet AllowedModes{ f_raw_elem,f_map_elem,f_str_elem };
         if (!MajorCheckMode("UELRegisterDone", AllowedModes)) return false;
         fmode = fmode_AftReg;
         return true;
@@ -2630,10 +2651,9 @@ namespace gxfile {
     //  assigned integer index is determined by the system
     //  Can only be used while writing to a gdx file
     int TGXFileObj::gdxUELRegisterRaw(const std::string &Uel) {
-        TgxModeSet AllowedModes{ f_raw_elem };
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
             std::cout << "Uel=" << Uel << '\n';
-        if ((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("UELRegisterRaw", AllowedModes))
+        if ((TraceLevel >= TraceLevels::trl_all || fmode != f_raw_elem) && !CheckMode("UELRegisterRaw", f_raw_elem))
             return false;
         std::string SV = utils::trimRight(Uel);
         if (ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
@@ -2648,8 +2668,7 @@ namespace gxfile {
     // See Also:
     //   gdxUELRegisterRaw, gdxUELRegisterDone
     int TGXFileObj::gdxUELRegisterRawStart() {
-        TgxModeSet AllowedModes { fw_init };
-        if (!MajorCheckMode("UELRegisterRawStart", AllowedModes)) return false;
+        if (!MajorCheckMode("UELRegisterRawStart", fw_init)) return false;
         fmode_AftReg = fw_init;
         fmode = f_raw_elem;
         return true;
@@ -2670,8 +2689,7 @@ namespace gxfile {
     // See Also:
     //   gdxUELRegisterStrStart, gdxUELRegisterDone
     int TGXFileObj::gdxUELRegisterStr(const std::string &Uel, int &UelNr) {
-        const TgxModeSet AllowedModes{ f_str_elem };
-        if ((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("UELRegisterStr", AllowedModes))
+        if ((TraceLevel >= TraceLevels::trl_all || fmode != f_str_elem) && !CheckMode("UELRegisterStr", f_str_elem))
             return false;
         std::string SV{ utils::trimRight(Uel) };
         if (ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
@@ -2687,7 +2705,7 @@ namespace gxfile {
     //   gdxUELRegisterStr, gdxUELRegisterDone
     // Description:
     int TGXFileObj::gdxUELRegisterStrStart() {
-        TgxModeSet AllowedModes{ fr_init, fw_init };
+        static const TgxModeSet AllowedModes{ fr_init, fw_init };
         if (!MajorCheckMode("UELRegisterStrStart", AllowedModes)) return false;
         fmode_AftReg = fmode == fw_init ? fw_init : fr_init;
         fmode = f_str_elem;
@@ -2861,12 +2879,11 @@ namespace gxfile {
     //   gdxDataWriteMapStart, gdxDataWriteDone
     // Description:
     int TGXFileObj::gdxDataWriteMap(const int *KeyInt, const double *Values) {
-        const TgxModeSet AllowedModes {fw_map_data};
         TIndex Keys;
         if(fmode == fw_dom_map)
             fmode = fw_map_data;
-        if(TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) {
-            if(!CheckMode("DataWriteMap", AllowedModes)) return false;
+        if(TraceLevel >= TraceLevels::trl_all || fmode != fw_map_data) {
+            if(!CheckMode("DataWriteMap", fw_map_data)) return false;
             std::cout << "   Index =";
             for(int D{}; D<FCurrentDim; D++) {
                 std::cout << " " << std::to_string(KeyInt[D]);
@@ -2895,7 +2912,7 @@ namespace gxfile {
     //   gdxUELRegisterMap, gdxUELRegisterDone
     // Description:
     int TGXFileObj::gdxUELRegisterMapStart() {
-        TgxModeSet AllowedModes {fr_init, fw_init};
+        static const TgxModeSet AllowedModes {fr_init, fw_init};
         if(!MajorCheckMode("UELRegisterMapStart", AllowedModes)) return false;
         fmode_AftReg = fmode == fw_init ? fw_init : fr_init;
         fmode = f_map_elem;
@@ -2919,10 +2936,9 @@ namespace gxfile {
     //   A unique element
     //   must follow the GAMS rules when it contains quote characters.
     int TGXFileObj::gdxUELRegisterMap(int UMap, const std::string &Uel) {
-        TgxModeSet AllowedModes {f_map_elem};
         std::string SV {utils::trimRight(Uel)};
-        if(TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) {
-            if(!CheckMode("UELRegisterMap", AllowedModes)) return false;
+        if(TraceLevel >= TraceLevels::trl_all || fmode != f_map_elem) {
+            if(!CheckMode("UELRegisterMap", f_map_elem)) return false;
             std::cout << "   Enter UEL: " << SV << " with number " << UMap << "\n";
         }
         if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR) ||
@@ -2958,7 +2974,7 @@ namespace gxfile {
     //   gdxDataReadMapStart, gdxDataReadFilteredStart, gdxDataReadDone
     // Description:
     int TGXFileObj::gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst) {
-        TgxModeSet AllowedModes{fr_map_data, fr_mapr_data};
+        static const TgxModeSet AllowedModes{fr_map_data, fr_mapr_data};
         if((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadMap", AllowedModes)) return false;
         if(CurSyPtr && CurSyPtr->SScalarFrst) {
             CurSyPtr->SScalarFrst = false;
@@ -3261,8 +3277,7 @@ namespace gxfile {
     //   of elements to a single integer; the filter number. A filter number
     //   can later be used to specify a filter for an index position when reading data.
     int TGXFileObj::gdxFilterRegisterStart(int FilterNr) {
-        static const TgxModeSet AllowedModes {fr_init};
-        if(!MajorCheckMode("FilterRegisterStart"s, AllowedModes) ||
+        if(!MajorCheckMode("FilterRegisterStart"s, fr_init) ||
             ErrorCondition(FilterNr >= 1, ERR_BAD_FILTER_NR)) return false;
 
         FilterList.AddFilter(TDFilter{ FilterNr, UELTable->UsrUel2Ent.GetHighestIndex() });
@@ -3285,9 +3300,8 @@ namespace gxfile {
     //  valid user indices or the index was never mapped into the
     //  user index space.
     int TGXFileObj::gdxFilterRegister(int UelMap) {
-        static const TgxModeSet AllowedModes {fr_filter};
-        if(TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes) &&
-            !CheckMode("FilterRegister"s, AllowedModes)) return false;
+        if((TraceLevel >= TraceLevels::trl_all || fmode != fr_filter) &&
+            !CheckMode("FilterRegister"s, fr_filter)) return false;
         auto &obj = *CurFilter;
         if(ErrorCondition(UelMap >= 1 && UelMap <= obj.FiltMaxUel, ERR_BAD_FILTER_INDX)) return false;
         int EN{UELTable->UsrUel2Ent.GetMapping(UelMap)};
@@ -3308,8 +3322,7 @@ namespace gxfile {
     // Description:
     //
     int TGXFileObj::gdxFilterRegisterDone() {
-        static const TgxModeSet AllowedModes {fr_filter};
-        if(!MajorCheckMode("FilterRegisterDone"s, AllowedModes)) return false;
+        if(!MajorCheckMode("FilterRegisterDone"s, fr_filter)) return false;
         fmode = fr_init;
         CurFilter->FiltSorted = true;
         if(UELTable && UELTable->GetMapToUserStatus() == map_unsorted) {
@@ -3722,7 +3735,7 @@ namespace gxfile {
     //   the highest value minus one for that index position. This function can be called
     //   multiple times.
     int TGXFileObj::gdxDataReadSlice(const char** UelFilterStr, int& Dimen, TDataStoreProc_t DP) {
-        if (!MajorCheckMode("DataReadSlice", { fr_slice }))
+        if (!MajorCheckMode("DataReadSlice", fr_slice))
             return false;
         bool GoodIndx {true};
         Dimen = 0;
@@ -3775,7 +3788,7 @@ namespace gxfile {
     //   This function maps this index space back in to unique elements represented as
     //   strings.
     int TGXFileObj::gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr) {
-        if (!MajorCheckMode("DataSliceUELS"s, { fr_slice })) return false;
+        if (!MajorCheckMode("DataSliceUELS"s, fr_slice)) return false;
         int HisDim{};
         for (int D{ 1 }; D <= FCurrentDim; D++) {
             if (!SliceElems[D].empty()) strcpy(KeyStr[D], SliceElems[D].c_str());
@@ -3935,12 +3948,11 @@ namespace gxfile {
     // See also:
     //   gdxUELMaxLength
     int TGXFileObj::gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) {
-        TgxModeSet AllowedModes{ fr_init };
         memset(LengthInfo, 0, MaxDim * sizeof(int));
 
         int NrRecs;
-        if ((TraceLevel >= TraceLevels::trl_some || !utils::in(fmode, AllowedModes))
-            && !CheckMode("SymbIndxMaxLength", AllowedModes)
+        if ((TraceLevel >= TraceLevels::trl_some || fmode != fr_init)
+            && !CheckMode("SymbIndxMaxLength", fr_init)
             || SyNr < 0 || SyNr > NameListOrdered.size() || !gdxDataReadRawStart(SyNr, NrRecs))
             return 0;
 
@@ -4186,11 +4198,15 @@ namespace gxfile {
     }
 
     int TUELTable::AddObject(const std::string &id, int mapping) {
-        int ix = IndexOf(id);
+        /*int ix = IndexOf(id);
         if (ix == -1) {
             ix = static_cast<int>(nameToIndexNum.size())+1;
             nameToIndexNum[id] = IndexNumPair {ix, mapping};
-        }
+        }*/
+        const auto &[it, wasNew] = nameToIndexNum.try_emplace(id, IndexNumPair{ 0, mapping });
+        int ix;
+        if (wasNew) (*it).second.index = ix = static_cast<int>(nameToIndexNum.size());
+        else ix = (*it).second.index;
         return ix;
     }
 
@@ -4204,12 +4220,18 @@ namespace gxfile {
         return it;
     }
 
-    std::string TUELTable::operator[](int index) {
-        return nth(index)->first;
+    utablemaptype::const_iterator TUELTable::cnth(int index) const {
+        auto it = nameToIndexNum.cbegin();
+        std::advance(it, index);
+        return it;
     }
 
-    int TUELTable::GetUserMap(int i) {
-        return nth(i-1)->second.num;
+    std::string TUELTable::operator[](int index) const {
+        return cnth(index)->first;
+    }
+
+    int TUELTable::GetUserMap(int i) const {
+        return cnth(i-1)->second.num;
     }
 
     void TUELTable::SetUserMap(int EN, int N) {
