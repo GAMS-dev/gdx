@@ -23,7 +23,7 @@ using namespace gdlib::gmsglob;
 
 namespace gxfile {
 
-    using UELTableImplChoice = TUELTable;
+    using UELTableImplChoice = TUELTableLegacy;
 
     NullBuffer null_buffer;
 
@@ -4262,28 +4262,6 @@ namespace gxfile {
         return res;
     }
 
-    TUELUserMapStatus TUELTable::GetMapToUserStatus() {
-        if(FMapToUserStatus == map_unknown) {
-            int LV {-1};
-            bool C {true};
-            FMapToUserStatus = map_sortgrow;
-            for(int N{1}; N<=size(); N++) {
-                int V = GetUserMap(N);
-                if(V < 0) C = false;
-                else if(V > LV) {
-                    LV = V;
-                    if(!C) FMapToUserStatus = map_sorted;
-                } else {
-                    FMapToUserStatus = map_unsorted;
-                    break;
-                }
-            }
-            if(FMapToUserStatus == map_sortgrow && C)
-                FMapToUserStatus = map_sortfull;
-        }
-        return FMapToUserStatus;
-    }
-
     // FIXME: How does this affect the ordering / sort list?
     // Should renaming change the index?
     void TUELTable::RenameEntry(int N, const std::string &s) {
@@ -4458,7 +4436,7 @@ namespace gxfile {
     }
 
     void TUELTableLegacy::SetUserMap(int EN, int N) {
-        GetObject(EN-1)->num = N;
+        GetObject(EN)->num = N;
     }
 
     void TUELTableLegacy::ResetMapToUserStatus() {
@@ -4469,8 +4447,8 @@ namespace gxfile {
         int res = GetObject(EN)->num;
         if(res < 0) {
             res = UsrUel2Ent.GetHighestIndex() + 1;
-            IndexNumPair p {res};
-            SetObject(EN, p);
+            GetObject(EN)->num = res;
+            UsrUel2Ent[res] = EN;
         }
         ResetMapToUserStatus();
         return res;
@@ -4493,8 +4471,8 @@ namespace gxfile {
         int res {GetObject(EN)->num};
         if(res < 0) {
             res = UelNr;
-            IndexNumPair p {res};
-            SetObject(EN, p);
+            GetObject(EN)->num = res;
+            UsrUel2Ent[res] = EN;
         } else if(res != UelNr) {
             res = -1;
         }
@@ -4502,22 +4480,21 @@ namespace gxfile {
         return res;
     }
 
-    TUELUserMapStatus TUELTableLegacy::GetMapToUserStatus() {
-        return map_sortfull;
-    }
-
     int TUELTableLegacy::GetMaxUELLength() const {
         int maxLen{};
         for(auto &bucket : Buckets)
-            maxLen = std::max<int>(bucket.StrP.length(), maxLen);
+            maxLen = std::max<int>(static_cast<int>(bucket.StrP.length()), maxLen);
         return maxLen;
     }
 
     void TUELTableLegacy::Reserve(int n) {
-        // no op
+        UsrUel2Ent.reserve(n);
+        Buckets.reserve(n);
+
     }
 
     TUELTableLegacy::TUELTableLegacy() {
+        Buckets.reserve(10000);
         OneBased = true;
         ResetMapToUserStatus();
     }
@@ -4537,5 +4514,27 @@ namespace gxfile {
 
     void TUELTableLegacy::RenameEntry(int N, const std::string &s) {
         gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::RenameEntry(N, s);
+    }
+
+    TUELUserMapStatus IUELTable::GetMapToUserStatus() {
+        if(FMapToUserStatus == map_unknown) {
+            int LV {-1};
+            bool C {true};
+            FMapToUserStatus = map_sortgrow;
+            for(int N{1}; N<=size(); N++) {
+                int V = GetUserMap(N);
+                if(V < 0) C = false;
+                else if(V > LV) {
+                    LV = V;
+                    if(!C) FMapToUserStatus = map_sorted;
+                } else {
+                    FMapToUserStatus = map_unsorted;
+                    break;
+                }
+            }
+            if(FMapToUserStatus == map_sortgrow && C)
+                FMapToUserStatus = map_sortfull;
+        }
+        return FMapToUserStatus;
     }
 }

@@ -23,6 +23,7 @@ namespace gdlib::datastorage {
             FTotalSize{sizeof(T)},
             FMinKey{},
             FMaxKey{std::numeric_limits<int>::max()} {
+            data.reserve(1024);
         }
 
         ~TLinkedData() = default;

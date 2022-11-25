@@ -20,7 +20,6 @@ namespace xpwrap {
     }
 
     int GDXFile::gdxDataWriteStr(const char **KeyStr, const double *Values) {
-        //StrIndexBuffers keys{ &KeyStr };
         return ::gdxDataWriteStr(pgx, KeyStr, Values);
     }
 

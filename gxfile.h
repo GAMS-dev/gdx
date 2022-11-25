@@ -241,7 +241,7 @@ namespace gxfile {
         virtual int NewUsrUel(int EN) = 0;
         virtual int AddUsrNew(const std::string& s) = 0;
         virtual int AddUsrIndxNew(const std::string &s, int UelNr) = 0;
-        virtual TUELUserMapStatus GetMapToUserStatus() = 0;
+        virtual TUELUserMapStatus GetMapToUserStatus();
         virtual void RenameEntry(int N, const std::string &s) = 0;
         virtual int GetMaxUELLength() const = 0;
         virtual void Reserve(int n) = 0;
@@ -265,7 +265,6 @@ namespace gxfile {
         int NewUsrUel(int EN) override;
         int AddUsrNew(const std::string& s) override;
         int AddUsrIndxNew(const std::string &s, int UelNr) override;
-        TUELUserMapStatus GetMapToUserStatus() override;
         void RenameEntry(int N, const std::string &s) override;
         int GetMaxUELLength() const override;
         void Reserve(int n) override;
@@ -283,7 +282,6 @@ namespace gxfile {
         int NewUsrUel(int EN) override;
         int AddUsrNew(const std::string &s) override;
         int AddUsrIndxNew(const std::string &s, int UelNr) override;
-        TUELUserMapStatus GetMapToUserStatus() override;
         int GetMaxUELLength() const override;
         void Reserve(int n) override;
         int IndexOf(const std::string &s) override;

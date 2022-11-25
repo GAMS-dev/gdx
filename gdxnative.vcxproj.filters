@@ -148,6 +148,12 @@
     <ClCompile Include="rtl\p3process.cpp">
       <Filter>rtl</Filter>
     </ClCompile>
+    <ClCompile Include="gdlib\strhash.cpp">
+      <Filter>gdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="gdlib\datastorage.cpp">
+      <Filter>gdlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">
@@ -263,6 +269,12 @@
     </ClInclude>
     <ClInclude Include="rtl\p3process.h">
       <Filter>rtl</Filter>
+    </ClInclude>
+    <ClInclude Include="gdlib\strhash.h">
+      <Filter>gdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="gdlib\datastorage.h">
+      <Filter>gdlib</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

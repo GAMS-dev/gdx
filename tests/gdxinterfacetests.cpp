@@ -1394,9 +1394,9 @@ namespace tests::gdxinterfacetests {
             enforceSlowdownLimit(wrrp, 1.1);
         }
         {
-            // only tolerate on average 10% performance degradation at max!
+            // only tolerate on average 50% performance degradation at max!
             WriteReadStrPair wrsp;
-            enforceSlowdownLimit(wrsp, 1.1);
+            enforceSlowdownLimit(wrsp, 1.5);
         }
     }
 

@@ -13,8 +13,9 @@ namespace gdlib::strhash {
     template<typename T>
     struct THashBucket {
         std::string StrP {};
-        int NxtBuckIndex {}, StrNr {};
-        T *Obj {};
+        size_t NxtBuckIndex {};
+        int StrNr {};
+        T Obj {};
     };
 
     template<typename T>
@@ -32,7 +33,8 @@ namespace gdlib::strhash {
 
         void ClearHashTable() {
             PHashTable = nullptr;
-            HashTableSize = SizeOfHashTable = ReHashCnt = 0;
+            SizeOfHashTable = 0;
+            HashTableSize = ReHashCnt = 0;
         }
 
         void HashTableReset(int ACnt) {
@@ -40,11 +42,17 @@ namespace gdlib::strhash {
                         HashSize_2 = 9973,
                         HashSize_3 = 99991,
                         HashSize_4 = 999979,
+                        HashSize_5 = 9999991,
+                        HashSize_6 = 99999989,
                         Next_1 = 150,
                         Next_2 = 10000,
                         Next_3 = 100000,
-                        Next_4 = std::numeric_limits<int>::max(); 
-            if(ACnt >= Next_3) { HashTableSize = HashSize_4; ReHashCnt = Next_4; }
+                        Next_4 = 1500000,
+                        Next_5 = 15000000,
+                        Next_6 = std::numeric_limits<int>::max(); 
+            if (ACnt >= Next_5) { HashTableSize = HashSize_6; ReHashCnt = Next_6; }
+            else if(ACnt >= Next_4) { HashTableSize = HashSize_5; ReHashCnt = Next_5; }
+            else if(ACnt >= Next_3) { HashTableSize = HashSize_4; ReHashCnt = Next_4; }
             else if(ACnt >= Next_2) { HashTableSize = HashSize_3; ReHashCnt = Next_3; }
             else if(ACnt >= Next_1) { HashTableSize = HashSize_2; ReHashCnt = Next_2; }
             else { HashTableSize = HashSize_1; ReHashCnt = Next_1; }
@@ -80,11 +88,11 @@ namespace gdlib::strhash {
         }
 
         T *GetObject(int N) {
-            return Buckets[N-(OneBased ? 1 : 0)].Obj;
+            return &Buckets[N-(OneBased ? 1 : 0)].Obj;
         }
 
-        void SetObject(int N, T &AObj) {
-            Buckets[N-(OneBased ? 1 : 0)].Obj = &AObj;
+        void SetObject(int N, T AObj) {
+            Buckets[N-(OneBased ? 1 : 0)].Obj = AObj;
         }
 
         void SetSortedObject(int N, T &AObj) {
@@ -188,7 +196,7 @@ namespace gdlib::strhash {
             return FCount - 1 + (OneBased ? 1 : 0);
         }
 
-        inline int GetBucketIndexByHash(int hash) {
+        inline size_t GetBucketIndexByHash(int hash) {
             return (*PHashTable)[hash];
         }
 
@@ -200,7 +208,7 @@ namespace gdlib::strhash {
             return !index ? nullptr : &Buckets[index-1];
         }
 
-        int AddObject(const std::string &s, T &AObj) {
+        int AddObject(const std::string &s, T AObj) {
             assert(FCount < std::numeric_limits<int>::max());
             if(FCount >= ReHashCnt) HashAll();
             int HV {Hash(s)};
@@ -221,7 +229,7 @@ namespace gdlib::strhash {
             }
             FCount++; // ugly
             PBuck->StrP = s;
-            PBuck->Obj = &AObj;
+            PBuck->Obj = std::move(AObj);
             return res;
         }
 
@@ -277,8 +285,10 @@ namespace gdlib::strhash {
                 int HV0{ Hash(GetString(N+1)) }, HV1 {Hash(s)};
                 if(HV0 != HV1) {
                     PHashBucket<T> PrevBuck {}, PBuck;
-                    int PBuckIndex{};
-                    for(PBuck = GetBucketByHash(HV0), PBuckIndex = GetBucketIndexByHash(HV0); PBuck->StrNr != N; PBuckIndex = PBuck->NxtBuckIndex, PBuck = GetBucket(PBuck->NxtBuckIndex))
+                    size_t PBuckIndex{};
+                    for(PBuck = GetBucketByHash(HV0), PBuckIndex = GetBucketIndexByHash(HV0);
+                        PBuck->StrNr != N;
+                        PBuckIndex = PBuck->NxtBuckIndex, PBuck = GetBucket(PBuck->NxtBuckIndex))
                         PrevBuck = PBuck;
                     if(!PrevBuck) (*PHashTable)[HV0] = PBuck->NxtBuckIndex;
                     else PrevBuck->NxtBuckIndex = PBuck->NxtBuckIndex;
