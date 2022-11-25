@@ -23,6 +23,8 @@ using namespace gdlib::gmsglob;
 
 namespace gxfile {
 
+    using UELTableImplChoice = TUELTable;
+
     NullBuffer null_buffer;
 
     //version = 5 has 32 bit offsets and no compression
@@ -323,7 +325,7 @@ namespace gxfile {
         InitErrors();
         NameList.clear();
         NameListOrdered.clear();
-        UELTable = std::make_unique<TUELTable>();
+        UELTable = std::make_unique<UELTableImplChoice>();
         AcronymList.clear();
         FilterList.clear();
         FFile->WriteByte(gdxHeaderNr);
@@ -1863,7 +1865,7 @@ namespace gxfile {
         // reading UEL table
         FFile->SetCompression(DoUncompress);
         FFile->SetPosition(UELPos);
-        UELTable = std::make_unique<TUELTable>();
+        UELTable = std::make_unique<UELTableImplChoice>();
 
         if (ErrorCondition(FFile->ReadString() == MARK_UEL, ERR_OPEN_UELMARKER1))
             return FileErrorNr();
@@ -4192,13 +4194,13 @@ namespace gxfile {
         return static_cast<int>(nameToIndexNum.size());
     }
 
-    int TUELTable::IndexOf(const std::string &s) const {
+    int TUELTable::IndexOf(const std::string &s) {
         const auto it = nameToIndexNum.find(s);
         return it == nameToIndexNum.end() ? -1 : (*it).second.index;
     }
 
     int TUELTable::AddObject(const std::string &id, int mapping) {
-        const auto &[it, wasNew] = nameToIndexNum.try_emplace(id, IndexNumPair{ 0, mapping });
+        const auto &[it, wasNew] = nameToIndexNum.try_emplace(id, IndexNumPair{mapping});
         int ix;
         if (wasNew) (*it).second.index = ix = static_cast<int>(nameToIndexNum.size());
         else ix = (*it).second.index;
@@ -4225,7 +4227,7 @@ namespace gxfile {
         return cnth(index)->first;
     }
 
-    int TUELTable::GetUserMap(int i) const {
+    int TUELTable::GetUserMap(int i) {
         return cnth(i-1)->second.num;
     }
 
@@ -4316,6 +4318,11 @@ namespace gxfile {
             res = -1;
         ResetMapToUserStatus();
         return res;
+    }
+
+    TUELTable::TUELTable() {
+        //nameToIndexNum.set_empty_key("");
+        Reserve(10000);
     }
 
     void initialization() {
@@ -4431,5 +4438,104 @@ namespace gxfile {
                 return i;
         emplace_back(s);
         return static_cast<int>(size()-1);
+    }
+
+    void TUELTableLegacy::clear() {
+        Clear();
+        UsrUel2Ent.clear();
+    }
+
+    int TUELTableLegacy::size() const {
+        return FCount;
+    }
+
+    bool TUELTableLegacy::empty() const {
+        return !FCount;
+    }
+
+    int TUELTableLegacy::GetUserMap(int i) {
+        return GetObject(i)->num;
+    }
+
+    void TUELTableLegacy::SetUserMap(int EN, int N) {
+        GetObject(EN-1)->num = N;
+    }
+
+    void TUELTableLegacy::ResetMapToUserStatus() {
+        FMapToUserStatus = map_unknown;
+    }
+
+    int TUELTableLegacy::NewUsrUel(int EN) {
+        int res = GetObject(EN)->num;
+        if(res < 0) {
+            res = UsrUel2Ent.GetHighestIndex() + 1;
+            IndexNumPair p {res};
+            SetObject(EN, p);
+        }
+        ResetMapToUserStatus();
+        return res;
+    }
+
+    int TUELTableLegacy::AddUsrNew(const std::string &s) {
+        int EN {AddObject(s, -1)};
+        int res {GetObject(EN)->num};
+        if(res < 0) {
+            res = UsrUel2Ent.GetHighestIndex() + 1;
+            GetObject(EN)->num = res;
+            UsrUel2Ent[res] = EN;
+        }
+        ResetMapToUserStatus();
+        return res;
+    }
+
+    int TUELTableLegacy::AddUsrIndxNew(const std::string &s, int UelNr) {
+        int EN {AddObject(s, -1)};
+        int res {GetObject(EN)->num};
+        if(res < 0) {
+            res = UelNr;
+            IndexNumPair p {res};
+            SetObject(EN, p);
+        } else if(res != UelNr) {
+            res = -1;
+        }
+        ResetMapToUserStatus();
+        return res;
+    }
+
+    TUELUserMapStatus TUELTableLegacy::GetMapToUserStatus() {
+        return map_sortfull;
+    }
+
+    int TUELTableLegacy::GetMaxUELLength() const {
+        int maxLen{};
+        for(auto &bucket : Buckets)
+            maxLen = std::max<int>(bucket.StrP.length(), maxLen);
+        return maxLen;
+    }
+
+    void TUELTableLegacy::Reserve(int n) {
+        // no op
+    }
+
+    TUELTableLegacy::TUELTableLegacy() {
+        OneBased = true;
+        ResetMapToUserStatus();
+    }
+
+    int TUELTableLegacy::IndexOf(const std::string &s) {
+        return gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::IndexOf(s);
+    }
+
+    int TUELTableLegacy::AddObject(const std::string &id, int mapping) {
+        IndexNumPair p{mapping};
+        return gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::AddObject(id, p);
+    }
+
+    std::string TUELTableLegacy::operator[](int index) const {
+        return GetString(index+1);
+    }
+
+    void TUELTableLegacy::RenameEntry(int N, const std::string &s) {
+        gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::RenameEntry(N, s);
     }
 }

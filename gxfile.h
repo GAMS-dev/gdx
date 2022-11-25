@@ -21,6 +21,8 @@
 #include "sparsehash/dense_hash_map"
 #include "ankerl/unordered_dense.h"
 
+#include "gdlib/strhash.h"
+
 namespace gdlib::gmsstrm {
     class TMiBufferedStreamDelphi;
 }
@@ -194,7 +196,10 @@ namespace gxfile {
         int index, num;
         IndexNumPair() : index{}, num{} {}
         explicit IndexNumPair(int _index, int _num) : index(_index), num(_num) {}
+        IndexNumPair(int _num) : index{}, num{_num} {}
     };
+
+    //static IndexNumPair unmappedPair {-1};
 
     struct caseInsensitiveHasher {
         size_t operator()(const std::string& input) const {
@@ -218,53 +223,73 @@ namespace gxfile {
 
     using utablemaptype = umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>;
 
-    class TUELTable {
-        utablemaptype nameToIndexNum{};
-        
-        // ...
+    class IUELTable {
+    protected:
         TUELUserMapStatus FMapToUserStatus {map_unknown};
-
-        utablemaptype::iterator nth(int index);
-        utablemaptype::const_iterator cnth(int index) const;
-
     public:
         TIntegerMapping UsrUel2Ent {}; // from user uelnr to table entry
+        virtual ~IUELTable() = default;
+        virtual void clear() = 0;
+        virtual int size() const = 0;
+        virtual bool empty() const = 0;
+        virtual int IndexOf(const std::string &s) = 0;
+        virtual int AddObject(const std::string &id, int mapping) = 0;
+        virtual std::string operator[](int index) const = 0;
+        virtual int GetUserMap(int i) = 0;
+        virtual void SetUserMap(int EN, int N) = 0;
+        virtual void ResetMapToUserStatus() = 0;
+        virtual int NewUsrUel(int EN) = 0;
+        virtual int AddUsrNew(const std::string& s) = 0;
+        virtual int AddUsrIndxNew(const std::string &s, int UelNr) = 0;
+        virtual TUELUserMapStatus GetMapToUserStatus() = 0;
+        virtual void RenameEntry(int N, const std::string &s) = 0;
+        virtual int GetMaxUELLength() const = 0;
+        virtual void Reserve(int n) = 0;
+    };
 
-        TUELTable() {
-            //nameToIndexNum.set_empty_key("");
-            Reserve(10000);
-        }
+    class TUELTable : public IUELTable {
+        utablemaptype nameToIndexNum{};
+        utablemaptype::iterator nth(int index);
+        utablemaptype::const_iterator cnth(int index) const;
+    public:
+        TUELTable();
+        void clear() override;
+        int size() const override;
+        bool empty() const override;
+        int IndexOf(const std::string &s) override;
+        int AddObject(const std::string &id, int mapping) override;
+        std::string operator[](int index) const override;
+        int GetUserMap(int i) override;
+        void SetUserMap(int EN, int N) override;
+        void ResetMapToUserStatus() override;
+        int NewUsrUel(int EN) override;
+        int AddUsrNew(const std::string& s) override;
+        int AddUsrIndxNew(const std::string &s, int UelNr) override;
+        TUELUserMapStatus GetMapToUserStatus() override;
+        void RenameEntry(int N, const std::string &s) override;
+        int GetMaxUELLength() const override;
+        void Reserve(int n) override;
+    };
 
-        void clear();
-
-        int size() const;
-        bool empty() const;
-
-        int IndexOf(const std::string &s) const;
-
-        int AddObject(const std::string &id, int mapping);
-
-        std::string operator[](int index) const;
-
-        int GetUserMap(int i) const;
-
-        void SetUserMap(int EN, int N);
-
-        void ResetMapToUserStatus();
-
-        int NewUsrUel(int EN);
-
-        int AddUsrNew(const std::string& s);
-
-        int AddUsrIndxNew(const std::string &s, int UelNr);
-
-        TUELUserMapStatus GetMapToUserStatus();
-
-        void RenameEntry(int N, const std::string &s);
-
-        int GetMaxUELLength() const;
-
-        void Reserve(int n);
+    class TUELTableLegacy : public IUELTable, public gdlib::strhash::TXStrHashList<IndexNumPair> {
+    public:
+        TUELTableLegacy();
+        void clear() override;
+        int size() const override;
+        bool empty() const override;
+        int GetUserMap(int i) override;
+        void SetUserMap(int EN, int N) override;
+        void ResetMapToUserStatus() override;
+        int NewUsrUel(int EN) override;
+        int AddUsrNew(const std::string &s) override;
+        int AddUsrIndxNew(const std::string &s, int UelNr) override;
+        TUELUserMapStatus GetMapToUserStatus() override;
+        int GetMaxUELLength() const override;
+        void Reserve(int n) override;
+        int IndexOf(const std::string &s) override;
+        int AddObject(const std::string &id, int mapping) override;
+        std::string operator[](int index) const override;
+        void RenameEntry(int N, const std::string &s) override;
     };
 
     std::string MakeGoodExplText(const std::string& s);
@@ -312,7 +337,7 @@ namespace gxfile {
         TgxFileMode fmode {f_not_open}, fmode_AftReg {f_not_open};
         enum {stat_notopen, stat_read, stat_write} fstatus;
         int fComprLev{};
-        std::unique_ptr<TUELTable> UELTable;
+        std::unique_ptr<IUELTable> UELTable;
         std::unique_ptr<TSetTextList> SetTextList {};
         std::vector<int> MapSetText;
         int FCurrentDim{};

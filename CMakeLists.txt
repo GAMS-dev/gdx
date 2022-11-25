@@ -41,6 +41,7 @@ set(common
 		gdlib/gmsdata.h gdlib/gmsdata.cpp
 		gdlib/datastorage.cpp gdlib/datastorage.h
 		gdlib/runner.cpp gdlib/runner.h
+		gdlib/strhash.h gdlib/strhash.cpp
 
 		expertapi/palmcc.h expertapi/palmcc.c
 		expertapi/gcmt.h expertapi/gcmt.c

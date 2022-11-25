@@ -541,9 +541,9 @@ namespace gdlib::strutilx {
     bool PStrUEqual(const std::string &P1, const std::string &P2) {
         if(P1.empty() || P2.empty()) return P1.empty() && P2.empty();
         else {
-            auto L{P1.length()};
+            size_t L{P1.length()};
             if(L != P2.length()) return false;
-            for(auto K{L-1}; K >= 0; K--) {
+            for(int K{static_cast<int>(L)-1}; K >= 0; K--) {
                 if(std::toupper(P1[K]) != std::toupper(P2[K]))
                     return false;
             }
@@ -564,15 +564,15 @@ namespace gdlib::strutilx {
             int d = std::toupper(S1[K]) - std::toupper(S2[K]);
             if(d) return d;
         }
-        return S1.length() - S2.length();
+        return static_cast<int>(S1.length() - S2.length());
     }
 
     bool PStrEqual(const std::string &P1, const std::string &P2) {
         if(P1.empty() || P2.empty()) return P1.empty() && P2.empty();
         else {
-            auto L{P1.length()};
+            size_t L{P1.length()};
             if(L != P2.length()) return false;
-            for(auto K{L-1}; K >= 0; K--) {
+            for(int K{static_cast<int>(L)-1}; K >= 0; K--) {
                 if(P1[K] != P2[K])
                     return false;
             }
