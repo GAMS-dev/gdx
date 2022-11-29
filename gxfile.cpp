@@ -1875,7 +1875,7 @@ namespace gxfile {
         if (utils::substr(FileSystemID, 15, 4) == "2001") NrElem--;
 
         while (UELTable->size() < NrElem) {
-            UELTable->AddObject(FFile->ReadString(), -1);
+            UELTable->StoreObject(FFile->ReadString(), -1);
         }
         UelCntOrig = UELTable->size(); // needed when reading universe
 
@@ -4207,6 +4207,12 @@ namespace gxfile {
         return ix;
     }
 
+    int TUELTable::StoreObject(const std::string& id, int mapping) {
+        int ix{static_cast<int>(nameToIndexNum.size())+1};
+        nameToIndexNum[id] = IndexNumPair{ ix, mapping };
+        return ix;
+    }
+
     bool TUELTable::empty() const {
         return !size();
     }
@@ -4506,6 +4512,11 @@ namespace gxfile {
     int TUELTableLegacy::AddObject(const std::string &id, int mapping) {
         IndexNumPair p{mapping};
         return gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::AddObject(id, p);
+    }
+
+    int TUELTableLegacy::StoreObject(const std::string& id, int mapping) {
+        IndexNumPair p{ mapping };
+        return gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::StoreObject(id, p);
     }
 
     std::string TUELTableLegacy::operator[](int index) const {

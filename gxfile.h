@@ -234,6 +234,7 @@ namespace gxfile {
         virtual bool empty() const = 0;
         virtual int IndexOf(const std::string &s) = 0;
         virtual int AddObject(const std::string &id, int mapping) = 0;
+        virtual int StoreObject(const std::string& id, int mapping) = 0;
         virtual std::string operator[](int index) const = 0;
         virtual int GetUserMap(int i) = 0;
         virtual void SetUserMap(int EN, int N) = 0;
@@ -258,6 +259,7 @@ namespace gxfile {
         bool empty() const override;
         int IndexOf(const std::string &s) override;
         int AddObject(const std::string &id, int mapping) override;
+        int StoreObject(const std::string& id, int mapping) override;
         std::string operator[](int index) const override;
         int GetUserMap(int i) override;
         void SetUserMap(int EN, int N) override;
@@ -286,6 +288,7 @@ namespace gxfile {
         void Reserve(int n) override;
         int IndexOf(const std::string &s) override;
         int AddObject(const std::string &id, int mapping) override;
+        int StoreObject(const std::string& id, int mapping) override;
         std::string operator[](int index) const override;
         void RenameEntry(int N, const std::string &s) override;
     };

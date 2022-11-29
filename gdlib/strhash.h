@@ -83,7 +83,7 @@ namespace gdlib::strhash {
                 auto &PBuck = Buckets[N];
                 int HV = Hash(PBuck.StrP);
                 PBuck.NxtBuckIndex = GetBucketIndexByHash(HV);
-                (*PHashTable)[HV] = N;
+                (*PHashTable)[HV] = N+1;
             }
         }
 
@@ -181,7 +181,7 @@ namespace gdlib::strhash {
             FSorted = false;
         }
 
-        int StoreObject(const std::string &s, T &AObj) {
+        /*int StoreObject(const std::string& s, T& AObj) {
             if(PHashTable) ClearHashTable();
             Buckets.emplace_back();
             auto &PBuck = Buckets.back();
@@ -194,7 +194,7 @@ namespace gdlib::strhash {
             PBuck.StrP = s;
             PBuck.Obj = &AObj;
             return FCount - 1 + (OneBased ? 1 : 0);
-        }
+        }*/
 
         inline size_t GetBucketIndexByHash(int hash) {
             return (*PHashTable)[hash];
@@ -208,13 +208,30 @@ namespace gdlib::strhash {
             return !index ? nullptr : &Buckets[index-1];
         }
 
+        int StoreObject(const std::string& s, T AObj) {
+            if (PHashTable) ClearHashTable();
+            Buckets.push_back({});
+            PHashBucket<T> PBuck = &Buckets.back();
+            PBuck->NxtBuckIndex = 0;
+            PBuck->StrNr = FCount; // before it was added!
+            int res{ FCount + (OneBased ? 1 : 0) };
+            if (SortMap) {
+                (*SortMap)[FCount] = FCount;
+                FSorted = false;
+            }
+            FCount++; // ugly
+            PBuck->StrP = s;
+            PBuck->Obj = std::move(AObj);
+            return res;
+        }
+
         int AddObject(const std::string &s, T AObj) {
             assert(FCount < std::numeric_limits<int>::max());
             if(FCount >= ReHashCnt) HashAll();
             int HV {Hash(s)};
             PHashBucket<T> PBuck = GetBucketByHash(HV);
             while(PBuck) {
-                if(!utils::sameText(PBuck->StrP, s)) PBuck = GetBucket(PBuck->NxtBuckIndex);
+                if(!EntryEqual(PBuck->StrP, s)) PBuck = GetBucket(PBuck->NxtBuckIndex);
                 else return PBuck->StrNr + (OneBased ? 1 : 0);
             }
             Buckets.push_back({});
