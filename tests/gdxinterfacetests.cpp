@@ -1381,6 +1381,37 @@ namespace tests::gdxinterfacetests {
         }
     };
 
+    class WriteReadMappedPair : public AbstractWriteReadPair {
+        void write(GDXInterface &pgx, int count, const int *nums) override {
+            std::array<std::pair<int, std::string>, 5> mappedUels {{
+              {8, "i8"s},
+              {3, "i3"s},
+              {2, "i2"s},
+              {10, "i10"s},
+              {1, "i1"s}
+            }};
+            pgx.gdxUELRegisterMapStart();
+            for(auto &[n, uel] : mappedUels)
+                pgx.gdxUELRegisterMap(n, uel);
+            pgx.gdxUELRegisterDone();
+            pgx.gdxDataWriteMapStart("i"s, "a set"s, 1, global::gmsspecs::gms_dt_set, 0);
+            for (int i{}; i<mappedUels.size(); i++) {
+                keys.front() = mappedUels[i].first;
+                pgx.gdxDataWriteMap(keys.data(), values.data());
+            }
+            pgx.gdxDataWriteDone();
+        }
+
+        void read(GDXInterface &pgx, int count, const int *nums) override {
+            int numRecs;
+            pgx.gdxDataReadMapStart(1, numRecs);
+            int dimFirst;
+            for (int i{}; i < 5; i++)
+                pgx.gdxDataReadMap(i+1, keys.data(), values.data(), dimFirst);
+            pgx.gdxDataReadDone();
+        }
+    };
+
     void enforceSlowdownLimit(AbstractWriteReadPair &pair, double limit) {
         const double avgSlowdown = perfBenchmarkCppVsDelphi(pair, true);
         //std::cout << "slowdown = " << avgSlowdown << std::endl;
@@ -1397,6 +1428,11 @@ namespace tests::gdxinterfacetests {
             // only tolerate on average 50% performance degradation at max!
             WriteReadStrPair wrsp;
             enforceSlowdownLimit(wrsp, 1.5);
+        }
+        {
+            // only tolerate on average 50% performance degradation at max!
+            WriteReadMappedPair wrmp;
+            enforceSlowdownLimit(wrmp, 1.1);
         }
     }
 
