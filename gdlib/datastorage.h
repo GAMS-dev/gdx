@@ -11,19 +11,22 @@ namespace gdlib::datastorage {
 
     // TODO: Get rid of this (use standard library collection instead)
     // implement radix sort in a general way for sequences/collections
-    template<typename  T>
+    template<typename T>
     class TLinkedData {
-        std::vector<std::pair<global::gmsspecs::TIndex, T>> data;
+    public:
+        using TLDStorageType = std::list<std::pair<global::gmsspecs::TIndex, T>>;
+    private:
+        TLDStorageType data;
         int FMinKey, FMaxKey, FDimension, FKeySize, FTotalSize, FDataSize;
+
     public:
         TLinkedData(int ADimension, int ADataSize) :
             FDimension{ADimension},
             FDataSize{ADataSize},
             FKeySize{static_cast<int>(ADimension*sizeof(int))},
-            FTotalSize{sizeof(T)},
-            FMinKey{},
-            FMaxKey{std::numeric_limits<int>::max()} {
-            data.reserve(1024);
+            FTotalSize{2*(int)sizeof(void*)+FKeySize+FDataSize},
+            FMinKey{std::numeric_limits<int>::max()},
+            FMaxKey{} {
         }
 
         ~TLinkedData() = default;
@@ -41,20 +44,6 @@ namespace gdlib::datastorage {
         void clear() {
             data.clear();
         }
-
-        /*T &operator[](const global::gmsspecs::TIndex &index) {
-            for(int i{}; i<data.size(); i++) {
-                bool match{true};
-                for (int d{}; d < FDimension; d++) {
-                    if (data[i].first[d] != index[d]) {
-                        match = false;
-                        break;
-                    }
-                }
-                if(match) return data[i].first;
-            }
-            data.emplace_back(std::make_pair());
-        }*/
 
         void Clear() {
             data.clear();
@@ -74,7 +63,7 @@ namespace gdlib::datastorage {
 
         void Sort(const int *AMap = nullptr) {
             // FIXME: Should this consider wildcards? =0?
-            std::sort(data.begin(), data.end(), [&](const std::pair<global::gmsspecs::TIndex, T>& p1, const std::pair<global::gmsspecs::TIndex, T>& p2) {
+            data.sort([&](const std::pair<global::gmsspecs::TIndex, T>& p1, const std::pair<global::gmsspecs::TIndex, T>& p2) {
                 for (int D{}; D < FDimension; D++) {
                     if (p1.first[D] < p2.first[D]) return true;
                     else if (p1.first[D] > p2.first[D]) return false;
@@ -83,25 +72,24 @@ namespace gdlib::datastorage {
             });
         }
 
-        bool StartRead(int &it, const int *AMap = nullptr) {
+        typename TLDStorageType::iterator StartRead(const int *AMap = nullptr) {
             if (!data.empty()) {
                 Sort(AMap);
-                it = 0;
-                return true;
+                return data.begin();
             }
-            it = -1;
-            return false;
+            return data.end();
         }
 
-        bool GetNextRecord(int &it, int *AKey, double *Data) {
-            if (it < 0 || it >= data.size()) return false;
-            const auto& item = data[it++];
+        bool GetNextRecord(typename TLDStorageType::iterator &it, int *AKey, double *Data) {
+            if(it == data.end()) return false;
+            const std::pair<global::gmsspecs::TIndex, T>& item = *it;
             memcpy(AKey, item.first.data(), FKeySize);
             memcpy(Data, item.second.data(), sizeof(double)*item.second.size());
-            if (it >= data.size()) it = -1;
+            it++;
             return true;
         }
 
+        // TODO: AS: Fully port and test this!
         void SortDelphiStyle(const std::optional<std::vector<int>> &AMap = std::nullopt) {
             auto IsSorted = [&]() {
                 int KD{};

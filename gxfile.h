@@ -353,7 +353,7 @@ namespace gxfile {
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
         //std::map<global::gmsspecs::TIndex, gxdefs::TgdxValues> SortList;
         std::unique_ptr<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>> SortList;
-        int ReadPtr;
+        std::optional<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>::TLDStorageType::iterator> ReadPtr;
         gdlib::gmsdata::TTblGamsData ErrorList;
         PgdxSymbRecord CurSyPtr{};
         int ErrCnt{}, ErrCntTotal{};

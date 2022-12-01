@@ -319,7 +319,7 @@ namespace gxfile {
         fComprLev = Compr;
         CompressOut = Compr > 0;
         fmode = f_not_open;
-        ReadPtr = -1;
+        ReadPtr = std::nullopt;
         MajContext = "OpenWrite";
         TraceLevel = defaultTraceLevel;
         InitErrors();
@@ -443,7 +443,7 @@ namespace gxfile {
         if(!MajorCheckMode("DataWriteDone"s, AllowedModes)) return false;
         if(!utils::in(fmode, fw_raw_data, fw_dom_raw)) {
             InitDoWrite(static_cast<int>(SortList->size()));
-            SortList->StartRead(ReadPtr, nullptr);
+            ReadPtr = SortList->StartRead(nullptr);
             for(const auto &[keys, values] : *SortList) {
                 DoWrite(keys.data(), values.data());
             }
@@ -1067,7 +1067,7 @@ namespace gxfile {
                             SortList->AddItem(AElements, Avals);
                         }
                     }
-                    SortList->StartRead(ReadPtr, nullptr);
+                    ReadPtr = SortList->StartRead(nullptr);
                     res = (int)SortList->size();
                 } catch(std::exception &e) {
                     std::cout << "Exception: " << e.what() << "\n";
@@ -1751,7 +1751,7 @@ namespace gxfile {
         MajContext = "OpenRead"s;
         TraceLevel = defaultTraceLevel;
         fmode = f_not_open;
-        ReadPtr = -1;
+        ReadPtr = std::nullopt;
         InitErrors();
 
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
@@ -2986,8 +2986,8 @@ namespace gxfile {
         }
         if(fmode == fr_map_data) {
             DimFrst = 0;
-            if (ReadPtr == -1) return false;
-            SortList->GetNextRecord(ReadPtr, KeyInt, Values);
+            if (!ReadPtr || *ReadPtr == SortList->end()) return false;
+            SortList->GetNextRecord(*ReadPtr, KeyInt, Values);
             // checking mapped values
             for(int D{}; D<FCurrentDim; D++) {
                 if(KeyInt[D] != PrevElem[D]) {
