@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <list>
 #include "../global/modhead.h"
 #include "../global/gmsspecs.h"
 #include <limits>
@@ -17,7 +18,7 @@ namespace gdlib::datastorage {
         using TLDStorageType = std::list<std::pair<global::gmsspecs::TIndex, T>>;
     private:
         TLDStorageType data;
-        int FMinKey, FMaxKey, FDimension, FKeySize, FTotalSize, FDataSize;
+        int FDimension, FDataSize, FKeySize, FTotalSize, FMinKey, FMaxKey;
 
     public:
         TLinkedData(int ADimension, int ADataSize) :
