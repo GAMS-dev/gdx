@@ -7,6 +7,11 @@
 // Interface
 // ==============================================================================================================
 namespace gdlib::strutilx{
+    struct DelphiStrRef {
+        uint8_t length;
+        char* chars;
+    };
+
 	std::string UpperCase(const std::string &s);
 	std::string LowerCase(const std::string &s);
 
@@ -39,6 +44,7 @@ namespace gdlib::strutilx{
     bool SpecialStrAsInt(const std::string& s, int& v);
 
     bool StrUEqual(const std::string &S1, const std::string &S2);
+    bool StrUEqual(const DelphiStrRef& S1, const std::string& S2);
 
     std::string IncludeTrailingPathDelimiterEx(const std::string& S);
     std::string ExcludeTrailingPathDelimiterEx(const std::string &S);

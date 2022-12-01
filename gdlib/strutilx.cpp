@@ -333,6 +333,14 @@ namespace gdlib::strutilx {
         return true;
     }
 
+    bool StrUEqual(const DelphiStrRef &S1, const std::string& S2) {
+        auto L{ S1.length };
+        if (L != S2.length()) return false;
+        for (int K{ L - 1 }; K >= 0; K--) // significant stuff at the end?
+            if (toupper(S1.chars[K]) != toupper(S2[K])) return false;
+        return true;
+    }
+
     std::string ExtractFilePathEx(const std::string &FileName) {
         return FileName.substr(0, LastDelimiter(""s + PathDelim + (OSFileType() == OSFileWIN ? "/" : "") + DriveDelim, FileName) + 1);
     }
