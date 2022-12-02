@@ -12,10 +12,13 @@ namespace gdlib::datastorage {
 
     // TODO: Get rid of this (use standard library collection instead)
     // implement radix sort in a general way for sequences/collections
-    template<typename T>
+    template<typename KeyType, typename ValType, int valMaxSize>
     class TLinkedData {
     public:
-        using TLDStorageType = std::list<std::pair<global::gmsspecs::TIndex, T>>;
+        using KeyArray = std::vector<KeyType>;
+        using ValArray = std::array<ValType, valMaxSize>;
+        using EntryType = std::pair<KeyArray, ValArray>;
+        using TLDStorageType = std::list<EntryType>;
     private:
         TLDStorageType data;
         int FDimension, FDataSize, FKeySize, FTotalSize, FMinKey, FMaxKey;
@@ -32,6 +35,7 @@ namespace gdlib::datastorage {
 
         ~TLinkedData() = default;
 
+        [[nodiscard]]
         int size() const { return (int)data.size(); }
 
         auto begin() {
@@ -52,8 +56,11 @@ namespace gdlib::datastorage {
             FMinKey = std::numeric_limits<int>::max();
         }
 
-        T &AddItem(const global::gmsspecs::TIndex &AKey, const T &AData) {
-            data.push_back(std::make_pair(AKey, AData));
+        ValArray &AddItem(const KeyType *AKey, const ValType *AData) {
+            data.push_back({});
+            data.back().first.resize(FDimension);
+            memcpy(data.back().first.data(), AKey, sizeof(KeyType)*FDimension);
+            memcpy(data.back().second.data(), AData, sizeof(ValType)*valMaxSize);
             for(int D{}; D<FDimension; D++) {
                 int Key {AKey[D]};
                 if(Key > FMaxKey) FMaxKey = Key;
@@ -64,7 +71,7 @@ namespace gdlib::datastorage {
 
         void Sort(const int *AMap = nullptr) {
             // FIXME: Should this consider wildcards? =0?
-            data.sort([&](const std::pair<global::gmsspecs::TIndex, T>& p1, const std::pair<global::gmsspecs::TIndex, T>& p2) {
+            data.sort([&](const EntryType & p1, const EntryType & p2) {
                 for (int D{}; D < FDimension; D++) {
                     if (p1.first[D] < p2.first[D]) return true;
                     else if (p1.first[D] > p2.first[D]) return false;
@@ -81,9 +88,9 @@ namespace gdlib::datastorage {
             return data.end();
         }
 
-        bool GetNextRecord(typename TLDStorageType::iterator &it, int *AKey, double *Data) {
+        bool GetNextRecord(typename TLDStorageType::iterator &it, KeyType *AKey, ValType *Data) {
             if(it == data.end()) return false;
-            const std::pair<global::gmsspecs::TIndex, T>& item = *it;
+            const EntryType & item = *it;
             memcpy(AKey, item.first.data(), FKeySize);
             memcpy(Data, item.second.data(), sizeof(double)*item.second.size());
             it++;
@@ -95,7 +102,7 @@ namespace gdlib::datastorage {
             auto IsSorted = [&]() {
                 int KD{};
                 const global::gmsspecs::TIndex * PrevKey{};
-                for(const std::pair<global::gmsspecs::TIndex, T> &pair : data) {
+                for(const EntryType &pair : data) {
                     const global::gmsspecs::TIndex &keys = pair.first;
                     if(PrevKey) {
                         for (int D{}; D < FDimension; D++) {
@@ -113,11 +120,11 @@ namespace gdlib::datastorage {
 
             int KeyBase {FMinKey};
             const int64_t AllocCount = (int64_t)FMaxKey - FMinKey + 1;
-            std::vector<T*> Head(AllocCount), Tail(AllocCount);
+            std::vector<ValType *> Head(AllocCount), Tail(AllocCount);
             for(int Key{}; Key < FMaxKey - KeyBase; Key++) {
                 Head[Key] = nullptr;
                 for(int D{FDimension-1}; D >= 0; D--) {
-                    for(const std::pair<global::gmsspecs::TIndex, T>& pair : data) {
+                    for(const EntryType & pair : data) {
                         const global::gmsspecs::TIndex& keys = pair.first;
                         Key = (!AMap ? keys[D] : keys[(*AMap)[D]]) - KeyBase;
                     }

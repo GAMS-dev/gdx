@@ -329,6 +329,8 @@ namespace gxfile {
     using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
     using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
 
+    using LinkedDataType = gdlib::datastorage::TLinkedData<int, double, global::gmsspecs::valscale+1>;
+
     // Description:
     //    Class for reading and writing gdx files
     class TGXFileObj : public gdxinterface::GDXInterface {
@@ -352,8 +354,8 @@ namespace gxfile {
         std::unique_ptr<std::vector<std::string>> DomainStrList;
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
         //std::map<global::gmsspecs::TIndex, gxdefs::TgdxValues> SortList;
-        std::unique_ptr<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>> SortList;
-        std::optional<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>::TLDStorageType::iterator> ReadPtr;
+        std::unique_ptr<LinkedDataType> SortList;
+        std::optional<LinkedDataType::TLDStorageType::iterator> ReadPtr;
         gdlib::gmsdata::TTblGamsData ErrorList;
         PgdxSymbRecord CurSyPtr{};
         int ErrCnt{}, ErrCntTotal{};

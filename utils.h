@@ -373,6 +373,7 @@ namespace utils {
 
     std::string asdelphifmt(double v, int precision = 8);
 
+    // Do not use this in inner-loop performance critical code!
     template<typename T, int card>
     std::array<T, card> asArray(const T* ptr) {
         std::array<T, card> a{};

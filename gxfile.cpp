@@ -384,7 +384,7 @@ namespace gxfile {
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) {
         if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
         LastStrElem.fill(std::nullopt);
-        SortList = std::make_unique<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
+        SortList = std::make_unique<LinkedDataType>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
         fmode = fw_dom_str;
         return true;
     }
@@ -427,7 +427,7 @@ namespace gxfile {
                 if(KD > MaxElem[D]) MaxElem[D] = KD;
             }
         }
-        SortList->AddItem(LastElem, utils::asArray<double, 5>( Values ));
+        SortList->AddItem(LastElem.data(), Values);
         return true;
     }
 
@@ -975,7 +975,7 @@ namespace gxfile {
             } else {
                 //WriteLn('Cannot do mapped read fast');
                 try {
-                    SortList = std::make_unique<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
+                    SortList = std::make_unique<LinkedDataType>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
                     int FIDim = FCurrentDim; // First invalid dimension
                     TgdxValues Avals;
                     TIndex AElements{};
@@ -1064,7 +1064,7 @@ namespace gxfile {
                                 }
                                 AddNew = false;
                             }
-                            SortList->AddItem(AElements, Avals);
+                            SortList->AddItem(AElements.data(), Avals.data());
                         }
                     }
                     ReadPtr = SortList->StartRead(nullptr);
@@ -2865,7 +2865,7 @@ namespace gxfile {
     int TGXFileObj::gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
                                          int UserInfo) {
         if(!PrepareSymbolWrite("DataWriteMapStart", SyId, ExplTxt, Dimen, Typ, UserInfo)) return false;
-        SortList = std::make_unique<gdlib::datastorage::TLinkedData<gxdefs::TgdxValues>>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
+        SortList = std::make_unique<LinkedDataType>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
         fmode = fw_dom_map;
         return true;
     }
@@ -2902,7 +2902,7 @@ namespace gxfile {
             if(KD < MinElem[D]) MinElem[D] = KD;
             if(KD > MaxElem[D]) MaxElem[D] = KD;
         }
-        SortList->AddItem(Keys, utils::asArray<double, 5>(Values));
+        SortList->AddItem(Keys.data(), Values);
         return true;
     }
 
