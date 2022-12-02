@@ -329,7 +329,7 @@ namespace gxfile {
     using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
     using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
 
-    using LinkedDataType = gdlib::datastorage::TLinkedData<int, double, global::gmsspecs::valscale+1>;
+    using LinkedDataType = gdlib::datastorage::TLinkedData<int, global::gmsspecs::MaxDim, double, global::gmsspecs::valscale+1>;
 
     // Description:
     //    Class for reading and writing gdx files

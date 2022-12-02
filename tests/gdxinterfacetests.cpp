@@ -1293,6 +1293,7 @@ namespace tests::gdxinterfacetests {
     public:
         virtual void write(GDXInterface &pgx, int count, const int *nums) = 0;
         virtual void read(GDXInterface &pgx, int count, const int *nums) = 0;
+        virtual std::string getName() const = 0;
     };
 
     double perfBenchmarkCppVsDelphi(AbstractWriteReadPair &pair, bool randomOrderInsert = true) {
@@ -1357,6 +1358,10 @@ namespace tests::gdxinterfacetests {
                 pgx.gdxDataReadRaw(keys.data(), values.data(), dimFirst);
             pgx.gdxDataReadDone();
         }
+
+        std::string getName() const override {
+            return "raw"s;
+        }
     };
 
     class WriteReadStrPair : public AbstractWriteReadPair {
@@ -1378,6 +1383,10 @@ namespace tests::gdxinterfacetests {
             for (int i{}; i < count; i++)
                 pgx.gdxDataReadStr(sib.ptrs(), values.data(), dimFirst);
             pgx.gdxDataReadDone();
+        }
+
+        std::string getName() const override {
+            return "str"s;
         }
     };
 
@@ -1410,11 +1419,15 @@ namespace tests::gdxinterfacetests {
                 pgx.gdxDataReadMap(i+1, keys.data(), values.data(), dimFirst);
             pgx.gdxDataReadDone();
         }
+
+        std::string getName() const override {
+            return "mapped";
+        }
     };
 
     void enforceSlowdownLimit(AbstractWriteReadPair &pair, double limit) {
         const double avgSlowdown = perfBenchmarkCppVsDelphi(pair, true);
-        //std::cout << "slowdown = " << avgSlowdown << std::endl;
+        //std::cout << "slowdown = " << avgSlowdown << " for " << pair.getName() << std::endl;
         REQUIRE(avgSlowdown <= limit);
     }
 

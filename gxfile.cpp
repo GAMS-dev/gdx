@@ -444,9 +444,10 @@ namespace gxfile {
         if(!utils::in(fmode, fw_raw_data, fw_dom_raw)) {
             InitDoWrite(static_cast<int>(SortList->size()));
             ReadPtr = SortList->StartRead(nullptr);
-            for(const auto &[keys, values] : *SortList) {
-                DoWrite(keys.data(), values.data());
-            }
+            TIndex AElements;
+            TgdxValues AVals;
+            while(SortList->GetNextRecord(*ReadPtr, AElements.data(), AVals.data()))
+                DoWrite(AElements.data(), AVals.data());
             SortList = nullptr;
         }
         FFile->WriteByte(255); // end of data
@@ -2986,8 +2987,7 @@ namespace gxfile {
         }
         if(fmode == fr_map_data) {
             DimFrst = 0;
-            if (!ReadPtr || *ReadPtr == SortList->end()) return false;
-            SortList->GetNextRecord(*ReadPtr, KeyInt, Values);
+            if (!ReadPtr || !SortList->GetNextRecord(*ReadPtr, KeyInt, Values)) return false;
             // checking mapped values
             for(int D{}; D<FCurrentDim; D++) {
                 if(KeyInt[D] != PrevElem[D]) {

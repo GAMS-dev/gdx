@@ -1,34 +1,53 @@
 #pragma once
 
+#include <cstring>
 #include <vector>
 #include <list>
-#include "../global/modhead.h"
-#include "../global/gmsspecs.h"
 #include <limits>
 #include <algorithm>
 #include <optional>
+
+#include "../global/modhead.h"
+#include "../global/gmsspecs.h"
 
 namespace gdlib::datastorage {
 
     // TODO: Get rid of this (use standard library collection instead)
     // implement radix sort in a general way for sequences/collections
-    template<typename KeyType, typename ValType, int valMaxSize>
+    template<typename KeyType, int keyMaxSize, typename ValType, int valMaxSize>
     class TLinkedData {
     public:
-        using KeyArray = std::vector<KeyType>;
+        using KeyArray = std::array<KeyType, keyMaxSize>;
         using ValArray = std::array<ValType, valMaxSize>;
         using EntryType = std::pair<KeyArray, ValArray>;
         using TLDStorageType = std::list<EntryType>;
+        using TLDIterator = typename std::list<EntryType>::iterator;
+
     private:
         TLDStorageType data;
-        int FDimension, FDataSize, FKeySize, FTotalSize, FMinKey, FMaxKey;
+        int FDimension, FKeySize, FMinKey, FMaxKey;
+
+        bool IsSorted() {
+            const KeyType * PrevKey{};
+            for(const EntryType &pair : data) {
+                const KeyArray &keys = pair.first;
+                if(PrevKey) {
+                    int KD{};
+                    for (int D{}; D < FDimension; D++) {
+                        KD = keys[D] - PrevKey[D];
+                        if (KD) break;
+                    }
+                    if (KD < 0) return false;
+                }
+                PrevKey = keys.data();
+            }
+            return true;
+        };
 
     public:
         TLinkedData(int ADimension, int ADataSize) :
             FDimension{ADimension},
-            FDataSize{ADataSize},
             FKeySize{static_cast<int>(ADimension*sizeof(int))},
-            FTotalSize{2*(int)sizeof(void*)+FKeySize+FDataSize},
             FMinKey{std::numeric_limits<int>::max()},
             FMaxKey{} {
         }
@@ -36,18 +55,8 @@ namespace gdlib::datastorage {
         ~TLinkedData() = default;
 
         [[nodiscard]]
-        int size() const { return (int)data.size(); }
-
-        auto begin() {
-            return data.begin();
-        }
-
-        auto end() {
-            return data.end();
-        }
-
-        void clear() {
-            data.clear();
+        int size() const {
+            return (int)data.size();
         }
 
         void Clear() {
@@ -58,7 +67,7 @@ namespace gdlib::datastorage {
 
         ValArray &AddItem(const KeyType *AKey, const ValType *AData) {
             data.push_back({});
-            data.back().first.resize(FDimension);
+            //data.back().first.resize(FDimension);
             memcpy(data.back().first.data(), AKey, sizeof(KeyType)*FDimension);
             memcpy(data.back().second.data(), AData, sizeof(ValType)*valMaxSize);
             for(int D{}; D<FDimension; D++) {
@@ -70,6 +79,7 @@ namespace gdlib::datastorage {
         }
 
         void Sort(const int *AMap = nullptr) {
+            if(data.empty() || IsSorted()) return;
             // FIXME: Should this consider wildcards? =0?
             data.sort([&](const EntryType & p1, const EntryType & p2) {
                 for (int D{}; D < FDimension; D++) {
@@ -97,45 +107,25 @@ namespace gdlib::datastorage {
             return true;
         }
 
-        // TODO: AS: Fully port and test this!
-        void SortDelphiStyle(const std::optional<std::vector<int>> &AMap = std::nullopt) {
-            auto IsSorted = [&]() {
-                int KD{};
-                const global::gmsspecs::TIndex * PrevKey{};
-                for(const EntryType &pair : data) {
-                    const global::gmsspecs::TIndex &keys = pair.first;
-                    if(PrevKey) {
-                        for (int D{}; D < FDimension; D++) {
-                            KD = keys[D] - (*PrevKey)[D];
-                            if (KD) break;
-                        }
-                        if (KD < 0) return false;
-                    }
-                    PrevKey = &keys;
-                }
-                return true;
-            };
-
+    private:
+        // FIXME: Unfinished!
+        void RadixSort(const int *AMap = nullptr) {
             if(data.empty() || IsSorted()) return;
-
             int KeyBase {FMinKey};
             const int64_t AllocCount = (int64_t)FMaxKey - FMinKey + 1;
             std::vector<ValType *> Head(AllocCount), Tail(AllocCount);
+            TLDIterator myhead = data.begin();
             for(int Key{}; Key < FMaxKey - KeyBase; Key++) {
                 Head[Key] = nullptr;
                 for(int D{FDimension-1}; D >= 0; D--) {
-                    for(const EntryType & pair : data) {
-                        const global::gmsspecs::TIndex& keys = pair.first;
-                        Key = (!AMap ? keys[D] : keys[(*AMap)[D]]) - KeyBase;
+                    for(EntryType & pair : data) {
+                        const KeyArray & keys = pair.first;
+                        Key = (!AMap ? keys[D] : keys[AMap[D]]) - KeyBase;
+                        if(!Head[Key]) Head[Key] = pair.second.data();
+
                     }
-                    /*for(int Key{FMaxKey}; Key >= 0; Key--) {
-                        // ...
-                    }*/
                 }
             }
-
-            // ...
-            STUBWARN();
         }
     };
 
