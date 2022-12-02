@@ -25,6 +25,23 @@ namespace gdlib::datastorage {
         using RecType = TLinkedDataRec<KeyType, maxKeySize, ValueType, maxValueSize>;
         RecType *FHead, *FTail;
 
+        bool IsSorted() {
+            RecType *R{FHead};
+            auto *PrevKey {R->RecKeys.data()};
+            R = R->RecNext;
+            int KD{};
+            while(R) {
+                for(int D{}; D<FDimension; D++) {
+                    KD = R->RecKeys[D] - PrevKey[D];
+                    if(KD) break;
+                }
+                if(KD < 0) return false;
+                PrevKey = R->RecKeys.data();
+                R = R->RecNext;
+            }
+            return true;
+        }
+
     public:
         using KeyArray = std::array<KeyType, maxKeySize>;
         using ValArray = std::array<ValueType, maxValueSize>;
@@ -42,16 +59,19 @@ namespace gdlib::datastorage {
         {
         };
 
+        int Count() const {
+            return FCount;
+        }
+
         void Clear() {
-            RecType *P {FHead}, *Pn{};
+            RecType *P {FHead};
             while(P) {
-                Pn = P->RecNext;
+                auto Pn = P->RecNext;
                 delete P;
                 P = Pn;
             }
-            FCount = 0;
+            FCount = FMaxKey = 0;
             FHead = FTail = nullptr;
-            FMaxKey = 0;
             FMinKey = std::numeric_limits<int>::max();
         }
 
@@ -66,17 +86,61 @@ namespace gdlib::datastorage {
             FTail = node;
             node->RecNext = nullptr;
             std::memcpy(node->RecKeys.data(), AKey, FKeySize);
-            std::memcpy(node->RecData.data(), AData, FDataSize);
+            std::memcpy(node->RecData.data(), AData, node->RecData.size()*sizeof(ValueType)/*FDataSize*/);
             FCount++;
             for(int D{}; D<FDimension; D++) {
                 int Key{AKey[D]};
                 if(Key > FMaxKey) FMaxKey = Key;
                 if(Key < FMinKey) FMinKey = Key;
             }
-            return *node;
+            return node->RecData;
         }
 
-        // ...
+        void Sort(const int *AMap = nullptr) {
+            if(!FHead || IsSorted()) return;
+            const int AllocCount = FMaxKey - FMinKey + 1;
+            std::vector<RecType *> Head(AllocCount), Tail(AllocCount);
+            int KeyBase {FMinKey};
+            // Perform radix sort
+            std::fill_n(Head.begin(), FMaxKey-KeyBase, nullptr);
+            for(int D{FDimension-1}; D>=0; D--) {
+                RecType *R = FHead;
+                while(R) {
+                    int Key {R->RecKeys[AMap ? AMap[D] : D] - KeyBase};
+                    if(!Head[Key]) Head[Key] = R;
+                    else Tail[Key]->RecNext = R;
+                    Tail[Key] = R;
+                    R = R->RecNext;
+                }
+                R = nullptr;
+                for(int Key{FMaxKey-KeyBase}; Key >= 0; Key--) {
+                    if(Head[Key]) {
+                        Tail[Key]->RecNext = R;
+                        R = Head[Key];
+                        Head[Key] = nullptr; // so we keep it all nullptr
+                    }
+                }
+                FHead = R;
+            }
+            FTail = nullptr; // what is the tail???
+        }
+
+        std::optional<RecType*> StartRead(const int *AMap = nullptr) {
+            if(FCount <= 0) return std::nullopt;
+            Sort(AMap);
+            return {FHead};
+        }
+
+        bool GetNextRecord(RecType **P, KeyType *AKey, ValueType *AData) {
+            if(P && *P) {
+                const RecType &it = **P;
+                std::memcpy(AKey, it.RecKeys.data(), FKeySize);
+                std::memcpy(AData, it.RecData.data(), /*FDataSize*/ it.RecData.size() * sizeof(ValueType));
+                *P = it.RecNext;
+                return true;
+            }
+            return false;
+        }
     };
 
     // TODO: Get rid of this (use standard library collection instead)
@@ -121,9 +185,8 @@ namespace gdlib::datastorage {
 
         ~TLinkedData() = default;
 
-        [[nodiscard]]
-        int size() const {
-            return (int)data.size();
+        int Count() const {
+            return static_cast<int>(data.size());
         }
 
         void Clear() {
@@ -169,7 +232,7 @@ namespace gdlib::datastorage {
             if(it == data.end()) return false;
             const EntryType & item = *it;
             memcpy(AKey, item.first.data(), FKeySize);
-            memcpy(Data, item.second.data(), sizeof(double)*item.second.size());
+            memcpy(Data, item.second.data(), sizeof(ValType)*item.second.size());
             it++;
             return true;
         }

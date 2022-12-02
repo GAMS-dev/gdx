@@ -329,7 +329,10 @@ namespace gxfile {
     using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
     using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
 
-    using LinkedDataType = gdlib::datastorage::TLinkedData<int, global::gmsspecs::MaxDim, double, global::gmsspecs::valscale+1>;
+    //using LinkedDataType = gdlib::datastorage::TLinkedData<int, global::gmsspecs::MaxDim, double, global::gmsspecs::valscale+1>;
+    //using LinkedDataIteratorType = LinkedDataType::TLDStorageType::iterator;
+    using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, global::gmsspecs::MaxDim, double, global::gmsspecs::valscale+1>;
+    using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, global::gmsspecs::MaxDim, double, global::gmsspecs::valscale+1> *;
 
     // Description:
     //    Class for reading and writing gdx files
@@ -355,7 +358,7 @@ namespace gxfile {
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
         //std::map<global::gmsspecs::TIndex, gxdefs::TgdxValues> SortList;
         std::unique_ptr<LinkedDataType> SortList;
-        std::optional<LinkedDataType::TLDStorageType::iterator> ReadPtr;
+        std::optional<LinkedDataIteratorType> ReadPtr;
         gdlib::gmsdata::TTblGamsData ErrorList;
         PgdxSymbRecord CurSyPtr{};
         int ErrCnt{}, ErrCntTotal{};

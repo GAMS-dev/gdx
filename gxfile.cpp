@@ -384,7 +384,7 @@ namespace gxfile {
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) {
         if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
         LastStrElem.fill(std::nullopt);
-        SortList = std::make_unique<LinkedDataType>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
+        SortList = std::make_unique<LinkedDataType>(FCurrentDim, DataSize * static_cast<int>(sizeof(double)));
         fmode = fw_dom_str;
         return true;
     }
@@ -442,11 +442,11 @@ namespace gxfile {
         static const TgxModeSet AllowedModes {fw_raw_data,fw_map_data,fw_str_data, fw_dom_raw, fw_dom_map, fw_dom_str};
         if(!MajorCheckMode("DataWriteDone"s, AllowedModes)) return false;
         if(!utils::in(fmode, fw_raw_data, fw_dom_raw)) {
-            InitDoWrite(static_cast<int>(SortList->size()));
+            InitDoWrite(static_cast<int>(SortList->Count()));
             ReadPtr = SortList->StartRead(nullptr);
             TIndex AElements;
             TgdxValues AVals;
-            while(SortList->GetNextRecord(*ReadPtr, AElements.data(), AVals.data()))
+            while(ReadPtr && SortList->GetNextRecord(&*ReadPtr, AElements.data(), AVals.data()))
                 DoWrite(AElements.data(), AVals.data());
             SortList = nullptr;
         }
@@ -1069,7 +1069,7 @@ namespace gxfile {
                         }
                     }
                     ReadPtr = SortList->StartRead(nullptr);
-                    res = (int)SortList->size();
+                    res = static_cast<int>(SortList->Count());
                 } catch(std::exception &e) {
                     std::cout << "Exception: " << e.what() << "\n";
                     AllocOk = false;
@@ -2987,7 +2987,7 @@ namespace gxfile {
         }
         if(fmode == fr_map_data) {
             DimFrst = 0;
-            if (!ReadPtr || !SortList->GetNextRecord(*ReadPtr, KeyInt, Values)) return false;
+            if (!ReadPtr || !SortList->GetNextRecord(&*ReadPtr, KeyInt, Values)) return false;
             // checking mapped values
             for(int D{}; D<FCurrentDim; D++) {
                 if(KeyInt[D] != PrevElem[D]) {
