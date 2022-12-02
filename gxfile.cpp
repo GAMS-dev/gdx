@@ -1305,6 +1305,7 @@ namespace gxfile {
         } else {
             AFDim = B;
             for(int D{AFDim-1}; D <FCurrentDim; D++) {
+                assert(D>=0);
                 switch(ElemType[D]) {
                     case sz_integer: LastElem[D] = FFile->ReadInteger() + MinElem[D]; break;
                     case sz_word: LastElem[D] = FFile->ReadWord() + MinElem[D]; break;

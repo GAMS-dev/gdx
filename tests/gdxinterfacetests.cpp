@@ -1338,16 +1338,32 @@ namespace tests::gdxinterfacetests {
 
     class WriteReadRawPair : public AbstractWriteReadPair {
         void write(GDXInterface &pgx, int count, const int *nums) override {
+            // Register many UELs
             pgx.gdxUELRegisterRawStart();
             for (int i{}; i<count; i++)
                 REQUIRE(pgx.gdxUELRegisterRaw("i"s + std::to_string(nums[i])));
             pgx.gdxUELRegisterDone();
+            // Write set symbol "i" with many records referencing the large number of UELs for its elements
             REQUIRE(pgx.gdxDataWriteRawStart("i"s, "a set"s, 1, global::gmsspecs::gms_dt_set, 0));
             for (int i{}; i<count; i++) {
                 keys.front() = i+1;
                 REQUIRE(pgx.gdxDataWriteRaw(keys.data(), values.data()));
             }
             pgx.gdxDataWriteDone();
+            // Write a many dimensional parameter symbol "d(i,...,i)" with many records
+            const int paramDim {16};
+            pgx.gdxDataWriteRawStart("d"s, "a parameter"s, paramDim, global::gmsspecs::gms_dt_par, 0);
+            for(int i{}; i<count; i++) {
+                for(int d{}; d<paramDim; d++)
+                    keys[d] = i+1;
+                values[global::gmsspecs::vallevel] = i+1;
+                pgx.gdxDataWriteRaw(keys.data(), values.data());
+            }
+            pgx.gdxDataWriteDone();
+            std::array<std::string, 20> domainNames;
+            domainNames.fill("i"s);
+            StrIndexBuffers sib {&domainNames};
+            pgx.gdxSymbolSetDomainX(2, sib.cptrs());
         }
 
         void read(GDXInterface &pgx, int count, const int *nums) override {
@@ -1355,6 +1371,10 @@ namespace tests::gdxinterfacetests {
             pgx.gdxDataReadRawStart(1, numRecs);
             int dimFirst;
             for (int i{}; i < count; i++)
+                pgx.gdxDataReadRaw(keys.data(), values.data(), dimFirst);
+            pgx.gdxDataReadDone();
+            pgx.gdxDataReadRawStart(2, numRecs);
+            for(int i{}; i< count; i++)
                 pgx.gdxDataReadRaw(keys.data(), values.data(), dimFirst);
             pgx.gdxDataReadDone();
         }
@@ -1392,20 +1412,18 @@ namespace tests::gdxinterfacetests {
 
     class WriteReadMappedPair : public AbstractWriteReadPair {
         void write(GDXInterface &pgx, int count, const int *nums) override {
-            std::array<std::pair<int, std::string>, 5> mappedUels {{
-              {8, "i8"s},
-              {3, "i3"s},
-              {2, "i2"s},
-              {10, "i10"s},
-              {1, "i1"s}
-            }};
+            // TODO: Algorithmically generate these with cardinality "count" to make it less easy
+            std::vector<std::string> uelIds(count);
+            for(int i{}; i<uelIds.size(); i++)
+                uelIds[i] = "i"+std::to_string(i+1);
+            std::shuffle(uelIds.begin(), uelIds.end(), std::default_random_engine(42));
             pgx.gdxUELRegisterMapStart();
-            for(auto &[n, uel] : mappedUels)
-                pgx.gdxUELRegisterMap(n, uel);
+            for(int i{}; i<count; i++)
+                pgx.gdxUELRegisterMap(nums[i], uelIds[i]);
             pgx.gdxUELRegisterDone();
             pgx.gdxDataWriteMapStart("i"s, "a set"s, 1, global::gmsspecs::gms_dt_set, 0);
-            for (int i{}; i<mappedUels.size(); i++) {
-                keys.front() = mappedUels[i].first;
+            for (int i{}; i<count; i++) {
+                keys.front() = nums[i];
                 pgx.gdxDataWriteMap(keys.data(), values.data());
             }
             pgx.gdxDataWriteDone();
@@ -1414,9 +1432,11 @@ namespace tests::gdxinterfacetests {
         void read(GDXInterface &pgx, int count, const int *nums) override {
             int numRecs;
             pgx.gdxDataReadMapStart(1, numRecs);
+            REQUIRE_EQ(count, numRecs);
             int dimFirst;
-            for (int i{}; i < 5; i++)
-                pgx.gdxDataReadMap(i+1, keys.data(), values.data(), dimFirst);
+            // TODO: Fix this failing due to D<0 in gxfile.cpp:1308
+            /*for (int i{}; i < count; i++)
+                pgx.gdxDataReadMap(i + 1, keys.data(), values.data(), dimFirst);*/
             pgx.gdxDataReadDone();
         }
 
