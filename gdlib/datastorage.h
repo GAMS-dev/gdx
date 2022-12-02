@@ -12,6 +12,73 @@
 
 namespace gdlib::datastorage {
 
+    template<typename KeyType, int maxKeySize, typename ValueType, int maxValueSize>
+    struct TLinkedDataRec {
+        TLinkedDataRec *RecNext, *HashNext;
+        std::array<ValueType, maxValueSize> RecData;
+        std::array<KeyType, maxKeySize> RecKeys;
+    };
+
+    template<typename KeyType, int maxKeySize, typename ValueType, int maxValueSize>
+    class TLinkedDataLegacy {
+        int FMinKey, FMaxKey, FDimension, FKeySize, FTotalSize, FDataSize, FCount;
+        using RecType = TLinkedDataRec<KeyType, maxKeySize, ValueType, maxValueSize>;
+        RecType *FHead, *FTail;
+
+    public:
+        using KeyArray = std::array<KeyType, maxKeySize>;
+        using ValArray = std::array<ValueType, maxValueSize>;
+
+        TLinkedDataLegacy(int ADimension, int ADataSize) :
+            FDimension(ADimension),
+            FKeySize(ADimension * (int)sizeof(KeyType)),
+            FDataSize(ADataSize),
+            FTotalSize(sizeof(RecType)),
+            FHead{},
+            FTail{},
+            FCount{},
+            FMaxKey{},
+            FMinKey{std::numeric_limits<int>::max()}
+        {
+        };
+
+        void Clear() {
+            RecType *P {FHead}, *Pn{};
+            while(P) {
+                Pn = P->RecNext;
+                delete P;
+                P = Pn;
+            }
+            FCount = 0;
+            FHead = FTail = nullptr;
+            FMaxKey = 0;
+            FMinKey = std::numeric_limits<int>::max();
+        }
+
+        int MemoryUsed() {
+            return FCount * FTotalSize;
+        }
+
+        ValArray &AddItem(const KeyType *AKey, const ValueType *AData) {
+            auto node = new RecType {};
+            if(!FHead) FHead = node;
+            else FTail->RecNext = node;
+            FTail = node;
+            node->RecNext = nullptr;
+            std::memcpy(node->RecKeys.data(), AKey, FKeySize);
+            std::memcpy(node->RecData.data(), AData, FDataSize);
+            FCount++;
+            for(int D{}; D<FDimension; D++) {
+                int Key{AKey[D]};
+                if(Key > FMaxKey) FMaxKey = Key;
+                if(Key < FMinKey) FMinKey = Key;
+            }
+            return *node;
+        }
+
+        // ...
+    };
+
     // TODO: Get rid of this (use standard library collection instead)
     // implement radix sort in a general way for sequences/collections
     template<typename KeyType, int keyMaxSize, typename ValType, int valMaxSize>
