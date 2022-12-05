@@ -156,6 +156,8 @@ namespace xpwrap {
         int gdxSymbIndxMaxLength(int SyNr, int *LengthInfo) override;
 
         int gdxUELMaxLength() override;
+
+        std::string getImplName() const override;
     };
 
 }

@@ -4186,6 +4186,10 @@ namespace gxfile {
         return it == NameList.end() ? -1 : it->second->SSyNrActual;
     }
 
+    std::string TGXFileObj::getImplName() const {
+        return "tgxfileobj"s;
+    }
+
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         nameToIndexNum.clear();

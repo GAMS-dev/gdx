@@ -159,7 +159,7 @@ namespace tests::gdxinterfacetests {
 
     void runGdxToYamlScript(const std::string &filename1 = ""s, const std::string &filename2 = ""s) {
 #if defined(__APPLE__) || defined(__linux__)
-        const std::string pythonInterpreter {"python3"};
+        const std::string pythonInterpreter {"/usr/bin/python3"};
 #else
         const std::string pythonInterpreter {"python"};
 #endif
@@ -167,12 +167,7 @@ namespace tests::gdxinterfacetests {
         system((pythonInterpreter + " gdxtoyaml/main.py "s + filename1 + f2).c_str());
     }
 
-    void testMatchingWrites(const std::string &filename1,
-                            const std::string &filename2,
-                            const std::function<void(GDXInterface&)> &cb,
-                            bool skipDiffing = false) {
-        testWriteOp<xpwrap::GDXFile>(filename1, cb);
-        testWriteOp<gxfile::TGXFileObj>(filename2, cb);
+    void checkForMismatches(const std::string &filename1, const std::string &filename2, bool skipDiffing) {
         if(!filename1.empty() && !filename2.empty() && !skipDiffing) {
             auto maybeMismatches = utils::binaryFileDiff(filename1, filename2);
             if (maybeMismatches) {
@@ -191,6 +186,15 @@ namespace tests::gdxinterfacetests {
             } else mycout << "No mismatches found between " << filename1 << " and " << filename2 << std::endl;
             REQUIRE_FALSE(maybeMismatches);
         }
+    }
+
+    void testMatchingWrites(const std::string &filename1,
+                            const std::string &filename2,
+                            const std::function<void(GDXInterface&)> &cb,
+                            bool skipDiffing = false) {
+        testWriteOp<xpwrap::GDXFile>(filename1, cb);
+        testWriteOp<gxfile::TGXFileObj>(filename2, cb);
+        checkForMismatches(filename1, filename2, skipDiffing);
     }
 
     TEST_CASE("Test adding uels (raw mode)") {
@@ -1294,6 +1298,11 @@ namespace tests::gdxinterfacetests {
         virtual void write(GDXInterface &pgx, int count, const int *nums) = 0;
         virtual void read(GDXInterface &pgx, int count, const int *nums) = 0;
         virtual std::string getName() const = 0;
+
+        virtual void reset() {
+            keys.fill(0);
+            values.fill(0.0);
+        }
     };
 
     double perfBenchmarkCppVsDelphi(AbstractWriteReadPair &pair, bool randomOrderInsert = true) {
@@ -1309,28 +1318,47 @@ namespace tests::gdxinterfacetests {
         std::array<double, 2> elapsedTimes {};
         const int ntries = 10;
         std::array<double, ntries> slowdowns{};
+        std::map<std::string, std::string> gdxFns {
+                {"xpwrap", "speed_test_wrapped.gdx"},
+                {"tgxfileobj", "speed_test_ported.gdx"}
+        };
+        std::vector<std::string> tmpFiles;
         for (int n{}; n < ntries; n++) {
             int methodIx{};
             basicTest([&](GDXInterface& pgx) {
+                const std::string implName = pgx.getImplName();
                 int errNr;
-                const std::string gdxFn{ "speed_test.gdx"s };
 
-                std::chrono::time_point start = std::chrono::high_resolution_clock::now();
-                pgx.gdxOpenWrite(gdxFn, "gdxinterfacetest", errNr);
+                std::chrono::time_point startWrite = std::chrono::high_resolution_clock::now();
+                pgx.gdxOpenWrite(gdxFns[implName], "gdxinterfacetest", errNr);
+                pair.reset();
                 pair.write(pgx, upto, nums->data());
                 pgx.gdxClose();
-                pgx.gdxOpenRead(gdxFn, errNr);
+                std::chrono::time_point endWrite = std::chrono::high_resolution_clock::now();
+                double timeWrite = std::chrono::duration<double, std::milli>(endWrite - startWrite).count();
+
+                tmpFiles.push_back(gdxFns[implName]);
+                if(tmpFiles.size() >= 2)
+                    checkForMismatches(tmpFiles.front(), tmpFiles[1], false);
+
+                std::chrono::time_point startRead = std::chrono::high_resolution_clock::now();
+                pgx.gdxOpenRead(gdxFns[implName], errNr);
+                pair.reset();
                 pair.read(pgx, upto, nums->data());
                 pgx.gdxClose();
-                elapsedTimes[methodIx] = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - start).count();
+                std::chrono::time_point endRead = std::chrono::high_resolution_clock::now();
+                double timeRead = std::chrono::duration<double, std::milli>(endRead - startRead).count();
+                elapsedTimes[methodIx] = timeWrite + timeRead;
 
                 /*std::cout << "Method " << std::to_string(methodIx + 1) << " ("s << methodNames[methodIx] <<
                     "): Time elapsed for entering set with "s << std::to_string(upto) << " elements: "s <<
                     std::to_string(elapsedTimes[methodIx]) << " ms" << std::endl;*/
 
-                std::filesystem::remove(gdxFn);
                 methodIx++;
             });
+            for(const auto &s : tmpFiles)
+                std::filesystem::remove(s);
+            tmpFiles.clear();
             slowdowns[n] = elapsedTimes[1] / elapsedTimes[0];
         }
         return std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / ntries;

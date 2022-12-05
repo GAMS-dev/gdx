@@ -596,6 +596,8 @@ namespace gxfile {
         int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP);
         int gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs);
 
+        std::string getImplName() const override;
+
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from

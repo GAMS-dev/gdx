@@ -227,6 +227,6 @@ def convert_file(fn):
 if __name__ == '__main__':
     args = sys.argv
     if len(args) == 3:
-        os.system(f'diff {convert_file(args[1])} {convert_file(args[2])}')
+        os.system(f'/usr/bin/diff {convert_file(args[1])} {convert_file(args[2])}')
     else:
         print(to_yaml(read_gdx('xptest.gdx' if len(sys.argv) <= 1 else sys.argv[1])))

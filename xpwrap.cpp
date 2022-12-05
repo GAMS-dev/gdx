@@ -5,6 +5,7 @@
 #include <cstring>
 
 using namespace gdxinterface;
+using namespace std::literals::string_literals;
 
 namespace xpwrap {
     int GDXFile::gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) {
@@ -353,5 +354,9 @@ namespace xpwrap {
 
     int GDXFile::gdxUELMaxLength() {
         return ::gdxUELMaxLength(pgx);
+    }
+
+    std::string GDXFile::getImplName() const {
+        return "xpwrap"s;
     }
 }

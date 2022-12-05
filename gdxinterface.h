@@ -199,6 +199,8 @@ namespace gdxinterface {
         virtual int gdxSymbIndxMaxLength(int SyNr, int *LengthInfo) = 0;
         virtual int gdxUELMaxLength() = 0;
         // endregion
+
+        virtual std::string getImplName() const = 0;
     };
 
 }
