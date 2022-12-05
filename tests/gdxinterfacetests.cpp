@@ -1482,7 +1482,7 @@ namespace tests::gdxinterfacetests {
         REQUIRE(avgSlowdown <= limit);
     }
 
-    TEST_CASE("Test performance of legacy vs. new GDX object") {
+    TEST_CASE("Test performance of legacy vs. new GDX object for writing and reading records") {
         {
             WriteReadRawPair wrrp;
             enforceSlowdownLimit(wrrp, 1.0);
@@ -1495,6 +1495,76 @@ namespace tests::gdxinterfacetests {
             WriteReadMappedPair wrmp;
             enforceSlowdownLimit(wrmp, 1.1);
         }
+    }
+
+    std::string makeCorporateGDXAvailable() {
+        const std::string model_fn = "Corporate.gms"s,
+                log_fn = "corporateLog.txt"s,
+                fnpf = "corporate"s;
+        std::string gdxfn = fnpf+".gdx"s; // non-const so we get automatic move
+        std::system(("finlib Corporate > gamslibLog.txt"s).c_str());
+        std::filesystem::remove("gamslibLog.txt");
+        REQUIRE(std::filesystem::exists(model_fn));
+        std::system(("gams " + model_fn + " gdx="s + fnpf + " lo=0 o=lf > " + log_fn).c_str());
+        std::filesystem::remove(log_fn);
+        std::filesystem::remove(model_fn);
+        std::filesystem::remove("CorporateCommonInclude.inc");
+        std::filesystem::remove("CorporateScenarios.inc");
+        std::filesystem::remove("lf");
+        REQUIRE(std::filesystem::exists(gdxfn));
+        return gdxfn;
+    }
+
+    TEST_CASE("Test performance of legacy vs. new GDX object for reading a big reference GDX file") {
+        const std::string gdxfn = makeCorporateGDXAvailable();
+        const int ntries {10};
+        std::map<std::string, std::list<double>> elapsedTimes {};
+
+        auto addEntry = [&](const std::string &implName, double elapsed) {
+            auto [it,wasNew] = elapsedTimes.insert({implName, {}});
+            it->second.push_back(elapsed);
+        };
+
+        std::array<int, global::gmsspecs::MaxDim> keys{};
+        std::array<double, global::gmsspecs::valscale + 1> values{};
+
+        for(int n{}; n<ntries; n++) {
+            testReads(gdxfn, gdxfn, [&](GDXInterface &pgx) {
+                std::chrono::time_point startRead = std::chrono::high_resolution_clock::now();
+                int symCnt, uelCnt;
+                REQUIRE(pgx.gdxSystemInfo(symCnt, uelCnt));
+                REQUIRE_EQ(34, symCnt);
+                REQUIRE_EQ(10021, uelCnt);
+                for(int syNr{1}; syNr <= symCnt; syNr++) {
+                    int recCnt, userInfo;
+                    std::string explTxt;
+                    REQUIRE(pgx.gdxSymbolInfoX(syNr, recCnt, userInfo, explTxt));
+                    int nrRecs;
+                    REQUIRE(pgx.gdxDataReadRawStart(syNr, nrRecs));
+                    //REQUIRE_EQ(nrRecs, recCnt);
+                    int dimFrst;
+                    for(int i{}; i<nrRecs; i++)
+                        REQUIRE(pgx.gdxDataReadRaw(keys.data(), values.data(), dimFrst));
+                    REQUIRE(pgx.gdxDataReadDone());
+                }
+                double elapsed = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - startRead).count();
+                addEntry(pgx.getImplName(), elapsed);
+            });
+        }
+        std::filesystem::remove(gdxfn);
+
+        std::map<std::string, double> averageElapsedForImpl;
+        for(auto &[implName, elapsedSamples] : elapsedTimes) {
+            double averageElapsed {};
+            for(double elapsed : elapsedSamples)
+                averageElapsed += elapsed;
+            averageElapsed /= static_cast<double>(elapsedSamples.size());
+            //std::cout << "Average elapsed time for method \"" << implName << "\" is: " << averageElapsed << std::endl;
+            averageElapsedForImpl[implName] = averageElapsed;
+        }
+
+        double avgSlowdown = averageElapsedForImpl["tgxfileobj"] / averageElapsedForImpl["xpwrap"];
+        REQUIRE(avgSlowdown <= 1.2);
     }
 
     TEST_SUITE_END();
