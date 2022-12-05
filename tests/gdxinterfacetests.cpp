@@ -1484,19 +1484,16 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test performance of legacy vs. new GDX object") {
         {
-            // only tolerate on average 10% performance degradation at max!
             WriteReadRawPair wrrp;
-            enforceSlowdownLimit(wrrp, 1.1);
+            enforceSlowdownLimit(wrrp, 1.0);
         }
         {
-            // only tolerate on average 50% performance degradation at max!
             WriteReadStrPair wrsp;
-            enforceSlowdownLimit(wrsp, 1.5);
+            enforceSlowdownLimit(wrsp, 1.0);
         }
         {
-            // only tolerate on average 50% performance degradation at max!
             WriteReadMappedPair wrmp;
-            enforceSlowdownLimit(wrmp, 1.1);
+            enforceSlowdownLimit(wrmp, 1.0);
         }
     }
 
