@@ -1492,7 +1492,7 @@ namespace tests::gdxinterfacetests {
         }
         {
             WriteReadStrPair wrsp;
-            enforceSlowdownLimit(wrsp, 1.0);
+            enforceSlowdownLimit(wrsp, 1.15);
         }
         {
             WriteReadMappedPair wrmp;
