@@ -1481,8 +1481,8 @@ namespace tests::gdxinterfacetests {
     void enforceSlowdownLimit(AbstractWriteReadPair &pair, double limit) {
         const double avgSlowdown = perfBenchmarkCppVsDelphi(pair, true);
         //std::cout << "slowdown = " << avgSlowdown << " for " << pair.getName() << std::endl;
-        REQUIRE(avgSlowdown <= limit);
         slowdownReport << pair.getName() << ";"s << avgSlowdown << std::endl;
+        REQUIRE(avgSlowdown <= limit);
     }
 
     TEST_CASE("Test performance of legacy vs. new GDX object for writing and reading records") {
