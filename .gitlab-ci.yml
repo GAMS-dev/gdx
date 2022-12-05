@@ -94,7 +94,7 @@ test-leg:
 #  coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
     name: unittest-results-linux
-    paths: [doctest_results_linux.xml]
+    paths: [doctest_results_linux.xml,slowdown.txt]
     reports:
       junit: doctest_results_linux.xml
 #      coverage_report:
