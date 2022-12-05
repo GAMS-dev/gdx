@@ -17,6 +17,8 @@ namespace tests::gdxinterfacetests {
     //static std::ostream &mycout = std::cout;
     static std::ostream mycout {&gxfile::null_buffer};
 
+    static std::ofstream slowdownReport {"slowdown.txt"};
+
     auto getBuilders() {
         static std::string ErrMsg;
         std::list<std::function<GDXInterface*()>> builders {
@@ -1480,6 +1482,7 @@ namespace tests::gdxinterfacetests {
         const double avgSlowdown = perfBenchmarkCppVsDelphi(pair, true);
         //std::cout << "slowdown = " << avgSlowdown << " for " << pair.getName() << std::endl;
         REQUIRE(avgSlowdown <= limit);
+        slowdownReport << pair.getName() << ";"s << avgSlowdown << std::endl;
     }
 
     TEST_CASE("Test performance of legacy vs. new GDX object for writing and reading records") {
@@ -1564,6 +1567,7 @@ namespace tests::gdxinterfacetests {
         }
 
         double avgSlowdown = averageElapsedForImpl["tgxfileobj"] / averageElapsedForImpl["xpwrap"];
+        slowdownReport << "corporate;" << avgSlowdown << std::endl;
         REQUIRE(avgSlowdown <= 1.2);
     }
 
