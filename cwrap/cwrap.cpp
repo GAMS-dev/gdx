@@ -192,8 +192,8 @@ int gdxDataReadRawStart(TGXFileRec_t *pgdx, int SyNr, int *NrRecs) {
     return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadRawStart(SyNr, *NrRecs);
 }
 
-int gdxDataReadSlice(TGXFileRec_t *pgdx, const char *UelFilterStr[], int *Dimen, TDataStoreProc_t DP) {
-    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadSlice(UelFilterStr, *Dimen, DP);
+int gdxDataReadSlice(TGXFileRec_t *pgdx, const char *UelFilterStr[], int *Dimen, ::TDataStoreProc_t DP) {
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxDataReadSlice(UelFilterStr, *Dimen, (gxfile::TDataStoreProc_t)DP);
 }
 
 int gdxDataReadSliceStart(TGXFileRec_t *pgdx, int SyNr, int ElemCounts[]) {
@@ -506,12 +506,12 @@ void gdxCreateD(TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBu
     gdxCreate(pgdx, msgBuf, msgBufLen);
 }
 
-int gdxDataReadRawFast(TGXFileRec_t *TGXFile, int SyNr, TDataStoreProc_t DP, int *NrRecs) {
-    return reinterpret_cast<TGXFileObj *>(TGXFile)->gdxDataReadRawFast(SyNr, DP, *NrRecs);
+int gdxDataReadRawFast(TGXFileRec_t *TGXFile, int SyNr, ::TDataStoreProc_t DP, int *NrRecs) {
+    return reinterpret_cast<TGXFileObj *>(TGXFile)->gdxDataReadRawFast(SyNr, (gxfile::TDataStoreProc_t)DP, *NrRecs);
 }
 
-int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP) {
-    return reinterpret_cast<TGXFileObj *>(TGXFile)->gdxDataReadRawFastFilt(SyNr, UelFilterStr, DP);
+int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char **UelFilterStr, ::TDataStoreFiltProc_t DP) {
+    return reinterpret_cast<TGXFileObj *>(TGXFile)->gdxDataReadRawFastFilt(SyNr, UelFilterStr, (gxfile::TDataStoreFiltProc_t)DP);
 }
 
 void setCallByRef(const char *FuncName, int cbrValue) {
