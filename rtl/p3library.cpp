@@ -7,11 +7,6 @@
 #include <dlfcn.h>
 #endif
 
-#include "sysutils_p3.h"
-#include "p3platform.h"
-
-using namespace rtl::sysutils_p3;
-using namespace rtl::p3platform;
 using namespace std::literals::string_literals;
 
 namespace rtl::p3library {
@@ -42,11 +37,6 @@ namespace rtl::p3library {
 #endif
     }
 
-    bool P3LibHandleIsNil(const TLibHandle handle)
-    {
-        return !handle;
-    }
-
     void* P3GetProcAddress(TLibHandle handle, const std::string& name)
     {
 #ifdef MY_WINPLATFORM
@@ -58,25 +48,5 @@ namespace rtl::p3library {
         errMsg = dlerror();
         return NULL != errMsg ? nullptr : res;
 #endif
-    }
-
-    std::string P3MakeLibName(const std::string& path, const std::string& base)
-    {
-        return path.empty() ? P3LibraryPrefix() + base + P3LibraryExt() : ExcludeTrailingPathDelimiter(path) + PathDelim + P3LibraryPrefix() + base + P3LibraryExt();
-    }
-
-    TLibHandle P3NilLibHandle()
-    {
-        return nullptr;
-    }
-
-    std::string P3LibraryExt()
-    {
-        return OSDllExtension[OSPlatform()];
-    }
-
-    std::string P3LibraryPrefix()
-    {
-        return OSDllPrefix[OSPlatform()];
     }
 }

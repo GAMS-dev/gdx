@@ -46,7 +46,6 @@
     <ClCompile Include="gxfile.cpp" />
     <ClCompile Include="palxxx\gdlaudit.cpp" />
     <ClCompile Include="palxxx\paldoorg.cpp" />
-    <ClCompile Include="rtl\math_p3.cpp" />
     <ClCompile Include="rtl\p3library.cpp" />
     <ClCompile Include="rtl\p3platform.cpp" />
     <ClCompile Include="rtl\p3process.cpp" />
@@ -94,7 +93,6 @@
     <ClInclude Include="kvbuffers.h" />
     <ClInclude Include="palxxx\gdlaudit.h" />
     <ClInclude Include="palxxx\paldoorg.h" />
-    <ClInclude Include="rtl\math_p3.h" />
     <ClInclude Include="rtl\p3library.h" />
     <ClInclude Include="rtl\p3platform.h" />
     <ClInclude Include="rtl\p3process.h" />

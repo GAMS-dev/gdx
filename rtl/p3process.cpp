@@ -7,7 +7,6 @@
 #include <cassert>
 #include <cstring>
 #include "../utils.h"
-#include "sysutils_p3.h"
 
 #if defined(_WIN32) || defined(_WIN64)
 #include <Windows.h>
@@ -28,7 +27,6 @@ using namespace std::literals::string_literals;
 namespace fs = std::filesystem;
 
 using namespace rtl::p3platform;
-using namespace rtl::sysutils_p3;
 
 namespace rtl::p3process {
 
@@ -146,22 +144,6 @@ public:
 
 	static int getCPUInfo (	int *nSockets, int *nCores, int *nThreads,
                        		int *coresPerSocket, int *threadsPerCore);
-
-	// nSockets: count of physical sockets, aka packages
-	// nCores:   count of cores, aka physical CPUs
-	// nThreads: count of threads, aka logical CPUs or vCPUs.
-	//           with Intel's Hyperthreading, each core can run 2 threads
-	// if the values above are detected OK,
-	//   return TRUE
-	// else
-	//   return FALSE
-	// If we return true and the number of cores per socket looks good, return it,
-	// o/w return coresPerSocket=-1
-	// If we return true and the number of threads per core looks good, return it,
-	// o/w return ThreadsPerCore=-1
-	bool p3GetCPUInfo(int& nSockets, int& nCores, int& nThreads, int& coresPerSocket, int& threadsPerCore) {
-		return !getCPUInfo(&nSockets, &nCores, &nThreads, &coresPerSocket, &threadsPerCore);
-	}
 
 	/* on success, return 0: this implies nSockets, nCores, nThreads are all good */
 	/* coresPerSocket and threadsPerCore are -1 if there is any doubt about them */
@@ -338,85 +320,9 @@ public:
 #endif
 	}
 
-#if defined(_WIN32)
-	/* on success, return TRUE */
-	BOOL winProcInfo(int* coreCount, int* logicalCount)
-	{
-		DWORD rc, len, pos, group;
-		PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX buf, proc;
-		unsigned char* ucPtr;
-		SYSTEM_INFO siSysInfo;
-
-		*coreCount = -1;
-		*logicalCount = -1;
-
-		len = 0;
-		rc = GetLogicalProcessorInformationEx(RelationProcessorCore, NULL, &len);
-		if (rc || (ERROR_INSUFFICIENT_BUFFER != GetLastError()))
-			return FALSE; /* failure */
-		buf = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)malloc(len);
-		if (NULL == buf)
-			return FALSE; /* failure */
-		rc = GetLogicalProcessorInformationEx(RelationProcessorCore, buf, &len);
-		if (!rc) {
-			free(buf);
-			return FALSE; /* failure */
-		}
-		*coreCount = 0;
-		*logicalCount = 0;
-		ucPtr = (unsigned char*)buf;
-		for (pos = 0; pos < len; ) {
-			proc = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX)(ucPtr + pos);
-			if (RelationProcessorCore == proc->Relationship) {
-				++* coreCount;
-				for (group = 0; group < proc->Processor.GroupCount; group++) {
-					KAFFINITY mask = proc->Processor.GroupMask[group].Mask;
-					while (0 != mask) {
-						*logicalCount += mask & 1;
-						mask >>= 1;
-					}
-				}
-			}
-			pos += proc->Size;
-		}
-		free(buf);
-		/* only if logicalCount <= 64 can we
-		 * verify what we computed is consistent with numberOfProcessors */
-		if (*logicalCount <= 64) {
-			GetSystemInfo(&siSysInfo);
-			if (*logicalCount != (int)siSysInfo.dwNumberOfProcessors) {
-				*coreCount = -1;
-				*logicalCount = -1;
-				return FALSE; /* failure */
-			}
-		}
-
-		return TRUE; /* success */
-	} /* winProcInfo */
-#endif
-
-	int p3GetNumberOfProcessors()
-	{
-		#if defined(_WIN32)
-			int coreCount, logicalCount;
-			SYSTEM_INFO siSysInfo;
-			if (winProcInfo(&coreCount, &logicalCount))
-				return logicalCount;
-			/* my assumption: better to use GetSystemInfo than return -1, */
-			/*                even if GetSystemInfo may undercount        */
-			GetSystemInfo(&siSysInfo);
-			return (int) siSysInfo.dwNumberOfProcessors;
-		#elif defined(__linux__) || defined(__APPLE__)
-			return (int) sysconf(_SC_NPROCESSORS_ONLN);
-		#else
-			throw std::runtime_error("Unknown platform for getNumberOfProcessors!");
-		#endif
-	}
 
 	const std::string CMD_WIN7 = "C:\\windows\\system32\\cmd.exe";
 	const std::string CMD_WINNT = "C:\\winnt\\system32\\cmd.exe";
-
-	int wShowWindow{};
 
 	int CppCreateProc(const std::string& exeName, const std::string& cmdLine, bool inheritedHandles, int& exeRC) {
 #if _WIN32 || _WIN64
@@ -752,272 +658,6 @@ bool killProcGroupUnix (pid_t p, TKillHow how)
 		return res;
 	}
 
-	int win32ASyncCreateProc(const char* exeName, char* cmdLine, int newConsole, int inheritedHandles, TProcInfo& procInfo);
-
-	/*
-	* * execute program given in cmdPtr using a shell
-	 *   procInfo: pid-style info for the shell running the child program
-	 *   msg:      empty on success, nonempty on error
-	 *   result:   error code for starting the program - 0 on success, ~0 otherwise
-	 *
-	*/
-	int asyncSystem4Win(const std::string &cmdPtr, bool newConsole, bool inheritedHandles, TProcInfo& procInfo, std::string& msg) {
-#ifdef _WIN32
-		msg.clear();
-		std::string cs = QueryEnvironmentVariable("COMSPEC");
-		if (cs.empty()) {
-			if (FileExists(CMD_WIN7)) cs = CMD_WIN7;
-			else if (FileExists(CMD_WINNT)) cs = CMD_WINNT;
-			else {
-				msg = "COMSPEC not set and cmd.exe not found";
-				return 1;
-			}
-		}
-		std::string arg = cs + (!cmdPtr.empty() ? " /C " : "") + cmdPtr;
-		std::vector<char> argBuf(arg.size()+1);
-		strcpy(argBuf.data(), arg.c_str());
-		return win32ASyncCreateProc(cs.c_str(), argBuf.data(), newConsole, inheritedHandles, procInfo);
-#else
-		throw std::runtime_error("Should never be called on UNIX!");
-#endif
-	}
-
-	int asyncSystem4Unix(const std::string &cmdPtr, TProcInfo &procInfo, std::string &msg) {
-#ifdef _WIN32
-		throw std::runtime_error("Should never be called on Windows!");
-#else
-		int pid, rc = ForkWithSplitArgs(libcASyncForkExec, cmdPtr, pid);
-		procInfo.pid = pid;
-		return rc;
-#endif
-	}
-
-	int p3ASyncSystemP(const std::string& cmdPtr, bool newConsole, TProcInfo& procInfo, std::string& msg)
-	{
-		msg.clear();
-		memset(&procInfo, 0, sizeof(TProcInfo));
-		switch (OSFileType()) {
-		case OSFileWIN:
-			return asyncSystem4Win(cmdPtr, newConsole, true, procInfo, msg);
-		case OSFileUNIX:
-			return asyncSystem4Unix(cmdPtr, procInfo, msg);
-		default:
-			assert(0 && "p3AsyncSystemP not implemented for OSFileType yet!");
-			break;
-		}
-		return 1;
-	}
-
-	int win32ASyncCreateProc(const char* exeName, char* cmdLine, int newConsole, int inheritedHandles, TProcInfo &procInfo) {
-#ifdef _WIN32
-		int brc, nc;
-		PROCESS_INFORMATION processInformation;
-		STARTUPINFOA startupInfo;
-
-		procInfo.pid = ~0;
-
-		/* Initialize the startup information to be the same as that of the
-		 * parent.  This is easier than initializing the many
-		 * individual startup information fields and should be fine in most
-		 * cases. */
-		GetStartupInfoA(&startupInfo);
-
-		if (newConsole)
-		{
-
-			/* This new settings allows us to send a CtrlC via the new "GAMS Message Interrupt" to a
-			   particular GAMS job without disturbing the parent and vice versa. Along this, we
-			   allowed the new async processes to gets their own stdin/out/err. */
-
-			startupInfo.dwFlags |= STARTF_USESHOWWINDOW;
-			startupInfo.dwFlags &= ~STARTF_USESTDHANDLES;
-			startupInfo.wShowWindow = SW_MINIMIZE;
-			inheritedHandles = FALSE;
-			nc = CREATE_NEW_CONSOLE;
-		}
-		else
-		{
-			startupInfo.wShowWindow = wShowWindow;    /* get the locally stored showWindow preference */
-			nc = 0;
-		}
-
-		if (!CreateProcessA(
-			exeName,               /* ApplicationName */
-			cmdLine,               /* lpCommandLine */
-			NULL,                  /* lpProcessAttributes */
-			NULL,                  /* lpThreadAttribute */
-			inheritedHandles,      /* bInheritedHandles */
-			nc,                    /* dwCreationFlags */
-			NULL,                  /* lpEnvironment */
-			NULL,                  /* lpCurrentDirectory */
-			&startupInfo,          /* lpStartupInfo */
-			&processInformation    /* lpProcessInformation */
-		)) {
-			return GetLastError();  /* failed to execute */
-		}
-
-		/* child is running now - just clean up and return the process info */
-		procInfo.pid = processInformation.dwProcessId;
-		procInfo.tid = processInformation.dwThreadId;
-		procInfo.hProcess = processInformation.hProcess;
-
-		CloseHandle(processInformation.hThread);
-		/* CloseHandle (processInformation.hProcess); */
-#else
-		throw std::runtime_error("Function should never be called on UNIX!");
-#endif
-		return 0;
-	}
-
-	int p3ASyncExecP(const std::string& cmdPtr, bool newConsole, TProcInfo& procInfo, std::string& msg)
-	{
-		int argc, i;
-		const char** pargv;
-		std::string s, param;
-
-		memset(&procInfo, 0, sizeof(TProcInfo));
-		int res{ 1 };
-		msg.clear();
-
-		switch (OSFileType()) {
-		case OSFileWIN: {
-				std::vector<char> cmdPtrBuf(cmdPtr.size() + 1);
-				strcpy(cmdPtrBuf.data(), cmdPtr.c_str());
-				return win32ASyncCreateProc(nullptr, cmdPtrBuf.data(), newConsole, 1, procInfo);
-			}
-			break;
-		case OSFileUNIX:
-			{
-#ifndef _WIN32
-				int pid, rc = ForkWithSplitArgs(libcASyncForkExec, cmdPtr, pid);
-				procInfo.pid = pid;
-				return rc;
-#endif
-			}
-		default:
-			assert(0 && "p3ASyncExecP not implemented for OSFileType yet");
-		}
-		return 1;
-	}
-
-	/*
-	* p3ASyncStatus returns information about the process in procInfo
-	 * The procInfo.pid should be good on input.  Typically (say, on return from p3ASyncExec? )
-	 * the other values in procInfo are good too.  If you only have the PID (e.g. if
-	 * you are re-initializing after a solve) set the other values to 0 and
-	 * the wait structures will be reinitialized as required.
-	 * After you reap a child, a subsequent call on that PID will return 4 (no process)
-	 * There are several possible returns:
-	 *   0: error (impossible PID, other failures)
-	 *   1: process is still running
-	 *   2: process is finished with return code in procRC
-	 *   3: process is finished but no return code available
-	 *   4: no such process
-	 * 127: child forked but never exec'ed
-	 *
-	*/
-	int p3ASyncStatus(TProcInfo& procInfo, int& progRC, std::string& msg)
-	{
-#ifdef _WIN32
-		int res{};
-		HANDLE h;
-		DWORD p, rc, exitCode;
-		char ebuf[256];
-		p = (DWORD)procInfo.pid;
-		h = (HANDLE)procInfo.hProcess;
-		if (!h) {
-			h = OpenProcess(PROCESS_ALL_ACCESS, FALSE, p);
-			if (NULL == h) {
-				rc = GetLastError();
-				switch (rc) {
-				case ERROR_INVALID_PARAMETER:
-					/* system process but that is pid=0, we checked for that already */
-					/* or expired or invalid PID */
-					msg.clear();
-					return 4; /* no such process */
-					break;
-
-				case ERROR_ACCESS_DENIED:
-				default:
-					/*(void)winErrMsg(rc, ebuf, sizeof(ebuf));
-					_P3_pchar2str(msg, 255, (SYSTEM_char*)ebuf);*/
-					break;
-
-				} /* end switch */
-				
-				return 0;
-			}
-			procInfo.hProcess =  h;
-			/* we have no way to get a thread ID, given a process ID */
-			/* procinfo->tid = 0; */
-		}
-
-		/* assume we have a PID and handle now */
-		rc = WaitForSingleObject(h, 0);
-		switch (rc) {
-		case WAIT_OBJECT_0: /* signalled/completed */
-			rc = GetExitCodeProcess(h, &exitCode);
-			if (rc && (0xffffffff != exitCode)) {
-				progRC = exitCode;
-				res = 2;
-			}
-			else {
-				res = 3;
-			}
-			CloseHandle(h);
-			procInfo.hProcess = nullptr;
-			return res;
-			break;
-		case WAIT_TIMEOUT: /* still running normally */
-			return 1;
-			break;
-		default:
-			msg = "Unexpected return from wait";
-			return 0;
-		} /* end switch */
-		return res; /* should never get here */
-#else
-		if(!procInfo.pid) return 0;
-
-		pid_t pid, p2;
-		int wstat, *progrc = &progRC;
-
-		pid = (pid_t) procInfo.pid;
-		/*if (pid <= 0) {                  // PIDs are positive
-			msg ="Invalid PID";
-			return 0;
-		}*/
-		if ((0 != procInfo.tid) || (0 != procInfo.hProcess)) {  /* we only use/set the pid on non-windows  */
-			msg ="Corrupt or bogus procInfo";
-			return 0;
-		}
-		p2 = waitpid (pid, &wstat, WNOHANG);
-		if (pid == p2) { /* process p has changed state - assume it was to exit */
-			/* consider using waitid() instead of waitpid() to get
-			* "more precise control over which child state changes to wait for" */
-			if (! WIFEXITED(wstat)) { /* no exit code is available */
-			return 3;
-			}
-			*progrc = WEXITSTATUS(wstat);
-			if (127 == *progrc) {   /* return for fork & failed exec */
-			return 127;
-			}
-			else
-			return 2;             /* we really have something to return */
-		}
-		else if (-1 == p2) {  /* error, e.g. no such process or not a child */
-			msg ="No such process or not a child";
-			return 4;
-		}
-		else if (0 == p2) {  /* child exists but has not exited */
-			return 1;
-		}
-
-		msg ="Unexpected return from wait";
-		return 0;
-#endif
-	}
-
 #ifdef _WIN32
 	bool killProcessTree(DWORD myprocID) {
 		PROCESSENTRY32 pe;
@@ -1067,28 +707,6 @@ bool killProcGroupUnix (pid_t p, TKillHow how)
 		return true;
 	}
 #endif
-	
-	bool p3KillProcGroupTP(const TProcInfo& procInfo, TKillHow how)
-	{
-#ifdef _WIN32
-		return killProcessTree(procInfo.pid);
-#else
-		return killProcGroupUnix(procInfo.pid, how);
-#endif
-	}
-
-	bool p3IsPIDValid(global::delphitypes::Cardinal pid)
-	{
-#ifdef _WIN32
-		DWORD p = pid;
-		HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, p);
-		if (hProcess) CloseHandle(hProcess);
-		return hProcess;
-#else
-		int rc = unixPidStatus(pid);
-		return rc == 1 || !rc;
-#endif
-	}
 
     static const tCtrlHandler *CtrlHandler;
 
@@ -1115,53 +733,4 @@ bool killProcGroupUnix (pid_t p, TKillHow how)
 	}
 #endif
 
-    CtrlHandlerState P3InstallCtrlHandler(const tCtrlHandler &newHandler) {
-        if(CtrlHandler) {
-            CtrlHandler = &newHandler;
-            return P3CtrlHandlerOK;
-        }
-#ifdef _WIN32
-        CtrlHandler = &newHandler;
-		bool rc = SetConsoleCtrlHandler(&P3Handler, true);
-		if (!rc) CtrlHandler = nullptr;
-		return rc ? P3CtrlHandlerOK : P3CtrlHandlerSysFail;
-#else
-		int rc = sigemptyset(&sigSet);
-        if(rc) return P3CtrlHandlerSysFail;
-        newAction.sa_handler = p3CtrlCHandler;
-        newAction.sa_mask = sigSet;
-        newAction.sa_flags = 0;
-        CtrlHandler = &newHandler;
-        rc = sigaction(SIGINT, &newAction, &oldAction);
-        if(rc) {
-            CtrlHandler = nullptr;
-            return P3CtrlHandlerSysFail;
-        } else {
-            oldHandler = oldAction.sa_handler;
-            return P3CtrlHandlerOK;
-        }
-#endif
-        return P3CtrlHandlerSysFail;
-    }
-
-    int P3UninstallCtrlHandler() {
-#ifdef _WIN32
-        CtrlHandler = nullptr;
-		return SetConsoleCtrlHandler(&P3Handler, false) ? P3CtrlHandlerOK : P3CtrlHandlerSysFail;
-#else
-        int rc = sigemptyset(&sigSet);
-        if(rc) return P3CtrlHandlerSysFail;
-        newAction.sa_handler = oldHandler;
-        newAction.sa_mask = sigSet;
-        newAction.sa_flags = 0;
-        rc = sigaction(SIGINT, &newAction, &oldAction);
-        CtrlHandler = nullptr;
-        return rc || oldAction.sa_handler != p3CtrlCHandler ? P3CtrlHandlerSysFail : P3CtrlHandlerOK;
-#endif
-        return P3CtrlHandlerSysFail;
-    }
-
-    tCtrlHandler P3GetCtrlHandler() {
-        return *CtrlHandler;
-    }
 }

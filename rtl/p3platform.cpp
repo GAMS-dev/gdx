@@ -1,6 +1,4 @@
 #include "p3platform.h"
-#include "../global/unit.h"
-#include <string>
 
 using namespace std::literals::string_literals;
 
@@ -8,16 +6,6 @@ using namespace std::literals::string_literals;
 // Implementation
 // ==============================================================================================================
 namespace rtl::p3platform {
-
-	static tOSFileType localOSFileType;
-	static tOSPlatform localOSPlatform;
-
-	static std::string
-		localOSNullFileName,
-		localOSConsoleName,
-		localOSLanguagePascal,
-		localOSLanguageC;
-	static bool localIsLittleEndian;
 
 	tOSFileType OSFileType() {
 #if defined(WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(_WIN32) || defined(__NT__)
@@ -42,57 +30,4 @@ namespace rtl::p3platform {
 		return OSMissing;
 #endif
 	}
-
-	std::string OSNullFilename()
-	{
-		return localOSNullFileName;
-	}
-
-	std::string OSConsoleName()
-	{
-		return localOSConsoleName;
-	}
-
-	std::string OSLanguagePascal()
-	{
-		return localOSLanguagePascal;
-	}
-
-	std::string OSLanguageC()
-	{
-		return localOSLanguageC;
-	}
-
-	bool nativeIsLittleEndian()
-	{
-		return localIsLittleEndian;
-	}
-
-	void initialization() {
-		localOSFileType = OSFileType();
-		localOSPlatform = OSPlatform();
-
-		switch (localOSFileType) {
-		case OSFileWIN:
-			localOSNullFileName = "nul"s;
-			localOSConsoleName = "con"s;
-			break;
-		case OSFileUNIX:
-			localOSNullFileName = "/dev/null"s;
-			localOSConsoleName = "/dev/tty"s;
-			break;
-		case OSFileMissing:
-			localOSNullFileName = ""s;
-			localOSConsoleName = ""s;
-			break;
-		}
-
-		localIsLittleEndian = true;
-	}
-
-	void finalization() {
-	}
-
-	UNIT_INIT_FINI();
-
 }
