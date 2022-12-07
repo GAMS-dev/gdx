@@ -6,6 +6,7 @@
 #include <limits>
 #include <algorithm>
 #include <optional>
+#include <array>
 
 namespace gdlib::datastorage {
 

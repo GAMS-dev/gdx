@@ -1048,9 +1048,9 @@ namespace gdlib::gmsstrm {
 
     enum tgmsvalue { xvreal, xvund, xvna, xvpin, xvmin, xveps, xvacr };
     static tgmsvalue mapval(double x) {
-        if (x < sv_valund) return xvreal;
+        if (x < GMS_SV_UNDEF) return xvreal;
         if (x >= GMS_SV_ACR) return xvacr;
-        x /= sv_valund;
+        x /= GMS_SV_UNDEF;
         int k = static_cast<int>(std::round(x));
         if (std::abs(k - x) > 1.0e-5)
             return xvund;
@@ -1117,7 +1117,7 @@ namespace gdlib::gmsstrm {
     }
 
     double TMiBufferedStreamDelphi::ReadGmsDouble() {
-        const static std::array<double, 9> bToRes { sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps, GMS_SV_ACR, 0.0, 1.0, -1.0};
+        const static std::array<double, 9> bToRes { GMS_SV_UNDEF, GMS_SV_NA, GMS_SV_PINF, GMS_SV_MINF, GMS_SV_EPS, GMS_SV_ACR, 0.0, 1.0, -1.0};
         auto B {ReadByte()};
         if(!(B & 128)) return B >= 1 && B <= 9 ? (B == 6 ? ReadGmsInteger() : 1.0) * bToRes[B] : 0.0;
         TDoubleVar Z{};
