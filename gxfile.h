@@ -607,4 +607,6 @@ namespace gxfile {
     std::string MakeGoodExplText(const std::string &s);
     bool IsGoodIdent(const std::string &S);
 
+    int ConvertGDXFile(const std::string &fn, const std::string &MyComp);
+
 }

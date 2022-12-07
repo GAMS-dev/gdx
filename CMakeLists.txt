@@ -13,9 +13,11 @@ endif(CCACHE_FOUND)
 set(mylibs dl pthread)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGC_NO_MUTEX")
 if (MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 -DGAMSBUILD")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
 	set(mylibs "")
 endif (MSVC)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGAMSBUILD")
 
 set(common
 		expertapi/gclgms.h expertapi/gclgms.c

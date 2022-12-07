@@ -132,5 +132,21 @@ namespace tests::gxfiletests {
         std::filesystem::remove(tmpfn);
     }*/
 
+    TEST_CASE("Test conversion of GDX files using gdxcopy utility") {
+        auto rmfiles = [](const std::initializer_list<std::string> &fns) {
+            for(auto &fn : fns)
+                std::filesystem::remove(fn);
+        };
+        system("gamslib trnsport > gamslibLog.txt");
+        std::filesystem::remove("gamslibLog.txt");
+        system("gams trnsport a=c gdx=trnsport lo=0 o=lf > log.txt");
+        rtl::p3utils::P3SetEnv("GDXCOMPRESS", "1"s);
+        rtl::p3utils::P3SetEnv("GDXCONVERT", "V5");
+        REQUIRE_EQ(0, gxfile::ConvertGDXFile("trnsport.gdx"s, "U"s));
+        rtl::p3utils::P3UnSetEnv("GDXCOMPRESS"s);
+        rtl::p3utils::P3UnSetEnv("GDXCONVERT"s);
+        rmfiles({"trnsport.gms", "trnsport.gdx", "log.txt", "lf.txt"});
+    }
+
     TEST_SUITE_END();
 }

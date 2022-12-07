@@ -18,9 +18,7 @@ using namespace gxdefs;
 namespace gxfile {
 
     const int MaxDimV148 = 10;
-    const int MaxDim = GLOBAL_MAX_INDEX_DIM;
-    using TIndex = std::array<int, MaxDim>;
-    const int MaxNameLen = 63; // starting version 149
+    using TIndex = std::array<int, GLOBAL_MAX_INDEX_DIM>;
 
     static std::string gdlSetSystemName() {
         palHandle_t pal;
@@ -176,10 +174,10 @@ namespace gxfile {
 
     int GetEnvCompressFlag();
 
-    static int ConvertGDXFile(const std::string &fn, const std::string &MyComp) {
+    int ConvertGDXFile(const std::string &fn, const std::string &MyComp) {
         std::string Conv {utils::trim(utils::uppercase(rtl::sysutils_p3::QueryEnvironmentVariable(strGDXCONVERT)))};
         if(Conv.empty()) Conv = "V7"s;
-        std::string Comp = Conv == "V5" ? ""s : (!GetEnvCompressFlag() ? "U" : "C");
+        std::string Comp = utils::sameText(Conv, "V5") ? ""s : (!GetEnvCompressFlag() ? "U" : "C");
         if(utils::sameText(Conv+Comp, "V7"+MyComp)) return 0;
         return system(("gdxcopy -"s + Conv + Comp + " -Replace "s + fn).c_str());
     }
@@ -204,6 +202,7 @@ namespace gxfile {
     }
 
     bool IsGoodIdent(const std::string &S) {
+        const int MaxNameLen = 63; // starting version 149
         if(!S.empty() && S.length() <= MaxNameLen && isalpha(S.front())) {
             for(int n{1}; n<S.length(); n++)
                 if(!isalnum(S[n]) && S[n] != '_') return false;
@@ -1381,7 +1380,7 @@ namespace gxfile {
         }
     }
 
-    void TGXFileObj::AddToErrorListDomErrs(const std::array<int, MaxDim> &AElements, const double * AVals) {
+    void TGXFileObj::AddToErrorListDomErrs(const std::array<int, GLOBAL_MAX_INDEX_DIM> &AElements, const double * AVals) {
         if (ErrorList.size() >= 11) return;
 
         for (int D{}; D < FCurrentDim; D++) {
@@ -1405,7 +1404,7 @@ namespace gxfile {
     void TGXFileObj::AddToErrorList(const int *AElements, const double *AVals) {
         if (ErrorList.size() >= 11) // avoid storing too many errors
             return;
-        ErrorList[ utils::asArrayN<int, MaxDim>(AElements, FCurrentDim) ] = utils::asArray<double, 5>(AVals);
+        ErrorList[ utils::asArrayN<int, GLOBAL_MAX_INDEX_DIM>(AElements, FCurrentDim) ] = utils::asArray<double, 5>(AVals);
     }
 
     bool TGXFileObj::ResultWillBeSorted(const int *ADomainNrs) {
@@ -1670,7 +1669,7 @@ namespace gxfile {
             return false;
         }
         if(fmode == fr_slice) {
-            for(int D{}; D<MaxDim; D++) {
+            for(int D{}; D<GLOBAL_MAX_INDEX_DIM; D++) {
                 SliceIndxs[D].clear();
                 SliceRevMap[D].clear();
             }
@@ -1750,7 +1749,7 @@ namespace gxfile {
     //      end;
     int TGXFileObj::gdxDataReadStrStart(int SyNr, int &NrRecs) {
         NrRecs = PrepareSymbolRead("DataReadStrStart"s, SyNr,
-                                   utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED).data(), fr_str_data);
+                                   utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED).data(), fr_str_data);
         return NrRecs >= 0;
     }
 
@@ -2138,7 +2137,7 @@ namespace gxfile {
     //   gdxDataReadRaw, gdxDataReadMapStart, gdxDataReadStrStart, gdxDataReadDone
     int TGXFileObj::gdxDataReadRawStart(int SyNr, int &NrRecs) {
         NrRecs = PrepareSymbolRead("DataReadRawStart", SyNr,
-                                   utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED).data(), fr_raw_data);
+                                   utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED).data(), fr_raw_data);
         return NrRecs >= 0;
     }
 
@@ -2969,7 +2968,7 @@ namespace gxfile {
     // See Also:
     //   gdxDataReadMap, gdxDataReadRawStart, gdxDataReadStrStart, gdxDataReadDone
     int TGXFileObj::gdxDataReadMapStart(int SyNr, int &NrRecs) {
-        auto XDomains = utils::arrayWithValue<int, MaxDim>(DOMC_STRICT);
+        auto XDomains = utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_STRICT);
         NrRecs = PrepareSymbolRead("DataReadMapStart", SyNr, XDomains.data(), fr_map_data);
         return NrRecs >= 0;
     }
@@ -3468,7 +3467,7 @@ namespace gxfile {
         TIntegerMapping DomainIndxs;
 
         //-- Note: PrepareSymbolRead checks for the correct status
-        TIndex XDomains = utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED);
+        TIndex XDomains = utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED);
 
         // Following call also clears ErrorList
         PrepareSymbolRead("gdxGetDomain"s, SyNr, XDomains.data(), fr_raw_data);
@@ -3697,11 +3696,11 @@ namespace gxfile {
     int TGXFileObj::gdxDataReadSliceStart(int SyNr, int* ElemCounts)
     {
         //-- Note: PrepareSymbolRead checks for the correct status
-        TgdxUELIndex XDomains = utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED);
+        TgdxUELIndex XDomains = utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED);
         SliceSyNr = SyNr;
         PrepareSymbolRead("DataReadSliceStart"s, SliceSyNr, XDomains.data(), fr_raw_data);
 
-        memset(ElemCounts, 0, sizeof(int) * MaxDim);
+        memset(ElemCounts, 0, sizeof(int) * GLOBAL_MAX_INDEX_DIM);
 
         TgdxValues Values;
         int FDim;
@@ -3765,7 +3764,7 @@ namespace gxfile {
         }
         fmode = fr_init;
         if (!GoodIndx) return false;
-        TgdxUELIndex XDomains = utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED);
+        TgdxUELIndex XDomains = utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED);
         PrepareSymbolRead("DataReadSlice"s, SliceSyNr, XDomains.data(), fr_slice);
         TgdxValues Values;
         TgdxUELIndex HisIndx;
@@ -3961,7 +3960,7 @@ namespace gxfile {
     // See also:
     //   gdxUELMaxLength
     int TGXFileObj::gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) {
-        memset(LengthInfo, 0, MaxDim * sizeof(int));
+        memset(LengthInfo, 0, GLOBAL_MAX_INDEX_DIM * sizeof(int));
 
         int NrRecs;
         if ((TraceLevel >= TraceLevels::trl_some || fmode != fr_init)
@@ -4129,7 +4128,7 @@ namespace gxfile {
         bool res{};
         // -- Note: PrepareSymbolRead checks for the correct status
         int NrRecs { PrepareSymbolRead("gdxDataReadRawFastFilt", SyNr,
-                                       utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED).data(),
+                                       utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED).data(),
                                        fr_raw_data) };
         if(NrRecs >= 0) {
             bool GoodIndx = true;
@@ -4181,7 +4180,7 @@ namespace gxfile {
     //   to read the data is faster because we no longer have to check the context for each
     //   call to read a record.
     int TGXFileObj::gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs) {
-        NrRecs = PrepareSymbolRead("gdxDataReadRawFast"s, SyNr, utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED).data(), fr_raw_data);
+        NrRecs = PrepareSymbolRead("gdxDataReadRawFast"s, SyNr, utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED).data(), fr_raw_data);
         std::array<double, GMS_VAL_SCALE + 1> AVals;
         int AFDim;
         while(DoRead(AVals.data(), AFDim))
