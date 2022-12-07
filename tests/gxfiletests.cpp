@@ -55,7 +55,7 @@ namespace tests::gxfiletests {
         std::string VarName{};
         REQUIRE(pgx.gdxSymbolInfo(SyNr, VarName, Dim, VarTyp));
         REQUIRE(Dim == 1);
-        REQUIRE(global::gmsspecs::dt_par == VarTyp);
+        REQUIRE(dt_par == VarTyp);
 
         int NrRecs;
         REQUIRE(pgx.gdxDataReadStrStart(SyNr, NrRecs));
@@ -63,8 +63,8 @@ namespace tests::gxfiletests {
 
         mycout << "Parameter demand has " << std::to_string(NrRecs) << " records\n";
 
-        std::array<std::array<char, 256>, global::gmsspecs::MaxDim> bufs {};
-        std::array<char *, global::gmsspecs::MaxDim> Indx {};
+        std::array<std::array<char, 256>, GLOBAL_MAX_INDEX_DIM> bufs {};
+        std::array<char *, GLOBAL_MAX_INDEX_DIM> Indx {};
 
         gdxinterface::StrIndexBuffers sibufs {};
 
@@ -77,7 +77,7 @@ namespace tests::gxfiletests {
             for (int D{}; D < Dim; D++)
                 mycout << (D ? '.' : ' ') << Indx[D];
             mycout << " = %7.2f\n" << Values[global::gmsspecs::vallevel] << '\n';*/
-            mycout << "Key=" << Indx.front() << ", Value=" << Values[global::gmsspecs::vallevel] << "\n";
+            mycout << "Key=" << Indx.front() << ", Value=" << Values[GMS_VAL_LEVEL] << "\n";
         }
 
         REQUIRE(pgx.gdxDataReadDone());

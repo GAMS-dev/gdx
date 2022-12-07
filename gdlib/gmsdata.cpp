@@ -5,7 +5,6 @@
 
 namespace gdlib::gmsdata {
 
-
     void TTblGamsData::GetRecord(int N, int * Inx,  int InxCnt, double * Vals) {
         const auto InxArr = keyset[N];
         memcpy(Inx, InxArr.data(), InxCnt * sizeof(int));

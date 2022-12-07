@@ -54,7 +54,7 @@ int gdxClose(TGXFileRec_t *pgx) {
 
 int gdx_set1d(TGXFileRec_t *pgx, const char *name, const char **elems) {
     auto obj = reinterpret_cast<TGXFileObj *>(pgx);
-    obj->gdxDataWriteStrStart(name, "A 1D set", 1, global::gmsspecs::dt_set, 0);
+    obj->gdxDataWriteStrStart(name, "A 1D set", 1, dt_set, 0);
     gxdefs::TgdxStrIndex keyStrs {};
     gxdefs::TgdxValues values {};
     int i;
@@ -78,7 +78,7 @@ int create_gdx_file(const char *filename) {
         std::cout << "Error opening " << filename << " for writing. Error code = " << ErrNr << '\n';
         return 1;
     }
-    gdx.gdxDataWriteStrStart("i", "A simple set", 1, global::gmsspecs::dt_set, 0);
+    gdx.gdxDataWriteStrStart("i", "A simple set", 1, dt_set, 0);
     gxdefs::TgdxValues vals{};
     gxdefs::TgdxStrIndex keys{};
     for (int i{1}; i <= 5; i++) {
@@ -520,7 +520,7 @@ int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char **UelFilt
 
 void setCallByRef(const char *FuncName, int cbrValue) {
     // FIXME: Actually do something!
-    STUBWARN();
+    // ...
 }
 
 }

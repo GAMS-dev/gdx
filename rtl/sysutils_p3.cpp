@@ -2,17 +2,15 @@
 #include <filesystem>
 #include <cstring>
 #include <ctime>
+#include <array>
 
 #include "sysutils_p3.h"
-#include "p3platform.h"
 
 #if defined(_WIN32)
 #include <Windows.h>
 #endif
-#include "../global/unit.h"
 
 using namespace global::delphitypes;
-using namespace rtl::p3platform;
 using namespace std::literals::chrono_literals;
 using namespace std::literals::string_literals;
 

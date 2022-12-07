@@ -21,19 +21,14 @@
 #include "../rtl/sysutils_p3.h"
 
 #include "../utils.h"
-//#include "../ctv.h"
-
-//#include "statlib.h"
-#include "xcompress.h"
 #include "strutilx.h"
 #include "gmsstrm.h"
-#include "../global/gmsspecs.h"
 
-using namespace gdlib::xcompress;
+#include "../expertapi/gclgms.h"
+
 using namespace gdlib::strutilx;
 using namespace rtl::p3utils;
 using namespace std::literals::string_literals;
-using namespace global::gmsspecs;
 
 // ==============================================================================================================
 // Implementation
@@ -79,8 +74,7 @@ namespace gdlib::gmsstrm {
         std::string& errmsg) : frw{}, NrWritten{}, FLoadPath{} {
         offsetInBuffer = -1;
         std::string Msg;
-        if (!ZLibDllLoaded()) LoadZLibLibrary(GetLoadPath() + "gmszlib1", Msg);
-        FCanCompress = ZLibDllLoaded();
+        FCanCompress = true;
         ErrNr = strmErrorNoError;
         FS = std::make_unique<std::fstream>(fn, std::ios::in | std::ios::binary);
         if (FS->rdstate() & std::ifstream::failbit) {
@@ -183,7 +177,7 @@ namespace gdlib::gmsstrm {
              : FMajorVersionRead{}, FMinorVersionRead{}, FRewindPoint{}, NrLoaded{}, FLoadPath{strutilx::ExcludeTrailingPathDelimiterEx("")}
      {
         NrRead = NrWritten = 0;
-        FCanCompress = ZLibDllLoaded();
+        FCanCompress = true;
         FFileSignature = signature;
         frw = fm_write;
         ErrNr = strmErrorNoError;
@@ -455,7 +449,7 @@ namespace gdlib::gmsstrm {
     }
 
     TGZipInputStream::TGZipInputStream(const std::string& fn, std::string& ErrMsg) {
-        pgz = gzReadOpen(fn);
+        pgz = gzopen(fn.c_str(), "r");
         if(!pgz) ErrMsg = "Cannot open file";
         else {
             ErrMsg.clear();
@@ -465,12 +459,12 @@ namespace gdlib::gmsstrm {
     }
 
     TGZipInputStream::~TGZipInputStream() {
-        gzReadClose(pgz);
+        gzclose(pgz);
     }
 
     global::delphitypes::LongWord TGZipInputStream::Read(void *buffer, int Count) {
         std::function<bool()> FillBuffer = [&]() {
-            NrLoaded = gzRead(pgz, Buf.data(), this->Buf.size());
+            NrLoaded = gzread(pgz, Buf.data(), this->Buf.size());
             NrRead = 0;
             return NrLoaded > 0;
         };
@@ -781,8 +775,8 @@ namespace gdlib::gmsstrm {
                 if(!CBufPtr->cxHeader.cxTyp) NrLoaded = TXFileStreamDelphi::Read(BufPtr.data(), WLen);
                 else {
                     TXFileStreamDelphi::Read(&CBufPtr->cxData, WLen);
-                    xcompress::ulong XLen = BufSize; // we need a var parameter
-                    xcompress::uncompress(BufPtr.data(), XLen, &CBufPtr->cxData, WLen);
+                    unsigned long XLen = BufSize; // we need a var parameter
+                    uncompress(BufPtr.data(), &XLen, &CBufPtr->cxData, WLen);
                     NrLoaded = XLen;
                 }
             }
@@ -832,9 +826,7 @@ namespace gdlib::gmsstrm {
     {
         std::string Msg;
         SetLoadPath(LoadPath);
-        if(!ZLibDllLoaded())
-            LoadZLibLibrary(GetLoadPath() + "gmszlib1", Msg);
-        FCanCompress = ZLibDllLoaded(); // no longer a fatal error
+        FCanCompress = true; // no longer a fatal error
     }
 
     TBufferedFileStreamDelphi::~TBufferedFileStreamDelphi() {
@@ -852,8 +844,8 @@ namespace gdlib::gmsstrm {
             ActWritten = TXFileStreamDelphi::Write(BufPtr.data(), NrWritten);
             res = NrWritten == ActWritten;
         } else {
-            xcompress::ulong Len = CBufSize - sizeof(TCompressHeader);
-            xcompress::compress(&CBufPtr->cxData, Len, BufPtr.data(), NrWritten);
+            unsigned long Len = CBufSize - sizeof(TCompressHeader);
+            compress(&CBufPtr->cxData, &Len, BufPtr.data(), NrWritten);
             if(Len < NrWritten) {
                 CBufPtr->cxHeader.cxTyp = 1; // indicates compressed
                 CBufPtr->cxHeader.cxB1 = Len >> 8;
@@ -1054,6 +1046,20 @@ namespace gdlib::gmsstrm {
         Write(W.data(), C+1);
     }
 
+    enum tgmsvalue { xvreal, xvund, xvna, xvpin, xvmin, xveps, xvacr };
+    static tgmsvalue mapval(double x) {
+        if (x < sv_valund) return xvreal;
+        if (x >= GMS_SV_ACR) return xvacr;
+        x /= sv_valund;
+        int k = static_cast<int>(std::round(x));
+        if (std::abs(k - x) > 1.0e-5)
+            return xvund;
+        constexpr std::array<tgmsvalue, 5> kToRetMapping = {
+                xvund, xvna, xvpin, xvmin, xveps
+        };
+        return k >= 1 && k <= kToRetMapping.size() ? kToRetMapping[k-1] : xvacr;
+    }
+
     void TMiBufferedStreamDelphi::WriteGmsDouble(double D)
     {
         tgmsvalue gv = mapval(D);        
@@ -1065,7 +1071,7 @@ namespace gdlib::gmsstrm {
         }
         if(B) {
             Write(&B, 1);
-            if(gv == xvacr) WriteGmsInteger((int)std::round(D/valacr));
+            if(gv == xvacr) WriteGmsInteger((int)std::round(D/GMS_SV_ACR));
             return;
         }
         int C{};
@@ -1111,7 +1117,7 @@ namespace gdlib::gmsstrm {
     }
 
     double TMiBufferedStreamDelphi::ReadGmsDouble() {
-        const static std::array bToRes {valund, valna, valpin, valmin, valeps, valacr, 0.0, 1.0, -1.0};
+        const static std::array<double, 9> bToRes { sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps, GMS_SV_ACR, 0.0, 1.0, -1.0};
         auto B {ReadByte()};
         if(!(B & 128)) return B >= 1 && B <= 9 ? (B == 6 ? ReadGmsInteger() : 1.0) * bToRes[B] : 0.0;
         TDoubleVar Z{};

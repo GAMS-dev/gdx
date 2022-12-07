@@ -2,30 +2,25 @@
 #include "rtl/sysutils_p3.h"
 #include "utils.h"
 #include "gdlib/gmsstrm.h"
-#include "gdlib/gmsglob.h"
-#include "gdlib/runner.h"
-#include "global/modhead.h"
-#include "global/gmsspecs.h"
 #include "palxxx/gdlaudit.h"
-#include "global/unit.h"
 #include "yaml.h"
 
 #include <cassert>
 #include <numeric>
-#include <unordered_map>
 
 #include "expertapi/palmcc.h"
 
 using namespace gdxinterface;
 using namespace gdlib::gmsstrm;
-using namespace global::gmsspecs;
 using namespace std::literals::string_literals;
 using namespace gxdefs;
-using namespace gdlib::gmsglob;
 
 namespace gxfile {
 
-    static std::string auditLine {"GDX Library      00.0.0 ffffffff May  4, 1970  (AUDIT) XYZ arch xybit/myOS"};
+    const int MaxDimV148 = 10;
+    const int MaxDim = GLOBAL_MAX_INDEX_DIM;
+    using TIndex = std::array<int, MaxDim>;
+    const int MaxNameLen = 63; // starting version 149
 
     static std::string gdlSetSystemName() {
         palHandle_t pal;
@@ -37,6 +32,12 @@ namespace gxfile {
         palFree(&pal);
         return msg;
     }
+
+#ifdef GAMSBUILD
+    static std::string auditLine { gdlSetSystemName() };
+#else
+    static std::string auditLine {"GDX Library      00.0.0 ffffffff May  4, 1970  (AUDIT) XYZ arch xybit/myOS"};
+#endif
 
     using UELTableImplChoice = TUELTableLegacy;
 
@@ -87,8 +88,8 @@ namespace gxfile {
         "Read-Slice"s     //fr_slice
     };
 
-    std::string DLLLoadPath;
-    
+    std::string DLLLoadPath {};
+
     const int
     ERR_NOERROR              =  0,
     ERR_NOFILE               = -100000,
@@ -180,16 +181,7 @@ namespace gxfile {
         if(Conv.empty()) Conv = "V7"s;
         std::string Comp = Conv == "V5" ? ""s : (!GetEnvCompressFlag() ? "U" : "C");
         if(utils::sameText(Conv+Comp, "V7"+MyComp)) return 0;
-
-        gdlib::runner::TRunner R {};
-        R.SetExecutable(DLLLoadPath.empty() ? "gdxcopy" : DLLLoadPath + rtl::sysutils_p3::PathDelim + "gdxcopy");
-        R.ParamsAdd("-" + Conv + Comp);
-        R.ParamsAdd("-Replace");
-        R.ParamsAdd(fn);
-        int res{ R.StartAndWait() };
-        if(!res && R.GetProgRC()) res = ERR_GDXCOPY - R.GetProgRC();
-        // TODO: Replace with plain system call (no DLL load path)
-        return res;
+        return system(("gdxcopy -"s + Conv + Comp + " -Replace "s + fn).c_str());
     }
 
     // If both single and double quotes appear in the string, replace
@@ -713,11 +705,11 @@ namespace gxfile {
     // Description:
     //
     int TGXFileObj::gdxResetSpecialValues() {
-        intlValueMapDbl[vm_valund] = valund;
-        intlValueMapDbl[vm_valna ] = valna;
-        intlValueMapDbl[vm_valpin] = valpin;
-        intlValueMapDbl[vm_valmin] = valmin;
-        intlValueMapDbl[vm_valeps] = valeps;
+        intlValueMapDbl[vm_valund] = GMS_SV_UNDEF;
+        intlValueMapDbl[vm_valna ] = GMS_SV_NA;
+        intlValueMapDbl[vm_valpin] = GMS_SV_PINF;
+        intlValueMapDbl[vm_valmin] = GMS_SV_MINF;
+        intlValueMapDbl[vm_valeps] = GMS_SV_EPS;
         intlValueMapDbl[vm_zero] = 0.0;
         intlValueMapDbl[vm_one] = 1.0;
         intlValueMapDbl[vm_mone] = -1.0;
@@ -734,7 +726,7 @@ namespace gxfile {
         }
 
         copyIntlMapDblToI64(intlValueMapDbl, intlValueMapI64);
-        Zvalacr = valacr;
+        Zvalacr = GMS_SV_ACR;
         return true;
     }
 
@@ -755,13 +747,13 @@ namespace gxfile {
 
         if(!IsGoodNewSymbol(AName)) return false;
 
-        if( ErrorCondition(ADim >= 0 && ADim <= global::gmsspecs::MaxDim, ERR_BADDIMENSION) ||
+        if( ErrorCondition(ADim >= 0 && ADim <= GLOBAL_MAX_INDEX_DIM, ERR_BADDIMENSION) ||
             ErrorCondition(AType >= 0 && AType <= dt_equ, ERR_BADDATATYPE)) return false;
         CurSyPtr = new TgdxSymbRecord{};
         auto &obj = CurSyPtr;
         obj->SPosition = CurSyPtr->SDataCount = CurSyPtr->SErrors = 0; // Position
         obj->SDim = ADim;
-        obj->SDataType = static_cast<TgdxDataType>(AType);
+        obj->SDataType = static_cast<gdxSyType>(AType);
         obj->SUserInfo = AUserInfo;
         obj->SSetText = false;
         obj->SExplTxt = MakeGoodExplText(AText);
@@ -769,7 +761,7 @@ namespace gxfile {
         obj->SCommentsList.clear();
         obj->SDomSymbols = nullptr;
         obj->SDomStrings = nullptr;
-        obj->SSetBitMap = utils::in((TgdxDataType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
+        obj->SSetBitMap = utils::in((gdxSyType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
                 std::make_unique<std::vector<bool>>() : nullptr;
 
         CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = static_cast<int>(NameListOrdered.size()+1); // +1 for universe
@@ -784,7 +776,7 @@ namespace gxfile {
 
         DataSize = gxdefs::DataTypSize[AType];
         if(DataSize > 0)
-            LastDataField = static_cast<tvarvaltype>(DataSize - 1);
+            LastDataField = DataSize - 1;
 
         for(int D{}; D<FCurrentDim; D++) {
             LastElem[D] = INDEX_INITIAL;
@@ -918,7 +910,7 @@ namespace gxfile {
         if (ReadUniverse) {
             FCurrentDim = 1;
             DataSize = DataTypSize[dt_set];
-            LastDataField = static_cast<tvarvaltype>( DataSize - 1 );
+            LastDataField = DataSize - 1;
             NrRecs = UelCntOrig;
             UniverseNr = 0;
             CurSyPtr = nullptr;
@@ -928,7 +920,7 @@ namespace gxfile {
             FFile->SetCompression(CurSyPtr->SIsCompressed);
             FFile->SetPosition(CurSyPtr->SPosition);
             DataSize = DataTypSize[CurSyPtr->SDataType];
-            if (DataSize > 0) LastDataField = static_cast<tvarvaltype>(DataSize - 1);
+            if (DataSize > 0) LastDataField = DataSize - 1;
             NrRecs = CurSyPtr->SDataCount;
         }
         if(verboseTrace && TraceLevel >= TraceLevels::trl_some) {
@@ -1143,7 +1135,9 @@ namespace gxfile {
     * have large constants on input
     */
     bool HAVE_MEM;
-    int64_t signMask, expoMask, mantMask;
+    int64_t signMask {(int64_t)0x80000000 << 32},
+            expoMask {(int64_t)0x7ff00000 << 32},
+            mantMask {~(signMask | expoMask)};
 
     enum TDblClass {
         DBL_NAN,       /* any sort of NaN */
@@ -1274,11 +1268,11 @@ namespace gxfile {
                 }
             }
             if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
-                std::cout << "level=" << AVals[vallevel] << std::endl;
+                std::cout << "level=" << AVals[GMS_VAL_LEVEL] << std::endl;
         }
         DataCount++;
         if (utils::in(CurSyPtr->SDataType, dt_set, dt_alias)) {
-            if (AVals[vallevel] != 0.0) CurSyPtr->SSetText = true;
+            if (AVals[GMS_VAL_LEVEL] != 0.0) CurSyPtr->SSetText = true;
             if (FCurrentDim == 1 && CurSyPtr->SSetBitMap) {
                 auto& ssbm = *CurSyPtr->SSetBitMap;
                 if (ssbm.size() <= LastElem.front())
@@ -1299,7 +1293,7 @@ namespace gxfile {
             bool res{ UniverseNr <= UelCntOrig };
             if (res) {
                 LastElem[0] = UniverseNr;
-                AVals[vallevel] = 0.0;
+                AVals[GMS_VAL_LEVEL] = 0.0;
                 AFDim = 1;
             }
             return res;
@@ -1329,20 +1323,20 @@ namespace gxfile {
             }
         }
         if(DataSize > 0) {
-            for(int DV{vallevel}; DV<=LastDataField; DV++) {
+            for(int DV{GMS_VAL_LEVEL}; DV<=LastDataField; DV++) {
                 uint8_t BSV;
                 FFile->Read(&BSV, 1);
                 TgdxIntlValTyp SV {static_cast<TgdxIntlValTyp>(BSV)};
                 AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap(DV, FFile->ReadDouble());
             }
-            if(!MapSetText.empty() && AVals[vallevel] != 0.0 && CurSyPtr->SDataType == gms_dt_set) { // remap settext number
-                double X {AVals[vallevel]};
+            if(!MapSetText.empty() && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set) { // remap settext number
+                double X {AVals[GMS_VAL_LEVEL]};
                 int D {static_cast<int>(std::round(X))};
                 if(std::abs(X-D) < 1e-12 && D >= 0 && D < SetTextList->size())
-                    AVals[vallevel] = MapSetText[D];
+                    AVals[GMS_VAL_LEVEL] = MapSetText[D];
             }
             if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
-                std::cout << "level=" << AVals[vallevel] << std::endl;
+                std::cout << "level=" << AVals[GMS_VAL_LEVEL] << std::endl;
         }
         return true;
     }
@@ -1445,15 +1439,15 @@ namespace gxfile {
         case dt_set:
         case dt_alias:
         case dt_par:
-            Avals[vallevel] = 0.0;
+            Avals[GMS_VAL_LEVEL] = 0.0;
             break;
         case dt_var:
             ui = CurSyPtr->SUserInfo;
-            memcpy(Avals, ui >= stypunknwn && ui <= stypsemiint ? defrecvar[ui].data() : defrecvar[stypunknwn].data(), sizeof(double)*5);
+            memcpy(Avals, ui >= GMS_VARTYPE_UNKNOWN && ui <= GMS_VARTYPE_SEMIINT ? gmsDefRecVar[ui] : gmsDefRecVar[GMS_VARTYPE_UNKNOWN], sizeof(double)*5);
             break;
         case dt_equ:
             ui = CurSyPtr->SUserInfo;
-            memcpy(Avals, ui >= ssyeque && ui <= ssyeque + (styequb + 1) ? defrecequ[ui].data() : defrecequ[ssyeque].data(), sizeof(double)*5);
+            memcpy(Avals, ui >= GMS_EQUTYPE_E && ui <= GMS_EQUTYPE_E + (GMS_EQUTYPE_B + 1) ? gmsDefRecEqu[ui] : gmsDefRecEqu[GMS_EQUTYPE_E], sizeof(double)*5);
             break;
         default:
             assert(false && "GetDefaultRecord-2");
@@ -1851,7 +1845,7 @@ namespace gxfile {
             CurSyPtr->SPosition = VersionRead <= 5 ? FFile->ReadInteger() : FFile->ReadInt64();
             CurSyPtr->SDim = FFile->ReadInteger();
             uint8_t B {FFile->ReadByte()};
-            CurSyPtr->SDataType = static_cast<TgdxDataType>(B);
+            CurSyPtr->SDataType = static_cast<gdxSyType>( B );
             CurSyPtr->SUserInfo = FFile->ReadInteger();
             CurSyPtr->SDataCount = FFile->ReadInteger();
             CurSyPtr->SErrors = FFile->ReadInteger();
@@ -2246,7 +2240,7 @@ namespace gxfile {
     // do begin
     //    for D := 1 to Dim
     //    do Write(Uels[D], '  ');
-    //    indx := Round(Vals[vallevel]);
+    //    indx := Round(Vals[GMS_VAL_LEVEL]);
     //    if indx > 0
     //    then
     //       begin
@@ -2370,7 +2364,7 @@ namespace gxfile {
                 }
             }
         }
-        
+
         intlValueMapDbl = tmpDbl;
         readIntlValueMapDbl = intlValueMapDbl;
 
@@ -3479,7 +3473,7 @@ namespace gxfile {
         // Following call also clears ErrorList
         PrepareSymbolRead("gdxGetDomain"s, SyNr, XDomains.data(), fr_raw_data);
         int AFDim;
-        tvarreca AVals;
+        std::array<double, GMS_VAL_SCALE + 1> AVals;
         while (DoRead(AVals.data(), AFDim)) {
             int RawNr{ LastElem[DimPos-1] };
             if (DFilter) {
@@ -3827,7 +3821,8 @@ namespace gxfile {
     // Returns:
     //   The number of bytes used by the data objects
     int64_t TGXFileObj::gdxGetMemoryUsed() {
-        STUBWARN();
+        // TODO: Actually return something meaningful!
+        // ...
         return 0;
     }
 
@@ -4118,7 +4113,7 @@ namespace gxfile {
     // begin
     // Result := 1;
     // gdxUMUelGet(Uptr, Indx[2], s, UelMap);
-    // WriteLn(s, ' ', Vals[vallevel]);
+    // WriteLn(s, ' ', Vals[GMS_VAL_LEVEL]);
     // end;
     //
     // var
@@ -4187,7 +4182,7 @@ namespace gxfile {
     //   call to read a record.
     int TGXFileObj::gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs) {
         NrRecs = PrepareSymbolRead("gdxDataReadRawFast"s, SyNr, utils::arrayWithValue<int, MaxDim>(DOMC_UNMAPPED).data(), fr_raw_data);
-        tvarreca AVals;
+        std::array<double, GMS_VAL_SCALE + 1> AVals;
         int AFDim;
         while(DoRead(AVals.data(), AFDim))
             DP(LastElem.data(), AVals.data());
@@ -4329,22 +4324,6 @@ namespace gxfile {
         Reserve(10000);
     }
 
-    void initialization() {
-#ifdef GAMSBUILD
-        auditLine = gdlSetSystemName();
-#endif
-        DLLLoadPath.clear();
-        /*do this until P3 accepts large constants like $80000000000000000*/
-        signMask = 0x80000000;
-        signMask = signMask << 32;
-        expoMask = 0x7ff00000;
-        expoMask = expoMask << 32;
-        mantMask = ~(signMask | expoMask);
-    }
-
-    void finalization() {
-    }
-
     int TAcronymList::FindEntry(int Map) const {
         const auto it = std::find_if(begin(), end(), [&](const auto &item) {
             return item.AcrMap == Map;
@@ -4381,8 +4360,6 @@ namespace gxfile {
         }
         this->push_back(F);
     }
-
-    UNIT_INIT_FINI();
 
     int TIntegerMapping::GetHighestIndex() const {
         return std::max<int>(0, static_cast<int>(Map.size()) - 1);

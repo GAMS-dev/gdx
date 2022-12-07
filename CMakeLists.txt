@@ -18,45 +18,23 @@ if (MSVC)
 endif (MSVC)
 
 set(common
-		# replace with expertapi gclgms.h and gclgms.c (maybe rename some refs)
-		global/gmsspecs.h global/gmsspecs.cpp
-
-		# Remove fully
-		global/modhead.h global/modhead.cpp
-		global/unit.h
+		expertapi/gclgms.h expertapi/gclgms.c
 
 		rtl/p3utils.h rtl/p3utils.cpp
 		rtl/sysutils_p3.h rtl/sysutils_p3.cpp
 
-		# TODO: remove DLL dependency on zlib: either statically link or compile source into
-		rtl/p3library.h rtl/p3library.cpp
-		global/gmslibname.h global/gmslibname.cpp
-
-		# TODO: replace with single system call in gdxccopy invoke and ignore DLL load path
-		rtl/p3process.h rtl/p3process.cpp
-		gdlib/runner.cpp gdlib/runner.h
-
 		# Only needed for -DGAMSBUILD
 		expertapi/palmcc.h expertapi/palmcc.c
 
-		gdlib/gmsstrm.h gdlib/gmsstrm.cpp # get rid of zlib DLL
-		gdlib/xcompress.h gdlib/xcompress.cpp
+		gdlib/gmsstrm.h gdlib/gmsstrm.cpp
 		# TODO: Replace with std::filesystem, ... standard library stuff
 		gdlib/strutilx.h gdlib/strutilx.cpp
-
-		# TODO: all in gclgms.h/c
-		gdlib/gmsglob.h gdlib/gmsglob.cpp
 
 		gdlib/gmsdata.h gdlib/gmsdata.cpp
 		gdlib/datastorage.cpp gdlib/datastorage.h
 		gdlib/strhash.h gdlib/strhash.cpp
 
-		simplegdx/tgx.h simplegdx/tgx.cpp
-		simplegdx/twostream.h simplegdx/twostream.cpp
-		simplegdx/mistream.h simplegdx/mistream.cpp
-
 		gdxinterface.h gdxinterface.cpp
-		#kvbuffers.h
 		utils.h utils.cpp
 		gxfile.h gxfile.cpp
 
@@ -65,11 +43,13 @@ set(common
 
 		# Do not compile into production DLL: ifdef YAMLDEBUG
 		yaml.h yaml.cpp
+
+		# ZLIB modules
+		zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c zlib/zutil.c
 )
 
 set(common_legacy ${common}
 	expertapi/gdxcc.h expertapi/gdxcc.c
-	expertapi/gclgms.h expertapi/gclgms.c
 	xpwrap.cpp xpwrap.h
 )
 
@@ -80,7 +60,7 @@ set(tests
 		tests/doctestmain.cpp
 		tests/gxfiletests.cpp
 		tests/xpwraptests.cpp
-		tests/tgxtests.cpp
+		#tests/tgxtests.cpp
 		tests/gdxinterfacetests.cpp
 		tests/xp_example1.cpp
 		tests/serializetests.cpp

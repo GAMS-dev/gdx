@@ -11,7 +11,7 @@
 #include "../rtl/p3utils.h"
 #include "../global/delphitypes.h"
 
-#include "xcompress.h"
+#include "../zlib/zlib.h"
 
 // ==============================================================================================================
 // Interface
@@ -281,7 +281,7 @@ namespace gdlib::gmsstrm {
     };
 
     class TGZipInputStream {
-        xcompress::pgzFile pgz;
+        gzFile pgz;
         std::vector<uint8_t> Buf;
         global::delphitypes::LongWord  NrLoaded, NrRead;
 

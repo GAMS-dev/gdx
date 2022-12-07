@@ -7,9 +7,6 @@
 #include <algorithm>
 #include <optional>
 
-#include "../global/modhead.h"
-#include "../global/gmsspecs.h"
-
 namespace gdlib::datastorage {
 
     template<typename KeyType, int maxKeySize, typename ValueType, int maxValueSize>

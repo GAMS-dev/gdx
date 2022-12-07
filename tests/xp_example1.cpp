@@ -31,7 +31,7 @@ namespace tests::xp_example1 {
                    const std::string &s,
                    double V) {
         Indx[0] = s;
-        Values[global::gmsspecs::vallevel] = V;
+        Values[GMS_VAL_LEVEL] = V;
         const char *keyptrs[] = {s.c_str()};
         PGX.gdxDataWriteStr(keyptrs, Values.data());
     }
@@ -74,7 +74,7 @@ namespace tests::xp_example1 {
         bool res {PGX->gdxDataWriteStrStart("Demand",
                                             "Demand data",
                                             1,
-                                            global::gmsspecs::dt_par,
+                                            dt_par,
                                             0) > 0};
         if(!res)
             ReportGDXError(*PGX);
@@ -117,8 +117,8 @@ namespace tests::xp_example1 {
         int Dim, VarTyp;
         REQUIRE(PGX->gdxSymbolInfo(VarNr, VarName, Dim, VarTyp));
         REQUIRE_EQ(2, Dim);
-        REQUIRE_EQ(global::gmsspecs::dt_var, VarTyp);
-        if(Dim != 2 || VarTyp != global::gmsspecs::dt_var) {
+        REQUIRE_EQ(dt_var, VarTyp);
+        if(Dim != 2 || VarTyp != dt_var) {
             mycout << "**** X is not a two dimensional variable: " << Dim << ":" << VarTyp << "\n";
             // exit(1);
         }
@@ -130,7 +130,7 @@ namespace tests::xp_example1 {
 
         int N;
         while(PGX->gdxDataReadStr(Indx.ptrs(), Values.data(), N)) {
-            if(0.0 == Values[global::gmsspecs::vallevel]) continue;
+            if(0.0 == Values[GMS_VAL_LEVEL]) continue;
             for(int D{}; D<Dim; D++)
                 mycout << (D ? '.':' ') << Indx[D].str();
             //printf(" = %7.2f\n", Values[global::gmsspecs::vallevel]);

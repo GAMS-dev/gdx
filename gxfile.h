@@ -10,7 +10,6 @@
 #include <vector>
 #include <optional>
 #include <unordered_set>
-#include "global/gmsspecs.h"
 #include "gxdefs.h"
 #include "gdlib/gmsdata.h"
 #include "gdlib/datastorage.h"
@@ -22,6 +21,8 @@
 #include "ankerl/unordered_dense.h"
 
 #include "gdlib/strhash.h"
+
+#include "expertapi/gclgms.h"
 
 namespace gdlib::gmsstrm {
     class TMiBufferedStreamDelphi;
@@ -104,7 +105,7 @@ namespace gxfile {
         TgdxDAction DAction;
     };
 
-    using TDomainList = std::array<TDomain, global::gmsspecs::MaxDim>;
+    using TDomainList = std::array<TDomain, GLOBAL_MAX_INDEX_DIM>;
 
     struct TgdxSymbRecord {
         int SSyNr;
@@ -112,7 +113,7 @@ namespace gxfile {
         int SSyNrActual;
         int64_t SPosition;
         int SDim, SDataCount, SErrors;
-        global::gmsspecs::TgdxDataType SDataType;
+        gdxSyType SDataType;
         int SUserInfo;
         bool SSetText;
         std::string SExplTxt;
@@ -329,10 +330,10 @@ namespace gxfile {
     using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
     using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
 
-    //using LinkedDataType = gdlib::datastorage::TLinkedData<int, global::gmsspecs::MaxDim, double, global::gmsspecs::valscale+1>;
+    //using LinkedDataType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, global::gmsspecs::valscale+1>;
     //using LinkedDataIteratorType = LinkedDataType::TLDStorageType::iterator;
-    using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, global::gmsspecs::MaxDim, double, global::gmsspecs::valscale+1>;
-    using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, global::gmsspecs::MaxDim, double, global::gmsspecs::valscale+1> *;
+    using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_SCALE+1>;
+    using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_SCALE+1> *;
 
     // Description:
     //    Class for reading and writing gdx files
@@ -348,10 +349,10 @@ namespace gxfile {
         std::unique_ptr<TSetTextList> SetTextList {};
         std::vector<int> MapSetText;
         int FCurrentDim{};
-        global::gmsspecs::TIndex LastElem, PrevElem, MinElem, MaxElem;
-        std::array<std::optional<std::string>, global::gmsspecs::MaxDim> LastStrElem;
+        std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem, PrevElem, MinElem, MaxElem;
+        std::array<std::optional<std::string>, GLOBAL_MAX_INDEX_DIM> LastStrElem;
         int DataSize{};
-        global::gmsspecs::tvarvaltype LastDataField;
+        uint8_t LastDataField;
         std::map<std::string, PgdxSymbRecord, strCompCaseInsensitive> NameList;
         // symbol names in order of insertion, used for quick iteration
         std::vector<std::string> NameListOrdered;
@@ -377,9 +378,9 @@ namespace gxfile {
         int64_t MajorIndexPosition{};
         int64_t NextWritePosition{};
         int DataCount{}, NrMappedAdded{};
-        std::array<TgdxElemSize, global::gmsspecs::MaxDim> ElemType;
+        std::array<TgdxElemSize, GLOBAL_MAX_INDEX_DIM> ElemType;
         std::string MajContext;
-        std::array<TIntegerMapping, global::gmsspecs::MaxDim> SliceIndxs, SliceRevMap;
+        std::array<TIntegerMapping, GLOBAL_MAX_INDEX_DIM> SliceIndxs, SliceRevMap;
         int SliceSyNr{};
         gxdefs::TgdxStrIndex SliceElems;
         //void *ReadPtr{};
@@ -389,7 +390,7 @@ namespace gxfile {
         int DeltaForRead{}; // first position indicating change
         double Zvalacr{}; // tricky
         TAcronymList AcronymList;
-        std::array<std::vector<bool> *, global::gmsspecs::MaxDim> WrBitMaps;
+        std::array<std::vector<bool> *, GLOBAL_MAX_INDEX_DIM> WrBitMaps;
         bool ReadUniverse{};
         int UniverseNr{}, UelCntOrig{}; // original uel count when we open the file
         int AutoConvert{1};
@@ -421,7 +422,7 @@ namespace gxfile {
         void InitDoWrite(int NrRecs);
         bool DoWrite(const int *AElements, const double *AVals);
         bool DoRead(double *AVals, int &AFDim);
-        void AddToErrorListDomErrs(const std::array<int, global::gmsspecs::MaxDim>& AElements, const double * AVals);
+        void AddToErrorListDomErrs(const std::array<int, GLOBAL_MAX_INDEX_DIM>& AElements, const double * AVals);
         void AddToErrorList(const int *AElements, const double *AVals);
         void GetDefaultRecord(double *Avals);
         double AcronymRemap(double V);

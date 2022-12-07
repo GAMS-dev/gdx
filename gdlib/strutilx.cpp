@@ -10,11 +10,9 @@
 #include "../utils.h"
 
 #include "../rtl/sysutils_p3.h"
-#include "../rtl/p3platform.h"
 
 using namespace std::literals::string_literals;
 using namespace rtl::sysutils_p3;
-using namespace rtl::p3platform;
 
 // ==============================================================================================================
 // Implementation

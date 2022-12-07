@@ -17,7 +17,7 @@ namespace gxdefs {
     }
 
     bool GoodUELString(const std::string &s) {
-        return s.length() <= global::gmsspecs::MaxNameLen && CanBeQuoted(s); // also checks Ch < '
+        return s.length() <= GLOBAL_UEL_IDENT_SIZE-1 && CanBeQuoted(s); // also checks Ch < '
     }
 
 }

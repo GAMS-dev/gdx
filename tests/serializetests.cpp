@@ -24,7 +24,7 @@ namespace tests::serializetests {
         obj.SetWriteModes(t == TestType::YAML, t == TestType::TEXT);
         int errNr;
         obj.gdxOpenWrite(gdx_fn, "serializetests", errNr);
-        obj.gdxDataWriteStrStart("i", "expl", 1, global::gmsspecs::dt_set, 0);
+        obj.gdxDataWriteStrStart("i", "expl", 1, dt_set, 0);
         gxdefs::TgdxStrIndex keyStrs {};
         gxdefs::TgdxValues vals {};
         for(int i{}; i<5; i++) {

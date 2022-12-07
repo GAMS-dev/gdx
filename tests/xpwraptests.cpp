@@ -6,7 +6,6 @@
 #include <string>
 #include <filesystem>
 #include <iostream>
-#include "../global/gmsspecs.h"
 #include "../gxdefs.h"
 
 using namespace std::literals::string_literals;
@@ -66,7 +65,7 @@ namespace tests::xpwraptests {
             for (int i{}; i < nrRecs; i++) {
                 pgx.gdxDataReadStr(index, values.data(), dimFrst);
                 REQUIRE_EQ(index[0], exampleData[i].first);
-                REQUIRE(vals[global::gmsspecs::vallevel] - exampleData[i].second < 0.001);
+                REQUIRE(vals[GMS_VAL_LEVEL] - exampleData[i].second < 0.001);
             }
             REQUIRE(pgx.gdxDataReadDone());
 

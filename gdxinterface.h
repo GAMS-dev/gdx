@@ -3,6 +3,7 @@
 #include <string>
 #include <array>
 #include <cstring>
+#include <vector>
 #include "gxdefs.h"
 
 namespace gdxinterface {
