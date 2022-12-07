@@ -22,7 +22,13 @@ using namespace std::literals::string_literals;
 namespace rtl::sysutils_p3 {
     namespace fs = std::filesystem;
 
-    char PathDelim, DriveDelim;
+#if defined(_WIN32)
+    char PathDelim = '\\';
+    char DriveDelim = ':';
+#else
+    char PathDelim = '/';
+    char DriveDelim = '\0';
+#endif
 
     std::string ExtractShortPathName(const std::string &FileName) {
 #if defined(_WIN32)
@@ -80,27 +86,4 @@ namespace rtl::sysutils_p3 {
                     return i;
         return -1;
     }
-
-    void initialization() {
-        switch(OSFileType()) {
-            case OSFileWIN:
-                PathDelim = '\\';
-                DriveDelim = ':';
-                break;
-
-            case OSFileUNIX:
-                PathDelim = '/';
-                DriveDelim = '\0';
-                break;
-
-            default:
-                PathDelim = DriveDelim = '?';
-                break;
-        }
-    }
-
-    void finalization() {
-    }
-
-    UNIT_INIT_FINI();
 }

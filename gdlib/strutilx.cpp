@@ -21,6 +21,12 @@ using namespace rtl::p3platform;
 // ==============================================================================================================
 namespace gdlib::strutilx {
 
+#if defined(_WIN32)
+    static bool onWindows = true;
+#else
+    static bool onWindows = false;
+#endif
+
     const std::string MAXINT_S = "maxint"s, MININT_S = "minint"s;
     const std::string MAXDOUBLE_S = "maxdouble"s, EPSDOUBLE_S = "eps", MINDOUBLE_S = "mindouble";
 
@@ -267,18 +273,18 @@ namespace gdlib::strutilx {
     std::string IncludeTrailingPathDelimiterEx(const std::string& S)
     {
         std::set<char> myDelim = { PathDelim };
-        if (OSFileType() == OSFileWIN) myDelim.insert('/');
+        if (onWindows) myDelim.insert('/');
         return !S.empty() && utils::in(S.back(), myDelim) ? S : S+PathDelim;
     }
 
     std::string ExcludeTrailingPathDelimiterEx(const std::string &S) {
         std::set<char> myDelim = { PathDelim };
-        if (OSFileType() == OSFileWIN) myDelim.insert('/');
+        if (onWindows) myDelim.insert('/');
         return !S.empty() && utils::in(S.back(), myDelim) ? S.substr(0, S.length()-1) : S;
     }
 
     std::string ExtractFileNameEx(const std::string& FileName) {
-        return FileName.substr(LastDelimiter(""s + PathDelim + (OSFileType() == OSFileWIN ? "/" : "") + DriveDelim, FileName) + 1);
+        return FileName.substr(LastDelimiter(""s + PathDelim + (onWindows ? "/" : "") + DriveDelim, FileName) + 1);
     }
 
     bool StrAsDoubleEx(const std::string &s, double &v) {
@@ -342,7 +348,7 @@ namespace gdlib::strutilx {
     }
 
     std::string ExtractFilePathEx(const std::string &FileName) {
-        return FileName.substr(0, LastDelimiter(""s + PathDelim + (OSFileType() == OSFileWIN ? "/" : "") + DriveDelim, FileName) + 1);
+        return FileName.substr(0, LastDelimiter(""s + PathDelim + (onWindows ? "/" : "") + DriveDelim, FileName) + 1);
     }
 
     std::string PadRight(const std::string &s, int W) {
@@ -405,12 +411,12 @@ namespace gdlib::strutilx {
     }
 
     std::string ChangeFileExtEx(const std::string &FileName, const std::string &Extension) {
-        int I {LastDelimiter(OSFileType() == rtl::p3platform::OSFileWIN ? "\\/:."s : "/."s, FileName) };
+        int I {LastDelimiter(onWindows ? "\\/:."s : "/."s, FileName) };
         return FileName.substr(0, I == -1 || FileName[I] != '.' ? static_cast<int>(FileName.length()) : I) + Extension;
     }
 
     std::string ExtractFileExtEx(const std::string &FileName) {
-        int I {LastDelimiter(OSFileType() == rtl::p3platform::OSFileWIN ? "\\/:."s : "/."s, FileName) };
+        int I {LastDelimiter(onWindows ? "\\/:."s : "/."s, FileName) };
         return I >= 0 && FileName[I] == '.' ? FileName.substr(I) : ""s;
     }
 

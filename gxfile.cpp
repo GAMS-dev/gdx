@@ -14,6 +14,8 @@
 #include <numeric>
 #include <unordered_map>
 
+#include "expertapi/palmcc.h"
+
 using namespace gdxinterface;
 using namespace gdlib::gmsstrm;
 using namespace global::gmsspecs;
@@ -22,6 +24,19 @@ using namespace gxdefs;
 using namespace gdlib::gmsglob;
 
 namespace gxfile {
+
+    static std::string auditLine {"GDX Library      00.0.0 ffffffff May  4, 1970  (AUDIT) XYZ arch xybit/myOS"};
+
+    static std::string gdlSetSystemName() {
+        palHandle_t pal;
+        char msg[256];
+        if (!palCreate(&pal, msg, sizeof(msg)))
+            printf("error");
+        palSetSystemName(pal, "GDX Library");
+        palGetAuditLine(pal, msg);
+        palFree(&pal);
+        return msg;
+    }
 
     using UELTableImplChoice = TUELTableLegacy;
 
@@ -173,6 +188,7 @@ namespace gxfile {
         R.ParamsAdd(fn);
         int res{ R.StartAndWait() };
         if(!res && R.GetProgRC()) res = ERR_GDXCOPY - R.GetProgRC();
+        // TODO: Replace with plain system call (no DLL load path)
         return res;
     }
 
@@ -333,8 +349,7 @@ namespace gxfile {
         VersionRead = VERSION;
         FFile->WriteInteger(VersionRead);
         FFile->WriteInteger(Compr);
-        FileSystemID = palxxx::gdlaudit::gdlGetAuditLine();
-        //FileSystemID = "GDX Library      41.0.0 30fa42b3 Aug  9, 2022  (ALPHA) WEI x86 64bit/MS Window"s;
+        FileSystemID = auditLine;
         FFile->WriteString(FileSystemID);
         FProducer = Producer;
         FProducer2.clear();
@@ -3641,7 +3656,7 @@ namespace gxfile {
     //
     // See Also:
     int TGXFileObj::gdxGetDLLVersion(std::string &V) const {
-        V = palxxx::gdlaudit::gdlGetAuditLine();
+        V = auditLine;
         return true;
     }
 
@@ -4315,7 +4330,9 @@ namespace gxfile {
     }
 
     void initialization() {
-        palxxx::gdlaudit::gdlSetSystemName("GDX Library");
+#ifdef GAMSBUILD
+        auditLine = gdlSetSystemName();
+#endif
         DLLLoadPath.clear();
         /*do this until P3 accepts large constants like $80000000000000000*/
         signMask = 0x80000000;

@@ -11,56 +11,66 @@ if(CCACHE_FOUND)
 endif(CCACHE_FOUND)
 
 set(mylibs dl pthread)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGC_NO_MUTEX")
 if (MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 -DGAMSBUILD")
 	set(mylibs "")
 endif (MSVC)
 
 set(common
-		global/gmslibname.h global/gmslibname.cpp
+		# replace with expertapi gclgms.h and gclgms.c (maybe rename some refs)
 		global/gmsspecs.h global/gmsspecs.cpp
+
+		# Remove fully
 		global/modhead.h global/modhead.cpp
 		global/unit.h
-		global/gmsglobx2.h global/gmsglobx2.cpp
-		global/gmsglobx1.h global/gmsglobx1.cpp
 
 		rtl/p3utils.h rtl/p3utils.cpp
 		rtl/sysutils_p3.h rtl/sysutils_p3.cpp
-		rtl/p3platform.h rtl/p3platform.cpp
+
+		# TODO: remove DLL dependency on zlib: either statically link or compile source into
 		rtl/p3library.h rtl/p3library.cpp
+		global/gmslibname.h global/gmslibname.cpp
+
+		# TODO: replace with single system call in gdxccopy invoke and ignore DLL load path
 		rtl/p3process.h rtl/p3process.cpp
+		gdlib/runner.cpp gdlib/runner.h
 
-		palxxx/gdlaudit.h palxxx/gdlaudit.cpp
-		palxxx/paldoorg.h palxxx/paldoorg.cpp
+		# Only needed for -DGAMSBUILD
+		expertapi/palmcc.h expertapi/palmcc.c
 
-		gdlib/gmsstrm.h gdlib/gmsstrm.cpp
-		gdlib/strutilx.h gdlib/strutilx.cpp
+		gdlib/gmsstrm.h gdlib/gmsstrm.cpp # get rid of zlib DLL
 		gdlib/xcompress.h gdlib/xcompress.cpp
+		# TODO: Replace with std::filesystem, ... standard library stuff
+		gdlib/strutilx.h gdlib/strutilx.cpp
+
+		# TODO: all in gclgms.h/c
 		gdlib/gmsglob.h gdlib/gmsglob.cpp
+
 		gdlib/gmsdata.h gdlib/gmsdata.cpp
 		gdlib/datastorage.cpp gdlib/datastorage.h
-		gdlib/runner.cpp gdlib/runner.h
 		gdlib/strhash.h gdlib/strhash.cpp
-
-		expertapi/palmcc.h expertapi/palmcc.c
-		expertapi/gcmt.h expertapi/gcmt.c
 
 		simplegdx/tgx.h simplegdx/tgx.cpp
 		simplegdx/twostream.h simplegdx/twostream.cpp
 		simplegdx/mistream.h simplegdx/mistream.cpp
 
 		gdxinterface.h gdxinterface.cpp
-		kvbuffers.h
+		#kvbuffers.h
 		utils.h utils.cpp
 		gxfile.h gxfile.cpp
-		xpwrap.cpp xpwrap.h
+
+		# TODO: gclgms.h/c
 		gxdefs.cpp gxdefs.h
+
+		# Do not compile into production DLL: ifdef YAMLDEBUG
 		yaml.h yaml.cpp
 )
 
 set(common_legacy ${common}
 	expertapi/gdxcc.h expertapi/gdxcc.c
 	expertapi/gclgms.h expertapi/gclgms.c
+	xpwrap.cpp xpwrap.h
 )
 
 set(common_neo ${common} cwrap/cwrap.h cwrap/cwrap.cpp)

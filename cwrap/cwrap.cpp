@@ -1,3 +1,7 @@
+// TODO: Potentially replace std::string usages with PChars
+// TODO: Get rid of cwrap and use TGXFileObj class in gdxcclib.cPP directly
+// Optional TODO: Maybe also add variants of some heavily used functions that directly take Delphi short strings
+
 #include "cwrap.h"
 #include "../gxfile.h"
 #include <iostream>

@@ -403,16 +403,11 @@ public:
 	int P3SystemP(const std::string& CmdPtr, int& ProgRC)
 	{
 		int res{};
-		switch (OSFileType()) {
-		case OSFileWIN:
-			res = System4Win(CmdPtr, true, ProgRC);
-			break;
-		case OSFileUNIX:
-			res = System4Unix(CmdPtr, ProgRC);
-			break;
-		default:
-			throw std::runtime_error("Unimplemented P3SysstemP for OSFileType");
-		}
+#if defined(_WIN32)
+        res = System4Win(CmdPtr, true, ProgRC);
+#else
+        res = System4Unix(CmdPtr, ProgRC);
+#endif
 		return res;
 	}
 
@@ -642,19 +637,11 @@ bool killProcGroupUnix (pid_t p, TKillHow how)
 	int P3ExecP(const std::string& CmdPtr, int& ProgRC)
 	{
 		int res{ 1 };
-		switch (OSFileType()) {
-		case OSFileWIN:
-			res = CppCreateProc("", CmdPtr, true, ProgRC);
-			break;
-		case OSFileUNIX:
-#ifndef _WIN32
-			res = ForkWithSplitArgs(LibcForkExec, CmdPtr, ProgRC);
+#ifdef _WIN32
+        res = CppCreateProc("", CmdPtr, true, ProgRC);
+#else
+        res = ForkWithSplitArgs(LibcForkExec, CmdPtr, ProgRC);
 #endif
-			break;
-		default:
-			assert(0 && "unimplemented P3ExecP for OSFileType");
-			break;
-		}
 		return res;
 	}
 

@@ -10,6 +10,7 @@ extern "C" {
 # define GDX_CALLCONV
 #endif
 
+    // TODO: Clean up stuff that is already in gclgms
     typedef char gdxStrIndex_t[20][256];
     typedef struct TGXFileRec TGXFileRec_t;
 
