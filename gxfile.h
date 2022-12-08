@@ -462,8 +462,8 @@ namespace gxfile {
 
         int gdxResetSpecialValues();
 
-        int gdxErrorStr(int ErrNr, std::string &ErrMsg) override;
-        static int gdxErrorStrStatic(int ErrNr, std::string& ErrMsg);
+        int gdxErrorStr(int ErrNr, char *ErrMsg) override;
+        static int gdxErrorStrStatic(int ErrNr, char *ErrMsg);
 
         int gdxOpenRead(const std::string &FileName, int &ErrNr) override;
 
@@ -582,7 +582,7 @@ namespace gxfile {
         double gdxAcronymValue(int AIndx) const override;
         int gdxAutoConvert(int nv);
 
-        int gdxGetDLLVersion(std::string &V) const;
+        int gdxGetDLLVersion(char *V) const;
         int gdxFileInfo(int &FileVer, int &ComprLev) const;
 
         int gdxDataReadSliceStart(int SyNr, int* ElemCounts);

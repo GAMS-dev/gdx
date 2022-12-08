@@ -17,11 +17,10 @@ namespace tests::xp_example1 {
     }
 
     void ReportGDXError(gdxinterface::GDXInterface &PGX) {
-        std::string S;
+        char S[GMS_SSSIZE];
         mycout << "**** Fatal GDX Error\n";
         REQUIRE(PGX.gdxErrorStr(PGX.gdxGetLastError(), S));
         mycout << "**** " << S << "\n";
-        // exit(1);
     }
 
     static gdxinterface::StrIndexBuffers Indx {};

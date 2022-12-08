@@ -855,7 +855,7 @@ namespace gxfile {
         if(TraceLevel >= TraceLevels::trl_errors && N != LastRepError) {
             if(!MajContext.empty())
                 std::cout << "Error after call to " << MajContext << '\n';
-            std::string s;
+            char s[GMS_SSSIZE];
             this->gdxErrorStr(N, s);
             std::cout << "Error = " << N << " : " << s << "\n";
         }
@@ -1582,14 +1582,13 @@ namespace gxfile {
     //
     // See Also:
     //   gdxGetLastError
-    int TGXFileObj::gdxErrorStr(int ErrNr, std::string &ErrMsg) {
+    int TGXFileObj::gdxErrorStr(int ErrNr, char *ErrMsg) {
         return gdxErrorStrStatic(ErrNr, ErrMsg);
     }
 
-    int TGXFileObj::gdxErrorStrStatic(int ErrNr, std::string& ErrMsg) {
+    int TGXFileObj::gdxErrorStrStatic(int ErrNr, char * ErrMsg) {
         const auto it = errorCodeToStr.find(ErrNr);
-        if (it == errorCodeToStr.end()) ErrMsg = rtl::sysutils_p3::SysErrorMessage(ErrNr);
-        else ErrMsg = it->second;
+        utils::assignStrToBuf(it == errorCodeToStr.end() ? rtl::sysutils_p3::SysErrorMessage(ErrNr) : it->second, ErrMsg);
         return true;
     }
 
@@ -3686,8 +3685,8 @@ namespace gxfile {
     // Description:
     //
     // See Also:
-    int TGXFileObj::gdxGetDLLVersion(std::string &V) const {
-        V = auditLine;
+    int TGXFileObj::gdxGetDLLVersion(char *V) const {
+        utils::assignStrToBuf(auditLine, V);
         return true;
     }
 

@@ -153,7 +153,7 @@ namespace gdxinterface {
         virtual int gdxDataErrorRecord(int RecNr, int *KeyInt, double * Values) = 0;
         virtual int gdxDataErrorRecordX(int RecNr, int *KeyInt, double *Values) = 0;
         virtual int gdxErrorCount() = 0;
-        virtual int gdxErrorStr(int ErrNr, std::string &ErrMsg) = 0;
+        virtual int gdxErrorStr(int ErrNr, char *ErrMsg) = 0;
         virtual int gdxGetLastError() = 0;
         // endregion
 

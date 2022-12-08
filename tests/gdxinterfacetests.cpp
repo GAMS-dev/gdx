@@ -53,9 +53,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE_NE(0, ErrNr);
             // TODO: Why is this zero?
             REQUIRE_EQ(0, pgx.gdxErrorCount());
-            std::string msg;
+            char msg[GMS_SSSIZE];
             REQUIRE(pgx.gdxErrorStr(pgx.gdxGetLastError(), msg));
-            REQUIRE_EQ("File name is empty", msg);
+            REQUIRE(!strcmp("File name is empty", msg));
             REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
             REQUIRE_FALSE(ErrNr);
             REQUIRE_EQ(0, pgx.gdxErrorCount());
@@ -70,9 +70,9 @@ namespace tests::gdxinterfacetests {
             int ErrNr;
             REQUIRE_FALSE(pgx.gdxOpenRead("doesNotExist", ErrNr));
             REQUIRE_EQ(2, ErrNr);
-            std::string errMsg;
+            char errMsg[GMS_SSSIZE];
             REQUIRE(pgx.gdxErrorStr(ErrNr, errMsg));
-            REQUIRE_EQ("No such file or directory", errMsg);
+            REQUIRE(!strcmp("No such file or directory", errMsg));
             pgx.gdxClose();
         });
     }
@@ -767,9 +767,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataErrorRecordX(1, &key, values.data()));
             REQUIRE_EQ(1, key);
             int ec = pgx.gdxGetLastError();
-            std::string errMsg;
+            char errMsg[GMS_SSSIZE];
             REQUIRE(pgx.gdxErrorStr(ec, errMsg));
-            REQUIRE_EQ("Data not sorted when writing raw", errMsg);
+            REQUIRE(!strcmp("Data not sorted when writing raw", errMsg));
             pgx.gdxClose();
         });
         std::filesystem::remove(fn);
@@ -978,7 +978,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteDone());
 
             REQUIRE_EQ(1, pgx.gdxErrorCount());
-            std::string msg;
+            char msg[GMS_SSSIZE];
             REQUIRE(pgx.gdxErrorStr(pgx.gdxGetLastError(), msg));
             REQUIRE_EQ("Domain violation"s, msg);
 
@@ -1013,9 +1013,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteStr(keyptrs, vals.data()));
             REQUIRE(pgx.gdxDataWriteDone());
             REQUIRE_EQ(1, pgx.gdxErrorCount());
-            std::string msg;
+            char msg[GMS_SSSIZE];
             pgx.gdxErrorStr(pgx.gdxGetLastError(), msg);
-            REQUIRE_EQ("Duplicate keys", msg);
+            REQUIRE(!strcmp("Duplicate keys", msg));
             pgx.gdxClose();
             std::filesystem::remove(fn);
         });
@@ -1134,7 +1134,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteDone());
             if(pgx.gdxErrorCount() > 0) {
                 int errNr = pgx.gdxGetLastError();
-                std::string errMsg;
+                char errMsg[GMS_SSSIZE];
                 pgx.gdxErrorStr(errNr, errMsg);
                 std::cout << errMsg << std::endl;
             }

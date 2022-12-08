@@ -56,7 +56,7 @@ namespace xpwrap {
 
         int gdxErrorCount() override;
 
-        int gdxErrorStr(int ErrNr, std::string &ErrMsg) override;
+        int gdxErrorStr(int ErrNr, char *ErrMsg) override;
 
         int gdxGetElemText(int TxtNr, std::string &Txt, int &Node) override;
 

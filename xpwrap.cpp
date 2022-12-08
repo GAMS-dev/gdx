@@ -128,11 +128,8 @@ namespace xpwrap {
         return ::gdxErrorCount(pgx);
     }
     
-    int GDXFile::gdxErrorStr(int ErrNr, std::string &ErrMsg) {
-        CharBuf ErrMsgBuf{};
-        int rc{ ::gdxErrorStr(pgx, ErrNr, ErrMsgBuf.get()) };
-        ErrMsg = ErrMsgBuf;
-        return rc;
+    int GDXFile::gdxErrorStr(int ErrNr, char *ErrMsg) {
+        return ::gdxErrorStr(pgx, ErrNr, ErrMsg);
     }
 
     int GDXFile::gdxGetElemText(int TxtNr, std::string &Txt, int &Node) {

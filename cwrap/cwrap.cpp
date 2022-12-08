@@ -190,10 +190,7 @@ int gdxDataWriteStr(TGXFileRec_t *pgdx, const char *KeyStr[], const double Value
 }
 
 int gdxGetDLLVersion(TGXFileRec_t *pgdx, char *V) {
-    std::string sV;
-    int rc{ reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetDLLVersion(sV) };
-    utils::stocp(sV, V);
-    return rc;
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetDLLVersion(V);
 }
 
 int gdxErrorCount(TGXFileRec_t *pgdx) {
@@ -201,12 +198,7 @@ int gdxErrorCount(TGXFileRec_t *pgdx) {
 }
 
 int gdxErrorStr(TGXFileRec_t *pgdx, int ErrNr, char *ErrMsg) {
-    std::string sErrMsg;
-    int rc;
-    if (pgdx) rc = reinterpret_cast<TGXFileObj*>(pgdx)->gdxErrorStr(ErrNr, sErrMsg);
-    else rc = TGXFileObj::gdxErrorStrStatic(ErrNr, sErrMsg);
-    utils::stocp(sErrMsg, ErrMsg);
-    return rc;
+    return pgdx ? reinterpret_cast<TGXFileObj*>(pgdx)->gdxErrorStr(ErrNr, ErrMsg) : TGXFileObj::gdxErrorStrStatic(ErrNr, ErrMsg);
 }
 
 int gdxFileInfo(TGXFileRec_t *pgdx, int *FileVer, int *ComprLev) {
