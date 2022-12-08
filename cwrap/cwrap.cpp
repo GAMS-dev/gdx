@@ -1,6 +1,6 @@
-// TODO: Potentially replace std::string usages with PChars
+// TODO: Try making most functions here one liner that delegate to an instance of TGXFileObj
 // TODO: Get rid of cwrap and use TGXFileObj class in gdxcclib.cPP directly
-// Optional TODO: Maybe also add variants of some heavily used functions that directly take Delphi short strings
+// TODO: Optional: Maybe also add variants of some heavily used functions that directly take Delphi short strings
 
 #include "cwrap.h"
 #include "../gxfile.h"
@@ -242,6 +242,7 @@ int gdxGetMemoryUsed(TGXFileRec_t *pgdx) {
 }
 
 int gdxGetSpecialValues(TGXFileRec_t *pgdx, double AVals[]) {
+    // FIXME: Should be one-liner!
     std::array<double, 7> cppAVals{};
     int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetSpecialValues(cppAVals);
     for(int i=0; i<cppAVals.size(); i++)
@@ -274,12 +275,14 @@ int gdxSetHasText(TGXFileRec_t *pgdx, int SyNr) {
 }
 
 int gdxSetReadSpecialValues(TGXFileRec_t *pgdx, const double AVals[]) {
+    // FIXME: Should be one-liner!
     std::array<double, 7> cppAVals {};
     std::memcpy(cppAVals.data(), AVals, cppAVals.size()*sizeof(double));
     return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetReadSpecialValues(cppAVals);
 }
 
 int gdxSetSpecialValues(TGXFileRec_t *pgdx, const double AVals[]) {
+    // FIXME: Should be one-liner!
     std::array<double, 7> cppAVals {};
     std::memcpy(cppAVals.data(), AVals, cppAVals.size()*sizeof(double));
     return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetSpecialValues(cppAVals);
