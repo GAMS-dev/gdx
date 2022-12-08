@@ -104,7 +104,7 @@ namespace gdxinterface {
     public:
         virtual ~GDXInterface() = default;
 
-        virtual int gdxFileVersion(std::string &FileStr, std::string &ProduceStr) = 0;
+        virtual int gdxFileVersion(char *FileStr, char *ProduceStr) = 0;
         virtual int gdxSystemInfo(int &SyCnt, int &UelCnt) = 0;
 
         // region Open file for reading or writing with/without additional options

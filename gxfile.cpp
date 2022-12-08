@@ -1634,9 +1634,9 @@ namespace gxfile {
     //   gdxOpenWrite, gdxOpenWriteEx
     // Description:
     //
-    int TGXFileObj::gdxFileVersion(std::string &FileStr, std::string &ProduceStr) {
-        FileStr = FileSystemID;
-        ProduceStr = FProducer;
+    int TGXFileObj::gdxFileVersion(char *FileStr, char *ProduceStr) {
+        utils::assignStrToBuf(FileSystemID, FileStr);
+        utils::assignStrToBuf(FProducer, ProduceStr);
         return true;
     }
 

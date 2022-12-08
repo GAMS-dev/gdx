@@ -99,10 +99,10 @@ namespace tests::xp_example1 {
         REQUIRE(PGX->gdxOpenRead("result.gdx", ErrNr));
         if(ErrNr) ReportIOError(ErrNr, "gdxOpenRead");
         REQUIRE_EQ(0, ErrNr);
-        std::string Msg, Producer;
-        REQUIRE(PGX->gdxFileVersion(Msg, Producer));
-        mycout <<    "GDX file written using version " << Msg <<
-                  "\nGDX file written by " << Producer << "\n";
+        std::array<char, GMS_SSSIZE> Msg, Producer;
+        REQUIRE(PGX->gdxFileVersion(Msg.data(), Producer.data()));
+        mycout <<    "GDX file written using version " << Msg.data() <<
+                  "\nGDX file written by " << Producer.data() << "\n";
 
         int VarNr;
         res = PGX->gdxFindSymbol("x", VarNr);

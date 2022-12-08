@@ -23,7 +23,7 @@ namespace xpwrap {
 
         int gdxOpenRead(const std::string &FileName, int &ErrNr) override;
 
-        int gdxFileVersion(std::string &FileStr, std::string &ProduceStr) override;
+        int gdxFileVersion(char *FileStr, char *ProduceStr) override;
 
         int gdxFindSymbol(const std::string &SyId, int &SyNr) override;
 

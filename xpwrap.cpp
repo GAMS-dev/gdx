@@ -57,12 +57,8 @@ namespace xpwrap {
         return ::gdxOpenRead(pgx, FileName.c_str(), &ErrNr);
     }
 
-    int GDXFile::gdxFileVersion(std::string &FileStr, std::string &ProduceStr) {
-        CharBuf fsBuf{}, psBuf{};
-        int rc = ::gdxFileVersion(pgx, fsBuf.get(), psBuf.get());
-        FileStr = fsBuf;
-        ProduceStr = psBuf;
-        return rc;
+    int GDXFile::gdxFileVersion(char *FileStr, char *ProduceStr) {
+        return ::gdxFileVersion(pgx, FileStr, ProduceStr);
     }
 
     int GDXFile::gdxFindSymbol(const std::string &SyId, int &SyNr) {

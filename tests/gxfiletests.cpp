@@ -42,10 +42,10 @@ namespace tests::gxfiletests {
         REQUIRE(pgx.gdxOpenRead(fn, ErrNr));
         REQUIRE_EQ(0, ErrNr);
         //if (ErrNr) ReportIOError(ErrNr, "gdxOpenRead");
-        std::string Producer;
-        REQUIRE(pgx.gdxFileVersion(msg, Producer));
+        char Producer[GMS_SSSIZE], FileVersion[GMS_SSSIZE];
+        REQUIRE(pgx.gdxFileVersion(FileVersion, Producer));
 
-        mycout << "GDX file written using version: " << msg << '\n';
+        mycout << "GDX file written using version: " << FileVersion << '\n';
         mycout << "GDX file written by: " << Producer << '\n';
 
         int SyNr{};

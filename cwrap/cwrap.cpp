@@ -206,11 +206,7 @@ int gdxFileInfo(TGXFileRec_t *pgdx, int *FileVer, int *ComprLev) {
 }
 
 int gdxFileVersion(TGXFileRec_t *pgdx, char *FileStr, char *ProduceStr) {
-    std::string sFileStr, sProduceStr;
-    int rc{ reinterpret_cast<TGXFileObj *>(pgdx)->gdxFileVersion(sFileStr, sProduceStr) };
-    utils::stocp(sFileStr, FileStr);
-    utils::stocp(sProduceStr, ProduceStr);
-    return rc;
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxFileVersion(FileStr, ProduceStr);
 }
 
 int gdxFilterExists(TGXFileRec_t *pgdx, int FilterNr) {
