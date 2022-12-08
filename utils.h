@@ -412,6 +412,10 @@ namespace utils {
     inline void assignStrToBuf(const std::string &s, char *buf) {
         const int maxShortStrSize = 256;
         if(s.length() > maxShortStrSize) return;
+#if defined(_WIN32)
+        strncpy_s(buf, maxShortStrSize, s.c_str(), s.length()+1);
+#else
         strncpy(buf, s.c_str(), maxShortStrSize);
+#endif
     }
 }
