@@ -475,7 +475,7 @@ namespace gxfile {
 
         int gdxDataReadDone() override;
 
-        int gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) override;
+        int gdxSymbolInfo(int SyNr, char *SyId, int &Dim, int &Typ) override;
 
         int gdxDataReadStrStart(int SyNr, int &NrRecs) override;
 
@@ -514,7 +514,7 @@ namespace gxfile {
 
         int gdxSymbolDim(int SyNr) override;
 
-        int gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) override;
+        int gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, char *ExplTxt) override;
 
         int gdxSymbolSetDomain(const char **DomainIDs) override;
 
@@ -596,7 +596,7 @@ namespace gxfile {
         int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) override;
         int gdxSymbMaxLength();
         int gdxSymbolAddComment(int SyNr, const std::string& Txt) override;
-        int gdxSymbolGetComment(int SyNr, int N, std::string& Txt) override;
+        int gdxSymbolGetComment(int SyNr, int N, char *Txt) override;
         int gdxUELMaxLength() override;
         int gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap);
         int gdxStoreDomainSets() override;

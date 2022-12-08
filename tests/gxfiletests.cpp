@@ -52,7 +52,7 @@ namespace tests::gxfiletests {
         REQUIRE(pgx.gdxFindSymbol("demand", SyNr));
 
         int Dim{}, VarTyp{};
-        std::string VarName{};
+        char VarName[GMS_SSSIZE];
         REQUIRE(pgx.gdxSymbolInfo(SyNr, VarName, Dim, VarTyp));
         REQUIRE(Dim == 1);
         REQUIRE(dt_par == VarTyp);

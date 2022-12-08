@@ -700,13 +700,13 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxFindSymbol("aliasI", aliasIx));
             REQUIRE_EQ(2, aliasIx);
             int numRecords, userInfo, dim, typ;
-            std::string explText, symbolName;
+            char explText[GMS_SSSIZE], symbolName[GMS_SSSIZE];
             REQUIRE(pgx.gdxSymbolInfoX(2, numRecords, userInfo, explText));
             REQUIRE(pgx.gdxSymbolInfo(2, symbolName, dim, typ));
             REQUIRE_EQ(0, numRecords);
             REQUIRE_EQ(1, userInfo); // symbol index of "i"
-            REQUIRE_EQ("Aliased with i", explText);
-            REQUIRE_EQ("aliasI", symbolName);
+            REQUIRE(!strcmp("Aliased with i", explText));
+            REQUIRE(!strcmp("aliasI", symbolName));
             REQUIRE_EQ(1, dim);
             REQUIRE_EQ(dt_alias, typ);
         });
@@ -824,15 +824,15 @@ namespace tests::gdxinterfacetests {
                 REQUIRE(std::find(uelsSeen.begin(), uelsSeen.end(), uel) != uelsSeen.end());
 
             for(int i{1}; i<=numSymbols; i++) {
-                std::string name;
+                char name[GMS_SSSIZE];
                 int dim, typ;
                 REQUIRE(pgx.gdxSymbolInfo(i, name, dim, typ));
                 REQUIRE(dim >= 0);
                 REQUIRE(typ >= 0);
-                REQUIRE(!name.empty());
+                REQUIRE(name[0] != '\0');
                 symbolsSeen.push_back(name);
 
-                std::string explanatoryText;
+                char explanatoryText[GMS_SSSIZE];
                 int userInfo, numRecords;
                 REQUIRE(pgx.gdxSymbolInfoX(i, numRecords, userInfo, explanatoryText));
                 if(numRecords) {
@@ -901,24 +901,24 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxFindSymbol("*", symNr));
             REQUIRE_EQ(0, symNr);
 
-            std::string symName;
+            char symName[GMS_SSSIZE];
             int dim, typ;
             REQUIRE(pgx.gdxSymbolInfo(0, symName, dim, typ));
-            REQUIRE_EQ("*", symName);
+            REQUIRE(!strcmp("*", symName));
             REQUIRE_EQ(1, dim);
             REQUIRE_EQ(dt_set, typ);
 
             int recCnt, userInfo;
-            std::string explText;
+            char explText[GMS_SSSIZE];
             REQUIRE(pgx.gdxSymbolInfoX(0, recCnt, userInfo, explText));
             REQUIRE_EQ(0, recCnt);
             REQUIRE_EQ(0, userInfo);
-            REQUIRE_EQ("Universe", explText);
+            REQUIRE(!strcmp("Universe", explText));
 
             REQUIRE_FALSE(pgx.gdxSymbolInfoX(999, recCnt, userInfo, explText));
             REQUIRE_EQ(0, recCnt);
             REQUIRE_EQ(0, userInfo);
-            REQUIRE(explText.empty());
+            REQUIRE(explText[0] == '\0');
 
             pgx.gdxClose();
 
@@ -1057,7 +1057,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteDone());
             const auto commentStrExp {"A fancy comment!"s};
             REQUIRE(pgx.gdxSymbolAddComment(1, commentStrExp));
-            std::string commentStrGot;
+            char commentStrGot[GMS_SSSIZE];
             REQUIRE(pgx.gdxSymbolGetComment(1, 1, commentStrGot));
             REQUIRE_EQ(commentStrExp, commentStrGot);
         });
@@ -1245,10 +1245,10 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test symbol info out of range") {
         testReadModelGDX("trnsport"s, [&](GDXInterface &pgx) {
-            std::string symId;
+            char symId[GMS_SSSIZE];
             int dim, typ;
             REQUIRE_FALSE(pgx.gdxSymbolInfo(99, symId, dim, typ));
-            REQUIRE(symId.empty());
+            REQUIRE(symId[0] == '\0');
             REQUIRE_EQ(-1, dim);
             REQUIRE_EQ(dt_set, typ);
         });
@@ -1540,7 +1540,7 @@ namespace tests::gdxinterfacetests {
                 REQUIRE_EQ(10021, uelCnt);
                 for(int syNr{1}; syNr <= symCnt; syNr++) {
                     int recCnt, userInfo;
-                    std::string explTxt;
+                    char explTxt[GMS_SSSIZE];
                     REQUIRE(pgx.gdxSymbolInfoX(syNr, recCnt, userInfo, explTxt));
                     int nrRecs;
                     REQUIRE(pgx.gdxDataReadRawStart(syNr, nrRecs));

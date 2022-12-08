@@ -73,11 +73,8 @@ namespace xpwrap {
         return ::gdxDataReadDone(pgx);
     }
 
-    int GDXFile::gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) {
-        CharBuf SyIdBuf{};
-        int rc{::gdxSymbolInfo(pgx, SyNr, SyIdBuf.get(), &Dim, &Typ)};
-        SyId = SyIdBuf;
-        return rc;
+    int GDXFile::gdxSymbolInfo(int SyNr, char *SyId, int &Dim, int &Typ) {
+        return ::gdxSymbolInfo(pgx, SyNr, SyId, &Dim, &Typ);
     }
 
     int GDXFile::gdxDataReadStrStart(int SyNr, int &NrRecs) {
@@ -156,11 +153,8 @@ namespace xpwrap {
         return ::gdxSymbolDim(pgx, SyNr);
     }
 
-    int GDXFile::gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) {
-        CharBuf explTxtBuf{};
-        int rc = ::gdxSymbolInfoX(pgx, SyNr, &RecCnt, &UserInfo, explTxtBuf.get());
-        ExplTxt = explTxtBuf;
-        return rc;
+    int GDXFile::gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, char *ExplTxt) {
+        return ::gdxSymbolInfoX(pgx, SyNr, &RecCnt, &UserInfo, ExplTxt);
     }
 
     int GDXFile::gdxSymbolSetDomain(const char **DomainIDs) {
@@ -305,11 +299,8 @@ namespace xpwrap {
         return ::gdxSymbolAddComment(pgx, SyNr, Txt.c_str());
     }
 
-    int GDXFile::gdxSymbolGetComment(int SyNr, int N, std::string &Txt) {
-        CharBuf TxtBuf{};
-        int rc{::gdxSymbolGetComment(pgx, SyNr, N, TxtBuf.get())};
-        Txt = TxtBuf;
-        return rc;
+    int GDXFile::gdxSymbolGetComment(int SyNr, int N, char *Txt) {
+        return ::gdxSymbolGetComment(pgx, SyNr, N, Txt);
     }
 
     int GDXFile::gdxStoreDomainSets() {

@@ -306,10 +306,7 @@ int gdxSymbolAddComment(TGXFileRec_t *pgdx, int SyNr, const char *Txt) {
 }
 
 int gdxSymbolGetComment(TGXFileRec_t *pgdx, int SyNr, int N, char *Txt) {
-    std::string sTxt;
-    int rc{ reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolGetComment(SyNr, N, sTxt) };
-    utils::stocp(sTxt, Txt);
-    return rc;
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolGetComment(SyNr, N, Txt);
 }
 
 int gdxSymbolGetDomain(TGXFileRec_t *pgdx, int SyNr, int DomainSyNrs[]) {
@@ -325,17 +322,11 @@ int gdxSymbolDim(TGXFileRec_t *pgdx, int SyNr) {
 }
 
 int gdxSymbolInfo(TGXFileRec_t *pgdx, int SyNr, char *SyId, int *Dimen, int *Typ) {
-    std::string sSyId;
-    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolInfo(SyNr, sSyId, *Dimen, *Typ);
-    utils::stocp(sSyId, SyId);
-    return rc;
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolInfo(SyNr, SyId, *Dimen, *Typ);
 }
 
 int gdxSymbolInfoX(TGXFileRec_t *pgdx, int SyNr, int *RecCnt, int *UserInfo, char *ExplTxt) {
-    std::string sExplTxt;
-    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolInfoX(SyNr, *RecCnt, *UserInfo, sExplTxt);
-    utils::stocp(sExplTxt, ExplTxt);
-    return rc;
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSymbolInfoX(SyNr, *RecCnt, *UserInfo, ExplTxt);
 }
 
 int gdxSymbolSetDomain(TGXFileRec_t *pgdx, const char *DomainIDs[]) {

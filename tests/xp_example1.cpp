@@ -112,7 +112,7 @@ namespace tests::xp_example1 {
             //exit(1);
         }
 
-        std::string VarName;
+        char VarName[GMS_SSSIZE];
         int Dim, VarTyp;
         REQUIRE(PGX->gdxSymbolInfo(VarNr, VarName, Dim, VarTyp));
         REQUIRE_EQ(2, Dim);

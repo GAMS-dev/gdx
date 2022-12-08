@@ -140,8 +140,8 @@ namespace gdxinterface {
         // endregion
 
         virtual int gdxFindSymbol(const std::string &SyId, int &SyNr) = 0;
-        virtual int gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) = 0;
-        virtual int gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) = 0;
+        virtual int gdxSymbolInfo(int SyNr, char *SyId, int &Dim, int &Typ) = 0;
+        virtual int gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, char *ExplTxt) = 0;
         virtual int gdxSymbolDim(int SyNr) = 0;
 
         virtual int gdxAddAlias(const std::string &Id1, const std::string &Id2) = 0;
@@ -198,7 +198,7 @@ namespace gdxinterface {
         virtual int gdxAcronymName(double V, char *AName) = 0;
         virtual double gdxAcronymValue(int AIndx) const = 0;
         virtual int gdxSymbolAddComment(int SyNr, const std::string& Txt) = 0;
-        virtual int gdxSymbolGetComment(int SyNr, int N, std::string& Txt) = 0;
+        virtual int gdxSymbolGetComment(int SyNr, int N, char *Txt) = 0;
         virtual int gdxStoreDomainSets() = 0;
         virtual void gdxStoreDomainSetsSet(int x) = 0;
         virtual int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr) = 0;

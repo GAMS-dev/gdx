@@ -1737,9 +1737,10 @@ namespace gxfile {
     //   Zero if the symbol number is not in the correct range, non-zero otherwise
     // See Also:
     //   gdxSystemInfo, gdxSymbolInfoX, gdxSymbolDim, gdxFindSymbol
-    int TGXFileObj::gdxSymbolInfo(int SyNr, std::string &SyId, int &Dim, int &Typ) {
+    int TGXFileObj::gdxSymbolInfo(int SyNr, char *SyId, int &Dim, int &Typ) {
         if (!SyNr) {
-            SyId = "*"s;
+            SyId[0] = '*';
+            SyId[1] = '\0';;
             Dim = 1;
             Typ = dt_set;
             return true;
@@ -1749,14 +1750,14 @@ namespace gxfile {
             auto maybeNameAndSym = symbolWithIndex(SyNr);
             if (maybeNameAndSym) {
                 auto &[name, sym] = *maybeNameAndSym;
-                SyId = name;
+                utils::assignStrToBuf(name, SyId);
                 Dim = sym->SDim;
                 Typ = sym->SDataType;
                 return true;
             }
         }
 
-        SyId.clear();
+        SyId[0] = '\0';
         Dim = -1;
         Typ = dt_set;
         return false;
@@ -2516,23 +2517,23 @@ namespace gxfile {
     //   Zero if the symbol number is not in the correct range, non-zero otherwise
     // See Also:
     //   gdxSystemInfo, gdxSymbolInfo, gdxFindSymbol
-    int TGXFileObj::gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, std::string &ExplTxt) {
+    int TGXFileObj::gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, char *ExplTxt) {
         if (!SyNr) {
             RecCnt = UelCntOrig;
             UserInfo = 0;
-            ExplTxt = "Universe";
+            utils::assignStrToBuf("Universe"s, ExplTxt);
             return true;
         }
         else if (NameList.empty() || SyNr < 1 || SyNr > NameList.size()) {
             RecCnt = UserInfo = 0;
-            ExplTxt.clear();
+            ExplTxt[0] = '\0';
             return false;
         }
         else {
             const auto obj = (*symbolWithIndex(SyNr)).second;
             RecCnt = !obj->SDim ? 1 : obj->SDataCount; // scalar trick
             UserInfo = obj->SUserInfo;
-            ExplTxt = obj->SExplTxt;
+            utils::assignStrToBuf(obj->SExplTxt, ExplTxt);
             return true;
         }
     }
@@ -4073,15 +4074,15 @@ namespace gxfile {
     //   Non-zero if the operation is possible, zero otherwise
     // See Also:
     //   gdxSymbolAddComment
-    int TGXFileObj::gdxSymbolGetComment(int SyNr, int N, std::string& Txt) {
+    int TGXFileObj::gdxSymbolGetComment(int SyNr, int N, char *Txt) {
         if (!NameList.empty() && SyNr >= 1 && SyNr <= NameList.size()) {
             const auto obj = NameList[NameListOrdered[SyNr-1]];
             if (!obj->SCommentsList.empty() && N >= 1 && N <= obj->SCommentsList.size()) {
-                Txt = obj->SCommentsList[N - 1];
+                utils::assignStrToBuf(obj->SCommentsList[N - 1], Txt);
                 return true;
             }
         }
-        Txt.clear();
+        Txt[0] = '\0';
         return false;
     }
 
