@@ -234,27 +234,6 @@ namespace gdlib::datastorage {
             it++;
             return true;
         }
-
-    private:
-        // FIXME: Unfinished!
-        void RadixSort(const int *AMap = nullptr) {
-            if(data.empty() || IsSorted()) return;
-            int KeyBase {FMinKey};
-            const int64_t AllocCount = (int64_t)FMaxKey - FMinKey + 1;
-            std::vector<ValType *> Head(AllocCount), Tail(AllocCount);
-            TLDIterator myhead = data.begin();
-            for(int Key{}; Key < FMaxKey - KeyBase; Key++) {
-                Head[Key] = nullptr;
-                for(int D{FDimension-1}; D >= 0; D--) {
-                    for(EntryType & pair : data) {
-                        const KeyArray & keys = pair.first;
-                        Key = (!AMap ? keys[D] : keys[AMap[D]]) - KeyBase;
-                        if(!Head[Key]) Head[Key] = pair.second.data();
-
-                    }
-                }
-            }
-        }
     };
 
 }

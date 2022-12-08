@@ -5,7 +5,6 @@
 #include "cwrap.h"
 #include "../gxfile.h"
 #include <iostream>
-#include "../utils.h"
 #include <cassert>
 
 using namespace gxfile;

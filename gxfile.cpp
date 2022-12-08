@@ -1,16 +1,15 @@
-#include "gxfile.h"
 #include "rtl/sysutils_p3.h"
-#include "utils.h"
 #include "gdlib/gmsstrm.h"
-#include "palxxx/gdlaudit.h"
-#include "yaml.h"
+#include "expertapi/palmcc.h"
+
+#include "gxfile.h"
+#include "utils.h"
 
 #include <cassert>
 #include <numeric>
 
-#include "expertapi/palmcc.h"
-
 #ifdef YAML
+#include "yaml.h"
 #define WRYAML(instr) instr;
 #else
 #define WRYAML(instr) ;
