@@ -10,7 +10,7 @@ namespace tests::serializetests {
 
     enum class TestType {
         TEXT,
-        YAML
+        TYAML
     };
 
     static const auto
@@ -21,7 +21,7 @@ namespace tests::serializetests {
     void commonFileCreation(TestType t) {
         std::string msg;
         TGXFileObj obj {msg};
-        obj.SetWriteModes(t == TestType::YAML, t == TestType::TEXT);
+        obj.SetWriteModes(t == TestType::TYAML, t == TestType::TEXT);
         int errNr;
         obj.gdxOpenWrite(gdx_fn, "serializetests", errNr);
         obj.gdxDataWriteStrStart("i", "expl", 1, dt_set, 0);
@@ -44,7 +44,7 @@ namespace tests::serializetests {
     }
 
     TEST_CASE("YAML representation of GDX file data") {
-        commonFileCreation(TestType::YAML);
+        commonFileCreation(TestType::TYAML);
         REQUIRE(std::filesystem::is_regular_file(yaml_fn));
         std::filesystem::remove(gdx_fn);
         std::filesystem::remove(yaml_fn);

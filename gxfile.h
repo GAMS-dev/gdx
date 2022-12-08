@@ -338,8 +338,10 @@ namespace gxfile {
     // Description:
     //    Class for reading and writing gdx files
     class TGXFileObj : public gdxinterface::GDXInterface {
+#ifdef YAML
         // TODO: Should only be included in compilation if -DYAML or something is set...
         std::unique_ptr<yaml::TYAMLFile> YFile;
+#endif
         bool writeAsYAML{}, writeAsText{};
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
         TgxFileMode fmode {f_not_open}, fmode_AftReg {f_not_open};

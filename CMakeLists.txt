@@ -17,6 +17,7 @@ if (MSVC)
 	set(mylibs "")
 endif (MSVC)
 
+# -DYAML
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGAMSBUILD")
 
 set(common
