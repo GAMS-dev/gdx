@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cassert>
 
+using namespace gdxinterface;
 using namespace gxfile;
 
 extern "C" {
@@ -54,8 +55,8 @@ int gdxClose(TGXFileRec_t *pgx) {
 int gdx_set1d(TGXFileRec_t *pgx, const char *name, const char **elems) {
     auto obj = reinterpret_cast<TGXFileObj *>(pgx);
     obj->gdxDataWriteStrStart(name, "A 1D set", 1, dt_set, 0);
-    gxdefs::TgdxStrIndex keyStrs {};
-    gxdefs::TgdxValues values {};
+    TgdxStrIndex keyStrs {};
+    TgdxValues values {};
     int i;
     for(i=0; elems[i]; i++) {
         keyStrs[0].assign(elems[i]);
@@ -78,8 +79,8 @@ int create_gdx_file(const char *filename) {
         return 1;
     }
     gdx.gdxDataWriteStrStart("i", "A simple set", 1, dt_set, 0);
-    gxdefs::TgdxValues vals{};
-    gxdefs::TgdxStrIndex keys{};
+    TgdxValues vals{};
+    TgdxStrIndex keys{};
     for (int i{1}; i <= 5; i++) {
         keys[0] = "uel_" + std::to_string(i);
         const char *keyptrs[1];

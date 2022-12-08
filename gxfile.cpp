@@ -18,9 +18,26 @@
 using namespace gdxinterface;
 using namespace gdlib::gmsstrm;
 using namespace std::literals::string_literals;
-using namespace gxdefs;
 
 namespace gxfile {
+
+    bool CanBeQuoted(const std::string &s) {
+        bool saw_single{}, saw_double{};
+        for(auto Ch : s) {
+            if(Ch == '\'') {
+                if(saw_double) return false;
+                saw_single = true;
+            } else if(Ch == '\"') {
+                if(saw_single) return false;
+                saw_double = true;
+            } else if(Ch < ' ') return false;
+        }
+        return true;
+    }
+
+    bool GoodUELString(const std::string &s) {
+        return s.length() <= GLOBAL_UEL_IDENT_SIZE-1 && CanBeQuoted(s); // also checks Ch < '
+    }
 
     const int MaxDimV148 = 10;
     using TIndex = std::array<int, GLOBAL_MAX_INDEX_DIM>;
@@ -313,7 +330,7 @@ namespace gxfile {
             LastError = ErrNr;
             return false;
         }
-        FFile = std::make_unique<TMiBufferedStreamDelphi>(FileName, fmCreate, DLLLoadPath);
+        FFile = std::make_unique<TMiBufferedStreamDelphi>(FileName, fmCreate);
         ErrNr = FFile->GetLastIOResult();
         if(ErrNr) {
             FFile = nullptr;
@@ -792,7 +809,7 @@ namespace gxfile {
         // 255 is EOF
         DeltaForWrite = 255 - (VERSION <= 6 ? MaxDimV148 : FCurrentDim) - 1;
 
-        DataSize = gxdefs::DataTypSize[AType];
+        DataSize = DataTypSize[AType];
         if(DataSize > 0)
             LastDataField = DataSize - 1;
 
@@ -1804,7 +1821,7 @@ namespace gxfile {
             ErrNr = ERR_NOFILE;
             return FileNoGood();
         }
-        FFile = std::make_unique<TMiBufferedStreamDelphi>(Afn, filemode, DLLLoadPath);
+        FFile = std::make_unique<TMiBufferedStreamDelphi>(Afn, filemode);
         const std::string FileNameYML = utils::replaceSubstrs(Afn, ".gdx", ".yaml");
 #ifdef YAML
         YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
@@ -2326,7 +2343,7 @@ namespace gxfile {
     //  gdxResetSpecialValues, gdxSetSpecialValues
     // Description:
     //
-    int TGXFileObj::gdxGetSpecialValues(TgdxSVals &AVals) {
+    int TGXFileObj::gdxGetSpecialValues(std::array<double, GMS_SVIDX_MAX> &AVals) {
         AVals[sv_valund] = intlValueMapDbl[vm_valund] ;
         AVals[sv_valna ] = intlValueMapDbl[vm_valna ] ;
         AVals[sv_valpin] = intlValueMapDbl[vm_valpin] ;
@@ -2357,7 +2374,7 @@ namespace gxfile {
     //   gdxSetReadSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
     // Description:
     //
-    int TGXFileObj::gdxSetSpecialValues(const TgdxSVals &AVals) {
+    int TGXFileObj::gdxSetSpecialValues(const std::array<double, GMS_SVIDX_MAX> &AVals) {
         TIntlValueMapDbl tmpDbl{ intlValueMapDbl };
 
         tmpDbl[vm_valund] = AVals[sv_valund];

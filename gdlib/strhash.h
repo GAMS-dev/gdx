@@ -2,7 +2,6 @@
 
 #include "gmsstrm.h"
 #include "../utils.h"
-#include "strutilx.h"
 
 #include <vector>
 #include <string>
@@ -69,11 +68,11 @@ namespace gdlib::strhash {
         }
 
         virtual bool EntryEqual(const std::string &ps1, const std::string &ps2) {
-            return gdlib::strutilx::PStrUEqual(ps1, ps2);
+            return utils::sameText(ps1, ps2);
         }
 
         virtual int Compare(const std::string &ps1, const std::string &ps2) {
-            return gdlib::strutilx::PStrUCmp(ps1, ps2);
+            return utils::strCompare(ps1, ps2);
         }
 
         void HashAll() {

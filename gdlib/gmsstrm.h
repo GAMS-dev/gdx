@@ -195,22 +195,19 @@ namespace gdlib::gmsstrm {
         std::vector<uint8_t> BufPtr;
 
         bool FCompress, FCanCompress;
-        std::string FLoadPath;
 
         bool FillBuffer();
         
     protected:
         int64_t GetSize() override;
     public:
-        TBufferedFileStreamDelphi(const std::string &FileName, uint16_t Mode, const std::string &LoadPath = "");
+        TBufferedFileStreamDelphi(const std::string &FileName, uint16_t Mode);
         ~TBufferedFileStreamDelphi() override;
         bool FlushBuffer();
         uint32_t Read(void *Buffer, uint32_t Count) override;
         char ReadCharacter();
         uint32_t Write(const void *Buffer, uint32_t Count) override;
         bool IsEof();
-        std::string GetLoadPath();
-        void SetLoadPath(const std::string &s);
         bool GetCompression() const;
         void SetCompression(bool V);
         bool GetCanCompress() const;
@@ -259,7 +256,7 @@ namespace gdlib::gmsstrm {
 
         void DetermineByteOrder();
     public:
-        TMiBufferedStreamDelphi(const std::string &FileName, uint16_t Mode, const std::string &LoadPath);
+        TMiBufferedStreamDelphi(const std::string &FileName, uint16_t Mode);
         static void ReverseBytes(void *psrc, void *pdest, int sz);
         int GoodByteOrder() const;
         double ReadDouble() override;
@@ -332,7 +329,7 @@ namespace gdlib::gmsstrm {
         int FLastIOResult{};
 
         bool FCanCompress, FCompress{};
-        std::string FLoadPath, FPassword{};
+        std::string FPassword{};
 
         const bool noBuffering {false};
         std::array<char, BufferSize> readBuffer{};
@@ -341,8 +338,6 @@ namespace gdlib::gmsstrm {
         void maybeFillReadBuffer();
 
         int GetLastIOResult() const;
-
-        std::string GetLoadPath() const;
 
         static std::string RandString(int L) ;
 

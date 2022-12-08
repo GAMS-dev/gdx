@@ -4,6 +4,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 #set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
+set(ENABLE_YAML 0)
+
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
 	set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
@@ -17,8 +19,10 @@ if (MSVC)
 	set(mylibs "")
 endif (MSVC)
 
-# -DYAML
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGAMSBUILD")
+if(ENABLE_YAML)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DYAML")
+endif(ENABLE_YAML)
 
 set(common
 		expertapi/gclgms.h expertapi/gclgms.c
@@ -30,9 +34,6 @@ set(common
 		expertapi/palmcc.h expertapi/palmcc.c
 
 		gdlib/gmsstrm.h gdlib/gmsstrm.cpp
-		# TODO: Replace with std::filesystem, ... standard library stuff
-		gdlib/strutilx.h gdlib/strutilx.cpp
-
 		gdlib/gmsdata.h gdlib/gmsdata.cpp
 		gdlib/datastorage.cpp gdlib/datastorage.h
 		gdlib/strhash.h gdlib/strhash.cpp
@@ -41,15 +42,12 @@ set(common
 		utils.h utils.cpp
 		gxfile.h gxfile.cpp
 
-		# TODO: gclgms.h/c
-		gxdefs.cpp gxdefs.h
-
-		# Do not compile into production DLL: ifdef YAMLDEBUG
-		yaml.h yaml.cpp
-
 		# ZLIB modules
 		zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c zlib/zutil.c
 )
+if(ENABLE_YAML)
+	set(common ${common} yaml.h yaml.cpp)
+endif(ENABLE_YAML)
 
 set(common_legacy ${common}
 	expertapi/gdxcc.h expertapi/gdxcc.c

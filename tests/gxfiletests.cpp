@@ -71,7 +71,7 @@ namespace tests::gxfiletests {
         for(int i=0; i<Indx.size(); i++) {
             Indx[i] = bufs[i].data();
         }
-        gxdefs::TgdxValues Values;
+        gdxinterface::TgdxValues Values;
         for (int N{}; pgx.gdxDataReadStr(Indx.data(), Values.data(), N);) {
             /*if (0 == Values[global::gmsspecs::vallevel]) continue;
             for (int D{}; D < Dim; D++)

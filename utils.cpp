@@ -438,6 +438,21 @@ namespace utils {
         std::memcpy(cp, s.c_str(), s.length()+1);
     }
 
+    inline int b2i(bool b) { return b ? 1 : 0; }
+
+    int strCompare(const std::string &S1, const std::string &S2, bool caseInsensitive) {
+        if(S1.empty() || S2.empty()) return b2i(!S1.empty()) - b2i(!S2.empty());
+        auto L = S1.length();
+        if(L > S2.length()) L = S2.length();
+        for(int K{}; K<L; K++) {
+            int c1 = caseInsensitive ? ::toupper(S1[K]) : S1[K];
+            int c2 = caseInsensitive ? ::toupper(S2[K]) : S2[K];
+            int d = c1 - c2;
+            if(d) return d;
+        }
+        return static_cast<int>(S1.length() - S2.length());
+    }
+
     StringBuffer::StringBuffer(int size) : s(size, '\0'), bufferSize {size} {}
 
     char *StringBuffer::getPtr() { return &s[0]; }
@@ -451,4 +466,57 @@ namespace utils {
 
     BinaryDiffMismatch::BinaryDiffMismatch(uint64_t offset, uint8_t lhs, uint8_t rhs) : offset(offset), lhs(lhs),
                                                                                         rhs(rhs) {}
+
+    bool checkBOMOffset(const tBomIndic &potBOM, int &BOMOffset, std::string &msg) {
+        enum tBOM { bUTF8, bUTF16BE, bUTF16LE, bUTF32BE, bUTF32LE, num_tboms };
+        const std::array<std::string, num_tboms> BOMtxt = { "UTF8"s, "UTF16BE"s, "UTF16LE"s, "UTF32BE"s, "UTF32LE"s };
+        const std::array<std::array<uint8_t, maxBOMLen+1>, num_tboms> BOMS = {
+                {{3, 239, 187, 191, 0},  // UTF8
+                 {2, 254, 255, 0, 0},  // UTF16BE
+                 {2, 255, 254, 0, 0},  // UTF16LE
+                 {4, 0, 0, 254, 255},  // UTF32BE
+                 {4, 255, 254, 0, 0} // UTF32LE
+                }
+        };
+        msg.clear();
+        BOMOffset = 0;
+        for(int b = 0; b<num_tboms; b++) {
+            bool match{true};
+            for(int j{1}; j<=BOMS[b][0]; j++) {
+                if(BOMS[b][j] != potBOM[j-1]) {
+                    match = false;
+                    break;
+                }
+            }
+            if(!match) continue;
+
+            if(b == bUTF8) BOMOffset = BOMS[b].front(); // UTF8 is the only one, which is OK atm
+            else {
+                msg = BOMtxt[b] + " BOM detected. This is an unsupported encoding.";
+                return false;
+            }
+            break;
+        }
+        return true;
+    }
+
+    /**
+     * PORTING NOTES FROM ANDRE
+     * Pascal/Delphi convention: 1 byte is size/length/charcount, then character bytes, then quote byte END
+     * C/C++ convention here: raw character bytes, null terminator \0, quote char after that
+     * Doing the quote char after the terminator keeps strlen etc working
+     **/
+
+    // Convert C++ standard library string to Delphi short string
+    int strConvCppToDelphi(const std::string &s, char *delphistr) {
+        if(s.length() > std::numeric_limits<uint8_t>::max()) {
+            const std::string errorMessage {"Error: Maximum short string length is 255 characters!"s};
+            memcpy(&delphistr[1], errorMessage.c_str(), errorMessage.length()+1);
+            return static_cast<int>(errorMessage.length());
+        }
+        const auto l = static_cast<uint8_t>(s.length());
+        delphistr[0] = static_cast<char>(l);
+        memcpy(&delphistr[1], s.c_str(), l);
+        return 0;
+    }
 }

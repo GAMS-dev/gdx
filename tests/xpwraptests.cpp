@@ -6,10 +6,10 @@
 #include <string>
 #include <filesystem>
 #include <iostream>
-#include "../gxdefs.h"
 
 using namespace std::literals::string_literals;
 using namespace xpwrap;
+using namespace gdxinterface;
 
 namespace tests::xpwraptests {
     TEST_SUITE_BEGIN("expert level wrapper api");
@@ -25,8 +25,8 @@ namespace tests::xpwraptests {
     TEST_CASE("Test writing and reading demand data for gamslib/trnsport to/from GDX") {
         std::string ErrMsg;
         int ErrNr{};
-        gxdefs::TgdxStrIndex keys;
-        gxdefs::TgdxValues  vals;
+        TgdxStrIndex keys;
+        TgdxValues  vals;
 
         // Write data
         {
@@ -59,7 +59,7 @@ namespace tests::xpwraptests {
 
             std::array<char, 256> buf {};
             char *index[] = { buf.data() };
-            gxdefs::TgdxValues values{};
+            TgdxValues values{};
             int dimFrst{};
 
             for (int i{}; i < nrRecs; i++) {

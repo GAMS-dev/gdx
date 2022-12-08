@@ -25,7 +25,7 @@ namespace tests::xp_example1 {
     }
 
     static gdxinterface::StrIndexBuffers Indx {};
-    static gxdefs::TgdxValues Values{};
+    static gdxinterface::TgdxValues Values{};
 
     void WriteData(gdxinterface::GDXInterface &PGX,
                    const std::string &s,

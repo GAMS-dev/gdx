@@ -4,9 +4,14 @@
 #include <array>
 #include <cstring>
 #include <vector>
-#include "gxdefs.h"
+#include "expertapi/gclgms.h"
 
 namespace gdxinterface {
+
+    using TgdxStrIndex = std::array<std::string, GMS_MAX_INDEX_DIM>;
+    using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
+    using TgdxValues = std::array<double, GMS_VAL_SCALE+ 1>;
+
     class CharBuf {
         std::array<char, 256> buf;
 
@@ -62,7 +67,7 @@ namespace gdxinterface {
         std::array<std::array<char, 256>, 20> bufContents{};
         std::array<char*, 20> bufPtrs{};
     public:
-        explicit StrIndexBuffers(const gxdefs::TgdxStrIndex *strIndex = nullptr) {
+        explicit StrIndexBuffers(const TgdxStrIndex *strIndex = nullptr) {
             for (int i{}; i < bufPtrs.size(); i++) {
                 bufPtrs[i] = bufContents[i].data();
                 if (strIndex)
@@ -77,8 +82,8 @@ namespace gdxinterface {
         char **ptrs() { return bufPtrs.data(); }
         const char** cptrs() { return (const char **)bufPtrs.data(); }
 
-        gxdefs::TgdxStrIndex strs() const {
-            gxdefs::TgdxStrIndex res;
+        TgdxStrIndex strs() const {
+            TgdxStrIndex res;
             for (int i{}; i < res.size(); i++) {
                 res[i].assign(bufPtrs[i]);
             }
@@ -152,8 +157,8 @@ namespace gdxinterface {
         virtual int gdxGetLastError() = 0;
         // endregion
 
-        virtual int gdxGetSpecialValues(gxdefs::TgdxSVals &Avals) = 0;
-        virtual int gdxSetSpecialValues(const gxdefs::TgdxSVals &AVals) = 0;
+        virtual int gdxGetSpecialValues(std::array<double, GMS_SVIDX_MAX> &Avals) = 0;
+        virtual int gdxSetSpecialValues(const std::array<double, GMS_SVIDX_MAX> &AVals) = 0;
 
         virtual int gdxSymbolSetDomain(const char **DomainIDs) = 0;
         virtual int gdxSymbolSetDomainX(int SyNr, const char **DomainIDs) = 0;

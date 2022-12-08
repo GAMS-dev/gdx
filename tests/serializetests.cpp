@@ -4,6 +4,7 @@
 
 using namespace std::literals::string_literals;
 using namespace gxfile;
+using namespace gdxinterface;
 
 namespace tests::serializetests {
     TEST_SUITE_BEGIN("Test serialization of GDX to write operations and YAML");
@@ -25,8 +26,8 @@ namespace tests::serializetests {
         int errNr;
         obj.gdxOpenWrite(gdx_fn, "serializetests", errNr);
         obj.gdxDataWriteStrStart("i", "expl", 1, dt_set, 0);
-        gxdefs::TgdxStrIndex keyStrs {};
-        gxdefs::TgdxValues vals {};
+        TgdxStrIndex keyStrs {};
+        TgdxValues vals {};
         for(int i{}; i<5; i++) {
             keyStrs.front() = "i"s+std::to_string(i+1);
             const char *keyptrs[] = {keyStrs.front().c_str()};

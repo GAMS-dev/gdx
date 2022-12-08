@@ -10,7 +10,6 @@
 #include <vector>
 #include <optional>
 #include <unordered_set>
-#include "gxdefs.h"
 #include "gdlib/gmsdata.h"
 #include "gdlib/datastorage.h"
 #include <cstring>
@@ -39,6 +38,12 @@ namespace yaml {
 
 namespace gxfile {
 
+    const std::array<int, GMS_DT_ALIAS+1> DataTypSize {1,1,5,5,0};
+
+    const int   DOMC_UNMAPPED = -2, // indicator for unmapped index pos
+                DOMC_EXPAND = -1, // indicator growing index pos
+                DOMC_STRICT = 0; // indicator mapped index pos
+
     template<typename K, typename V, typename H, typename E>
     //using umaptype = google::dense_hash_map<K, V, H, E>;
     //using umaptype = std::unordered_map<K,V, H, E>;
@@ -55,7 +60,7 @@ namespace gxfile {
                         strGDXCOMPRESS = "GDXCOMPRESS",
                         strGDXCONVERT = "GDXCONVERT";
 
-    using PUELIndex = gxdefs::TgdxUELIndex*;
+    using PUELIndex = gdxinterface::TgdxUELIndex*;
 
     struct strCompCaseInsensitive {
         bool operator() (const std::string& lhs, const std::string& rhs) const {
@@ -360,7 +365,7 @@ namespace gxfile {
         std::vector<std::string> NameListOrdered;
         std::unique_ptr<std::vector<std::string>> DomainStrList;
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
-        //std::map<global::gmsspecs::TIndex, gxdefs::TgdxValues> SortList;
+        //std::map<global::gmsspecs::TIndex, TgdxValues> SortList;
         std::unique_ptr<LinkedDataType> SortList;
         std::optional<LinkedDataIteratorType> ReadPtr;
         gdlib::gmsdata::TTblGamsData ErrorList;
@@ -384,7 +389,7 @@ namespace gxfile {
         std::string MajContext;
         std::array<TIntegerMapping, GLOBAL_MAX_INDEX_DIM> SliceIndxs, SliceRevMap;
         int SliceSyNr{};
-        gxdefs::TgdxStrIndex SliceElems;
+        gdxinterface::TgdxStrIndex SliceElems;
         //void *ReadPtr{};
         bool    DoUncompress{}, // when reading
                 CompressOut{}; // when writing
@@ -499,9 +504,9 @@ namespace gxfile {
 
         int gdxGetLastError() override;
 
-        int gdxGetSpecialValues(gxdefs::TgdxSVals &Avals) override;
+        int gdxGetSpecialValues(std::array<double, GMS_SVIDX_MAX> &Avals) override;
 
-        int gdxSetSpecialValues(const gxdefs::TgdxSVals &AVals) override;
+        int gdxSetSpecialValues(const std::array<double, GMS_SVIDX_MAX> &AVals) override;
 
         int gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) override;
 

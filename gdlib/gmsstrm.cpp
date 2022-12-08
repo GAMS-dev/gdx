@@ -17,16 +17,15 @@
 // only supported by MSVC so far :(
 //#include <format>
 
+#include "../expertapi/gclgms.h"
+
 #include "../rtl/p3utils.h"
 #include "../rtl/sysutils_p3.h"
 
 #include "../utils.h"
-#include "strutilx.h"
+
 #include "gmsstrm.h"
 
-#include "../expertapi/gclgms.h"
-
-using namespace gdlib::strutilx;
 using namespace rtl::p3utils;
 using namespace std::literals::string_literals;
 
@@ -64,14 +63,10 @@ namespace gdlib::gmsstrm {
         return FLastIOResult;
     }
 
-    std::string TBinaryTextFileIO::GetLoadPath() const {
-        return FLoadPath.empty() ? FLoadPath : IncludeTrailingPathDelimiterEx(FLoadPath);
-    }
-
     // Corresponds to gmsstrm.TBinaryTextFileIO.OpenForRead from CMEX
     // AS: Not sure if it makes sense to duplicate the whole gmsstrm type hierarchy, since std::streams already do some of the low level lifting
     TBinaryTextFileIO::TBinaryTextFileIO(const std::string& fn, const std::string& PassWord, int& ErrNr,
-        std::string& errmsg) : frw{}, NrWritten{}, FLoadPath{} {
+        std::string& errmsg) : frw{}, NrWritten{} {
         offsetInBuffer = -1;
         std::string Msg;
         FCanCompress = true;
@@ -99,9 +94,9 @@ namespace gdlib::gmsstrm {
         srcBuf.resize(B2);
         if (B1 == signature_header) Read(srcBuf.data(), B2);
         if (B1 != signature_header || srcBuf != signature_gams) {
-            tBomIndic fileStart = { B1, B2, ReadByte(), ReadByte() };
+            utils::tBomIndic fileStart = { B1, B2, ReadByte(), ReadByte() };
             int BOMOffset;
-            if (!checkBOMOffset(fileStart, BOMOffset, errmsg)) {
+            if (!utils::checkBOMOffset(fileStart, BOMOffset, errmsg)) {
                 ErrNr = strmErrorEncoding;
                 return;
             }
@@ -174,7 +169,7 @@ namespace gdlib::gmsstrm {
                                          bool comp,
                                          int& ErrNr,
                                          std::string& errmsg)
-             : FMajorVersionRead{}, FMinorVersionRead{}, FRewindPoint{}, NrLoaded{}, FLoadPath{strutilx::ExcludeTrailingPathDelimiterEx("")}
+             : FMajorVersionRead{}, FMinorVersionRead{}, FRewindPoint{}, NrLoaded{}
      {
         NrRead = NrWritten = 0;
         FCanCompress = true;
@@ -395,7 +390,7 @@ namespace gdlib::gmsstrm {
     void TBinaryTextFileIO::WriteString(const std::string &s) {
         static std::array<char, 256> buf {};
         if(Paranoid) ParWrite(rw_string);
-        strConvCppToDelphi(s, buf.data());
+        utils::strConvCppToDelphi(s, buf.data());
         FS->write(buf.data(), s.length()+1);
     }
 
@@ -513,7 +508,7 @@ namespace gdlib::gmsstrm {
         if(fstext)
             *fstext << "WriteString@" << GetPosition() << "#" << ++cnt << ": " << s << "\n";
         if (Paranoid) ParWrite(rw_string);
-        strConvCppToDelphi(s, buf.data());
+        utils::strConvCppToDelphi(s, buf.data());
         Write(buf.data(), s.length()+1);
     }
 
@@ -813,7 +808,7 @@ namespace gdlib::gmsstrm {
         return res;
     }
 
-    TBufferedFileStreamDelphi::TBufferedFileStreamDelphi(const std::string& FileName, uint16_t Mode, const std::string& LoadPath)
+    TBufferedFileStreamDelphi::TBufferedFileStreamDelphi(const std::string& FileName, uint16_t Mode)
         : TXFileStreamDelphi{ FileName, (FileAccessMode)Mode },
         NrLoaded{},
         NrRead{},
@@ -825,7 +820,6 @@ namespace gdlib::gmsstrm {
         CBufPtr{ (PCompressBuffer)malloc(sizeof(TCompressHeader)+CBufSize) }
     {
         std::string Msg;
-        SetLoadPath(LoadPath);
         FCanCompress = true; // no longer a fatal error
     }
 
@@ -927,14 +921,6 @@ namespace gdlib::gmsstrm {
         return NrRead >= NrLoaded && GetPosition() >= GetSize();
     }
 
-    std::string TBufferedFileStreamDelphi::GetLoadPath() {
-        return FLoadPath.empty() ? ""s : IncludeTrailingPathDelimiterEx(FLoadPath);
-    }
-
-    void TBufferedFileStreamDelphi::SetLoadPath(const std::string& s) {
-        FLoadPath = ExcludeTrailingPathDelimiterEx(s);
-    }
-
     void TBufferedFileStreamDelphi::SetCompression(bool V)
     {
         if((FCompress || V) && NrWritten > 0) FlushBuffer();
@@ -955,7 +941,7 @@ namespace gdlib::gmsstrm {
         initOrderCommon<double>(order_double, size_double, PAT_DOUBLE);
     }
 
-    TMiBufferedStreamDelphi::TMiBufferedStreamDelphi(const std::string& FileName, uint16_t Mode, const std::string& LoadPath) : TBufferedFileStreamDelphi{FileName, Mode, LoadPath}
+    TMiBufferedStreamDelphi::TMiBufferedStreamDelphi(const std::string& FileName, uint16_t Mode) : TBufferedFileStreamDelphi{FileName, Mode}
     {
         if(FLastIOResult) return;
         if(Mode != fmCreate) DetermineByteOrder(); // we cannot update a mixed environment file!
@@ -1166,9 +1152,9 @@ namespace gdlib::gmsstrm {
         srcBuf.resize(B2);
         if (B1 == signature_header) Read(srcBuf.data(), B2);
         if (B1 != signature_header || srcBuf != signature_gams) { // nothing special
-            tBomIndic fileStart {B1, B2, FS->ReadByte(), FS->ReadByte()};
+            utils::tBomIndic fileStart {B1, B2, FS->ReadByte(), FS->ReadByte()};
             int BOMOffset;
-            if(!checkBOMOffset(fileStart, BOMOffset, errMsg)) {
+            if(!utils::checkBOMOffset(fileStart, BOMOffset, errMsg)) {
                 ErrNr = strmErrorEncoding;
                 return;
             }

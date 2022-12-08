@@ -147,11 +147,11 @@ namespace xpwrap {
         return ::gdxGetLastError(pgx);
     }
 
-    int GDXFile::gdxGetSpecialValues(gxdefs::TgdxSVals &Avals) {
+    int GDXFile::gdxGetSpecialValues(std::array<double, GMS_SVIDX_MAX> &Avals) {
         return ::gdxGetSpecialValues(pgx, Avals.data());
     }
 
-    int GDXFile::gdxSetSpecialValues(const gxdefs::TgdxSVals &AVals) {
+    int GDXFile::gdxSetSpecialValues(const std::array<double, GMS_SVIDX_MAX> &AVals) {
         return ::gdxSetSpecialValues(pgx, AVals.data());
     }
 

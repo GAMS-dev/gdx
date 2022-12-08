@@ -401,4 +401,10 @@ namespace utils {
         return acc;
     }
 
+    int strCompare(const std::string &S1, const std::string &S2, bool caseInsensitive = true);
+
+    const int maxBOMLen = 4;
+    using tBomIndic = std::array<uint8_t, maxBOMLen>;
+    bool checkBOMOffset(const tBomIndic &potBOM, int &BOMOffset, std::string &msg);
+    int strConvCppToDelphi(const std::string &s, char *delphistr);
 }

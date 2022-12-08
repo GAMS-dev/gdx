@@ -297,7 +297,7 @@ namespace tests::gdxinterfacetests {
     TEST_CASE("Test write and read record raw") {
         std::string f1{"rwrecordraw_wrapper.gdx"}, f2{"rwrecordraw_port.gdx"};
         int key;
-        gxdefs::TgdxValues values{};
+        TgdxValues values{};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw("TheOnlyUEL"));
@@ -337,7 +337,7 @@ namespace tests::gdxinterfacetests {
     TEST_CASE("Test write and read record in string mode") {
         std::string f1{"rwrecordstr_wrapper.gdx"}, f2{"rwrecordstr_port.gdx"};
         StrIndexBuffers keyNames;
-        gxdefs::TgdxValues values{};
+        TgdxValues values{};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
             REQUIRE(pgx.gdxDataWriteStrStart("mysym", "This is my symbol!", 1, dt_par, 0));
             values[GMS_VAL_LEVEL] = 3.141;
@@ -373,7 +373,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test getting special values") {
-        gxdefs::TgdxSVals specialValuesFromWrap{}, specialValuesFromPort{};
+        std::array<double, GMS_SVIDX_MAX> specialValuesFromWrap{}, specialValuesFromPort{};
         std::string ErrMsg;
         {
             xpwrap::GDXFile pgx{ErrMsg};
@@ -391,7 +391,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test setting special values") {
         basicTest([&](GDXInterface &pgx) {
-            gxdefs::TgdxSVals moddedSpecVals, queriedSpecVals;
+            std::array<double, GMS_SVIDX_MAX> moddedSpecVals, queriedSpecVals;
             pgx.gdxGetSpecialValues(moddedSpecVals);
             moddedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin] = 0.0;
             pgx.gdxSetSpecialValues(moddedSpecVals);
@@ -419,7 +419,7 @@ namespace tests::gdxinterfacetests {
 
         REQUIRE(pgx.gdxDataWriteMapStart("irregularSym", "So out of order!", 1, dt_par, 0));
         int key;
-        gxdefs::TgdxValues values{};
+        TgdxValues values{};
         for(const auto ix : randomOrder) {
             key = ix;
             values[GMS_VAL_LEVEL] = 3.141 * ix;
@@ -440,7 +440,7 @@ namespace tests::gdxinterfacetests {
     TEST_CASE("Test write and read record mapped - out of order") {
         std::string f1{ "rwrecordmapped_ooo_wrapper.gdx" }, f2 {"rwrecordmapped_ooo_port.gdx"};
         int key;
-        gxdefs::TgdxValues values{};
+        TgdxValues values{};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
             int uelCnt, highMap;
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
@@ -521,7 +521,7 @@ namespace tests::gdxinterfacetests {
     TEST_CASE("Test write and read record mapped - in order") {
         std::string f1{ "rwrecordmapped_io_wrapper.gdx" }, f2 {"rwrecordmapped_io_port.gdx"};
         int key;
-        gxdefs::TgdxValues values{};
+        TgdxValues values{};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
             int uelCnt, highMap;
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
@@ -620,7 +620,7 @@ namespace tests::gdxinterfacetests {
                 "setgetdomain_port.gdx"s,
         };
 
-        gxdefs::TgdxStrIndex newSymDomainNames {};
+        TgdxStrIndex newSymDomainNames {};
         std::array<int, 2> newSymDomainIndices {};
         for(int i{}; i<domainNames.size(); i++) {
             newSymDomainNames[i] = domainNames[i];
@@ -721,8 +721,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUELRegisterRaw("onlyuel"));
             REQUIRE(pgx.gdxUELRegisterDone());
             REQUIRE(pgx.gdxDataWriteRawStart("i", "expl", 1, dt_set, 0));
-            gxdefs::TgdxUELIndex keys;
-            gxdefs::TgdxValues values;
+            TgdxUELIndex keys;
+            TgdxValues values;
             keys[0] = 1;
             values[GMS_VAL_LEVEL] = 1;
             REQUIRE(pgx.gdxDataWriteRaw(keys.data(), values.data()));
@@ -743,7 +743,7 @@ namespace tests::gdxinterfacetests {
     TEST_CASE("Test invalid raw writing error processing") {
         const std::string fn {"tmpfile.gdx"s};
         int key;
-        gxdefs::TgdxValues values{};
+        TgdxValues values{};
         basicTest([&](GDXInterface& pgx) {
             if(std::filesystem::exists(fn))
                 std::filesystem::remove(fn);
@@ -840,7 +840,7 @@ namespace tests::gdxinterfacetests {
                     REQUIRE(pgx.gdxDataReadStrStart(i, numRecords2));
                     REQUIRE_EQ(numRecords, numRecords2);
                     StrIndexBuffers keyNames;
-                    gxdefs::TgdxValues values;
+                    TgdxValues values;
                     int dimFirst;
                     for(int j{}; j<numRecords; j++) {
                         REQUIRE(pgx.gdxDataReadStr(keyNames.ptrs(), values.data(), dimFirst));
@@ -889,7 +889,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errNr));
             REQUIRE(pgx.gdxDataWriteStrStart("i", "A set", 1, dt_set, 0));
             StrIndexBuffers keys{};
-            gxdefs::TgdxValues vals{};
+            TgdxValues vals{};
             for(int i=1; i<=8; i++) {
                 keys[0] = "uel_" + std::to_string(i);
                 const char *keyptrs[] = {keys[0].c_str()};
@@ -950,7 +950,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errnr));
             REQUIRE(pgx.gdxDataWriteStrStart("i", "expl", 1, dt_set, 0));
             std::string key;
-            gxdefs::TgdxValues vals{};
+            TgdxValues vals{};
             for(int i{}; i<6; i++) {
                 key = "i"s+std::to_string(i+1);
                 const char *keyptrs[] = {key.c_str()};
@@ -1002,8 +1002,8 @@ namespace tests::gdxinterfacetests {
             auto fn = "dup.gdx"s;
             REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errNr));
             REQUIRE(pgx.gdxDataWriteStrStart("i", "A set", 1, dt_set, 0));
-            gxdefs::TgdxStrIndex keys{};
-            gxdefs::TgdxValues vals{};
+            TgdxStrIndex keys{};
+            TgdxValues vals{};
             for(int i=1; i<=8; i++) {
                 keys[0] = "uel_" + std::to_string(i);
                 const char *keyptrs[] = { keys[0].c_str() };
@@ -1075,7 +1075,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUELRegisterDone());
 
             pgx.gdxDataWriteRawStart("i", "cities", 1, dt_set, 0);
-            gxdefs::TgdxValues vals {};
+            TgdxValues vals {};
             vals[GMS_VAL_LEVEL] = 3.141;
             int key {1};
             pgx.gdxDataWriteRaw(&key, vals.data());
@@ -1118,14 +1118,14 @@ namespace tests::gdxinterfacetests {
             pgx.gdxUELRegisterDone();
 
             pgx.gdxDataWriteRawStart("j", "", 1, dt_set, 0);
-            gxdefs::TgdxValues vals {};
+            TgdxValues vals {};
             vals[GMS_VAL_LEVEL] = 3.141;
             int key;
             for(key=17; key <= 32; key++)
                 pgx.gdxDataWriteRaw(&key, vals.data());
             REQUIRE(pgx.gdxDataWriteDone());
             REQUIRE(pgx.gdxDataWriteRawStart("jb", "", 1, dt_set, 0));
-            gxdefs::TgdxStrIndex domainNames {};
+            TgdxStrIndex domainNames {};
             domainNames.front() = "j";
             StrIndexBuffers domainIds {&domainNames};
             REQUIRE(pgx.gdxSymbolSetDomain(domainIds.cptrs()));
@@ -1147,7 +1147,7 @@ namespace tests::gdxinterfacetests {
         std::string f1{ "sv_scalars_wrapper.gdx" },
                 f2 {"sv_scalars_port.gdx"};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
-            gxdefs::TgdxValues vals {};
+            TgdxValues vals {};
             vals[GMS_VAL_LEVEL] = 1e+300;
             REQUIRE(pgx.gdxDataWriteRawStart("undef", "", 0, dt_par, 0));
             REQUIRE(pgx.gdxDataWriteRaw(nullptr, vals.data()));
@@ -1160,7 +1160,7 @@ namespace tests::gdxinterfacetests {
             int recCnt;
             REQUIRE(pgx.gdxDataReadRawStart(1, recCnt));
             int dimFirst;
-            gxdefs::TgdxValues vals {};
+            TgdxValues vals {};
             pgx.gdxDataReadRaw(nullptr, vals.data(), dimFirst);
             REQUIRE(pgx.gdxDataReadDone());
             double undef = vals[GMS_VAL_LEVEL];
@@ -1206,7 +1206,7 @@ namespace tests::gdxinterfacetests {
         rtl::p3utils::P3SetEnv("GDXCOMPRESS", compress ? "1"s : "0"s);
         rtl::p3utils::P3SetEnv("GDXCONVERT", convert);
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
-            gxdefs::TgdxValues vals {};
+            TgdxValues vals {};
             REQUIRE(pgx.gdxDataWriteRawStart("undef", "", 0, dt_par, 0));
             REQUIRE(pgx.gdxDataWriteRaw(nullptr, vals.data()));
             REQUIRE(pgx.gdxDataWriteDone());
@@ -1268,7 +1268,7 @@ namespace tests::gdxinterfacetests {
         testReadModelGDX("trnsport"s, [](GDXInterface &pgx) {
             int nrRecs, dimFirst;
             // uels: seattle 1, san-diego 2, new-york 3, chicago 4, topeka 5
-            std::array<int, 2> filterAction { gxdefs::DOMC_EXPAND, gxdefs::DOMC_EXPAND },
+            std::array<int, 2> filterAction { gxfile::DOMC_EXPAND, gxfile::DOMC_EXPAND },
                                keys { 3, 1 }; // new-york, seattle
             std::array<double, GLOBAL_MAX_INDEX_DIM> values {};
 
