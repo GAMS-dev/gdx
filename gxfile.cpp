@@ -177,9 +177,9 @@ namespace gxfile {
     int ConvertGDXFile(const std::string &fn, const std::string &MyComp) {
         std::string Conv {utils::trim(utils::uppercase(rtl::sysutils_p3::QueryEnvironmentVariable(strGDXCONVERT)))};
         if(Conv.empty()) Conv = "V7"s;
-        std::string Comp = utils::sameText(Conv, "V5") ? ""s : (!GetEnvCompressFlag() ? "U" : "C");
+        std::string Comp = Conv == "V5" ? ""s : (!GetEnvCompressFlag() ? "U" : "C");
         if(utils::sameText(Conv+Comp, "V7"+MyComp)) return 0;
-        return system(("gdxcopy -"s + Conv + Comp + " -Replace "s + fn).c_str());
+        return system(("gdxcopy -"s + Conv+Comp + " -Replace "s + utils::quoteWhitespace(fn, '\"')).c_str());
     }
 
     // If both single and double quotes appear in the string, replace
