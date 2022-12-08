@@ -731,9 +731,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxAddSetText("set text", txtNr));
             REQUIRE_EQ(1, txtNr);
             int elemNode;
-            std::string elemTxt;
+            char elemTxt[GMS_SSSIZE];
             REQUIRE(pgx.gdxGetElemText(txtNr, elemTxt, elemNode));
-            REQUIRE_EQ("set text", elemTxt);
+            REQUIRE(!strcmp("set text", elemTxt));
             REQUIRE_EQ(0, elemNode);
         });
         for (const auto& fn : { f1, f2 })
@@ -1082,7 +1082,7 @@ namespace tests::gdxinterfacetests {
             pgx.gdxDataWriteDone();
         });
         testReads(f1, f2, [&](GDXInterface& pgx) {
-            std::string txt;
+            char txt[GMS_SSSIZE];
             int node;
             REQUIRE(pgx.gdxGetElemText(0, txt, node));
             int hi {std::numeric_limits<int>::max()};

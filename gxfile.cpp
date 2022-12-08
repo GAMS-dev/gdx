@@ -2288,19 +2288,19 @@ namespace gxfile {
     //    WriteLn;
     //    end
     // </CODE>
-    int TGXFileObj::gdxGetElemText(int TxtNr, std::string &Txt, int &Node) {
+    int TGXFileObj::gdxGetElemText(int TxtNr, char *Txt, int &Node) {
         Node = 0;
         if(!SetTextList) {
-            Txt.clear();
+            Txt[0] = '\0';
             return false;
         }
         if(TraceLevel >= TraceLevels::trl_all && !CheckMode("GetElemText", {}))
             return false;
         if(TxtNr < 0 || TxtNr >= SetTextList->size()) {
-            Txt = BADStr_PREFIX + std::to_string(TxtNr);
+            utils::assignStrToBuf(BADStr_PREFIX + std::to_string(TxtNr), Txt);
             return false;
         } else {
-            Txt = (*SetTextList)[TxtNr];
+            utils::assignStrToBuf((*SetTextList)[TxtNr], Txt);
             Node = SetTextList->mapContains(Txt) ? SetTextList->strToNodeNr[Txt] : 0;
             return true;
         }

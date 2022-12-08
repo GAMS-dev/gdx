@@ -230,10 +230,7 @@ int gdxFindSymbol(TGXFileRec_t *pgdx, const char *SyId, int *SyNr) {
 }
 
 int gdxGetElemText(TGXFileRec_t *pgdx, int TxtNr, char *Txt, int *Node) {
-    std::string sTxt;
-    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetElemText(TxtNr, sTxt, *Node);
-    utils::stocp(sTxt, Txt);
-    return rc;
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetElemText(TxtNr, Txt, *Node);
 }
 
 int gdxGetLastError(TGXFileRec_t *pgdx) {

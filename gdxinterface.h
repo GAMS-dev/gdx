@@ -146,7 +146,7 @@ namespace gdxinterface {
 
         virtual int gdxAddAlias(const std::string &Id1, const std::string &Id2) = 0;
         virtual int gdxAddSetText(const std::string &Txt, int &TxtNr) = 0;
-        virtual int gdxGetElemText(int TxtNr, std::string &Txt, int &Node) = 0;
+        virtual int gdxGetElemText(int TxtNr, char *Txt, int &Node) = 0;
 
         //region Error handling
         virtual int gdxDataErrorCount() = 0;
