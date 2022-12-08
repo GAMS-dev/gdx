@@ -13,6 +13,7 @@
 #include <vector>
 #include <map>
 #include <optional>
+#include <cstring>
 
 // ==============================================================================================================
 // Interface
@@ -411,6 +412,6 @@ namespace utils {
     inline void assignStrToBuf(const std::string &s, char *buf) {
         const int maxShortStrSize = 256;
         if(s.length() > maxShortStrSize) return;
-        strcpy_s(buf, maxShortStrSize, s.c_str());
+        strncpy(buf, s.c_str(), maxShortStrSize);
     }
 }
