@@ -10,8 +10,6 @@ extern "C" {
 # define GDX_CALLCONV
 #endif
 
-    // TODO: Clean up stuff that is already in gclgms
-    typedef char gdxStrIndex_t[20][256];
     typedef struct TGXFileRec TGXFileRec_t;
 
     typedef void (GDX_CALLCONV *TDataStoreProc_t) (const int Indx[], const double Vals[]);
@@ -28,8 +26,6 @@ extern "C" {
 
     typedef long long INT64;
 
-    int create_gdx_file(const char *filename);
-
     int gdxFree(TGXFileRec_t **pgdx);
     int gdxGetReady(char *msgBuf, int msgBufLen);
     int gdxLibraryLoaded();
@@ -38,8 +34,6 @@ extern "C" {
     int gdxCreate(TGXFileRec_t **pgdx, char *errBuf, int bufSize);
     void gdxCreateD(TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen);
     void gdxDestroy(TGXFileRec_t **pgx);
-
-    int gdx_set1d(TGXFileRec_t *pgx, const char *name, const char **elems);
 
     int gdxAcronymAdd(TGXFileRec_t *pgdx, const char *AName, const char *Txt, int AIndx);
     int gdxAcronymCount(TGXFileRec_t *pgdx);
@@ -135,6 +129,11 @@ extern "C" {
     int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char *UelFilterStr[], TDataStoreFiltProc_t DP);
 
     void setCallByRef(const char *FuncName, int cbrValue);
+
+#ifdef PYGDX_EXPERIMENT
+    int create_gdx_file(const char *filename);
+    int gdx_set1d(TGXFileRec_t *pgx, const char *name, const char **elems);
+#endif
 
 #ifdef __cplusplus
 }

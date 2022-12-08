@@ -195,7 +195,7 @@ namespace gdxinterface {
         virtual int gdxDataReadFilteredStart(int SyNr, const int *FilterAction, int &NrRecs) = 0;
         virtual int gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) = 0;
         virtual int gdxAcronymIndex(double V) const = 0;
-        virtual int gdxAcronymName(double V, std::string &AName) = 0;
+        virtual int gdxAcronymName(double V, char *AName) = 0;
         virtual double gdxAcronymValue(int AIndx) const = 0;
         virtual int gdxSymbolAddComment(int SyNr, const std::string& Txt) = 0;
         virtual int gdxSymbolGetComment(int SyNr, int N, std::string& Txt) = 0;

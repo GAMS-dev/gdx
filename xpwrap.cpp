@@ -310,11 +310,8 @@ namespace xpwrap {
         return ::gdxAcronymIndex(pgx, V);
     }
 
-    int GDXFile::gdxAcronymName(double V, std::string &AName) {
-        CharBuf ANameBuf{};
-        int rc {::gdxAcronymName(pgx, V, ANameBuf.get())};
-        AName = ANameBuf;
-        return rc;
+    int GDXFile::gdxAcronymName(double V, char *AName) {
+        return ::gdxAcronymName(pgx, V, AName);
     }
 
     double GDXFile::gdxAcronymValue(int AIndx) const {

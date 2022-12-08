@@ -139,7 +139,7 @@ namespace xpwrap {
 
         int gdxAcronymIndex(double V) const override;
 
-        int gdxAcronymName(double V, std::string &AName) override;
+        int gdxAcronymName(double V, char *AName) override;
 
         double gdxAcronymValue(int AIndx) const override;
 

@@ -3636,13 +3636,13 @@ namespace gxfile {
     //   of the form UnknownAcronymNNN; were NNN is the index of the acronym.
     // See Also:
     //    gdxAcronymIndex
-    int TGXFileObj::gdxAcronymName(double V, std::string &AName) {
+    int TGXFileObj::gdxAcronymName(double V, char *AName) {
         int Indx {gdxAcronymIndex(V)};
         //not an acronym
-        if(Indx <= 0) AName.clear();
+        if(Indx <= 0) AName[0] = '\0';
         else {
             int N {AcronymList.FindEntry(Indx)};
-            AName = N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : AcronymList[N].AcrName;
+            utils::assignStrToBuf(N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : AcronymList[N].AcrName, AName);
             return true;
         }
         return false;
