@@ -88,14 +88,14 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUELRegisterStr("myuel", uelNr));
             REQUIRE(pgx.gdxUELRegisterDone());
 
-            std::string queriedUel;
+            char queriedUel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, queriedUel, uelMap));
-            REQUIRE_EQ("myuel", queriedUel);
+            REQUIRE(!strcmp("myuel", queriedUel));
 
             pgx.gdxRenameUEL("myuel", "newname");
             REQUIRE(pgx.gdxUMUelGet(1, queriedUel, uelMap));
-            REQUIRE_EQ("newname", queriedUel);
+            REQUIRE(!strcmp("newname", queriedUel));
 
             pgx.gdxClose();
         });
@@ -210,15 +210,15 @@ namespace tests::gdxinterfacetests {
         });
         testReads(f1, f2, [](GDXInterface &pgx) {
             int uelCnt, highMap, uelMap;
-            std::string uel;
+            char uel[GMS_SSSIZE];
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
             REQUIRE_EQ(0, highMap);
             REQUIRE_EQ(2, uelCnt);
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE(uel.empty());
+            REQUIRE(uel[0] == '\0');
             REQUIRE_EQ(-1, uelMap);
             REQUIRE(pgx.gdxUMUelGet(2, uel, uelMap));
-            REQUIRE_EQ("New-York", uel);
+            REQUIRE(!strcmp("New-York", uel));
             REQUIRE_EQ(-1, uelMap);
             REQUIRE_FALSE(pgx.gdxGetUEL(2, uel));
             REQUIRE_NE("New-York", uel);
@@ -242,12 +242,12 @@ namespace tests::gdxinterfacetests {
         });
         testReads(f1, f2, [](GDXInterface& pgx) {
             int uelCnt, highMap, uelMap;
-            std::string uel;
+            char uel[GMS_SSSIZE];
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
             REQUIRE_EQ(0, highMap);
             REQUIRE_EQ(1, uelCnt);
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE(!strcmp("TheOnlyUEL", uel));
             REQUIRE_EQ(-1, uelMap);
             REQUIRE_FALSE(pgx.gdxGetUEL(1, uel));
             REQUIRE_NE("TheOnlyUEL", uel);
@@ -266,10 +266,10 @@ namespace tests::gdxinterfacetests {
         });
         testReads(f1, f2, [](GDXInterface& pgx) {
             int uelCnt, highMap, uelMap;
-            std::string uel;
+            char uel[GMS_SSSIZE];
 
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE(!strcmp("TheOnlyUEL", uel));
             REQUIRE_EQ(-1, uelMap);
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
             REQUIRE_EQ(0, highMap);
@@ -280,7 +280,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUELRegisterDone());
 
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE(!strcmp("TheOnlyUEL", uel));
             REQUIRE_EQ(3, uelMap);
 
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
@@ -288,7 +288,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(1, uelCnt);
             
             REQUIRE(pgx.gdxGetUEL(3, uel));
-            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE(!strcmp("TheOnlyUEL", uel));
         });
         for (const auto& fn : filenames)
             std::filesystem::remove(fn);
@@ -312,10 +312,10 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteDone());
         });
         testReads(f1, f2, [&](GDXInterface &pgx) {
-            std::string uel;
+            char uel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE_EQ("TheOnlyUEL", uel);
+            REQUIRE(!strcmp("TheOnlyUEL", uel));
             REQUIRE_EQ(-1, uelMap);
             int NrRecs;
             REQUIRE(pgx.gdxDataReadRawStart(1, NrRecs));
@@ -452,9 +452,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUELRegisterMap(5, "Third"));
             REQUIRE(pgx.gdxUELRegisterMap(2, "Fourth"));
             REQUIRE(pgx.gdxUELRegisterDone());
-            std::string uel;
+            char uel[GMS_SSSIZE];
             REQUIRE(pgx.gdxGetUEL(3, uel));
-            REQUIRE_EQ("First", uel);
+            REQUIRE(!strcmp("First", uel));
             REQUIRE(pgx.gdxDataWriteMapStart("mysym", "Single record", 1, dt_par, 0));
             key = 3;
             values[GMS_VAL_LEVEL] = 3.141;
@@ -472,10 +472,10 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(0, pgx.gdxDataErrorCount());
         });
         testReads(f1, f2, [&](GDXInterface& pgx) {
-            std::string uel;
+            char uel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE_EQ("First", uel);
+            REQUIRE(!strcmp("First", uel));
             REQUIRE_EQ(-1, uelMap);
 
             REQUIRE(pgx.gdxUELRegisterMapStart());
@@ -486,10 +486,10 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUELRegisterDone());
 
             REQUIRE(pgx.gdxGetUEL(3, uel));
-            REQUIRE_EQ("First", uel);
+            REQUIRE(!strcmp("First", uel));
 
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));            
-            REQUIRE_EQ("First", uel);
+            REQUIRE(!strcmp("First", uel));
             REQUIRE_EQ(3, uelMap);
 
             int NrRecs;
@@ -533,9 +533,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUELRegisterMap(7, "Third"));
             REQUIRE(pgx.gdxUELRegisterMap(8, "Fourth"));
             REQUIRE(pgx.gdxUELRegisterDone());
-            std::string uel;
+            char uel[GMS_SSSIZE];
             REQUIRE(pgx.gdxGetUEL(5, uel));
-            REQUIRE_EQ("First", uel);
+            REQUIRE(!strcmp("First", uel));
 
             // User UEL indices increasing
             REQUIRE(pgx.gdxDataWriteMapStart("mysym", "Four records", 1, dt_par, 0));
@@ -548,10 +548,10 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(0, pgx.gdxDataErrorCount());
         });
         testReads(f1, f2, [&](GDXInterface& pgx) {
-            std::string uel;
+            char uel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE_EQ("First", uel);
+            REQUIRE(!strcmp("First", uel));
             REQUIRE_EQ(-1, uelMap);
 
             REQUIRE(pgx.gdxUELRegisterMapStart());
@@ -562,10 +562,10 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUELRegisterDone());
 
             REQUIRE(pgx.gdxGetUEL(5, uel));
-            REQUIRE_EQ("First", uel);
+            REQUIRE(!strcmp("First", uel));
 
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE_EQ("First", uel);
+            REQUIRE(!strcmp("First", uel));
             REQUIRE_EQ(5, uelMap);
 
             int NrRecs;
@@ -813,10 +813,10 @@ namespace tests::gdxinterfacetests {
             pgx.gdxSystemInfo(numSymbols, numUels);
             std::list<std::string> uelsSeen {}, symbolsSeen {};
             for(int i{1}; i<=numUels; i++) {
-                std::string uel;
+                char uel[GMS_SSSIZE];
                 int uelMap;
                 REQUIRE(pgx.gdxUMUelGet(i, uel, uelMap));
-                REQUIRE(!uel.empty());
+                REQUIRE(uel[0] != '\0');
                 uelsSeen.push_back(uel);
             }
             REQUIRE_EQ(expectedUels.size(), uelsSeen.size());
@@ -987,7 +987,7 @@ namespace tests::gdxinterfacetests {
             std::array<int, 20> errRecKeys {};
             std::array<double, 5> errRecVals {};
             REQUIRE(pgx.gdxDataErrorRecord(1, errRecKeys.data(), errRecVals.data()));
-            std::string uelNotInSuperset;
+            char uelNotInSuperset[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(errRecKeys.front(), uelNotInSuperset, uelMap));
             REQUIRE_EQ("not_in_i"s, uelNotInSuperset);
@@ -1192,7 +1192,7 @@ namespace tests::gdxinterfacetests {
         basicTest([&](GDXInterface &pgx) {
             pgx.gdxOpenRead(getfn(cnt), errNr);
             int uelMap;
-            std::string uelStr;
+            char uelStr[GMS_SSSIZE];
             pgx.gdxUMUelGet(1, uelStr, uelMap);
             REQUIRE_EQ("b"s, uelStr);
             pgx.gdxClose();

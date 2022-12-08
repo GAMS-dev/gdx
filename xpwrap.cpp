@@ -195,11 +195,8 @@ namespace xpwrap {
         return ::gdxUELRegisterStrStart(pgx);
     }
 
-    int GDXFile::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
-        CharBuf uelBuf{};
-        int rc{ ::gdxUMUelGet(pgx, UelNr, uelBuf.get(), &UelMap)};
-        Uel = uelBuf;
-        return rc;
+    int GDXFile::gdxUMUelGet(int UelNr, char *Uel, int &UelMap) {
+        return ::gdxUMUelGet(pgx, UelNr, Uel, &UelMap);
     }
 
     int GDXFile::gdxUMUelInfo(int &UelCnt, int &HighMap) {
@@ -218,11 +215,8 @@ namespace xpwrap {
         return ::gdxOpenReadEx(pgx, FileName.c_str(), ReadMode, &ErrNr);
     }
 
-    int GDXFile::gdxGetUEL(int uelNr, std::string &Uel) {
-        CharBuf uelBuf{};
-        int rc{::gdxGetUEL(pgx, uelNr, uelBuf.get())};
-        Uel = uelBuf;
-        return rc;
+    int GDXFile::gdxGetUEL(int uelNr, char *Uel) {
+        return ::gdxGetUEL(pgx, uelNr, Uel);
     }
 
     int GDXFile::gdxDataWriteMapStart(const std::string &SyId,

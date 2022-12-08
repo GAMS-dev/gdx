@@ -90,7 +90,7 @@ namespace xpwrap {
 
         int gdxUELRegisterStrStart() override;
 
-        int gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) override;
+        int gdxUMUelGet(int UelNr, char *Uel, int &UelMap) override;
 
         int gdxUMUelInfo(int &UelCnt, int &HighMap) override;
 
@@ -100,7 +100,7 @@ namespace xpwrap {
 
         int gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) override;
 
-        int gdxGetUEL(int uelNr, std::string &Uel) override;
+        int gdxGetUEL(int uelNr, char *Uel) override;
 
         int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;

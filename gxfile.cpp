@@ -2775,14 +2775,14 @@ namespace gxfile {
     //   gdxUMUelInfo, gdxGetUEL
     // Description:
     //
-    int TGXFileObj::gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) {
+    int TGXFileObj::gdxUMUelGet(int UelNr, char *Uel, int &UelMap) {
         if (UELTable && UelNr >= 1 && UelNr <= UELTable->size()) {
-            Uel = (*UELTable)[UelNr-1];
+            utils::assignStrToBuf((*UELTable)[UelNr-1], Uel);
             UelMap = UELTable->UsrUel2Ent.empty() ? -1 : UELTable->UsrUel2Ent.GetReverseMapping(UelNr);
             return true;
         }
         else {
-            Uel = BADUEL_PREFIX + std::to_string(UelNr);
+            utils::assignStrToBuf(BADUEL_PREFIX + std::to_string(UelNr), Uel);
             UelMap = -1;
             return false;
         }
@@ -2888,13 +2888,13 @@ namespace gxfile {
     //  Retrieve the string for a unique element based on a mapped index number.
     // See Also:
     //   gdxUMUelGet
-    int TGXFileObj::gdxGetUEL(int uelNr, std::string &Uel) {
+    int TGXFileObj::gdxGetUEL(int uelNr, char *Uel) {
         if(!UELTable) {
-            Uel.clear();
+            Uel[0] = '\0';
             return false;
         }
         int EN = UELTable->UsrUel2Ent.GetMapping(uelNr);
-        Uel = EN >= 1 ? (*UELTable)[EN-1] : BADUEL_PREFIX + std::to_string(uelNr);
+        utils::assignStrToBuf(EN >= 1 ? (*UELTable)[EN-1] : BADUEL_PREFIX + std::to_string(uelNr), Uel);
         return EN >= 1;
     }
 

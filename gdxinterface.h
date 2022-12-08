@@ -175,8 +175,8 @@ namespace gdxinterface {
         virtual int gdxUELRegisterDone() = 0;
         // endregion
 
-        virtual int gdxGetUEL(int uelNr, std::string &Uel) = 0;
-        virtual int gdxUMUelGet(int UelNr, std::string &Uel, int &UelMap) = 0;
+        virtual int gdxGetUEL(int uelNr, char *Uel) = 0;
+        virtual int gdxUMUelGet(int UelNr, char *Uel, int &UelMap) = 0;
         virtual int gdxUMUelInfo(int &UelCnt, int &HighMap) = 0;
 
         virtual int gdxCurrentDim() = 0;

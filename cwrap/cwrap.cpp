@@ -250,10 +250,7 @@ int gdxGetSpecialValues(TGXFileRec_t *pgdx, double AVals[]) {
 }
 
 int gdxGetUEL(TGXFileRec_t *pgdx, int UelNr, char *Uel) {
-    std::string sUel;
-    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetUEL(UelNr, sUel);
-    utils::stocp(sUel, Uel);
-    return rc;
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetUEL(UelNr, Uel);
 }
 
 int gdxMapValue(TGXFileRec_t *pgdx, double D, int *sv) {
@@ -390,10 +387,7 @@ int gdxUMFindUEL(TGXFileRec_t *pgdx, const char *Uel, int *UelNr, int *UelMap) {
 }
 
 int gdxUMUelGet(TGXFileRec_t *pgdx, int UelNr, char *Uel, int *UelMap) {
-    std::string sUel;
-    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxUMUelGet(UelNr, sUel, *UelMap);
-    utils::stocp(sUel, Uel);
-    return rc;
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxUMUelGet(UelNr, Uel, *UelMap);
 }
 
 int gdxUMUelInfo(TGXFileRec_t *pgdx, int *UelCnt, int *HighMap) {
