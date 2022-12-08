@@ -1027,7 +1027,7 @@ namespace tests::gdxinterfacetests {
         testMatchingWrites(f1, f2, [](GDXInterface &pgx) {
             REQUIRE_EQ(0, pgx.gdxAcronymCount());
             REQUIRE(pgx.gdxAcronymAdd("myacr"s, "my acronym"s, 23));
-            std::string acroName, acroText;
+            char acroName[GMS_SSSIZE], acroText[GMS_SSSIZE];
             int acroIndex;
             REQUIRE(pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex));
             REQUIRE_EQ("myacr"s, acroName);
@@ -1041,8 +1041,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(23, acroIndex);
 
             REQUIRE_FALSE(pgx.gdxAcronymGetInfo(999, acroName, acroText, acroIndex));
-            REQUIRE(acroName.empty());
-            REQUIRE(acroText.empty());
+            REQUIRE(acroName[0] == '\0');
+            REQUIRE(acroText[0] == '\0');
             REQUIRE_EQ(0, acroIndex);
         });
         for (const auto& fn : { f1, f2 })

@@ -114,11 +114,7 @@ int gdxAcronymCount(TGXFileRec_t *pgdx) {
 }
 
 int gdxAcronymGetInfo(TGXFileRec_t *pgdx, int N, char *AName, char *Txt, int *AIndx) {
-    std::string sAName, sTxt;
-    int rc{ reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymGetInfo(N, sAName, sTxt, *AIndx) };
-    utils::stocp(sAName, AName);
-    utils::stocp(sTxt, Txt);
-    return rc;
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxAcronymGetInfo(N, AName, Txt, *AIndx);
 }
 
 int gdxAcronymGetMapping(TGXFileRec_t *pgdx, int N, int *orgIndx, int *newIndx, int *autoIndex) {

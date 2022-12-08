@@ -3192,16 +3192,15 @@ namespace gxfile {
     //   Non-zero if the index into the acronym table is valid; false otherwise
     // See Also:
     //    gdxAcronymSetInfo, gdxAcronymCount
-    int TGXFileObj::gdxAcronymGetInfo(int N, std::string &AName, std::string &Txt, int &AIndx) const {
+    int TGXFileObj::gdxAcronymGetInfo(int N, char *AName, char *Txt, int &AIndx) const {
         if(N < 1 || N > AcronymList.size()) {
-            AName.clear();
-            Txt.clear();
+            AName[0] = Txt[0] = '\0';
             AIndx = 0;
             return false;
         }
         auto acr = AcronymList[N-1];
-        AName = acr.AcrName;
-        Txt = acr.AcrText;
+        utils::assignStrToBuf(acr.AcrName, AName);
+        utils::assignStrToBuf(acr.AcrText, Txt);
         AIndx = acr.AcrMap;
         return true;
     }

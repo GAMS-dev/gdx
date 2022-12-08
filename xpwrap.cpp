@@ -266,12 +266,8 @@ namespace xpwrap {
         return ::gdxAcronymCount(pgx);
     }
 
-    int GDXFile::gdxAcronymGetInfo(int N, std::string &AName, std::string &Txt, int &AIndx) const {
-        CharBuf nameBuf{}, txtBuf{};
-        int rc{::gdxAcronymGetInfo(pgx, N, nameBuf.get(), txtBuf.get(), &AIndx)};
-        AName = nameBuf;
-        Txt = txtBuf;
-        return rc;
+    int GDXFile::gdxAcronymGetInfo(int N, char *AName, char *Txt, int &AIndx) const {
+        return ::gdxAcronymGetInfo(pgx, N, AName, Txt, &AIndx);
     }
 
     int GDXFile::gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) {

@@ -117,7 +117,7 @@ namespace xpwrap {
 
         int gdxAcronymCount() const override;
 
-        int gdxAcronymGetInfo(int N, std::string &AName, std::string &Txt, int &AIndx) const override;
+        int gdxAcronymGetInfo(int N, char *AName, char *Txt, int &AIndx) const override;
 
         int gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) override;
 
