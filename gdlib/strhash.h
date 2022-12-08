@@ -349,7 +349,7 @@ namespace gdlib::strhash {
         }
 
         bool EntryEqual(const std::string &ps1, const std::string &ps2) override {
-            return gdlib::strutilx::PStrEqual(ps1, ps2);
+            return ps1 == ps2;
         }
     };
 
