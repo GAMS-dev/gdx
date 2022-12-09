@@ -64,7 +64,7 @@ namespace xpwrap {
 
         int gdxGetSpecialValues(double *Avals) override;
 
-        int gdxSetSpecialValues(const std::array<double, GMS_SVIDX_MAX> &AVals) override;
+        int gdxSetSpecialValues(const double *AVals) override;
 
         int gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) override;
 

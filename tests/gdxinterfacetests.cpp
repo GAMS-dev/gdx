@@ -394,7 +394,7 @@ namespace tests::gdxinterfacetests {
             std::array<double, GMS_SVIDX_MAX> moddedSpecVals, queriedSpecVals;
             pgx.gdxGetSpecialValues(moddedSpecVals.data());
             moddedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin] = 0.0;
-            pgx.gdxSetSpecialValues(moddedSpecVals);
+            pgx.gdxSetSpecialValues(moddedSpecVals.data());
             pgx.gdxGetSpecialValues(queriedSpecVals.data());
             REQUIRE_EQ(0.0, queriedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin]);
         });

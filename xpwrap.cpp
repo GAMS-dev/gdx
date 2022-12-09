@@ -137,8 +137,8 @@ namespace xpwrap {
         return ::gdxGetSpecialValues(pgx, Avals);
     }
 
-    int GDXFile::gdxSetSpecialValues(const std::array<double, GMS_SVIDX_MAX> &AVals) {
-        return ::gdxSetSpecialValues(pgx, AVals.data());
+    int GDXFile::gdxSetSpecialValues(const double *AVals) {
+        return ::gdxSetSpecialValues(pgx, AVals);
     }
 
     int GDXFile::gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) {

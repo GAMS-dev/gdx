@@ -277,10 +277,7 @@ int gdxSetReadSpecialValues(TGXFileRec_t *pgdx, const double AVals[]) {
 }
 
 int gdxSetSpecialValues(TGXFileRec_t *pgdx, const double AVals[]) {
-    // FIXME: Should be one-liner!
-    std::array<double, 7> cppAVals {};
-    std::memcpy(cppAVals.data(), AVals, cppAVals.size()*sizeof(double));
-    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetSpecialValues(cppAVals);
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxSetSpecialValues(AVals);
 }
 
 int gdxSetTextNodeNr(TGXFileRec_t *pgdx, int TxtNr, int Node) {
