@@ -133,8 +133,8 @@ namespace xpwrap {
         return ::gdxGetLastError(pgx);
     }
 
-    int GDXFile::gdxGetSpecialValues(std::array<double, GMS_SVIDX_MAX> &Avals) {
-        return ::gdxGetSpecialValues(pgx, Avals.data());
+    int GDXFile::gdxGetSpecialValues(double *Avals) {
+        return ::gdxGetSpecialValues(pgx, Avals);
     }
 
     int GDXFile::gdxSetSpecialValues(const std::array<double, GMS_SVIDX_MAX> &AVals) {

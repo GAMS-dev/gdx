@@ -2343,7 +2343,7 @@ namespace gxfile {
     //  gdxResetSpecialValues, gdxSetSpecialValues
     // Description:
     //
-    int TGXFileObj::gdxGetSpecialValues(std::array<double, GMS_SVIDX_MAX> &AVals) {
+    int TGXFileObj::gdxGetSpecialValues(double *AVals) {
         AVals[sv_valund] = intlValueMapDbl[vm_valund] ;
         AVals[sv_valna ] = intlValueMapDbl[vm_valna ] ;
         AVals[sv_valpin] = intlValueMapDbl[vm_valpin] ;

@@ -62,7 +62,7 @@ namespace xpwrap {
 
         int gdxGetLastError() override;
 
-        int gdxGetSpecialValues(std::array<double, GMS_SVIDX_MAX> &Avals) override;
+        int gdxGetSpecialValues(double *Avals) override;
 
         int gdxSetSpecialValues(const std::array<double, GMS_SVIDX_MAX> &AVals) override;
 

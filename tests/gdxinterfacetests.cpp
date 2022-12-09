@@ -377,11 +377,11 @@ namespace tests::gdxinterfacetests {
         std::string ErrMsg;
         {
             xpwrap::GDXFile pgx{ErrMsg};
-            REQUIRE(pgx.gdxGetSpecialValues(specialValuesFromWrap));
+            REQUIRE(pgx.gdxGetSpecialValues(specialValuesFromWrap.data()));
         }
         {
             gxfile::TGXFileObj pgx{ErrMsg};
-            REQUIRE(pgx.gdxGetSpecialValues(specialValuesFromPort));
+            REQUIRE(pgx.gdxGetSpecialValues(specialValuesFromPort.data()));
         }
         for(int i{}; i<specialValuesFromPort.size(); i++) {
             const double eps = 0.001;
@@ -392,10 +392,10 @@ namespace tests::gdxinterfacetests {
     TEST_CASE("Test setting special values") {
         basicTest([&](GDXInterface &pgx) {
             std::array<double, GMS_SVIDX_MAX> moddedSpecVals, queriedSpecVals;
-            pgx.gdxGetSpecialValues(moddedSpecVals);
+            pgx.gdxGetSpecialValues(moddedSpecVals.data());
             moddedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin] = 0.0;
             pgx.gdxSetSpecialValues(moddedSpecVals);
-            pgx.gdxGetSpecialValues(queriedSpecVals);
+            pgx.gdxGetSpecialValues(queriedSpecVals.data());
             REQUIRE_EQ(0.0, queriedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin]);
         });
     }

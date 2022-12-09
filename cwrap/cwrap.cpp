@@ -242,12 +242,7 @@ int gdxGetMemoryUsed(TGXFileRec_t *pgdx) {
 }
 
 int gdxGetSpecialValues(TGXFileRec_t *pgdx, double AVals[]) {
-    // FIXME: Should be one-liner!
-    std::array<double, 7> cppAVals{};
-    int rc = reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetSpecialValues(cppAVals);
-    for(int i=0; i<cppAVals.size(); i++)
-        AVals[i] = cppAVals[i];
-    return rc;
+    return reinterpret_cast<TGXFileObj *>(pgdx)->gdxGetSpecialValues(AVals);
 }
 
 int gdxGetUEL(TGXFileRec_t *pgdx, int UelNr, char *Uel) {

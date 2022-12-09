@@ -157,7 +157,7 @@ namespace gdxinterface {
         virtual int gdxGetLastError() = 0;
         // endregion
 
-        virtual int gdxGetSpecialValues(std::array<double, GMS_SVIDX_MAX> &Avals) = 0;
+        virtual int gdxGetSpecialValues(double *Avals) = 0;
         virtual int gdxSetSpecialValues(const std::array<double, GMS_SVIDX_MAX> &AVals) = 0;
 
         virtual int gdxSymbolSetDomain(const char **DomainIDs) = 0;
