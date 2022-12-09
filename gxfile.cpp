@@ -3970,7 +3970,7 @@ namespace gxfile {
     //  gdxSetSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
     // Description:
     //
-    int TGXFileObj::gdxSetReadSpecialValues(const std::array<double, 7>& AVals) {
+    int TGXFileObj::gdxSetReadSpecialValues(const double *AVals) {
         readIntlValueMapDbl[vm_valund] = AVals[sv_valund];
         readIntlValueMapDbl[vm_valna] = AVals[sv_valna];
         readIntlValueMapDbl[vm_valpin] = AVals[sv_valpin];

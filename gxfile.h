@@ -592,7 +592,7 @@ namespace gxfile {
         int gdxMapValue(double D, int& sv);
         int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr) override;
         int gdxSetHasText(int SyNr);
-        int gdxSetReadSpecialValues(const std::array<double, 7>& AVals);
+        int gdxSetReadSpecialValues(const double *AVals);
         int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) override;
         int gdxSymbMaxLength();
         int gdxSymbolAddComment(int SyNr, const std::string& Txt) override;
