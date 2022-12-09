@@ -21,14 +21,14 @@ void GDX_CALLCONV doGetLoadPath(char *s) {
 gdxSetLoadPath_t gdxSetLoadPath = doSetLoadPath;
 gdxGetLoadPath_t gdxGetLoadPath = doGetLoadPath;
 
-int gdxCreate(TGXFileRec_t **pgdx, char *errBuf, int bufSize) {
+int gdxCreate(TGXFileRec_t **TGXFile, char *errBuf, int bufSize) {
     std::string ErrMsg;
     auto *pgx = new gxfile::TGXFileObj {ErrMsg};
     if(!ErrMsg.empty())
         memcpy(errBuf, ErrMsg.c_str(), std::min<int>((int)ErrMsg.length()+1, bufSize));
     else
         errBuf[0] = '\0';
-    *pgdx = reinterpret_cast<TGXFileRec_t *>(pgx);
+    *TGXFile = reinterpret_cast<TGXFileRec_t *>(pgx);
     return true;
 }
 
@@ -49,353 +49,353 @@ int gdxClose(TGXFileRec_t *pgx) {
     return reinterpret_cast<gxfile::TGXFileObj *>(pgx)->gdxClose();
 }
 
-int gdxOpenWriteEx(TGXFileRec_t *pgdx, const char *FileName, const char *Producer, int Compr, int *ErrNr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxOpenWriteEx(FileName, Producer, Compr, *ErrNr);
+int gdxOpenWriteEx(TGXFileRec_t *TGXFile, const char *FileName, const char *Producer, int Compr, int *ErrNr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxOpenWriteEx(FileName, Producer, Compr, *ErrNr);
 }
 
-int gdxDataWriteStrStart(TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataWriteStrStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
+int gdxDataWriteStrStart(TGXFileRec_t *TGXFile, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataWriteStrStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
 }
 
-int gdxDataWriteRaw(TGXFileRec_t *pgdx, const int *KeyInt, const double *Values) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataWriteRaw(KeyInt, Values);
+int gdxDataWriteRaw(TGXFileRec_t *TGXFile, const int *KeyInt, const double *Values) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataWriteRaw(KeyInt, Values);
 }
 
 
-int gdxAcronymAdd(TGXFileRec_t *pgdx, const char *AName, const char *Txt, int AIndx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAcronymAdd(AName, Txt, AIndx);
+int gdxAcronymAdd(TGXFileRec_t *TGXFile, const char *AName, const char *Txt, int AIndx) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAcronymAdd(AName, Txt, AIndx);
 }
 
-int gdxAcronymCount(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAcronymCount();
+int gdxAcronymCount(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAcronymCount();
 }
 
-int gdxAcronymGetInfo(TGXFileRec_t *pgdx, int N, char *AName, char *Txt, int *AIndx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAcronymGetInfo(N, AName, Txt, *AIndx);
+int gdxAcronymGetInfo(TGXFileRec_t *TGXFile, int N, char *AName, char *Txt, int *AIndx) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAcronymGetInfo(N, AName, Txt, *AIndx);
 }
 
-int gdxAcronymGetMapping(TGXFileRec_t *pgdx, int N, int *orgIndx, int *newIndx, int *autoIndex) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAcronymGetMapping(N, *orgIndx, *newIndx, *autoIndex);
+int gdxAcronymGetMapping(TGXFileRec_t *TGXFile, int N, int *orgIndx, int *newIndx, int *autoIndex) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAcronymGetMapping(N, *orgIndx, *newIndx, *autoIndex);
 }
 
-int gdxAcronymIndex(TGXFileRec_t *pgdx, double V) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAcronymIndex(V);
+int gdxAcronymIndex(TGXFileRec_t *TGXFile, double V) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAcronymIndex(V);
 }
 
-int gdxAcronymName(TGXFileRec_t *pgdx, double V, char *AName) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAcronymName(V, AName);
+int gdxAcronymName(TGXFileRec_t *TGXFile, double V, char *AName) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAcronymName(V, AName);
 }
 
-int gdxAcronymNextNr(TGXFileRec_t *pgdx, int NV) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAcronymNextNr(NV);
+int gdxAcronymNextNr(TGXFileRec_t *TGXFile, int NV) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAcronymNextNr(NV);
 }
 
-int gdxAcronymSetInfo(TGXFileRec_t *pgdx, int N, const char *AName, const char *Txt, int AIndx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAcronymSetInfo(N, AName, Txt, AIndx);
+int gdxAcronymSetInfo(TGXFileRec_t *TGXFile, int N, const char *AName, const char *Txt, int AIndx) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAcronymSetInfo(N, AName, Txt, AIndx);
 }
 
-double gdxAcronymValue(TGXFileRec_t *pgdx, int AIndx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAcronymValue(AIndx);
+double gdxAcronymValue(TGXFileRec_t *TGXFile, int AIndx) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAcronymValue(AIndx);
 }
 
-int gdxAddAlias(TGXFileRec_t *pgdx, const char *Id1, const char *Id2) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAddAlias(Id1, Id2);
+int gdxAddAlias(TGXFileRec_t *TGXFile, const char *Id1, const char *Id2) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAddAlias(Id1, Id2);
 }
 
-int gdxAddSetText(TGXFileRec_t *pgdx, const char *Txt, int *TxtNr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAddSetText(Txt, *TxtNr);
+int gdxAddSetText(TGXFileRec_t *TGXFile, const char *Txt, int *TxtNr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAddSetText(Txt, *TxtNr);
 }
 
-int gdxAutoConvert(TGXFileRec_t *pgdx, int NV) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxAutoConvert(NV);
+int gdxAutoConvert(TGXFileRec_t *TGXFile, int NV) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxAutoConvert(NV);
 }
 
-int gdxDataErrorCount(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataErrorCount();
+int gdxDataErrorCount(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataErrorCount();
 }
 
-int gdxDataErrorRecord(TGXFileRec_t *pgdx, int RecNr, int KeyInt[], double Values[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataErrorRecord(RecNr, KeyInt, Values);
+int gdxDataErrorRecord(TGXFileRec_t *TGXFile, int RecNr, int KeyInt[], double Values[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataErrorRecord(RecNr, KeyInt, Values);
 }
 
-int gdxDataErrorRecordX(TGXFileRec_t *pgdx, int RecNr, int KeyInt[], double Values[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataErrorRecordX(RecNr, KeyInt, Values);
+int gdxDataErrorRecordX(TGXFileRec_t *TGXFile, int RecNr, int KeyInt[], double Values[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataErrorRecordX(RecNr, KeyInt, Values);
 }
 
-int gdxDataReadDone(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataReadDone();
+int gdxDataReadDone(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadDone();
 }
 
-int gdxDataReadFilteredStart(TGXFileRec_t *pgdx, int SyNr, const int FilterAction[], int *NrRecs) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataReadFilteredStart(SyNr, FilterAction, *NrRecs);
+int gdxDataReadFilteredStart(TGXFileRec_t *TGXFile, int SyNr, const int FilterAction[], int *NrRecs) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadFilteredStart(SyNr, FilterAction, *NrRecs);
 }
 
-int gdxDataReadMap(TGXFileRec_t *pgdx, int RecNr, int KeyInt[], double Values[], int *DimFrst) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataReadMap(RecNr, KeyInt, Values, *DimFrst);
+int gdxDataReadMap(TGXFileRec_t *TGXFile, int RecNr, int KeyInt[], double Values[], int *DimFrst) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadMap(RecNr, KeyInt, Values, *DimFrst);
 }
 
-int gdxDataReadMapStart(TGXFileRec_t *pgdx, int SyNr, int *NrRecs) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataReadMapStart(SyNr, *NrRecs);
+int gdxDataReadMapStart(TGXFileRec_t *TGXFile, int SyNr, int *NrRecs) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadMapStart(SyNr, *NrRecs);
 }
 
-int gdxDataReadRaw(TGXFileRec_t *pgdx, int KeyInt[], double Values[], int *DimFrst) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataReadRaw(KeyInt, Values, *DimFrst);
+int gdxDataReadRaw(TGXFileRec_t *TGXFile, int KeyInt[], double Values[], int *DimFrst) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadRaw(KeyInt, Values, *DimFrst);
 }
 
-int gdxDataReadRawStart(TGXFileRec_t *pgdx, int SyNr, int *NrRecs) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataReadRawStart(SyNr, *NrRecs);
+int gdxDataReadRawStart(TGXFileRec_t *TGXFile, int SyNr, int *NrRecs) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadRawStart(SyNr, *NrRecs);
 }
 
-int gdxDataReadSlice(TGXFileRec_t *pgdx, const char *UelFilterStr[], int *Dimen, ::TDataStoreProc_t DP) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataReadSlice(UelFilterStr, *Dimen, (gxfile::TDataStoreProc_t)DP);
+int gdxDataReadSlice(TGXFileRec_t *TGXFile, const char *UelFilterStr[], int *Dimen, ::TDataStoreProc_t DP) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadSlice(UelFilterStr, *Dimen, (gxfile::TDataStoreProc_t)DP);
 }
 
-int gdxDataReadSliceStart(TGXFileRec_t *pgdx, int SyNr, int ElemCounts[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataReadSliceStart(SyNr, ElemCounts);
+int gdxDataReadSliceStart(TGXFileRec_t *TGXFile, int SyNr, int ElemCounts[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadSliceStart(SyNr, ElemCounts);
 }
 
-int gdxDataReadStr(TGXFileRec_t *pgdx, char *KeyStr[], double Values[], int *DimFrst) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataReadStr(KeyStr, Values, *DimFrst);
+int gdxDataReadStr(TGXFileRec_t *TGXFile, char *KeyStr[], double Values[], int *DimFrst) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadStr(KeyStr, Values, *DimFrst);
 }
 
-int gdxDataReadStrStart(TGXFileRec_t *pgdx, int SyNr, int *NrRecs) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataReadStrStart(SyNr, *NrRecs);
+int gdxDataReadStrStart(TGXFileRec_t *TGXFile, int SyNr, int *NrRecs) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadStrStart(SyNr, *NrRecs);
 }
 
-int gdxDataSliceUELS(TGXFileRec_t *pgdx, const int SliceKeyInt[], char *KeyStr[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataSliceUELS(SliceKeyInt, KeyStr);
+int gdxDataSliceUELS(TGXFileRec_t *TGXFile, const int SliceKeyInt[], char *KeyStr[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataSliceUELS(SliceKeyInt, KeyStr);
 }
 
-int gdxDataWriteDone(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataWriteDone();
+int gdxDataWriteDone(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataWriteDone();
 }
 
-int gdxDataWriteMap(TGXFileRec_t *pgdx, const int KeyInt[], const double Values[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataWriteMap(KeyInt, Values);
+int gdxDataWriteMap(TGXFileRec_t *TGXFile, const int KeyInt[], const double Values[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataWriteMap(KeyInt, Values);
 }
 
-int gdxDataWriteMapStart(TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataWriteMapStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
+int gdxDataWriteMapStart(TGXFileRec_t *TGXFile, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataWriteMapStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
 }
 
-int gdxDataWriteRawStart(TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataWriteRawStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
+int gdxDataWriteRawStart(TGXFileRec_t *TGXFile, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataWriteRawStart(SyId, ExplTxt, Dimen, Typ, UserInfo);
 }
 
-int gdxDataWriteStr(TGXFileRec_t *pgdx, const char *KeyStr[], const double Values[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxDataWriteStr(KeyStr, Values);
+int gdxDataWriteStr(TGXFileRec_t *TGXFile, const char *KeyStr[], const double Values[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataWriteStr(KeyStr, Values);
 }
 
-int gdxGetDLLVersion(TGXFileRec_t *pgdx, char *V) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxGetDLLVersion(V);
+int gdxGetDLLVersion(TGXFileRec_t *TGXFile, char *V) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetDLLVersion(V);
 }
 
-int gdxErrorCount(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxErrorCount();
+int gdxErrorCount(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxErrorCount();
 }
 
-int gdxErrorStr(TGXFileRec_t *pgdx, int ErrNr, char *ErrMsg) {
-    return pgdx ? reinterpret_cast<gxfile::TGXFileObj*>(pgdx)->gdxErrorStr(ErrNr, ErrMsg) : gxfile::TGXFileObj::gdxErrorStrStatic(ErrNr, ErrMsg);
+int gdxErrorStr(TGXFileRec_t *TGXFile, int ErrNr, char *ErrMsg) {
+    return TGXFile ? reinterpret_cast<gxfile::TGXFileObj*>(TGXFile)->gdxErrorStr(ErrNr, ErrMsg) : gxfile::TGXFileObj::gdxErrorStrStatic(ErrNr, ErrMsg);
 }
 
-int gdxFileInfo(TGXFileRec_t *pgdx, int *FileVer, int *ComprLev) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxFileInfo(*FileVer, *ComprLev);
+int gdxFileInfo(TGXFileRec_t *TGXFile, int *FileVer, int *ComprLev) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxFileInfo(*FileVer, *ComprLev);
 }
 
-int gdxFileVersion(TGXFileRec_t *pgdx, char *FileStr, char *ProduceStr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxFileVersion(FileStr, ProduceStr);
+int gdxFileVersion(TGXFileRec_t *TGXFile, char *FileStr, char *ProduceStr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxFileVersion(FileStr, ProduceStr);
 }
 
-int gdxFilterExists(TGXFileRec_t *pgdx, int FilterNr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxFilterExists(FilterNr);
+int gdxFilterExists(TGXFileRec_t *TGXFile, int FilterNr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxFilterExists(FilterNr);
 }
 
-int gdxFilterRegister(TGXFileRec_t *pgdx, int UelMap) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxFilterRegister(UelMap);
+int gdxFilterRegister(TGXFileRec_t *TGXFile, int UelMap) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxFilterRegister(UelMap);
 }
 
-int gdxFilterRegisterDone(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxFilterRegisterDone();
+int gdxFilterRegisterDone(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxFilterRegisterDone();
 }
 
-int gdxFilterRegisterStart(TGXFileRec_t *pgdx, int FilterNr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxFilterRegisterStart(FilterNr);
+int gdxFilterRegisterStart(TGXFileRec_t *TGXFile, int FilterNr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxFilterRegisterStart(FilterNr);
 }
 
-int gdxFindSymbol(TGXFileRec_t *pgdx, const char *SyId, int *SyNr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxFindSymbol(SyId, *SyNr);
+int gdxFindSymbol(TGXFileRec_t *TGXFile, const char *SyId, int *SyNr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxFindSymbol(SyId, *SyNr);
 }
 
-int gdxGetElemText(TGXFileRec_t *pgdx, int TxtNr, char *Txt, int *Node) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxGetElemText(TxtNr, Txt, *Node);
+int gdxGetElemText(TGXFileRec_t *TGXFile, int TxtNr, char *Txt, int *Node) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetElemText(TxtNr, Txt, *Node);
 }
 
-int gdxGetLastError(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxGetLastError();
+int gdxGetLastError(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetLastError();
 }
 
-int gdxGetMemoryUsed(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxGetMemoryUsed();
+int gdxGetMemoryUsed(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetMemoryUsed();
 }
 
-int gdxGetSpecialValues(TGXFileRec_t *pgdx, double AVals[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxGetSpecialValues(AVals);
+int gdxGetSpecialValues(TGXFileRec_t *TGXFile, double AVals[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetSpecialValues(AVals);
 }
 
-int gdxGetUEL(TGXFileRec_t *pgdx, int UelNr, char *Uel) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxGetUEL(UelNr, Uel);
+int gdxGetUEL(TGXFileRec_t *TGXFile, int UelNr, char *Uel) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetUEL(UelNr, Uel);
 }
 
-int gdxMapValue(TGXFileRec_t *pgdx, double D, int *sv) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxMapValue(D, *sv);
+int gdxMapValue(TGXFileRec_t *TGXFile, double D, int *sv) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxMapValue(D, *sv);
 }
 
-int gdxOpenAppend(TGXFileRec_t *pgdx, const char *FileName, const char *Producer, int *ErrNr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxOpenAppend(FileName, Producer, *ErrNr);
+int gdxOpenAppend(TGXFileRec_t *TGXFile, const char *FileName, const char *Producer, int *ErrNr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxOpenAppend(FileName, Producer, *ErrNr);
 }
 
-int gdxOpenReadEx(TGXFileRec_t *pgdx, const char *FileName, int ReadMode, int *ErrNr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxOpenReadEx(FileName, ReadMode, *ErrNr);
+int gdxOpenReadEx(TGXFileRec_t *TGXFile, const char *FileName, int ReadMode, int *ErrNr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxOpenReadEx(FileName, ReadMode, *ErrNr);
 }
 
-int gdxResetSpecialValues(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxResetSpecialValues();
+int gdxResetSpecialValues(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxResetSpecialValues();
 }
 
-int gdxSetHasText(TGXFileRec_t *pgdx, int SyNr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSetHasText(SyNr);
+int gdxSetHasText(TGXFileRec_t *TGXFile, int SyNr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSetHasText(SyNr);
 }
 
-int gdxSetReadSpecialValues(TGXFileRec_t *pgdx, const double AVals[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSetReadSpecialValues(AVals);
+int gdxSetReadSpecialValues(TGXFileRec_t *TGXFile, const double AVals[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSetReadSpecialValues(AVals);
 }
 
-int gdxSetSpecialValues(TGXFileRec_t *pgdx, const double AVals[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSetSpecialValues(AVals);
+int gdxSetSpecialValues(TGXFileRec_t *TGXFile, const double AVals[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSetSpecialValues(AVals);
 }
 
-int gdxSetTextNodeNr(TGXFileRec_t *pgdx, int TxtNr, int Node) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSetTextNodeNr(TxtNr, Node);
+int gdxSetTextNodeNr(TGXFileRec_t *TGXFile, int TxtNr, int Node) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSetTextNodeNr(TxtNr, Node);
 }
 
-int gdxSetTraceLevel(TGXFileRec_t *pgdx, int N, const char *s) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSetTraceLevel(N, s);
+int gdxSetTraceLevel(TGXFileRec_t *TGXFile, int N, const char *s) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSetTraceLevel(N, s);
 }
 
-int gdxSymbIndxMaxLength(TGXFileRec_t *pgdx, int SyNr, int LengthInfo[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbIndxMaxLength(SyNr, LengthInfo);
+int gdxSymbIndxMaxLength(TGXFileRec_t *TGXFile, int SyNr, int LengthInfo[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbIndxMaxLength(SyNr, LengthInfo);
 }
 
-int gdxSymbMaxLength(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbMaxLength();
+int gdxSymbMaxLength(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbMaxLength();
 }
 
-int gdxSymbolAddComment(TGXFileRec_t *pgdx, int SyNr, const char *Txt) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbolAddComment(SyNr, Txt);
+int gdxSymbolAddComment(TGXFileRec_t *TGXFile, int SyNr, const char *Txt) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbolAddComment(SyNr, Txt);
 }
 
-int gdxSymbolGetComment(TGXFileRec_t *pgdx, int SyNr, int N, char *Txt) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbolGetComment(SyNr, N, Txt);
+int gdxSymbolGetComment(TGXFileRec_t *TGXFile, int SyNr, int N, char *Txt) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbolGetComment(SyNr, N, Txt);
 }
 
-int gdxSymbolGetDomain(TGXFileRec_t *pgdx, int SyNr, int DomainSyNrs[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbolGetDomain(SyNr, DomainSyNrs);
+int gdxSymbolGetDomain(TGXFileRec_t *TGXFile, int SyNr, int DomainSyNrs[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbolGetDomain(SyNr, DomainSyNrs);
 }
 
-int gdxSymbolGetDomainX(TGXFileRec_t *pgdx, int SyNr, char *DomainIDs[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbolGetDomainX(SyNr, DomainIDs);
+int gdxSymbolGetDomainX(TGXFileRec_t *TGXFile, int SyNr, char *DomainIDs[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbolGetDomainX(SyNr, DomainIDs);
 }
 
-int gdxSymbolDim(TGXFileRec_t *pgdx, int SyNr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbolDim(SyNr);
+int gdxSymbolDim(TGXFileRec_t *TGXFile, int SyNr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbolDim(SyNr);
 }
 
-int gdxSymbolInfo(TGXFileRec_t *pgdx, int SyNr, char *SyId, int *Dimen, int *Typ) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbolInfo(SyNr, SyId, *Dimen, *Typ);
+int gdxSymbolInfo(TGXFileRec_t *TGXFile, int SyNr, char *SyId, int *Dimen, int *Typ) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbolInfo(SyNr, SyId, *Dimen, *Typ);
 }
 
-int gdxSymbolInfoX(TGXFileRec_t *pgdx, int SyNr, int *RecCnt, int *UserInfo, char *ExplTxt) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbolInfoX(SyNr, *RecCnt, *UserInfo, ExplTxt);
+int gdxSymbolInfoX(TGXFileRec_t *TGXFile, int SyNr, int *RecCnt, int *UserInfo, char *ExplTxt) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbolInfoX(SyNr, *RecCnt, *UserInfo, ExplTxt);
 }
 
-int gdxSymbolSetDomain(TGXFileRec_t *pgdx, const char *DomainIDs[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbolSetDomain(DomainIDs);
+int gdxSymbolSetDomain(TGXFileRec_t *TGXFile, const char *DomainIDs[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbolSetDomain(DomainIDs);
 }
 
-int gdxSymbolSetDomainX(TGXFileRec_t *pgdx, int SyNr, const char *DomainIDs[]) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSymbolSetDomainX(SyNr, DomainIDs);
+int gdxSymbolSetDomainX(TGXFileRec_t *TGXFile, int SyNr, const char *DomainIDs[]) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSymbolSetDomainX(SyNr, DomainIDs);
 }
 
-int gdxSystemInfo(TGXFileRec_t *pgdx, int *SyCnt, int *UelCnt) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxSystemInfo(*SyCnt, *UelCnt);
+int gdxSystemInfo(TGXFileRec_t *TGXFile, int *SyCnt, int *UelCnt) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxSystemInfo(*SyCnt, *UelCnt);
 }
 
-int gdxUELMaxLength(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUELMaxLength();
+int gdxUELMaxLength(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUELMaxLength();
 }
 
-int gdxUELRegisterDone(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUELRegisterDone();
+int gdxUELRegisterDone(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUELRegisterDone();
 }
 
-int gdxUELRegisterMap(TGXFileRec_t *pgdx, int UMap, const char *Uel) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUELRegisterMap(UMap, Uel);
+int gdxUELRegisterMap(TGXFileRec_t *TGXFile, int UMap, const char *Uel) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUELRegisterMap(UMap, Uel);
 }
 
-int gdxUELRegisterMapStart(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUELRegisterMapStart();
+int gdxUELRegisterMapStart(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUELRegisterMapStart();
 }
 
-int gdxUELRegisterRaw(TGXFileRec_t *pgdx, const char *Uel) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUELRegisterRaw(Uel);
+int gdxUELRegisterRaw(TGXFileRec_t *TGXFile, const char *Uel) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUELRegisterRaw(Uel);
 }
 
-int gdxUELRegisterRawStart(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUELRegisterRawStart();
+int gdxUELRegisterRawStart(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUELRegisterRawStart();
 }
 
-int gdxUELRegisterStr(TGXFileRec_t *pgdx, const char *Uel, int *UelNr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUELRegisterStr(Uel, *UelNr);
+int gdxUELRegisterStr(TGXFileRec_t *TGXFile, const char *Uel, int *UelNr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUELRegisterStr(Uel, *UelNr);
 }
 
-int gdxUELRegisterStrStart(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUELRegisterStrStart();
+int gdxUELRegisterStrStart(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUELRegisterStrStart();
 }
 
-int gdxUMFindUEL(TGXFileRec_t *pgdx, const char *Uel, int *UelNr, int *UelMap) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUMFindUEL(Uel, *UelNr, *UelMap);
+int gdxUMFindUEL(TGXFileRec_t *TGXFile, const char *Uel, int *UelNr, int *UelMap) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUMFindUEL(Uel, *UelNr, *UelMap);
 }
 
-int gdxUMUelGet(TGXFileRec_t *pgdx, int UelNr, char *Uel, int *UelMap) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUMUelGet(UelNr, Uel, *UelMap);
+int gdxUMUelGet(TGXFileRec_t *TGXFile, int UelNr, char *Uel, int *UelMap) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUMUelGet(UelNr, Uel, *UelMap);
 }
 
-int gdxUMUelInfo(TGXFileRec_t *pgdx, int *UelCnt, int *HighMap) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxUMUelInfo(*UelCnt, *HighMap);
+int gdxUMUelInfo(TGXFileRec_t *TGXFile, int *UelCnt, int *HighMap) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxUMUelInfo(*UelCnt, *HighMap);
 }
 
-int gdxGetDomainElements(TGXFileRec_t *pgdx, int SyNr, int DimPos, int FilterNr, ::TDomainIndexProc_t DP, int *NrElem, void *Uptr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxGetDomainElements(SyNr, DimPos, FilterNr, (gxfile::TDomainIndexProc_t)DP, *NrElem, Uptr);
+int gdxGetDomainElements(TGXFileRec_t *TGXFile, int SyNr, int DimPos, int FilterNr, ::TDomainIndexProc_t DP, int *NrElem, void *Uptr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetDomainElements(SyNr, DimPos, FilterNr, (gxfile::TDomainIndexProc_t)DP, *NrElem, Uptr);
 }
 
-int gdxCurrentDim(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxCurrentDim();
+int gdxCurrentDim(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxCurrentDim();
 }
 
-int gdxRenameUEL(TGXFileRec_t *pgdx, const char *OldName, const char *NewName) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxRenameUEL(OldName, NewName);
+int gdxRenameUEL(TGXFileRec_t *TGXFile, const char *OldName, const char *NewName) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxRenameUEL(OldName, NewName);
 }
 
-int gdxStoreDomainSets(TGXFileRec_t *pgdx) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxStoreDomainSets();
+int gdxStoreDomainSets(TGXFileRec_t *TGXFile) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxStoreDomainSets();
 }
 
-void gdxStoreDomainSetsSet(TGXFileRec_t *pgdx, int x) {
-    reinterpret_cast<gxfile::TGXFileObj *>(pgdx)->gdxStoreDomainSetsSet(x);
+void gdxStoreDomainSetsSet(TGXFileRec_t *TGXFile, int x) {
+    reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxStoreDomainSetsSet(x);
 }
 
-int gdxFree(TGXFileRec_t **pgdx) {
-    gdxDestroy(pgdx);
+int gdxFree(TGXFileRec_t **TGXFile) {
+    gdxDestroy(TGXFile);
     return 1;
 }
 
@@ -417,10 +417,10 @@ int gdxLibraryUnload() {
 }
 
 // FIXME: For some reason using the 32-bit DLL (gdxcclib.dll) directly from Delphi fails close to here
-void gdxCreateD(TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen) {
+void gdxCreateD(TGXFileRec_t **TGXFile, const char *sysDir, char *msgBuf, int msgBufLen) {
     // FIXME: Is this correct?
     doSetLoadPath(sysDir);
-    gdxCreate(pgdx, msgBuf, msgBufLen);
+    gdxCreate(TGXFile, msgBuf, msgBufLen);
 }
 
 int gdxDataReadRawFast(TGXFileRec_t *TGXFile, int SyNr, ::TDataStoreProc_t DP, int *NrRecs) {
