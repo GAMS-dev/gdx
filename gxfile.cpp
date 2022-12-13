@@ -352,8 +352,8 @@ namespace gxfile {
         MajContext = "OpenWrite";
         TraceLevel = defaultTraceLevel;
         InitErrors();
-        NameList.clear();
-        NameListOrdered.clear();
+        NameList = std::make_unique<gdlib::strhash::TXStrHashList<PgdxSymbRecord>>();
+        NameList->OneBased = true;
         UELTable = std::make_unique<UELTableImplChoice>();
         AcronymList.clear();
         FilterList.clear();
@@ -514,14 +514,14 @@ namespace gxfile {
             FFile->SetPosition(NextWritePosition);
             int64_t SymbPos = NextWritePosition;
             FFile->WriteString(MARK_SYMB);
-            FFile->WriteInteger(static_cast<int>(NameList.size()));
+            FFile->WriteInteger(static_cast<int>(NameList->size()));
 #ifdef YAML
             YFile->AddKeyItem("symbols");
             YFile->IncIndentLevel();
 #endif
-            for(const auto &name : NameListOrdered) {
-                const auto &PSy = NameList[name];
-                FFile->WriteString(name);
+            for(int N{1}; N<=NameList->Count(); N++) {
+                FFile->WriteString(NameList->GetString(N));
+                const auto PSy = *NameList->GetObject(N);
                 FFile->WriteInt64(PSy->SPosition);
                 FFile->WriteInteger(PSy->SDim);
                 FFile->WriteByte(PSy->SDataType);
@@ -534,7 +534,7 @@ namespace gxfile {
 
 #ifdef YAML
                 if(writeAsYAML) {
-                    YFile->AddKey(name);
+                    YFile->AddKey(NameList->GetString(N));
                     YFile->IncIndentLevel();
                     YFile->AddKeyValue("position", static_cast<int>(PSy->SPosition));
                     YFile->AddKeyValue("dim", PSy->SDim);
@@ -649,10 +649,10 @@ namespace gxfile {
             WRYAML(YFile->AddKeyItem("symbol_domains"));
             WRYAML(YFile->IncIndentLevel());
             int ix{1};
-            for(const auto &name : NameListOrdered) {
-                const auto &PSy = NameList[name];
+            for(int N{1}; N<=NameList->Count(); N++) {
+                const auto PSy = *(*NameList)[N];
                 if(PSy->SDomStrings) {
-                    WRYAML(YFile->AddKeyItem(name));
+                    WRYAML(YFile->AddKeyItem(NameList->GetString(N)));
                     WRYAML(YFile->IncIndentLevel());
                     FFile->WriteInteger(ix);
                     for(const auto &i : (*PSy->SDomStrings)) {
@@ -689,8 +689,16 @@ namespace gxfile {
         int res{FFile ? FFile->GetLastIOResult() : 1};
 
         // Many free operations. Some not necessary anymore due to RAII pattern (out of scope -> destroy)
-        for(const auto &[name, psy] : NameList) {
-            delete psy;
+        if(NameList) {
+            for (int N{1}; N <= NameList->Count(); N++) {
+                const auto PSy = *NameList->GetObject(N);
+                //PSy->SDomSymbols = nullptr;
+                //PSy->SCommentsList.clear();
+                //PSy->SSetBitMap = nullptr;
+                //PSy->SDomStrings = nullptr;
+                delete PSy;
+            }
+            NameList = nullptr;
         }
 
         FFile = nullptr;
@@ -799,9 +807,7 @@ namespace gxfile {
         obj->SSetBitMap = utils::in((gdxSyType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
                 std::make_unique<std::vector<bool>>() : nullptr;
 
-        CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = static_cast<int>(NameListOrdered.size()+1); // +1 for universe
-        NameList[AName] = CurSyPtr;
-        NameListOrdered.push_back(AName);
+        CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = NameList->AddObject(AName, CurSyPtr); // +1 for universe
         FCurrentDim = ADim;
         // old case; we never write V6
         // V = 0..Dim which dimension changed
@@ -841,7 +847,7 @@ namespace gxfile {
     }
 
     bool TGXFileObj::IsGoodNewSymbol(const std::string &s) {
-        return !(ErrorCondition(NameList.find(s) == NameList.end(), ERR_DUPLICATESYMBOL) ||
+        return !(ErrorCondition(NameList->IndexOf(s) < 1, ERR_DUPLICATESYMBOL) ||
                  ErrorCondition(utils::indexOf<TAcronym>(AcronymList, [&s](auto acro) { return utils::sameText(acro.AcrName, s); }) == -1, ERR_DUPLICATESYMBOL) ||
                  ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT));
     }
@@ -925,8 +931,8 @@ namespace gxfile {
         }
         ReadUniverse = !SyNr;
         if (!ReadUniverse) {
-            if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return -1;
-            CurSyPtr = (*symbolWithIndex(SyNr)).second;
+            if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return -1;
+            CurSyPtr = *NameList->GetObject(SyNr);
             if (CurSyPtr->SDataType == dt_alias) {
                 do {
                     SyNr = CurSyPtr->SUserInfo;
@@ -934,7 +940,7 @@ namespace gxfile {
                         ReadUniverse = true;
                         break;
                     }
-                    CurSyPtr = (*symbolWithIndex(SyNr)).second;
+                    CurSyPtr = *NameList->GetObject(SyNr);
                 } while (CurSyPtr->SDataType == dt_alias);
                 if (!ReadUniverse) {
                     assert(CurSyPtr->SDataType == dt_set && "Bad aliased set-1");
@@ -1655,8 +1661,15 @@ namespace gxfile {
     // See Also:
     //   gdxSymbolInfo, gdxSymbolInfoX
     int TGXFileObj::gdxFindSymbol(const std::string &SyId, int &SyNr) {
-        SyNr = symbolNameToIndex(SyId);
-        return SyNr != -1;
+        if(SyId == "*"s) {
+            SyNr = 0;
+            return true;
+        }
+        if(NameList) {
+            SyNr = NameList->IndexOf(SyId);
+            return SyNr >= 1;
+        }
+        return false;
     }
 
     // Brief:
@@ -1746,15 +1759,12 @@ namespace gxfile {
             return true;
         }
 
-        if (!NameList.empty() && SyNr > 0 && SyNr <= NameList.size()) {
-            auto maybeNameAndSym = symbolWithIndex(SyNr);
-            if (maybeNameAndSym) {
-                auto &[name, sym] = *maybeNameAndSym;
-                utils::assignStrToBuf(name, SyId);
-                Dim = sym->SDim;
-                Typ = sym->SDataType;
-                return true;
-            }
+        if (NameList && !NameList->empty() && SyNr > 0 && SyNr <= NameList->size()) {
+            const auto sym = *NameList->GetObject(SyNr);
+            utils::assignStrToBuf(NameList->GetString(SyNr), SyId);
+            Dim = sym->SDim;
+            Typ = sym->SDataType;
+            return true;
         }
 
         SyId[0] = '\0';
@@ -1873,8 +1883,8 @@ namespace gxfile {
         FFile->SetPosition(SymbPos);
         if(ErrorCondition(FFile->ReadString() == MARK_SYMB, ERR_OPEN_SYMBOLMARKER1)) return FileErrorNr();
         int NrElem {FFile->ReadInteger()};
-        NameList.clear();
-        NameListOrdered.clear();
+        NameList = std::make_unique<gdlib::strhash::TXStrHashList<PgdxSymbRecord>>();
+        NameList->OneBased = true;
         AcronymList.clear();
         FilterList.clear();
         const int NrElemsOfSym = NrElem;
@@ -1907,9 +1917,7 @@ namespace gxfile {
             }
             CurSyPtr->SSetBitMap = nullptr;
             CurSyPtr->SDomStrings = nullptr;
-            NameList[S] = CurSyPtr;
-            NameListOrdered.push_back(S);
-            CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = static_cast<int>(NameListOrdered.size());
+            CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = NameList->StoreObject(S, CurSyPtr);
         }
 
         // reading UEL table
@@ -1973,13 +1981,10 @@ namespace gxfile {
             while (true) {
                 int SyNr = FFile->ReadInteger();
                 if (SyNr <= 0) break;
-                auto maybeNameAndSym = symbolWithIndex(SyNr);
-                if (maybeNameAndSym) {
-                    auto sym = (*maybeNameAndSym).second;
-                    sym->SDomStrings = std::make_unique<std::vector<int>>(sym->SDim);
-                    for (auto &SDomString : *sym->SDomStrings)
-                        SDomString = FFile->ReadInteger();
-                }
+                const auto sym = *NameList->GetObject(SyNr);
+                sym->SDomStrings = std::make_unique<std::vector<int>>(sym->SDim);
+                for (auto &SDomString : *sym->SDomStrings)
+                    SDomString = FFile->ReadInteger();
             }
             if (ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER3)) return FileErrorNr();
         }
@@ -1990,12 +1995,6 @@ namespace gxfile {
         fstatus = stat_read;
         FFile->SetCompression(false);
         return true;
-    }
-
-    std::optional<std::pair<const std::string, PgdxSymbRecord>> TGXFileObj::symbolWithIndex(int index) {
-        if(index < 1 || index > NameListOrdered.size()) return std::nullopt;
-        std::string name = NameListOrdered[index-1];
-        return std::make_optional(std::make_pair(name, NameList[name]));
     }
 
     // Summary:
@@ -2014,8 +2013,8 @@ namespace gxfile {
     //   gdxSymbolSetDomain
     int TGXFileObj::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
         if(!MajorCheckMode("AddAlias", AnyWriteMode)) return false;
-        int SyNr1 { Id1 == "*" ? std::numeric_limits<int>::max() : symbolNameToIndex(Id1) };
-        int SyNr2 { Id2 == "*" ? std::numeric_limits<int>::max() : symbolNameToIndex(Id2) };
+        int SyNr1 { Id1 == "*" ? std::numeric_limits<int>::max() : NameList->IndexOf(Id1) };
+        int SyNr2 { Id2 == "*" ? std::numeric_limits<int>::max() : NameList->IndexOf(Id2) };
         if(ErrorCondition((SyNr1 >= 0) != (SyNr2 >= 0), ERR_ALIASSETEXPECTED)) return false;
         int SyNr;
         std::string AName;
@@ -2027,7 +2026,7 @@ namespace gxfile {
             AName = Id1;
         }
         if(SyNr == std::numeric_limits<int>::max()) SyNr = 0;
-        else if(ErrorCondition(utils::in(symbolWithIndex(SyNr)->second->SDataType, dt_set, dt_alias), ERR_ALIASSETEXPECTED)) return false;
+        else if(ErrorCondition(utils::in((*NameList->GetObject(SyNr))->SDataType, dt_set, dt_alias), ERR_ALIASSETEXPECTED)) return false;
         if(!IsGoodNewSymbol(AName)) return false;
         auto SyPtr = new TgdxSymbRecord{};
         SyPtr->SDataType = dt_alias;
@@ -2036,13 +2035,11 @@ namespace gxfile {
             SyPtr->SDim = 1;
             SyPtr->SExplTxt = "Aliased with *"s;
         } else {
-            SyPtr->SDim = symbolWithIndex(SyNr)->second->SDim;
-            SyPtr->SExplTxt = "Aliased with "s + symbolWithIndex(SyNr)->first;
+            SyPtr->SDim = (*NameList->GetObject(SyNr))->SDim;
+            SyPtr->SExplTxt = "Aliased with "s + NameList->GetString(SyNr);
         }
         // TODO: Also the Delphi source does not set SSyNr here correctly, hence the helper field "SSyNrActual" is used
-        NameList[AName] = SyPtr;
-        NameListOrdered.push_back(AName);
-        SyPtr->SSyNrActual = static_cast<int>(NameListOrdered.size());
+        SyPtr->SSyNrActual = NameList->AddObject(AName, SyPtr);
         return true;
     }
 
@@ -2431,8 +2428,8 @@ namespace gxfile {
     // See Also:
     //   gdxSymbolSetDomain, gdxSymbolGetDomainX
     int TGXFileObj::gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) {
-        if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
-        PgdxSymbRecord SyPtr{ (*symbolWithIndex(SyNr)).second };
+        if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return false;
+        PgdxSymbRecord SyPtr{ (*NameList->GetObject(SyNr)) };
         for (int D{}; D < SyPtr->SDim; D++)
             DomainSyNrs[D] = !SyPtr->SDomSymbols || (*SyPtr->SDomSymbols)[D] == 0 ? 0 : (*SyPtr->SDomSymbols)[D];
         return true;
@@ -2453,8 +2450,8 @@ namespace gxfile {
     // See Also:
     //   gdxSymbolSetDomainX, gdxSymbolSetDomain
     int TGXFileObj::gdxSymbolGetDomainX(int SyNr, char **DomainIDs) {
-        if (ErrorCondition(!NameList.empty() && SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return 0;
-        PgdxSymbRecord SyPtr{ (*symbolWithIndex(SyNr)).second };
+        if (ErrorCondition(!NameList->empty() && SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return 0;
+        PgdxSymbRecord SyPtr{ (*NameList->GetObject(SyNr)) };
 
         for(int D{}; D<SyPtr->SDim; D++) {
             DomainIDs[D][0] = '*';
@@ -2474,7 +2471,7 @@ namespace gxfile {
         else {
             for (int D{}; D < SyPtr->SDim; D++)
                 if ((*SyPtr->SDomSymbols)[D])
-                    utils::stocp((*symbolWithIndex((*SyPtr->SDomSymbols)[D])).first, DomainIDs[D]);
+                    utils::stocp(NameList->GetString((*SyPtr->SDomSymbols)[D]), DomainIDs[D]);
             res = 3;
         }
 
@@ -2502,7 +2499,7 @@ namespace gxfile {
     //   gdxSymbolInfo, gdxSymbolInfoX, gdxFindSymbol
     int TGXFileObj::gdxSymbolDim(int SyNr) {
         if (!SyNr) return 1;
-        return NameList.empty() || SyNr < 1 || SyNr > NameList.size() ? -1 : (*symbolWithIndex(SyNr)).second->SDim;
+        return !NameList || NameList->empty() || SyNr < 1 || SyNr > NameList->size() ? -1 : (*NameList->GetObject(SyNr))->SDim;
     }
 
     // Brief:
@@ -2524,13 +2521,13 @@ namespace gxfile {
             utils::assignStrToBuf("Universe"s, ExplTxt);
             return true;
         }
-        else if (NameList.empty() || SyNr < 1 || SyNr > NameList.size()) {
+        else if (!NameList || NameList->empty() || SyNr < 1 || SyNr > NameList->size()) {
             RecCnt = UserInfo = 0;
             ExplTxt[0] = '\0';
             return false;
         }
         else {
-            const auto obj = (*symbolWithIndex(SyNr)).second;
+            const auto obj = (*NameList->GetObject(SyNr));
             RecCnt = !obj->SDim ? 1 : obj->SDataCount; // scalar trick
             UserInfo = obj->SUserInfo;
             utils::assignStrToBuf(obj->SExplTxt, ExplTxt);
@@ -2576,7 +2573,7 @@ namespace gxfile {
             else {
                 // Since SSyNr of alias symbol objects is 0
                 // so symbol number of alias is deduced by helper field SSyNrActual
-                DomSy = symbolNameToIndex(DomainIDs[D]);
+                DomSy = NameList->IndexOf(DomainIDs[D]);
                 if (DomSy <= -1) {
                     ReportError(ERR_UNKNOWNDOMAIN);
                     DomSy = -1;
@@ -2587,7 +2584,7 @@ namespace gxfile {
             if (DomSy > 0) {
                 SyNr = DomSy;
                 do {
-                    const auto *obj = (*symbolWithIndex(SyNr)).second;
+                    const auto *obj = (*NameList->GetObject(SyNr));
                     if (obj->SDataType == dt_set) break;
                     if (obj->SDataType == dt_alias) {
                         SyNr = obj->SUserInfo;
@@ -2604,8 +2601,8 @@ namespace gxfile {
             (*CurSyPtr->SDomSymbols)[D] = DomSy;
             if (domap && DomSy > 0) {
                 // this is the case for set i(i)
-                if (CurSyPtr->SDim != 1 || CurSyPtr != (*symbolWithIndex(DomSy)).second) {
-                    auto thesym = (*symbolWithIndex(SyNr)).second;
+                if (CurSyPtr->SDim != 1 || CurSyPtr != *NameList->GetObject(DomSy)) {
+                    auto thesym = (*NameList->GetObject(SyNr));
                     WrBitMaps[D] = thesym->SSetBitMap ? thesym->SSetBitMap.get() : nullptr;
                 }
             }
@@ -2635,8 +2632,8 @@ namespace gxfile {
     //   gdxSymbolSetDomain, gdxSymbolGetDomainX
     int TGXFileObj::gdxSymbolSetDomainX(int SyNr, const char **DomainIDs) {
         // check for write or append only
-        if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
-        PgdxSymbRecord SyPtr = (*symbolWithIndex(SyNr)).second;
+        if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return false;
+        PgdxSymbRecord SyPtr = (*NameList->GetObject(SyNr));
 
         if(verboseTrace && TraceLevel == TraceLevels::trl_all) {
             std::cout << "SetDomainX SyNr=" << SyNr << std::endl;
@@ -2673,7 +2670,7 @@ namespace gxfile {
     //   Returns a non-zero value
     int TGXFileObj::gdxSystemInfo(int &SyCnt, int &UelCnt) {
         UelCnt = UELTable ? (int)UELTable->size() : 0;
-        SyCnt = (int)NameList.size();
+        SyCnt = NameList ? (int)NameList->size() : 0;
         return true;
     }
 
@@ -3493,8 +3490,8 @@ namespace gxfile {
     // </CODE>
     int TGXFileObj::gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int& NrElem, void* UPtr)
     {
-        if (ErrorCondition(SyNr >= 1 && SyNr <= NameList.size(), ERR_BADSYMBOLINDEX)) return false;
-        int Dim{ (*symbolWithIndex(SyNr)).second->SDim };
+        if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return false;
+        int Dim{ (*NameList->GetObject(SyNr))->SDim };
         if (!Dim || ErrorCondition(DimPos >= 1 && DimPos <= Dim, ERR_BADDIMENSION)) return false;
         TDFilter *DFilter = FilterNr == DOMC_EXPAND ? nullptr : FilterList.FindFilter(FilterNr);
         if (FilterNr != DOMC_EXPAND && !DFilter) {
@@ -3954,7 +3951,7 @@ namespace gxfile {
     // Description:
     //
     int TGXFileObj::gdxSetHasText(int SyNr) {
-        return !NameList.empty() && SyNr >= 1 && SyNr <= NameList.size() && NameList[NameListOrdered[SyNr-1]]->SSetText;
+        return NameList && !NameList->empty() && SyNr >= 1 && SyNr <= NameList->size() && (*NameList->GetObject(SyNr))->SSetText;
     }
 
     // Brief:
@@ -4003,7 +4000,7 @@ namespace gxfile {
         int NrRecs;
         if ((TraceLevel >= TraceLevels::trl_some || fmode != fr_init)
             && !CheckMode("SymbIndxMaxLength", fr_init)
-            || SyNr < 0 || SyNr > NameListOrdered.size() || !gdxDataReadRawStart(SyNr, NrRecs))
+            || SyNr < 0 || SyNr > NameList->size() || !gdxDataReadRawStart(SyNr, NrRecs))
             return 0;
 
         int res{};
@@ -4034,11 +4031,10 @@ namespace gxfile {
     // Returns:
     //   The length of the longest symbol name
     int TGXFileObj::gdxSymbMaxLength() {
-        return utils::reduce<int, std::string>(NameListOrdered, 0,
-            [](int acc, const std::string& symbolName) {
-                return std::max<int>(acc, (int)symbolName.length());
-            }
-        );
+        int acc {};
+        for(int N{1}; N<=NameList->Count(); N++)
+            acc = std::max<int>(acc, (int)NameList->GetString(N).length());
+        return acc;
     }
 
     // Summary:
@@ -4055,7 +4051,7 @@ namespace gxfile {
         if (!MajorCheckMode("SymbolAddComment"s, AnyWriteMode)) return false;
         PgdxSymbRecord SyPtr;
         if (SyNr <= 0) SyPtr = CurSyPtr;
-        else SyPtr = !NameList.empty() && SyNr <= NameList.size() ? NameList[NameListOrdered[SyNr-1]] : nullptr;
+        else SyPtr = NameList && !NameList->empty() && SyNr <= NameList->size() ? *NameList->GetObject(SyNr) : nullptr;
         if (!SyPtr) {
             ReportError(ERR_NOSYMBOLFORCOMMENT);
             return false;
@@ -4075,8 +4071,8 @@ namespace gxfile {
     // See Also:
     //   gdxSymbolAddComment
     int TGXFileObj::gdxSymbolGetComment(int SyNr, int N, char *Txt) {
-        if (!NameList.empty() && SyNr >= 1 && SyNr <= NameList.size()) {
-            const auto obj = NameList[NameListOrdered[SyNr-1]];
+        if (NameList && !NameList->empty() && SyNr >= 1 && SyNr <= NameList->size()) {
+            const auto obj = *NameList->GetObject(SyNr);
             if (!obj->SCommentsList.empty() && N >= 1 && N <= obj->SCommentsList.size()) {
                 utils::assignStrToBuf(obj->SCommentsList[N - 1], Txt);
                 return true;
@@ -4219,18 +4215,12 @@ namespace gxfile {
     //   call to read a record.
     int TGXFileObj::gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs) {
         NrRecs = PrepareSymbolRead("gdxDataReadRawFast"s, SyNr, utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED).data(), fr_raw_data);
-        std::array<double, GMS_VAL_SCALE + 1> AVals;
+        std::array<double, GMS_VAL_SCALE + 1> AVals {};
         int AFDim;
         while(DoRead(AVals.data(), AFDim))
             DP(LastElem.data(), AVals.data());
         gdxDataReadDone();
         return NrRecs >= 0;
-    }
-
-    int TGXFileObj::symbolNameToIndex(const std::string &name) {
-        if(name == "*"s) return 0;
-        const auto it = NameList.find(name);
-        return it == NameList.end() ? -1 : it->second->SSyNrActual;
     }
 
     std::string TGXFileObj::getImplName() const {

@@ -360,9 +360,8 @@ namespace gxfile {
         std::array<std::optional<std::string>, GLOBAL_MAX_INDEX_DIM> LastStrElem;
         int DataSize{};
         uint8_t LastDataField;
-        std::map<std::string, PgdxSymbRecord, strCompCaseInsensitive> NameList;
+        std::unique_ptr<gdlib::strhash::TXStrHashList<PgdxSymbRecord>> NameList;
         // symbol names in order of insertion, used for quick iteration
-        std::vector<std::string> NameListOrdered;
         std::unique_ptr<std::vector<std::string>> DomainStrList;
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
         //std::map<global::gmsspecs::TIndex, TgdxValues> SortList;
@@ -439,9 +438,6 @@ namespace gxfile {
         // ...
 
         int gdxOpenReadXX(const std::string &Afn, int filemode, int ReadMode, int &ErrNr);
-
-        std::optional<std::pair<const std::string, PgdxSymbRecord>> symbolWithIndex(int index);
-        int symbolNameToIndex(const std::string &name);
 
     public:
         explicit TGXFileObj(std::string &ErrMsg);

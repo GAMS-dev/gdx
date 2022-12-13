@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 #set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
-set(ENABLE_YAML 0)
+set(ENABLE_YAML 1)
 
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)

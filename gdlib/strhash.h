@@ -86,10 +86,6 @@ namespace gdlib::strhash {
             }
         }
 
-        T *GetObject(int N) {
-            return &Buckets[N-(OneBased ? 1 : 0)].Obj;
-        }
-
         void SetObject(int N, T AObj) {
             Buckets[N-(OneBased ? 1 : 0)].Obj = AObj;
         }
@@ -97,10 +93,6 @@ namespace gdlib::strhash {
         void SetSortedObject(int N, T &AObj) {
             if(!FSorted) Sort();
             Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]].Obj = &AObj;
-        }
-
-        std::string &GetString(int N) {
-            return Buckets[N-(OneBased ? 1 : 0)].StrP;
         }
 
         std::string &GetSortedString(int N) {
@@ -194,6 +186,10 @@ namespace gdlib::strhash {
             PBuck.Obj = &AObj;
             return FCount - 1 + (OneBased ? 1 : 0);
         }*/
+
+        T *GetObject(int N) {
+            return &Buckets[N-(OneBased ? 1 : 0)].Obj;
+        }
 
         inline size_t GetBucketIndexByHash(int hash) {
             return (*PHashTable)[hash];
@@ -319,6 +315,10 @@ namespace gdlib::strhash {
             return GetObject(N);
         }
 
+        T& operator[](const std::string &key) {
+            return *GetObject(IndexOf(key));
+        }
+
         T* GetSortedObject(int N) {
             if(!FSorted) Sort();
             return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]].Obj;
@@ -335,6 +335,18 @@ namespace gdlib::strhash {
 
         int Count() const {
             return FCount;
+        }
+
+        int size() const {
+            return FCount;
+        }
+
+        bool empty() const {
+            return !FCount;
+        }
+
+        std::string &GetString(int N) {
+            return Buckets[N-(OneBased ? 1 : 0)].StrP;
         }
     };
 
