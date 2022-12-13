@@ -409,13 +409,12 @@ namespace utils {
     bool checkBOMOffset(const tBomIndic &potBOM, int &BOMOffset, std::string &msg);
     int strConvCppToDelphi(const std::string &s, char *delphistr);
 
-    inline void assignStrToBuf(const std::string &s, char *buf) {
-        const int maxShortStrSize = 256;
-        if(s.length() > maxShortStrSize) return;
+    inline void assignStrToBuf(const std::string &s, char *buf, int outBufSize = 256) {
+        if(s.length() > outBufSize) return;
 #if defined(_WIN32)
-        strncpy_s(buf, maxShortStrSize, s.c_str(), s.length()+1);
+        strcpy_s(buf, outBufSize, s.c_str());
 #else
-        strncpy(buf, s.c_str(), maxShortStrSize);
+        strcpy(buf, s.c_str());
 #endif
     }
 }

@@ -727,7 +727,7 @@ namespace gxfile {
         LastError = LastRepError = ERR_NOERROR;
     }
 
-    TGXFileObj::TGXFileObj(std::string &ErrMsg) : fstatus{stat_notopen} {
+    TGXFileObj::TGXFileObj(std::string &ErrMsg) : fstatus{stat_notopen}, TraceLevel{TraceLevels::trl_none} {
         ErrMsg.clear();
         gdxResetSpecialValues();
     }
@@ -1594,7 +1594,7 @@ namespace gxfile {
 
     int TGXFileObj::gdxErrorStrStatic(int ErrNr, char * ErrMsg) {
         const auto it = errorCodeToStr.find(ErrNr);
-        utils::assignStrToBuf(it == errorCodeToStr.end() ? rtl::sysutils_p3::SysErrorMessage(ErrNr) : it->second, ErrMsg);
+        utils::assignStrToBuf(it == errorCodeToStr.end() ? rtl::sysutils_p3::SysErrorMessage(ErrNr) : it->second, ErrMsg, GMS_SSSIZE);
         return true;
     }
 
@@ -1641,8 +1641,8 @@ namespace gxfile {
     // Description:
     //
     int TGXFileObj::gdxFileVersion(char *FileStr, char *ProduceStr) {
-        utils::assignStrToBuf(FileSystemID, FileStr);
-        utils::assignStrToBuf(FProducer, ProduceStr);
+        utils::assignStrToBuf(FileSystemID, FileStr, GMS_SSSIZE);
+        utils::assignStrToBuf(FProducer, ProduceStr, GMS_SSSIZE);
         return true;
     }
 
@@ -1761,7 +1761,7 @@ namespace gxfile {
 
         if (NameList && !NameList->empty() && SyNr > 0 && SyNr <= NameList->size()) {
             const auto sym = *NameList->GetObject(SyNr);
-            utils::assignStrToBuf(NameList->GetString(SyNr), SyId);
+            utils::assignStrToBuf(NameList->GetString(SyNr), SyId, GMS_SSSIZE);
             Dim = sym->SDim;
             Typ = sym->SDataType;
             return true;
@@ -2295,10 +2295,10 @@ namespace gxfile {
         if(TraceLevel >= TraceLevels::trl_all && !CheckMode("GetElemText", {}))
             return false;
         if(TxtNr < 0 || TxtNr >= SetTextList->size()) {
-            utils::assignStrToBuf(BADStr_PREFIX + std::to_string(TxtNr), Txt);
+            utils::assignStrToBuf(BADStr_PREFIX + std::to_string(TxtNr), Txt, GMS_SSSIZE);
             return false;
         } else {
-            utils::assignStrToBuf((*SetTextList)[TxtNr], Txt);
+            utils::assignStrToBuf((*SetTextList)[TxtNr], Txt, GMS_SSSIZE);
             Node = SetTextList->mapContains(Txt) ? SetTextList->strToNodeNr[Txt] : 0;
             return true;
         }
@@ -2518,7 +2518,7 @@ namespace gxfile {
         if (!SyNr) {
             RecCnt = UelCntOrig;
             UserInfo = 0;
-            utils::assignStrToBuf("Universe"s, ExplTxt);
+            utils::assignStrToBuf("Universe"s, ExplTxt, GMS_SSSIZE);
             return true;
         }
         else if (!NameList || NameList->empty() || SyNr < 1 || SyNr > NameList->size()) {
@@ -2530,7 +2530,7 @@ namespace gxfile {
             const auto obj = (*NameList->GetObject(SyNr));
             RecCnt = !obj->SDim ? 1 : obj->SDataCount; // scalar trick
             UserInfo = obj->SUserInfo;
-            utils::assignStrToBuf(obj->SExplTxt, ExplTxt);
+            utils::assignStrToBuf(obj->SExplTxt, ExplTxt, GMS_SSSIZE);
             return true;
         }
     }
@@ -2775,12 +2775,12 @@ namespace gxfile {
     //
     int TGXFileObj::gdxUMUelGet(int UelNr, char *Uel, int &UelMap) {
         if (UELTable && UelNr >= 1 && UelNr <= UELTable->size()) {
-            utils::assignStrToBuf((*UELTable)[UelNr-1], Uel);
+            utils::assignStrToBuf((*UELTable)[UelNr-1], Uel, GLOBAL_UEL_IDENT_SIZE);
             UelMap = UELTable->UsrUel2Ent.empty() ? -1 : UELTable->UsrUel2Ent.GetReverseMapping(UelNr);
             return true;
         }
         else {
-            utils::assignStrToBuf(BADUEL_PREFIX + std::to_string(UelNr), Uel);
+            utils::assignStrToBuf(BADUEL_PREFIX + std::to_string(UelNr), Uel, GLOBAL_UEL_IDENT_SIZE);
             UelMap = -1;
             return false;
         }
@@ -2892,7 +2892,7 @@ namespace gxfile {
             return false;
         }
         int EN = UELTable->UsrUel2Ent.GetMapping(uelNr);
-        utils::assignStrToBuf(EN >= 1 ? (*UELTable)[EN-1] : BADUEL_PREFIX + std::to_string(uelNr), Uel);
+        utils::assignStrToBuf(EN >= 1 ? (*UELTable)[EN-1] : BADUEL_PREFIX + std::to_string(uelNr), Uel, GLOBAL_UEL_IDENT_SIZE);
         return EN >= 1;
     }
 
@@ -3196,8 +3196,8 @@ namespace gxfile {
             return false;
         }
         auto acr = AcronymList[N-1];
-        utils::assignStrToBuf(acr.AcrName, AName);
-        utils::assignStrToBuf(acr.AcrText, Txt);
+        utils::assignStrToBuf(acr.AcrName, AName, GMS_SSSIZE);
+        utils::assignStrToBuf(acr.AcrText, Txt, GMS_SSSIZE);
         AIndx = acr.AcrMap;
         return true;
     }
@@ -3639,7 +3639,7 @@ namespace gxfile {
         if(Indx <= 0) AName[0] = '\0';
         else {
             int N {AcronymList.FindEntry(Indx)};
-            utils::assignStrToBuf(N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : AcronymList[N].AcrName, AName);
+            utils::assignStrToBuf(N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : AcronymList[N].AcrName, AName, GMS_SSSIZE);
             return true;
         }
         return false;
@@ -3684,7 +3684,7 @@ namespace gxfile {
     //
     // See Also:
     int TGXFileObj::gdxGetDLLVersion(char *V) const {
-        utils::assignStrToBuf(auditLine, V);
+        utils::assignStrToBuf(auditLine, V, GMS_SSSIZE);
         return true;
     }
 
@@ -4074,7 +4074,7 @@ namespace gxfile {
         if (NameList && !NameList->empty() && SyNr >= 1 && SyNr <= NameList->size()) {
             const auto obj = *NameList->GetObject(SyNr);
             if (!obj->SCommentsList.empty() && N >= 1 && N <= obj->SCommentsList.size()) {
-                utils::assignStrToBuf(obj->SCommentsList[N - 1], Txt);
+                utils::assignStrToBuf(obj->SCommentsList[N - 1], Txt, GMS_SSSIZE);
                 return true;
             }
         }
