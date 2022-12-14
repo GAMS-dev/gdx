@@ -370,8 +370,8 @@ namespace gxfile {
         // Reserve some space for positions
         MajorIndexPosition = FFile->GetPosition();
         for(int N{1}; N<=10; N++) FFile->WriteInt64(0);
-        SetTextList = std::make_unique<TSetTextList>();
-        SetTextList->Add(""s);
+        SetTextList = std::make_unique<gdlib::strhash::TXStrHashList<int>>();
+        SetTextList->AddObject(""s, -1);
         gdxResetSpecialValues();
         NextWritePosition = FFile->GetPosition();
         fmode = fw_init;
@@ -591,7 +591,8 @@ namespace gxfile {
             WRYAML(YFile->IncIndentLevel());
             FFile->WriteInteger(static_cast<int>(SetTextList ? SetTextList->size() : 0));
             if(SetTextList) {
-                for (const auto &SetText: *SetTextList) {
+                for (int N{}; N < SetTextList->Count(); N++) {
+                    const std::string& SetText = SetTextList->GetString(N);
                     FFile->WriteString(SetText);
                     WRYAML(YFile->AddItem(SetText));
                 }
@@ -1941,12 +1942,12 @@ namespace gxfile {
         if (ReadMode % 2 == 0) { // reading text table
             FFile->SetCompression(DoUncompress);
             FFile->SetPosition(SetTextPos);
-            SetTextList = std::make_unique<TSetTextList>();
+            SetTextList = std::make_unique<gdlib::strhash::TXStrHashList<int>>();
             if(ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1)) return FileErrorNr();
             NrElem = FFile->ReadInteger();
-            SetTextList->reserve(NrElem);
+            //SetTextList->reserve(NrElem);
             for (int N{}; N < NrElem; N++) {
-                int TextNum{ SetTextList->Add(FFile->ReadString()) };
+                int TextNum{ SetTextList->AddObject(FFile->ReadString(), -1) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
                     MapSetText.resize(NrElem);
                     // TODO: Could this be replaced by std::iota?
@@ -2059,7 +2060,7 @@ namespace gxfile {
     int TGXFileObj::gdxAddSetText(const std::string &Txt, int &TxtNr) {
         if(!SetTextList || TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText", {}))
             return false;
-        TxtNr = SetTextList->Add(MakeGoodExplText(Txt));
+        TxtNr = SetTextList->AddObject(MakeGoodExplText(Txt), 0);
         return true;
     }
 
@@ -2298,8 +2299,9 @@ namespace gxfile {
             utils::assignStrToBuf(BADStr_PREFIX + std::to_string(TxtNr), Txt, GMS_SSSIZE);
             return false;
         } else {
-            utils::assignStrToBuf((*SetTextList)[TxtNr], Txt, GMS_SSSIZE);
-            Node = SetTextList->mapContains(Txt) ? SetTextList->strToNodeNr[Txt] : 0;
+            utils::assignStrToBuf(SetTextList->GetString(TxtNr), Txt, GMS_SSSIZE);
+            int ix{ SetTextList->IndexOf(Txt) };
+            Node = ix == -1 ? 0 : *SetTextList->GetObject(ix);
             return true;
         }
     }
@@ -3442,8 +3444,8 @@ namespace gxfile {
     {
         if (!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("SetTextNodeNr", {}))) return false;
         auto& obj = *SetTextList;
-        if (TxtNr >= 0 && TxtNr < obj.size() && !obj.mapContains(obj[TxtNr])) {
-            obj.strToNodeNr[obj[TxtNr]] = Node;
+        if (TxtNr >= 0 && TxtNr < obj.size() && *obj.GetObject(TxtNr) == -1) {
+            *obj.GetObject(TxtNr) = Node;
             return true;
         }
         return false;
@@ -4434,20 +4436,6 @@ namespace gxfile {
                 return i;
         }
         return -1;
-    }
-
-    bool TSetTextList::mapContains(const std::string& s) {
-        return std::any_of(strToNodeNr.begin(), strToNodeNr.end(), [&s](const auto &pair) {
-            return utils::sameText(s, pair.first);
-        });
-    }
-
-    int TSetTextList::Add(const std::string &s) {
-        for(int i{}; i<size(); i++)
-            if(utils::sameText((*this)[i], s))
-                return i;
-        emplace_back(s);
-        return static_cast<int>(size()-1);
     }
 
     void TUELTableLegacy::clear() {

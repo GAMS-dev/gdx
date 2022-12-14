@@ -324,13 +324,6 @@ namespace gxfile {
     using TIntlValueMapDbl = std::array<double, vm_count>;
     using TIntlValueMapI64 = std::array<int64_t, vm_count>;
 
-    class TSetTextList : public std::vector<std::string> {
-    public:
-        std::map<std::string, int, strCompCaseInsensitive> strToNodeNr;
-        bool mapContains(const std::string& s);
-        int Add(const std::string &s);
-    };
-
     using TDomainIndexProc_t = void(*)(int RawIndex, int MappedIndex, void* Uptr);
     using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
     using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
@@ -353,13 +346,14 @@ namespace gxfile {
         enum {stat_notopen, stat_read, stat_write} fstatus;
         int fComprLev{};
         std::unique_ptr<IUELTable> UELTable;
-        std::unique_ptr<TSetTextList> SetTextList {};
+        std::unique_ptr<gdlib::strhash::TXStrHashList<int>> SetTextList {};
         std::vector<int> MapSetText;
         int FCurrentDim{};
         std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem, PrevElem, MinElem, MaxElem;
         std::array<std::optional<std::string>, GLOBAL_MAX_INDEX_DIM> LastStrElem;
         int DataSize{};
         uint8_t LastDataField;
+        // FIXME: TODO: AS: Actually should be gdlib::gmsobj::TXStrPool!!!
         std::unique_ptr<gdlib::strhash::TXStrHashList<PgdxSymbRecord>> NameList;
         // symbol names in order of insertion, used for quick iteration
         std::unique_ptr<std::vector<std::string>> DomainStrList;
