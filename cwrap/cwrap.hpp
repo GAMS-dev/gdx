@@ -439,7 +439,6 @@ GDX_INLINE int gdxLibraryUnload() {
     return 1;
 }
 
-// FIXME: For some reason using the 32-bit DLL (gdxcclib.dll) directly from Delphi fails close to here
 GDX_INLINE void gdxCreateD(TGXFileRec_t **TGXFile, const char *sysDir, char *msgBuf, int msgBufLen) {
     // FIXME: Is this correct?
     doSetLoadPath(sysDir);

@@ -1,4 +1,3 @@
-// TODO: Get rid of cwrap and use TGXFileObj class in gdxcclib.cPP directly
 // TODO: Optional: Maybe also add variants of some heavily used functions that directly take Delphi short strings
 
 #define GDX_INLINE

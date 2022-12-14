@@ -337,7 +337,6 @@ namespace gxfile {
     //    Class for reading and writing gdx files
     class TGXFileObj : public gdxinterface::GDXInterface {
 #ifdef YAML
-        // TODO: Should only be included in compilation if -DYAML or something is set...
         std::unique_ptr<yaml::TYAMLFile> YFile;
 #endif
         bool writeAsYAML{}, writeAsText{};
