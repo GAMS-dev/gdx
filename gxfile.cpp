@@ -371,6 +371,7 @@ namespace gxfile {
         MajorIndexPosition = FFile->GetPosition();
         for(int N{1}; N<=10; N++) FFile->WriteInt64(0);
         SetTextList = std::make_unique<gdlib::strhash::TXStrHashList<int>>();
+        SetTextList->OneBased = false;
         SetTextList->AddObject(""s, 0);
         gdxResetSpecialValues();
         NextWritePosition = FFile->GetPosition();
@@ -1943,6 +1944,7 @@ namespace gxfile {
             FFile->SetCompression(DoUncompress);
             FFile->SetPosition(SetTextPos);
             SetTextList = std::make_unique<gdlib::strhash::TXStrHashList<int>>();
+            SetTextList->OneBased = false;
             if(ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1)) return FileErrorNr();
             NrElem = FFile->ReadInteger();
             //SetTextList->reserve(NrElem);
@@ -2300,8 +2302,7 @@ namespace gxfile {
             return false;
         } else {
             utils::assignStrToBuf(SetTextList->GetString(TxtNr), Txt, GMS_SSSIZE);
-            int ix{ SetTextList->IndexOf(Txt) };
-            Node = ix == -1 ? 0 : *SetTextList->GetObject(ix);
+            Node = *SetTextList->GetObject(TxtNr);
             return true;
         }
     }
@@ -3444,7 +3445,7 @@ namespace gxfile {
     {
         if (!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("SetTextNodeNr", {}))) return false;
         auto& obj = *SetTextList;
-        if (TxtNr >= 0 && TxtNr < obj.size() && !obj.GetObject(TxtNr)) {
+        if (TxtNr >= 0 && TxtNr < obj.size() && !*obj.GetObject(TxtNr)) {
             *obj.GetObject(TxtNr) = Node;
             return true;
         }
