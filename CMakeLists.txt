@@ -65,6 +65,7 @@ set(tests
 		tests/gdxinterfacetests.cpp
 		tests/xp_example1.cpp
 		tests/serializetests.cpp
+		tests/pfgdx.cpp
 )
 
 add_library(gdxcclib64 SHARED ${common_neo})

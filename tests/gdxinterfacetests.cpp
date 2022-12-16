@@ -1482,7 +1482,9 @@ namespace tests::gdxinterfacetests {
         const double avgSlowdown = perfBenchmarkCppVsDelphi(pair, true);
         //std::cout << "slowdown = " << avgSlowdown << " for " << pair.getName() << std::endl;
         slowdownReport << pair.getName() << ";"s << avgSlowdown << std::endl;
+#ifdef NDEBUG
         REQUIRE(avgSlowdown <= limit);
+#endif
     }
 
     TEST_CASE("Test performance of legacy vs. new GDX object for writing and reading records") {
@@ -1568,7 +1570,9 @@ namespace tests::gdxinterfacetests {
 
         double avgSlowdown = averageElapsedForImpl["tgxfileobj"] / averageElapsedForImpl["xpwrap"];
         slowdownReport << "corporate;" << avgSlowdown << std::endl;
+#ifdef NDEBUG
         REQUIRE(avgSlowdown <= 1.2);
+#endif
     }
 
     TEST_SUITE_END();

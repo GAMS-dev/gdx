@@ -39,6 +39,7 @@
     <ClCompile Include="tests\doctestmain.cpp" />
     <ClCompile Include="tests\gdxinterfacetests.cpp" />
     <ClCompile Include="tests\gxfiletests.cpp" />
+    <ClCompile Include="tests\pfgdx.cpp" />
     <ClCompile Include="tests\xptests.cpp" />
     <ClCompile Include="tests\xpwraptests.cpp" />
     <ClCompile Include="tests\xp_example1.cpp" />
@@ -79,6 +80,7 @@
     <ClInclude Include="rtl\p3utils.h" />
     <ClInclude Include="rtl\sysutils_p3.h" />
     <ClInclude Include="tests\doctest.h" />
+    <ClInclude Include="tests\pfgdx.hpp" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="xpwrap.h" />
     <ClInclude Include="yaml.h" />

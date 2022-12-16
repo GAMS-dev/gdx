@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <iostream>
 
+#include "pfgdx.hpp"
+
 using namespace gxfile;
 using namespace std::literals::string_literals;
 
@@ -146,6 +148,12 @@ namespace tests::gxfiletests {
         rtl::p3utils::P3UnSetEnv("GDXCOMPRESS"s);
         rtl::p3utils::P3UnSetEnv("GDXCONVERT"s);
         rmfiles({"trnsport.gms", "trnsport.gdx", "log.txt", "lf.txt"});
+    }
+
+    TEST_CASE("Run pfgdx for src/glcaerwt.gdx in order to debug memory issues (and test pfgdx port)") {
+        std::string gdx_file_path = "C:\\dockerhome\\src\\glcaerwt.gdx"s;
+        if(std::filesystem::exists(gdx_file_path))
+            pfgdx::runWithTiming(gdx_file_path, false);
     }
 
     TEST_SUITE_END();
