@@ -96,15 +96,16 @@ namespace pfgdx {
 
     int PerfGDX::pfregister_uels(const int reverse, const int dowrite) {
         int i, j, maxuellen, symCount, uelCount;
-        char *uels;
-        char label[256];
+        //char label[256];
+        char* uels{};
 
         maxuellen = PGX->gdxUELMaxLength() + 1;
 
         if (!PGX->gdxSystemInfo(symCount, uelCount))
             return 1;
 
-        uels = new char[maxuellen * (uelCount+1)];
+        std::vector<char> uelsStorage(maxuellen * (uelCount + 1));
+        uels = uelsStorage.data();
         if (!uels) return 1;
         for (i = 0; i < uelCount; i++) {
             if (!PGX->gdxUMUelGet(i + 1, uels + i * maxuellen, j))
@@ -126,8 +127,6 @@ namespace pfgdx {
         }
         if (!gdx->gdxUELRegisterDone())
             return 1;
-
-        delete [] uels;
 
         return 0;
     }
