@@ -161,7 +161,7 @@ namespace tests::gxfiletests {
 #endif
         for(const auto &fn : gdxFilePathCandidates)
             if(std::filesystem::exists(fn))
-                pfgdx::runWithTiming(fn, false, 20, 20);
+                pfgdx::runWithTiming(fn, false);
     }
 
     TEST_SUITE_END();
