@@ -1235,11 +1235,13 @@ namespace gxfile {
         for (int D{}; D < FCurrentDim; D++) {
             if (WrBitMaps[D] && !accessBitMap(*WrBitMaps[D], AElements[D])) {
                 ReportError(ERR_DOMAINVIOLATION);
-                TgdxUELIndex  ErrorUELs;
-                for (int DD{}; DD < D - 1; DD++)
+                TgdxUELIndex ErrorUELs{};
+                // FIXME: AS: Are index boundaries right here?
+                for (int DD{}; DD < D; DD++)
                     ErrorUELs[DD] = AElements[DD];
                 ErrorUELs[D] = -AElements[D];
                 // see if there are more domain violations
+                // FIXME: AS: Are index boundaries right here?
                 for (int DD{ D + 1 }; DD < FCurrentDim; DD++) {
                     bool neg{ WrBitMaps[DD] && !accessBitMap(*WrBitMaps[DD],AElements[DD]) };
                     ErrorUELs[DD] = (neg ? -1 : 1) * AElements[DD];
@@ -1306,8 +1308,8 @@ namespace gxfile {
                 if (xv == vm_normal) {
                     FFile->WriteDouble(X);
                     if (X >= Zvalacr) {
-                        int v = static_cast<int>(std::round(X / Zvalacr));
-                        int ix = utils::indexOf<TAcronym>(AcronymList, [&v](const TAcronym& acro) { return acro.AcrMap == v; });
+                        int v { static_cast<int>(std::round(X / Zvalacr)) };
+                        int ix { utils::indexOf<TAcronym>(AcronymList, [&v](const TAcronym& acro) { return acro.AcrMap == v; }) };
                         if (ix == -1) AcronymList.push_back(TAcronym{ "", "", v });
                     }
                 }

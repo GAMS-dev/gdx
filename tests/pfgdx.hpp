@@ -10,7 +10,15 @@ namespace pfgdx {
         gdxValues_t Values;
         gdxinterface::GDXInterface *PGX {}, *wPGX {};
 
+        int symCountLimit {-1}, recCountLimit {-1};
+
+        void enforceSymCountLimit(int &symCount);
+
+        void enforceRecCountLimit(int &recCount);
+
     public:
+        void setLimits(int nsyms, int nrecs);
+
         int pfinit(const char *sysdir, bool useLegacy = false);
         int pffini();
         int pfopenread(const char *fname);
@@ -22,5 +30,5 @@ namespace pfgdx {
         int pfwritemap(const int reverse);
     };
 
-    void runWithTiming(const std::string &gdxfn, bool quiet = false);
+    void runWithTiming(const std::string &gdxfn, bool quiet = false, int symCountLimit=-1, int recCountLimit=-1);
 }

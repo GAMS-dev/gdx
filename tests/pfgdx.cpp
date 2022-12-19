@@ -56,6 +56,8 @@ namespace pfgdx {
 
         if (!PGX->gdxSystemInfo(symCount, uelCount))
             return 1;
+        
+        enforceSymCountLimit(symCount);
 
         if (dowrite) {
             if (!wPGX->gdxOpenWrite("out.gdx", "pfcc test raw", ErrNr))
@@ -72,6 +74,7 @@ namespace pfgdx {
                 if (!wPGX->gdxDataWriteRawStart(syid, "", sydim, sytype, 0))
                     return 1;
             }
+            enforceRecCountLimit(nrecs);
             for (k = 0; k < nrecs; k++) {
                 if (!PGX->gdxDataReadRaw(Uels, Values, afdim))
                     return 1;
@@ -103,6 +106,8 @@ namespace pfgdx {
 
         if (!PGX->gdxSystemInfo(symCount, uelCount))
             return 1;
+
+        enforceSymCountLimit(symCount);
 
         std::vector<char> uelsStorage(maxuellen * (uelCount + 1));
         uels = uelsStorage.data();
@@ -138,6 +143,8 @@ namespace pfgdx {
         if (!PGX->gdxSystemInfo(symCount, uelCount))
             return 1;
 
+        enforceSymCountLimit(symCount);
+
         if (dowrite) {
             if (!wPGX->gdxOpenWrite("out.gdx", "pfcc test str", ErrNr))
                 return 1;
@@ -155,6 +162,7 @@ namespace pfgdx {
                 if (!wPGX->gdxDataWriteStrStart(syid, "", sydim, sytype, 0))
                     return 1;
             }
+            enforceRecCountLimit(nrecs);
             for (k = 0; k < nrecs; k++) {
                 if (!PGX->gdxDataReadStr(Indx, Values, afdim))
                     return 1;
@@ -184,6 +192,8 @@ namespace pfgdx {
         if (!PGX->gdxSystemInfo(symCount, uelCount))
             return 1;
 
+        enforceSymCountLimit(symCount);
+
         for (i = 1; i <= symCount; i++) {
             if (!PGX->gdxSymbolInfo(i, syid, sydim, sytype))
                 return 1;
@@ -191,6 +201,7 @@ namespace pfgdx {
                 continue;
             if (!PGX->gdxDataReadMapStart(i, nrecs))
                 return 1;
+            enforceRecCountLimit(nrecs);
             for (k = 0; k < nrecs; k++) {
                 if (!PGX->gdxDataReadMap(k, Uels, Values, afdim))
                     return 1;
@@ -208,6 +219,8 @@ namespace pfgdx {
         if (!PGX->gdxSystemInfo(symCount, uelCount))
             return 1;
 
+        enforceSymCountLimit(symCount);
+
         if (!wPGX->gdxOpenWrite("out.gdx", "pfcc test map", ErrNr))
             return 1;
 
@@ -224,6 +237,7 @@ namespace pfgdx {
             if (!wPGX->gdxDataWriteMapStart(syid, "", sydim, sytype, 0))
                 return 1;
 
+            enforceRecCountLimit(nrecs);
             for (k = 0; k < nrecs; k++) {
                 if (!PGX->gdxDataReadRaw(Uels, Values, afdim))
                     return 1;
@@ -238,6 +252,19 @@ namespace pfgdx {
         if (wPGX->gdxClose())
             return 1;
         return 0;
+    }
+
+    void PerfGDX::setLimits(int nsyms, int nrecs) {
+        symCountLimit = nsyms;
+        recCountLimit = nrecs;
+    }
+
+    inline void PerfGDX::enforceSymCountLimit(int &symCount) {
+        if(symCountLimit != -1) symCount = std::min<int>(symCountLimit, symCount);
+    }
+
+    inline void PerfGDX::enforceRecCountLimit(int &recCount) {
+        if(recCountLimit != -1) recCount = std::min<int>(recCountLimit, recCount);
     }
 
     struct TimeTriple {
@@ -256,10 +283,11 @@ namespace pfgdx {
         t.item_start = std::chrono::high_resolution_clock::now();
     }
 
-    void runWithTiming(const std::string &gdxfn, bool quiet) {
+    void runWithTiming(const std::string &gdxfn, bool quiet, int symCountLimit, int recCountLimit) {
         if(quiet) silencePrintT = true;
         TimeTriple t;
         PerfGDX cgdx;
+        cgdx.setLimits(symCountLimit, recCountLimit);
         cgdx.pfinit("", false);
         int rc{cgdx.pfopenread(gdxfn.c_str())};
         printT(t, gdxfn, "capi cgdxopenread"s);

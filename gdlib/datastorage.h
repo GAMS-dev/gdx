@@ -57,6 +57,10 @@ namespace gdlib::datastorage {
         {
         };
 
+        ~TLinkedDataLegacy() {
+            Clear();
+        }
+
         int Count() const {
             return FCount;
         }
