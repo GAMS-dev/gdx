@@ -2781,7 +2781,7 @@ namespace gxfile {
     int TGXFileObj::gdxUMUelGet(int UelNr, char *Uel, int &UelMap) {
         if (UELTable && UelNr >= 1 && UelNr <= UELTable->size()) {
             utils::assignStrToBuf((*UELTable)[UelNr-1], Uel, GLOBAL_UEL_IDENT_SIZE);
-            UelMap = UELTable->UsrUel2Ent.empty() ? -1 : UELTable->UsrUel2Ent.GetReverseMapping(UelNr);
+            UelMap = UELTable->GetUserMap(UelNr);
             return true;
         }
         else {
@@ -4431,14 +4431,6 @@ namespace gxfile {
 
     void TIntegerMapping::reserve(int n) {
         Map.reserve(n);
-    }
-
-    int TIntegerMapping::GetReverseMapping(int T) const {
-        for (int i{}; i < Map.size(); i++) {
-            if (Map[i] == T)
-                return i;
-        }
-        return -1;
     }
 
     void TUELTableLegacy::clear() {

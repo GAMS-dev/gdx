@@ -188,7 +188,6 @@ namespace gxfile {
         int GetHighestIndex() const;
         void SetMapping(int F, int T);
         int GetMapping(int F) const;
-        int GetReverseMapping(int T) const;
         int MemoryUsed();
         void clear();
         int &operator[](int index);
