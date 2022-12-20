@@ -352,6 +352,55 @@ namespace gxfile {
     using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_SCALE+1>;
     using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_SCALE+1> *;
 
+#ifdef CPP_HASHMAP
+    template<typename T>
+    class WrapCxxUnorderedMap {
+        umaptype<std::string, T, caseInsensitiveHasher, caseInsensitiveStrEquality> dict;
+    public:
+        bool OneBased{};
+
+        int AddObject(const std::string &key, T val) {
+            dict[key] = val;
+            return dict.size() - (OneBased ? 0 : 1);
+        }
+
+        int StoreObject(const std::string& key, T val) {
+            return AddObject(key, val);
+        }
+
+        std::string GetString(int ix) const {
+            auto it = dict.cbegin();
+            std::advance(it, ix-(OneBased ? 1 : 0));
+            return (*it).first;
+        }
+
+        int size() const {  return dict.size(); }
+        int Count() const { return dict.size(); }
+
+        T *GetObject(int ix) {
+            auto it = dict.begin();
+            std::advance(it, ix-(OneBased ? 1 : 0));
+            return &((*it).second);
+        }
+
+        T* operator[](int N) {
+            return GetObject(N);
+        }
+
+        int IndexOf(const std::string &s) const {
+            auto it = dict.find(s);
+            return it == dict.end() ? -1 : std::distance(dict.begin(), it) + (OneBased ? 1 : 0);
+        }
+
+        bool empty() const { return !size(); }
+    };
+    using TSetTextList = WrapCxxUnorderedMap<int>;
+    using TNameList = WrapCxxUnorderedMap<PgdxSymbRecord>;
+#else
+    using TSetTextList = gdlib::strhash::TXStrHashList<int>;
+    using TNameList = gdlib::strhash::TXStrHashList<PgdxSymbRecord>;
+#endif
+
     // Description:
     //    Class for reading and writing gdx files
     class TGXFileObj : public gdxinterface::GDXInterface {
@@ -364,7 +413,7 @@ namespace gxfile {
         enum {stat_notopen, stat_read, stat_write} fstatus;
         int fComprLev{};
         std::unique_ptr<IUELTable> UELTable;
-        std::unique_ptr<gdlib::strhash::TXStrHashList<int>> SetTextList {};
+        std::unique_ptr<TSetTextList> SetTextList {};
         std::vector<int> MapSetText;
         int FCurrentDim{};
         std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem, PrevElem, MinElem, MaxElem;
@@ -373,7 +422,7 @@ namespace gxfile {
         uint8_t LastDataField;
         // FIXME: TODO: AS: Actually should be gdlib::gmsobj::TXStrPool!!!
         // FIXME: TODO: AS: Also make this symbol table optionally use C++ hashmaps like std, ankerl, google!
-        std::unique_ptr<gdlib::strhash::TXStrHashList<PgdxSymbRecord>> NameList;
+        std::unique_ptr<TNameList> NameList;
         // symbol names in order of insertion, used for quick iteration
         std::unique_ptr<std::vector<std::string>> DomainStrList;
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData

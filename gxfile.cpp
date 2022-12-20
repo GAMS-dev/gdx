@@ -356,7 +356,7 @@ namespace gxfile {
         MajContext = "OpenWrite";
         TraceLevel = defaultTraceLevel;
         InitErrors();
-        NameList = std::make_unique<gdlib::strhash::TXStrHashList<PgdxSymbRecord>>();
+        NameList = std::make_unique<TNameList>();
         NameList->OneBased = true;
         UELTable = std::make_unique<UELTableImplChoice>();
         AcronymList.clear();
@@ -374,7 +374,7 @@ namespace gxfile {
         // Reserve some space for positions
         MajorIndexPosition = FFile->GetPosition();
         for(int N{1}; N<=10; N++) FFile->WriteInt64(0);
-        SetTextList = std::make_unique<gdlib::strhash::TXStrHashList<int>>();
+        SetTextList = std::make_unique<TSetTextList>();
         SetTextList->OneBased = false;
         SetTextList->AddObject(""s, 0);
         gdxResetSpecialValues();
@@ -1891,7 +1891,7 @@ namespace gxfile {
         FFile->SetPosition(SymbPos);
         if(ErrorCondition(FFile->ReadString() == MARK_SYMB, ERR_OPEN_SYMBOLMARKER1)) return FileErrorNr();
         int NrElem {FFile->ReadInteger()};
-        NameList = std::make_unique<gdlib::strhash::TXStrHashList<PgdxSymbRecord>>();
+        NameList = std::make_unique<TNameList>();
         NameList->OneBased = true;
         AcronymList.clear();
         FilterList.clear();
@@ -1949,7 +1949,7 @@ namespace gxfile {
         if (ReadMode % 2 == 0) { // reading text table
             FFile->SetCompression(DoUncompress);
             FFile->SetPosition(SetTextPos);
-            SetTextList = std::make_unique<gdlib::strhash::TXStrHashList<int>>();
+            SetTextList = std::make_unique<TSetTextList>();
             SetTextList->OneBased = false;
             if(ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1)) return FileErrorNr();
             NrElem = FFile->ReadInteger();
