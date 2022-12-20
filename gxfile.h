@@ -16,8 +16,17 @@
 
 #include "utils.h"
 
+// Hashmap choice:
+// Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
+#if defined(GOOGLE_HASHMAP)
 #include "sparsehash/dense_hash_map"
+#elif defined(ANKERL_HASHMAP)
 #include "ankerl/unordered_dense.h"
+#endif
+
+#if defined(GOOGLE_HASHMAP) || defined(ANKERL_HASHMAP) || defined(STD_HASHMAP)
+#define CPP_HASHMAP
+#endif
 
 #include "gdlib/strhash.h"
 
@@ -44,10 +53,16 @@ namespace gxfile {
                 DOMC_EXPAND = -1, // indicator growing index pos
                 DOMC_STRICT = 0; // indicator mapped index pos
 
+#if defined(CPP_HASHMAP)
     template<typename K, typename V, typename H, typename E>
-    //using umaptype = google::dense_hash_map<K, V, H, E>;
-    //using umaptype = std::unordered_map<K,V, H, E>;
+#endif
+#if defined(GOOGLE_HASHMAP)
+    using umaptype = google::dense_hash_map<K, V, H, E>;
+#elif defined(STD_HASHMAP)
+    using umaptype = std::unordered_map<K, V, H, E>;
+#elif defined(ANKERL_HASHMAP)
     using umaptype = ankerl::unordered_dense::map<K, V, H, E>;
+#endif
 
     class NullBuffer : public std::streambuf {
     public:
@@ -221,12 +236,15 @@ namespace gxfile {
         }
     };
 
+#ifdef ANKERL_HASHMAP
     using caseSensitiveHasher = ankerl::unordered_dense::hash<std::string>;
+#endif
     using caseSensitiveStrEquality = std::equal_to<std::string>;
 
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
-
+#ifdef CPP_HASHMAP
     using utablemaptype = umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>;
+#endif
 
     class IUELTable {
     protected:
@@ -253,6 +271,7 @@ namespace gxfile {
         virtual void Reserve(int n) = 0;
     };
 
+#ifdef CPP_HASHMAP
     class TUELTable : public IUELTable {
         utablemaptype nameToIndexNum{};
         utablemaptype::iterator nth(int index);
@@ -276,6 +295,7 @@ namespace gxfile {
         int GetMaxUELLength() const override;
         void Reserve(int n) override;
     };
+#endif
 
     class TUELTableLegacy : public IUELTable, public gdlib::strhash::TXStrHashList<IndexNumPair> {
     public:
@@ -352,6 +372,7 @@ namespace gxfile {
         int DataSize{};
         uint8_t LastDataField;
         // FIXME: TODO: AS: Actually should be gdlib::gmsobj::TXStrPool!!!
+        // FIXME: TODO: AS: Also make this symbol table optionally use C++ hashmaps like std, ankerl, google!
         std::unique_ptr<gdlib::strhash::TXStrHashList<PgdxSymbRecord>> NameList;
         // symbol names in order of insertion, used for quick iteration
         std::unique_ptr<std::vector<std::string>> DomainStrList;

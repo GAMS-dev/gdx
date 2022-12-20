@@ -59,7 +59,11 @@ namespace gxfile {
     static std::string auditLine {"GDX Library      00.0.0 ffffffff May  4, 1970  (AUDIT) XYZ arch xybit/myOS"};
 #endif
 
+#ifdef CPP_HASHMAP
+    using UELTableImplChoice = TUELTable;
+#else
     using UELTableImplChoice = TUELTableLegacy;
+#endif
 
     NullBuffer null_buffer;
 
@@ -4232,6 +4236,7 @@ namespace gxfile {
         return "tgxfileobj"s;
     }
 
+#ifdef CPP_HASHMAP
     void TUELTable::clear() {
         UsrUel2Ent.clear();
         nameToIndexNum.clear();
@@ -4352,9 +4357,12 @@ namespace gxfile {
     }
 
     TUELTable::TUELTable() {
-        //nameToIndexNum.set_empty_key("");
+#ifdef GOOGLE_HASHMAP
+        nameToIndexNum.set_empty_key("");
+#endif
         Reserve(10000);
     }
+#endif
 
     int TAcronymList::FindEntry(int Map) const {
         const auto it = std::find_if(begin(), end(), [&](const auto &item) {
