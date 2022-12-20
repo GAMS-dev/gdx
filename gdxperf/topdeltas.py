@@ -19,9 +19,18 @@ cxx_times = collect_item_times('srcSuiteCxx.log')
 
 shared_expls = [k for k, v in p3_times.items() if k in cxx_times]
 
+
+def slowdown(new_t, old_t):
+    if old_t == 0:
+        return new_t if new_t > 0 else 0
+    sign = 1 if new_t > old_t else -1
+    return sign * new_t / old_t
+
+
 deltas = []
 for expl in shared_expls:
-    deltas.append((expl, cxx_times[expl]-p3_times[expl]))
+    new_t, old_t = cxx_times[expl], p3_times[expl]
+    deltas.append(dict(expl=expl, slowdown=slowdown(new_t, old_t), new_t=new_t, old_t=old_t))
 
-for pair in list(sorted(deltas, key=lambda pair: pair[1], reverse=True))[:10]:
+for pair in list(sorted(deltas, key=lambda row: row['slowdown'], reverse=True))[:10]:
     print(pair)
