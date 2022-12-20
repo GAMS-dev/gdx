@@ -276,10 +276,14 @@ namespace pfgdx {
 
     static void printT(TimeTriple &t, const std::string &fn, const std::string &text) {
         if(silencePrintT) return;
-        t.item_t = std::chrono::duration<double, std::milli>(std::chrono::high_resolution_clock::now() - t.item_start).count();
+        t.item_t = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t.item_start).count();
         t.total_t = t.total_t + t.item_t;
         t.subtotal_t = t.subtotal_t + t.item_t;
-        printf("%09.3f %09.3f %09.3f - %10s %s\n", t.total_t, t.subtotal_t, t.item_t, fn.c_str(), text.c_str());
+        std::cout   << utils::doubleToString(t.total_t, 9, 3) << " "
+                    << utils::doubleToString(t.subtotal_t, 9, 3) << " "
+                    << utils::doubleToString(t.item_t, 9, 3) << " "
+                    << utils::blanks(std::max<int>(0, 10 - fn.length())) << fn << " "
+                    << text << '\n';
         t.item_start = std::chrono::high_resolution_clock::now();
     }
 
