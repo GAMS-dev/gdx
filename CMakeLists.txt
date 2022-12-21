@@ -22,9 +22,8 @@ endif (MSVC)
 # Hashmap choice
 # None -> gdlib::strhash::TXStrHashList
 # -DSTD_HASHMAP -> std::unordered_map
-# FIXME: Currently broken due to unstable references (iterators) in insertOrder vector:
-# -DGOOGLE_HASHMAP -> google::dense_hash_map
 # -DANKERL_HASHMAP -> ankerl::unordered_dense::map
+# -DGOOGLE_HASHMAP -> google::dense_hash_map
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGAMSBUILD")
 if(ENABLE_YAML)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DYAML")

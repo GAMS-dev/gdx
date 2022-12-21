@@ -28,6 +28,12 @@
 #define CPP_HASHMAP
 #endif
 
+// std::unordered_map has stable references to nodes (iterators)
+// Ankerl has not for sure, for Google I am not entirely sure
+#if defined(STD_HASHMAP)
+#define STABLE_REFS
+#endif
+
 #include "gdlib/strhash.h"
 
 #include "expertapi/gclgms.h"
@@ -274,7 +280,11 @@ namespace gxfile {
 #ifdef CPP_HASHMAP
     class TUELTable : public IUELTable {
         utablemaptype nameToIndexNum{};
+#ifdef STABLE_REFS
         std::vector<typename utablemaptype::iterator> insertOrder {};
+#else
+        std::vector<std::string> insertOrder {};
+#endif
     public:
         TUELTable();
         void clear() override;
@@ -361,16 +371,31 @@ namespace gxfile {
     template<typename T>
     class WrapCxxUnorderedMap {
         using strToT = umaptype<std::string, PayloadIndex<T>, caseInsensitiveHasher, caseInsensitiveStrEquality>;
+#ifdef STABLE_REFS
         std::vector<typename strToT::iterator> insertOrder {};
+#else
+        std::vector<std::string> insertOrder {};
+#endif
         strToT dict {};
     public:
         bool OneBased{};
+
+#ifdef GOOGLE_HASHMAP
+        WrapCxxUnorderedMap() {
+            // SetTextList needs empty string ("") as key unfortunately!
+            dict.set_empty_key("__EMPTY_KEY__");
+        }
+#endif
 
         int AddObject(const std::string &key, T val) {
             auto [it, wasNew] = dict.try_emplace(key, PayloadIndex<T> {-1, val});
             auto &elem = (*it).second;
             if(wasNew) {
+#ifdef STABLE_REFS
                 insertOrder.push_back(it);
+#else
+                insertOrder.push_back(key);
+#endif
                 elem.i = static_cast<int>(insertOrder.size()) - (OneBased ? 0 : 1);
             }
             return elem.i;
@@ -380,19 +405,31 @@ namespace gxfile {
             int ix = static_cast<int>(insertOrder.size()) + (OneBased ? 1 : 0);
             auto [it, wasNew] = dict.emplace(key, PayloadIndex<T> {ix, val});
             assert(wasNew);
+#ifdef STABLE_REFS
             insertOrder.push_back(it);
+#else
+            insertOrder.push_back(key);
+#endif
             return ix;
         }
 
         std::string GetString(int ix) const {
+#ifdef STABLE_REFS
             return (*insertOrder[ix - (OneBased ? 1 : 0)]).first;
+#else
+            return insertOrder[ix - (OneBased ? 1 : 0)];
+#endif
         }
 
         int size() const {  return static_cast<int>(dict.size()); }
         int Count() const { return static_cast<int>(dict.size()); }
 
         T *GetObject(int ix) {
+#ifdef STABLE_REFS
             return &((*insertOrder[ix - (OneBased ? 1 : 0)]).second.payload);
+#else
+            return &(dict[insertOrder[ix - (OneBased ? 1 : 0)]].payload);
+#endif
         }
 
         T* operator[](int N) {

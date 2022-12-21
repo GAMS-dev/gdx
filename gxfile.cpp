@@ -4256,7 +4256,11 @@ namespace gxfile {
         int ix;
         if (wasNew) {
             it->second.index = ix = static_cast<int>(nameToIndexNum.size());
+#ifdef STABLE_REFS
             insertOrder.push_back(it);
+#else
+            insertOrder.push_back(id);
+#endif
         }
         else ix = it->second.index;
         return ix;
@@ -4266,7 +4270,11 @@ namespace gxfile {
         int ix{static_cast<int>(nameToIndexNum.size())+1};
         auto [it,wasNew] = nameToIndexNum.emplace(id, IndexNumPair{ ix, mapping });
         assert(wasNew);
+#ifdef STABLE_REFS
         insertOrder.push_back(it);
+#else
+        insertOrder.push_back(id);
+#endif
         return ix;
     }
 
@@ -4275,15 +4283,27 @@ namespace gxfile {
     }
 
     std::string TUELTable::operator[](int index) const {
+#ifdef STABLE_REFS
         return insertOrder[index]->first;
+#else
+        return insertOrder[index];
+#endif
     }
 
     int TUELTable::GetUserMap(int i) {
+#ifdef STABLE_REFS
         return insertOrder[i-1]->second.num;
+#else
+        return nameToIndexNum[insertOrder[i-1]].num;
+#endif
     }
 
     void TUELTable::SetUserMap(int EN, int N) {
+#ifdef STABLE_REFS
         insertOrder[EN-1]->second.num = N;
+#else
+        nameToIndexNum[insertOrder[EN-1]].num = N;
+#endif
     }
 
     void TUELTable::ResetMapToUserStatus() {
@@ -4303,7 +4323,11 @@ namespace gxfile {
 
     int TUELTable::AddUsrNew(const std::string &s) {
         int EN{ AddObject(s, -1) };
+#ifdef STABLE_REFS
         int res{ insertOrder[EN-1]->second.num };
+#else
+        int res{ nameToIndexNum[insertOrder[EN-1]].num };
+#endif
         if (res < 0) {
             res = UsrUel2Ent.GetHighestIndex() + 1;
             SetUserMap(EN, res);
@@ -4316,12 +4340,22 @@ namespace gxfile {
     // FIXME: How does this affect the ordering / sort list?
     // Should renaming change the index?
     void TUELTable::RenameEntry(int N, const std::string &s) {
+
+#ifdef STABLE_REFS
         auto old = insertOrder[N-1];
         auto oldPair = old->second;
         nameToIndexNum.erase(old->first);
+#else
+        auto oldPair = nameToIndexNum[insertOrder[N-1]];
+        nameToIndexNum.erase(insertOrder[N-1]);
+#endif
         auto [it, wasNew] = nameToIndexNum.emplace(s, oldPair);
         assert(wasNew);
+#ifdef STABLE_REFS
         insertOrder[N - 1] = it;
+#else
+        insertOrder[N - 1] = s;
+#endif
     }
 
     int TUELTable::GetMaxUELLength() const {
@@ -4339,7 +4373,11 @@ namespace gxfile {
 
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
         int EN {AddObject(s, -1)};
+#ifdef STABLE_REFS
         auto& itsNum = insertOrder[EN - 1]->second.num;
+#else
+        auto& itsNum = nameToIndexNum[insertOrder[EN-1]].num;
+#endif
         int res {itsNum};
         if (res < 0) {
             itsNum = res = UelNr;
