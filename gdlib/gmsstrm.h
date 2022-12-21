@@ -7,6 +7,7 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <optional>
 
 #include "../rtl/p3utils.h"
 #include "../global/delphitypes.h"
@@ -286,7 +287,7 @@ namespace gdlib::gmsstrm {
         TGZipInputStream(const std::string& fn, std::string& ErrMsg);
         virtual ~TGZipInputStream();
 
-        global::delphitypes::LongWord Read(void *buffer, int Count);
+        global::delphitypes::LongWord Read(void *buffer, unsigned int Count);
 
         void ReadLine(std::vector<uint8_t> &buffer, int MaxInp, char &LastChar);
     };
@@ -334,7 +335,7 @@ namespace gdlib::gmsstrm {
         const bool noBuffering {false};
         std::array<char, BufferSize> readBuffer{};
         uint64_t lastReadCount{};
-        int64_t offsetInBuffer{};
+        std::optional<uint64_t> offsetInBuffer{};
         void maybeFillReadBuffer();
 
         int GetLastIOResult() const;

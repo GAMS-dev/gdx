@@ -31,7 +31,7 @@ namespace rtl::sysutils_p3 {
     std::string ExtractShortPathName(const std::string &FileName) {
 #if defined(_WIN32)
         std::array<char, 260> buf;
-        GetShortPathNameA(FileName.c_str(), buf.data(), sizeof(char)*buf.size());
+        GetShortPathNameA(FileName.c_str(), buf.data(), (DWORD)(sizeof(char)*buf.size()));
         return buf.data();
 #else
         // TODO: Does this make sense?
@@ -40,7 +40,13 @@ namespace rtl::sysutils_p3 {
     }
 
     std::string SysErrorMessage(int errorCode) {
+#if defined(_WIN32)
+        static std::array<char, 256> errMsgBuf;
+        strerror_s(errMsgBuf.data(), (int)errMsgBuf.size(), errorCode);
+        char *errMsg = errMsgBuf.data();
+#else
         char *errMsg = strerror(errorCode);
+#endif
         if(!errMsg) return "Unknown error " + std::to_string(errorCode);
         return errMsg;
     }

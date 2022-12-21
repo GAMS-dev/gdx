@@ -67,7 +67,7 @@ namespace gdlib::gmsstrm {
     // AS: Not sure if it makes sense to duplicate the whole gmsstrm type hierarchy, since std::streams already do some of the low level lifting
     TBinaryTextFileIO::TBinaryTextFileIO(const std::string& fn, const std::string& PassWord, int& ErrNr,
         std::string& errmsg) : frw{}, NrWritten{} {
-        offsetInBuffer = -1;
+        offsetInBuffer = std::nullopt;
         std::string Msg;
         FCanCompress = true;
         ErrNr = strmErrorNoError;
@@ -144,7 +144,7 @@ namespace gdlib::gmsstrm {
         if (ReadString() != signature_gams) return;
         ErrNr = strmErrorNoError;
         errmsg.clear();
-        if(!noBuffering) offsetInBuffer = 0;
+        if(!noBuffering) offsetInBuffer = std::make_optional<uint64_t>(0);
     }
 
     /*
@@ -226,12 +226,12 @@ namespace gdlib::gmsstrm {
         int numBytesRetrieved{Count};
 
         // offsetInBuffer < 0 skips buffering
-        if(!noBuffering && offsetInBuffer >= 0) {
+        if(!noBuffering && offsetInBuffer) {
             maybeFillReadBuffer();
-            int bytesRemaining = (int) readBuffer.size() - offsetInBuffer;
+            int bytesRemaining = (int)(readBuffer.size() - *offsetInBuffer);
             if(bytesRemaining < Count) numBytesRetrieved = bytesRemaining;
-            memcpy(Buffer, &readBuffer.data()[offsetInBuffer], numBytesRetrieved);
-            offsetInBuffer += numBytesRetrieved;
+            memcpy(Buffer, &readBuffer.data()[*offsetInBuffer], numBytesRetrieved);
+            *offsetInBuffer += numBytesRetrieved;
             NrRead += numBytesRetrieved;
         } else {
             FS->read(Buffer, Count);
@@ -295,7 +295,7 @@ namespace gdlib::gmsstrm {
     void TBinaryTextFileIO::ReWind() {
         FS->clear();
         FS->seekg(0);
-        if(offsetInBuffer >= 0 && lastReadCount > 0) lastReadCount = 0;
+        if(offsetInBuffer && lastReadCount > 0) lastReadCount = 0;
     }
 
     uint8_t TBinaryTextFileIO::ReadByte()
@@ -402,10 +402,10 @@ namespace gdlib::gmsstrm {
     }
 
     void TBinaryTextFileIO::maybeFillReadBuffer() {
-        if(!lastReadCount || offsetInBuffer >= readBuffer.size()) {
+        if(!lastReadCount || *offsetInBuffer >= readBuffer.size()) {
             FS->read(readBuffer.data(), BufferSize);
             lastReadCount = FS->gcount();
-            offsetInBuffer = 0;
+            *offsetInBuffer = 0;
         }
     }
 
@@ -419,7 +419,7 @@ namespace gdlib::gmsstrm {
         std::array<char, 4096> Buffer{};
         int NrRead{};
         do {
-            NrRead = Fin.Read(Buffer.data(), Buffer.size());
+            NrRead = Fin.Read(Buffer.data(), (int)Buffer.size());
             if (!NrRead) break;
             Fout.Write(Buffer.data(), NrRead);
         } while (NrRead >= Buffer.size());
@@ -457,9 +457,9 @@ namespace gdlib::gmsstrm {
         gzclose(pgz);
     }
 
-    global::delphitypes::LongWord TGZipInputStream::Read(void *buffer, int Count) {
+    global::delphitypes::LongWord TGZipInputStream::Read(void *buffer, unsigned int Count) {
         std::function<bool()> FillBuffer = [&]() {
-            NrLoaded = gzread(pgz, Buf.data(), this->Buf.size());
+            NrLoaded = gzread(pgz, Buf.data(), (int)this->Buf.size());
             NrRead = 0;
             return NrLoaded > 0;
         };
@@ -470,9 +470,9 @@ namespace gdlib::gmsstrm {
             return Count;
         } else {
             int UsrReadCnt {};
-            for(int NrBytes{}; Count > 0; NrRead += NrBytes, UsrReadCnt += NrBytes, Count -= NrBytes) {
+            for(unsigned int NrBytes{}; Count > 0; NrRead += NrBytes, UsrReadCnt += NrBytes, Count -= NrBytes) {
                 if(NrRead >= NrLoaded && !FillBuffer()) break;
-                NrBytes = static_cast<int>(NrLoaded - NrRead);
+                NrBytes = static_cast<unsigned int>(NrLoaded - NrRead);
                 if(NrBytes > Count) NrBytes = Count;
                 memcpy(&Buf[NrRead], &((uint8_t *)buffer)[UsrReadCnt], NrBytes);
             }
@@ -509,7 +509,7 @@ namespace gdlib::gmsstrm {
             *fstext << "WriteString@" << GetPosition() << "#" << ++cnt << ": " << s << "\n";
         if (Paranoid) ParWrite(rw_string);
         utils::strConvCppToDelphi(s, buf.data());
-        Write(buf.data(), s.length()+1);
+        Write(buf.data(), (uint32_t)s.length()+1);
     }
 
     void TXStreamDelphi::WriteDouble(double x) {
@@ -670,7 +670,7 @@ namespace gdlib::gmsstrm {
     void TXFileStreamDelphi::SetPosition(int64_t P)
     {
         PhysPosition = P;
-        int64_t NP;
+        //int64_t NP;
         FS->seekp(P);
         SetLastIOResult(FS->bad() ? 1 : 0);
         //SetLastIOResult(P3FileSetPointer(FS, P, NP, P3_FILE_BEGIN));
@@ -794,7 +794,7 @@ namespace gdlib::gmsstrm {
         if(NrLoaded > 0 && !FCompress) {
             int64_t StartOfBuf {PhysPosition-NrLoaded};
             if(p >= StartOfBuf && p < PhysPosition) {
-                NrRead = p - StartOfBuf;
+                NrRead = (uint32_t)(p - StartOfBuf);
                 return;
             }
         }
@@ -842,7 +842,7 @@ namespace gdlib::gmsstrm {
             compress(&CBufPtr->cxData, &Len, BufPtr.data(), NrWritten);
             if(Len < NrWritten) {
                 CBufPtr->cxHeader.cxTyp = 1; // indicates compressed
-                CBufPtr->cxHeader.cxB1 = Len >> 8;
+                CBufPtr->cxHeader.cxB1 = (uint8_t)(Len >> 8);
                 CBufPtr->cxHeader.cxB2 = Len & 0xFF;
                 Len += sizeof(TCompressHeader);
                 ActWritten = TXFileStreamDelphi::Write(&CBufPtr->cxHeader.cxTyp, Len);
@@ -1070,9 +1070,9 @@ namespace gdlib::gmsstrm {
             }
             B = 128 | C;
             Write(&B, 1);
-            Write(&Z.VA[C+1], Z.VA.size()-C);
+            Write(&Z.VA[C+1], (uint32_t)Z.VA.size()-C);
         } else {
-            for(int i{Z.VA.size()-1}; i>=0; i--) {
+            for(int i{(int)Z.VA.size()-1}; i>=0; i--) {
                 if(!Z.VA[i]) C++;
                 else break;
             }
@@ -1117,7 +1117,7 @@ namespace gdlib::gmsstrm {
                 }
             }
         } else {
-            for(int i{Z.VA.size()-1}; i>=0; i--) {
+            for(int i{(int)Z.VA.size()-1}; i>=0; i--) {
                 if(!C) Z.VA[i] = ReadByte();
                 else {
                     Z.VA[i] = 0;

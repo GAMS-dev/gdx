@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <filesystem>
+#include "../utils.h"
 #include "../kvbuffers.h"
 
 using namespace std::literals::string_literals;
@@ -23,7 +24,7 @@ namespace tests::xptests {
 
         KVBuffers bufs;
         for(const auto &[key, value] : exampleData) {
-            std::strcpy(bufs.strBuffers[0], key.c_str());
+            utils::assignStrToBuf(key, bufs.strBuffers[0]);
             bufs.vals[GMS_VAL_LEVEL] = value;
             gdxDataWriteStr(pgx, const_cast<const char **>(bufs.strPtrs), bufs.vals);
         }
@@ -57,7 +58,7 @@ namespace tests::xptests {
     gdxHandle_t setupGdxObject() {
         std::array<char, 256> msgBuf {};
         gdxHandle_t pgx {};
-        REQUIRE(gdxCreate(&pgx, msgBuf.data(), msgBuf.size()));
+        REQUIRE(gdxCreate(&pgx, msgBuf.data(), (int)msgBuf.size()));
         REQUIRE_EQ('\0', msgBuf.front());
         return pgx;
     };

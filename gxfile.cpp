@@ -3846,11 +3846,15 @@ namespace gxfile {
         if (!MajorCheckMode("DataSliceUELS"s, fr_slice)) return false;
         int HisDim{};
         for (int D{ 1 }; D <= FCurrentDim; D++) {
-            if (!SliceElems[D].empty()) strcpy(KeyStr[D], SliceElems[D].c_str());
+            if (!SliceElems[D].empty())
+                utils::assignStrToBuf(SliceElems[D], KeyStr[D]);
             else {
                 HisDim++;
                 int N = SliceRevMap[D].GetMapping(SliceKeyInt[HisDim]);
-                if (N < 0) strcpy(KeyStr[D], "?");
+                if (N < 0) {
+                    KeyStr[D][0] = '?';
+                    KeyStr[D][1] = '\0';
+                }
                 else memcpy(KeyStr[D], (*UELTable)[N].c_str(), (*UELTable)[N].length() + 1);
             }
         }

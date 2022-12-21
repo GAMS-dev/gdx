@@ -258,7 +258,7 @@ GDX_INLINE int gdxGetLastError(TGXFileRec_t *TGXFile) {
 }
 
 GDX_INLINE int gdxGetMemoryUsed(TGXFileRec_t *TGXFile) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetMemoryUsed();
+    return (int)reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetMemoryUsed();
 }
 
 GDX_INLINE int gdxGetSpecialValues(TGXFileRec_t *TGXFile, double AVals[]) {
