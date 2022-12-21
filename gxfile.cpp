@@ -4248,20 +4248,25 @@ namespace gxfile {
 
     int TUELTable::IndexOf(const std::string &s) {
         const auto it = nameToIndexNum.find(s);
-        return it == nameToIndexNum.end() ? -1 : (*it).second.index;
+        return it == nameToIndexNum.end() ? -1 : it->second.index;
     }
 
     int TUELTable::AddObject(const std::string &id, int mapping) {
         const auto &[it, wasNew] = nameToIndexNum.try_emplace(id, IndexNumPair{mapping});
         int ix;
-        if (wasNew) (*it).second.index = ix = static_cast<int>(nameToIndexNum.size());
-        else ix = (*it).second.index;
+        if (wasNew) {
+            it->second.index = ix = static_cast<int>(nameToIndexNum.size());
+            insertOrder.push_back(it);
+        }
+        else ix = it->second.index;
         return ix;
     }
 
     int TUELTable::StoreObject(const std::string& id, int mapping) {
         int ix{static_cast<int>(nameToIndexNum.size())+1};
-        nameToIndexNum[id] = IndexNumPair{ ix, mapping };
+        auto [it,wasNew] = nameToIndexNum.emplace(id, IndexNumPair{ ix, mapping });
+        assert(wasNew);
+        insertOrder.push_back(it);
         return ix;
     }
 
@@ -4269,28 +4274,16 @@ namespace gxfile {
         return !size();
     }
 
-    utablemaptype::iterator TUELTable::nth(int index) {
-        auto it = nameToIndexNum.begin();
-        std::advance(it, index);
-        return it;
-    }
-
-    utablemaptype::const_iterator TUELTable::cnth(int index) const {
-        auto it = nameToIndexNum.cbegin();
-        std::advance(it, index);
-        return it;
-    }
-
     std::string TUELTable::operator[](int index) const {
-        return cnth(index)->first;
+        return insertOrder[index]->first;
     }
 
     int TUELTable::GetUserMap(int i) {
-        return cnth(i-1)->second.num;
+        return insertOrder[i-1]->second.num;
     }
 
     void TUELTable::SetUserMap(int EN, int N) {
-        nth(EN-1)->second.num = N;
+        insertOrder[EN-1]->second.num = N;
     }
 
     void TUELTable::ResetMapToUserStatus() {
@@ -4310,7 +4303,7 @@ namespace gxfile {
 
     int TUELTable::AddUsrNew(const std::string &s) {
         int EN{ AddObject(s, -1) };
-        int res{ nth(EN-1)->second.num };
+        int res{ insertOrder[EN-1]->second.num };
         if (res < 0) {
             res = UsrUel2Ent.GetHighestIndex() + 1;
             SetUserMap(EN, res);
@@ -4323,7 +4316,7 @@ namespace gxfile {
     // FIXME: How does this affect the ordering / sort list?
     // Should renaming change the index?
     void TUELTable::RenameEntry(int N, const std::string &s) {
-        auto old = nth(N-1);
+        auto old = insertOrder[N-1];
         auto oldPair = old->second;
         nameToIndexNum.erase(old->first);
         nameToIndexNum[s] = oldPair;
@@ -4344,7 +4337,7 @@ namespace gxfile {
 
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
         int EN {AddObject(s, -1)};
-        auto& itsNum = nth(EN - 1)->second.num;
+        auto& itsNum = insertOrder[EN - 1]->second.num;
         int res {itsNum};
         if (res < 0) {
             itsNum = res = UelNr;

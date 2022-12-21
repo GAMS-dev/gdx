@@ -274,8 +274,7 @@ namespace gxfile {
 #ifdef CPP_HASHMAP
     class TUELTable : public IUELTable {
         utablemaptype nameToIndexNum{};
-        utablemaptype::iterator nth(int index);
-        utablemaptype::const_iterator cnth(int index) const;
+        std::vector<typename utablemaptype::iterator> insertOrder {};
     public:
         TUELTable();
         void clear() override;
@@ -378,7 +377,11 @@ namespace gxfile {
         }
 
         int StoreObject(const std::string& key, T val) {
-            return AddObject(key, val);
+            int ix = insertOrder.size() + (OneBased ? 1 : 0);
+            auto [it, wasNew] = dict.emplace(key, PayloadIndex<T> {ix, val});
+            assert(wasNew);
+            insertOrder.push_back(it);
+            return ix;
         }
 
         std::string GetString(int ix) const {
