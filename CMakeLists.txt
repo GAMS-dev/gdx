@@ -15,7 +15,7 @@ endif(CCACHE_FOUND)
 set(mylibs dl pthread)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGC_NO_MUTEX")
 if (MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /W3")
 	set(mylibs "")
 endif (MSVC)
 
