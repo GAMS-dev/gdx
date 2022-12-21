@@ -371,13 +371,13 @@ namespace gxfile {
             auto &elem = (*it).second;
             if(wasNew) {
                 insertOrder.push_back(it);
-                elem.i = insertOrder.size() - (OneBased ? 0 : 1);
+                elem.i = static_cast<int>(insertOrder.size()) - (OneBased ? 0 : 1);
             }
             return elem.i;
         }
 
         int StoreObject(const std::string& key, T val) {
-            int ix = insertOrder.size() + (OneBased ? 1 : 0);
+            int ix = static_cast<int>(insertOrder.size()) + (OneBased ? 1 : 0);
             auto [it, wasNew] = dict.emplace(key, PayloadIndex<T> {ix, val});
             assert(wasNew);
             insertOrder.push_back(it);
@@ -388,8 +388,8 @@ namespace gxfile {
             return (*insertOrder[ix - (OneBased ? 1 : 0)]).first;
         }
 
-        int size() const {  return dict.size(); }
-        int Count() const { return dict.size(); }
+        int size() const {  return static_cast<int>(dict.size()); }
+        int Count() const { return static_cast<int>(dict.size()); }
 
         T *GetObject(int ix) {
             return &((*insertOrder[ix - (OneBased ? 1 : 0)]).second.payload);

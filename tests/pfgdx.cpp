@@ -282,7 +282,7 @@ namespace pfgdx {
         std::cout   << utils::doubleToString(t.total_t, 9, 3) << " "
                     << utils::doubleToString(t.subtotal_t, 9, 3) << " "
                     << utils::doubleToString(t.item_t, 9, 3) << " "
-                    << utils::blanks(std::max<int>(0, 10 - fn.length())) << fn << " "
+                    << utils::blanks(std::max<int>(0, 10 - static_cast<int>(fn.length()))) << fn << " "
                     << text << '\n';
         t.item_start = std::chrono::high_resolution_clock::now();
     }

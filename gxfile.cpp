@@ -596,7 +596,7 @@ namespace gxfile {
             WRYAML(YFile->IncIndentLevel());
             FFile->WriteInteger(static_cast<int>(SetTextList ? SetTextList->size() : 0));
             if(SetTextList) {
-                for (int N{}; N < SetTextList->Count(); N++) {
+                for (int N{}; N < static_cast<int>(SetTextList->Count()); N++) {
                     const std::string& SetText = SetTextList->GetString(N);
                     FFile->WriteString(SetText);
                     WRYAML(YFile->AddItem(SetText));
@@ -4319,7 +4319,9 @@ namespace gxfile {
         auto old = insertOrder[N-1];
         auto oldPair = old->second;
         nameToIndexNum.erase(old->first);
-        nameToIndexNum[s] = oldPair;
+        auto [it, wasNew] = nameToIndexNum.emplace(s, oldPair);
+        assert(wasNew);
+        insertOrder[N - 1] = it;
     }
 
     int TUELTable::GetMaxUELLength() const {
