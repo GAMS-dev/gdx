@@ -1747,7 +1747,7 @@ namespace gxfile {
                 int EN {UELTable->UsrUel2Ent.GetMapping(N)}; // nr in ueltable
 #ifndef NDEBUG
                 int d {UELTable->GetUserMap(EN)};
-                assert(d == -1 || d == N && "Mapped already");
+                assert((d == -1 || d == N) && "Mapped already");
 #endif
                 UELTable->SetUserMap(EN, N); // map to user entry
             }

@@ -254,7 +254,7 @@ namespace utils {
     }
     char& getCharAtIndexOrAppend(std::string& s, int ix) {
         const auto l = s.length();
-        assert(ix >= 0 && ix <= l && "Index not in valid range");
+        assert(ix >= 0 && ix <= (int)l && "Index not in valid range");
         if ((size_t)ix == l) s.push_back('\0');
         return s[ix];
     }

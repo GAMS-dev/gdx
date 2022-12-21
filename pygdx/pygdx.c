@@ -1,6 +1,8 @@
 #include <Python.h>
 #include <stddef.h>
 #include <structmember.h>
+
+#define PYGDX_EXPERIMENT
 #include "../cwrap/cwrap.h"
 
 static PyObject *method_create_gdx_file(PyObject *self, PyObject *args) {
