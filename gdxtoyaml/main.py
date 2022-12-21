@@ -3,6 +3,7 @@ import os
 import struct
 import yaml
 import sys
+import platform
 
 sz_integer = 0
 sz_byte = 1
@@ -227,6 +228,9 @@ def convert_file(fn):
 if __name__ == '__main__':
     args = sys.argv
     if len(args) == 3:
-        os.system(f'/usr/bin/diff {convert_file(args[1])} {convert_file(args[2])}')
+        diff_path = 'diff' if 'Windows' in platform.system() else '/usr/bin/diff'
+        cmd = f'{diff_path} {convert_file(args[1])} {convert_file(args[2])}'
+        print(cmd)
+        os.system(cmd)
     else:
         print(to_yaml(read_gdx('xptest.gdx' if len(sys.argv) <= 1 else sys.argv[1])))
