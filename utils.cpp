@@ -18,13 +18,17 @@ using namespace std::literals::string_literals;
 // ==============================================================================================================
 namespace utils {
 
+    bool sameTextInvariant(const std::string& a, const std::string& b);
+    void parseHex(const std::string &s, int &num, int &code);
+    bool determineCode(const std::string &s, const std::function<bool(char)> &charIsLegalPredicate, int& code);
+
     bool anychar(const std::function<bool(char)> &predicate, const std::string &s) {
         return std::any_of(std::cbegin(s), std::cend(s), predicate);
     }
 
     void permutAssign(std::string& lhs, const std::string& rhs,
         const std::vector<int> &writeIndices, const std::vector<int> &readIndices) {
-        for (int i = 0; i < writeIndices.size(); i++) {
+        for (int i = 0; i < (int)writeIndices.size(); i++) {
             lhs[writeIndices[i]] = rhs[readIndices[i]];
         }
     }
@@ -32,7 +36,7 @@ namespace utils {
     std::string strInflateWidth(int num, int targetStrLen, char inflateChar) {
         auto s = std::to_string(num);
         const auto l = s.length();
-        if(l >= targetStrLen) return s;
+        if(l >= (size_t)targetStrLen) return s;
         return std::string(targetStrLen-l, inflateChar) + s;
     }
 
@@ -58,7 +62,7 @@ namespace utils {
     bool sameTextInvariant(const std::string& a, const std::string& b) {
         const auto l = a.length();
         if (b.length() != a.length()) return false;
-        for (int i = 0; i < l; i++) {
+        for (size_t i{}; i < l; i++) {
             if (::tolower(a[i]) != ::tolower(b[i]))
                 return false;
         }
@@ -146,7 +150,7 @@ namespace utils {
 		std::string out{};
 		const int ssl = static_cast<int>(substr.length());
 		const auto positions = substrPositions(s, substr);
-		for(int i=0; i<s.length(); i++) {
+		for(int i=0; i<(int)s.length(); i++) {
 			if(utils::in<size_t>(i, positions)) {
 				out += replacement;
 				i += ssl - 1;
@@ -159,7 +163,7 @@ namespace utils {
 
     bool determineCode(const std::string &s, const std::function<bool(char)> &charIsLegalPredicate, int& code) {
         // first check for offending char and return its position plus one (since 0 is code for "all ok")
-        for (int i{}; i < s.length(); i++) {
+        for (int i{}; i < (int)s.length(); i++) {
             char c = s[i];
             if (!charIsLegalPredicate(c)) {
                 code = i + 1;
@@ -251,7 +255,7 @@ namespace utils {
     char& getCharAtIndexOrAppend(std::string& s, int ix) {
         const auto l = s.length();
         assert(ix >= 0 && ix <= l && "Index not in valid range");
-        if (ix == l) s.push_back('\0');
+        if ((size_t)ix == l) s.push_back('\0');
         return s[ix];
     }
 
@@ -264,7 +268,7 @@ namespace utils {
     }
 
     bool excl_or(bool a, bool b) {
-        return a && !b || !a && b;
+        return (a && !b) || (!a && b);
     }
 
     int posOfSubstr(const std::string& sub, const std::string& s) {
@@ -328,7 +332,7 @@ namespace utils {
 
     // same as std::string::substr but silent when offset > input size
     std::string substr(const std::string& s, int offset, int len) {
-        return (s.empty() || offset > s.size() - 1) ? ""s : s.substr(offset, len);
+        return (s.empty() || offset > (int)s.size() - 1) ? ""s : s.substr(offset, len);
     }
 
     std::string constructStr(int size, const std::function<char(int)> &charForIndex) {
@@ -352,7 +356,7 @@ namespace utils {
         std::string res(len, sep);
         int i{};
         for(const std::string &part : parts) {
-            for(int j{}; j<part.length(); j++)
+            for(int j{}; j<(int)part.length(); j++)
                 res[i++] = part[j];
             if(i < len) i++;
         }
@@ -361,7 +365,7 @@ namespace utils {
 
     bool starts_with(const std::string &s, const std::string &prefix) {
         if (prefix.length() > s.length()) return false;
-        for(int i=0; i<prefix.length(); i++) {
+        for(int i=0; i<(int)prefix.length(); i++) {
             if(s[i] != prefix[i])
                 return false;
         }
@@ -370,7 +374,7 @@ namespace utils {
 
     bool ends_with(const std::string &s, const std::string &suffix) {
         if (suffix.length() > s.length()) return false;
-        for(int i=0; i<suffix.length(); i++) {
+        for(int i=0; i<(int)suffix.length(); i++) {
             if(s[s.length()-1-i] != suffix[suffix.length()-1-i])
                 return false;
         }
@@ -397,7 +401,7 @@ namespace utils {
         ss.precision(precision);
         ss << std::fixed << v;
         std::string res = ss.str();
-        return res.length() >= width ? res : std::string(width-res.length(), ' ') + res;
+        return (int)res.length() >= width ? res : std::string(width-(int)res.length(), ' ') + res;
     }
 
     bool strToBool(const std::string &s) {
@@ -417,7 +421,7 @@ namespace utils {
             f2.get(c2);
             if (c1 != c2) {
                 mismatches.emplace_back(offset, c1, c2);
-                if (mismatches.size() >= countLimit)
+                if ((int)mismatches.size() >= countLimit)
                     break;
             }
             offset++;
@@ -444,7 +448,7 @@ namespace utils {
         if(S1.empty() || S2.empty()) return b2i(!S1.empty()) - b2i(!S2.empty());
         auto L = S1.length();
         if(L > S2.length()) L = S2.length();
-        for(int K{}; K<L; K++) {
+        for(size_t K{}; K<L; K++) {
             int c1 = caseInsensitive ? ::toupper(S1[K]) : S1[K];
             int c2 = caseInsensitive ? ::toupper(S2[K]) : S2[K];
             int d = c1 - c2;

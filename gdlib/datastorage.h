@@ -45,15 +45,15 @@ namespace gdlib::datastorage {
         using ValArray = std::array<ValueType, maxValueSize>;
 
         TLinkedDataLegacy(int ADimension, int ADataSize) :
-            FDimension(ADimension),
-            FKeySize(ADimension * (int)sizeof(KeyType)),
-            FDataSize(ADataSize),
-            FTotalSize(sizeof(RecType)),
-            FHead{},
-            FTail{},
-            FCount{},
+            FMinKey{std::numeric_limits<int>::max()},
             FMaxKey{},
-            FMinKey{std::numeric_limits<int>::max()}
+            FDimension{ADimension},
+            FKeySize{ADimension * (int)sizeof(KeyType)},
+            FTotalSize{sizeof(RecType)},
+            FDataSize{ADataSize},
+            FCount{},
+            FHead{},
+            FTail{}
         {
         };
 

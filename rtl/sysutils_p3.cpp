@@ -20,6 +20,8 @@ using namespace std::literals::string_literals;
 namespace rtl::sysutils_p3 {
     namespace fs = std::filesystem;
 
+    int AssignEnvironmentVariable(const std::string& sid, const std::string& setval);
+
 #if defined(_WIN32)
     char PathDelim = '\\';
     char DriveDelim = ':';

@@ -14,12 +14,32 @@ using namespace gdxinterface;
 namespace tests::gdxinterfacetests {
     TEST_SUITE_BEGIN("GDX interface tests");
 
+    std::list<std::function<GDXInterface*()>> getBuilders();
+    void basicTest(const std::function<void(GDXInterface&)> &cb, int ub = -1);
+    void testReads(const std::string &filename1,
+                   const std::string &filename2,
+                   const std::function<void(GDXInterface&)> &cb);
+    void runGdxToYamlScript(const std::string &filename1 = ""s, const std::string &filename2 = ""s);
+    void checkForMismatches(const std::string &filename1, const std::string &filename2, bool skipDiffing);
+    std::string makeCorporateGDXAvailable();
+    void testMatchingWrites(const std::string &filename1,
+                            const std::string &filename2,
+                            const std::function<void(GDXInterface&)> &cb,
+                            bool skipDiffing = false);
+    void writeMappedRecordsOutOfOrder(GDXInterface &pgx);
+    void domainSetGetTestSetupPrefix(GDXInterface &pgx);
+    std::string acquireGDXforModel(const std::string &model);
+    void commonSetGetDomainTests(const std::vector<std::string> &domainNames,
+                                 const std::vector<int> &domainIndices);
+    void testReadModelGDX(const std::string &model, const std::function<void(GDXInterface&)> &func);
+    void testWithCompressConvert(bool compress = false, const std::string &convert = ""s);
+
     //static std::ostream &mycout = std::cout;
     static std::ostream mycout {&gxfile::null_buffer};
 
     static std::ofstream slowdownReport {"slowdown.txt"};
 
-    auto getBuilders() {
+    std::list<std::function<GDXInterface*()>> getBuilders() {
         static std::string ErrMsg;
         std::list<std::function<GDXInterface*()>> builders {
                 [&]() { return new xpwrap::GDXFile{ErrMsg}; },
@@ -28,7 +48,7 @@ namespace tests::gdxinterfacetests {
         return builders;
     }
 
-    void basicTest(const std::function<void(GDXInterface&)> &cb, int ub = -1) {
+    void basicTest(const std::function<void(GDXInterface&)> &cb, int ub) {
         int i {};
         for(const auto &builder : getBuilders()) {
             if(ub != -1 && i++ >= ub) break;
@@ -159,14 +179,15 @@ namespace tests::gdxinterfacetests {
         testReadOp<gxfile::TGXFileObj>(filename2, cb);
     }
 
-    void runGdxToYamlScript(const std::string &filename1 = ""s, const std::string &filename2 = ""s) {
+    void runGdxToYamlScript(const std::string &filename1, const std::string &filename2) {
 #if defined(__APPLE__) || defined(__linux__)
         const std::string pythonInterpreter {"/usr/bin/python3"};
 #else
         const std::string pythonInterpreter {"python"};
 #endif
         std::string f2 = filename2.empty() ? ""s : " "s + filename2;
-        system((pythonInterpreter + " gdxtoyaml/main.py "s + filename1 + f2).c_str());
+        int rc {system((pythonInterpreter + " gdxtoyaml/main.py "s + filename1 + f2).c_str())};
+        REQUIRE_FALSE(rc);
     }
 
     void checkForMismatches(const std::string &filename1, const std::string &filename2, bool skipDiffing) {
@@ -193,7 +214,7 @@ namespace tests::gdxinterfacetests {
     void testMatchingWrites(const std::string &filename1,
                             const std::string &filename2,
                             const std::function<void(GDXInterface&)> &cb,
-                            bool skipDiffing = false) {
+                            bool skipDiffing) {
         testWriteOp<xpwrap::GDXFile>(filename1, cb);
         testWriteOp<gxfile::TGXFileObj>(filename2, cb);
         checkForMismatches(filename1, filename2, skipDiffing);
@@ -221,7 +242,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(!strcmp("New-York", uel));
             REQUIRE_EQ(-1, uelMap);
             REQUIRE_FALSE(pgx.gdxGetUEL(2, uel));
-            REQUIRE_NE("New-York", uel);
+            REQUIRE(strcmp("New-York", uel));
             REQUIRE_FALSE(pgx.gdxUMUelGet(23, uel, uelMap));
             REQUIRE_EQ("?L__23"s, uel);
             REQUIRE_EQ(-1, uelMap);
@@ -250,7 +271,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(!strcmp("TheOnlyUEL", uel));
             REQUIRE_EQ(-1, uelMap);
             REQUIRE_FALSE(pgx.gdxGetUEL(1, uel));
-            REQUIRE_NE("TheOnlyUEL", uel);
+            REQUIRE(strcmp("TheOnlyUEL", uel));
         });
         for (const auto& fn : filenames)
             std::filesystem::remove(fn);
@@ -383,7 +404,7 @@ namespace tests::gdxinterfacetests {
             gxfile::TGXFileObj pgx{ErrMsg};
             REQUIRE(pgx.gdxGetSpecialValues(specialValuesFromPort.data()));
         }
-        for(int i{}; i<specialValuesFromPort.size(); i++) {
+        for(int i{}; i<(int)specialValuesFromPort.size(); i++) {
             const double eps = 0.001;
             REQUIRE(specialValuesFromWrap[i] - specialValuesFromPort[i] < eps);
         }
@@ -507,7 +528,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(4, NrRecs);
             // unordered mapped write comes out ordered
             std::array<int, 4> expKey { 2, 3, 4, 5 };
-            for(int i{1}; i<=expKey.size(); i++) {
+            for(int i{1}; i<=(int)expKey.size(); i++) {
                 REQUIRE(pgx.gdxDataReadMap(i, &key, values.data(), dimFrst));
                 REQUIRE_EQ(expKey[i-1], key);
             }
@@ -573,7 +594,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(4, NrRecs);
             // should still be ordered
             std::array<int, 4> expKey { 5, 6, 7, 8 };
-            for(int i{1}; i<=expKey.size(); i++) {
+            for(int i{1}; i<=(int)expKey.size(); i++) {
                 int dimFrst;
                 REQUIRE(pgx.gdxDataReadMap(i, &key, values.data(), dimFrst));
                 REQUIRE_EQ(expKey[i-1], key);
@@ -622,7 +643,7 @@ namespace tests::gdxinterfacetests {
 
         TgdxStrIndex newSymDomainNames {};
         std::array<int, 2> newSymDomainIndices {};
-        for(int i{}; i<domainNames.size(); i++) {
+        for(int i{}; i<(int)domainNames.size(); i++) {
             newSymDomainNames[i] = domainNames[i];
             newSymDomainIndices[i] = domainIndices[i];
         }
@@ -780,10 +801,12 @@ namespace tests::gdxinterfacetests {
                           log_fn = model + "Log.txt"s,
                           fnpf = "model_data"s;
         std::string gdxfn = fnpf+".gdx"s; // non-const so we get automatic move
-        std::system(("gamslib "s + model + " > gamslibLog.txt"s).c_str());
+        int rc = std::system(("gamslib "s + model + " > gamslibLog.txt"s).c_str());
+        REQUIRE_FALSE(rc);
         std::filesystem::remove("gamslibLog.txt");
         REQUIRE(std::filesystem::exists(model_fn));
-        std::system(("gams " + model_fn + " gdx="s + fnpf + " lo=0 o=lf > " + log_fn).c_str());
+        rc = std::system(("gams " + model_fn + " gdx="s + fnpf + " lo=0 o=lf > " + log_fn).c_str());
+        REQUIRE_FALSE(rc);
         std::filesystem::remove(log_fn);
         std::filesystem::remove(model_fn);
         std::filesystem::remove("lf");
@@ -1201,7 +1224,7 @@ namespace tests::gdxinterfacetests {
         });
     }
 
-    void testWithCompressConvert(bool compress = false, const std::string &convert = ""s) {
+    void testWithCompressConvert(bool compress, const std::string &convert) {
         const std::string f1 {"conv_compr_wrap.gdx"}, f2 {"conv_compr_port.gdx"};
         rtl::p3utils::P3SetEnv("GDXCOMPRESS", compress ? "1"s : "0"s);
         rtl::p3utils::P3SetEnv("GDXCONVERT", convert);
@@ -1307,7 +1330,10 @@ namespace tests::gdxinterfacetests {
         }
     };
 
-    double perfBenchmarkCppVsDelphi(AbstractWriteReadPair &pair, bool randomOrderInsert = true) {
+    double perfBenchmarkCppVsDelphi(AbstractWriteReadPair &pair, bool randomOrderInsert = true);
+    void enforceSlowdownLimit(AbstractWriteReadPair &pair, double limit);
+
+    double perfBenchmarkCppVsDelphi(AbstractWriteReadPair &pair, bool randomOrderInsert) {
         const int upto {10000};
         auto nums = std::make_unique<std::array<int, upto>>();
         std::iota(nums->begin(), nums->end(), 1);
@@ -1443,7 +1469,7 @@ namespace tests::gdxinterfacetests {
     class WriteReadMappedPair : public AbstractWriteReadPair {
         void registerMappedUels(GDXInterface &pgx, int count, const int *nums) {
             std::vector<std::string> uelIds(count);
-            for(int i{}; i<uelIds.size(); i++)
+            for(int i{}; i<(int)uelIds.size(); i++)
                 uelIds[i] = "i"+std::to_string(i+1);
             std::shuffle(uelIds.begin(), uelIds.end(), std::default_random_engine(42));
             REQUIRE(pgx.gdxUELRegisterMapStart());
@@ -1507,10 +1533,12 @@ namespace tests::gdxinterfacetests {
                 log_fn = "corporateLog.txt"s,
                 fnpf = "corporate"s;
         std::string gdxfn = fnpf+".gdx"s; // non-const so we get automatic move
-        std::system(("finlib Corporate > gamslibLog.txt"s).c_str());
+        int rc = std::system(("finlib Corporate > gamslibLog.txt"s).c_str());
+        REQUIRE_FALSE(rc);
         std::filesystem::remove("gamslibLog.txt");
         REQUIRE(std::filesystem::exists(model_fn));
-        std::system(("gams " + model_fn + " gdx="s + fnpf + " lo=0 o=lf > " + log_fn).c_str());
+        rc = std::system(("gams " + model_fn + " gdx="s + fnpf + " lo=0 o=lf > " + log_fn).c_str());
+        REQUIRE_FALSE(rc);
         std::filesystem::remove(log_fn);
         std::filesystem::remove(model_fn);
         std::filesystem::remove("CorporateCommonInclude.inc");

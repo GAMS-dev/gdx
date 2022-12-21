@@ -346,7 +346,7 @@ namespace gdlib::gmsstrm {
         FPassword.clear();
         if(s.empty()) return;
         bool BB{};
-        for(int K{}; K<s.length(); K++) {
+        for(int K{}; K<(int)s.length(); K++) {
             if(s[K] != ' ') BB = false;
             else {
                 if(BB) continue;
@@ -395,7 +395,7 @@ namespace gdlib::gmsstrm {
     }
 
     void TBinaryTextFileIO::SetCompression(bool V) {
-        if(FCompress || V && NrWritten > 0) FS->flush();
+        if((FCompress || V) && NrWritten > 0) FS->flush();
         if(FCompress != V)
             NrLoaded = NrRead = 0;
         FCompress = V;
@@ -422,7 +422,7 @@ namespace gdlib::gmsstrm {
             NrRead = Fin.Read(Buffer.data(), (int)Buffer.size());
             if (!NrRead) break;
             Fout.Write(Buffer.data(), NrRead);
-        } while (NrRead >= Buffer.size());
+        } while (NrRead >= (int)Buffer.size());
     }
 
     void UnCompressTextFile(const std::string& fn, const std::string& fo, const std::string& PassWord, int& ErrNr, std::string& ErrMsg) {
@@ -482,7 +482,7 @@ namespace gdlib::gmsstrm {
 
     void TGZipInputStream::ReadLine(std::vector<uint8_t> &buffer, int MaxInp, char &LastChar) {
         const char subst = (char)0x1A;
-        while(!utils::in<char>(LastChar, '\r', '\n', subst) || buffer.size() == MaxInp) {
+        while(!utils::in<char>(LastChar, '\r', '\n', subst) || (int)buffer.size() == MaxInp) {
             buffer.push_back(LastChar);
             if(NrLoaded - NrRead >= 1)  {
                 LastChar = (char)Buf[NrRead++];
@@ -628,7 +628,7 @@ namespace gdlib::gmsstrm {
         FPassWord.clear();
         if(s.empty()) return;
         bool BB{};
-        for(int K{}; K<s.length(); K++) {
+        for(int K{}; K<(int)s.length(); K++) {
             if(s[K] != ' ') BB = false;
             else {
                 if(BB) continue;
@@ -677,7 +677,7 @@ namespace gdlib::gmsstrm {
     }
 
     TXFileStreamDelphi::TXFileStreamDelphi(std::string AFileName, const FileAccessMode AMode)
-        : FFileName{std::move( AFileName )}, FPassWord{}, FLastIOResult{}, PhysPosition{}, FS{}
+        : FS{}, FFileName{std::move( AFileName )}, FPassWord{}, FLastIOResult{}, PhysPosition{}
     {
         rtl::p3utils::Tp3FileOpenAction FMode{ p3OpenRead };
         switch (AMode) {
@@ -813,14 +813,13 @@ namespace gdlib::gmsstrm {
         NrLoaded{},
         NrRead{},
         NrWritten{},
-        FCompress{},
         BufSize{ BufferSize },
-        BufPtr(BufferSize),
         CBufSize{ (uint32_t)std::round((double)BufferSize * 12.0 / 10.0) + 20 },
-        CBufPtr{ (PCompressBuffer)malloc(sizeof(TCompressHeader)+CBufSize) }
+        BufPtr(BufferSize),
+        CBufPtr{ (PCompressBuffer)malloc(sizeof(TCompressHeader)+CBufSize) },
+        FCompress{},
+        FCanCompress{true} // no longer a fatal error
     {
-        std::string Msg;
-        FCanCompress = true; // no longer a fatal error
     }
 
     TBufferedFileStreamDelphi::~TBufferedFileStreamDelphi() {
@@ -1043,7 +1042,7 @@ namespace gdlib::gmsstrm {
         constexpr std::array<tgmsvalue, 5> kToRetMapping = {
                 xvund, xvna, xvpin, xvmin, xveps
         };
-        return k >= 1 && k <= kToRetMapping.size() ? kToRetMapping[k-1] : xvacr;
+        return k >= 1 && k <= (int)kToRetMapping.size() ? kToRetMapping[k-1] : xvacr;
     }
 
     void TMiBufferedStreamDelphi::WriteGmsDouble(double D)
@@ -1272,7 +1271,7 @@ namespace gdlib::gmsstrm {
             gzFS->ReadLine(Buffer, MaxInp, LastChar);
         else {
             Buffer.clear();
-            while (!(utils::in(LastChar, substChar, '\n', '\r') || Buffer.size() == MaxInp)) {
+            while (!(utils::in(LastChar, substChar, '\n', '\r') || (int)Buffer.size() == MaxInp)) {
                 Buffer.push_back(LastChar);
                 if (FS->NrLoaded - FS->NrRead >= 1) { // the simple case
                     LastChar = (char)FS->BufPtr[FS->NrRead];

@@ -14,6 +14,10 @@ using namespace kvbuffers;
 namespace tests::xptests {
     TEST_SUITE_BEGIN("expert level api");
 
+    void writeDemandData(gdxHandle_t pgx, const std::string &fn, const std::array<std::pair<std::string, double>, 3> &exampleData);
+    void readDemandData(gdxHandle_t pgx, const std::string &fn, const std::array<std::pair<std::string, double>, 3> &exampleData);
+    gdxHandle_t setupGdxObject();
+
     void writeDemandData(gdxHandle_t pgx,
                          const std::string &fn,
                          const std::array<std::pair<std::string, double>, 3> &exampleData) {

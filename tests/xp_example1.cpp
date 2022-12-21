@@ -9,6 +9,18 @@ using namespace std::literals::string_literals;
 namespace tests::xp_example1 {
     TEST_SUITE_BEGIN("gxfile");
 
+    enum class GDXImplType {
+        wrapped,
+        ported
+    };
+
+    void ReportIOError(int N, const std::string &msg);
+    void ReportGDXError(gdxinterface::GDXInterface &PGX);
+    void WriteData(gdxinterface::GDXInterface &PGX, const std::string &s, double V);
+    gdxinterface::GDXInterface *SetupGDXObject(GDXImplType implType);
+    void TeardownGDXObject(gdxinterface::GDXInterface **pgx);
+    void runXpExample1Main(GDXImplType implType);
+
     static std::ostream mycout {&gxfile::null_buffer};
 
     void ReportIOError(int N, const std::string &msg) {
@@ -17,10 +29,10 @@ namespace tests::xp_example1 {
     }
 
     void ReportGDXError(gdxinterface::GDXInterface &PGX) {
-        char S[GMS_SSSIZE];
+        std::array<char, GMS_SSSIZE> S;
         mycout << "**** Fatal GDX Error\n";
-        REQUIRE(PGX.gdxErrorStr(PGX.gdxGetLastError(), S));
-        mycout << "**** " << S << "\n";
+        REQUIRE(PGX.gdxErrorStr(PGX.gdxGetLastError(), S.data()));
+        mycout << "**** " << S.data() << "\n";
     }
 
     static gdxinterface::StrIndexBuffers Indx {};
@@ -34,11 +46,6 @@ namespace tests::xp_example1 {
         const char *keyptrs[] = {s.c_str()};
         PGX.gdxDataWriteStr(keyptrs, Values.data());
     }
-
-    enum class GDXImplType {
-        wrapped,
-        ported
-    };
 
     gdxinterface::GDXInterface *SetupGDXObject(GDXImplType implType) {
         std::string Msg;
@@ -89,9 +96,11 @@ namespace tests::xp_example1 {
         mycout << "Demand data written by xp_example1\n";
         TeardownGDXObject(&PGX);
 
-        system("gamslib trnsport > gamslibLog.txt");
+        int rc = system("gamslib trnsport > gamslibLog.txt");
+        REQUIRE_FALSE(rc);
         // FIXME: Actually load data from GDX file by modifying trnsport src here
-        system("gams trnsport gdx=result lo=0 o=lf");// > gamsLog.txt");
+        rc = system("gams trnsport gdx=result lo=0 o=lf");// > gamsLog.txt");
+        REQUIRE_FALSE(rc);
         std::filesystem::remove("gamslibLog.txt");
         //std::filesystem::remove("gamsLog.txt");
 

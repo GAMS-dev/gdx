@@ -11,6 +11,9 @@ using namespace std::literals::string_literals;
 namespace tests::gxfiletests {
     TEST_SUITE_BEGIN("gxfile");
 
+    void writeFile();
+    void readFile();
+
     static std::ostream mycout {&gxfile::null_buffer};
 
     const std::string fn {"mytest.gdx"};
@@ -70,7 +73,7 @@ namespace tests::gxfiletests {
 
         gdxinterface::StrIndexBuffers sibufs {};
 
-        for(int i=0; i<Indx.size(); i++) {
+        for(int i=0; i<(int)Indx.size(); i++) {
             Indx[i] = bufs[i].data();
         }
         gdxinterface::TgdxValues Values;
@@ -139,9 +142,12 @@ namespace tests::gxfiletests {
             for(auto &fn : fns)
                 std::filesystem::remove(fn);
         };
-        system("gamslib trnsport > gamslibLog.txt");
+        int rc{};
+        rc = system("gamslib trnsport > gamslibLog.txt");
         std::filesystem::remove("gamslibLog.txt");
-        system("gams trnsport a=c gdx=trnsport lo=0 o=lf > log.txt");
+        REQUIRE_EQ(0, rc);
+        rc = system("gams trnsport a=c gdx=trnsport lo=0 o=lf > log.txt");
+        REQUIRE_EQ(0, rc);
         rtl::p3utils::P3SetEnv("GDXCOMPRESS", "1"s);
         rtl::p3utils::P3SetEnv("GDXCONVERT", "V5");
         REQUIRE_EQ(0, gxfile::ConvertGDXFile("trnsport.gdx"s, "U"s));

@@ -21,6 +21,10 @@ using namespace std::literals::string_literals;
 
 namespace gxfile {
 
+    bool CanBeQuoted(const std::string &s);
+    bool GoodUELString(const std::string &s);
+    int64_t dblToI64(double x);
+
     bool CanBeQuoted(const std::string &s) {
         bool saw_single{}, saw_double{};
         for(auto Ch : s) {
@@ -229,8 +233,8 @@ namespace gxfile {
 
     bool IsGoodIdent(const std::string &S) {
         const int MaxNameLen = 63; // starting version 149
-        if(!S.empty() && S.length() <= MaxNameLen && isalpha(S.front())) {
-            for(int n{1}; n<S.length(); n++)
+        if(!S.empty() && (int)S.length() <= MaxNameLen && isalpha(S.front())) {
+            for(int n{1}; n<(int)S.length(); n++)
                 if(!isalnum(S[n]) && S[n] != '_') return false;
             return true;
         }
@@ -255,8 +259,10 @@ namespace gxfile {
         return i64Rec.i64;
     }
 
+    void copyIntlMapDblToI64(const TIntlValueMapDbl &dMap, TIntlValueMapI64 &iMap);
+
     void copyIntlMapDblToI64(const TIntlValueMapDbl &dMap, TIntlValueMapI64 &iMap) {
-        for(int k=0; k<iMap.size(); k++) {
+        for(int k=0; k<(int)iMap.size(); k++) {
             iMap[k] = dblToI64(dMap[k]);
         }
     }
@@ -686,7 +692,7 @@ namespace gxfile {
 #ifdef YAML
             YFile->AddKeyItem("section_offsets");
             YFile->IncIndentLevel();
-            for(int i{}; i<offsets.size(); i++)
+            for(int i{}; i<(int)offsets.size(); i++)
                 YFile->AddKeyValue(offsetNames[i], (int)offsets[i]);
             YFile->DecIndentLevel();
 #endif
@@ -770,7 +776,7 @@ namespace gxfile {
             std::cout << "reset special vals, dump of readIntlValueMapDbl" << std::endl;
             std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
             std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
-            for(int i=0; i<svNames.size(); i++)
+            for(int i=0; i<(int)svNames.size(); i++)
                 std::cout << svNames[i] << "=" << readIntlValueMapDbl[svIndices[i]] << std::endl;
         }
 
@@ -1195,6 +1201,8 @@ namespace gxfile {
         DBL_FINITE     /* positive infinity */
     };
 
+    TDblClass dblInfo(double x, int64_t &i);
+
     const std::array DblClassText {
         "NaN"s, "negative infinity"s, "positive infinity"s, "finite"s
     };
@@ -1223,7 +1231,7 @@ namespace gxfile {
     }
 
     inline bool accessBitMap(const std::vector<bool> &bmap, int index) {
-        return !(index < 0 || index >= bmap.size()) && bmap[index];
+        return !(index < 0 || index >= (int)bmap.size()) && bmap[index];
     }
 
     bool TGXFileObj::DoWrite(const int* AElements, const double* AVals)
@@ -1326,7 +1334,7 @@ namespace gxfile {
             if (AVals[GMS_VAL_LEVEL] != 0.0) CurSyPtr->SSetText = true;
             if (FCurrentDim == 1 && CurSyPtr->SSetBitMap) {
                 auto& ssbm = *CurSyPtr->SSetBitMap;
-                if (ssbm.size() <= LastElem.front())
+                if ((int)ssbm.size() <= LastElem.front())
                     ssbm.resize(LastElem.front()+1, false);
                 ssbm[LastElem.front()] = true;
             }
@@ -1736,9 +1744,11 @@ namespace gxfile {
             int HighestIndex = UELTable->UsrUel2Ent.GetHighestIndex();
             for(int N{HighestIndex}; N >= HighestIndex - NrMappedAdded + 1; N--) {
                 assert(N >= 1 && "Wrong entry number");
-                int EN {UELTable->UsrUel2Ent.GetMapping(N)}, // nr in ueltable
-                    d {UELTable->GetUserMap(EN)};
+                int EN {UELTable->UsrUel2Ent.GetMapping(N)}; // nr in ueltable
+#ifndef NDEBUG
+                int d {UELTable->GetUserMap(EN)};
                 assert(d == -1 || d == N && "Mapped already");
+#endif
                 UELTable->SetUserMap(EN, N); // map to user entry
             }
             NrMappedAdded = 0;
@@ -1970,7 +1980,7 @@ namespace gxfile {
             FFile->SetPosition(AcronymPos);
             if (ErrorCondition(FFile->ReadString() == MARK_ACRO, ERR_OPEN_ACROMARKER1)) return FileErrorNr();
             AcronymList.resize(FFile->ReadInteger());
-            for (int i = 0; i < AcronymList.size(); i++) {
+            for (int i = 0; i < (int)AcronymList.size(); i++) {
                 auto& obj = AcronymList[i];
                 obj.AcrName = FFile->ReadString();
                 obj.AcrText = FFile->ReadString();
@@ -2066,7 +2076,7 @@ namespace gxfile {
     //  The integer value can be used to set the associated text of a set element.
     //  The string must follow the GAMS syntax rules for explanatory text.
     int TGXFileObj::gdxAddSetText(const std::string &Txt, int &TxtNr) {
-        if(!SetTextList || TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText", {}))
+        if(!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText", {})))
             return false;
         TxtNr = SetTextList->AddObject(MakeGoodExplText(Txt), 0);
         return true;
@@ -2360,7 +2370,7 @@ namespace gxfile {
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
             std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
             std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
-            for(int i=0; i<svNames.size(); i++)
+            for(int i=0; i<(int)svNames.size(); i++)
                 std::cout << svNames[i] << "=" << AVals[svIndices[i]] << std::endl;
         }
 
@@ -2392,7 +2402,7 @@ namespace gxfile {
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
             std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
             std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
-            for(int i=0; i<svNames.size(); i++)
+            for(int i=0; i<(int)svNames.size(); i++)
                 std::cout << svNames[i] << "=" << AVals[svIndices[i]] << std::endl;
         }
 
@@ -2417,7 +2427,7 @@ namespace gxfile {
             std::cout << "Read dump, readIntlValueMapDbl" << std::endl;
             std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
             std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
-            for(int i=0; i<svNames.size(); i++)
+            for(int i=0; i<(int)svNames.size(); i++)
                 std::cout << svNames[i] << "=" << readIntlValueMapDbl[svIndices[i]] << std::endl;
         }
 
@@ -3199,7 +3209,7 @@ namespace gxfile {
     // See Also:
     //    gdxAcronymSetInfo, gdxAcronymCount
     int TGXFileObj::gdxAcronymGetInfo(int N, char *AName, char *Txt, int &AIndx) const {
-        if(N < 1 || N > AcronymList.size()) {
+        if(N < 1 || N > (int)AcronymList.size()) {
             AName[0] = Txt[0] = '\0';
             AIndx = 0;
             return false;
@@ -3237,7 +3247,7 @@ namespace gxfile {
         if(TraceLevel >= TraceLevels::trl_some)
             WriteTrace("AcronymSetInfo: "s + AName + " index = " + std::to_string(AIndx));
 
-        if(ErrorCondition(N >= 1 || N <= AcronymList.size(), ERR_BADACRONUMBER)) return false;
+        if(ErrorCondition(N >= 1 || N <= (int)AcronymList.size(), ERR_BADACRONUMBER)) return false;
         auto &obj = AcronymList[N-1];
         if(utils::in(fmode, AnyWriteMode) || obj.AcrAutoGen) {
             if(ErrorCondition(IsGoodNewSymbol(AName), ERR_BADACRONAME)) return false;
@@ -3296,8 +3306,8 @@ namespace gxfile {
     int TGXFileObj::gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex) {
         if(TraceLevel >= TraceLevels::trl_some)
             WriteTrace("AcronymGetMapping: N = "s + std::to_string(N));
-        if(ErrorCondition(N >= 1 || N <= AcronymList.size(), ERR_BADACRONUMBER)) return false;
-        auto &obj = AcronymList[N-1];
+        if(ErrorCondition(N >= 1 || N <= (int)AcronymList.size(), ERR_BADACRONUMBER)) return false;
+        const auto &obj = AcronymList[N-1];
         orgIndx = obj.AcrMap;
         newIndx = obj.AcrReadMap;
         autoIndex = obj.AcrAutoGen;
@@ -3604,10 +3614,10 @@ namespace gxfile {
     //   are added implicitly use gdxAcronymSetInfo to update the table.
     //
     int TGXFileObj::gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) {
-        for(int N{}; N<AcronymList.size(); N++) {
+        for(int N{}; N<(int)AcronymList.size(); N++) {
             auto &obj = AcronymList[N];
             if(utils::sameText(obj.AcrName, AName)) {
-                if(ErrorCondition(obj.AcrMap = AIndx, ERR_ACROBADADDITION)) return -1;
+                if(ErrorCondition(obj.AcrMap == AIndx, ERR_ACROBADADDITION)) return -1;
                 return N;
             }
             if(ErrorCondition(obj.AcrMap != AIndx, ERR_ACROBADADDITION)) return -1;
@@ -3991,7 +4001,7 @@ namespace gxfile {
             std::cout << "gdxSetReadSpecialValues, dump of readIntlValueMapDbl" << std::endl;
             std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
             std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
-            for(int i=0; i<svNames.size(); i++)
+            for(int i=0; i<(int)svNames.size(); i++)
                 std::cout << svNames[i] << "=" << readIntlValueMapDbl[svIndices[i]] << std::endl;
         }
 
@@ -4011,9 +4021,9 @@ namespace gxfile {
         memset(LengthInfo, 0, GLOBAL_MAX_INDEX_DIM * sizeof(int));
 
         int NrRecs;
-        if ((TraceLevel >= TraceLevels::trl_some || fmode != fr_init)
-            && !CheckMode("SymbIndxMaxLength", fr_init)
-            || SyNr < 0 || SyNr > NameList->size() || !gdxDataReadRawStart(SyNr, NrRecs))
+        if (((TraceLevel >= TraceLevels::trl_some || fmode != fr_init)
+            && !CheckMode("SymbIndxMaxLength", fr_init))
+            || (SyNr < 0 || SyNr > NameList->size()) || !gdxDataReadRawStart(SyNr, NrRecs))
             return 0;
 
         int res{};
@@ -4086,7 +4096,7 @@ namespace gxfile {
     int TGXFileObj::gdxSymbolGetComment(int SyNr, int N, char *Txt) {
         if (NameList && !NameList->empty() && SyNr >= 1 && SyNr <= NameList->size()) {
             const auto obj = *NameList->GetObject(SyNr);
-            if (!obj->SCommentsList.empty() && N >= 1 && N <= obj->SCommentsList.size()) {
+            if (!obj->SCommentsList.empty() && N >= 1 && N <= (int)obj->SCommentsList.size()) {
                 utils::assignStrToBuf(obj->SCommentsList[N - 1], Txt, GMS_SSSIZE);
                 return true;
             }
@@ -4429,7 +4439,7 @@ namespace gxfile {
 
     void TFilterList::AddFilter(const TDFilter& F)
     {
-        for (int N{}; N < size(); N++) {
+        for (int N{}; N < (int)size(); N++) {
             if ((*this)[N].FiltNumber == F.FiltNumber) {
                 this->erase(this->begin() + N);
                 break;
@@ -4443,7 +4453,7 @@ namespace gxfile {
     }
 
     void TIntegerMapping::SetMapping(int F, int T) {
-        if(F >= Map.size()) {
+        if(F >= (int)Map.size()) {
             Map.resize(F + 1, -1);
             assert(F+1 < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
         }
@@ -4451,7 +4461,7 @@ namespace gxfile {
     }
 
     int TIntegerMapping::GetMapping(int F) const {
-        return F >= 0 && F < Map.size() ? Map[F] : -1;
+        return F >= 0 && F < (int)Map.size() ? Map[F] : -1;
     }
 
     void TIntegerMapping::clear() {
@@ -4459,7 +4469,7 @@ namespace gxfile {
     }
 
     int &TIntegerMapping::operator[](int index) {
-        if(index >= Map.size()) {
+        if(index >= (int)Map.size()) {
             Map.resize(index+1, -1);
             assert(index+1 < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
         }

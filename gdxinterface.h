@@ -68,7 +68,7 @@ namespace gdxinterface {
         std::array<char*, 20> bufPtrs{};
     public:
         explicit StrIndexBuffers(const TgdxStrIndex *strIndex = nullptr) {
-            for (int i{}; i < bufPtrs.size(); i++) {
+            for (int i{}; i < (int)bufPtrs.size(); i++) {
                 bufPtrs[i] = bufContents[i].data();
                 if (strIndex)
                     memcpy(bufPtrs[i], (*strIndex)[i].c_str(),(*strIndex)[i].length()+1);
@@ -84,14 +84,14 @@ namespace gdxinterface {
 
         TgdxStrIndex strs() const {
             TgdxStrIndex res;
-            for (int i{}; i < res.size(); i++) {
+            for (int i{}; i < (int)res.size(); i++) {
                 res[i].assign(bufPtrs[i]);
             }
             return res;
         }
 
         void clear() {
-            for (int i{}; i < bufContents.size(); i++)
+            for (int i{}; i < (int)bufContents.size(); i++)
                 bufContents[i].fill(0);
         }
 

@@ -338,6 +338,8 @@ namespace pfgdx {
         assert(!rc);
         rc = cgdx.pffini();
         assert(!rc);
+        // silence rc not used warning when compiling in release build (asserts removed).
+        if(rc) std::cout << "Final result code non-zero!" << std::endl;
         std::filesystem::remove("out.gdx"s);
     }
 }

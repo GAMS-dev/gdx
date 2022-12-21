@@ -14,6 +14,8 @@ namespace tests::serializetests {
         TYAML
     };
 
+    void commonFileCreation(TestType t);
+
     static const auto
         gdx_fn {"serialize_test.gdx"s},
         yaml_fn {"serialize_test.yaml"s},

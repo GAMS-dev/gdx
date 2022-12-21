@@ -6,7 +6,7 @@ namespace yaml {
 
     const int numSpacesPerIndent = 2;
 
-    TYAMLFile::TYAMLFile(const std::string &filename, bool _active) : active{_active}, curDepth{0} {
+    TYAMLFile::TYAMLFile(const std::string &filename, bool _active) : curDepth{}, active{_active} {
         if(active) {
             fp.open(filename);
             if(!fp.is_open()) {

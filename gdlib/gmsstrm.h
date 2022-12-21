@@ -147,13 +147,13 @@ namespace gdlib::gmsstrm {
 
         std::unique_ptr<rtl::p3utils::Tp3File> FS{};
         bool FileIsOpen{};
-        std::string FPassWord{}, FFileName{};
+        std::string FFileName{}, FPassWord{};
 
         static std::string RandString(int L);
 
     protected:
-        int64_t PhysPosition{};
         int FLastIOResult{};
+        int64_t PhysPosition{};
 
         int64_t GetSize() override;
         int64_t GetPosition() override;
@@ -190,10 +190,10 @@ namespace gdlib::gmsstrm {
     class TBufferedFileStreamDelphi : public TXFileStreamDelphi {
         friend class TBinaryTextFileIODelphi;
 
-        uint32_t BufSize, CBufSize, NrLoaded, NrRead, NrWritten;
+        uint32_t NrLoaded, NrRead, NrWritten, BufSize, CBufSize;
 
-        PCompressBuffer CBufPtr;
         std::vector<uint8_t> BufPtr;
+        PCompressBuffer CBufPtr;
 
         bool FCompress, FCanCompress;
 

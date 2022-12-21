@@ -410,7 +410,7 @@ namespace utils {
     int strConvCppToDelphi(const std::string &s, char *delphistr);
 
     inline void assignStrToBuf(const std::string &s, char *buf, int outBufSize = 256) {
-        if(s.length() > outBufSize) return;
+        if((int)s.length() > outBufSize) return;
 #if defined(_WIN32)
         strcpy_s(buf, outBufSize, s.c_str());
 #else

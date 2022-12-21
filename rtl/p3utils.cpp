@@ -55,6 +55,10 @@ using namespace std::literals::string_literals;
 // ==============================================================================================================
 namespace rtl::p3utils {
 
+#if !defined(_WIN32)
+    bool homePlus(const std::string &dd1, const std::string &dd2, std::string &s);
+#endif
+
 #if defined(_WIN32)
 #else
     static bool setEnvironmentVariableUnix(const std::string &name, const std::string &value = ""s) {

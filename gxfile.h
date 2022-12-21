@@ -106,12 +106,12 @@ namespace gxfile {
         }
 
         bool InFilter(int V) const {
-            return V >= 0 && V <= FiltMaxUel && V < FiltMap.size() && FiltMap[V];
+            return V >= 0 && V <= FiltMaxUel && V < (int)FiltMap.size() && FiltMap[V];
         }
 
         void SetFilter(int ix, bool v) {
             if (ix < 0) return;
-            if (ix >= FiltMap.size()) FiltMap.resize(ix + 1);
+            if (ix >= (int)FiltMap.size()) FiltMap.resize(ix + 1);
             FiltMap[ix] = v;
         }
     };
