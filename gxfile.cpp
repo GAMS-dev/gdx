@@ -46,6 +46,7 @@ namespace gxfile {
     const int MaxDimV148 = 10;
     using TIndex = std::array<int, GLOBAL_MAX_INDEX_DIM>;
 
+#ifdef GAMSBUILD
     static std::string gdlSetSystemName() {
         palHandle_t pal;
         char msg[256];
@@ -56,8 +57,6 @@ namespace gxfile {
         palFree(&pal);
         return msg;
     }
-
-#ifdef GAMSBUILD
     static std::string auditLine { gdlSetSystemName() };
 #else
     static std::string auditLine {"GDX Library      00.0.0 ffffffff May  4, 1970  (AUDIT) XYZ arch xybit/myOS"};
