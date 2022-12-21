@@ -354,14 +354,27 @@ namespace gxfile {
 
 #ifdef CPP_HASHMAP
     template<typename T>
+    struct PayloadIndex {
+        int i;
+        T payload;
+    };
+
+    template<typename T>
     class WrapCxxUnorderedMap {
-        umaptype<std::string, T, caseInsensitiveHasher, caseInsensitiveStrEquality> dict;
+        using strToT = umaptype<std::string, PayloadIndex<T>, caseInsensitiveHasher, caseInsensitiveStrEquality>;
+        std::vector<typename strToT::iterator> insertOrder {};
+        strToT dict {};
     public:
         bool OneBased{};
 
         int AddObject(const std::string &key, T val) {
-            dict[key] = val;
-            return dict.size() - (OneBased ? 0 : 1);
+            auto [it, wasNew] = dict.try_emplace(key, PayloadIndex<T> {-1, val});
+            auto &elem = (*it).second;
+            if(wasNew) {
+                insertOrder.push_back(it);
+                elem.i = insertOrder.size() - (OneBased ? 0 : 1);
+            }
+            return elem.i;
         }
 
         int StoreObject(const std::string& key, T val) {
@@ -369,18 +382,14 @@ namespace gxfile {
         }
 
         std::string GetString(int ix) const {
-            auto it = dict.cbegin();
-            std::advance(it, ix-(OneBased ? 1 : 0));
-            return (*it).first;
+            return (*insertOrder[ix - (OneBased ? 1 : 0)]).first;
         }
 
         int size() const {  return dict.size(); }
         int Count() const { return dict.size(); }
 
         T *GetObject(int ix) {
-            auto it = dict.begin();
-            std::advance(it, ix-(OneBased ? 1 : 0));
-            return &((*it).second);
+            return &((*insertOrder[ix - (OneBased ? 1 : 0)]).second.payload);
         }
 
         T* operator[](int N) {
@@ -389,11 +398,12 @@ namespace gxfile {
 
         int IndexOf(const std::string &s) const {
             auto it = dict.find(s);
-            return it == dict.end() ? -1 : std::distance(dict.begin(), it) + (OneBased ? 1 : 0);
+            return it == dict.end() ? -1 : (*it).second.i;
         }
 
         bool empty() const { return !size(); }
     };
+
     using TSetTextList = WrapCxxUnorderedMap<int>;
     using TNameList = WrapCxxUnorderedMap<PgdxSymbRecord>;
 #else
