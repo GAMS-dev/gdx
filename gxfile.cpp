@@ -30,7 +30,7 @@ namespace gxfile {
             } else if(Ch == '\"') {
                 if(saw_single) return false;
                 saw_double = true;
-            } else if(Ch < ' ') return false;
+            } else if(static_cast<unsigned char>(Ch) < ' ') return false;
         }
         return true;
     }
