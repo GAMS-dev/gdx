@@ -4484,9 +4484,11 @@ namespace gxfile {
     }
 
     void TIntegerMapping::growMapping(int F) {
+#ifndef NDEBUG
         bool at_max_capacity {FMAXCAPACITY <= (int64_t)Map.size()};
         assert(!at_max_capacity && "Already at maximum capacity: cannot grow TIntegerMapping");
-        int64_t currCap = (int64_t)Map.size(), prevCpa = currCap, delta{};
+#endif
+        int64_t currCap = (int64_t)Map.size(), delta{};
         while(F >= currCap) {
             if(currCap >= 1024 * 1024) delta = currCap / 2;
             else if(currCap <= 0) delta = 1024;
