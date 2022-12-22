@@ -157,12 +157,14 @@ namespace tests::gxfiletests {
     }
 
     TEST_CASE("Run pfgdx for src/glcaerwt.gdx in order to debug memory issues (and test pfgdx port)") {
+        const std::string   suiteName = "src"s, //"src"s,
+                            modelName = "4"s; //"glcaerwt"s;
 #if defined(_WIN32)
-        std::array gdxFilePathCandidates { "C:\\dockerhome\\src\\glcaerwt.gdx"s };
+        std::array gdxFilePathCandidates { "C:\\dockerhome\\"s+suiteName+"\\"s+modelName+".gdx"s };
 #else
         std::array gdxFilePathCandidates {
-                "/mnt/c/dockerhome/src/glcaerwt.gdx"s,
-                "/home/andre/dockerhome/src/glcaerwt.gdx"s
+                "/mnt/c/dockerhome/"s+suiteName+"/"s+modelName+".gdx"s,
+                "/home/andre/dockerhome/"s+suiteName+"/"s+modelName+".gdx"s
         };
 #endif
         for(const auto &fn : gdxFilePathCandidates)
