@@ -404,11 +404,12 @@ namespace gxfile {
 
         int StoreObject(const std::string& key, T val) {
             int ix = static_cast<int>(insertOrder.size()) + (OneBased ? 1 : 0);
+#ifdef STABLE_REFS
             auto [it, wasNew] = dict.emplace(key, PayloadIndex<T> {ix, val});
             assert(wasNew);
-#ifdef STABLE_REFS
             insertOrder.push_back(it);
 #else
+            dict[key] = PayloadIndex<T> {ix, val};
             insertOrder.push_back(key);
 #endif
             return ix;

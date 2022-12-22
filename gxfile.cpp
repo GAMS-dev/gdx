@@ -4281,11 +4281,12 @@ namespace gxfile {
 
     int TUELTable::StoreObject(const std::string& id, int mapping) {
         int ix{static_cast<int>(nameToIndexNum.size())+1};
+#ifdef STABLE_REFS
         auto [it,wasNew] = nameToIndexNum.emplace(id, IndexNumPair{ ix, mapping });
         assert(wasNew);
-#ifdef STABLE_REFS
         insertOrder.push_back(it);
 #else
+        nameToIndexNum[id] = IndexNumPair{ix, mapping};
         insertOrder.push_back(id);
 #endif
         return ix;
@@ -4358,15 +4359,13 @@ namespace gxfile {
         auto old = insertOrder[N-1];
         auto oldPair = old->second;
         nameToIndexNum.erase(old->first);
+        auto [it, wasNew] = nameToIndexNum.emplace(s, oldPair);
+        assert(wasNew);
+        insertOrder[N - 1] = it;
 #else
         auto oldPair = nameToIndexNum[insertOrder[N-1]];
         nameToIndexNum.erase(insertOrder[N-1]);
-#endif
-        auto [it, wasNew] = nameToIndexNum.emplace(s, oldPair);
-        assert(wasNew);
-#ifdef STABLE_REFS
-        insertOrder[N - 1] = it;
-#else
+        nameToIndexNum[s] = oldPair;
         insertOrder[N - 1] = s;
 #endif
     }
