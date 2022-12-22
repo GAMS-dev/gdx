@@ -26,13 +26,11 @@ namespace gdlib::strhash {
         std::vector<THashBucket<T>> Buckets {};
         std::unique_ptr<std::vector<size_t>> PHashTable {};
         std::unique_ptr<std::vector<int>> SortMap {};
-        int64_t SizeOfHashTable {};
         int HashTableSize {}, ReHashCnt {}, FCount {};
         bool FSorted {};
 
         void ClearHashTable() {
             PHashTable = nullptr;
-            SizeOfHashTable = 0;
             HashTableSize = ReHashCnt = 0;
         }
 
@@ -55,8 +53,7 @@ namespace gdlib::strhash {
             else if(ACnt >= Next_2) { HashTableSize = HashSize_3; ReHashCnt = Next_3; }
             else if(ACnt >= Next_1) { HashTableSize = HashSize_2; ReHashCnt = Next_2; }
             else { HashTableSize = HashSize_1; ReHashCnt = Next_1; }
-            SizeOfHashTable = HashTableSize * sizeof(void *);
-            PHashTable = std::make_unique<std::vector<size_t>>(SizeOfHashTable);
+            PHashTable = std::make_unique<std::vector<size_t>>(HashTableSize);
             std::fill_n(PHashTable->begin(), HashTableSize, 0);
         }
 
