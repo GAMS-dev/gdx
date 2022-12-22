@@ -201,9 +201,14 @@ namespace gxfile {
         sz_integer
     };
 
+    // N.B.: we store integers in [0..high(integer)] in TIntegerMapping, so
+    // FMAXCAPACITY = high(integer) + 1 is all we will ever need, and we will
+    // never get a request to grow any larger.  The checks and code
+    // in growMapping reflect this
     class TIntegerMapping {
         // FMAXCAPACITY == number of index positions required to store [0..high(integer)]
         int64_t FMAXCAPACITY {std::numeric_limits<int>::max() + static_cast<int64_t>(1)};
+        int FHighestIndex{};
         std::vector<int> Map{};
         void growMapping(int F);
     public:

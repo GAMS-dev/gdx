@@ -4447,13 +4447,14 @@ namespace gxfile {
     }
 
     int TIntegerMapping::GetHighestIndex() const {
-        return std::max<int>(0, static_cast<int>(Map.size()) - 1);
+        return FHighestIndex;
     }
 
     void TIntegerMapping::SetMapping(int F, int T) {
         if(F >= (int)Map.size())
             growMapping(F);
         Map[F] = T;
+        FHighestIndex = std::max<int>(FHighestIndex, F);
     }
 
     int TIntegerMapping::GetMapping(int F) const {
@@ -4462,11 +4463,13 @@ namespace gxfile {
 
     void TIntegerMapping::clear() {
         Map.clear();
+        FHighestIndex = 0;
     }
 
     int &TIntegerMapping::operator[](int index) {
         if(index >= (int)Map.size())
             growMapping(index);
+        FHighestIndex = std::max<int>(FHighestIndex, index);
         return Map[index];
     }
 
@@ -4487,13 +4490,12 @@ namespace gxfile {
         bool at_max_capacity {FMAXCAPACITY <= (int64_t)Map.size()};
         assert(!at_max_capacity && "Already at maximum capacity: cannot grow TIntegerMapping");
 #endif
-        int64_t currCap = (int64_t)Map.size(), delta{};
-        while(F >= currCap) {
+        int64_t currCap, delta{};
+        for(currCap = (int64_t)Map.size(); F >= currCap;
+            currCap += delta, currCap = std::min<int64_t>(FMAXCAPACITY, currCap)) {
             if(currCap >= 1024 * 1024) delta = currCap / 2;
             else if(currCap <= 0) delta = 1024;
             else delta = currCap;
-            currCap += delta;
-            if(currCap > FMAXCAPACITY) currCap = FMAXCAPACITY;
         }
         Map.resize(currCap, -1);
     }
