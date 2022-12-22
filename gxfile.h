@@ -205,6 +205,7 @@ namespace gxfile {
         // FMAXCAPACITY == number of index positions required to store [0..high(integer)]
         int64_t FMAXCAPACITY {std::numeric_limits<int>::max() + static_cast<int64_t>(1)};
         std::vector<int> Map{};
+        void growMapping(int F);
     public:
         int GetHighestIndex() const;
         void SetMapping(int F, int T);

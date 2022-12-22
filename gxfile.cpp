@@ -4452,10 +4452,8 @@ namespace gxfile {
     }
 
     void TIntegerMapping::SetMapping(int F, int T) {
-        if(F >= (int)Map.size()) {
-            Map.resize(F + 1, -1);
-            assert(F+1 < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
-        }
+        if(F >= (int)Map.size())
+            growMapping(F);
         Map[F] = T;
     }
 
@@ -4468,10 +4466,8 @@ namespace gxfile {
     }
 
     int &TIntegerMapping::operator[](int index) {
-        if(index >= (int)Map.size()) {
-            Map.resize(index+1, -1);
-            assert(index+1 < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
-        }
+        if(index >= (int)Map.size())
+            growMapping(index);
         return Map[index];
     }
 
@@ -4485,6 +4481,20 @@ namespace gxfile {
 
     void TIntegerMapping::reserve(int n) {
         Map.reserve(n);
+    }
+
+    void TIntegerMapping::growMapping(int F) {
+        bool at_max_capacity {FMAXCAPACITY <= (int64_t)Map.size()};
+        assert(!at_max_capacity && "Already at maximum capacity: cannot grow TIntegerMapping");
+        int64_t currCap = (int64_t)Map.size(), prevCpa = currCap, delta{};
+        while(F >= currCap) {
+            if(currCap >= 1024 * 1024) delta = currCap / 2;
+            else if(currCap <= 0) delta = 1024;
+            else delta = currCap;
+            currCap += delta;
+            if(currCap > FMAXCAPACITY) currCap = FMAXCAPACITY;
+        }
+        Map.resize(currCap, -1);
     }
 
     void TUELTableLegacy::clear() {
