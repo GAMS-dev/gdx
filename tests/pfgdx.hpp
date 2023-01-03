@@ -1,6 +1,8 @@
 #include "../expertapi/gclgms.h"
 #include "../gdxinterface.h"
 
+#include <chrono>
+
 namespace pfgdx {
 
     class PerfGDX {
@@ -30,5 +32,10 @@ namespace pfgdx {
         int pfwritemap(const int reverse);
     };
 
-    void runWithTiming(const std::string &gdxfn, bool quiet = false, int symCountLimit=-1, int recCountLimit=-1);
+    struct TimeTriple {
+        std::chrono::time_point<std::chrono::high_resolution_clock> item_start{std::chrono::high_resolution_clock::now()};
+        double total_t{}, subtotal_t{}, item_t{};
+    };
+
+    TimeTriple runWithTiming(const std::string &gdxfn, bool useLegacy = false, bool quiet = false, int symCountLimit=-1, int recCountLimit=-1);
 }

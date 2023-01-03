@@ -156,7 +156,7 @@ namespace tests::gxfiletests {
         rmfiles({"trnsport.gms", "trnsport.gdx", "log.txt", "lf.txt"});
     }
 
-    TEST_CASE("Run pfgdx for src/glcaerwt.gdx in order to debug memory issues (and test pfgdx port)") {
+    TEST_CASE("Run pfgdx for suiteName/modelName.gdx in order to debug memory issues (and test pfgdx port)") {
         const std::string   suiteName = "src"s, //"src"s,
                             modelName = "4"s; //"glcaerwt"s;
 #if defined(_WIN32)
@@ -167,9 +167,16 @@ namespace tests::gxfiletests {
                 "/home/andre/dockerhome/"s+suiteName+"/"s+modelName+".gdx"s
         };
 #endif
-        for(const auto &fn : gdxFilePathCandidates)
-            if(std::filesystem::exists(fn))
-                pfgdx::runWithTiming(fn, false);
+        const bool quiet = false;
+        for(const auto &fn : gdxFilePathCandidates) {
+            if (std::filesystem::exists(fn)) {
+                auto tWrap = pfgdx::runWithTiming(fn, true, quiet);
+                auto tPort = pfgdx::runWithTiming(fn, false, quiet);
+                if(!quiet)
+                    std::cout << "Slowdown for " << fn << " = " << tPort.total_t / tWrap.total_t << std::endl;
+
+            }
+        }
     }
 
     TEST_SUITE_END();

@@ -2,7 +2,6 @@
 #include "../gxfile.h"
 #include "../xpwrap.h"
 
-#include <chrono>
 #include <cassert>
 #include <filesystem>
 
@@ -267,11 +266,6 @@ namespace pfgdx {
         if(recCountLimit != -1) recCount = std::min<int>(recCountLimit, recCount);
     }
 
-    struct TimeTriple {
-        std::chrono::time_point<std::chrono::high_resolution_clock> item_start{std::chrono::high_resolution_clock::now()};
-        double total_t{}, subtotal_t{}, item_t{};
-    };
-
     static bool silencePrintT {};
 
     static void printT(TimeTriple &t, const std::string &fn, const std::string &text) {
@@ -287,12 +281,12 @@ namespace pfgdx {
         t.item_start = std::chrono::high_resolution_clock::now();
     }
 
-    void runWithTiming(const std::string &gdxfn, bool quiet, int symCountLimit, int recCountLimit) {
+    TimeTriple runWithTiming(const std::string &gdxfn, bool useLegacy, bool quiet, int symCountLimit, int recCountLimit) {
         if(quiet) silencePrintT = true;
         TimeTriple t;
         PerfGDX cgdx;
         cgdx.setLimits(symCountLimit, recCountLimit);
-        cgdx.pfinit("", false);
+        cgdx.pfinit("", useLegacy);
         int rc{cgdx.pfopenread(gdxfn.c_str())};
         printT(t, gdxfn, "capi cgdxopenread"s);
         assert(!rc);
@@ -341,5 +335,6 @@ namespace pfgdx {
         // silence rc not used warning when compiling in release build (asserts removed).
         if(rc) std::cout << "Final result code non-zero!" << std::endl;
         std::filesystem::remove("out.gdx"s);
+        return t;
     }
 }
