@@ -56,6 +56,7 @@ install-gamsdist-leg:
     - chmod 777 linux_x64_64_sfx.exe
     - python3 ci/fetch_gams.py install
     - echo $GAMS_LICENSE > $(pwd)/gamsdist/gamslice.txt
+    - gams
   artifacts:
     name: gamsdist-leg
     expire_in: 1 hour
