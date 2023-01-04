@@ -164,7 +164,7 @@ namespace tests::gxfiletests {
 #else
         std::array gdxFilePathCandidates {
                 "/mnt/c/dockerhome/"s+suiteName+"/"s+modelName+".gdx"s,
-                "/home/andre/dockerhome/"s+suiteName+"/"s+modelName+".gdx"s
+                "/home/andre/dockerhome/distrib/"s+suiteName+"/"s+modelName+".gdx"s
         };
 #endif
         const bool quiet = false;
