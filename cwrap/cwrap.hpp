@@ -33,8 +33,8 @@ typedef long long INT64;
 #endif
 
 // PROTOTYPES BEGIN
-void doSetLoadPath(const char *s);
-void doGetLoadPath(char *s);
+void GDX_CALLCONV doSetLoadPath(const char *s);
+void GDX_CALLCONV doGetLoadPath(char *s);
 int gdxFree(TGXFileRec_t **pgdx);
 int gdxGetReady(char *msgBuf, int msgBufLen);
 int gdxLibraryLoaded();
