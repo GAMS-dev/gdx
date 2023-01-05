@@ -903,6 +903,11 @@ namespace gxfile {
         return false;
     }
 
+    bool TGXFileObj::CheckMode(const std::string &Routine) {
+        WriteTrace(Routine);
+        return true;
+    }
+
     bool TGXFileObj::CheckMode(const std::string &Routine, const TgxModeSet &MS) {
         if(MS.empty() || utils::in(fmode, MS)) {
             WriteTrace(Routine);
@@ -2077,7 +2082,7 @@ namespace gxfile {
     //  The integer value can be used to set the associated text of a set element.
     //  The string must follow the GAMS syntax rules for explanatory text.
     int TGXFileObj::gdxAddSetText(const std::string &Txt, int &TxtNr) {
-        if(!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText", {})))
+        if(!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText")))
             return false;
         TxtNr = SetTextList->AddObject(MakeGoodExplText(Txt), 0);
         return true;
@@ -2312,7 +2317,7 @@ namespace gxfile {
             Txt[0] = '\0';
             return false;
         }
-        if(TraceLevel >= TraceLevels::trl_all && !CheckMode("GetElemText", {}))
+        if(TraceLevel >= TraceLevels::trl_all && !CheckMode("GetElemText"))
             return false;
         if(TxtNr < 0 || TxtNr >= SetTextList->size()) {
             utils::assignStrToBuf(BADStr_PREFIX + std::to_string(TxtNr), Txt, GMS_SSSIZE);
@@ -3462,7 +3467,7 @@ namespace gxfile {
     //  integer which is stored without further restrictions.
     int TGXFileObj::gdxSetTextNodeNr(int TxtNr, int Node)
     {
-        if (!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("SetTextNodeNr", {}))) return false;
+        if (!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("SetTextNodeNr"))) return false;
         auto& obj = *SetTextList;
         if (TxtNr >= 0 && TxtNr < obj.size() && !*obj.GetObject(TxtNr)) {
             *obj.GetObject(TxtNr) = Node;

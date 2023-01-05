@@ -541,6 +541,7 @@ namespace gxfile {
         bool ErrorCondition(bool cnd, int N);
         bool MajorCheckMode(const std::string& Routine, TgxFileMode m);
         bool MajorCheckMode(const std::string &Routine, const TgxModeSet &MS);
+        bool CheckMode(const std::string &Routine);
         bool CheckMode(const std::string& Routine, TgxFileMode m);
         bool CheckMode(const std::string &Routine, const TgxModeSet &MS);
         void WriteTrace(const std::string &s);
