@@ -2724,7 +2724,9 @@ namespace gxfile {
             std::cout << "Uel=" << Uel << '\n';
         if ((TraceLevel >= TraceLevels::trl_all || fmode != f_raw_elem) && !CheckMode("UELRegisterRaw", f_raw_elem))
             return false;
-        std::string SV = utils::trimRight(Uel);
+        // AS: Directly use passed UEL if trimming is not needed (empty or last actual char is non-blank)
+        auto optTrimmed = utils::maybeTrimRight(Uel);
+        const std::string &SV = optTrimmed ? *optTrimmed : Uel;
         if (ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
         UELTable->AddObject(SV, -1); // should about existing mapping?
         return true;

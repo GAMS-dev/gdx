@@ -113,6 +113,12 @@ namespace utils {
         return s.substr(0, lastNonBlank+1);
     }
 
+    std::optional<std::string> maybeTrimRight(const std::string &s) {
+        if(s.empty() || !isblank(s.back())) return std::nullopt;
+        const auto lastNonBlank = s.find_last_not_of(" \t");
+        return s.substr(0, lastNonBlank+1);
+    }
+
     std::string trimZeroesRight(const std::string& s, char DecimalSep)
     {
         if (s.find(DecimalSep) == std::string::npos) return s;
