@@ -1969,7 +1969,7 @@ namespace gxfile {
             SetTextList->OneBased = false;
             if(ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1)) return FileErrorNr();
             NrElem = FFile->ReadInteger();
-            //SetTextList->reserve(NrElem);
+            //SetTextList->resize(NrElem);
             for (int N{}; N < NrElem; N++) {
                 int TextNum{ SetTextList->AddObject(FFile->ReadString(), 0) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
@@ -4632,5 +4632,30 @@ namespace gxfile {
                 FMapToUserStatus = map_sortfull;
         }
         return FMapToUserStatus;
+    }
+
+    int VecSetTextList::size() const { return (int)entries.size(); }
+
+    int VecSetTextList::Count() const { return (int)entries.size(); }
+
+    void VecSetTextList::resize(int n) { entries.resize(n); }
+
+    int VecSetTextList::AddObject(const std::string &s, int n) {
+        int ix = utils::indexOf<SetText>(entries, [&s](const SetText &elem) {
+            return elem.text == s;
+        });
+        if(ix == -1) {
+            entries.emplace_back(SetText{s, n});
+            return (int) entries.size() - 1;
+        }
+        return ix;
+    }
+
+    const std::string &VecSetTextList::GetString(int i) const {
+        return entries[i].text;
+    }
+
+    int *VecSetTextList::GetObject(int i) {
+        return &entries[i].node;
     }
 }

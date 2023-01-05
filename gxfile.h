@@ -1,5 +1,8 @@
 #pragma once
 
+// FIXME: AS: Fix hashmap based implementation of SetTextList to speed up dealing with many set element texts!
+#define SLOW_SET_TEXT_LIST
+
 // Description:
 //  This unit defines the GDX Object as a C++ object.
 
@@ -367,6 +370,30 @@ namespace gxfile {
     using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_SCALE+1>;
     using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_SCALE+1> *;
 
+    struct SetText {
+        std::string text;
+        int node;
+        SetText(const std::string &_text, int _node) : text{_text}, node{_node} {}
+        SetText() : text{}, node{} {}
+    };
+
+    class VecSetTextList {
+        std::vector<SetText> entries;
+    public:
+        bool OneBased;
+
+        int size() const;
+        int Count() const;
+
+        void resize(int n);
+
+        int AddObject(const std::string &s, int n);
+
+        const std::string &GetString(int i) const;
+
+        int *GetObject(int i);
+    };
+
 #ifdef CPP_HASHMAP
     template<typename T>
     struct PayloadIndex {
@@ -454,7 +481,13 @@ namespace gxfile {
     using TSetTextList = WrapCxxUnorderedMap<int>;
     using TNameList = WrapCxxUnorderedMap<PgdxSymbRecord>;
 #else
-    using TSetTextList = gdlib::strhash::TXStrHashList<int>;
+
+    #ifdef SLOW_SET_TEXT_LIST
+        using TSetTextList = VecSetTextList;
+    #else
+        using TSetTextList = gdlib::strhash::TXStrHashList<int>;
+    #endif
+
     using TNameList = gdlib::strhash::TXStrHashList<PgdxSymbRecord>;
 #endif
 
