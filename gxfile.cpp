@@ -618,7 +618,7 @@ namespace gxfile {
             FFile->WriteInteger(UELTable ? UELTable->size() : 0);
             if(UELTable) {
                 for(int i=0; i<UELTable->size(); i++) {
-                    const auto uelName = (*UELTable)[i];
+                    const std::string &uelName = (*UELTable)[i];
                     FFile->WriteString(uelName);
                     WRYAML(YFile->AddItem(uelName));
                 }
@@ -1711,8 +1711,10 @@ namespace gxfile {
         else {
             for (int D{}; D < FCurrentDim; D++) {
                 int LED{ LastElem[D] };
-                std::string s {LED >= 1 && LED <= (UELTable ? UELTable->size() : 0) ? (*UELTable)[LED-1] : BADUEL_PREFIX + std::to_string(LED)};
-                memcpy(KeyStr[D], s.c_str(), sizeof(char)*(s.length()+1));
+                utils::assignStrToBuf(LED >= 1 && LED <= (UELTable ? UELTable->size() : 0) ?
+                    (*UELTable)[LED-1] :
+                    BADUEL_PREFIX + std::to_string(LED),
+                    KeyStr[D], GLOBAL_UEL_IDENT_SIZE);
             }
             return true;
         }
@@ -3864,7 +3866,7 @@ namespace gxfile {
                     KeyStr[D][0] = '?';
                     KeyStr[D][1] = '\0';
                 }
-                else memcpy(KeyStr[D], (*UELTable)[N].c_str(), (*UELTable)[N].length() + 1);
+                else utils::assignStrToBuf((*UELTable)[N], KeyStr[D], GLOBAL_UEL_IDENT_SIZE);
             }
         }
         return true;
@@ -4595,7 +4597,7 @@ namespace gxfile {
         return gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::StoreObject(id, p);
     }
 
-    std::string TUELTableLegacy::operator[](int index) const {
+    const std::string &TUELTableLegacy::operator[](int index) const {
         return GetString(index+1);
     }
 

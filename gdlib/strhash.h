@@ -321,7 +321,7 @@ namespace gdlib::strhash {
             return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]].Obj;
         }
 
-        std::string GetString(int N) const {
+        const std::string &GetString(int N) const {
             return Buckets[N-(OneBased ? 1 : 0)].StrP;
         }
 
