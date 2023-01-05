@@ -1603,6 +1603,65 @@ namespace tests::gdxinterfacetests {
 #endif
     }
 
+    TEST_CASE("Correct set text numbers and element texts for agg.gdx") {
+        if(!std::filesystem::exists("agg.gdx")) return;
+        std::array<int, GLOBAL_MAX_INDEX_DIM> keys{};
+        std::array<double, GMS_VAL_SCALE + 1> values{};
+        std::string ErrMsg;
+        int ErrNr, nrRecs, dimFrst;
+        gdxinterface::GDXInterface *pgdx{};
+
+        // Check set text numbers
+        std::vector<int> memorizedSetTextNumbers{};
+        for(int k{}; k<2; k++) {
+            bool legacyRun = !k;
+            pgdx = legacyRun ? (gdxinterface::GDXInterface *)(new xpwrap::GDXFile{ErrMsg}) : (gdxinterface::GDXInterface *)(new gxfile::TGXFileObj {ErrMsg});
+            pgdx->gdxOpenRead("agg.gdx", ErrNr);
+            pgdx->gdxDataReadRawStart(11, nrRecs);
+            if(legacyRun) memorizedSetTextNumbers.resize(nrRecs);
+            for (int i{}; i < nrRecs; i++) {
+                pgdx->gdxDataReadRaw(keys.data(), values.data(), dimFrst);
+                if(legacyRun) memorizedSetTextNumbers[i] = static_cast<int>(values[GMS_VAL_LEVEL]);
+                REQUIRE_EQ(memorizedSetTextNumbers[i], values[GMS_VAL_LEVEL]);
+                if(!legacyRun && memorizedSetTextNumbers[i] != values[GMS_VAL_LEVEL]) {
+                    std::cout << "Mismatch at index " << i << std::endl;
+                }
+            }
+            pgdx->gdxDataReadDone();
+            pgdx->gdxClose();
+            delete pgdx;
+        }
+
+        // Check set element texts too
+        std::vector<std::string> setElemTxts{};
+        int refCount{};
+        for(int k{}; k<2; k++) {
+            bool legacyRun = !k;
+            pgdx = legacyRun ? (gdxinterface::GDXInterface *) (new xpwrap::GDXFile{ErrMsg})
+                             : (gdxinterface::GDXInterface *) (new gxfile::TGXFileObj{ErrMsg});
+            pgdx->gdxOpenRead("agg.gdx", ErrNr);
+            int node{}, n{1};
+            std::array<char, GMS_SSSIZE> text {};
+            while(pgdx->gdxGetElemText(n, text.data(), node)) {
+                if(legacyRun) setElemTxts.push_back(text.data());
+                // Set texts must match
+                std::string &s1 {setElemTxts[n-1]};
+                std::string s2 {text.data()};
+                if(!legacyRun && s1 != s2) {
+                    std::cout << "Mismatch \"" << s1 << "\" vs \"" << s2 << "\" at index " << n << std::endl;
+                }
+                REQUIRE_EQ(s1, s2);
+                n++;
+            }
+            // Cardinality must match!
+            if(legacyRun) refCount = n-1;
+            else REQUIRE_EQ(n-1, refCount);
+            pgdx->gdxDataReadDone();
+            pgdx->gdxClose();
+            delete pgdx;
+        }
+    }
+
     TEST_SUITE_END();
 
 }
