@@ -10,18 +10,17 @@
 
 namespace gdlib::datastorage {
 
-    template<typename KeyType, typename ValueType>
+    template<typename KeyType, int maxKeySize, typename ValueType, int maxValueSize>
     struct TLinkedDataRec {
         TLinkedDataRec *RecNext, *HashNext;
-        std::vector<ValueType> RecData;
-        std::vector<KeyType> RecKeys;
-        TLinkedDataRec(int nkeys, int nvalues) : RecData(nvalues), RecKeys(nkeys) {}
+        std::array<ValueType, maxValueSize> RecData;
+        std::array<KeyType, maxKeySize> RecKeys;
     };
 
-    template<typename KeyType, typename ValueType>
+    template<typename KeyType, int maxKeySize, typename ValueType, int maxValueSize>
     class TLinkedDataLegacy {
         int FMinKey, FMaxKey, FDimension, FKeySize, FTotalSize, FDataSize, FCount;
-        using RecType = TLinkedDataRec<KeyType, ValueType>;
+        using RecType = TLinkedDataRec<KeyType, maxKeySize, ValueType, maxValueSize>;
         RecType *FHead, *FTail;
 
         bool IsSorted() {
@@ -42,6 +41,9 @@ namespace gdlib::datastorage {
         }
 
     public:
+        using KeyArray = std::array<KeyType, maxKeySize>;
+        using ValArray = std::array<ValueType, maxValueSize>;
+
         TLinkedDataLegacy(int ADimension, int ADataSize) :
             FMinKey{std::numeric_limits<int>::max()},
             FMaxKey{},
@@ -79,21 +81,21 @@ namespace gdlib::datastorage {
             return FCount * FTotalSize;
         }
 
-        ValueType *AddItem(const KeyType *AKey, const ValueType *AData) {
-            auto node = new RecType { FKeySize, FDataSize/(int)sizeof(ValueType) };
+        ValArray &AddItem(const KeyType *AKey, const ValueType *AData) {
+            auto node = new RecType {};
             if(!FHead) FHead = node;
             else FTail->RecNext = node;
             FTail = node;
             node->RecNext = nullptr;
             std::memcpy(node->RecKeys.data(), AKey, FKeySize);
-            std::memcpy(node->RecData.data(), AData, /*node->RecData.size() * sizeof(ValueType)*/ FDataSize);
+            std::memcpy(node->RecData.data(), AData, node->RecData.size()*sizeof(ValueType)/*FDataSize*/);
             FCount++;
             for(int D{}; D<FDimension; D++) {
                 int Key{AKey[D]};
                 if(Key > FMaxKey) FMaxKey = Key;
                 if(Key < FMinKey) FMinKey = Key;
             }
-            return node->RecData.data();
+            return node->RecData;
         }
 
         void Sort(const int *AMap = nullptr) {
@@ -135,7 +137,7 @@ namespace gdlib::datastorage {
             if(P && *P) {
                 const RecType &it = **P;
                 std::memcpy(AKey, it.RecKeys.data(), FKeySize);
-                std::memcpy(AData, it.RecData.data(), /*it.RecData.size() * sizeof(ValueType)*/ FDataSize);
+                std::memcpy(AData, it.RecData.data(), /*FDataSize*/ it.RecData.size() * sizeof(ValueType));
                 *P = it.RecNext;
                 return true;
             }
