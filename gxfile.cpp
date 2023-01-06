@@ -1969,7 +1969,7 @@ namespace gxfile {
             SetTextList->OneBased = false;
             if(ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1)) return FileErrorNr();
             NrElem = FFile->ReadInteger();
-            //SetTextList->resize(NrElem);
+            //SetTextList->reserve(NrElem);
             for (int N{}; N < NrElem; N++) {
                 int TextNum{ SetTextList->AddObject(FFile->ReadString(), 0) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string

@@ -1,23 +1,25 @@
 #pragma once
 
-// FIXME: AS: Fix hashmap based implementation of SetTextList to speed up dealing with many set element texts!
-#define SLOW_SET_TEXT_LIST
-
 // Description:
 //  This unit defines the GDX Object as a C++ object.
 
 #include "gdxinterface.h"
+
+#include "expertapi/gclgms.h"
+
+#include "gdlib/gmsdata.h"
+#include "gdlib/datastorage.h"
+#include "gdlib/strhash.h"
+
+#include "utils.h"
+
 #include <memory>
 #include <map>
 #include <utility>
 #include <vector>
 #include <optional>
 #include <unordered_set>
-#include "gdlib/gmsdata.h"
-#include "gdlib/datastorage.h"
 #include <cstring>
-
-#include "utils.h"
 
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
@@ -33,13 +35,9 @@
 
 // std::unordered_map has stable references to nodes (iterators)
 // Ankerl has not for sure, for Google I am not entirely sure
-#if defined(STD_HASHMAP)
+#if !defined(GOOGLE_HASHMAP) && !defined(ANKERL_HASHMAP)
 #define STABLE_REFS
 #endif
-
-#include "gdlib/strhash.h"
-
-#include "expertapi/gclgms.h"
 
 namespace gdlib::gmsstrm {
     class TMiBufferedStreamDelphi;
@@ -62,15 +60,13 @@ namespace gxfile {
                 DOMC_EXPAND = -1, // indicator growing index pos
                 DOMC_STRICT = 0; // indicator mapped index pos
 
-#if defined(CPP_HASHMAP)
-    template<typename K, typename V, typename H, typename E>
-#endif
+template<typename K, typename V, typename H, typename E>
 #if defined(GOOGLE_HASHMAP)
     using umaptype = google::dense_hash_map<K, V, H, E>;
-#elif defined(STD_HASHMAP)
-    using umaptype = std::unordered_map<K, V, H, E>;
 #elif defined(ANKERL_HASHMAP)
     using umaptype = ankerl::unordered_dense::map<K, V, H, E>;
+#else
+    using umaptype = std::unordered_map<K, V, H, E>;
 #endif
 
     class NullBuffer : public std::streambuf {
@@ -382,6 +378,10 @@ namespace gxfile {
     public:
         bool OneBased;
 
+        void reserve(int n) {
+            entries.reserve(n);
+        }
+
         int size() const;
         int Count() const;
 
@@ -394,16 +394,15 @@ namespace gxfile {
         int *GetObject(int i);
     };
 
-#ifdef CPP_HASHMAP
     template<typename T>
     struct PayloadIndex {
         int i;
         T payload;
     };
 
-    template<typename T>
+    template<typename T, typename Hasher=caseInsensitiveHasher, typename Equality=caseInsensitiveStrEquality>
     class WrapCxxUnorderedMap {
-        using strToT = umaptype<std::string, PayloadIndex<T>, caseInsensitiveHasher, caseInsensitiveStrEquality>;
+        using strToT = umaptype<std::string, PayloadIndex<T>, Hasher, Equality>;
 #ifdef STABLE_REFS
         std::vector<typename strToT::iterator> insertOrder {};
 #else
@@ -412,6 +411,10 @@ namespace gxfile {
         strToT dict {};
     public:
         bool OneBased{};
+
+        void reserve(int n) {
+            dict.reserve(n);
+        }
 
 #ifdef GOOGLE_HASHMAP
         WrapCxxUnorderedMap() {
@@ -478,14 +481,17 @@ namespace gxfile {
         bool empty() const { return !size(); }
     };
 
+#ifdef CPP_HASHMAP
     using TSetTextList = WrapCxxUnorderedMap<int>;
     using TNameList = WrapCxxUnorderedMap<PgdxSymbRecord>;
 #else
 
     #ifdef SLOW_SET_TEXT_LIST
-        using TSetTextList = VecSetTextList;
+        //using TSetTextList = VecSetTextList;
+        // FIXME: Using std::unordered_map based impl of this type until gdlib/gmsobj/TXStrPool is ported fully
+        using TSetTextList = WrapCxxUnorderedMap<int, std::hash<std::string>, caseSensitiveStrEquality>;
     #else
-        using TSetTextList = gdlib::strhash::TXStrHashList<int>;
+        using TSetTextList = gdlib::strhash::TXCSStrHashList<int>;
     #endif
 
     using TNameList = gdlib::strhash::TXStrHashList<PgdxSymbRecord>;

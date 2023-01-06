@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 #set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
+# dump GDX data also as YAML representation
 set(ENABLE_YAML 1)
 
 find_program(CCACHE_FOUND ccache)
@@ -28,10 +29,14 @@ endif (UNIX)
 # -DSTD_HASHMAP -> std::unordered_map
 # -DANKERL_HASHMAP -> ankerl::unordered_dense::map
 # -DGOOGLE_HASHMAP -> google::dense_hash_map
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGAMSBUILD -DNO_SLOW_TESTS")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGAMSBUILD")
+
 if(ENABLE_YAML)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DYAML")
 endif(ENABLE_YAML)
+
+# optionally disable slow unit tests
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_SLOW_TESTS")
 
 set(common
 		expertapi/gclgms.h expertapi/gclgms.c
@@ -46,7 +51,6 @@ set(common
 		gdlib/gmsdata.h gdlib/gmsdata.cpp
 		gdlib/datastorage.cpp gdlib/datastorage.h
 		gdlib/strhash.h gdlib/strhash.cpp
-		gdlib/gmsobj.h gdlib/gmsobj.cpp
 
 		gdxinterface.h gdxinterface.cpp
 		utils.h utils.cpp
