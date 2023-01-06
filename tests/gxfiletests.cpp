@@ -14,15 +14,15 @@ namespace tests::gxfiletests {
     void writeFile();
     void readFile();
 
-    static std::ostream mycout {&gxfile::null_buffer};
+    static std::ostream my_cout {&gxfile::null_buffer};
 
-    const std::string fn {"mytest.gdx"};
+    const std::string tmp_fn {"mytest.gdx"};
 
     void writeFile() {
         std::string msg;
         TGXFileObj pgx{ msg };
         int ErrNr;
-        pgx.gdxOpenWrite(fn, "TGXFileObj", ErrNr);
+        pgx.gdxOpenWrite(tmp_fn, "TGXFileObj", ErrNr);
         pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0);
         auto writeRec = [&pgx](const std::string& s, double v) {
             static std::array<std::string, 20> keys{};
@@ -44,14 +44,14 @@ namespace tests::gxfiletests {
         TGXFileObj pgx{ msg };
 
         int ErrNr{};
-        REQUIRE(pgx.gdxOpenRead(fn, ErrNr));
+        REQUIRE(pgx.gdxOpenRead(tmp_fn, ErrNr));
         REQUIRE_EQ(0, ErrNr);
         //if (ErrNr) ReportIOError(ErrNr, "gdxOpenRead");
         char Producer[GMS_SSSIZE], FileVersion[GMS_SSSIZE];
         REQUIRE(pgx.gdxFileVersion(FileVersion, Producer));
 
-        mycout << "GDX file written using version: " << FileVersion << '\n';
-        mycout << "GDX file written by: " << Producer << '\n';
+        my_cout << "GDX file written using version: " << FileVersion << '\n';
+        my_cout << "GDX file written by: " << Producer << '\n';
 
         int SyNr{};
         REQUIRE(pgx.gdxFindSymbol("demand", SyNr));
@@ -66,12 +66,10 @@ namespace tests::gxfiletests {
         REQUIRE(pgx.gdxDataReadStrStart(SyNr, NrRecs));
         //if (!pgx.gdxDataReadStrStart(SyNr,NrRecs)) ReportGDXError(PGX);
 
-        mycout << "Parameter demand has " << std::to_string(NrRecs) << " records\n";
+        my_cout << "Parameter demand has " << std::to_string(NrRecs) << " records\n";
 
         std::array<std::array<char, 256>, GLOBAL_MAX_INDEX_DIM> bufs {};
         std::array<char *, GLOBAL_MAX_INDEX_DIM> Indx {};
-
-        gdxinterface::StrIndexBuffers sibufs {};
 
         for(int i=0; i<(int)Indx.size(); i++) {
             Indx[i] = bufs[i].data();
@@ -80,9 +78,9 @@ namespace tests::gxfiletests {
         for (int N{}; pgx.gdxDataReadStr(Indx.data(), Values.data(), N);) {
             /*if (0 == Values[global::gmsspecs::vallevel]) continue;
             for (int D{}; D < Dim; D++)
-                mycout << (D ? '.' : ' ') << Indx[D];
-            mycout << " = %7.2f\n" << Values[global::gmsspecs::vallevel] << '\n';*/
-            mycout << "Key=" << Indx.front() << ", Value=" << Values[GMS_VAL_LEVEL] << "\n";
+                my_cout << (D ? '.' : ' ') << Indx[D];
+            my_cout << " = %7.2f\n" << Values[global::gmsspecs::vallevel] << '\n';*/
+            my_cout << "Key=" << Indx.front() << ", Value=" << Values[GMS_VAL_LEVEL] << "\n";
         }
 
         REQUIRE(pgx.gdxDataReadDone());
@@ -92,7 +90,7 @@ namespace tests::gxfiletests {
     TEST_CASE("Test creating and reading a simple gdx file with gxfile port") {
         writeFile();
         readFile();
-        std::filesystem::remove(fn);
+        std::filesystem::remove(tmp_fn);
     }
 
     TEST_CASE("Test integer mapping") {
@@ -157,10 +155,13 @@ namespace tests::gxfiletests {
     }
 
     TEST_CASE("Run pfgdx for suiteName/modelName.gdx in order to debug memory issues (and test pfgdx port)") {
+#ifdef NO_SLOW_TESTS
+        return;
+#endif
         const std::string   suiteName = "src"s, //"src"s,
                             modelName = "4"s; //"glcaerwt"s;
 #if defined(_WIN32)
-        std::array gdxFilePathCandidates { "C:\\dockerhome\\"s+suiteName+"\\"s+modelName+".gdx"s };
+        std::array gdxFilePathCandidates { R"(C:\dockerhome\)"+suiteName+"\\"s+modelName+".gdx"s };
 #else
         std::array gdxFilePathCandidates {
                 "/mnt/c/dockerhome/"s+suiteName+"/"s+modelName+".gdx"s,

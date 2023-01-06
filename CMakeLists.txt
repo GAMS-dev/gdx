@@ -15,7 +15,7 @@ endif(CCACHE_FOUND)
 set(mylibs dl pthread)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGC_NO_MUTEX")
 if (MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /W3 /EHa")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /W3 /EHs")
 	set(mylibs "")
 endif (MSVC)
 
@@ -28,7 +28,7 @@ endif (UNIX)
 # -DSTD_HASHMAP -> std::unordered_map
 # -DANKERL_HASHMAP -> ankerl::unordered_dense::map
 # -DGOOGLE_HASHMAP -> google::dense_hash_map
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGAMSBUILD")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGAMSBUILD -DNO_SLOW_TESTS")
 if(ENABLE_YAML)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DYAML")
 endif(ENABLE_YAML)

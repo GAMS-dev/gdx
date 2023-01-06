@@ -2,8 +2,6 @@
 #include "doctest.h"
 #include "../xpwrap.h"
 #include "../gxfile.h"
-#include "../utils.h"
-#include "../rtl/p3utils.h"
 #include <cassert>
 #include <numeric>
 #include <random>
@@ -34,7 +32,7 @@ namespace tests::gdxinterfacetests {
     void testReadModelGDX(const std::string &model, const std::function<void(GDXInterface&)> &func);
     void testWithCompressConvert(bool compress = false, const std::string &convert = ""s);
 
-    //static std::ostream &mycout = std::cout;
+    //static std::ostream &my_cout = std::cout;
     static std::ostream mycout {&gxfile::null_buffer};
 
     static std::ofstream slowdownReport {"slowdown.txt"};
@@ -412,7 +410,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test setting special values") {
         basicTest([&](GDXInterface &pgx) {
-            std::array<double, GMS_SVIDX_MAX> moddedSpecVals, queriedSpecVals;
+            std::array<double, GMS_SVIDX_MAX> moddedSpecVals {}, queriedSpecVals {};
             pgx.gdxGetSpecialValues(moddedSpecVals.data());
             moddedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin] = 0.0;
             pgx.gdxSetSpecialValues(moddedSpecVals.data());
@@ -840,7 +838,7 @@ namespace tests::gdxinterfacetests {
                 int uelMap;
                 REQUIRE(pgx.gdxUMUelGet(i, uel, uelMap));
                 REQUIRE(uel[0] != '\0');
-                uelsSeen.push_back(uel);
+                uelsSeen.emplace_back(uel);
             }
             REQUIRE_EQ(expectedUels.size(), uelsSeen.size());
             for(const auto &uel : expectedUels)
@@ -853,7 +851,7 @@ namespace tests::gdxinterfacetests {
                 REQUIRE(dim >= 0);
                 REQUIRE(typ >= 0);
                 REQUIRE(name[0] != '\0');
-                symbolsSeen.push_back(name);
+                symbolsSeen.emplace_back(name);
 
                 char explanatoryText[GMS_SSSIZE];
                 int userInfo, numRecords;
@@ -989,7 +987,7 @@ namespace tests::gdxinterfacetests {
             std::array<int, 2> subset = {2, 4};
             for(int i : subset) {
                 key = "i"s+std::to_string(i);
-                const char *keyptrs[] = { key.c_str() };
+                keyptrs[0] = key.c_str();
                 REQUIRE(pgx.gdxDataWriteStr(keyptrs, vals.data()));
             }
 
@@ -1278,8 +1276,8 @@ namespace tests::gdxinterfacetests {
     }
 
     /*TEST_CASE("Test reading old GDX file") {
-        const std::string fn {R"(C:\Users\aschn\Desktop\leg_qa_GDX2_gams\gdx\20.6\taix.gdx)"};
-        testReads(fn, fn, [&](GDXInterface &pgx) {
+        const std::string tmp_fn {R"(C:\Users\aschn\Desktop\leg_qa_GDX2_gams\gdx\20.6\taix.gdx)"};
+        testReads(tmp_fn, tmp_fn, [&](GDXInterface &pgx) {
             int symbolCount, uelCount;
             REQUIRE(pgx.gdxSystemInfo(symbolCount, uelCount));
             REQUIRE_EQ(5, uelCount);
@@ -1467,7 +1465,7 @@ namespace tests::gdxinterfacetests {
     };
 
     class WriteReadMappedPair : public AbstractWriteReadPair {
-        void registerMappedUels(GDXInterface &pgx, int count, const int *nums) {
+        static void registerMappedUels(GDXInterface &pgx, int count, const int *nums) {
             std::vector<std::string> uelIds(count);
             for(int i{}; i<(int)uelIds.size(); i++)
                 uelIds[i] = "i"+std::to_string(i+1);
@@ -1549,6 +1547,9 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test performance of legacy vs. new GDX object for reading a big reference GDX file") {
+#ifdef NO_SLOW_TESTS
+        return;
+#endif
         const std::string gdxfn = makeCorporateGDXAvailable();
         const int ntries {10};
         std::map<std::string, std::list<double>> elapsedTimes {};
@@ -1643,13 +1644,12 @@ namespace tests::gdxinterfacetests {
             int node{}, n{1};
             std::array<char, GMS_SSSIZE> text {};
             while(pgdx->gdxGetElemText(n, text.data(), node)) {
-                if(legacyRun) setElemTxts.push_back(text.data());
+                if(legacyRun) setElemTxts.emplace_back(text.data());
                 // Set texts must match
                 std::string &s1 {setElemTxts[n-1]};
                 std::string s2 {text.data()};
-                if(!legacyRun && s1 != s2) {
+                if (!legacyRun && s1 != s2)
                     std::cout << "Mismatch \"" << s1 << "\" vs \"" << s2 << "\" at index " << n << std::endl;
-                }
                 REQUIRE_EQ(s1, s2);
                 n++;
             }
