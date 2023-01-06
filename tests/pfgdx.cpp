@@ -267,22 +267,25 @@ namespace pfgdx {
     }
 
     static bool silencePrintT {};
+    static int stepCnt {};
 
     static void printT(TimeTriple &t, const std::string &fn, const std::string &text) {
         if(silencePrintT) return;
         t.item_t = std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - t.item_start).count();
         t.total_t = t.total_t + t.item_t;
         t.subtotal_t = t.subtotal_t + t.item_t;
-        std::cout   << utils::doubleToString(t.total_t, 9, 3) << " "
-                    << utils::doubleToString(t.subtotal_t, 9, 3) << " "
-                    << utils::doubleToString(t.item_t, 9, 3) << " "
-                    << utils::blanks(std::max<int>(0, 10 - static_cast<int>(fn.length()))) << fn << " "
+        std::cout   << utils::doubleToString(t.total_t, 9, 3) << " # "
+                    << utils::doubleToString(t.subtotal_t, 9, 3) << " # "
+                    << utils::doubleToString(t.item_t, 9, 3) << " # "
+                    << utils::blanks(std::max<int>(0, 10 - static_cast<int>(fn.length()))) << fn << " # "
+                    << std::to_string(++stepCnt) << " # "
                     << text << '\n';
         t.item_start = std::chrono::high_resolution_clock::now();
     }
 
     TimeTriple runWithTiming(const std::string &gdxfn, bool useLegacy, bool quiet, int symCountLimit, int recCountLimit) {
         if(quiet) silencePrintT = true;
+        stepCnt = 0;
         TimeTriple t;
         PerfGDX cgdx;
         cgdx.setLimits(symCountLimit, recCountLimit);
