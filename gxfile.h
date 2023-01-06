@@ -190,7 +190,15 @@ template<typename K, typename V, typename H, typename E>
         tgxfilemode_count
     };
 
-    using TgxModeSet = std::unordered_set<TgxFileMode>;
+    class TgxModeSet : public utils::IContainsPredicate<TgxFileMode> {
+        std::vector<bool> modeActive;
+        uint8_t count;
+    public:
+        TgxModeSet(const std::initializer_list<TgxFileMode> modes);
+        bool contains(const TgxFileMode& mode) const override;
+        bool empty() const;
+    };
+    //using TgxModeSet = std::unordered_map<TgxFileMode>;
 
     const TgxModeSet    AnyWriteMode {fw_init,fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data,fw_map_data,fw_str_data},
                         AnyReadMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data,fr_str_data};

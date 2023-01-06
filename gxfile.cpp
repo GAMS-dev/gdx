@@ -4658,4 +4658,21 @@ namespace gxfile {
     int *VecSetTextList::GetObject(int i) {
         return &entries[i].node;
     }
+
+    TgxModeSet::TgxModeSet(const std::initializer_list<TgxFileMode> modes) : modeActive(tgxfilemode_count) {
+        std::fill(modeActive.begin(), modeActive.end(), false);
+        count = 0;
+        for (const auto mode : modes) {
+            modeActive[mode] = true;
+            count++;
+        }
+    }
+
+    inline bool TgxModeSet::contains(const TgxFileMode& mode) const {
+        return modeActive[mode];
+    }
+
+    inline bool TgxModeSet::empty() const {
+        return !count;
+    }
 }

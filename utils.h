@@ -67,6 +67,17 @@ namespace utils {
         return m.find(val) != m.end(); // C++20 starts offering contains method
     }
 
+    template<typename T>
+    class IContainsPredicate {
+    public:
+        virtual bool contains(const T& elem) const = 0;
+    };
+
+    template<typename T>
+    bool in(const T& val, const IContainsPredicate<T>& coll) {
+        return coll.contains(val);
+    }
+
     template<class T>
     std::set<T> intersectionOp(const std::set<T>& a, const std::set<T>& b) {
         std::set<T> res;
@@ -413,7 +424,7 @@ namespace utils {
     inline void assignStrToBuf(const std::string &s, char *buf, int outBufSize = 256) {
         if((int)s.length() > outBufSize) return;
 #if defined(_WIN32)
-        strcpy_s(buf, outBufSize, s.c_str());
+        memcpy(buf, s.c_str(), s.length()+1);
 #else
         strcpy(buf, s.c_str());
 #endif
