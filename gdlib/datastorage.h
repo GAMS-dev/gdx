@@ -15,7 +15,7 @@ namespace gdlib::datastorage {
         TLinkedDataRec *RecNext, *HashNext;
         std::vector<ValueType> RecData;
         std::vector<KeyType> RecKeys;
-        TLinkedDataRec(int nkeys, int nvalues) : RecNext{}, HashNext{}, RecData(nvalues), RecKeys(nkeys) {}
+        TLinkedDataRec(int nkeys, int nvalues) : RecData(nvalues), RecKeys(nkeys) {}
     };
 
     template<typename KeyType, typename ValueType>
