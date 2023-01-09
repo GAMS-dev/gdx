@@ -8,19 +8,48 @@
 #include <optional>
 #include <array>
 
+// TLinkedData dynamic array toggle
+// iff. defined? Use std::vector with actual dimension and value counts,
+// otherwise std::array with fixed maximum sizes, see below.
+// Maximum sizes are usually:
+// - keys:   GLOBAL_MAX_INDEX_DIM = 20
+// - values: GMS_VAL_MAX          = 5
+//#define TLD_DYN_ARRAYS
+
+#ifdef TLD_DYN_ARRAYS
+#define TLD_TEMPLATE_HEADER template<typename KeyType, typename ValueType>
+#define TLD_REC_TYPE TLinkedDataRec<KeyType, ValueType>
+#else
+#define TLD_TEMPLATE_HEADER template<typename KeyType, int maxKeySize, typename ValueType, int maxValueSize>
+#define TLD_REC_TYPE TLinkedDataRec<KeyType, maxKeySize, ValueType, maxValueSize>
+#endif
+
 namespace gdlib::datastorage {
 
-    template<typename KeyType, int maxKeySize, typename ValueType, int maxValueSize>
+    TLD_TEMPLATE_HEADER
     struct TLinkedDataRec {
-        TLinkedDataRec *RecNext, *HashNext;
+        TLinkedDataRec *RecNext{}, *HashNext{};
+#ifndef TLD_DYN_ARRAYS
         std::array<ValueType, maxValueSize> RecData;
         std::array<KeyType, maxKeySize> RecKeys;
+        TLinkedDataRec(int numKeys, int numValues) {}
+#else
+        std::vector<ValueType> RecData;
+        std::vector<KeyType> RecKeys;
+        TLinkedDataRec(int numKeys, int numValues) : RecData(numValues), RecKeys(numKeys) {}
+#endif
     };
 
-    template<typename KeyType, int maxKeySize, typename ValueType, int maxValueSize>
+    TLD_TEMPLATE_HEADER
     class TLinkedDataLegacy {
-        int FMinKey, FMaxKey, FDimension, FKeySize, FTotalSize, FDataSize, FCount;
-        using RecType = TLinkedDataRec<KeyType, maxKeySize, ValueType, maxValueSize>;
+        int FMinKey,
+            FMaxKey,
+            FDimension, // number of keys / symbol dimension
+            FKeySize,   // byte count for key storage
+            FDataSize,  // byte count for value storage
+            FTotalSize, // byte count for entry
+            FCount;
+        using RecType = TLD_REC_TYPE;
         RecType *FHead, *FTail;
 
         bool IsSorted() {
@@ -41,16 +70,13 @@ namespace gdlib::datastorage {
         }
 
     public:
-        using KeyArray = std::array<KeyType, maxKeySize>;
-        using ValArray = std::array<ValueType, maxValueSize>;
-
         TLinkedDataLegacy(int ADimension, int ADataSize) :
             FMinKey{std::numeric_limits<int>::max()},
             FMaxKey{},
             FDimension{ADimension},
             FKeySize{ADimension * (int)sizeof(KeyType)},
-            FTotalSize{sizeof(RecType)},
             FDataSize{ADataSize},
+            FTotalSize{2 * (int)sizeof(void *) + FKeySize + FDataSize},
             FCount{},
             FHead{},
             FTail{}
@@ -81,21 +107,21 @@ namespace gdlib::datastorage {
             return FCount * FTotalSize;
         }
 
-        ValArray &AddItem(const KeyType *AKey, const ValueType *AData) {
-            auto node = new RecType {};
+        ValueType *AddItem(const KeyType *AKey, const ValueType *AData) {
+            auto node = new RecType { FDimension, FDataSize / (int)sizeof(ValueType) };
             if(!FHead) FHead = node;
             else FTail->RecNext = node;
             FTail = node;
             node->RecNext = nullptr;
-            std::memcpy(node->RecKeys.data(), AKey, FKeySize);
-            std::memcpy(node->RecData.data(), AData, node->RecData.size()*sizeof(ValueType)/*FDataSize*/);
+            std::memcpy(node->RecKeys.data(), AKey, node->RecKeys.size()*sizeof(KeyType)); // FKeySize
+            std::memcpy(node->RecData.data(), AData, node->RecData.size()*sizeof(ValueType)); // FDataSize
             FCount++;
             for(int D{}; D<FDimension; D++) {
                 int Key{AKey[D]};
                 if(Key > FMaxKey) FMaxKey = Key;
                 if(Key < FMinKey) FMinKey = Key;
             }
-            return node->RecData;
+            return node->RecData.data();
         }
 
         void Sort(const int *AMap = nullptr) {
@@ -136,8 +162,8 @@ namespace gdlib::datastorage {
         bool GetNextRecord(RecType **P, KeyType *AKey, ValueType *AData) {
             if(P && *P) {
                 const RecType &it = **P;
-                std::memcpy(AKey, it.RecKeys.data(), FKeySize);
-                std::memcpy(AData, it.RecData.data(), /*FDataSize*/ it.RecData.size() * sizeof(ValueType));
+                std::memcpy(AKey, it.RecKeys.data(), it.RecKeys.size() * sizeof(KeyType)); // FKeySize
+                std::memcpy(AData, it.RecData.data(), it.RecData.size() * sizeof(ValueType)); // FDataSize
                 *P = it.RecNext;
                 return true;
             }

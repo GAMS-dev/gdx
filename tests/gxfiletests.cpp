@@ -159,9 +159,13 @@ namespace tests::gxfiletests {
         return;
 #endif
         const std::string   suiteName = "src"s, //"src"s,
-                            modelName = "1"s; //"glcaerwt"s;
+                            modelName = "case2736sp_Shift_Matrix"s; //"glcaerwt"s;
 #if defined(_WIN32)
-        std::array gdxFilePathCandidates { R"(C:\dockerhome\)"+suiteName+"\\"s+modelName+".gdx"s };
+        std::array gdxFilePathCandidates{
+            modelName + ".gdx"s,
+            suiteName + "\\"s + modelName + ".gdx"s,
+            R"(C:\dockerhome\)"+suiteName+"\\"s+modelName+".gdx"s
+        };
 #else
         std::array gdxFilePathCandidates {
                 "/mnt/c/dockerhome/"s+suiteName+"/"s+modelName+".gdx"s,

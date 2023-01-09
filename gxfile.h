@@ -372,8 +372,14 @@ template<typename K, typename V, typename H, typename E>
 
     //using LinkedDataType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, global::gmsspecs::valscale+1>;
     //using LinkedDataIteratorType = LinkedDataType::TLDStorageType::iterator;
-    using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_SCALE+1>;
-    using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_SCALE+1> *;
+
+#ifndef TLD_DYN_ARRAYS
+    using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>;
+    using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX> *;
+#else
+    using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, double>;
+    using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, double> *;
+#endif
 
     struct SetText {
         std::string text;
