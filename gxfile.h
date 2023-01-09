@@ -374,8 +374,13 @@ template<typename K, typename V, typename H, typename E>
     using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
 
 #ifndef TLD_LEGACY
-    using LinkedDataType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>;
-    using LinkedDataIteratorType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>::TLDStorageType::iterator;
+    #ifndef TLD_DYN_ARRAYS
+        using LinkedDataType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>;
+        using LinkedDataIteratorType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>::TLDStorageType::iterator;
+    #else
+        using LinkedDataType = gdlib::datastorage::TLinkedData<int, double>;
+        using LinkedDataIteratorType = gdlib::datastorage::TLinkedData<int, double>::TLDStorageType::iterator;
+    #endif
 #else
     #ifndef TLD_DYN_ARRAYS
         using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>;

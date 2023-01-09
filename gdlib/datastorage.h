@@ -171,20 +171,30 @@ namespace gdlib::datastorage {
         }
     };
 
-    // TODO: Get rid of this (use standard library collection instead)
-    // implement radix sort in a general way for sequences/collections
+#ifdef TLD_DYN_ARRAYS
+    template<typename KeyType, typename ValType>
+#else
     template<typename KeyType, int keyMaxSize, typename ValType, int valMaxSize>
+#endif
     class TLinkedData {
     public:
+#ifndef TLD_DYN_ARRAYS
         using KeyArray = std::array<KeyType, keyMaxSize>;
         using ValArray = std::array<ValType, valMaxSize>;
+#else
+        using KeyArray = std::vector<KeyType>;
+        using ValArray = std::vector<ValType>;
+#endif
         using EntryType = std::pair<KeyArray, ValArray>;
         using TLDStorageType = std::list<EntryType>;
         using TLDIterator = typename std::list<EntryType>::iterator;
 
     private:
         TLDStorageType data;
-        int FDimension, FKeySize, FMinKey, FMaxKey;
+
+        int FDimension, // number of keys / symbol dimension
+            FKeySize,   // byte count for key storage
+            FDataSize;  // byte count for value storage
 
         bool IsSorted() {
             const KeyType * PrevKey{};
@@ -207,8 +217,7 @@ namespace gdlib::datastorage {
         TLinkedData(int ADimension, int ADataSize) :
             FDimension{ADimension},
             FKeySize{static_cast<int>(ADimension*sizeof(int))},
-            FMinKey{std::numeric_limits<int>::max()},
-            FMaxKey{} {
+            FDataSize{ADataSize}{
         }
 
         ~TLinkedData() = default;
@@ -219,20 +228,18 @@ namespace gdlib::datastorage {
 
         void Clear() {
             data.clear();
-            FMaxKey = 0;
-            FMinKey = std::numeric_limits<int>::max();
         }
 
         ValArray &AddItem(const KeyType *AKey, const ValType *AData) {
+#ifdef TLD_DYN_ARRAYS
+            KeyArray keys(FDimension);
+            ValArray vals(FDataSize / (int)sizeof(double));
+            data.emplace_back(std::make_pair(keys, vals));
+#else
             data.push_back({});
-            //data.back().first.resize(FDimension);
-            memcpy(data.back().first.data(), AKey, sizeof(KeyType)*FDimension);
-            memcpy(data.back().second.data(), AData, sizeof(ValType)*valMaxSize);
-            for(int D{}; D<FDimension; D++) {
-                int Key {AKey[D]};
-                if(Key > FMaxKey) FMaxKey = Key;
-                if(Key < FMinKey) FMinKey = Key;
-            }
+#endif
+            memcpy(data.back().first.data(), AKey, FKeySize);
+            memcpy(data.back().second.data(), AData, FDataSize);
             return data.back().second;
         }
 
@@ -260,7 +267,7 @@ namespace gdlib::datastorage {
             if(it == data.end()) return false;
             const EntryType & item = *it;
             memcpy(AKey, item.first.data(), FKeySize);
-            memcpy(Data, item.second.data(), sizeof(ValType)*item.second.size());
+            memcpy(Data, item.second.data(), FDataSize);
             it++;
             return true;
         }
