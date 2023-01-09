@@ -22,6 +22,9 @@
 #include <unordered_map>
 #include <cstring>
 
+// TLinkedData implementation choice: Enable to use legacy implementation (with radix sort)
+//#define TLD_LEGACY
+
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
 #if defined(GOOGLE_HASHMAP)
@@ -370,15 +373,17 @@ template<typename K, typename V, typename H, typename E>
     using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
     using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
 
-    //using LinkedDataType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, global::gmsspecs::valscale+1>;
-    //using LinkedDataIteratorType = LinkedDataType::TLDStorageType::iterator;
-
-#ifndef TLD_DYN_ARRAYS
-    using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>;
-    using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX> *;
+#ifndef TLD_LEGACY
+    using LinkedDataType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>;
+    using LinkedDataIteratorType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>::TLDStorageType::iterator;
 #else
-    using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, double>;
-    using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, double> *;
+    #ifndef TLD_DYN_ARRAYS
+        using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>;
+        using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX> *;
+    #else
+        using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, double>;
+        using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, double> *;
+    #endif
 #endif
 
     struct SetText {

@@ -174,7 +174,7 @@ namespace tests::gxfiletests {
             "/home/andre/dockerhome/distrib/"s+suiteName+"/"s+modelName+".gdx"s
         };
 #endif
-        const bool quiet = false, onlyPorted = true;
+        const bool quiet = false, onlyPorted = false;
         for(const auto &fn : gdxFilePathCandidates) {
             if (std::filesystem::exists(fn)) {
                 pfgdx::TimeTriple tWrap;

@@ -486,7 +486,11 @@ namespace gxfile {
             ReadPtr = SortList->StartRead(nullptr);
             TIndex AElements;
             TgdxValues AVals;
-            while(ReadPtr && SortList->GetNextRecord(&*ReadPtr, AElements.data(), AVals.data()))
+#ifdef TLD_LEGACY
+            while (ReadPtr && SortList->GetNextRecord(&*ReadPtr, AElements.data(), AVals.data()))
+#else
+            while(ReadPtr && SortList->GetNextRecord(/*&*/*ReadPtr, AElements.data(), AVals.data()))
+#endif
                 DoWrite(AElements.data(), AVals.data());
             SortList = nullptr;
         }
@@ -3060,7 +3064,11 @@ namespace gxfile {
         }
         if(fmode == fr_map_data) {
             DimFrst = 0;
+#ifdef TLD_LEGACY
             if (!ReadPtr || !SortList->GetNextRecord(&*ReadPtr, KeyInt, Values)) return false;
+#else
+            if (!ReadPtr || !SortList->GetNextRecord(/*&*/*ReadPtr, KeyInt, Values)) return false;
+#endif
             // checking mapped values
             for(int D{}; D<FCurrentDim; D++) {
                 if(KeyInt[D] != PrevElem[D]) {
