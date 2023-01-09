@@ -113,8 +113,8 @@ namespace gdlib::datastorage {
             else FTail->RecNext = node;
             FTail = node;
             node->RecNext = nullptr;
-            std::memcpy(node->RecKeys.data(), AKey, node->RecKeys.size()*sizeof(KeyType)); // FKeySize
-            std::memcpy(node->RecData.data(), AData, node->RecData.size()*sizeof(ValueType)); // FDataSize
+            std::memcpy(node->RecKeys.data(), AKey, FKeySize);
+            std::memcpy(node->RecData.data(), AData, FDataSize);
             FCount++;
             for(int D{}; D<FDimension; D++) {
                 int Key{AKey[D]};
@@ -162,8 +162,8 @@ namespace gdlib::datastorage {
         bool GetNextRecord(RecType **P, KeyType *AKey, ValueType *AData) {
             if(P && *P) {
                 const RecType &it = **P;
-                std::memcpy(AKey, it.RecKeys.data(), it.RecKeys.size() * sizeof(KeyType)); // FKeySize
-                std::memcpy(AData, it.RecData.data(), it.RecData.size() * sizeof(ValueType)); // FDataSize
+                std::memcpy(AKey, it.RecKeys.data(), FKeySize);
+                std::memcpy(AData, it.RecData.data(), FDataSize);
                 *P = it.RecNext;
                 return true;
             }
