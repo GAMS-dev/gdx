@@ -168,16 +168,20 @@ namespace tests::gxfiletests {
         };
 #else
         std::array gdxFilePathCandidates {
-                "/mnt/c/dockerhome/"s+suiteName+"/"s+modelName+".gdx"s,
-                "/home/andre/dockerhome/distrib/"s+suiteName+"/"s+modelName+".gdx"s
+            modelName + ".gdx"s,
+            suiteName + "\\"s + modelName + ".gdx"s,
+            "/mnt/c/dockerhome/"s+suiteName+"/"s+modelName+".gdx"s,
+            "/home/andre/dockerhome/distrib/"s+suiteName+"/"s+modelName+".gdx"s
         };
 #endif
-        const bool quiet = false;
+        const bool quiet = false, onlyPorted = true;
         for(const auto &fn : gdxFilePathCandidates) {
             if (std::filesystem::exists(fn)) {
-                auto tWrap = pfgdx::runWithTiming(fn, true, quiet);
+                pfgdx::TimeTriple tWrap;
+                if(!onlyPorted)
+                    tWrap = pfgdx::runWithTiming(fn, true, quiet);
                 auto tPort = pfgdx::runWithTiming(fn, false, quiet);
-                if(!quiet)
+                if(!quiet && !onlyPorted)
                     std::cout << "Slowdown for " << fn << " = " << tPort.total_t / tWrap.total_t << std::endl;
 
             }
