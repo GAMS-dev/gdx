@@ -28,7 +28,7 @@ namespace gdlib::datastorage {
 
     TLD_TEMPLATE_HEADER
     struct TLinkedDataRec {
-        TLinkedDataRec *RecNext{}, *HashNext{};
+        TLinkedDataRec *RecNext{};
 #ifndef TLD_DYN_ARRAYS
         std::array<ValueType, maxValueSize> RecData;
         std::array<KeyType, maxKeySize> RecKeys;
@@ -187,7 +187,6 @@ namespace gdlib::datastorage {
 #endif
         using EntryType = std::pair<KeyArray, ValArray>;
         using TLDStorageType = std::list<EntryType>;
-        using TLDIterator = typename std::list<EntryType>::iterator;
 
     private:
         TLDStorageType data;
