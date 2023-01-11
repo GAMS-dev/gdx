@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <optional>
 #include <array>
+#include <cstdint>
 
 // TLinkedData dynamic array toggle
 // iff. defined? Use std::vector with actual dimension and value counts,
