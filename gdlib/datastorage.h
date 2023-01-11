@@ -34,9 +34,19 @@ namespace gdlib::datastorage {
         std::array<KeyType, maxKeySize> RecKeys;
         TLinkedDataRec(int numKeys, int numValues) {}
 #else
-        std::vector<ValueType> RecData;
-        std::vector<KeyType> RecKeys;
-        TLinkedDataRec(int numKeys, int numValues) : RecData(numValues), RecKeys(numKeys) {}
+        ValueType* RecData;
+        KeyType *RecKeys;
+
+        TLinkedDataRec(int numKeys, int numValues) :
+            RecData(new ValueType[numValues]),
+            RecKeys(new KeyType[numKeys])
+        {
+        }
+
+        ~TLinkedDataRec() {
+            delete[] RecData;
+            delete[] RecKeys;
+        }
 #endif
     };
 
@@ -54,7 +64,7 @@ namespace gdlib::datastorage {
 
         bool IsSorted() {
             RecType *R{FHead};
-            auto *PrevKey {R->RecKeys.data()};
+            auto *PrevKey {R->RecKeys};
             R = R->RecNext;
             int KD{};
             while(R) {
@@ -63,7 +73,7 @@ namespace gdlib::datastorage {
                     if(KD) break;
                 }
                 if(KD < 0) return false;
-                PrevKey = R->RecKeys.data();
+                PrevKey = R->RecKeys;
                 R = R->RecNext;
             }
             return true;
@@ -113,15 +123,15 @@ namespace gdlib::datastorage {
             else FTail->RecNext = node;
             FTail = node;
             node->RecNext = nullptr;
-            std::memcpy(node->RecKeys.data(), AKey, FKeySize);
-            std::memcpy(node->RecData.data(), AData, FDataSize);
+            std::memcpy(node->RecKeys, AKey, FKeySize);
+            std::memcpy(node->RecData, AData, FDataSize);
             FCount++;
             for(int D{}; D<FDimension; D++) {
                 int Key{AKey[D]};
                 if(Key > FMaxKey) FMaxKey = Key;
                 if(Key < FMinKey) FMinKey = Key;
             }
-            return node->RecData.data();
+            return node->RecData;
         }
 
         void Sort(const int *AMap = nullptr) {
@@ -162,8 +172,8 @@ namespace gdlib::datastorage {
         bool GetNextRecord(RecType **P, KeyType *AKey, ValueType *AData) {
             if(P && *P) {
                 const RecType &it = **P;
-                std::memcpy(AKey, it.RecKeys.data(), FKeySize);
-                std::memcpy(AData, it.RecData.data(), FDataSize);
+                std::memcpy(AKey, it.RecKeys, FKeySize);
+                std::memcpy(AData, it.RecData, FDataSize);
                 *P = it.RecNext;
                 return true;
             }
@@ -182,8 +192,8 @@ namespace gdlib::datastorage {
         using KeyArray = std::array<KeyType, keyMaxSize>;
         using ValArray = std::array<ValType, valMaxSize>;
 #else
-        using KeyArray = std::vector<KeyType>;
-        using ValArray = std::vector<ValType>;
+        using KeyArray = KeyType *;
+        using ValArray = ValType *;
 #endif
         using EntryType = std::pair<KeyArray, ValArray>;
         using TLDStorageType = std::list<EntryType>;
@@ -207,7 +217,7 @@ namespace gdlib::datastorage {
                     }
                     if (KD < 0) return false;
                 }
-                PrevKey = keys.data();
+                PrevKey = keys;
             }
             return true;
         };
@@ -219,26 +229,32 @@ namespace gdlib::datastorage {
             FDataSize{ADataSize}{
         }
 
-        ~TLinkedData() = default;
+        ~TLinkedData() {
+            Clear();
+        }
 
         int Count() const {
             return static_cast<int>(data.size());
         }
 
         void Clear() {
+            for (auto &[k,v] : data) {
+                delete[] k;
+                delete[] v;
+            }
             data.clear();
         }
 
         ValArray &AddItem(const KeyType *AKey, const ValType *AData) {
 #ifdef TLD_DYN_ARRAYS
-            KeyArray keys(FDimension);
-            ValArray vals(FDataSize / (int)sizeof(double));
+            KeyArray keys{ new KeyType[FDimension] };
+            ValArray vals{ new ValType[FDataSize / (int)sizeof(double)] };
             data.emplace_back(std::make_pair(keys, vals));
 #else
             data.push_back({});
 #endif
-            memcpy(data.back().first.data(), AKey, FKeySize);
-            memcpy(data.back().second.data(), AData, FDataSize);
+            memcpy(data.back().first, AKey, FKeySize);
+            memcpy(data.back().second, AData, FDataSize);
             return data.back().second;
         }
 
@@ -265,8 +281,8 @@ namespace gdlib::datastorage {
         bool GetNextRecord(typename TLDStorageType::iterator &it, KeyType *AKey, ValType *Data) {
             if(it == data.end()) return false;
             const EntryType & item = *it;
-            memcpy(AKey, item.first.data(), FKeySize);
-            memcpy(Data, item.second.data(), FDataSize);
+            memcpy(AKey, item.first, FKeySize);
+            memcpy(Data, item.second, FDataSize);
             it++;
             return true;
         }

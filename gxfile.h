@@ -23,7 +23,7 @@
 #include <cstring>
 
 // TLinkedData implementation choice: Enable to use legacy implementation (with radix sort)
-//#define TLD_LEGACY
+#define TLD_LEGACY
 
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
