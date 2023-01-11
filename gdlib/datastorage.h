@@ -33,6 +33,9 @@ namespace gdlib::datastorage {
         ValueType RecData[maxValueSize];
         KeyType RecKeys[maxKeySize];
 #else
+        // when RecData is used, first dim * sizeof(int) bytes are keys and then datasize * sizeof(double) bytes for values
+        // hence data bytes start at offset FKeySize
+        // when RecKeys is used corresponds directly to key entries (as integers)
         union {
             uint8_t RecData[5];
             int RecKeys[20];
@@ -115,9 +118,9 @@ namespace gdlib::datastorage {
             return FCount * FTotalSize;
         }
 
-        ValueType *AddItem(const KeyType *AKey, const ValueType *AData) {
+        RecType *AddItem(const KeyType *AKey, const ValueType *AData) {
 #ifdef TLD_DYN_ARRAYS
-            RecType* node = (RecType *)new uint8_t[FTotalSize];
+            auto* node = (RecType *)new uint8_t[FTotalSize];
             /*dataStorage.resize(dataStorage.size() + FTotalSize);
             RecType* node = (RecType*)(&dataStorage[dataStorage.size() - FTotalSize]);*/
 #else
@@ -131,8 +134,8 @@ namespace gdlib::datastorage {
             std::memcpy(node->RecKeys, AKey, FKeySize);
             std::memcpy(node->RecData, AData, FDataSize);
 #else
-            std::memcpy(node->RecData, AKey, FKeySize);
-            std::memcpy(&node->RecData[FKeySize], AData, FDataSize);
+            std::memcpy(node->RecData, AKey, FKeySize); // first FKeySize bytes for keys (integers)
+            std::memcpy(&node->RecData[FKeySize], AData, FDataSize); // rest for actual data (doubles)
 #endif
             FCount++;
             for(int D{}; D<FDimension; D++) {
@@ -140,7 +143,7 @@ namespace gdlib::datastorage {
                 if(Key > FMaxKey) FMaxKey = Key;
                 if(Key < FMinKey) FMinKey = Key;
             }
-            return (ValueType *)node->RecData;
+            return node;
         }
 
         void Sort(const int *AMap = nullptr) {
@@ -185,8 +188,8 @@ namespace gdlib::datastorage {
                 std::memcpy(AKey, it.RecKeys, FKeySize);
                 std::memcpy(AData, it.RecData, FDataSize);
 #else
-                std::memcpy(AKey, it.RecData, FKeySize);
-                std::memcpy(AData, &it.RecData[FKeySize], FDataSize);
+                std::memcpy(AKey, it.RecData, FKeySize); // first FKeySize bytes for keys (integers)
+                std::memcpy(AData, &it.RecData[FKeySize], FDataSize); // rest actual data bytes (doubles)
 #endif
                 *P = it.RecNext;
                 return true;
