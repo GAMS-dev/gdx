@@ -14,7 +14,7 @@
 // Maximum sizes are usually:
 // - keys:   GLOBAL_MAX_INDEX_DIM = 20
 // - values: GMS_VAL_MAX          = 5
-//#define TLD_DYN_ARRAYS
+#define TLD_DYN_ARRAYS
 
 #ifdef TLD_DYN_ARRAYS
 #define TLD_TEMPLATE_HEADER template<typename KeyType, typename ValueType>
@@ -32,21 +32,11 @@ namespace gdlib::datastorage {
 #ifndef TLD_DYN_ARRAYS
         ValueType RecData[maxValueSize];
         KeyType RecKeys[maxKeySize];
-        TLinkedDataRec(int numKeys, int numValues) {}
 #else
-        ValueType* RecData;
-        KeyType *RecKeys;
-
-        TLinkedDataRec(int numKeys, int numValues) :
-            RecData(new ValueType[numValues]),
-            RecKeys(new KeyType[numKeys])
-        {
-        }
-
-        ~TLinkedDataRec() {
-            delete[] RecData;
-            delete[] RecKeys;
-        }
+        union {
+            uint8_t RecData[5];
+            int RecKeys[20];
+        };
 #endif
     };
 
@@ -61,6 +51,10 @@ namespace gdlib::datastorage {
             FCount;
         using RecType = TLD_REC_TYPE;
         RecType *FHead, *FTail;
+
+/*#ifdef TLD_DYN_ARRAYS
+        std::vector<uint8_t> dataStorage;
+#endif*/
 
         bool IsSorted() {
             RecType *R{FHead};
@@ -86,7 +80,7 @@ namespace gdlib::datastorage {
             FDimension{ADimension},
             FKeySize{ADimension * (int)sizeof(KeyType)},
             FDataSize{ADataSize},
-            FTotalSize{2 * (int)sizeof(void *) + FKeySize + FDataSize},
+            FTotalSize{1 * (int)sizeof(void *) + FKeySize + FDataSize},
             FCount{},
             FHead{},
             FTail{}
@@ -102,12 +96,16 @@ namespace gdlib::datastorage {
         }
 
         void Clear() {
+//#ifndef TLD_DYN_ARRAYS
             RecType *P {FHead};
             while(P) {
                 auto Pn = P->RecNext;
                 delete P;
                 P = Pn;
             }
+/*#else
+            dataStorage.clear();
+#endif*/
             FCount = FMaxKey = 0;
             FHead = FTail = nullptr;
             FMinKey = std::numeric_limits<int>::max();
@@ -118,20 +116,31 @@ namespace gdlib::datastorage {
         }
 
         ValueType *AddItem(const KeyType *AKey, const ValueType *AData) {
-            auto node = new RecType { FDimension, FDataSize / (int)sizeof(ValueType) };
+#ifdef TLD_DYN_ARRAYS
+            RecType* node = (RecType *)new uint8_t[FTotalSize];
+            /*dataStorage.resize(dataStorage.size() + FTotalSize);
+            RecType* node = (RecType*)(&dataStorage[dataStorage.size() - FTotalSize]);*/
+#else
+            RecType *node = new RecType { FDimension, FDataSize / (int)sizeof(ValueType) };
+#endif
             if(!FHead) FHead = node;
             else FTail->RecNext = node;
             FTail = node;
             node->RecNext = nullptr;
+#ifndef TLD_DYN_ARRAYS
             std::memcpy(node->RecKeys, AKey, FKeySize);
             std::memcpy(node->RecData, AData, FDataSize);
+#else
+            std::memcpy(node->RecData, AKey, FKeySize);
+            std::memcpy(&node->RecData[FKeySize], AData, FDataSize);
+#endif
             FCount++;
             for(int D{}; D<FDimension; D++) {
                 int Key{AKey[D]};
                 if(Key > FMaxKey) FMaxKey = Key;
                 if(Key < FMinKey) FMinKey = Key;
             }
-            return node->RecData;
+            return (ValueType *)node->RecData;
         }
 
         void Sort(const int *AMap = nullptr) {
@@ -172,8 +181,13 @@ namespace gdlib::datastorage {
         bool GetNextRecord(RecType **P, KeyType *AKey, ValueType *AData) {
             if(P && *P) {
                 const RecType &it = **P;
+#ifndef TLD_DYN_ARRAYS
                 std::memcpy(AKey, it.RecKeys, FKeySize);
                 std::memcpy(AData, it.RecData, FDataSize);
+#else
+                std::memcpy(AKey, it.RecData, FKeySize);
+                std::memcpy(AData, &it.RecData[FKeySize], FDataSize);
+#endif
                 *P = it.RecNext;
                 return true;
             }
