@@ -197,7 +197,7 @@ template<typename K, typename V, typename H, typename E>
         std::vector<bool> modeActive;
         uint8_t count;
     public:
-        TgxModeSet(const std::initializer_list<TgxFileMode> modes);
+        TgxModeSet(std::initializer_list<TgxFileMode> modes);
         bool contains(const TgxFileMode& mode) const override;
         bool empty() const;
     };
@@ -239,7 +239,7 @@ template<typename K, typename V, typename H, typename E>
         int index, num;
         IndexNumPair() : index{}, num{} {}
         explicit IndexNumPair(int _index, int _num) : index(_index), num(_num) {}
-        IndexNumPair(int _num) : index{}, num{_num} {}
+        explicit IndexNumPair(int _num) : index{}, num{_num} {}
     };
 
     //static IndexNumPair unmappedPair {-1};
@@ -394,7 +394,7 @@ template<typename K, typename V, typename H, typename E>
     struct SetText {
         std::string text;
         int node;
-        SetText(const std::string &_text, int _node) : text{_text}, node{_node} {}
+        SetText(std::string _text, int _node) : text{std::move(_text)}, node{_node} {}
         SetText() : text{}, node{} {}
     };
 

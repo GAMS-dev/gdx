@@ -89,7 +89,7 @@ namespace utils {
             if(fs.eof() || c == '\0') break;
             ss << c;
             if(c == '\n' || c == '\r') break;
-        };
+        }
         return ss.str();
     }
 

@@ -4653,7 +4653,7 @@ namespace gxfile {
             return elem.text == s;
         });
         if(ix == -1) {
-            entries.emplace_back(SetText{s, n});
+            entries.emplace_back(s, n);
             return (int) entries.size() - 1;
         }
         return ix;

@@ -15,7 +15,7 @@ namespace yaml {
         void WrIndent();
 
     public:
-        TYAMLFile(const std::string &filename, bool active = true);
+        explicit TYAMLFile(const std::string &filename, bool active = true);
         virtual ~TYAMLFile();
 
         void IncIndentLevel();
