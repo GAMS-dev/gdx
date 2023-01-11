@@ -30,8 +30,8 @@ namespace gdlib::datastorage {
     struct TLinkedDataRec {
         TLinkedDataRec *RecNext{};
 #ifndef TLD_DYN_ARRAYS
-        std::array<ValueType, maxValueSize> RecData;
-        std::array<KeyType, maxKeySize> RecKeys;
+        ValueType RecData[maxValueSize];
+        KeyType RecKeys[maxKeySize];
         TLinkedDataRec(int numKeys, int numValues) {}
 #else
         ValueType* RecData;
