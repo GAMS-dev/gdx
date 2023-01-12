@@ -1,6 +1,6 @@
 import re
 
-pat = re.compile(r'^\s*(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)\s+\#(.+)$')
+pat = re.compile(r'^\s*(\d+\.\d+)\s+#\s+(\d+\.\d+)\s+#\s+(\d+\.\d+)\s+#(.+)$')
 
 
 def collect_item_times(fn):
@@ -14,8 +14,8 @@ def collect_item_times(fn):
     return expl_to_time
 
 
-p3_times = collect_item_times('srcSuiteP3.log')
-cxx_times = collect_item_times('srcSuiteCxx.log')
+p3_times = collect_item_times('all_capi_p3.log')
+cxx_times = collect_item_times('all_capi_cxx.log')
 
 shared_expls = [k for k, v in p3_times.items() if k in cxx_times]
 
