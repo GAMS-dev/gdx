@@ -56,10 +56,6 @@ namespace gdlib::datastorage {
         using RecType = TLD_REC_TYPE;
         RecType *FHead, *FTail;
 
-/*#ifdef TLD_DYN_ARRAYS
-        std::vector<uint8_t> dataStorage;
-#endif*/
-
         bool IsSorted() {
             RecType *R{FHead};
             auto *PrevKey {R->RecKeys};
@@ -100,16 +96,12 @@ namespace gdlib::datastorage {
         }
 
         void Clear() {
-//#ifndef TLD_DYN_ARRAYS
             RecType *P {FHead};
             while(P) {
                 auto Pn = P->RecNext;
                 delete P;
                 P = Pn;
             }
-/*#else
-            dataStorage.clear();
-#endif*/
             FCount = FMaxKey = 0;
             FHead = FTail = nullptr;
             FMinKey = std::numeric_limits<int>::max();
@@ -122,8 +114,6 @@ namespace gdlib::datastorage {
         RecType *AddItem(const KeyType *AKey, const ValueType *AData) {
 #ifdef TLD_DYN_ARRAYS
             auto* node = (RecType *)new uint8_t[FTotalSize];
-            /*dataStorage.resize(dataStorage.size() + FTotalSize);
-            RecType* node = (RecType*)(&dataStorage[dataStorage.size() - FTotalSize]);*/
 #else
             RecType *node = new RecType { FDimension, FDataSize / (int)sizeof(ValueType) };
 #endif

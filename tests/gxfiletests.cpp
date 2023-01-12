@@ -158,8 +158,8 @@ namespace tests::gxfiletests {
 #ifdef NO_SLOW_TESTS
         return;
 #endif
-        const std::string   suiteName = "src"s, //"src"s,
-                            modelName = "case2736sp_Shift_Matrix"s; //"glcaerwt"s;
+        const std::string   suiteName = "lwsup"s, //"src"s,
+                            modelName = "500rr"s; //"glcaerwt"s;
 #if defined(_WIN32)
         std::array gdxFilePathCandidates{
             modelName + ".gdx"s,
@@ -174,17 +174,25 @@ namespace tests::gxfiletests {
             "/home/andre/dockerhome/distrib/"s+suiteName+"/"s+modelName+".gdx"s
         };
 #endif
-        const bool quiet = false, onlyPorted = false, onlyWrapped = false;
+        const int ntries = 1;
+        const bool  quiet = false,
+                    onlyPorted = true,
+                    onlyWrapped = false;
         for(const auto &fn : gdxFilePathCandidates) {
             if (std::filesystem::exists(fn)) {
                 pfgdx::TimeTriple tWrap, tPort;
-                if(!onlyPorted)
-                    tWrap = pfgdx::runWithTiming(fn, true, quiet);
-                if(!onlyWrapped)
-                    tPort = pfgdx::runWithTiming(fn, false, quiet);
-                if(!quiet && !onlyPorted && !onlyWrapped)
-                    std::cout << "Slowdown for " << fn << " = " << tPort.total_t / tWrap.total_t << std::endl;
-
+                std::array<double, ntries> slowdowns;
+                for (int i = 0; i < ntries; i++) {
+                    if (!onlyPorted)
+                        tWrap = pfgdx::runWithTiming(fn, true, quiet);
+                    if (!onlyWrapped)
+                        tPort = pfgdx::runWithTiming(fn, false, quiet);
+                    slowdowns[i] = tPort.total_t / tWrap.total_t;
+                    if (!quiet && !onlyPorted && !onlyWrapped)
+                        std::cout << "Slowdown for " << fn << " = " << slowdowns[i] << std::endl;
+                }
+                if(!quiet)
+                    std::cout << "Average slowdown = " << std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / (double)ntries << std::endl;;
             }
         }
     }
