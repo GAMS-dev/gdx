@@ -175,9 +175,11 @@ namespace tests::gxfiletests {
         };
 #endif
         const int ntries = 1;
+
         const bool  quiet = false,
-                    onlyPorted = true,
+                    onlyPorted = false,
                     onlyWrapped = false;
+
         for(const auto &fn : gdxFilePathCandidates) {
             if (std::filesystem::exists(fn)) {
                 pfgdx::TimeTriple tWrap, tPort;

@@ -8,6 +8,7 @@
 #include <optional>
 #include <array>
 #include <cstdint>
+#include <cassert>
 
 // TLinkedData dynamic array toggle
 // iff. defined? Use std::vector with actual dimension and value counts,
@@ -16,6 +17,12 @@
 // - keys:   GLOBAL_MAX_INDEX_DIM = 20
 // - values: GMS_VAL_MAX          = 5
 #define TLD_DYN_ARRAYS
+
+// Batch allocations
+// When TLD_DYN_ARRAYS is active: No single item #TotalSize-bytes new allocations
+// but instead allocate big blocks (potentially wasting a couple bytes if items don't fit tightly)
+// also has space overhead for list of blocks to free it later
+#define TLD_BATCH_ALLOCS
 
 #ifdef TLD_DYN_ARRAYS
 #define TLD_TEMPLATE_HEADER template<typename KeyType, typename ValueType>
@@ -26,6 +33,50 @@
 #endif
 
 namespace gdlib::datastorage {
+
+#ifdef TLD_BATCH_ALLOCS
+    struct DataBatch {
+        DataBatch *next;
+        uint8_t *ptr;
+        DataBatch(size_t count) : next{}, ptr{new uint8_t[count]} {}
+    };
+
+    template<int batchSize>
+    class BatchAllocator {
+        DataBatch *head, *tail;
+        size_t offsetInTail;
+
+    public:
+        BatchAllocator() : head{}, tail{}, offsetInTail{} {}
+
+        ~BatchAllocator() {
+            clear();
+        }
+
+        void clear() {
+            for (DataBatch* it = head; it; it = it->next)
+                if(it && it->ptr)
+                    delete [] it->ptr;
+            head = tail = nullptr;
+        }
+
+        uint8_t *GetBytes(size_t count) {
+            assert(count <= batchSize);
+            if(!head) {
+                head = tail = new DataBatch{ batchSize };
+                offsetInTail = 0;
+            }
+            else if(batchSize - offsetInTail < count) {
+                tail->next = new DataBatch{ batchSize };
+                tail = tail->next;
+                offsetInTail = 0;
+            }
+            auto res {tail->ptr + offsetInTail};
+            offsetInTail += count;
+            return res;
+        }
+    };
+#endif
 
     TLD_TEMPLATE_HEADER
     struct TLinkedDataRec {
@@ -55,6 +106,10 @@ namespace gdlib::datastorage {
             FCount;
         using RecType = TLD_REC_TYPE;
         RecType *FHead, *FTail;
+
+#ifdef TLD_BATCH_ALLOCS
+        BatchAllocator<1024> batchAllocator;
+#endif
 
         bool IsSorted() {
             RecType *R{FHead};
@@ -97,11 +152,15 @@ namespace gdlib::datastorage {
 
         void Clear() {
             RecType *P {FHead};
+#ifdef TLD_BATCH_ALLOCS
+            batchAllocator.clear();
+#else
             while(P) {
                 auto Pn = P->RecNext;
                 delete P;
                 P = Pn;
             }
+#endif
             FCount = FMaxKey = 0;
             FHead = FTail = nullptr;
             FMinKey = std::numeric_limits<int>::max();
@@ -113,7 +172,11 @@ namespace gdlib::datastorage {
 
         RecType *AddItem(const KeyType *AKey, const ValueType *AData) {
 #ifdef TLD_DYN_ARRAYS
+    #ifdef TLD_BATCH_ALLOCS
+            auto* node = (RecType *)batchAllocator.GetBytes(FTotalSize);
+    #else
             auto* node = (RecType *)new uint8_t[FTotalSize];
+    #endif
 #else
             RecType *node = new RecType { FDimension, FDataSize / (int)sizeof(ValueType) };
 #endif
