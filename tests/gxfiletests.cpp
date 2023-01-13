@@ -159,7 +159,7 @@ namespace tests::gxfiletests {
         return;
 #endif
         const std::string   suiteName = "lwsup"s, //"src"s,
-                            modelName = "new"s; //"glcaerwt"s;
+                            modelName = "CRMoutliers"s; //"glcaerwt"s;
 #if defined(_WIN32)
         std::array gdxFilePathCandidates{
             modelName + ".gdx"s,

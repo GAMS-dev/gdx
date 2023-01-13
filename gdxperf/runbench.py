@@ -1,40 +1,9 @@
 import os
-import pickle
+import yaml
 import re
 import sys
 
-SKIPLIST = [
-    '5062.gdx',
-    'data1000.gdx',
-    'data10000.gdx',
-    'Modellendogen0004.gdx', 'Modellendogen0005.gdx', 'Modellendogen0725.gdx', 'Modellendogen0726.gdx',
-    'Modellendogen1093.gdx', 'Modellendogen1407.gdx',
-    'output2.gdx', 'output_DisEmp.gdx',
-    'preFix.gdx',
-    'soln_Toroptimierung_2_p1.gdx', 'Toroptimierung_2_p.gdx', 'Toroptimierung_2_p - Copy.gdx',
-    'z.gdx',
-    'data_m5.gdx',
-    'dbX2370.gdx', 'dbX2372.gdx',
-    'gmsgrid.gdx',
-    'testInstance1000Ite.gdx', 'testInstance100Ite.gdx', 'testInstance200Ite.gdx',
-    'x0.gdx', 'x1.gdx', 'x170.gdx', 'x170postfix.gdx', 'x171.gdx',
-    'test.gdx', 'gdxdump.gdx',
-    'map.gdx', 'new4.gdx',
-    'food_man.gdx',
-    'testExcel.gdx',
-    'ELMOD.gdx', 'JMM.gdx',
-    'arauco.gdx',
-    'modelo.gdx',
-    'PERSEUS.gdx'
-    'AssignmentBug.gdx', 'globiom.gdx',
-    'indata.gdx', 'seders.gdx',
-    'CHPSystemData2_Converted.gdx',
-    'pegase.gdx',
-    'getdata.gdx',
-    'rank_out.gdx', 'rank_output.gdx',
-    'bau_p.gdx'
-    'validnlpecopts.gdx', 'xyz.gdx'
-]
+from skipfiles import SKIPLIST
 
 PATH_BASE = "/home/andre/dockerhome/distrib/"
 P3_GAMS_PATH = PATH_BASE + "master/gms\\ test/"
@@ -59,13 +28,13 @@ def run_single(sysdir_path, fn):
     os.system(cmd)
     with open(log_fn) as fp:
         lines = fp.readlines()
+    os.remove(log_fn)
     aggr_secs, max_rss = None, None
     step_times = []
     for line in lines:
         step_t_match = step_time_pat.match(line)
         if step_t_match:
-            step_times.append(dict(t=float(step_t_match.group(3)),
-                                   expl=step_t_match.group(4).split('#')[-1].strip()))
+            step_times.append(float(step_t_match.group(3)))
         tot_t_match = tot_time_pat.match(line)
         if tot_t_match:
             hours, minutes, secs, msecs = (int(tot_t_match.group(i)) for i in [1, 2, 3, 4])
@@ -94,19 +63,24 @@ def collect_gdx_filenames(root_dir):
             elif os.path.isdir(fn):
                 recursive_helper(fn)
             elif fn.endswith('.gdx') and fn.split('/')[-1] not in SKIPLIST:
-                fns.append(dir + os.path.sep + fn)
+                nfn = dir + os.path.sep + fn
+                if nfn not in fns:
+                    fns.append(nfn)
+                else:
+                    raise RuntimeError('Duplicate entry ' + nfn)
 
     recursive_helper(root_dir)
     return fns
 
 
 def collect_results():
-    res = []
+    res_fn = 'results.yml'
+    if os.path.exists(res_fn):
+        os.remove(res_fn)
     for fn in collect_gdx_filenames('.'):
         p3_res, cxx_res = (run_single(sys_dir, fn) for sys_dir in [P3_GAMS_PATH, CXX_GAMS_PATH])
-        res.append(dict(fn=fn, p3=p3_res, cxx=cxx_res))
-    with open('results.pkl', 'w') as fp:
-        pickle.dump(res, fp)
+        with open(res_fn, 'a') as fp:
+            yaml.dump({fn: dict(p3=p3_res, cxx=cxx_res)}, fp)
 
 
 def main(args):
