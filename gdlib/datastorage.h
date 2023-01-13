@@ -151,10 +151,10 @@ namespace gdlib::datastorage {
         }
 
         void Clear() {
-            RecType *P {FHead};
 #ifdef TLD_BATCH_ALLOCS
             batchAllocator.clear();
 #else
+            RecType *P {FHead};
             while(P) {
                 auto Pn = P->RecNext;
                 delete P;
@@ -173,9 +173,9 @@ namespace gdlib::datastorage {
         RecType *AddItem(const KeyType *AKey, const ValueType *AData) {
 #ifdef TLD_DYN_ARRAYS
     #ifdef TLD_BATCH_ALLOCS
-            auto* node = (RecType *)batchAllocator.GetBytes(FTotalSize);
+            auto* node = reinterpret_cast<RecType *>(batchAllocator.GetBytes(FTotalSize));
     #else
-            auto* node = (RecType *)new uint8_t[FTotalSize];
+            auto* node = reinterpret_cast<RecType *>(new uint8_t[FTotalSize]);
     #endif
 #else
             RecType *node = new RecType { FDimension, FDataSize / (int)sizeof(ValueType) };

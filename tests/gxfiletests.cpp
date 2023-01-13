@@ -159,7 +159,7 @@ namespace tests::gxfiletests {
         return;
 #endif
         const std::string   suiteName = "lwsup"s, //"src"s,
-                            modelName = "500rr"s; //"glcaerwt"s;
+                            modelName = "new"s; //"glcaerwt"s;
 #if defined(_WIN32)
         std::array gdxFilePathCandidates{
             modelName + ".gdx"s,
@@ -195,6 +195,7 @@ namespace tests::gxfiletests {
                 }
                 if(!quiet)
                     std::cout << "Average slowdown = " << std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / (double)ntries << std::endl;;
+                return;
             }
         }
     }
