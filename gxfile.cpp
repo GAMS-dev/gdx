@@ -4582,7 +4582,7 @@ namespace gxfile {
     int TUELTableLegacy::GetMaxUELLength() const {
         int maxLen{};
         for(auto &bucket : Buckets)
-            maxLen = std::max<int>(static_cast<int>(bucket.StrP.length()), maxLen);
+            maxLen = std::max<int>(static_cast<int>(strlen(bucket.StrP)), maxLen);
         return maxLen;
     }
 
@@ -4612,7 +4612,7 @@ namespace gxfile {
         return gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::StoreObject(id, p);
     }
 
-    const std::string &TUELTableLegacy::operator[](int index) const {
+    const std::string TUELTableLegacy::operator[](int index) const {
         return GetString(index+1);
     }
 

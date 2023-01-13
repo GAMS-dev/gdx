@@ -11,7 +11,7 @@
 namespace gdlib::strhash {
     template<typename T>
     struct THashBucket {
-        std::string StrP {};
+        char *StrP {};
         size_t NxtBuckIndex {};
         int StrNr {};
         T Obj {};
@@ -62,6 +62,14 @@ namespace gdlib::strhash {
             for(char c : s)
                 res = 211 * res + toupper(c);
             return (res & 0x7FFFFFFF) % HashTableSize;
+        }
+
+        virtual bool EntryEqual(const char *ps1, const char *ps2) {
+#if defined(_WIN32)
+            return !_stricmp(ps1, ps2);
+#else
+            return !strcasecmp(ps1, ps2);
+#endif
         }
 
         virtual bool EntryEqual(const std::string &ps1, const std::string &ps2) {
@@ -162,6 +170,8 @@ namespace gdlib::strhash {
         }
 
         void Clear() {
+            for(auto &bucket : Buckets)
+                delete [] bucket.StrP;
             Buckets.clear();
             FCount = 0;
             ClearHashTable();
@@ -212,7 +222,8 @@ namespace gdlib::strhash {
                 FSorted = false;
             }
             FCount++; // ugly
-            PBuck->StrP = s;
+            PBuck->StrP = new char[s.length()+1];
+            utils::assignStrToBuf(s, PBuck->StrP, (int)s.length()+1);
             PBuck->Obj = std::move(AObj);
             return res;
         }
@@ -237,7 +248,8 @@ namespace gdlib::strhash {
                 FSorted = false;
             }
             FCount++; // ugly
-            PBuck->StrP = s;
+            PBuck->StrP = new char[s.length()+1];
+            utils::assignStrToBuf(s, PBuck->StrP, (int)s.length()+1);
             PBuck->Obj = std::move(AObj);
             return res;
         }
@@ -305,7 +317,7 @@ namespace gdlib::strhash {
                     (*PHashTable)[HV1] = PBuckIndex;
                 }
             }
-            GetString(N+1) = s;
+            SetString(N+1, s);
         }
 
         T* operator[](int N) {
@@ -321,8 +333,15 @@ namespace gdlib::strhash {
             return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]].Obj;
         }
 
-        const std::string &GetString(int N) const {
+        const std::string GetString(int N) const {
             return Buckets[N-(OneBased ? 1 : 0)].StrP;
+        }
+
+        void SetString(int N, const std::string s) {
+            auto &bucket = Buckets[N-(OneBased ? 1 : 0)];
+            delete [] bucket.StrP;
+            bucket.StrP = new char[s.length()+1];
+            utils::assignStrToBuf(s, bucket.StrP, (int)s.length()+1);
         }
 
         std::string GetSortedString(int N) const {
@@ -342,7 +361,7 @@ namespace gdlib::strhash {
             return !FCount;
         }
 
-        std::string &GetString(int N) {
+        std::string GetString(int N) {
             return Buckets[N-(OneBased ? 1 : 0)].StrP;
         }
     };
