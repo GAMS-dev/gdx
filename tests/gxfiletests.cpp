@@ -181,13 +181,13 @@ namespace tests::gxfiletests {
         for(const auto &fn : gdxFilePathCandidates) {
             if (std::filesystem::exists(fn)) {
                 pfgdx::TimeTriple tWrap, tPort;
-                std::array<double, ntries> slowdowns;
+                std::array<double, ntries> slowdowns {};
                 for (int i = 0; i < ntries; i++) {
                     if (!onlyPorted)
                         tWrap = pfgdx::runWithTiming(fn, true, quiet);
                     if (!onlyWrapped)
                         tPort = pfgdx::runWithTiming(fn, false, quiet);
-                    slowdowns[i] = tPort.total_t / tWrap.total_t;
+                    slowdowns[i] = tWrap.total_t > 0 ? tPort.total_t / tWrap.total_t : 0;
                     if (!quiet && !onlyPorted && !onlyWrapped)
                         std::cout << "Slowdown for " << fn << " = " << slowdowns[i] << std::endl;
                 }
