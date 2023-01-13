@@ -33,6 +33,6 @@ print('\nTop 10 slowdown:')
 for fn in sorted(fns, key=lambda fn: fn_to_slowdown[fn], reverse=True)[:10]:
     print(f'{fn} with slowdown {fn_to_slowdown[fn]} and cxx time {res[fn]["cxx"]["total_secs"]}')
 
-print('\nTop 10 VSS increase:')
+print('\nTop 10 RSS increase:')
 for fn in sorted(fns, key=lambda fn: fn_to_rss_incr[fn], reverse=True)[:10]:
     print(f'{fn} with increase {fn_to_rss_incr[fn]} and cxx time {res[fn]["cxx"]["total_secs"]}')
