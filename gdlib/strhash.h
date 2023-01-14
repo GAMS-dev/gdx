@@ -2,6 +2,7 @@
 
 #include "gmsstrm.h"
 #include "../utils.h"
+#include "datastorage.h"
 
 #include <vector>
 #include <string>
@@ -12,7 +13,7 @@ namespace gdlib::strhash {
     template<typename T>
     struct THashBucket {
         char *StrP {};
-        size_t NxtBuckIndex {};
+        THashBucket *NextBucket {};
         int StrNr {};
         T Obj {};
     };
@@ -23,8 +24,11 @@ namespace gdlib::strhash {
     template<typename T>
     class TXStrHashList {
     protected:
-        std::vector<THashBucket<T>> Buckets {};
-        std::unique_ptr<std::vector<size_t>> PHashTable {};
+#ifdef TLD_BATCH_ALLOCS
+        datastorage::BatchAllocator<1024> batchAllocator;
+#endif
+        std::vector<PHashBucket<T>> Buckets {}; // sorted by order of insertion, no gaps
+        std::unique_ptr<std::vector<PHashBucket<T>>> PHashTable {}; // sorted by hash value, with gaps
         std::unique_ptr<std::vector<int>> SortMap {};
         int HashTableSize {}, ReHashCnt {}, FCount {};
         bool FSorted {};
@@ -53,8 +57,8 @@ namespace gdlib::strhash {
             else if(ACnt >= Next_2) { HashTableSize = HashSize_3; ReHashCnt = Next_3; }
             else if(ACnt >= Next_1) { HashTableSize = HashSize_2; ReHashCnt = Next_2; }
             else { HashTableSize = HashSize_1; ReHashCnt = Next_1; }
-            PHashTable = std::make_unique<std::vector<size_t>>(HashTableSize);
-            std::fill_n(PHashTable->begin(), HashTableSize, 0);
+            PHashTable = std::make_unique<std::vector<PHashBucket<T>>>(HashTableSize);
+            std::fill_n(PHashTable->begin(), HashTableSize, nullptr);
         }
 
         virtual int Hash(const std::string &s) {
@@ -85,34 +89,34 @@ namespace gdlib::strhash {
             HashTableReset(FCount);
             for(int N{}; N<FCount; N++) {
                 auto &PBuck = Buckets[N];
-                int HV = Hash(PBuck.StrP);
-                PBuck.NxtBuckIndex = GetBucketIndexByHash(HV);
-                (*PHashTable)[HV] = N+1;
+                int HV = Hash(PBuck->StrP);
+                PBuck->NextBucket = GetBucketByHash(HV);
+                (*PHashTable)[HV] = PBuck;
             }
         }
 
         void SetObject(int N, T AObj) {
-            Buckets[N-(OneBased ? 1 : 0)].Obj = AObj;
+            Buckets[N-(OneBased ? 1 : 0)]->Obj = AObj;
         }
 
         void SetSortedObject(int N, T &AObj) {
             if(!FSorted) Sort();
-            Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]].Obj = &AObj;
+            Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]]->Obj = &AObj;
         }
 
         std::string &GetSortedString(int N) {
             if(FSorted) Sort();
-            return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]].StrP;
+            return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]]->StrP;
         }
 
         void QuickSort(int L, int R) {
             int i{L};
             while(i < R) {
                 int j {R}, p {(L+R) >> 1};
-                std::string pPivotStr = Buckets[(*SortMap)[p]].StrP;
+                std::string pPivotStr = Buckets[(*SortMap)[p]]->StrP;
                 do {
-                    while(Compare(Buckets[(*SortMap)[i]].StrP, pPivotStr) < 0) i++;
-                    while(Compare(Buckets[(*SortMap)[j]].StrP, pPivotStr) > 0) j--;
+                    while(Compare(Buckets[(*SortMap)[i]]->StrP, pPivotStr) < 0) i++;
+                    while(Compare(Buckets[(*SortMap)[j]]->StrP, pPivotStr) > 0) j--;
                     if(i < j) {
                         std::swap((*SortMap)[i], (*SortMap)[j]);
                         i++;
@@ -143,9 +147,9 @@ namespace gdlib::strhash {
             }
             if(!FSorted) {
                 if(FCount >= 2) {
-                    std::string PSN = Buckets[0].StrP;
+                    std::string PSN = Buckets[0]->StrP;
                     for(int N{}; N<FCount-1; N++) {
-                        std::string PSN1 = Buckets[N+1].StrP;
+                        std::string PSN1 = Buckets[N+1]->StrP;
                         if(Compare(PSN, PSN1) > 0) {
                             QuickSort(0, FCount-1);
                             break;
@@ -170,8 +174,14 @@ namespace gdlib::strhash {
         }
 
         void Clear() {
-            for(auto &bucket : Buckets)
-                delete [] bucket.StrP;
+#ifndef TLD_BATCH_ALLOCS
+            for(auto bucket : Buckets) {
+                delete[] bucket->StrP;
+                delete bucket;
+            }
+#else
+            batchAllocator.clear();
+#endif
             Buckets.clear();
             FCount = 0;
             ClearHashTable();
@@ -179,42 +189,23 @@ namespace gdlib::strhash {
             FSorted = false;
         }
 
-        /*int StoreObject(const std::string& s, T& AObj) {
-            if(PHashTable) ClearHashTable();
-            Buckets.emplace_back();
-            auto &PBuck = Buckets.back();
-            PBuck.StrNr = FCount; // before it was added!
-            if(SortMap) {
-                (*SortMap)[FCount] = FCount;
-                FSorted = false;
-            }
-            FCount++; // ugly
-            PBuck.StrP = s;
-            PBuck.Obj = &AObj;
-            return FCount - 1 + (OneBased ? 1 : 0);
-        }*/
-
         T *GetObject(int N) {
-            return &Buckets[N-(OneBased ? 1 : 0)].Obj;
-        }
-
-        inline size_t GetBucketIndexByHash(int hash) {
-            return (*PHashTable)[hash];
+            return &Buckets[N-(OneBased ? 1 : 0)]->Obj;
         }
 
         inline PHashBucket<T> GetBucketByHash(int hash) {
-            return GetBucket(GetBucketIndexByHash(hash));
-        }
-
-        inline PHashBucket<T> GetBucket(size_t index) {
-            return !index ? nullptr : &Buckets[index-1];
+            return (*PHashTable)[hash];
         }
 
         int StoreObject(const std::string& s, T AObj) {
             if (PHashTable) ClearHashTable();
-            Buckets.push_back({});
-            PHashBucket<T> PBuck = &Buckets.back();
-            PBuck->NxtBuckIndex = 0;
+#ifdef TLD_BATCH_ALLOCS
+            PHashBucket<T> PBuck = reinterpret_cast<PHashBucket<T>>(batchAllocator.GetBytes(sizeof(THashBucket<T>)));
+#else
+            PHashBucket<T> PBuck = new THashBucket<T>{};
+#endif
+            Buckets.push_back(PBuck);
+            PBuck->NextBucket = nullptr;
             PBuck->StrNr = FCount; // before it was added!
             int res{ FCount + (OneBased ? 1 : 0) };
             if (SortMap) {
@@ -222,7 +213,11 @@ namespace gdlib::strhash {
                 FSorted = false;
             }
             FCount++; // ugly
+#ifdef TLD_BATCH_ALLOCS
+            PBuck->StrP = reinterpret_cast<char *>(batchAllocator.GetBytes(s.length()+1));
+#else
             PBuck->StrP = new char[s.length()+1];
+#endif
             utils::assignStrToBuf(s, PBuck->StrP, (int)s.length()+1);
             PBuck->Obj = std::move(AObj);
             return res;
@@ -234,13 +229,17 @@ namespace gdlib::strhash {
             int HV {Hash(s)};
             PHashBucket<T> PBuck = GetBucketByHash(HV);
             while(PBuck) {
-                if(!EntryEqual(PBuck->StrP, s)) PBuck = GetBucket(PBuck->NxtBuckIndex);
+                if(!EntryEqual(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
                 else return PBuck->StrNr + (OneBased ? 1 : 0);
             }
-            Buckets.push_back({});
-            PBuck = &Buckets.back();
-            PBuck->NxtBuckIndex = GetBucketIndexByHash(HV);
-            (*PHashTable)[HV] = Buckets.size();
+#ifdef TLD_BATCH_ALLOCS
+            PBuck = reinterpret_cast<PHashBucket<T>>(batchAllocator.GetBytes(sizeof(THashBucket<T>)));
+#else
+            PBuck = new THashBucket<T>{};
+#endif
+            Buckets.push_back(PBuck);
+            PBuck->NextBucket = GetBucketByHash(HV);
+            (*PHashTable)[HV] = PBuck;
             PBuck->StrNr = FCount; // before it was added! zero based
             int res {FCount + (OneBased ? 1 : 0)};
             if(SortMap) {
@@ -248,7 +247,11 @@ namespace gdlib::strhash {
                 FSorted = false;
             }
             FCount++; // ugly
+#ifdef TLD_BATCH_ALLOCS
+            PBuck->StrP = reinterpret_cast<char *>(batchAllocator.GetBytes(s.length()+1));
+#else
             PBuck->StrP = new char[s.length()+1];
+#endif
             utils::assignStrToBuf(s, PBuck->StrP, (int)s.length()+1);
             PBuck->Obj = std::move(AObj);
             return res;
@@ -267,7 +270,7 @@ namespace gdlib::strhash {
             int HV {Hash(s)};
             PHashBucket<T> PBuck = GetBucketByHash(HV);
             while(PBuck) {
-                if(!EntryEqual(PBuck->StrP, s)) PBuck = GetBucket(PBuck->NxtBuckIndex);
+                if(!EntryEqual(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
                 else return PBuck->StrNr + (OneBased ? 1 : 0);
             }
             return -1;
@@ -306,15 +309,13 @@ namespace gdlib::strhash {
                 int HV0{ Hash(GetString(N+1)) }, HV1 {Hash(s)};
                 if(HV0 != HV1) {
                     PHashBucket<T> PrevBuck {}, PBuck;
-                    size_t PBuckIndex{};
-                    for(PBuck = GetBucketByHash(HV0), PBuckIndex = GetBucketIndexByHash(HV0);
-                        PBuck->StrNr != N;
-                        PBuckIndex = PBuck->NxtBuckIndex, PBuck = GetBucket(PBuck->NxtBuckIndex))
+                    for(PBuck = GetBucketByHash(HV0);
+                        PBuck->StrNr != N; PBuck = PBuck->NextBucket)
                         PrevBuck = PBuck;
-                    if(!PrevBuck) (*PHashTable)[HV0] = PBuck->NxtBuckIndex;
-                    else PrevBuck->NxtBuckIndex = PBuck->NxtBuckIndex;
-                    PBuck->NxtBuckIndex = GetBucketIndexByHash(HV1);
-                    (*PHashTable)[HV1] = PBuckIndex;
+                    if(!PrevBuck) (*PHashTable)[HV0] = PBuck->NextBucket;
+                    else PrevBuck->NextBucket = PBuck->NextBucket;
+                    PBuck->NextBucket = GetBucketByHash(HV1);
+                    (*PHashTable)[HV1] = PBuck;
                 }
             }
             SetString(N+1, s);
@@ -334,19 +335,24 @@ namespace gdlib::strhash {
         }
 
         const std::string GetString(int N) const {
-            return Buckets[N-(OneBased ? 1 : 0)].StrP;
+            return Buckets[N-(OneBased ? 1 : 0)]->StrP;
         }
 
         void SetString(int N, const std::string s) {
-            auto &bucket = Buckets[N-(OneBased ? 1 : 0)];
-            delete [] bucket.StrP;
-            bucket.StrP = new char[s.length()+1];
-            utils::assignStrToBuf(s, bucket.StrP, (int)s.length()+1);
+            auto bucket = Buckets[N-(OneBased ? 1 : 0)];
+#ifdef TLD_BATCH_ALLOCS
+            // Storage for old string will leak temporarily but will be collected by batchAllocator.clear call
+            bucket->StrP = reinterpret_cast<char *>(batchAllocator.GetBytes(s.length()+1));
+#else
+            delete [] bucket->StrP;
+            bucket->StrP = new char[s.length()+1];
+#endif
+            utils::assignStrToBuf(s, bucket->StrP, (int)s.length()+1);
         }
 
         std::string GetSortedString(int N) const {
             if(!FSorted) Sort();
-            return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]].StrP;
+            return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]]->StrP;
         }
 
         int Count() const {
@@ -362,7 +368,7 @@ namespace gdlib::strhash {
         }
 
         std::string GetString(int N) {
-            return Buckets[N-(OneBased ? 1 : 0)].StrP;
+            return Buckets[N-(OneBased ? 1 : 0)]->StrP;
         }
     };
 
@@ -378,6 +384,10 @@ namespace gdlib::strhash {
 
         bool EntryEqual(const std::string &ps1, const std::string &ps2) override {
             return ps1 == ps2;
+        }
+
+        bool EntryEqual(const char *ps1, const char *ps2) override {
+            return !strcmp(ps1, ps2);
         }
     };
 

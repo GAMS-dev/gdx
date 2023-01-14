@@ -235,15 +235,6 @@ template<typename K, typename V, typename H, typename E>
 
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
 
-    struct IndexNumPair {
-        int index, num;
-        IndexNumPair() : index{}, num{} {}
-        explicit IndexNumPair(int _index, int _num) : index(_index), num(_num) {}
-        explicit IndexNumPair(int _num) : index{}, num{_num} {}
-    };
-
-    //static IndexNumPair unmappedPair {-1};
-
     struct caseInsensitiveHasher {
         size_t operator()(const std::string& input) const {
             int res{};
@@ -266,6 +257,13 @@ template<typename K, typename V, typename H, typename E>
 
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
 #ifdef CPP_HASHMAP
+    struct IndexNumPair {
+        int index, num;
+        IndexNumPair() : index{}, num{} {}
+        explicit IndexNumPair(int _index, int _num) : index(_index), num(_num) {}
+        explicit IndexNumPair(int _num) : index{}, num{ _num } {}
+    };
+    //static IndexNumPair unmappedPair {-1};
     using utablemaptype = umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>;
 #endif
 
@@ -323,7 +321,7 @@ template<typename K, typename V, typename H, typename E>
     };
 #endif
 
-    class TUELTableLegacy : public IUELTable, public gdlib::strhash::TXStrHashList<IndexNumPair> {
+    class TUELTableLegacy : public IUELTable, public gdlib::strhash::TXStrHashList<int> {
     public:
         TUELTableLegacy();
         void clear() override;
