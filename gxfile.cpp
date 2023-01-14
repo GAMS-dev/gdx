@@ -4531,11 +4531,11 @@ namespace gxfile {
     }
 
     int TUELTableLegacy::GetUserMap(int i) {
-        return GetObject(i)->num;
+        return *GetObject(i);
     }
 
     void TUELTableLegacy::SetUserMap(int EN, int N) {
-        GetObject(EN)->num = N;
+        *GetObject(EN) = N;
     }
 
     void TUELTableLegacy::ResetMapToUserStatus() {
@@ -4543,10 +4543,10 @@ namespace gxfile {
     }
 
     int TUELTableLegacy::NewUsrUel(int EN) {
-        int res = GetObject(EN)->num;
+        int res = *GetObject(EN);
         if(res < 0) {
             res = UsrUel2Ent.GetHighestIndex() + 1;
-            GetObject(EN)->num = res;
+            *GetObject(EN) = res;
             UsrUel2Ent[res] = EN;
         }
         ResetMapToUserStatus();
@@ -4555,10 +4555,10 @@ namespace gxfile {
 
     int TUELTableLegacy::AddUsrNew(const std::string &s) {
         int EN {AddObject(s, -1)};
-        int res {GetObject(EN)->num};
+        int res { *GetObject(EN)};
         if(res < 0) {
             res = UsrUel2Ent.GetHighestIndex() + 1;
-            GetObject(EN)->num = res;
+            *GetObject(EN) = res;
             UsrUel2Ent[res] = EN;
         }
         ResetMapToUserStatus();
@@ -4567,10 +4567,10 @@ namespace gxfile {
 
     int TUELTableLegacy::AddUsrIndxNew(const std::string &s, int UelNr) {
         int EN {AddObject(s, -1)};
-        int res {GetObject(EN)->num};
+        int res { *GetObject(EN)};
         if(res < 0) {
             res = UelNr;
-            GetObject(EN)->num = res;
+            *GetObject(EN) = res;
             UsrUel2Ent[res] = EN;
         } else if(res != UelNr) {
             res = -1;
@@ -4582,34 +4582,31 @@ namespace gxfile {
     int TUELTableLegacy::GetMaxUELLength() const {
         int maxLen{};
         for(auto &bucket : Buckets)
-            maxLen = std::max<int>(static_cast<int>(strlen(bucket.StrP)), maxLen);
+            maxLen = std::max<int>(static_cast<int>(strlen(bucket->StrP)), maxLen);
         return maxLen;
     }
 
     void TUELTableLegacy::Reserve(int n) {
         UsrUel2Ent.reserve(n);
         Buckets.reserve(n);
-
     }
 
     TUELTableLegacy::TUELTableLegacy() {
-        Buckets.reserve(10000);
+        //Buckets.reserve(10000);
         OneBased = true;
         ResetMapToUserStatus();
     }
 
     int TUELTableLegacy::IndexOf(const std::string &s) {
-        return gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::IndexOf(s);
+        return gdlib::strhash::TXStrHashList<int>::IndexOf(s);
     }
 
     int TUELTableLegacy::AddObject(const std::string &id, int mapping) {
-        IndexNumPair p{mapping};
-        return gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::AddObject(id, p);
+        return gdlib::strhash::TXStrHashList<int>::AddObject(id, mapping);
     }
 
     int TUELTableLegacy::StoreObject(const std::string& id, int mapping) {
-        IndexNumPair p{ mapping };
-        return gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::StoreObject(id, p);
+        return gdlib::strhash::TXStrHashList<int>::StoreObject(id, mapping);
     }
 
     const std::string TUELTableLegacy::operator[](int index) const {
@@ -4617,7 +4614,7 @@ namespace gxfile {
     }
 
     void TUELTableLegacy::RenameEntry(int N, const std::string &s) {
-        gdlib::strhash::TXStrHashList<gxfile::IndexNumPair>::RenameEntry(N, s);
+        gdlib::strhash::TXStrHashList<int>::RenameEntry(N, s);
     }
 
     TUELUserMapStatus IUELTable::GetMapToUserStatus() {
