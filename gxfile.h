@@ -96,6 +96,7 @@ template<typename K, typename V, typename H, typename E>
         }
     };
 
+#ifndef USE_BBARRAY
     struct TDFilter {
         int FiltNumber, FiltMaxUel;
         std::vector<bool> FiltMap{};
@@ -122,6 +123,35 @@ template<typename K, typename V, typename H, typename E>
             FiltMap[ix] = v;
         }
     };
+#else
+    struct TDFilter {
+        int FiltNumber, FiltMaxUel;
+        gdlib::gmsobj::TBooleanBitArray FiltMap;
+        bool FiltSorted;
+
+        TDFilter(int Nr, int UserHigh) :
+            FiltNumber{Nr},
+            FiltMaxUel{UserHigh},
+            FiltMap{},
+            FiltSorted{}
+        {
+        }
+
+        ~TDFilter() = default;
+
+        int MemoryUsed() const {
+            return FiltMap.GetMemoryUsed();
+        }
+
+        bool InFilter(int V) const {
+            return V >= 0 && V <= FiltMaxUel && FiltMap.GetBit(V);
+        }
+
+        void SetFilter(int ix, bool v) {
+            FiltMap.SetBit(ix, v);
+        }
+    };
+#endif
 
     class TFilterList : public std::vector<TDFilter> {
     public:

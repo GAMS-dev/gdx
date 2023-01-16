@@ -72,7 +72,7 @@ namespace gdlib::gmsobj {
             }
         }
 
-        int GetMemoryUsed() {
+        int GetMemoryUsed() const {
             return FAllocated;
         }
     };
