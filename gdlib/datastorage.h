@@ -38,7 +38,10 @@ namespace gdlib::datastorage {
     struct DataBatch {
         DataBatch *next;
         uint8_t *ptr;
-        DataBatch(size_t count) : next{}, ptr{new uint8_t[count]} {}
+        explicit DataBatch(size_t count) : next{}, ptr{new uint8_t[count]} {}
+        ~DataBatch() {
+            delete [] ptr;
+        }
     };
 
     template<int batchSize>
@@ -54,9 +57,12 @@ namespace gdlib::datastorage {
         }
 
         void clear() {
-            for (DataBatch* it = head; it; it = it->next)
-                if(it && it->ptr)
-                    delete [] it->ptr;
+            if(!head) return;
+            DataBatch *next;
+            for (DataBatch* it = head; it; it = next) {
+                next = it->next;
+                delete it;
+            }
             head = tail = nullptr;
         }
 
