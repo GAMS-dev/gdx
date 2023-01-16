@@ -1,44 +1,54 @@
+import os.path
+
 import yaml
+import sys
 
-with open('results.yml') as fp:
-    try:
-        res = yaml.safe_load(fp)
-    except yaml.YAMLError as exc:
-        print(exc)
-        raise exc
 
-max_rss, max_tot_time = None, None
-max_rss_fn, max_time_fn = '', ''
+def main(args):
+    with open('results.yml') as fp:
+        try:
+            res = yaml.safe_load(fp)
+        except yaml.YAMLError as exc:
+            print(exc)
+            raise exc
 
-fns, fn_to_rss_incr, fn_to_slowdown = [], {}, {}
+    max_rss, max_tot_time = None, None
+    max_rss_fn, max_time_fn = '', ''
 
-for fn, pair in res.items():
-    if not pair['cxx']['max_rss']: continue
-    fns.append(fn)
-    rss_incr = max(1, pair['cxx']['max_rss']/pair['p3']['max_rss'])
-    fn_to_rss_incr[fn] = rss_incr
-    slowdown = max(1, pair['cxx']['total_secs']/pair['p3']['total_secs'])
-    fn_to_slowdown[fn] = slowdown
-    if not max_rss or rss_incr > max_rss:
-        max_rss = rss_incr
-        max_rss_fn = fn
-    if not max_tot_time or slowdown > max_tot_time:
-        max_tot_time = slowdown
-        max_time_fn = fn
+    fns, fn_to_rss_incr, fn_to_slowdown = [], {}, {}
 
-print(f'Max time slowdown fn: {max_time_fn} and time: {max_tot_time}')
-print(f'Max RSS increase: {max_rss_fn} and RSS: {max_rss}')
+    for fn, pair in res.items():
+        if not pair['cxx']['max_rss']: continue
+        fns.append(fn)
+        rss_incr = max(1, pair['cxx']['max_rss'] / pair['p3']['max_rss'])
+        fn_to_rss_incr[fn] = rss_incr
+        slowdown = max(1, pair['cxx']['total_secs'] / pair['p3']['total_secs'])
+        fn_to_slowdown[fn] = slowdown
+        if not max_rss or rss_incr > max_rss:
+            max_rss = rss_incr
+            max_rss_fn = fn
+        if not max_tot_time or slowdown > max_tot_time:
+            max_tot_time = slowdown
+            max_time_fn = fn
 
-toplist = []
-print('\nTop 10 slowdown:')
-for fn in sorted(fns, key=lambda fn: fn_to_slowdown[fn], reverse=True)[:10]:
-    print(f'{fn} with slowdown {fn_to_slowdown[fn]} and cxx time {res[fn]["cxx"]["total_secs"]}')
-    toplist.append(fn)
+    print(f'Max time slowdown fn: {max_time_fn} and time: {max_tot_time}')
+    print(f'Max RSS increase: {max_rss_fn} and RSS: {max_rss}')
 
-print('\nTop 10 RSS increase:')
-for fn in sorted(fns, key=lambda fn: fn_to_rss_incr[fn], reverse=True)[:10]:
-    print(f'{fn} with increase {fn_to_rss_incr[fn]} and cxx time {res[fn]["cxx"]["total_secs"]}')
-    toplist.append(fn)
+    toplist = []
+    print('\nTop 10 slowdown:')
+    for fn in sorted(fns, key=lambda fn: fn_to_slowdown[fn], reverse=True)[:10]:
+        print(f'{fn} with slowdown {fn_to_slowdown[fn]} and cxx time {res[fn]["cxx"]["total_secs"]}')
+        toplist.append(fn)
 
-with open('toplist.txt', 'w') as fp:
-    fp.write('\n'.join(toplist))
+    print('\nTop 10 RSS increase:')
+    for fn in sorted(fns, key=lambda fn: fn_to_rss_incr[fn], reverse=True)[:10]:
+        print(f'{fn} with increase {fn_to_rss_incr[fn]} and cxx time {res[fn]["cxx"]["total_secs"]}')
+        toplist.append(fn)
+
+    if not os.path.exists('toplist.txt'):  # do not overwrite
+        with open('toplist.txt', 'w') as fp:
+            fp.write('\n'.join(toplist))
+
+
+if __name__ == '__main__':
+    main(sys.argv)
