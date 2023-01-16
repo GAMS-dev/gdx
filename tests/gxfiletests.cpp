@@ -158,8 +158,8 @@ namespace tests::gxfiletests {
 #ifdef NO_SLOW_TESTS
         return;
 #endif
-        const std::string   suiteName = "lwsup"s, //"src"s,
-                            modelName = "CRMoutliers"s; //"glcaerwt"s;
+        const std::string   suiteName = "sqagams"s, //"src"s,
+                            modelName = "glcaerwt"s; //"glcaerwt"s;
 #if defined(_WIN32)
         std::array gdxFilePathCandidates{
             modelName + ".gdx"s,

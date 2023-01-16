@@ -25,7 +25,8 @@ namespace gdlib::strhash {
     class TXStrHashList {
     protected:
 #ifdef TLD_BATCH_ALLOCS
-        datastorage::BatchAllocator<1024> batchAllocator;
+        datastorage::BatchAllocator<960> batchAllocator;
+        datastorage::BatchAllocator<1024> batchStrAllocator;
 #endif
         std::vector<PHashBucket<T>> Buckets {}; // sorted by order of insertion, no gaps
         std::unique_ptr<std::vector<PHashBucket<T>>> PHashTable {}; // sorted by hash value, with gaps
@@ -181,6 +182,7 @@ namespace gdlib::strhash {
             }
 #else
             batchAllocator.clear();
+            batchStrAllocator.clear();
 #endif
             Buckets.clear();
             FCount = 0;
@@ -214,7 +216,7 @@ namespace gdlib::strhash {
             }
             FCount++; // ugly
 #ifdef TLD_BATCH_ALLOCS
-            PBuck->StrP = reinterpret_cast<char *>(batchAllocator.GetBytes(s.length()+1));
+            PBuck->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(s.length()+1));
 #else
             PBuck->StrP = new char[s.length()+1];
 #endif
@@ -248,7 +250,7 @@ namespace gdlib::strhash {
             }
             FCount++; // ugly
 #ifdef TLD_BATCH_ALLOCS
-            PBuck->StrP = reinterpret_cast<char *>(batchAllocator.GetBytes(s.length()+1));
+            PBuck->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(s.length()+1));
 #else
             PBuck->StrP = new char[s.length()+1];
 #endif
@@ -342,7 +344,7 @@ namespace gdlib::strhash {
             auto bucket = Buckets[N-(OneBased ? 1 : 0)];
 #ifdef TLD_BATCH_ALLOCS
             // Storage for old string will leak temporarily but will be collected by batchAllocator.clear call
-            bucket->StrP = reinterpret_cast<char *>(batchAllocator.GetBytes(s.length()+1));
+            bucket->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(s.length()+1));
 #else
             delete [] bucket->StrP;
             bucket->StrP = new char[s.length()+1];

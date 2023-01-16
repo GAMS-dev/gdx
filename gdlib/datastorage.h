@@ -114,7 +114,7 @@ namespace gdlib::datastorage {
         RecType *FHead, *FTail;
 
 #ifdef TLD_BATCH_ALLOCS
-        BatchAllocator<1024> batchAllocator;
+        BatchAllocator<960> batchAllocator;
 #endif
 
         bool IsSorted() {
