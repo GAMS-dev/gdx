@@ -29,10 +29,16 @@ for fn, pair in res.items():
 print(f'Max time slowdown fn: {max_time_fn} and time: {max_tot_time}')
 print(f'Max RSS increase: {max_rss_fn} and RSS: {max_rss}')
 
+toplist = []
 print('\nTop 10 slowdown:')
 for fn in sorted(fns, key=lambda fn: fn_to_slowdown[fn], reverse=True)[:10]:
     print(f'{fn} with slowdown {fn_to_slowdown[fn]} and cxx time {res[fn]["cxx"]["total_secs"]}')
+    toplist.append(fn)
 
 print('\nTop 10 RSS increase:')
 for fn in sorted(fns, key=lambda fn: fn_to_rss_incr[fn], reverse=True)[:10]:
     print(f'{fn} with increase {fn_to_rss_incr[fn]} and cxx time {res[fn]["cxx"]["total_secs"]}')
+    toplist.append(fn)
+
+with open('toplist.txt', 'w') as fp:
+    fp.write('\n'.join(toplist))
