@@ -17,6 +17,23 @@ namespace gdlib::gmsobj {
             M = 1 << (V & 0x7);
         }
 
+    public:
+        TBooleanBitArray() : PData{}, FAllocated{}, FHighIndex{-1} {
+        }
+
+        ~TBooleanBitArray() {
+            if(FAllocated > 0)
+                delete [] PData;
+        }
+
+        bool GetBit(int N) {
+            if(N < 0 || N > FHighIndex) return false;
+            int P;
+            uint8_t M;
+            GetBitMask(N, P, M);
+            return reinterpret_cast<uint8_t *>(PData)[P] && M;
+        }
+
         void SetHighIndex(int V) {
             if(V > FHighIndex) {
                 int NewMemSize {(V + 8) / 8};
@@ -41,23 +58,6 @@ namespace gdlib::gmsobj {
             }
         }
 
-    public:
-        TBooleanBitArray() : PData{}, FAllocated{}, FHighIndex{-1} {
-        }
-
-        ~TBooleanBitArray() {
-            if(FAllocated > 0)
-                delete [] PData;
-        }
-
-        bool GetBit(int N) {
-            if(N < 0 || N > FHighIndex) return false;
-            int P;
-            uint8_t M;
-            GetBitMask(N, P, M);
-            return reinterpret_cast<PByteDataArray>(PData)[P] && M;
-        }
-
         void SetBit(int N, bool V) {
             if(N >= 0) {
                 if(N >= FHighIndex) {
@@ -70,6 +70,10 @@ namespace gdlib::gmsobj {
                 if(V) *PData[P] |= M;
                 else *PData[P] &= !M;
             }
+        }
+
+        int GetMemoryUsed() {
+            return FAllocated;
         }
     };
 
