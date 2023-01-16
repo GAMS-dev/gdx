@@ -10,6 +10,7 @@
 #include "gdlib/gmsdata.h"
 #include "gdlib/datastorage.h"
 #include "gdlib/strhash.h"
+#include "gdlib/gmsobj.h"
 
 #include "utils.h"
 
@@ -21,6 +22,9 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <cstring>
+
+// Use TBooleanBitArray
+//#define USE_BBARRAY
 
 // TLinkedData implementation choice: Enable to use legacy implementation (with radix sort)
 #define TLD_LEGACY
@@ -136,6 +140,12 @@ template<typename K, typename V, typename H, typename E>
 
     using TDomainList = std::array<TDomain, GLOBAL_MAX_INDEX_DIM>;
 
+#ifdef USE_BBARRAY
+    using TSetBitMap = gdlib::gmsobj::TBooleanBitArray;
+#else
+    using TSetBitMap = std::vector<bool>;
+#endif
+
     struct TgdxSymbRecord {
         int SSyNr;
         // since SSyNr is not set correctly for alias, but we want to mimic original Delphi GDX behavior as closely as possible
@@ -152,7 +162,7 @@ template<typename K, typename V, typename H, typename E>
                                           SDomStrings; //relaxed domain info
         std::vector<std::string> SCommentsList; // TODO: should this also become an optional entry?
         bool SScalarFrst; // not stored
-        std::unique_ptr<std::vector<bool>> SSetBitMap; // for 1-dim sets only
+        std::unique_ptr<TSetBitMap> SSetBitMap; // for 1-dim sets only
     };
     using PgdxSymbRecord = TgdxSymbRecord*;
 
@@ -577,7 +587,7 @@ template<typename K, typename V, typename H, typename E>
         int DeltaForRead{}; // first position indicating change
         double Zvalacr{}; // tricky
         TAcronymList AcronymList;
-        std::array<std::vector<bool> *, GLOBAL_MAX_INDEX_DIM> WrBitMaps;
+        std::array<TSetBitMap *, GLOBAL_MAX_INDEX_DIM> WrBitMaps;
         bool ReadUniverse{};
         int UniverseNr{}, UelCntOrig{}; // original uel count when we open the file
         int AutoConvert{1};

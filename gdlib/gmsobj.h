@@ -12,7 +12,7 @@ namespace gdlib::gmsobj {
         PByteDataArray PData;
         int FAllocated, FHighIndex;
 
-        void GetBitMask(int V, int &N, uint8_t &M) {
+        void GetBitMask(int V, int &N, uint8_t &M) const {
             N = V >> 3;
             M = 1 << (V & 0x7);
         }
@@ -26,7 +26,7 @@ namespace gdlib::gmsobj {
                 delete [] PData;
         }
 
-        bool GetBit(int N) {
+        bool GetBit(int N) const {
             if(N < 0 || N > FHighIndex) return false;
             int P;
             uint8_t M;

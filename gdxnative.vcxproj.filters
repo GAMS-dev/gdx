@@ -139,6 +139,9 @@
     <ClCompile Include="tests\pfgdx.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="gdlib\gmsobj.cpp">
+      <Filter>gdlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">
@@ -236,6 +239,9 @@
     </ClInclude>
     <ClInclude Include="tests\pfgdx.hpp">
       <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="gdlib\gmsobj.h">
+      <Filter>gdlib</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

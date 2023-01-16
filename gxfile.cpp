@@ -820,7 +820,7 @@ namespace gxfile {
         obj->SDomSymbols = nullptr;
         obj->SDomStrings = nullptr;
         obj->SSetBitMap = utils::in((gdxSyType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
-                std::make_unique<std::vector<bool>>() : nullptr;
+                std::make_unique<TSetBitMap>() : nullptr;
 
         CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = NameList->AddObject(AName, CurSyPtr); // +1 for universe
         FCurrentDim = ADim;
@@ -1238,8 +1238,12 @@ namespace gxfile {
         return DBL_FINITE;
     }
 
-    inline bool accessBitMap(const std::vector<bool> &bmap, int index) {
+    inline bool accessBitMap(const TSetBitMap &bmap, int index) {
+#ifdef USE_BBARRAY
+        return bmap.GetBit(index);
+#else
         return !(index < 0 || index >= (int)bmap.size()) && bmap[index];
+#endif
     }
 
     bool TGXFileObj::DoWrite(const int* AElements, const double* AVals)
@@ -1342,9 +1346,13 @@ namespace gxfile {
             if (AVals[GMS_VAL_LEVEL] != 0.0) CurSyPtr->SSetText = true;
             if (FCurrentDim == 1 && CurSyPtr->SSetBitMap) {
                 auto& ssbm = *CurSyPtr->SSetBitMap;
+#ifdef USE_BBARRAY
+                ssbm.SetBit(LastElem.front(), true);
+#else
                 if ((int)ssbm.size() <= LastElem.front())
                     ssbm.resize(LastElem.front()+1, false);
                 ssbm[LastElem.front()] = true;
+#endif
             }
         }
         return true;
