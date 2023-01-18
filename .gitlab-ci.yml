@@ -77,6 +77,7 @@ build-leg:
   artifacts:
     name: gdxnative-leg
     paths: [gdxnativetest]
+    expire_in: 2 hours
     reports:
       junit: warnings.xml
 
@@ -96,6 +97,7 @@ test-leg:
   artifacts:
     name: unittest-results-linux
     paths: [doctest_results_linux.xml,slowdown.txt]
+    expire_in: 2 hours
     reports:
       junit: doctest_results_linux.xml
 #      coverage_report:
