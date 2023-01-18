@@ -11,7 +11,7 @@ namespace tests::gmsobjtests {
 
     static std::vector<bool> asBoolVec(const TBooleanBitArray &bba) {
         std::vector<bool> res(bba.GetHighIndex()+1);
-        for(size_t i{}; i<res.size(); i++)
+        for(int i{}; i<static_cast<int>(res.size()); i++)
             res[i] = bba.GetBit(i);
         return res;
     }
@@ -39,6 +39,14 @@ namespace tests::gmsobjtests {
         std::vector<bool> expectedVec {false, false, false, true, true};
         for(int i{}; i<5; i++)
             REQUIRE_EQ(expectedVec[i], vec[i]);
+        // Make sure we need a second alloc
+        oldMem = bba.GetMemoryUsed();
+        int highIndex = bba.GetMemoryUsed()*8+10;
+        bba.SetBit(highIndex, true);
+        REQUIRE(bba.GetBit(3));
+        REQUIRE(bba.GetBit(4));
+        REQUIRE(bba.GetBit(highIndex));
+        REQUIRE(bba.GetMemoryUsed() > oldMem);
     }
 
     TEST_SUITE_END();

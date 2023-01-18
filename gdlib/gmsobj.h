@@ -5,11 +5,8 @@
 
 namespace gdlib::gmsobj {
 
-    using TByteDataArray = uint8_t[10000000];
-    using PByteDataArray = TByteDataArray *;
-
     class TBooleanBitArray {
-        PByteDataArray PData;
+        uint8_t *PData;
         int FAllocated, FHighIndex;
 
         static void GetBitMask(int V, int &N, uint8_t &M) {
@@ -45,7 +42,7 @@ namespace gdlib::gmsobj {
                         else Delta += FAllocated / 4;
                     } while(NewMemSize >= FAllocated + Delta);
                     NewMemSize = FAllocated + Delta;
-                    auto NewMem = reinterpret_cast<PByteDataArray>(new uint8_t[NewMemSize]);
+                    auto NewMem = new uint8_t[NewMemSize];
                     memset(NewMem, 0, NewMemSize);
                     if(FAllocated) {
                         memcpy(NewMem, PData, FAllocated);
@@ -71,8 +68,8 @@ namespace gdlib::gmsobj {
                 int P;
                 uint8_t M;
                 GetBitMask(N, P, M);
-                if(V) *PData[P] |= M;
-                else *PData[P] &= !M;
+                if(V) PData[P] |= M;
+                else PData[P] &= !M;
             }
         }
 
