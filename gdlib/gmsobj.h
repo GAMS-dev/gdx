@@ -12,7 +12,7 @@ namespace gdlib::gmsobj {
         PByteDataArray PData;
         int FAllocated, FHighIndex;
 
-        void GetBitMask(int V, int &N, uint8_t &M) const {
+        static void GetBitMask(int V, int &N, uint8_t &M) {
             N = V >> 3;
             M = 1 << (V & 0x7);
         }
@@ -31,7 +31,7 @@ namespace gdlib::gmsobj {
             int P;
             uint8_t M;
             GetBitMask(N, P, M);
-            return reinterpret_cast<uint8_t *>(PData)[P] && M;
+            return reinterpret_cast<uint8_t *>(PData)[P] & M;
         }
 
         void SetHighIndex(int V) {
@@ -43,9 +43,9 @@ namespace gdlib::gmsobj {
                         if(!FAllocated) Delta += 256;
                         else if(FAllocated < 32 * 256) Delta += FAllocated;
                         else Delta += FAllocated / 4;
-                    } while(NewMemSize < FAllocated + Delta);
+                    } while(NewMemSize >= FAllocated + Delta);
                     NewMemSize = FAllocated + Delta;
-                    PByteDataArray NewMem = reinterpret_cast<PByteDataArray>(new uint8_t[NewMemSize]);
+                    auto NewMem = reinterpret_cast<PByteDataArray>(new uint8_t[NewMemSize]);
                     memset(NewMem, 0, NewMemSize);
                     if(FAllocated) {
                         memcpy(NewMem, PData, FAllocated);
@@ -56,6 +56,10 @@ namespace gdlib::gmsobj {
                 }
                 FHighIndex = V;
             }
+        }
+
+        int GetHighIndex() const {
+            return FHighIndex;
         }
 
         void SetBit(int N, bool V) {
