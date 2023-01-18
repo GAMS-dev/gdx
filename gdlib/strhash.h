@@ -40,15 +40,15 @@ namespace gdlib::strhash {
         }
 
         void HashTableReset(int ACnt) {
-            const int   HashSize_1 = 97,
+            const int   HashSize_1 = 997,
                         HashSize_2 = 9973,
                         HashSize_3 = 99991,
                         HashSize_4 = 999979,
                         HashSize_5 = 9999991,
                         HashSize_6 = 99999989,
-                        Next_1 = 150,
-                        Next_2 = 10000,
-                        Next_3 = 100000,
+                        Next_1 = 1500,
+                        Next_2 = 15000,
+                        Next_3 = 150000,
                         Next_4 = 1500000,
                         Next_5 = 15000000,
                         Next_6 = std::numeric_limits<int>::max(); 
