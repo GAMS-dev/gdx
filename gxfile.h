@@ -24,7 +24,7 @@
 #include <cstring>
 
 // Use TBooleanBitArray
-#define USE_BBARRAY
+//#define USE_BBARRAY
 
 // TLinkedData implementation choice: Enable to use legacy implementation (with radix sort)
 #define TLD_LEGACY
