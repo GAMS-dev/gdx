@@ -9,9 +9,9 @@ namespace tests::gmsobjtests {
 
     TEST_SUITE_BEGIN("gdlib::gmsobj");
 
-    static std::vector<bool> asBoolVec(TBooleanBitArray &bba) {
+    static std::vector<bool> asBoolVec(const TBooleanBitArray &bba) {
         std::vector<bool> res(bba.GetHighIndex()+1);
-        for(int i{}; i<res.size(); i++)
+        for(size_t i{}; i<res.size(); i++)
             res[i] = bba.GetBit(i);
         return res;
     }
