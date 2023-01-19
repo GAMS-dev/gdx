@@ -17,17 +17,19 @@ log_fn = 'log.txt'
 
 
 def get_cmd(sysdir_path, fn):
-    perf_args = f"--RUN single --SINGLERUN {fn} --RUNDEFAULT 0 --RUNCAPI 1"
+    perf_args = f"--RUN single --SINGLERUN \"{fn}\" --RUNDEFAULT 0 --RUNCAPI 1"
     sf = f" | tee {log_fn}"
     return f"{sysdir_path}gams {sysdir_path}gdxperf.gms ProcTreeMemMonitor 1 {perf_args} {sf}"
 
 
-def run_single(sysdir_path, fn, ntries=10):
+def run_single(sysdir_path, fn, ntries=4):
     cmd = get_cmd(sysdir_path, fn)
     print(cmd)
     total_ts, max_rsss, step_timess = [], [], []
     for k in range(ntries):
-        os.system(cmd)
+        rc = os.system(cmd)
+        if rc:
+            return None
         with open(log_fn) as fp:
             lines = fp.readlines()
         os.remove(log_fn)
@@ -88,10 +90,13 @@ def collect_results(filenames=None):
         os.remove(res_fn)
     if not filenames:
         filenames = collect_gdx_filenames('.')
-    for fn in filenames:
+    for fn in sorted(filenames, key=lambda fn: os.stat(fn).st_size):
         p3_res, cxx_res = (run_single(sys_dir, fn) for sys_dir in [P3_GAMS_PATH, CXX_GAMS_PATH])
-        with open(res_fn, 'a') as fp:
-            yaml.dump({fn: dict(p3=p3_res, cxx=cxx_res)}, fp)
+        if p3_res and cxx_res:
+            with open(res_fn, 'a') as fp:
+                yaml.dump({fn: dict(p3=p3_res, cxx=cxx_res)}, fp)
+        else:
+            print(f'Skipped {fn} due to missing results!')
 
 
 def get_entries(fn):
@@ -101,7 +106,8 @@ def get_entries(fn):
 
 
 def main(args):
-    collect_results(get_entries('toplist.txt'))
+    #get_entries('toplist.txt')
+    collect_results()
 
 
 if __name__ == '__main__':
