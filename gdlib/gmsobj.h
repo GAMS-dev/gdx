@@ -3,6 +3,9 @@
 #include <cstdint>
 #include "datastorage.h"
 
+// ==============================================================================================================
+// Interface
+// ==============================================================================================================
 namespace gdlib::gmsobj {
 
     class TBooleanBitArray {
@@ -28,7 +31,7 @@ namespace gdlib::gmsobj {
             int P;
             uint8_t M;
             GetBitMask(N, P, M);
-            return reinterpret_cast<uint8_t *>(PData)[P] & M;
+            return PData[P] & M;
         }
 
         void SetHighIndex(int V) {
@@ -61,7 +64,7 @@ namespace gdlib::gmsobj {
 
         void SetBit(int N, bool V) {
             if(N >= 0) {
-                if(N >= FHighIndex) {
+                if(N > FHighIndex) {
                     if(!V) return;
                     SetHighIndex(N);
                 }

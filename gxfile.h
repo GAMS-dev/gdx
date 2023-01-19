@@ -24,7 +24,7 @@
 #include <cstring>
 
 // Use TBooleanBitArray
-//#define USE_BBARRAY
+#define USE_BBARRAY
 
 // TLinkedData implementation choice: Enable to use legacy implementation (with radix sort)
 #define TLD_LEGACY
@@ -153,10 +153,12 @@ template<typename K, typename V, typename H, typename E>
     };
 #endif
 
-    class TFilterList : public std::vector<TDFilter> {
+    class TFilterList : public std::vector<TDFilter *> {
     public:
+        virtual ~TFilterList();
+        void Clear();
         TDFilter *FindFilter(int Nr);
-        void AddFilter(const TDFilter& F);
+        void AddFilter(TDFilter *F);
     };
 
     enum TgdxDAction {

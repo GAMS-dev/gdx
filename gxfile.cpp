@@ -365,7 +365,7 @@ namespace gxfile {
         NameList->OneBased = true;
         UELTable = std::make_unique<UELTableImplChoice>();
         AcronymList.clear();
-        FilterList.clear();
+        FilterList.Clear();
         FFile->WriteByte(gdxHeaderNr);
         FFile->WriteString(gdxHeaderId);
         VersionRead = VERSION;
@@ -723,7 +723,7 @@ namespace gxfile {
         DomainStrList = nullptr;
 
         ErrorList.clear();
-        FilterList.clear();
+        FilterList.Clear();
         AcronymList.clear();
         MapSetText.clear();
 
@@ -1922,7 +1922,7 @@ namespace gxfile {
         NameList = std::make_unique<TNameList>();
         NameList->OneBased = true;
         AcronymList.clear();
-        FilterList.clear();
+        FilterList.Clear();
         const int NrElemsOfSym = NrElem;
         for(int N{1}; N<=NrElemsOfSym; N++) {
             std::string S {FFile->ReadString()};
@@ -3369,8 +3369,8 @@ namespace gxfile {
         if(!MajorCheckMode("FilterRegisterStart"s, fr_init) ||
             ErrorCondition(FilterNr >= 1, ERR_BAD_FILTER_NR)) return false;
 
-        FilterList.AddFilter(TDFilter{ FilterNr, UELTable->UsrUel2Ent.GetHighestIndex() });
-        CurFilter = &FilterList.back();
+        FilterList.AddFilter(new TDFilter{ FilterNr, UELTable->UsrUel2Ent.GetHighestIndex() });
+        CurFilter = FilterList.back();
         fmode = fr_filter;
         return true;
     }
@@ -4455,20 +4455,29 @@ namespace gxfile {
     }
 
     TDFilter *TFilterList::FindFilter(int Nr) {
-        const auto it = std::find_if(begin(), end(),
-                                     [&Nr](const auto &f) { return f.FiltNumber == Nr; });
-        return it == end() ? nullptr : &(*it);
+        const auto it = std::find_if(begin(), end(), [&Nr](const auto *f) { return f->FiltNumber == Nr; });
+        return it == end() ? nullptr : *it;
     }
 
-    void TFilterList::AddFilter(const TDFilter& F)
-    {
+    void TFilterList::Clear() {
+        for (TDFilter* f : *this)
+            delete f;
+        std::vector<TDFilter*>::clear();
+    }
+
+    void TFilterList::AddFilter(TDFilter* F) {
         for (int N{}; N < (int)size(); N++) {
-            if ((*this)[N].FiltNumber == F.FiltNumber) {
+            if ((*this)[N]->FiltNumber == F->FiltNumber) {
+                delete (*this)[N];
                 this->erase(this->begin() + N);
                 break;
             }
         }
         this->push_back(F);
+    }
+
+    TFilterList::~TFilterList() {
+        clear();
     }
 
     int TIntegerMapping::GetHighestIndex() const {
