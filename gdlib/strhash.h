@@ -376,13 +376,13 @@ namespace gdlib::strhash {
 
     // Specialization when it is not a pointer type
     template<>
-    int TXStrHashList<uint8_t>::Add(const std::string &s) {
+    inline int TXStrHashList<uint8_t>::Add(const std::string &s) {
         return AddObject(s, 0);
     }
 
     template<>
     template<typename T2>
-    void TXStrHashList<uint8_t >::LoadFromStream(T2 &s) {
+    inline void TXStrHashList<uint8_t >::LoadFromStream(T2 &s) {
         Clear();
         int Cnt{s.ReadInteger()};
         for(int N{}; N<Cnt; N++)
