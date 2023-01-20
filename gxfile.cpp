@@ -832,7 +832,7 @@ namespace gxfile {
 
         DataSize = DataTypSize[AType];
         if(DataSize > 0)
-            LastDataField = DataSize - 1;
+            LastDataField = static_cast<tvarvaltype>(DataSize - 1);
 
         for(int D{}; D<FCurrentDim; D++) {
             LastElem[D] = INDEX_INITIAL;
@@ -971,7 +971,7 @@ namespace gxfile {
         if (ReadUniverse) {
             FCurrentDim = 1;
             DataSize = DataTypSize[dt_set];
-            LastDataField = DataSize - 1;
+            LastDataField = static_cast<tvarvaltype>(DataSize - 1);
             NrRecs = UelCntOrig;
             UniverseNr = 0;
             CurSyPtr = nullptr;
@@ -981,7 +981,7 @@ namespace gxfile {
             FFile->SetCompression(CurSyPtr->SIsCompressed);
             FFile->SetPosition(CurSyPtr->SPosition);
             DataSize = DataTypSize[CurSyPtr->SDataType];
-            if (DataSize > 0) LastDataField = DataSize - 1;
+            if (DataSize > 0) LastDataField = static_cast<tvarvaltype>(DataSize - 1);
             NrRecs = CurSyPtr->SDataCount;
         }
         if(verboseTrace && TraceLevel >= TraceLevels::trl_some) {

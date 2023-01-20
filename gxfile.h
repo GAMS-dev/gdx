@@ -566,6 +566,11 @@ template<typename K, typename V, typename H, typename E>
     // Find a way to use TXStrHashList anyways (w/out wasting a byte per entry as it is right now)
     using TDomainStrList = gdlib::strhash::TXStrHashList<uint8_t>;
 
+    enum tvarvaltype {
+        // 1     2           3        4        5
+        vallevel,valmarginal,vallower,valupper,valscale
+    };
+
     // Description:
     //    Class for reading and writing gdx files
     class TGXFileObj : public gdxinterface::GDXInterface {
@@ -584,7 +589,7 @@ template<typename K, typename V, typename H, typename E>
         std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem, PrevElem, MinElem, MaxElem;
         std::array<std::optional<std::string>, GLOBAL_MAX_INDEX_DIM> LastStrElem;
         int DataSize{};
-        uint8_t LastDataField;
+        tvarvaltype LastDataField;
         // FIXME: TODO: AS: Actually should be gdlib::gmsobj::TXStrPool!!!
         std::unique_ptr<TNameList> NameList;
         std::unique_ptr<TDomainStrList> DomainStrList;
