@@ -8,6 +8,119 @@
 // ==============================================================================================================
 namespace gdlib::gmsobj {
 
+    template<typename T>
+    class TXList {
+        bool OneBased;
+        int FCapacity;
+        size_t FListMemory;
+
+        T *Get(int Index) {
+            return FList[Index - (OneBased ? 1 : 0)];
+        }
+
+        void Put(int Index, T *Item) {
+            FreeItem(Index);
+            FList[Index-(OneBased?1:0)] = Item;
+        }
+
+        void SetCapacity(int NewCapacity) {
+            if(NewCapacity == FCapacity) return;
+            else if(NewCapacity < FCount) NewCapacity = FCount;
+            FListMemory = sizeof(T *) * NewCapacity;
+            if(!FList) FList = (T **)std::malloc(FListMemory);
+            else if(!NewCapacity) std::free(FList);
+            else FList = (T **)std::realloc(FList, FListMemory);
+            FCapacity = NewCapacity;
+        }
+
+        void SetCount(int NewCount) {
+            if(NewCount != FCount) {
+                if(NewCount > FCapacity) SetCapacity(NewCount);
+                if(NewCount > FCount) std::memset(&FList[FCount], 0, (NewCount-FCount)*sizeof(T*));
+                else for(int i{FCount-1}; i>=NewCount; i--) FreeItem(i);
+                FCount = NewCount;
+            }
+        }
+
+    protected:
+        int FCount;
+        T **FList;
+
+        virtual void Grow() {
+            int delta { FCapacity >= 1024 * 1024 ? FCapacity / 4 : (!FCapacity ? 16 : 7 * FCapacity) };
+            int64_t i64 = FCapacity;
+            i64 += delta;
+            if(i64 <= std::numeric_limits<int>::max()) SetCapacity((int)i64);
+            else {
+                delta = std::numeric_limits<int>::max();
+                if(FCapacity < delta) SetCapacity(delta);
+                else assert(i64 <= std::numeric_limits<int>::max() && "TXList.grow(): max capacity reached");
+            }
+        }
+
+        virtual void FreeItem(int Index) {
+            // No-op
+        }
+
+    public:
+        TXList() :
+            OneBased{},
+            FCapacity{},
+            FListMemory{},
+            FCount{},
+            FList{}
+        {
+        }
+
+        ~TXList() {
+            Clear();
+        }
+
+        int Add(T *Item) {
+            int res{FCount};
+            if(res == FCapacity) Grow();
+            FList[res] = Item;
+            FCount++;
+            if(OneBased) res++;
+            return res;
+        }
+
+        void Clear() {
+            for(int N{FCount-1+(OneBased?1:0)}; N>=(OneBased?1:0); N--) FreeItem(N);
+            FCount = 0;
+            SetCapacity(0);
+        }
+
+        void Delete(int Index) {
+            FreeItem(Index);
+            FCount--;
+            if(Index<FCount) {
+                if(OneBased) Index--;
+                std::memcpy(FList[Index], FList[Index+1], (FCount-Index)*sizeof(T*));
+            }
+        }
+
+        int GetCapacity() const {
+            return FCapacity;
+        }
+
+        int GetCount() const {
+            return FCount;
+        }
+
+        T *operator[](int Index) {
+            return Get(Index);
+        }
+
+        T *GetLast() {
+            return FCount <= 0 ? nullptr : FList[FCount-1];
+        }
+
+        size_t GetMemoryUsed() {
+            return FListMemory;
+        }
+    };
+
     class TBooleanBitArray {
         uint8_t *PData;
         int FAllocated, FHighIndex;

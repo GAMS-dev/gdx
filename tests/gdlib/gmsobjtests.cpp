@@ -49,6 +49,20 @@ namespace tests::gmsobjtests {
         REQUIRE(bba.GetMemoryUsed() > oldMem);
     }
 
+    TEST_CASE("Simple use of TXList") {
+        TXList<int> lst;
+        std::array<int, 23> nums {};
+        for(int i=0; i<nums.size(); i++) {
+            nums[i] = i + 1;
+            REQUIRE_EQ(i, lst.Add(&nums[i]));
+        }
+        REQUIRE_EQ(nums.size(), lst.GetCount());
+        REQUIRE(lst.GetMemoryUsed() > 0);
+        for(int i=0; i<lst.GetCount(); i++)
+            REQUIRE_EQ(&nums[i], lst[i]);
+        REQUIRE_EQ(&nums.back(), lst.GetLast());
+    }
+
     TEST_SUITE_END();
 
 }
