@@ -52,7 +52,7 @@ namespace tests::gmsobjtests {
     TEST_CASE("Simple use of TXList") {
         TXList<int> lst;
         std::array<int, 23> nums {};
-        for(int i=0; i<nums.size(); i++) {
+        for(int i=0; i<(int)nums.size(); i++) {
             nums[i] = i + 1;
             REQUIRE_EQ(i, lst.Add(&nums[i]));
         }

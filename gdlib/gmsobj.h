@@ -66,11 +66,11 @@ namespace gdlib::gmsobj {
         bool OneBased;
     public:
         TXList() :
-            OneBased{},
             FCapacity{},
             FListMemory{},
             FCount{},
-            FList{}
+            FList{},
+            OneBased{}
         {
         }
 
