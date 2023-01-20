@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 #include "datastorage.h"
+#include "../utils.h"
 
 // ==============================================================================================================
 // Interface
@@ -10,7 +12,6 @@ namespace gdlib::gmsobj {
 
     template<typename T>
     class TXList {
-        bool OneBased;
         int FCapacity;
         size_t FListMemory;
 
@@ -62,6 +63,7 @@ namespace gdlib::gmsobj {
             // No-op
         }
 
+        bool OneBased;
     public:
         TXList() :
             OneBased{},
@@ -155,6 +157,48 @@ namespace gdlib::gmsobj {
 
         size_t GetMemoryUsed() {
             return FListMemory;
+        }
+    };
+
+    inline char *NewString(const std::string &s, size_t &memSize) {
+        memSize = s.length()+1;
+        char *buf {new char[memSize]};
+        memcpy(buf, s.c_str(), memSize);
+        return buf;
+    }
+
+    class TXStrings : public TXList<char> {
+    private:
+        size_t FStrMemory;
+
+        void Put(int Index, const std::string &Item) {
+            FreeItem(Index);
+            FList[Index-(OneBased ? 1 : 0)] = NewString(Item, FStrMemory);
+        }
+
+        std::string Get(int Index) {
+            return FList[Index-(OneBased ? 1 : 0)];
+        }
+
+    protected:
+        void FreeItem(int Index) override {
+            delete [] FList[Index];
+        }
+
+    public:
+        int Add(const std::string &Item) {
+            return TXList<char>::Add(NewString(Item, FStrMemory));
+        }
+
+        int IndexOf(const std::string &Item) {
+            for(int N{}; N<FCount; N++)
+                if(utils::sameText(FList[N], Item))
+                    return N + (OneBased ? 1 : 0);
+            return -1;
+        }
+
+        std::string operator[](int Index) {
+            return Get(Index);
         }
     };
 

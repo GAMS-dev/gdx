@@ -79,6 +79,15 @@ namespace tests::gmsobjtests {
         REQUIRE_EQ(22, lst.GetCount());
     }
 
+    TEST_CASE("Simple use of TXStrings") {
+        TXStrings lst;
+        lst.Add("First");
+        lst.Add("Second");
+        lst.Add("Third");
+        REQUIRE_EQ(1, lst.IndexOf("Second"));
+        REQUIRE_EQ("First", lst[0]);
+    }
+
     TEST_SUITE_END();
 
 }
