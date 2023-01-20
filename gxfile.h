@@ -562,6 +562,10 @@ template<typename K, typename V, typename H, typename E>
     using TNameList = gdlib::strhash::TXStrHashList<PgdxSymbRecord>;
 #endif
 
+    // FIXME: It appears the object field is not actually needed
+    // Find a way to use TXStrHashList anyways (w/out wasting a byte per entry as it is right now)
+    using TDomainStrList = gdlib::strhash::TXStrHashList<uint8_t>;
+
     // Description:
     //    Class for reading and writing gdx files
     class TGXFileObj : public gdxinterface::GDXInterface {
@@ -582,10 +586,8 @@ template<typename K, typename V, typename H, typename E>
         int DataSize{};
         uint8_t LastDataField;
         // FIXME: TODO: AS: Actually should be gdlib::gmsobj::TXStrPool!!!
-        // FIXME: TODO: AS: Also make this symbol table optionally use C++ hashmaps like std, ankerl, google!
         std::unique_ptr<TNameList> NameList;
-        // symbol names in order of insertion, used for quick iteration
-        std::unique_ptr<std::vector<std::string>> DomainStrList;
+        std::unique_ptr<TDomainStrList> DomainStrList;
         // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
         //std::map<global::gmsspecs::TIndex, TgdxValues> SortList;
         std::unique_ptr<LinkedDataType> SortList;

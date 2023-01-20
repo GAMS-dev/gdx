@@ -278,18 +278,18 @@ namespace gdlib::strhash {
             return -1;
         }
 
-        void LoadFromStream(gdlib::gmsstrm::TXStream &s) {
+        template<typename T2>
+        void LoadFromStream(T2 &s) {
             Clear();
             int Cnt{s.ReadInteger()};
-            for(int N{}; N<Cnt; N++) {
-                std::string s2 = s.ReadString();
-                StoreObject(s2, nullptr);
-            }
+            for(int N{}; N<Cnt; N++)
+                StoreObject(s.ReadString(), nullptr);
         }
 
-        void SaveToStream(gdlib::gmsstrm::TXStream &s) {
+        template<typename T2>
+        void SaveToStream(T2 &s) {
             s.WriteInteger(FCount);
-            for(int N{}; N<FCount; N++)
+            for(int N{OneBased?1:0}; N<FCount+(OneBased?1:0); N++)
                 s.WriteString(GetString(N));
         }
 
@@ -373,6 +373,21 @@ namespace gdlib::strhash {
             return Buckets[N-(OneBased ? 1 : 0)]->StrP;
         }
     };
+
+    // Specialization when it is not a pointer type
+    template<>
+    int TXStrHashList<uint8_t>::Add(const std::string &s) {
+        return AddObject(s, 0);
+    }
+
+    template<>
+    template<typename T2>
+    void TXStrHashList<uint8_t >::LoadFromStream(T2 &s) {
+        Clear();
+        int Cnt{s.ReadInteger()};
+        for(int N{}; N<Cnt; N++)
+            StoreObject(s.ReadString(), 0);
+    }
 
     template<typename T>
     class TXCSStrHashList : public TXStrHashList<T> {

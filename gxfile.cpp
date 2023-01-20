@@ -385,7 +385,8 @@ namespace gxfile {
         gdxResetSpecialValues();
         NextWritePosition = FFile->GetPosition();
         fmode = fw_init;
-        DomainStrList = std::make_unique<std::vector<std::string>>();
+        DomainStrList = std::make_unique<TDomainStrList>();
+        DomainStrList->OneBased = true;
 
 #ifdef YAML
         const std::string FileNameYML = utils::replaceSubstrs(FileName, ".gdx", ".yaml");
@@ -649,15 +650,14 @@ namespace gxfile {
             auto DomStrPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_DOMS);
-            FFile->WriteInteger(DomainStrList ? static_cast<int>(DomainStrList->size()) : 0);
+            DomainStrList->SaveToStream(*FFile);
             WRYAML(YFile->AddKeyItem("domain_strings"));
             WRYAML(YFile->IncIndentLevel());
-            if(DomainStrList) {
-                for (const auto &DomStr: *DomainStrList) {
-                    FFile->WriteString(DomStr);
-                    WRYAML(YFile->AddItem(DomStr));
-                }
-            }
+#ifdef YAML
+            if(DomainStrList)
+                for(int i{1}; i<=DomainStrList->size(); i++)
+                    WRYAML(YFile->AddItem(DomainStrList->GetString(i)));
+#endif
             FFile->WriteString(MARK_DOMS);
             WRYAML(YFile->DecIndentLevel());
 
@@ -2006,14 +2006,13 @@ namespace gxfile {
             }
         }
 
-        DomainStrList = std::make_unique<std::vector<std::string>>();
+        DomainStrList = std::make_unique<TDomainStrList>();
+        DomainStrList->OneBased = true;
         if (VersionRead >= 7 && DomStrPos) {
             FFile->SetCompression(DoUncompress);
             FFile->SetPosition(DomStrPos);
             if(ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER1)) return FileErrorNr();
-            DomainStrList->resize(FFile->ReadInteger());
-            for (auto & i : *DomainStrList)
-                i = FFile->ReadString();
+            DomainStrList->LoadFromStream<TXStreamDelphi>(*FFile);
             if (ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER2)) return FileErrorNr();
             while (true) {
                 int SyNr = FFile->ReadInteger();
@@ -2500,7 +2499,7 @@ namespace gxfile {
         if (SyPtr->SDomStrings) {
             for (int D{}; D<SyPtr->SDim; D++)
                 if((*SyPtr->SDomStrings)[D])
-                    utils::stocp((*DomainStrList)[(*SyPtr->SDomStrings)[D]-1], DomainIDs[D]);
+                    utils::stocp(DomainStrList->GetString((*SyPtr->SDomStrings)[D]), DomainIDs[D]);
             res = 2;
         }
         else if (!SyPtr->SDomSymbols)
@@ -2685,11 +2684,9 @@ namespace gxfile {
                 const std::string &S { DomainIDs[D] };
                 if (S.empty() || S == "*" || !IsGoodIdent(S)) (*SyPtr->SDomStrings)[D] = 0;
                 else {
-                    (*SyPtr->SDomStrings)[D] = utils::indexOf<std::string>(*DomainStrList, [&](const auto &domStr) {
-                        return utils::sameText(domStr, S);
-                    }) + 1; // one based
+                    (*SyPtr->SDomStrings)[D] = DomainStrList->IndexOf(S); // one based
                     if ((*SyPtr->SDomStrings)[D] <= 0) {
-                        DomainStrList->push_back(S);
+                        DomainStrList->Add(S);
                         (*SyPtr->SDomStrings)[D] = (int) DomainStrList->size();
                     }
                 }
