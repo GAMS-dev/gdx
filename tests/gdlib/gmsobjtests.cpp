@@ -61,6 +61,22 @@ namespace tests::gmsobjtests {
         for(int i=0; i<lst.GetCount(); i++)
             REQUIRE_EQ(&nums[i], lst[i]);
         REQUIRE_EQ(&nums.back(), lst.GetLast());
+
+        lst.Delete(0);
+        REQUIRE_EQ(22, lst.GetCount());
+        REQUIRE_EQ(2, *lst[0]);
+        lst.Insert(0, &nums.front());
+        REQUIRE_EQ(23, lst.GetCount());
+        REQUIRE_EQ(1, *lst[0]);
+
+        lst.Insert(10, &nums.front());
+        REQUIRE_EQ(24, lst.GetCount());
+        REQUIRE_EQ(1, *lst[10]);
+        REQUIRE_EQ(lst[0], lst[10]);
+        REQUIRE_EQ(10, lst.Remove(&nums.front()));
+        REQUIRE_EQ(23, lst.GetCount());
+        REQUIRE_EQ(0, lst.Remove(&nums.front()));
+        REQUIRE_EQ(22, lst.GetCount());
     }
 
     TEST_SUITE_END();

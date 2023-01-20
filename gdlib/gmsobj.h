@@ -96,8 +96,45 @@ namespace gdlib::gmsobj {
             FCount--;
             if(Index<FCount) {
                 if(OneBased) Index--;
-                std::memcpy(FList[Index], FList[Index+1], (FCount-Index)*sizeof(T*));
+                std::memcpy(&FList[Index], &FList[Index+1], (FCount-Index)*sizeof(T*));
             }
+        }
+
+        T *Extract(T *Item) {
+            T *res{};
+            int I{IndexOf(Item)};
+            if(OneBased) I--;
+            if(I >= 0) {
+                res = Item;
+                // Delete item, do not call FreeItem
+                FCount--;
+                if(I < FCount)
+                    std::memcpy(&FList[I], &FList[I+1], (FCount-I)*sizeof(T *));
+            }
+            return res;
+        }
+
+        int IndexOf(T *Item) {
+            for(int N{}; N<FCount; N++)
+                if(FList[N] == Item)
+                    return N+(OneBased ? 1 : 0);
+            return -1;
+        }
+
+        void Insert(int Index, T *Item) {
+            if(FCount == FCapacity) Grow();
+            if(OneBased) Index--;
+            if(Index<FCount)
+                std::memcpy(&FList[Index+1], &FList[Index], (FCount-Index)*sizeof(T*));
+            FList[Index] = Item;
+            FCount++;
+        }
+
+        int Remove(T *Item) {
+            int res{FCount-1};
+            while(res >= 0 && FList[res] != Item) res--;
+            if(res >= (OneBased ? 1 : 0)) Delete(res);
+            return res;
         }
 
         int GetCapacity() const {
