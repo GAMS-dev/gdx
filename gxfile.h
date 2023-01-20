@@ -178,6 +178,9 @@ template<typename K, typename V, typename H, typename E>
     using TSetBitMap = std::vector<bool>;
 #endif
 
+    //using TCommentsList = std::vector<std::string>;
+    using TCommentsList = gdlib::gmsobj::TXStrings;
+
     struct TgdxSymbRecord {
         int SSyNr;
         int64_t SPosition;
@@ -192,9 +195,7 @@ template<typename K, typename V, typename H, typename E>
         std::unique_ptr<std::vector<int>> SDomSymbols, // real domain info
                                           SDomStrings; //relaxed domain info
 
-        // TODO: Should be gdlib/gmsobj/TXStrings
-        // TODO: should this also become an optional entry?
-        std::vector<std::string> SCommentsList;
+        std::optional<TCommentsList> SCommentsList;
 
         bool SScalarFrst; // not stored
         std::unique_ptr<TSetBitMap> SSetBitMap; // for 1-dim sets only

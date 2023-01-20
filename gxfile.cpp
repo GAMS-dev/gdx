@@ -578,7 +578,7 @@ namespace gxfile {
                     WRYAML(YFile->DecIndentLevel());
                 }
 
-                int CommCnt {static_cast<int>(PSy->SCommentsList.size())};
+                int CommCnt { PSy->SCommentsList ? static_cast<int>(PSy->SCommentsList->size()) : 0 };
                 FFile->WriteInteger(CommCnt);
                 if(CommCnt) {
 #ifdef YAML
@@ -586,8 +586,9 @@ namespace gxfile {
                     YFile->IncIndentLevel();
 #endif
                     for (int Cnt{}; Cnt < CommCnt; Cnt++) {
-                        FFile->WriteString(PSy->SCommentsList[Cnt]);
-                        WRYAML(YFile->AddItem(PSy->SCommentsList[Cnt]));
+                        auto comment = (*PSy->SCommentsList)[Cnt];
+                        FFile->WriteString(comment);
+                        WRYAML(YFile->AddItem(comment));
                     }
                     WRYAML(YFile->DecIndentLevel());
                 }
@@ -709,6 +710,7 @@ namespace gxfile {
                 const auto PSy = *NameList->GetObject(N);
                 //PSy->SDomSymbols = nullptr;
                 //PSy->SCommentsList.clear();
+                //PSy->SCommentsList = std::nullopt;
                 //PSy->SSetBitMap = nullptr;
                 //PSy->SDomStrings = nullptr;
                 delete PSy;
@@ -816,7 +818,7 @@ namespace gxfile {
         obj->SSetText = false;
         obj->SExplTxt = MakeGoodExplText(AText);
         obj->SIsCompressed = CompressOut && ADim > 0;
-        obj->SCommentsList.clear();
+        obj->SCommentsList = std::nullopt;
         obj->SDomSymbols = nullptr;
         obj->SDomStrings = nullptr;
         obj->SSetBitMap = utils::in((gdxSyType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
@@ -1939,6 +1941,7 @@ namespace gxfile {
             CurSyPtr->SExplTxt = FFile->ReadString();
             CurSyPtr->SIsCompressed = VersionRead > 5 && FFile->ReadByte();
             CurSyPtr->SDomSymbols = nullptr;
+            CurSyPtr->SCommentsList = std::nullopt;
             if(VersionRead >= 7) {
                 if(FFile->ReadByte()) {
                     CurSyPtr->SDomSymbols = std::make_unique<std::vector<int>>(CurSyPtr->SDim);
@@ -1946,9 +1949,12 @@ namespace gxfile {
                         SDomSym = FFile->ReadInteger();
                 }
                 NrElem = FFile->ReadInteger();
-                if(NrElem) {
-                    CurSyPtr->SCommentsList.emplace_back(FFile->ReadString());
-                    NrElem--;
+                if(NrElem > 0) {
+                    CurSyPtr->SCommentsList = std::make_optional<TCommentsList>();
+                    while(NrElem > 0) {
+                        CurSyPtr->SCommentsList->Add(FFile->ReadString());
+                        NrElem--;
+                    }
                 }
             }
             CurSyPtr->SSetBitMap = nullptr;
@@ -4099,7 +4105,9 @@ namespace gxfile {
             ReportError(ERR_NOSYMBOLFORCOMMENT);
             return false;
         }
-        SyPtr->SCommentsList.push_back(Txt);
+        if(!SyPtr->SCommentsList)
+            SyPtr->SCommentsList = std::make_optional<TCommentsList>();
+        SyPtr->SCommentsList->Add(Txt);
         return true;
     }
 
@@ -4116,8 +4124,8 @@ namespace gxfile {
     int TGXFileObj::gdxSymbolGetComment(int SyNr, int N, char *Txt) {
         if (NameList && !NameList->empty() && SyNr >= 1 && SyNr <= NameList->size()) {
             const auto obj = *NameList->GetObject(SyNr);
-            if (!obj->SCommentsList.empty() && N >= 1 && N <= (int)obj->SCommentsList.size()) {
-                utils::assignStrToBuf(obj->SCommentsList[N - 1], Txt, GMS_SSSIZE);
+            if (obj->SCommentsList && !obj->SCommentsList->empty() && N >= 1 && N <= (int)obj->SCommentsList->size()) {
+                utils::assignStrToBuf((*obj->SCommentsList)[N - 1], Txt, GMS_SSSIZE);
                 return true;
             }
         }

@@ -147,6 +147,14 @@ namespace gdlib::gmsobj {
             return FCount;
         }
 
+        int size() const {
+            return FCount;
+        }
+
+        bool empty() const {
+            return !FCount;
+        }
+
         T *operator[](int Index) {
             return Get(Index);
         }
