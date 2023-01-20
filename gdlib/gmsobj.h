@@ -74,7 +74,7 @@ namespace gdlib::gmsobj {
         {
         }
 
-        ~TXList() {
+        virtual ~TXList() {
             Clear();
         }
 
@@ -116,7 +116,7 @@ namespace gdlib::gmsobj {
             return res;
         }
 
-        int IndexOf(T *Item) {
+        int IndexOf(const T *Item) const {
             for(int N{}; N<FCount; N++)
                 if(FList[N] == Item)
                     return N+(OneBased ? 1 : 0);
@@ -132,7 +132,7 @@ namespace gdlib::gmsobj {
             FCount++;
         }
 
-        int Remove(T *Item) {
+        int Remove(const T *Item) {
             int res{FCount-1};
             while(res >= 0 && FList[res] != Item) res--;
             if(res >= (OneBased ? 1 : 0)) Delete(res);
@@ -194,6 +194,11 @@ namespace gdlib::gmsobj {
         }
 
     public:
+        TXStrings() : FStrMemory{} {}
+        virtual ~TXStrings() {
+            Clear();
+        }
+
         int Add(const std::string &Item) {
             return TXList<char>::Add(NewString(Item, FStrMemory));
         }
