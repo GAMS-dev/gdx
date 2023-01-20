@@ -822,7 +822,7 @@ namespace gxfile {
         obj->SSetBitMap = utils::in((gdxSyType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
                 std::make_unique<TSetBitMap>() : nullptr;
 
-        CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = NameList->AddObject(AName, CurSyPtr); // +1 for universe
+        CurSyPtr->SSyNr = NameList->AddObject(AName, CurSyPtr); // +1 for universe
         FCurrentDim = ADim;
         // old case; we never write V6
         // V = 0..Dim which dimension changed
@@ -863,7 +863,7 @@ namespace gxfile {
 
     bool TGXFileObj::IsGoodNewSymbol(const std::string &s) {
         return !(ErrorCondition(NameList->IndexOf(s) < 1, ERR_DUPLICATESYMBOL) ||
-                 ErrorCondition(utils::indexOf<TAcronym>(AcronymList, [&s](auto acro) { return utils::sameText(acro.AcrName, s); }) == -1, ERR_DUPLICATESYMBOL) ||
+                 ErrorCondition(AcronymList.FindName(s) == -1, ERR_DUPLICATESYMBOL) ||
                  ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT));
     }
 
@@ -1333,7 +1333,7 @@ namespace gxfile {
                     FFile->WriteDouble(X);
                     if (X >= Zvalacr) {
                         int v { static_cast<int>(std::round(X / Zvalacr)) };
-                        int ix { utils::indexOf<TAcronym>(AcronymList, [&v](const TAcronym& acro) { return acro.AcrMap == v; }) };
+                        int ix { AcronymList.FindEntry(v) };
                         if (ix == -1) AcronymList.push_back(TAcronym{ "", "", v });
                     }
                 }
@@ -1953,7 +1953,7 @@ namespace gxfile {
             }
             CurSyPtr->SSetBitMap = nullptr;
             CurSyPtr->SDomStrings = nullptr;
-            CurSyPtr->SSyNr = CurSyPtr->SSyNrActual = NameList->StoreObject(S, CurSyPtr);
+            CurSyPtr->SSyNr = NameList->StoreObject(S, CurSyPtr);
         }
 
         // reading UEL table
@@ -2074,8 +2074,7 @@ namespace gxfile {
             SyPtr->SDim = (*NameList->GetObject(SyNr))->SDim;
             SyPtr->SExplTxt = "Aliased with "s + NameList->GetString(SyNr);
         }
-        // TODO: Also the Delphi source does not set SSyNr here correctly, hence the helper field "SSyNrActual" is used
-        SyPtr->SSyNrActual = NameList->AddObject(AName, SyPtr);
+        NameList->AddObject(AName, SyPtr);
         return true;
     }
 
@@ -4444,11 +4443,34 @@ namespace gxfile {
         return static_cast<int>(size())-1;
     }
 
-    int TAcronymList::FindEntry(const std::string &Name) const {
+    int TAcronymList::FindName(const std::string &Name) const {
         const auto it = std::find_if(begin(), end(), [&](const auto &item) {
-            return item.AcrName == Name;
+            return utils::sameText(item.AcrName, Name);
         });
         return it == end() ? -1 : static_cast<int>(std::distance(begin(), it));
+    }
+
+    void TAcronymList::CheckEntry(int Map) {
+        if(FindEntry(Map) < 0)
+            AddEntry("", "", Map);
+    }
+
+    void TAcronymList::SaveToStream(TXStreamDelphi &S) {
+        S.WriteInteger((int)size());
+        for(auto &acr : *this)
+            acr.SaveToStream(S);
+    }
+
+    void TAcronymList::LoadFromStream(TXStreamDelphi &S) {
+        int cnt{S.ReadInteger()};
+        clear();
+        reserve(cnt);
+        for(int i{}; i<cnt; i++)
+            emplace_back(TAcronym{S});
+    }
+
+    int TAcronymList::MemoryUsed() {
+        return (int)(sizeof(TAcronym) * this->size());
     }
 
     TDFilter *TFilterList::FindFilter(int Nr) {

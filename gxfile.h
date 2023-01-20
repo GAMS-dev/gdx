@@ -180,8 +180,6 @@ template<typename K, typename V, typename H, typename E>
 
     struct TgdxSymbRecord {
         int SSyNr;
-        // since SSyNr is not set correctly for alias, but we want to mimic original Delphi GDX behavior as closely as possible
-        int SSyNrActual;
         int64_t SPosition;
         int SDim, SDataCount, SErrors;
         gdxSyType SDataType;
@@ -189,10 +187,15 @@ template<typename K, typename V, typename H, typename E>
         bool SSetText;
         std::string SExplTxt;
         bool SIsCompressed;
+
         // TODO: Maybe also use std::optional here instead of std::unique_ptr
         std::unique_ptr<std::vector<int>> SDomSymbols, // real domain info
                                           SDomStrings; //relaxed domain info
-        std::vector<std::string> SCommentsList; // TODO: should this also become an optional entry?
+
+        // TODO: Should be gdlib/gmsobj/TXStrings
+        // TODO: should this also become an optional entry?
+        std::vector<std::string> SCommentsList;
+
         bool SScalarFrst; // not stored
         std::unique_ptr<TSetBitMap> SSetBitMap; // for 1-dim sets only
     };
@@ -387,7 +390,7 @@ template<typename K, typename V, typename H, typename E>
     std::string MakeGoodExplText(const std::string& s);
 
     struct TAcronym {
-        std::string AcrName{}, AcrText{};
+        std::string AcrName{}, AcrText{}; // TODO: Evaluate using pchars here
         int AcrMap{}, AcrReadMap{};
         bool AcrAutoGen{};
 
@@ -395,15 +398,33 @@ template<typename K, typename V, typename H, typename E>
             : AcrName{std::move( Name )}, AcrText{ MakeGoodExplText(Text) }, AcrMap{ Map }, AcrReadMap{ -1 }, AcrAutoGen{} {
         }
 
+        // Equivalent to CreateFromStream
+        explicit TAcronym(gdlib::gmsstrm::TXStreamDelphi &S) :
+            TAcronym(S.ReadString(), S.ReadString(), S.ReadInteger()) {}
+
         TAcronym() = default;
+
+        int MemoryUsed() const {
+            return 2+(int)AcrName.length()+(int)AcrText.length();
+        }
+
+        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) {
+            S.WriteString(AcrName.empty() ? "UknownACRO" + std::to_string(AcrMap) : AcrName);
+            S.WriteString(AcrText);
+            S.WriteInteger(AcrMap);
+        }
     };
 
+    // TODO: Also make this use a gdlib/gmsobj/TXList
     class TAcronymList : public std::vector<TAcronym> {
     public:
         int FindEntry(int Map) const;
-        int FindEntry(const std::string &Name) const;
+        int FindName(const std::string &Name) const;
         int AddEntry(const std::string &Name, const std::string &Text, int Map);
-
+        void CheckEntry(int Map);
+        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S);
+        void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S);
+        int MemoryUsed();
     };
 
     using TIntlValueMapDbl = std::array<double, vm_count>;
