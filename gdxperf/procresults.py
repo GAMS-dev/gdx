@@ -3,6 +3,8 @@ import os.path
 import yaml
 import sys
 
+import runbench
+
 
 def main(args):
     with open('results.yml') as fp:
@@ -11,6 +13,10 @@ def main(args):
         except yaml.YAMLError as exc:
             print(exc)
             raise exc
+
+    total_count = len(runbench.collect_gdx_filenames('.'))
+    result_count = len(res)
+    print(f'Collected results for {result_count}/{total_count} files ({round(result_count/total_count * 100.0, 2)}%)')
 
     max_rss, max_tot_time = None, None
     max_rss_fn, max_time_fn = '', ''

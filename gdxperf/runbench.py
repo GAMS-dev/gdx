@@ -22,7 +22,7 @@ def get_cmd(sysdir_path, fn):
     return f"{sysdir_path}gams {sysdir_path}gdxperf.gms ProcTreeMemMonitor 1 {perf_args} {sf}"
 
 
-def run_single(sysdir_path, fn, ntries=4):
+def run_single(sysdir_path, fn, ntries=1):
     cmd = get_cmd(sysdir_path, fn)
     print(cmd)
     total_ts, max_rsss, step_timess = [], [], []
