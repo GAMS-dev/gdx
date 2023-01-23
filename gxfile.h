@@ -416,7 +416,7 @@ template<typename K, typename V, typename H, typename E>
         }
     };
 
-    // TODO: Also make this use a gdlib/gmsobj/TXList
+#ifndef TLD_LEGACY
     class TAcronymList : public std::vector<TAcronym> {
     public:
         int FindEntry(int Map) const;
@@ -427,6 +427,37 @@ template<typename K, typename V, typename H, typename E>
         void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S);
         int MemoryUsed();
     };
+    using TAcronymListImpl = TAcronymList;
+#else
+    class TAcronymListLegacy {
+        gdlib::gmsobj::TXList<TAcronym> FList;
+    public:
+        TAcronymListLegacy() = default;
+
+        ~TAcronymListLegacy();
+
+        int FindEntry(int Map);
+
+        int FindName(const std::string& Name);
+
+        int AddEntry(const std::string& Name, const std::string& Text, int Map);
+
+        void CheckEntry(int Map);
+
+        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi& S);
+
+        void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi& S);
+
+        int MemoryUsed();
+
+        int size() const;
+
+        TAcronym &operator[](int Index) {
+            return *FList[Index];
+        }
+    };
+    using TAcronymListImpl = TAcronymListLegacy;
+#endif
 
     using TIntlValueMapDbl = std::array<double, vm_count>;
     using TIntlValueMapI64 = std::array<int64_t, vm_count>;
@@ -647,7 +678,7 @@ template<typename K, typename V, typename H, typename E>
         int DeltaForWrite{}; // delta for last dimension or first changed dimension
         int DeltaForRead{}; // first position indicating change
         double Zvalacr{}; // tricky
-        TAcronymList AcronymList;
+        std::unique_ptr<TAcronymListImpl> AcronymList;
         std::array<TSetBitMap *, GLOBAL_MAX_INDEX_DIM> WrBitMaps;
         bool ReadUniverse{};
         int UniverseNr{}, UelCntOrig{}; // original uel count when we open the file

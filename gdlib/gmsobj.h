@@ -24,16 +24,6 @@ namespace gdlib::gmsobj {
             FList[Index-(OneBased?1:0)] = Item;
         }
 
-        void SetCapacity(int NewCapacity) {
-            if(NewCapacity == FCapacity) return;
-            else if(NewCapacity < FCount) NewCapacity = FCount;
-            FListMemory = sizeof(T *) * NewCapacity;
-            if(!FList) FList = (T **)std::malloc(FListMemory);
-            else if(!NewCapacity) std::free(FList);
-            else FList = (T **)std::realloc(FList, FListMemory);
-            FCapacity = NewCapacity;
-        }
-
         void SetCount(int NewCount) {
             if(NewCount != FCount) {
                 if(NewCount > FCapacity) SetCapacity(NewCount);
@@ -141,6 +131,16 @@ namespace gdlib::gmsobj {
 
         int GetCapacity() const {
             return FCapacity;
+        }
+
+        void SetCapacity(int NewCapacity) {
+            if (NewCapacity == FCapacity) return;
+            else if (NewCapacity < FCount) NewCapacity = FCount;
+            FListMemory = sizeof(T*) * NewCapacity;
+            if (!FList) FList = (T**)std::malloc(FListMemory);
+            else if (!NewCapacity) std::free(FList);
+            else FList = (T**)std::realloc(FList, FListMemory);
+            FCapacity = NewCapacity;
         }
 
         int GetCount() const {

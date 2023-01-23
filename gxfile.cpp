@@ -364,7 +364,7 @@ namespace gxfile {
         NameList = std::make_unique<TNameList>();
         NameList->OneBased = true;
         UELTable = std::make_unique<UELTableImplChoice>();
-        AcronymList.clear();
+        AcronymList = std::make_unique<TAcronymListImpl>();
         FilterList.Clear();
         FFile->WriteByte(gdxHeaderNr);
         FFile->WriteString(gdxHeaderId);
@@ -637,14 +637,14 @@ namespace gxfile {
             FFile->WriteString(MARK_ACRO);
             WRYAML(YFile->AddKeyItem("acronyms"));
             WRYAML(YFile->IncIndentLevel());
-            FFile->WriteInteger(static_cast<int>(AcronymList.size()));
-            for(const auto &acro : AcronymList) {
+#ifdef YAML
+            for(int N{}; N<AcronymList->size(); N++) {
+                const auto &acro = (*AcronymList)[N];
                 const auto acroName = acro.AcrName.empty() ? "UnknownACRO" + std::to_string(acro.AcrMap) : acro.AcrName;
-                FFile->WriteString(acroName);
-                FFile->WriteString(acro.AcrText);
-                FFile->WriteInteger(acro.AcrMap);
                 WRYAML(YFile->AddKeyValue(acroName, "{text:"s +  acro.AcrText + ", map:"s + std::to_string(acro.AcrMap) + "}"s));
             }
+#endif
+            AcronymList->SaveToStream(*FFile);
             FFile->WriteString(MARK_ACRO);
             WRYAML(YFile->DecIndentLevel());
 
@@ -726,7 +726,7 @@ namespace gxfile {
 
         ErrorList.clear();
         FilterList.Clear();
-        AcronymList.clear();
+        AcronymList = nullptr;
         MapSetText.clear();
 
         fmode = f_not_open;
@@ -865,7 +865,7 @@ namespace gxfile {
 
     bool TGXFileObj::IsGoodNewSymbol(const std::string &s) {
         return !(ErrorCondition(NameList->IndexOf(s) < 1, ERR_DUPLICATESYMBOL) ||
-                 ErrorCondition(AcronymList.FindName(s) == -1, ERR_DUPLICATESYMBOL) ||
+                 ErrorCondition(AcronymList->FindName(s) < 0, ERR_DUPLICATESYMBOL) ||
                  ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT));
     }
 
@@ -1333,11 +1333,8 @@ namespace gxfile {
                 FFile->WriteByte(xv);
                 if (xv == vm_normal) {
                     FFile->WriteDouble(X);
-                    if (X >= Zvalacr) {
-                        int v { static_cast<int>(std::round(X / Zvalacr)) };
-                        int ix { AcronymList.FindEntry(v) };
-                        if (ix == -1) AcronymList.push_back(TAcronym{ "", "", v });
-                    }
+                    if (X >= Zvalacr)
+                        AcronymList->CheckEntry(static_cast<int>(std::round(X / Zvalacr)));
                 }
             }
             if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
@@ -1421,26 +1418,26 @@ namespace gxfile {
     double TGXFileObj::AcronymRemap(double V) {
         auto GetAsAcronym = [&](double V)-> double {
             int orgIndx {static_cast<int>(std::round(V / Zvalacr))};
-            int N {AcronymList.FindEntry(orgIndx)};
+            int N {AcronymList->FindEntry(orgIndx)};
             int newIndx{};
             if(N < 0) { // not found
                 if(NextAutoAcronym <= 0) newIndx = orgIndx;
                 else {
                     newIndx = NextAutoAcronym;
                     NextAutoAcronym++;
-                    N = AcronymList.AddEntry("", "", orgIndx);
-                    AcronymList[N].AcrReadMap = newIndx;
-                    AcronymList[N].AcrAutoGen = true;
+                    N = AcronymList->AddEntry(""s, ""s, orgIndx);
+                    (*AcronymList)[N].AcrReadMap = newIndx;
+                    (*AcronymList)[N].AcrAutoGen = true;
                 }
             } else { // found
-                newIndx = AcronymList[N].AcrReadMap;
+                newIndx = (*AcronymList)[N].AcrReadMap;
                 if(newIndx <= 0) {
                     if(NextAutoAcronym <= 0) newIndx = orgIndx;
                     else {
                         newIndx = NextAutoAcronym;
                         NextAutoAcronym++;
-                        AcronymList[N].AcrReadMap = newIndx;
-                        AcronymList[N].AcrAutoGen = true;
+                        (*AcronymList)[N].AcrReadMap = newIndx;
+                        (*AcronymList)[N].AcrAutoGen = true;
                     }
                 }
             }
@@ -1923,7 +1920,7 @@ namespace gxfile {
         int NrElem {FFile->ReadInteger()};
         NameList = std::make_unique<TNameList>();
         NameList->OneBased = true;
-        AcronymList.clear();
+        AcronymList = std::make_unique<TAcronymListImpl>();
         FilterList.Clear();
         const int NrElemsOfSym = NrElem;
         for(int N{1}; N<=NrElemsOfSym; N++) {
@@ -2003,13 +2000,7 @@ namespace gxfile {
             FFile->SetCompression(DoUncompress);
             FFile->SetPosition(AcronymPos);
             if (ErrorCondition(FFile->ReadString() == MARK_ACRO, ERR_OPEN_ACROMARKER1)) return FileErrorNr();
-            AcronymList.resize(FFile->ReadInteger());
-            for (int i = 0; i < (int)AcronymList.size(); i++) {
-                auto& obj = AcronymList[i];
-                obj.AcrName = FFile->ReadString();
-                obj.AcrText = FFile->ReadString();
-                obj.AcrMap = FFile->ReadInteger();
-            }
+            AcronymList->LoadFromStream(*FFile);
         }
 
         DomainStrList = std::make_unique<TDomainStrList>();
@@ -3220,7 +3211,7 @@ namespace gxfile {
     // See Also:
     //    gdxAcronymSetInfo, gdxAcronymSetInfo
     int TGXFileObj::gdxAcronymCount() const {
-        return static_cast<int>(AcronymList.size());
+        return !AcronymList ? 0 : static_cast<int>(AcronymList->size());
     }
 
     // Summary:
@@ -3235,12 +3226,12 @@ namespace gxfile {
     // See Also:
     //    gdxAcronymSetInfo, gdxAcronymCount
     int TGXFileObj::gdxAcronymGetInfo(int N, char *AName, char *Txt, int &AIndx) const {
-        if(N < 1 || N > (int)AcronymList.size()) {
+        if(N < 1 || N > (int)AcronymList->size()) {
             AName[0] = Txt[0] = '\0';
             AIndx = 0;
             return false;
         }
-        auto acr = AcronymList[N-1];
+        auto &acr = (*AcronymList)[N-1];
         utils::assignStrToBuf(acr.AcrName, AName, GMS_SSSIZE);
         utils::assignStrToBuf(acr.AcrText, Txt, GMS_SSSIZE);
         AIndx = acr.AcrMap;
@@ -3265,16 +3256,17 @@ namespace gxfile {
     //     is used to provide the acronym index, and the AName parameter must match.
     int TGXFileObj::gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) {
         auto MapIsUnique = [this](int Indx) {
-            return std::none_of(AcronymList.begin(), AcronymList.end(), [&](const TAcronym &acr) {
-                return acr.AcrReadMap == Indx;
-            });
+            for(int i{}; i<AcronymList->size(); i++)
+                if((*AcronymList)[i].AcrReadMap == Indx)
+                    return false;
+            return true;
         };
 
         if(TraceLevel >= TraceLevels::trl_some)
             WriteTrace("AcronymSetInfo: "s + AName + " index = " + std::to_string(AIndx));
 
-        if(ErrorCondition(N >= 1 || N <= (int)AcronymList.size(), ERR_BADACRONUMBER)) return false;
-        auto &obj = AcronymList[N-1];
+        if(ErrorCondition(N >= 1 || N <= (int)AcronymList->size(), ERR_BADACRONUMBER)) return false;
+        auto &obj = (*AcronymList)[N-1];
         if(utils::in(fmode, AnyWriteMode) || obj.AcrAutoGen) {
             if(ErrorCondition(IsGoodNewSymbol(AName), ERR_BADACRONAME)) return false;
             if(obj.AcrAutoGen) {
@@ -3332,8 +3324,8 @@ namespace gxfile {
     int TGXFileObj::gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex) {
         if(TraceLevel >= TraceLevels::trl_some)
             WriteTrace("AcronymGetMapping: N = "s + std::to_string(N));
-        if(ErrorCondition(N >= 1 || N <= (int)AcronymList.size(), ERR_BADACRONUMBER)) return false;
-        const auto &obj = AcronymList[N-1];
+        if(ErrorCondition(N >= 1 || N <= (int)AcronymList->size(), ERR_BADACRONUMBER)) return false;
+        const auto &obj = (*AcronymList)[N-1];
         orgIndx = obj.AcrMap;
         newIndx = obj.AcrReadMap;
         autoIndex = obj.AcrAutoGen;
@@ -3640,16 +3632,16 @@ namespace gxfile {
     //   are added implicitly use gdxAcronymSetInfo to update the table.
     //
     int TGXFileObj::gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) {
-        for(int N{}; N<(int)AcronymList.size(); N++) {
-            auto &obj = AcronymList[N];
+        for(int N{}; N<(int)AcronymList->size(); N++) {
+            auto &obj = (*AcronymList)[N];
             if(utils::sameText(obj.AcrName, AName)) {
                 if(ErrorCondition(obj.AcrMap == AIndx, ERR_ACROBADADDITION)) return -1;
                 return N;
             }
             if(ErrorCondition(obj.AcrMap != AIndx, ERR_ACROBADADDITION)) return -1;
         }
-        int res{AcronymList.AddEntry(AName, Txt, AIndx)};
-        AcronymList[res].AcrReadMap = AIndx;
+        int res{AcronymList->AddEntry(AName, Txt, AIndx)};
+        (*AcronymList)[res].AcrReadMap = AIndx;
         res++;  // one based for the user
         return res;
     }
@@ -3683,8 +3675,8 @@ namespace gxfile {
         //not an acronym
         if(Indx <= 0) AName[0] = '\0';
         else {
-            int N {AcronymList.FindEntry(Indx)};
-            utils::assignStrToBuf(N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : AcronymList[N].AcrName, AName, GMS_SSSIZE);
+            int N {AcronymList->FindEntry(Indx)};
+            utils::assignStrToBuf(N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : (*AcronymList)[N].AcrName, AName, GMS_SSSIZE);
             return true;
         }
         return false;
@@ -4438,6 +4430,7 @@ namespace gxfile {
     }
 #endif
 
+#ifndef TLD_LEGACY
     int TAcronymList::FindEntry(int Map) const {
         const auto it = std::find_if(begin(), end(), [&](const auto &item) {
             return item.AcrMap == Map;
@@ -4480,6 +4473,7 @@ namespace gxfile {
     int TAcronymList::MemoryUsed() {
         return (int)(sizeof(TAcronym) * this->size());
     }
+#endif
 
     TDFilter *TFilterList::FindFilter(int Nr) {
         const auto it = std::find_if(begin(), end(), [&Nr](const auto *f) { return f->FiltNumber == Nr; });
@@ -4724,4 +4718,59 @@ namespace gxfile {
     inline bool TgxModeSet::empty() const {
         return !count;
     }
+
+#ifdef TLD_LEGACY
+    TAcronymListLegacy::~TAcronymListLegacy() {
+        for (int N{}; N<FList.GetCount(); N++)
+            delete FList[N];
+    }
+
+    int TAcronymListLegacy::FindEntry(int Map) {
+        for (int N{}; N<FList.GetCount(); N++)
+            if (FList[N]->AcrMap == Map)
+                return N;
+        return -1;
+    }
+
+    int TAcronymListLegacy::FindName(const std::string& Name) {
+        for (int N{}; N<FList.GetCount(); N++)
+            if (utils::sameText(FList[N]->AcrName, Name))
+                return N;
+        return -1;
+    }
+    
+    int TAcronymListLegacy::AddEntry(const std::string& Name, const std::string& Text, int Map) {
+        return FList.Add(new TAcronym{ Name, Text, Map });
+    }
+    
+    void TAcronymListLegacy::CheckEntry(int Map) {
+        if (FindEntry(Map) < 0)
+            AddEntry("", "", Map);
+    }
+    
+    void TAcronymListLegacy::SaveToStream(gdlib::gmsstrm::TXStreamDelphi& S) {
+        S.WriteInteger(FList.GetCount());
+        for (int N{}; N < FList.GetCount(); N++)
+            FList[N]->SaveToStream(S);
+    }
+    
+    void TAcronymListLegacy::LoadFromStream(gdlib::gmsstrm::TXStreamDelphi& S) {
+        int Cnt{ S.ReadInteger() };
+        FList.Clear();
+        FList.SetCapacity(Cnt);
+        while (FList.GetCount() < Cnt)
+            FList.Add(new TAcronym{ S });
+    }
+    
+    int TAcronymListLegacy::MemoryUsed() {
+        int res{ (int)FList.GetMemoryUsed() + FList.GetCount() * (int)sizeof(TAcronym*) };
+        for (int N{}; N < FList.GetCount(); N++)
+            res += FList[N]->MemoryUsed();
+        return res;
+    }
+
+    inline int TAcronymListLegacy::size() const {
+        return FList.GetCount();
+    }
+#endif
 }
