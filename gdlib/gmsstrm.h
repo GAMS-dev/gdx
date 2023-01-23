@@ -321,7 +321,7 @@ namespace gdlib::gmsstrm {
             fm_read,
             fm_write
         } frw;
-        TFileSignature FFileSignature;
+        TFileSignature FFileSignature{};
         uint8_t  FMajorVersionRead{}, FMinorVersionRead{};
         int FRewindPoint{};
 

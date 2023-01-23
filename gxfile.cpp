@@ -635,9 +635,9 @@ namespace gxfile {
             auto AcronymPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_ACRO);
+#ifdef YAML
             WRYAML(YFile->AddKeyItem("acronyms"));
             WRYAML(YFile->IncIndentLevel());
-#ifdef YAML
             for(int N{}; N<AcronymList->size(); N++) {
                 const auto &acro = (*AcronymList)[N];
                 const auto acroName = acro.AcrName.empty() ? "UnknownACRO" + std::to_string(acro.AcrMap) : acro.AcrName;
@@ -2001,6 +2001,7 @@ namespace gxfile {
             FFile->SetPosition(AcronymPos);
             if (ErrorCondition(FFile->ReadString() == MARK_ACRO, ERR_OPEN_ACROMARKER1)) return FileErrorNr();
             AcronymList->LoadFromStream(*FFile);
+            if (ErrorCondition(FFile->ReadString() == MARK_ACRO, ERR_OPEN_ACROMARKER2)) return FileErrorNr();
         }
 
         DomainStrList = std::make_unique<TDomainStrList>();

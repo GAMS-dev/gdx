@@ -391,7 +391,8 @@ template<typename K, typename V, typename H, typename E>
     std::string MakeGoodExplText(const std::string& s);
 
     struct TAcronym {
-        std::string AcrName{}, AcrText{}; // TODO: Evaluate using pchars here
+        // TODO: Evaluate using char* instead of std::strings here
+        std::string AcrName{}, AcrText{};
         int AcrMap{}, AcrReadMap{};
         bool AcrAutoGen{};
 
@@ -399,9 +400,15 @@ template<typename K, typename V, typename H, typename E>
             : AcrName{std::move( Name )}, AcrText{ MakeGoodExplText(Text) }, AcrMap{ Map }, AcrReadMap{ -1 }, AcrAutoGen{} {
         }
 
-        // Equivalent to CreateFromStream
-        explicit TAcronym(gdlib::gmsstrm::TXStreamDelphi &S) :
-            TAcronym(S.ReadString(), S.ReadString(), S.ReadInteger()) {}
+        explicit TAcronym(gdlib::gmsstrm::TXStreamDelphi &S) : TAcronym("", "", 0) {
+            FillFromStream(S);
+        }
+
+        void FillFromStream(gdlib::gmsstrm::TXStreamDelphi &S) {
+            AcrName = S.ReadString();
+            AcrText = S.ReadString();
+            AcrMap = S.ReadInteger();
+        }
 
         TAcronym() = default;
 
@@ -410,7 +417,7 @@ template<typename K, typename V, typename H, typename E>
         }
 
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) {
-            S.WriteString(AcrName.empty() ? "UknownACRO" + std::to_string(AcrMap) : AcrName);
+            S.WriteString(AcrName.empty() ? "UnknownACRO" + std::to_string(AcrMap) : AcrName);
             S.WriteString(AcrText);
             S.WriteInteger(AcrMap);
         }
@@ -433,23 +440,14 @@ template<typename K, typename V, typename H, typename E>
         gdlib::gmsobj::TXList<TAcronym> FList;
     public:
         TAcronymListLegacy() = default;
-
         ~TAcronymListLegacy();
-
         int FindEntry(int Map);
-
         int FindName(const std::string& Name);
-
         int AddEntry(const std::string& Name, const std::string& Text, int Map);
-
         void CheckEntry(int Map);
-
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi& S);
-
         void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi& S);
-
         int MemoryUsed();
-
         int size() const;
 
         TAcronym &operator[](int Index) {

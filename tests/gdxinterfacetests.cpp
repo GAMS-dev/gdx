@@ -1047,6 +1047,7 @@ namespace tests::gdxinterfacetests {
         auto [f1, f2] = filenames;
         testMatchingWrites(f1, f2, [](GDXInterface &pgx) {
             REQUIRE_EQ(0, pgx.gdxAcronymCount());
+
             REQUIRE(pgx.gdxAcronymAdd("myacr"s, "my acronym"s, 23));
             char acroName[GMS_SSSIZE], acroText[GMS_SSSIZE];
             int acroIndex;
@@ -1054,6 +1055,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ("myacr"s, acroName);
             REQUIRE_EQ("my acronym"s, acroText);
             REQUIRE_EQ(23, acroIndex);
+            REQUIRE_EQ(1, pgx.gdxAcronymCount());
 
             REQUIRE(pgx.gdxAcronymSetInfo(1, "myacr_mod"s, "my acronym_mod"s, 23));
             REQUIRE(pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex));
@@ -1065,6 +1067,16 @@ namespace tests::gdxinterfacetests {
             REQUIRE(acroName[0] == '\0');
             REQUIRE(acroText[0] == '\0');
             REQUIRE_EQ(0, acroIndex);
+
+            REQUIRE(pgx.gdxAcronymAdd("anotherOne"s, "my second acronym"s, 2));
+            REQUIRE_EQ(2, pgx.gdxAcronymCount());
+        });
+        testReads(f1, f2, [](GDXInterface &pgx) {
+            REQUIRE_EQ(2, pgx.gdxAcronymCount());
+            char acroName[GMS_SSSIZE], acroText[GMS_SSSIZE];
+            int acroIndex;
+            pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex);
+            REQUIRE(!strcmp("myacr_mod", acroName));
         });
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);
