@@ -2,8 +2,16 @@
 #include "../gxfile.h"
 #include <filesystem>
 #include <iostream>
+#include <algorithm>
 
 #include "pfgdx.hpp"
+
+// Needed for peak working set size query
+#if defined(_WIN32)
+#include <windows.h>
+#include <Psapi.h>
+#include <processthreadsapi.h>
+#endif
 
 using namespace gxfile;
 using namespace std::literals::string_literals;
@@ -154,6 +162,19 @@ namespace tests::gxfiletests {
         rmfiles({"trnsport.gms", "trnsport.gdx", "log.txt", "lf.txt"});
     }
 
+    static int64_t queryPeakRSS() {
+#if defined(_WIN32)
+        PROCESS_MEMORY_COUNTERS info;
+        if(!GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info)))
+            return 0;
+        return (int64_t)info.PeakWorkingSetSize;
+#elif defined(__linux)
+        return 0;
+#elif defined(__APPLE__)
+        return 0;
+#endif
+    }
+
     TEST_CASE("Run pfgdx for suiteName/modelName.gdx in order to debug memory issues (and test pfgdx port)") {
 #ifdef NO_SLOW_TESTS
         return;
@@ -184,11 +205,28 @@ namespace tests::gxfiletests {
             if (std::filesystem::exists(fn)) {
                 pfgdx::TimeTriple tWrap, tPort;
                 std::array<double, ntries> slowdowns {};
+
                 for (int i = 0; i < ntries; i++) {
-                    if (!onlyPorted)
+                    int64_t peakRSS;
+                    if (!onlyPorted) {
                         tWrap = pfgdx::runWithTiming(fn, true, quiet);
-                    if (!onlyWrapped)
+                        peakRSS = queryPeakRSS();
+                        if(!quiet) std::cout << "Peak RSS after wrapped GDX (P3/Delphi): " << peakRSS << std::endl;
+                    }
+                    if (!onlyWrapped) {
                         tPort = pfgdx::runWithTiming(fn, false, quiet);
+                        if(!onlyPorted) {
+                            auto newPeakRSS = queryPeakRSS();
+                            if(!quiet) std::cout << "Peak RSS after both wrapped and ported GDX: " << peakRSS << std::endl;
+                            if (newPeakRSS > peakRSS) {
+                                if(!quiet)
+                                    std::cout << "Warning: Peak RSS increase by " << newPeakRSS - peakRSS << " bytes ("
+                                              << ((double)newPeakRSS / (double)peakRSS - 1.0) * 100.0 << "%)" << std::endl;
+                            }
+                            REQUIRE_LE(newPeakRSS, peakRSS); // peak rss should not increase after running C++ GDX
+                        }
+                    }
+
                     slowdowns[i] = tWrap.total_t > 0 ? tPort.total_t / tWrap.total_t : 0;
                     if (!quiet && !onlyPorted && !onlyWrapped)
                         std::cout << "Slowdown for " << fn << " = " << slowdowns[i] << std::endl;
