@@ -4828,13 +4828,13 @@ namespace gxfile {
         }
         FCapacity = currCap;
         FMapBytes = (int64_t)(FCapacity * sizeof(int));
-        if(!PMap) PMap = new int[FCapacity];
+        if(!PMap) PMap = (int *)std::malloc(FMapBytes);
         else PMap = (int *)std::realloc(PMap, FMapBytes);
         std::memset(&PMap[prevCap], -1, FCapacity-prevCap);
     }
 
     TIntegerMappingLegacy::~TIntegerMappingLegacy() {
-        delete [] PMap;
+        std::free(PMap);
     }
 
     int TIntegerMappingLegacy::MemoryUsed() const {
