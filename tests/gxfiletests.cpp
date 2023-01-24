@@ -169,6 +169,16 @@ namespace tests::gxfiletests {
             return 0;
         return (int64_t)info.PeakWorkingSetSize;
 #elif defined(__linux)
+        std::ifstream ifs {"/proc/self/status"};
+        if(!ifs.is_open()) return 0;
+        std::string line;
+        while(!ifs.eof()) {
+            std::getline(ifs, line);
+            if(utils::starts_with(line, "VmHWM")) {
+                auto parts = utils::split(line);
+                return std::stoi(utils::nth(parts, 1));
+            }
+        }
         return 0;
 #elif defined(__APPLE__)
         return 0;
