@@ -4829,8 +4829,13 @@ namespace gxfile {
         FCapacity = currCap;
         FMapBytes = (int64_t)(FCapacity * sizeof(int));
         if(!PMap) PMap = (int *)std::malloc(FMapBytes);
-        else PMap = (int *)std::realloc(PMap, FMapBytes);
-        std::memset(&PMap[prevCap], -1, FCapacity-prevCap);
+        else {
+            void* p = std::realloc(PMap, FMapBytes);
+            if(p) PMap = (int*)p;
+        }
+        assert(PMap && "Problem allocating memory for integer mapping!");
+        if(PMap)
+            std::memset(&PMap[prevCap], -1, sizeof(int)*(FCapacity-prevCap));
     }
 
     TIntegerMappingLegacy::~TIntegerMappingLegacy() {
