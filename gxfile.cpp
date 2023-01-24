@@ -942,7 +942,7 @@ namespace gxfile {
             gdxDataReadDone();
         int res{-1};
         NrMappedAdded = 0;
-        TIntegerMapping ExpndList;
+        TIntegerMappingImpl ExpndList;
         ErrorList.clear();
         CurSyPtr = nullptr;
         SortList = nullptr;
@@ -3537,7 +3537,7 @@ namespace gxfile {
             return false;
         }
 
-        TIntegerMapping DomainIndxs;
+        TIntegerMappingImpl DomainIndxs;
 
         //-- Note: PrepareSymbolRead checks for the correct status
         TIndex XDomains = utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED);
@@ -4406,11 +4406,6 @@ namespace gxfile {
         return maxUelLength;
     }
 
-    void TUELTable::Reserve(int n) {
-        UsrUel2Ent.reserve(n);
-        nameToIndexNum.reserve(n);
-    }
-
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
         int EN {AddObject(s, -1)};
 #ifdef STABLE_REFS
@@ -4510,6 +4505,7 @@ namespace gxfile {
     }
 #endif
 
+#ifndef TIM_LEGACY
     int TIntegerMapping::GetHighestIndex() const {
         return FHighestIndex;
     }
@@ -4563,6 +4559,7 @@ namespace gxfile {
         }
         Map.resize(currCap, -1);
     }
+#endif
 
     void TUELTableLegacy::clear() {
         Clear();
@@ -4631,11 +4628,6 @@ namespace gxfile {
         for(auto &bucket : Buckets)
             maxLen = std::max<int>(static_cast<int>(strlen(bucket->StrP)), maxLen);
         return maxLen;
-    }
-
-    void TUELTableLegacy::Reserve(int n) {
-        UsrUel2Ent.reserve(n);
-        Buckets.reserve(n);
     }
 
     TUELTableLegacy::TUELTableLegacy() {
@@ -4824,4 +4816,65 @@ namespace gxfile {
     }
 #endif // TFL_LEGACY
 
+#ifdef TIM_LEGACY
+    void TIntegerMappingLegacy::growMapping(int F) {
+        assert(FCapacity < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
+        int64_t currCap {FCapacity}, prevCap{currCap};
+        while(F >= currCap) {
+            int64_t delta;
+            if(currCap >= 1024*1024) delta = currCap / 2;
+            else if(currCap <= 0) delta = 1024;
+            else delta = currCap;
+            currCap += delta;
+            if(currCap > FMAXCAPACITY) currCap = FMAXCAPACITY;
+        }
+        FCapacity = currCap;
+        FMapBytes = FCapacity * sizeof(int);
+        if(!PMap) PMap = new int[FCapacity];
+        else PMap = (int *)std::realloc(PMap, FMapBytes);
+        std::memset(&PMap[prevCap], -1, FCapacity-prevCap);
+    }
+
+    TIntegerMappingLegacy::~TIntegerMappingLegacy() {
+        delete [] PMap;
+    }
+
+    int TIntegerMappingLegacy::MemoryUsed() const {
+        return (int)FMapBytes;
+    }
+
+    int TIntegerMappingLegacy::GetHighestIndex() const {
+        return FHighestIndex;
+    }
+
+    int TIntegerMappingLegacy::GetMapping(int F) const {
+        return F >= 0 && F < FCapacity ? PMap[F] : -1;
+    }
+
+    void TIntegerMappingLegacy::SetMapping(int F, int T) {
+        if(F >= FCapacity) growMapping(F);
+        PMap[F] = T;
+        if(F > FHighestIndex) FHighestIndex = F;
+    }
+
+    int TIntegerMappingLegacy::size() const {
+        return (int)FCapacity;
+    }
+
+    bool TIntegerMappingLegacy::empty() const {
+        return !FCapacity;
+    }
+
+    int &TIntegerMappingLegacy::operator[](int F) const {
+        assert(F >= 0 && F < FCapacity);
+        return PMap[F];
+    }
+
+    void TIntegerMappingLegacy::clear() {
+        delete [] PMap;
+        FCapacity = FMapBytes = 0;
+        FHighestIndex = 0;
+    }
+
+#endif
 }

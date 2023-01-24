@@ -42,6 +42,9 @@
 // TFilterList based on paul object (TXList)
 #define TFL_LEGACY
 
+// TIntegerMapping based on manually managed heap buffer instead of std::vector<int>
+//#define TIM_LEGACY
+
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
 #if defined(GOOGLE_HASHMAP)
@@ -265,7 +268,7 @@ template<typename K, typename V, typename H, typename E>
         sz_integer
     };
 
-    // FIXME: Also port paul object for this!
+#ifndef TIM_LEGACY
     // N.B.: we store integers in [0..high(integer)] in TIntegerMapping, so
     // FMAXCAPACITY = high(integer) + 1 is all we will ever need, and we will
     // never get a request to grow any larger.  The checks and code
@@ -286,6 +289,29 @@ template<typename K, typename V, typename H, typename E>
         bool empty() const;
         void reserve(int n);
     };
+    using TIntegerMappingImpl = TIntegerMapping;
+#else
+    class TIntegerMappingLegacy {
+        int64_t FCapacity {}, FMapBytes {};
+        int64_t FMAXCAPACITY {std::numeric_limits<int>::max() + static_cast<int64_t>(1)};
+        int FHighestIndex{};
+        int *PMap {};
+
+        void growMapping(int F);
+    public:
+        TIntegerMappingLegacy() = default;
+        ~TIntegerMappingLegacy();
+        int MemoryUsed() const;
+        int GetHighestIndex() const;
+        int GetMapping(int F) const;
+        void SetMapping(int F, int T);
+        int size() const;
+        bool empty() const;
+        int &operator[](int F) const;
+        void clear();
+    };
+    using TIntegerMappingImpl = TIntegerMappingLegacy;
+#endif
 
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
 
@@ -325,7 +351,7 @@ template<typename K, typename V, typename H, typename E>
     protected:
         TUELUserMapStatus FMapToUserStatus {map_unknown};
     public:
-        TIntegerMapping UsrUel2Ent {}; // from user uelnr to table entry
+        TIntegerMappingImpl UsrUel2Ent {}; // from user uelnr to table entry
         virtual ~IUELTable() = default;
         virtual void clear() = 0;
         virtual int size() const = 0;
@@ -343,7 +369,6 @@ template<typename K, typename V, typename H, typename E>
         virtual TUELUserMapStatus GetMapToUserStatus();
         virtual void RenameEntry(int N, const std::string &s) = 0;
         virtual int GetMaxUELLength() const = 0;
-        virtual void Reserve(int n) = 0;
         virtual int MemoryUsed() const = 0;
     };
 
@@ -372,7 +397,6 @@ template<typename K, typename V, typename H, typename E>
         int AddUsrIndxNew(const std::string &s, int UelNr) override;
         void RenameEntry(int N, const std::string &s) override;
         int GetMaxUELLength() const override;
-        void Reserve(int n) override;
     };
 #endif
 
@@ -389,7 +413,6 @@ template<typename K, typename V, typename H, typename E>
         int AddUsrNew(const std::string &s) override;
         int AddUsrIndxNew(const std::string &s, int UelNr) override;
         int GetMaxUELLength() const override;
-        void Reserve(int n) override;
         int IndexOf(const std::string &s) override;
         int AddObject(const std::string &id, int mapping) override;
         int StoreObject(const std::string& id, int mapping) override;
@@ -706,7 +729,7 @@ template<typename K, typename V, typename H, typename E>
         int DataCount{}, NrMappedAdded{};
         std::array<TgdxElemSize, GLOBAL_MAX_INDEX_DIM> ElemType;
         std::string MajContext;
-        std::array<TIntegerMapping, GLOBAL_MAX_INDEX_DIM> SliceIndxs, SliceRevMap;
+        std::array<TIntegerMappingImpl, GLOBAL_MAX_INDEX_DIM> SliceIndxs, SliceRevMap;
         int SliceSyNr{};
         gdxinterface::TgdxStrIndex SliceElems;
         //void *ReadPtr{};

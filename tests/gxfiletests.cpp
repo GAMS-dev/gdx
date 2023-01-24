@@ -94,7 +94,7 @@ namespace tests::gxfiletests {
     }
 
     TEST_CASE("Test integer mapping") {
-        TIntegerMapping mapping;
+        TIntegerMappingImpl mapping;
         REQUIRE_FALSE(mapping.GetHighestIndex());
         mapping[3] = 5;
         REQUIRE_EQ(5, mapping[3]);
