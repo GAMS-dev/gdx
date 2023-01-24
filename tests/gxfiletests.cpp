@@ -104,14 +104,14 @@ namespace tests::gxfiletests {
     TEST_CASE("Test integer mapping") {
         TIntegerMappingImpl mapping;
         REQUIRE_FALSE(mapping.GetHighestIndex());
-        mapping[3] = 5;
-        REQUIRE_EQ(5, mapping[3]);
+        mapping.SetMapping(3, 5);
+        REQUIRE_EQ(5, mapping.GetMapping(3));
         const int memused = mapping.MemoryUsed();
         REQUIRE(memused > 0);
-        mapping.clear();
+        /*mapping.clear();
         REQUIRE(mapping.MemoryUsed() < memused);
         mapping.SetMapping(3, 5);
-        REQUIRE_EQ(5, mapping[3]);
+        REQUIRE_EQ(5, mapping[3]);*/
     }
 
     TEST_CASE("Test function for making a good explanatory text") {

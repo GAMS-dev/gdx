@@ -297,9 +297,14 @@ namespace gdlib::strhash {
             return GetString(N).length();
         }
 
-        int64_t MemoryUsed() {
-            // Return actual value!
-            return 0;
+        int64_t MemoryUsed() const {
+            int64_t res{};
+            for(int N{}; N<Count(); N++)
+                res += strlen(Buckets[N]->StrP)+1;
+            res += (int)(Buckets.size() * sizeof(THashBucket<T>));
+            if(PHashTable) res += (int)(PHashTable->size() * sizeof(THashBucket<T>));
+            if(SortMap) res += (int)(SortMap->size()*sizeof(int));
+            return res;
         }
 
         void RenameEntry(int N, const std::string &s) {

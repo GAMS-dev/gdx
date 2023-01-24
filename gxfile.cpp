@@ -1091,9 +1091,10 @@ namespace gxfile {
                                         if(V >= 0) AElements[D] = V;
                                         else {
                                             V = UELTable->GetUserMap(EN);
-                                            if(V >= 0)
-                                                AElements[D] = ExpndList[EN] = V;
-                                            else {
+                                            if(V >= 0) {
+                                                ExpndList.SetMapping(EN, V);
+                                                AElements[D] = V;
+                                            } else {
                                                 AElements[D] = -EN; // so we recognize and assign the same nr
                                                 AddNew = true;
                                             }
@@ -1125,7 +1126,8 @@ namespace gxfile {
                                     int EN = AElements[D];
                                     if(EN < 0) {
                                         V = UELTable->NewUsrUel(-EN);
-                                        AElements[D] = ExpndList[-EN] = V;
+                                        AElements[D] = V;
+                                        ExpndList.SetMapping(-EN, V);
                                         NrMappedAdded++;
                                         // look for same mapping to be issued
                                         for(int D2{D+1}; D2 < FCurrentDim; D2++) {
@@ -1753,15 +1755,15 @@ namespace gxfile {
         }
         if(fmode == fr_slice) {
             for(int D{}; D<GLOBAL_MAX_INDEX_DIM; D++) {
-                SliceIndxs[D].clear();
-                SliceRevMap[D].clear();
+                SliceIndxs[D] = std::nullopt;
+                SliceRevMap[D] = std::nullopt;
             }
         }
         if(NrMappedAdded) {
-            int HighestIndex = UELTable->UsrUel2Ent.GetHighestIndex();
+            int HighestIndex = UELTable->UsrUel2Ent->GetHighestIndex();
             for(int N{HighestIndex}; N >= HighestIndex - NrMappedAdded + 1; N--) {
                 assert(N >= 1 && "Wrong entry number");
-                int EN {UELTable->UsrUel2Ent.GetMapping(N)}; // nr in ueltable
+                int EN {UELTable->UsrUel2Ent->GetMapping(N)}; // nr in ueltable
 #ifndef NDEBUG
                 int d {UELTable->GetUserMap(EN)};
                 assert((d == -1 || d == N) && "Mapped already");
@@ -2836,7 +2838,7 @@ namespace gxfile {
         }
         else {
             UelCnt = UELTable ? UELTable->size() : 0;
-            HighMap = UELTable->UsrUel2Ent.GetHighestIndex(); // highest index
+            HighMap = UELTable->UsrUel2Ent->GetHighestIndex(); // highest index
             return true;
         }
     }
@@ -2924,7 +2926,7 @@ namespace gxfile {
             Uel[0] = '\0';
             return false;
         }
-        int EN = UELTable->UsrUel2Ent.GetMapping(uelNr);
+        int EN = UELTable->UsrUel2Ent->GetMapping(uelNr);
         utils::assignStrToBuf(EN >= 1 ? (*UELTable)[EN-1] : BADUEL_PREFIX + std::to_string(uelNr), Uel, GLOBAL_UEL_IDENT_SIZE);
         return EN >= 1;
     }
@@ -2973,7 +2975,7 @@ namespace gxfile {
             }
         }
         for(int D{}; D<FCurrentDim; D++) {
-            int KD = UELTable->UsrUel2Ent.GetMapping(KeyInt[D]);
+            int KD = UELTable->UsrUel2Ent->GetMapping(KeyInt[D]);
             if(KD < 0) {
                 ReportError(ERR_BADELEMENTINDEX);
                 return false;
@@ -3364,7 +3366,7 @@ namespace gxfile {
         if(!MajorCheckMode("FilterRegisterStart"s, fr_init) ||
             ErrorCondition(FilterNr >= 1, ERR_BAD_FILTER_NR)) return false;
 
-        CurFilter = new TDFilter{ FilterNr, UELTable->UsrUel2Ent.GetHighestIndex() };
+        CurFilter = new TDFilter{ FilterNr, UELTable->UsrUel2Ent->GetHighestIndex() };
         FilterList->AddFilter(CurFilter);
         fmode = fr_filter;
         return true;
@@ -3388,7 +3390,7 @@ namespace gxfile {
             !CheckMode("FilterRegister"s, fr_filter)) return false;
         auto &obj = *CurFilter;
         if(ErrorCondition(UelMap >= 1 && UelMap <= obj.FiltMaxUel, ERR_BAD_FILTER_INDX)) return false;
-        int EN{UELTable->UsrUel2Ent.GetMapping(UelMap)};
+        int EN{UELTable->UsrUel2Ent->GetMapping(UelMap)};
         if (EN >= 1) obj.SetFilter(UelMap, true);
         else {
             ReportError(ERR_FILTER_UNMAPPED);
@@ -3567,13 +3569,13 @@ namespace gxfile {
         if (!DP) { // we only count
             for (int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++)
                 // N-1?
-                if (DomainIndxs[N] == 1) NrElem++;
+                if (DomainIndxs.GetMapping(N) == 1) NrElem++;
         }
         else { //should we have an option to return indices in Raw order or in Mapped order?
             gdlib::gmsdata::TTblGamsData SortL;
             std::array<double, 5> vf{};
             for (int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++) {
-                if (DomainIndxs[N] == 1) {
+                if (DomainIndxs.GetMapping(N) == 1) {
                     NrElem++;
                     Index.front() = UELTable->NewUsrUel(N);
                     vf.front() = N;
@@ -3777,19 +3779,25 @@ namespace gxfile {
 
         TgdxValues Values;
         int FDim;
+        for(int D{1}; D<GLOBAL_MAX_INDEX_DIM; D++) {
+            SliceIndxs[D] = std::make_optional<TIntegerMappingImpl>();
+            SliceRevMap[D] = std::make_optional<TIntegerMappingImpl>();
+        }
+        // FIXME: Are indices ported correctly here?
+        // In Delphi the array starts at 1 and not 0 (as here)
         while (DoRead(Values.data(), FDim))
             for (int D{ 1 }; D <= FCurrentDim; D++)
-                SliceIndxs[D].SetMapping(LastElem[D], 1);
+                SliceIndxs[D]->SetMapping(LastElem[D], 1);
 
         gdxDataReadDone();
 
         for (int D{ 1 }; D <= FCurrentDim; D++) {
-            auto& obj = SliceIndxs[D];
+            auto& obj = *SliceIndxs[D];
             int Cnt{};
             for (int N{}; N <= obj.GetHighestIndex(); N++) {
                 if (obj.GetMapping(N) >= 0) {
                     obj.SetMapping(N, Cnt); // we keep it zero based
-                    SliceRevMap[D].SetMapping(Cnt, N);
+                    SliceRevMap[D]->SetMapping(Cnt, N);
                     Cnt++;
                 }
             }
@@ -3848,7 +3856,7 @@ namespace gxfile {
             for (int D{ 1 }; D <= FCurrentDim; D++) {
                 if (ElemNrs[D] == -1) {
                     HisDim++;
-                    HisIndx[HisDim] = SliceIndxs[D].GetMapping(LastElem[D]);
+                    HisIndx[HisDim] = SliceIndxs[D]->GetMapping(LastElem[D]);
                 }
                 else if(ElemNrs[D] != LastElem[D])
                     GoodIndx = false;
@@ -3879,7 +3887,7 @@ namespace gxfile {
                 utils::assignStrToBuf(SliceElems[D], KeyStr[D]);
             else {
                 HisDim++;
-                int N = SliceRevMap[D].GetMapping(SliceKeyInt[HisDim]);
+                int N = SliceRevMap[D]->GetMapping(SliceKeyInt[HisDim]);
                 if (N < 0) {
                     KeyStr[D][0] = '?';
                     KeyStr[D][1] = '\0';
@@ -4279,7 +4287,7 @@ namespace gxfile {
 
 #ifdef CPP_HASHMAP
     void TUELTable::clear() {
-        UsrUel2Ent.clear();
+        UsrUel2Ent->clear();
         nameToIndexNum.clear();
     }
 
@@ -4355,9 +4363,9 @@ namespace gxfile {
     int TUELTable::NewUsrUel(int EN) {
         int res = GetUserMap(EN);
         if (res < 0) {
-            res = UsrUel2Ent.GetHighestIndex() + 1;
+            res = UsrUel2Ent->GetHighestIndex() + 1;
             SetUserMap(EN, res);
-            UsrUel2Ent[res] = EN;
+            UsrUel2Ent->SetMapping(res, EN);
         }
         ResetMapToUserStatus();
         return res;
@@ -4371,9 +4379,9 @@ namespace gxfile {
         int res{ nameToIndexNum[insertOrder[EN-1]].num };
 #endif
         if (res < 0) {
-            res = UsrUel2Ent.GetHighestIndex() + 1;
+            res = UsrUel2Ent->GetHighestIndex() + 1;
             SetUserMap(EN, res);
-            UsrUel2Ent[res] = EN;
+            UsrUel2Ent->SetMapping(res, EN);
         }
         ResetMapToUserStatus();
         return res;
@@ -4416,7 +4424,7 @@ namespace gxfile {
         int res {itsNum};
         if (res < 0) {
             itsNum = res = UelNr;
-            UsrUel2Ent[res] = EN;
+            UsrUel2Ent->SetMapping(res, EN);
         }
         else if (res != UelNr)
             res = -1;
@@ -4429,6 +4437,7 @@ namespace gxfile {
         nameToIndexNum.set_empty_key("");
 #endif
         Reserve(10000);
+        UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
     }
 #endif
 
@@ -4521,18 +4530,6 @@ namespace gxfile {
         return F >= 0 && F < (int)Map.size() ? Map[F] : -1;
     }
 
-    void TIntegerMapping::clear() {
-        Map.clear();
-        FHighestIndex = 0;
-    }
-
-    int &TIntegerMapping::operator[](int index) {
-        if(index >= (int)Map.size())
-            growMapping(index);
-        FHighestIndex = std::max<int>(FHighestIndex, index);
-        return Map[index];
-    }
-
     int TIntegerMapping::MemoryUsed() const {
         return static_cast<int>(Map.size() * sizeof(int));
     }
@@ -4563,7 +4560,7 @@ namespace gxfile {
 
     void TUELTableLegacy::clear() {
         Clear();
-        UsrUel2Ent.clear();
+        UsrUel2Ent = nullptr;
     }
 
     int TUELTableLegacy::size() const {
@@ -4589,9 +4586,9 @@ namespace gxfile {
     int TUELTableLegacy::NewUsrUel(int EN) {
         int res = *GetObject(EN);
         if(res < 0) {
-            res = UsrUel2Ent.GetHighestIndex() + 1;
+            res = UsrUel2Ent->GetHighestIndex() + 1;
             *GetObject(EN) = res;
-            UsrUel2Ent[res] = EN;
+            UsrUel2Ent->SetMapping(res, EN);
         }
         ResetMapToUserStatus();
         return res;
@@ -4601,9 +4598,9 @@ namespace gxfile {
         int EN {AddObject(s, -1)};
         int res { *GetObject(EN)};
         if(res < 0) {
-            res = UsrUel2Ent.GetHighestIndex() + 1;
+            res = UsrUel2Ent->GetHighestIndex() + 1;
             *GetObject(EN) = res;
-            UsrUel2Ent[res] = EN;
+            UsrUel2Ent->SetMapping(res, EN);
         }
         ResetMapToUserStatus();
         return res;
@@ -4615,7 +4612,7 @@ namespace gxfile {
         if(res < 0) {
             res = UelNr;
             *GetObject(EN) = res;
-            UsrUel2Ent[res] = EN;
+            UsrUel2Ent->SetMapping(res, EN);
         } else if(res != UelNr) {
             res = -1;
         }
@@ -4633,6 +4630,7 @@ namespace gxfile {
     TUELTableLegacy::TUELTableLegacy() {
         //Buckets.reserve(10000);
         OneBased = true;
+        UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
         ResetMapToUserStatus();
     }
 
@@ -4657,7 +4655,7 @@ namespace gxfile {
     }
 
     int TUELTableLegacy::MemoryUsed() const {
-        return MemoryUsed() + UsrUel2Ent.MemoryUsed();
+        return (int)TXStrHashList::MemoryUsed() + UsrUel2Ent->MemoryUsed();
     }
 
     TUELUserMapStatus IUELTable::GetMapToUserStatus() {
@@ -4829,7 +4827,7 @@ namespace gxfile {
             if(currCap > FMAXCAPACITY) currCap = FMAXCAPACITY;
         }
         FCapacity = currCap;
-        FMapBytes = FCapacity * sizeof(int);
+        FMapBytes = (int64_t)(FCapacity * sizeof(int));
         if(!PMap) PMap = new int[FCapacity];
         else PMap = (int *)std::realloc(PMap, FMapBytes);
         std::memset(&PMap[prevCap], -1, FCapacity-prevCap);
@@ -4864,17 +4862,5 @@ namespace gxfile {
     bool TIntegerMappingLegacy::empty() const {
         return !FCapacity;
     }
-
-    int &TIntegerMappingLegacy::operator[](int F) const {
-        assert(F >= 0 && F < FCapacity);
-        return PMap[F];
-    }
-
-    void TIntegerMappingLegacy::clear() {
-        delete [] PMap;
-        FCapacity = FMapBytes = 0;
-        FHighestIndex = 0;
-    }
-
 #endif
 }

@@ -43,7 +43,7 @@
 #define TFL_LEGACY
 
 // TIntegerMapping based on manually managed heap buffer instead of std::vector<int>
-//#define TIM_LEGACY
+#define TIM_LEGACY
 
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
@@ -284,8 +284,6 @@ template<typename K, typename V, typename H, typename E>
         void SetMapping(int F, int T);
         int GetMapping(int F) const;
         int MemoryUsed() const;
-        void clear();
-        int &operator[](int index);
         bool empty() const;
         void reserve(int n);
     };
@@ -307,8 +305,6 @@ template<typename K, typename V, typename H, typename E>
         void SetMapping(int F, int T);
         int size() const;
         bool empty() const;
-        int &operator[](int F) const;
-        void clear();
     };
     using TIntegerMappingImpl = TIntegerMappingLegacy;
 #endif
@@ -351,7 +347,7 @@ template<typename K, typename V, typename H, typename E>
     protected:
         TUELUserMapStatus FMapToUserStatus {map_unknown};
     public:
-        TIntegerMappingImpl UsrUel2Ent {}; // from user uelnr to table entry
+        std::unique_ptr<TIntegerMappingImpl> UsrUel2Ent {}; // from user uelnr to table entry
         virtual ~IUELTable() = default;
         virtual void clear() = 0;
         virtual int size() const = 0;
@@ -729,7 +725,7 @@ template<typename K, typename V, typename H, typename E>
         int DataCount{}, NrMappedAdded{};
         std::array<TgdxElemSize, GLOBAL_MAX_INDEX_DIM> ElemType;
         std::string MajContext;
-        std::array<TIntegerMappingImpl, GLOBAL_MAX_INDEX_DIM> SliceIndxs, SliceRevMap;
+        std::array<std::optional<TIntegerMappingImpl>, GLOBAL_MAX_INDEX_DIM> SliceIndxs, SliceRevMap;
         int SliceSyNr{};
         gdxinterface::TgdxStrIndex SliceElems;
         //void *ReadPtr{};
