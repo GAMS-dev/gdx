@@ -363,6 +363,10 @@ namespace gdlib::datastorage {
             it++;
             return true;
         }
+
+        int MemoryUsed() const {
+            return (int)(data.size() * sizeof(EntryType));
+        }
     };
 
 }

@@ -159,11 +159,15 @@ namespace gdlib::gmsobj {
             return Get(Index);
         }
 
+        const T *GetConst(int Index) const {
+            return FList[Index - (OneBased ? 1 : 0)];
+        }
+
         T *GetLast() {
             return FCount <= 0 ? nullptr : FList[FCount-1];
         }
 
-        size_t GetMemoryUsed() {
+        size_t MemoryUsed() const {
             return FListMemory;
         }
     };
@@ -283,7 +287,7 @@ namespace gdlib::gmsobj {
             }
         }
 
-        int GetMemoryUsed() const {
+        int MemoryUsed() const {
             return FAllocated;
         }
     };

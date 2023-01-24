@@ -20,9 +20,9 @@ namespace tests::gmsobjtests {
         TBooleanBitArray bba;
         for(int i{-2}; i<4; i++)
             REQUIRE_FALSE(bba.GetBit(i));
-        REQUIRE_EQ(0, bba.GetMemoryUsed());
+        REQUIRE_EQ(0, bba.MemoryUsed());
         bba.SetBit(3, true);
-        REQUIRE(bba.GetMemoryUsed() > 0);
+        REQUIRE(bba.MemoryUsed() > 0);
         REQUIRE(bba.GetBit(3));
         REQUIRE_EQ(3, bba.GetHighIndex());
         for(int i{-2}; i<3; i++)
@@ -31,22 +31,22 @@ namespace tests::gmsobjtests {
             REQUIRE_FALSE(bba.GetBit(i));
         bba.SetHighIndex(4);
         REQUIRE_FALSE(bba.GetBit(4));
-        auto oldMem = bba.GetMemoryUsed();
+        auto oldMem = bba.MemoryUsed();
         bba.SetBit(4, true);
-        REQUIRE_EQ(bba.GetMemoryUsed(), oldMem);
+        REQUIRE_EQ(bba.MemoryUsed(), oldMem);
         auto vec = asBoolVec(bba);
         REQUIRE_EQ(5, vec.size());
         std::vector<bool> expectedVec {false, false, false, true, true};
         for(int i{}; i<5; i++)
             REQUIRE_EQ(expectedVec[i], vec[i]);
         // Make sure we need a second alloc
-        oldMem = bba.GetMemoryUsed();
-        int highIndex = bba.GetMemoryUsed()*8+10;
+        oldMem = bba.MemoryUsed();
+        int highIndex = bba.MemoryUsed()*8+10;
         bba.SetBit(highIndex, true);
         REQUIRE(bba.GetBit(3));
         REQUIRE(bba.GetBit(4));
         REQUIRE(bba.GetBit(highIndex));
-        REQUIRE(bba.GetMemoryUsed() > oldMem);
+        REQUIRE(bba.MemoryUsed() > oldMem);
     }
 
     TEST_CASE("Simple use of TXList") {
@@ -57,7 +57,7 @@ namespace tests::gmsobjtests {
             REQUIRE_EQ(i, lst.Add(&nums[i]));
         }
         REQUIRE_EQ(nums.size(), lst.GetCount());
-        REQUIRE(lst.GetMemoryUsed() > 0);
+        REQUIRE(lst.MemoryUsed() > 0);
         for(int i=0; i<lst.GetCount(); i++)
             REQUIRE_EQ(&nums[i], lst[i]);
         REQUIRE_EQ(&nums.back(), lst.GetLast());

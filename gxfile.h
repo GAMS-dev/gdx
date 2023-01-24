@@ -23,11 +23,24 @@
 #include <unordered_map>
 #include <cstring>
 
-// Use TBooleanBitArray
+//======================================================================================================================
+// Various switches for container/data structure implementation choices:
+// Either C++ standard library or GAMS custom (paul object)
+// For hashmaps: TXStrHash vs. C++ standard library and compatibles (open source hashmap libraries)
+// Some hashmaps have stable references (pointers don't invalidate on insertion/removal) but others have not
+//======================================================================================================================
+
+// Use TBooleanBitArray instead of std::vector<bool>
 #define USE_BBARRAY
 
 // TLinkedData implementation choice: Enable to use legacy implementation (with radix sort)
 #define TLD_LEGACY
+
+// TAcronymList based on paul object (TXList)
+#define TAL_LEGACY
+
+// TFilterList based on paul object (TXList)
+#define TFL_LEGACY
 
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
@@ -46,6 +59,8 @@
 #if !defined(GOOGLE_HASHMAP) && !defined(ANKERL_HASHMAP)
 #define STABLE_REFS
 #endif
+
+//======================================================================================================================
 
 namespace gdlib::gmsstrm {
     class TMiBufferedStreamDelphi;
@@ -140,7 +155,7 @@ template<typename K, typename V, typename H, typename E>
         ~TDFilter() = default;
 
         int MemoryUsed() const {
-            return FiltMap.GetMemoryUsed();
+            return FiltMap.MemoryUsed();
         }
 
         bool InFilter(int V) const {
@@ -152,19 +167,6 @@ template<typename K, typename V, typename H, typename E>
         }
     };
 #endif
-
-    // TODO: Like TAcronymList, this should use a TXList internally instead of std::vector
-    class TFilterList : public std::vector<TDFilter *> {
-    public:
-        virtual ~TFilterList();
-        void Clear();
-        TDFilter *FindFilter(int Nr);
-        void AddFilter(TDFilter *F);
-        int MemoryUsed() const {
-            // FIXME: Return actual value!
-            return 0;
-        }
-    };
 
     enum TgdxDAction {
         dm_unmapped,dm_strict,dm_filter,dm_expand
@@ -263,6 +265,7 @@ template<typename K, typename V, typename H, typename E>
         sz_integer
     };
 
+    // FIXME: Also port paul object for this!
     // N.B.: we store integers in [0..high(integer)] in TIntegerMapping, so
     // FMAXCAPACITY = high(integer) + 1 is all we will ever need, and we will
     // never get a request to grow any larger.  The checks and code
@@ -277,7 +280,7 @@ template<typename K, typename V, typename H, typename E>
         int GetHighestIndex() const;
         void SetMapping(int F, int T);
         int GetMapping(int F) const;
-        int MemoryUsed();
+        int MemoryUsed() const;
         void clear();
         int &operator[](int index);
         bool empty() const;
@@ -431,7 +434,7 @@ template<typename K, typename V, typename H, typename E>
         }
     };
 
-#ifndef TLD_LEGACY
+#ifndef TAL_LEGACY
     class TAcronymList : public std::vector<TAcronym> {
     public:
         int FindEntry(int Map) const;
@@ -443,7 +446,23 @@ template<typename K, typename V, typename H, typename E>
         int MemoryUsed();
     };
     using TAcronymListImpl = TAcronymList;
-#else
+#endif
+
+#ifndef TFL_LEGACY
+    class TFilterList : public std::vector<TDFilter *> {
+    public:
+        virtual ~TFilterList();
+        void Clear();
+        TDFilter *FindFilter(int Nr);
+        void AddFilter(TDFilter *F);
+        int MemoryUsed() const {
+            return (int)(sizeof(TDFilter) * size());
+        }
+    };
+    using TFilterListImpl = TFilterList;
+#endif
+
+#ifdef TAL_LEGACY
     class TAcronymListLegacy {
         gdlib::gmsobj::TXList<TAcronym> FList;
     public:
@@ -463,6 +482,20 @@ template<typename K, typename V, typename H, typename E>
         }
     };
     using TAcronymListImpl = TAcronymListLegacy;
+#endif
+
+#ifdef TFL_LEGACY
+    class TFilterListLegacy {
+        gdlib::gmsobj::TXList<TDFilter> FList;
+    public:
+        TFilterListLegacy() = default;
+        ~TFilterListLegacy();
+        void AddFilter(TDFilter *F);
+        void DeleteFilter(int ix);
+        TDFilter *FindFilter(int Nr);
+        int MemoryUsed() const;
+    };
+    using TFilterListImpl = TFilterListLegacy;
 #endif
 
     using TIntlValueMapDbl = std::array<double, vm_count>;
@@ -652,15 +685,13 @@ template<typename K, typename V, typename H, typename E>
         // FIXME: TODO: AS: Actually should be gdlib::gmsobj::TXStrPool!!!
         std::unique_ptr<TNameList> NameList;
         std::unique_ptr<TDomainStrList> DomainStrList;
-        // FIXME: Make sure these match functionality/semantics AND performance of TLinkedData and TTblGamsData
-        //std::map<global::gmsspecs::TIndex, TgdxValues> SortList;
         std::unique_ptr<LinkedDataType> SortList;
         std::optional<LinkedDataIteratorType> ReadPtr;
         gdlib::gmsdata::TTblGamsData ErrorList;
         PgdxSymbRecord CurSyPtr{};
         int ErrCnt{}, ErrCntTotal{};
         int LastError{}, LastRepError{};
-        TFilterList FilterList;
+        std::unique_ptr<TFilterListImpl> FilterList;
         TDFilter *CurFilter{};
         TDomainList DomainList;
         bool StoreDomainSets{true};

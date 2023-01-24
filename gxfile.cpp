@@ -365,7 +365,7 @@ namespace gxfile {
         NameList->OneBased = true;
         UELTable = std::make_unique<UELTableImplChoice>();
         AcronymList = std::make_unique<TAcronymListImpl>();
-        FilterList.Clear();
+        FilterList = std::make_unique<TFilterListImpl>();
         FFile->WriteByte(gdxHeaderNr);
         FFile->WriteString(gdxHeaderId);
         VersionRead = VERSION;
@@ -638,7 +638,7 @@ namespace gxfile {
 #ifdef YAML
             WRYAML(YFile->AddKeyItem("acronyms"));
             WRYAML(YFile->IncIndentLevel());
-            for(int N{}; N<AcronymList->size(); N++) {
+            for(int N{}; N<(int)AcronymList->size(); N++) {
                 const auto &acro = (*AcronymList)[N];
                 const auto acroName = acro.AcrName.empty() ? "UnknownACRO" + std::to_string(acro.AcrMap) : acro.AcrName;
                 WRYAML(YFile->AddKeyValue(acroName, "{text:"s +  acro.AcrText + ", map:"s + std::to_string(acro.AcrMap) + "}"s));
@@ -725,7 +725,7 @@ namespace gxfile {
         DomainStrList = nullptr;
 
         ErrorList.clear();
-        FilterList.Clear();
+        FilterList = nullptr;
         AcronymList = nullptr;
         MapSetText.clear();
 
@@ -1001,7 +1001,7 @@ namespace gxfile {
                 case DOMC_EXPAND: obj.DAction = dm_expand; break;
                 case DOMC_STRICT: obj.DAction = dm_strict; break;
                 default: // filter number
-                    obj.DFilter = FilterList.FindFilter(ADomainNrs[D]);
+                    obj.DFilter = FilterList->FindFilter(ADomainNrs[D]);
                     if(obj.DFilter) obj.DAction = dm_filter;
                     else {
                         ReportError(ERR_UNKNOWNFILTER);
@@ -1499,7 +1499,7 @@ namespace gxfile {
                     break;
                 default:
                     if(UELTable->GetMapToUserStatus() >= map_sorted) continue;
-                    TDFilter *PFilter = FilterList.FindFilter(ADomainNrs[D]);
+                    TDFilter *PFilter = FilterList->FindFilter(ADomainNrs[D]);
                     if(!PFilter->FiltSorted) return false;
                     break;
             }
@@ -1921,7 +1921,7 @@ namespace gxfile {
         NameList = std::make_unique<TNameList>();
         NameList->OneBased = true;
         AcronymList = std::make_unique<TAcronymListImpl>();
-        FilterList.Clear();
+        FilterList = std::make_unique<TFilterListImpl>();
         const int NrElemsOfSym = NrElem;
         for(int N{1}; N<=NrElemsOfSym; N++) {
             std::string S {FFile->ReadString()};
@@ -3257,7 +3257,7 @@ namespace gxfile {
     //     is used to provide the acronym index, and the AName parameter must match.
     int TGXFileObj::gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) {
         auto MapIsUnique = [this](int Indx) {
-            for(int i{}; i<AcronymList->size(); i++)
+            for(int i{}; i<(int)AcronymList->size(); i++)
                 if((*AcronymList)[i].AcrReadMap == Indx)
                     return false;
             return true;
@@ -3345,7 +3345,7 @@ namespace gxfile {
     //
     int TGXFileObj::gdxFilterExists(int FilterNr) {
         if(!MajorCheckMode("FilterExists"s, AnyReadMode)) return false;
-        return FilterList.FindFilter(FilterNr) != nullptr;
+        return FilterList->FindFilter(FilterNr) != nullptr;
     }
 
     // Brief:
@@ -3364,8 +3364,8 @@ namespace gxfile {
         if(!MajorCheckMode("FilterRegisterStart"s, fr_init) ||
             ErrorCondition(FilterNr >= 1, ERR_BAD_FILTER_NR)) return false;
 
-        FilterList.AddFilter(new TDFilter{ FilterNr, UELTable->UsrUel2Ent.GetHighestIndex() });
-        CurFilter = FilterList.back();
+        CurFilter = new TDFilter{ FilterNr, UELTable->UsrUel2Ent.GetHighestIndex() };
+        FilterList->AddFilter(CurFilter);
         fmode = fr_filter;
         return true;
     }
@@ -3531,7 +3531,7 @@ namespace gxfile {
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return false;
         int Dim{ (*NameList->GetObject(SyNr))->SDim };
         if (!Dim || ErrorCondition(DimPos >= 1 && DimPos <= Dim, ERR_BADDIMENSION)) return false;
-        TDFilter *DFilter = FilterNr == DOMC_EXPAND ? nullptr : FilterList.FindFilter(FilterNr);
+        TDFilter *DFilter = FilterNr == DOMC_EXPAND ? nullptr : FilterList->FindFilter(FilterNr);
         if (FilterNr != DOMC_EXPAND && !DFilter) {
             ReportError(ERR_UNKNOWNFILTER);
             return false;
@@ -3904,7 +3904,7 @@ namespace gxfile {
         if(DomainStrList) res += DomainStrList->MemoryUsed();
         if(SortList) res += SortList->MemoryUsed();
         res += ErrorList.MemoryUsed();
-        res += FilterList.MemoryUsed();
+        if(FilterList) res += FilterList->MemoryUsed();
         return res;
     }
 
@@ -4437,7 +4437,7 @@ namespace gxfile {
     }
 #endif
 
-#ifndef TLD_LEGACY
+#ifndef TAL_LEGACY
     int TAcronymList::FindEntry(int Map) const {
         const auto it = std::find_if(begin(), end(), [&](const auto &item) {
             return item.AcrMap == Map;
@@ -4482,6 +4482,7 @@ namespace gxfile {
     }
 #endif
 
+#ifndef TFL_LEGACY
     TDFilter *TFilterList::FindFilter(int Nr) {
         const auto it = std::find_if(begin(), end(), [&Nr](const auto *f) { return f->FiltNumber == Nr; });
         return it == end() ? nullptr : *it;
@@ -4507,6 +4508,7 @@ namespace gxfile {
     TFilterList::~TFilterList() {
         clear();
     }
+#endif
 
     int TIntegerMapping::GetHighestIndex() const {
         return FHighestIndex;
@@ -4535,7 +4537,7 @@ namespace gxfile {
         return Map[index];
     }
 
-    int TIntegerMapping::MemoryUsed() {
+    int TIntegerMapping::MemoryUsed() const {
         return static_cast<int>(Map.size() * sizeof(int));
     }
 
@@ -4663,8 +4665,7 @@ namespace gxfile {
     }
 
     int TUELTableLegacy::MemoryUsed() const {
-        // FIXME: Return actual value!
-        return 0;
+        return MemoryUsed() + UsrUel2Ent.MemoryUsed();
     }
 
     TUELUserMapStatus IUELTable::GetMapToUserStatus() {
@@ -4731,7 +4732,7 @@ namespace gxfile {
         return !count;
     }
 
-#ifdef TLD_LEGACY
+#ifdef TAL_LEGACY
     TAcronymListLegacy::~TAcronymListLegacy() {
         for (int N{}; N<FList.GetCount(); N++)
             delete FList[N];
@@ -4775,7 +4776,7 @@ namespace gxfile {
     }
     
     int TAcronymListLegacy::MemoryUsed() {
-        int res{ (int)FList.GetMemoryUsed() + FList.GetCount() * (int)sizeof(TAcronym*) };
+        int res{ (int)FList.MemoryUsed() + FList.GetCount() * (int)sizeof(TAcronym*) };
         for (int N{}; N < FList.GetCount(); N++)
             res += FList[N]->MemoryUsed();
         return res;
@@ -4785,4 +4786,42 @@ namespace gxfile {
         return FList.GetCount();
     }
 #endif
+
+#ifdef TFL_LEGACY
+    void TFilterListLegacy::AddFilter(TDFilter *F) {
+        for(int N{}; N<FList.size(); N++) {
+            if(FList[N]->FiltNumber == F->FiltNumber) {
+                DeleteFilter(N);
+                break;
+            }
+        }
+        FList.Add(F);
+    }
+
+    TFilterListLegacy::~TFilterListLegacy() {
+        while(!FList.empty())
+            DeleteFilter(FList.size()-1);
+        FList.Clear();
+    }
+
+    void TFilterListLegacy::DeleteFilter(int ix) {
+        delete FList[ix];
+        FList.Delete(ix);
+    }
+
+    TDFilter *TFilterListLegacy::FindFilter(int Nr) {
+        for(int N{}; N<FList.size(); N++)
+            if(FList[N]->FiltNumber == Nr)
+                return FList[N];
+        return nullptr;
+    }
+
+    int TFilterListLegacy::MemoryUsed() const {
+        int res{(int)(FList.MemoryUsed() + FList.size() * sizeof(TDFilter))};
+        for(int N{}; N<FList.size(); N++)
+            res += FList.GetConst(N)->MemoryUsed();
+        return res;
+    }
+#endif // TFL_LEGACY
+
 }
