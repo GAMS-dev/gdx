@@ -202,6 +202,7 @@ template<typename K, typename V, typename H, typename E>
         bool SIsCompressed;
 
         // TODO: Maybe also use std::optional here instead of std::unique_ptr
+        // TODO: Is the overhead of a std::vector to a raw heap array (int *) here relevant?
         std::unique_ptr<std::vector<int>> SDomSymbols, // real domain info
                                           SDomStrings; //relaxed domain info
 
@@ -695,7 +696,7 @@ template<typename K, typename V, typename H, typename E>
         int fComprLev{};
         std::unique_ptr<IUELTable> UELTable;
         std::unique_ptr<TSetTextList> SetTextList {};
-        std::vector<int> MapSetText;
+        std::vector<int> MapSetText; // TODO: Overhead to raw int * heap array relevant here?
         int FCurrentDim{};
         std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem, PrevElem, MinElem, MaxElem;
         std::array<std::optional<std::string>, GLOBAL_MAX_INDEX_DIM> LastStrElem;

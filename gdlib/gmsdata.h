@@ -5,6 +5,8 @@
 #include <array>
 #include <vector>
 
+#include "gmsobj.h"
+
 namespace gdlib::gmsdata {
 
 	const int BufSize = 1024 * 16;
@@ -41,5 +43,34 @@ namespace gdlib::gmsdata {
             return 0;
         }
 	};
+
+    class TGrowArrayFxd {
+        PGADataArray PBase;
+        PGADataBuffer PCurrentBuf;
+        int BaseAllocator, BaseUsed, FSize, FStoreFact;
+        int64_t FCount;
+
+    public:
+        explicit TGrowArrayFxd(int ASize) {}
+        ~TGrowArrayFxd() = default;
+        void Clear() {}
+        void *ReserveMem() { return nullptr; }
+        void *ReserveAndClear() { return nullptr; }
+        void *AddItem(const void *R) { return nullptr; }
+        uint8_t *GetItemPtrIndex(int N) { return nullptr; }
+        void GetItem(int N, void **R) {}
+        int64_t MemoryUsed() const { return 0; }
+        int64_t GetCount() const { return FCount; }
+    };
+
+    class TTblGamsDataLegacy {
+        TGrowArrayFxd DS;
+        gdlib::gmsobj::TXList<uint8_t> FList;
+        int FDim, FIndexSize, FDataSize;
+        bool FIsSorted;
+        int FLastIndex;
+
+    public:
+    };
 
 }
