@@ -298,6 +298,7 @@ namespace gdlib::strhash {
         }
 
         int64_t MemoryUsed() {
+            // Return actual value!
             return 0;
         }
 

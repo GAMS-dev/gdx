@@ -39,6 +39,7 @@ static PyObject *GDXObject_new(PyTypeObject *type, PyObject *args, PyObject *kwd
 }
 
 static int GDXObject_init(GDXObject *self, PyObject *args, PyObject *kwds) {
+    // FIXME: This function does nothing really!
     return 0;
 }
 

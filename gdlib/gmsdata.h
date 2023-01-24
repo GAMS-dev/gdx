@@ -22,6 +22,8 @@ namespace gdlib::gmsdata {
     using IndexKeys = std::array<int, 20>;
     using ValueFields = std::array<double, 5>;
 
+    // TODO: The port of this class uses C++ standard library collections instead of Paul's custom GAMS colections
+    // evalute performance impact of this choice!
 	class TTblGamsData {
         std::map<IndexKeys, ValueFields> mapping;
         std::vector<IndexKeys> keyset;
@@ -34,6 +36,10 @@ namespace gdlib::gmsdata {
         std::map<IndexKeys, ValueFields>::iterator end();
         bool empty() const;
 		void sort();
+        int MemoryUsed() const {
+            // FIXME: Return actual value!
+            return 0;
+        }
 	};
 
 }

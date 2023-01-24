@@ -153,12 +153,17 @@ template<typename K, typename V, typename H, typename E>
     };
 #endif
 
+    // TODO: Like TAcronymList, this should use a TXList internally instead of std::vector
     class TFilterList : public std::vector<TDFilter *> {
     public:
         virtual ~TFilterList();
         void Clear();
         TDFilter *FindFilter(int Nr);
         void AddFilter(TDFilter *F);
+        int MemoryUsed() const {
+            // FIXME: Return actual value!
+            return 0;
+        }
     };
 
     enum TgdxDAction {
@@ -336,6 +341,7 @@ template<typename K, typename V, typename H, typename E>
         virtual void RenameEntry(int N, const std::string &s) = 0;
         virtual int GetMaxUELLength() const = 0;
         virtual void Reserve(int n) = 0;
+        virtual int MemoryUsed() const = 0;
     };
 
 #ifdef CPP_HASHMAP
@@ -386,6 +392,8 @@ template<typename K, typename V, typename H, typename E>
         int StoreObject(const std::string& id, int mapping) override;
         const std::string operator[](int index) const override;
         void RenameEntry(int N, const std::string &s) override;
+
+        int MemoryUsed() const override;
     };
 
     std::string MakeGoodExplText(const std::string& s);

@@ -3897,9 +3897,15 @@ namespace gxfile {
     // Returns:
     //   The number of bytes used by the data objects
     int64_t TGXFileObj::gdxGetMemoryUsed() {
-        // TODO: Actually return something meaningful!
-        // ...
-        return 0;
+        int64_t res{};
+        if(UELTable) res += UELTable->MemoryUsed();
+        if(SetTextList) res += SetTextList->MemoryUsed();
+        if(NameList) res += NameList->MemoryUsed();
+        if(DomainStrList) res += DomainStrList->MemoryUsed();
+        if(SortList) res += SortList->MemoryUsed();
+        res += ErrorList.MemoryUsed();
+        res += FilterList.MemoryUsed();
+        return res;
     }
 
     // Brief:
@@ -4654,6 +4660,11 @@ namespace gxfile {
 
     void TUELTableLegacy::RenameEntry(int N, const std::string &s) {
         gdlib::strhash::TXStrHashList<int>::RenameEntry(N, s);
+    }
+
+    int TUELTableLegacy::MemoryUsed() const {
+        // FIXME: Return actual value!
+        return 0;
     }
 
     TUELUserMapStatus IUELTable::GetMapToUserStatus() {
