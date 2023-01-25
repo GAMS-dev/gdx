@@ -285,10 +285,13 @@ namespace tests::gxfiletests {
     };
 
     TEST_CASE("Benchmark filter performance (set, lookup) for boolean bit array vs. std::vector<bool> internally") {
-        auto resBoolVec = benchmarkFilterClass<TDFilterBoolVec>();
-        std::cout << "Bool vec:\nTime = " << resBoolVec.time << " peak RSS = " << resBoolVec.peakRSS << std::endl;
+        const bool quiet {true};
         auto resBBA = benchmarkFilterClass<TDFilterLegacy>();
-        std::cout << "BBA:\nTime = " << resBBA.time << " peak RSS = " << resBBA.peakRSS << std::endl;
+        auto resBoolVec = benchmarkFilterClass<TDFilterBoolVec>();
+        if(!quiet) {
+            std::cout << "BBA:\nTime = " << resBBA.time << " peak RSS = " << resBBA.peakRSS << std::endl;
+            std::cout << "Bool vec:\nTime = " << resBoolVec.time << " peak RSS = " << resBoolVec.peakRSS << std::endl;
+        }
     }
 
     TEST_SUITE_END();
