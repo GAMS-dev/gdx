@@ -1201,7 +1201,7 @@ namespace gxfile {
     /* we have to make these mask "constants" vars since we cannot
     * have large constants on input
     */
-    bool HAVE_MEM;
+    bool HAVE_MEM {};
     int64_t signMask {(int64_t)0x80000000 << 32},
             expoMask {(int64_t)0x7ff00000 << 32},
             mantMask {~(signMask | expoMask)};
@@ -3547,7 +3547,7 @@ namespace gxfile {
         // Following call also clears ErrorList
         PrepareSymbolRead("gdxGetDomain"s, SyNr, XDomains.data(), fr_raw_data);
         int AFDim;
-        std::array<double, GMS_VAL_SCALE + 1> AVals;
+        std::array<double, GMS_VAL_SCALE + 1> AVals {};
         while (DoRead(AVals.data(), AFDim)) {
             int RawNr{ LastElem[DimPos-1] };
             if (DFilter) {
@@ -4646,7 +4646,7 @@ namespace gxfile {
         return gdlib::strhash::TXStrHashList<int>::StoreObject(id, mapping);
     }
 
-    const std::string TUELTableLegacy::operator[](int index) const {
+    std::string TUELTableLegacy::operator[](int index) const {
         return GetString(index+1);
     }
 
@@ -4703,6 +4703,10 @@ namespace gxfile {
 
     int *VecSetTextList::GetObject(int i) {
         return &entries[i].node;
+    }
+
+    void VecSetTextList::reserve(int n) {
+        entries.reserve(n);
     }
 
     TgxModeSet::TgxModeSet(const std::initializer_list<TgxFileMode> modes) : modeActive(tgxfilemode_count) {
@@ -4774,6 +4778,10 @@ namespace gxfile {
 
     inline int TAcronymListLegacy::size() const {
         return FList.GetCount();
+    }
+
+    TAcronym &TAcronymListLegacy::operator[](int Index) {
+        return *FList[Index];
     }
 #endif
 

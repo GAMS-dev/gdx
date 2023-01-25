@@ -21,6 +21,9 @@ namespace gdlib::strhash {
     template<typename T>
     using PHashBucket = THashBucket<T>*;
 
+    // TODO: This is still deviating significantly from the original P3-Implementation
+    // Consider doing a more verbatim line-by-line port by also porting data structures like
+    // gdlib/gmsdata/TGrowArrayFxd and gmsheapnew
     template<typename T>
     class TXStrHashList {
     protected:

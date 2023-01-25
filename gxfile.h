@@ -214,38 +214,38 @@ template<typename K, typename V, typename H, typename E>
     using PgdxSymbRecord = TgdxSymbRecord*;
 
     enum TgdxIntlValTyp { // values stored internally via the indicator byte
-        vm_valund ,
-        vm_valna  ,
-        vm_valpin ,
-        vm_valmin ,
-        vm_valeps ,
-        vm_zero   ,
-        vm_one    ,
-        vm_mone   ,
-        vm_half   ,
-        vm_two    ,
-        vm_normal ,
+        vm_valund,
+        vm_valna,
+        vm_valpin,
+        vm_valmin,
+        vm_valeps,
+        vm_zero,
+        vm_one,
+        vm_mone,
+        vm_half,
+        vm_two,
+        vm_normal,
         vm_count
     };
 
     enum TgxFileMode {
-        f_not_open   ,
-        fr_init      ,
-        fw_init      ,
-        fw_dom_raw   ,
-        fw_dom_map   ,
-        fw_dom_str   ,
-        fw_raw_data  ,
-        fw_map_data  ,
-        fw_str_data  ,
-        f_raw_elem   ,
-        f_map_elem   ,
-        f_str_elem   ,
-        fr_raw_data  ,
-        fr_map_data  ,
-        fr_mapr_data ,
-        fr_str_data  ,
-        fr_filter    ,
+        f_not_open,
+        fr_init,
+        fw_init,
+        fw_dom_raw,
+        fw_dom_map,
+        fw_dom_str,
+        fw_raw_data,
+        fw_map_data,
+        fw_str_data,
+        f_raw_elem,
+        f_map_elem,
+        f_str_elem,
+        fr_raw_data,
+        fr_map_data,
+        fr_mapr_data,
+        fr_str_data,
+        fr_filter,
         fr_slice,
         tgxfilemode_count
     };
@@ -356,7 +356,7 @@ template<typename K, typename V, typename H, typename E>
         virtual int IndexOf(const std::string &s) = 0;
         virtual int AddObject(const std::string &id, int mapping) = 0;
         virtual int StoreObject(const std::string& id, int mapping) = 0;
-        virtual const std::string operator[](int index) const = 0;
+        virtual std::string operator[](int index) const = 0;
         virtual int GetUserMap(int i) = 0;
         virtual void SetUserMap(int EN, int N) = 0;
         virtual void ResetMapToUserStatus() = 0;
@@ -413,9 +413,8 @@ template<typename K, typename V, typename H, typename E>
         int IndexOf(const std::string &s) override;
         int AddObject(const std::string &id, int mapping) override;
         int StoreObject(const std::string& id, int mapping) override;
-        const std::string operator[](int index) const override;
+        std::string operator[](int index) const override;
         void RenameEntry(int N, const std::string &s) override;
-
         int MemoryUsed() const override;
     };
 
@@ -447,7 +446,7 @@ template<typename K, typename V, typename H, typename E>
             return 2+(int)AcrName.length()+(int)AcrText.length();
         }
 
-        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) {
+        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) const {
             S.WriteString(AcrName.empty() ? "UnknownACRO" + std::to_string(AcrMap) : AcrName);
             S.WriteString(AcrText);
             S.WriteInteger(AcrMap);
@@ -496,10 +495,7 @@ template<typename K, typename V, typename H, typename E>
         void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi& S);
         int MemoryUsed();
         int size() const;
-
-        TAcronym &operator[](int Index) {
-            return *FList[Index];
-        }
+        TAcronym &operator[](int Index);
     };
     using TAcronymListImpl = TAcronymListLegacy;
 #endif
@@ -554,20 +550,12 @@ template<typename K, typename V, typename H, typename E>
         std::vector<SetText> entries;
     public:
         bool OneBased;
-
-        void reserve(int n) {
-            entries.reserve(n);
-        }
-
+        void reserve(int n);
         int size() const;
         int Count() const;
-
         void resize(int n);
-
         int AddObject(const std::string &s, int n);
-
         const std::string &GetString(int i) const;
-
         int *GetObject(int i);
     };
 
@@ -698,10 +686,10 @@ template<typename K, typename V, typename H, typename E>
         std::unique_ptr<TSetTextList> SetTextList {};
         std::vector<int> MapSetText; // TODO: Overhead to raw int * heap array relevant here?
         int FCurrentDim{};
-        std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem, PrevElem, MinElem, MaxElem;
+        std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem{}, PrevElem{}, MinElem{}, MaxElem{};
         std::array<std::optional<std::string>, GLOBAL_MAX_INDEX_DIM> LastStrElem;
         int DataSize{};
-        tvarvaltype LastDataField;
+        tvarvaltype LastDataField{};
         // FIXME: TODO: AS: Actually should be gdlib::gmsobj::TXStrPool!!!
         std::unique_ptr<TNameList> NameList;
         std::unique_ptr<TDomainStrList> DomainStrList;
@@ -713,10 +701,10 @@ template<typename K, typename V, typename H, typename E>
         int LastError{}, LastRepError{};
         std::unique_ptr<TFilterListImpl> FilterList;
         TDFilter *CurFilter{};
-        TDomainList DomainList;
+        TDomainList DomainList{};
         bool StoreDomainSets{true};
-        TIntlValueMapDbl intlValueMapDbl, readIntlValueMapDbl;
-        TIntlValueMapI64  intlValueMapI64;
+        TIntlValueMapDbl intlValueMapDbl{}, readIntlValueMapDbl{};
+        TIntlValueMapI64  intlValueMapI64{};
         enum class TraceLevels { trl_none, trl_errors, trl_some, trl_all } TraceLevel;
         std::string TraceStr;
         int VersionRead{};
@@ -724,7 +712,7 @@ template<typename K, typename V, typename H, typename E>
         int64_t MajorIndexPosition{};
         int64_t NextWritePosition{};
         int DataCount{}, NrMappedAdded{};
-        std::array<TgdxElemSize, GLOBAL_MAX_INDEX_DIM> ElemType;
+        std::array<TgdxElemSize, GLOBAL_MAX_INDEX_DIM> ElemType{};
         std::string MajContext;
         std::array<std::optional<TIntegerMappingImpl>, GLOBAL_MAX_INDEX_DIM> SliceIndxs, SliceRevMap;
         int SliceSyNr{};
@@ -736,7 +724,7 @@ template<typename K, typename V, typename H, typename E>
         int DeltaForRead{}; // first position indicating change
         double Zvalacr{}; // tricky
         std::unique_ptr<TAcronymListImpl> AcronymList;
-        std::array<TSetBitMap *, GLOBAL_MAX_INDEX_DIM> WrBitMaps;
+        std::array<TSetBitMap *, GLOBAL_MAX_INDEX_DIM> WrBitMaps{};
         bool ReadUniverse{};
         int UniverseNr{}, UelCntOrig{}; // original uel count when we open the file
         int AutoConvert{1};
@@ -786,108 +774,59 @@ template<typename K, typename V, typename H, typename E>
 
         int gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
         int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) override;
-        int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ,
-                                 int UserInfo) override;
+        int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) override;
         int gdxDataWriteStr(const char **KeyStr, const double *Values) override;
         int gdxDataWriteDone() override;
-
         int gdxUELRegisterMapStart() override;
-
         int gdxUELRegisterMap(int UMap, const std::string &Uel) override;
-
         int gdxClose() override;
-
         int gdxResetSpecialValues();
-
         int gdxErrorStr(int ErrNr, char *ErrMsg) override;
         static int gdxErrorStrStatic(int ErrNr, char *ErrMsg);
-
         int gdxOpenRead(const std::string &FileName, int &ErrNr) override;
-
         int gdxFileVersion(char *FileStr, char *ProduceStr) override;
-
         int gdxFindSymbol(const std::string &SyId, int &SyNr) override;
-
         int gdxDataReadStr(char **KeyStr, double *Values, int &DimFrst) override;
-
         int gdxDataReadDone() override;
-
         int gdxSymbolInfo(int SyNr, char *SyId, int &Dim, int &Typ) override;
-
         int gdxDataReadStrStart(int SyNr, int &NrRecs) override;
-
         int gdxAddAlias(const std::string &Id1, const std::string &Id2) override;
-
         int gdxAddSetText(const std::string &Txt, int &TxtNr) override;
-
         int gdxDataErrorCount() override;
-
         int gdxDataErrorRecord(int RecNr,  int *KeyInt, double * Values) override;
-
         int gdxDataErrorRecordX(int RecNr,  int *KeyInt,  double *Values) override;
-
         int gdxDataReadRaw(int *KeyInt, double *Values, int &DimFrst) override;
-
         int gdxDataReadRawStart(int SyNr, int &NrRecs) override;
-
         int gdxDataWriteRaw(const int* KeyInt, const double* Values) override;
-
         int gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
-
         int gdxErrorCount() override;
-
         int gdxGetElemText(int TxtNr, char *Txt, int &Node) override;
-
         int gdxGetLastError() override;
-
         int gdxGetSpecialValues(double *Avals) override;
-
         int gdxSetSpecialValues(const double *AVals) override;
-
         int gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) override;
-
         int gdxSymbolGetDomainX(int SyNr, char **DomainIDs) override;
-
         int gdxSymbolDim(int SyNr) override;
-
         int gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, char *ExplTxt) override;
-
         int gdxSymbolSetDomain(const char **DomainIDs) override;
-
         int gdxSymbolSetDomainX(int SyNr, const char **DomainIDs) override;
-
         int gdxSystemInfo(int &SyCnt, int &UelCnt) override;
-
         int gdxUELRegisterDone() override;
-
         int gdxUELRegisterRaw(const std::string &Uel) override;
-
         int gdxUELRegisterRawStart() override;
-
         int gdxUELRegisterStr(const std::string &Uel, int &UelNr) override;
-
         int gdxUELRegisterStrStart() override;
-
         int gdxUMUelGet(int UelNr, char *Uel, int &UelMap) override;
-
         int gdxUMUelInfo(int &UelCnt, int &HighMap) override;
-
         int gdxCurrentDim() override;
-
         int gdxRenameUEL(const std::string &OldName, const std::string &NewName) override;
-
         int gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) override;
-
         int gdxGetUEL(int uelNr, char *Uel) override;
-
         int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
-
         int gdxDataWriteMap(const int *KeyInt, const double *Values) override;
-
         int gdxDataReadMapStart(int SyNr, int &NrRecs) override;
-
         int gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst) override;
 
         void SetTraceLevel(TraceLevels tl);
@@ -948,7 +887,6 @@ template<typename K, typename V, typename H, typename E>
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from
 
-    std::string MakeGoodExplText(const std::string &s);
     bool IsGoodIdent(const std::string &S);
 
     int ConvertGDXFile(const std::string &fn, const std::string &MyComp);
