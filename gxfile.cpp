@@ -203,12 +203,39 @@ namespace gxfile {
 
     int GetEnvCompressFlag();
 
+    static int SystemP(const std::string &cmd, int &ProgRC) {
+        int res {std::system(cmd.c_str())};
+#if defined(_WIN32)
+        ProgRC = 0;
+#else
+        if(WIFEXITED(res)) {
+            ProgRC = WEXITSTATUS(res);
+            if(ProgRC == 127) {
+                ProgRC = 0;
+                return 127;
+            }
+            if(ProgRC == 126) {
+                ProgRC = 0;
+                return 126;
+            }
+        } else if(WIFSIGNALED(res)) {
+            ProgRC = WTERMSIG(res);
+            return 1;
+        } else {
+            ProgRC = 0;
+            return 2;
+        }
+#endif
+        return res;
+    }
+
     int ConvertGDXFile(const std::string &fn, const std::string &MyComp) {
         std::string Conv {utils::trim(utils::uppercase(rtl::sysutils_p3::QueryEnvironmentVariable(strGDXCONVERT)))};
         if(Conv.empty()) Conv = "V7"s;
         std::string Comp = Conv == "V5" ? ""s : (!GetEnvCompressFlag() ? "U" : "C");
         if(utils::sameText(Conv+Comp, "V7"+MyComp)) return 0;
-        return system(("gdxcopy -"s + Conv+Comp + " -Replace "s + utils::quoteWhitespace(fn, '\"')).c_str());
+        int progRC, res {SystemP("gdxcopy -"s + Conv+Comp + " -Replace "s + utils::quoteWhitespace(fn, '\"'), progRC)};
+        return progRC ? ERR_GDXCOPY - progRC : res;
     }
 
     // If both single and double quotes appear in the string, replace
