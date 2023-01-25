@@ -114,18 +114,18 @@ template<typename K, typename V, typename H, typename E>
         }
     };
 
-#ifndef USE_BBARRAY
-    struct TDFilter {
+    // Uses std::vector of booleans internally
+    struct TDFilterBoolVec {
         int FiltNumber, FiltMaxUel;
         std::vector<bool> FiltMap{};
         bool FiltSorted{};
 
-        TDFilter(int Nr, int UserHigh) :
+        TDFilterBoolVec(int Nr, int UserHigh) :
             FiltNumber{Nr},
             FiltMaxUel{UserHigh}
         {}
 
-        ~TDFilter() = default;
+        ~TDFilterBoolVec() = default;
 
         int64_t MemoryUsed() const {
             return static_cast<int64_t>(FiltMap.capacity());
@@ -141,13 +141,14 @@ template<typename K, typename V, typename H, typename E>
             FiltMap[ix] = v;
         }
     };
-#else
-    struct TDFilter {
+
+    // Uses gdlib::gmsobj::TBooleanBitArray internally
+    struct TDFilterLegacy {
         int FiltNumber, FiltMaxUel;
         gdlib::gmsobj::TBooleanBitArray FiltMap;
         bool FiltSorted;
 
-        TDFilter(int Nr, int UserHigh) :
+        TDFilterLegacy(int Nr, int UserHigh) :
             FiltNumber{Nr},
             FiltMaxUel{UserHigh},
             FiltMap{},
@@ -155,7 +156,7 @@ template<typename K, typename V, typename H, typename E>
         {
         }
 
-        ~TDFilter() = default;
+        ~TDFilterLegacy() = default;
 
         int MemoryUsed() const {
             return FiltMap.MemoryUsed();
@@ -169,6 +170,11 @@ template<typename K, typename V, typename H, typename E>
             FiltMap.SetBit(ix, v);
         }
     };
+
+#ifdef USE_BBARRAY
+    using TDFilter = TDFilterLegacy;
+#else
+    using TDFilter = TDFilterBoolVec;
 #endif
 
     enum TgdxDAction {
