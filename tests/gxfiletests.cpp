@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <iostream>
 #include <algorithm>
+#include <random>
 
 #include "pfgdx.hpp"
 
@@ -11,8 +12,6 @@
 #include <windows.h>
 #include <Psapi.h>
 #include <processthreadsapi.h>
-#include <random>
-
 #endif
 
 using namespace gxfile;
