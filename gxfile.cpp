@@ -230,14 +230,21 @@ namespace gxfile {
         return res;
     }
 
+    static inline bool isLetter(char c) {
+        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+    }
+
+    static inline bool isLetterDigitOrUnderscore(char c) {
+        return isLetter(c) || (c >= '0' && c <= '9') || (c == '_');
+    }
+
     bool IsGoodIdent(const std::string &S) {
-        const int MaxNameLen = 63; // starting version 149
-        if(!S.empty() && (int)S.length() <= MaxNameLen && isalpha(S.front())) {
-            for(int n{1}; n<(int)S.length(); n++)
-                if(!isalnum(S[n]) && S[n] != '_') return false;
-            return true;
-        }
-        return false;
+        if(S.empty() || (int)S.length() >= GLOBAL_UEL_IDENT_SIZE || !isLetter(S.front()))
+            return false;
+        for(int n{1}; n<(int)S.length(); n++)
+            if(!isLetterDigitOrUnderscore(S[n]))
+                return false;
+        return true;
     }
 
     static TgdxElemSize GetIntegerSize(int N) {
