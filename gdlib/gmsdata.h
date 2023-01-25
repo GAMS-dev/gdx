@@ -5,6 +5,8 @@
 #include <array>
 #include <vector>
 
+#include "../expertapi/gclgms.h"
+
 #include "gmsobj.h"
 
 namespace gdlib::gmsdata {
@@ -12,17 +14,18 @@ namespace gdlib::gmsdata {
 	const int BufSize = 1024 * 16;
 
 	struct TGADataBuffer {
-		int BytesUsed{}, filler{};
+		int BytesUsed{},
+            filler{}; //so a buffer can start on 8 byte boundary
 		std::array<uint8_t, BufSize> Buffer{};
 	};
-	using PGADataBuffer = TGADataBuffer;
-	using TGADataArray = std::array<PGADataBuffer, 1024 * 1024 * 257 - 2>;
-	using PGADataArray = TGADataArray*;
+
+	using PGADataBuffer = TGADataBuffer *;
+	using PGADataArray = TGADataBuffer *; // dynamic heap array of pointers
 
 	using TXIntList = std::vector<int>;
 
-    using IndexKeys = std::array<int, 20>;
-    using ValueFields = std::array<double, 5>;
+    using IndexKeys = std::array<int, GLOBAL_MAX_INDEX_DIM>;
+    using ValueFields = std::array<double, GMS_VAL_MAX>;
 
     // TODO: The port of this class uses C++ standard library collections instead of Paul's custom GAMS colections
     // evalute performance impact of this choice!
@@ -45,24 +48,25 @@ namespace gdlib::gmsdata {
 	};
 
     class TGrowArrayFxd {
-        PGADataArray PBase;
-        PGADataBuffer PCurrentBuf;
-        int BaseAllocator, BaseUsed, FSize, FStoreFact;
-        int64_t FCount;
+        PGADataArray PBase {};
+        PGADataBuffer PCurrentBuf {};
+        int BaseAllocated {}, BaseUsed {-1}, FSize, FStoreFact;
+        int64_t FCount {};
 
     public:
-        explicit TGrowArrayFxd(int ASize) {}
-        ~TGrowArrayFxd() = default;
-        void Clear() {}
-        void *ReserveMem() { return nullptr; }
-        void *ReserveAndClear() { return nullptr; }
-        void *AddItem(const void *R) { return nullptr; }
-        uint8_t *GetItemPtrIndex(int N) { return nullptr; }
-        void GetItem(int N, void **R) {}
-        int64_t MemoryUsed() const { return 0; }
-        int64_t GetCount() const { return FCount; }
+        explicit TGrowArrayFxd(int ASize);
+        ~TGrowArrayFxd();
+        void Clear();
+        void *ReserveMem();
+        void *ReserveAndClear();
+        void *AddItem(const void *R);
+        uint8_t *GetItemPtrIndex(int N);
+        void GetItem(int N, void **R);
+        int64_t MemoryUsed() const;
+        int64_t GetCount() const;
     };
 
+    // FIXME: Work in progress!
     class TTblGamsDataLegacy {
         TGrowArrayFxd DS;
         gdlib::gmsobj::TXList<uint8_t> FList;
