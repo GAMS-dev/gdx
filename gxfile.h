@@ -427,36 +427,16 @@ template<typename K, typename V, typename H, typename E>
     std::string MakeGoodExplText(const std::string& s);
 
     struct TAcronym {
-        // TODO: Evaluate using char* instead of std::strings here
         std::string AcrName{}, AcrText{};
         int AcrMap{}, AcrReadMap{};
         bool AcrAutoGen{};
 
-        TAcronym(std::string Name, const std::string& Text, int Map)
-            : AcrName{std::move( Name )}, AcrText{ MakeGoodExplText(Text) }, AcrMap{ Map }, AcrReadMap{ -1 }, AcrAutoGen{} {
-        }
-
-        explicit TAcronym(gdlib::gmsstrm::TXStreamDelphi &S) : TAcronym("", "", 0) {
-            FillFromStream(S);
-        }
-
-        void FillFromStream(gdlib::gmsstrm::TXStreamDelphi &S) {
-            AcrName = S.ReadString();
-            AcrText = S.ReadString();
-            AcrMap = S.ReadInteger();
-        }
-
+        TAcronym(std::string Name, const std::string& Text, int Map);
+        explicit TAcronym(gdlib::gmsstrm::TXStreamDelphi &S);
+        void FillFromStream(gdlib::gmsstrm::TXStreamDelphi &S);
         TAcronym() = default;
-
-        int MemoryUsed() const {
-            return 2+(int)AcrName.length()+(int)AcrText.length();
-        }
-
-        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) const {
-            S.WriteString(AcrName.empty() ? "UnknownACRO" + std::to_string(AcrMap) : AcrName);
-            S.WriteString(AcrText);
-            S.WriteInteger(AcrMap);
-        }
+        int MemoryUsed() const;
+        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) const;
     };
 
 #ifndef TAL_LEGACY

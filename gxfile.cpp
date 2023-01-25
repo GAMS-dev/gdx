@@ -4910,4 +4910,32 @@ namespace gxfile {
         return !FCapacity;
     }
 #endif
+
+    TAcronym::TAcronym(std::string Name, const std::string &Text, int Map) :
+        AcrName { std::move(Name) },
+        AcrText { MakeGoodExplText(Text) },
+        AcrMap{ Map },
+        AcrReadMap{ -1 },
+        AcrAutoGen{} {
+    }
+
+    TAcronym::TAcronym(TXStreamDelphi &S) : TAcronym("", "", 0) {
+        FillFromStream(S);
+    }
+
+    void TAcronym::FillFromStream(TXStreamDelphi &S) {
+        AcrName = S.ReadString();
+        AcrText = S.ReadString();
+        AcrMap = S.ReadInteger();
+    }
+
+    int TAcronym::MemoryUsed() const {
+        return 2 + (int)AcrName.length() + (int)AcrText.length();
+    }
+
+    void TAcronym::SaveToStream(TXStreamDelphi &S) const {
+        S.WriteString(AcrName.empty() ? "UnknownACRO" + std::to_string(AcrMap) : AcrName);
+        S.WriteString(AcrText);
+        S.WriteInteger(AcrMap);
+    }
 }
