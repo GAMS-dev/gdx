@@ -507,6 +507,7 @@ namespace gdlib::strhash {
             else { HashTableSize = HashSize_1; ReHashCnt = Next_1; }
             SizeOfHashTable = HashTableSize * sizeof(THashBucket<T>*);
             PHashTable = (THashBucket<T> **)std::malloc(SizeOfHashTable);
+            std::memset(PHashTable, 0, SizeOfHashTable);
         }
 
         void HashAll() {
@@ -532,27 +533,85 @@ namespace gdlib::strhash {
         }
 
         int AddObject(const std::string &s, T AObj) {
-            // FIXME: Implement this!
-            return 0;
+            if(FCount >= ReHashCnt) HashAll();
+            int HV{Hash(s)};
+            THashBucket<T> *PBuck {PHashTable[HV]};
+            while(PBuck) {
+                if(!EntryEqual(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
+                else return PBuck->StrNr + (OneBased ? 1 : 0);
+            }
+            PBuck = Buckets.ReserveMem();
+            auto obj = PBuck;
+            obj->NextBucket = PHashTable[HV];
+            PHashTable[HV] = PBuck;
+            obj->StrNr = FCount; // before it was added! zero based
+            int res{FCount + (OneBased ? 1 : 0)};
+            if(SortMap) {
+                (*SortMap)[FCount] = FCount;
+                FSorted = false;
+            }
+            FCount++; // ugly
+            obj->StrP = gmsobj::NewString(s);
+            obj->Obj = AObj;
+            return res;
         }
 
         int StoreObject(const std::string &s, T AObj) {
-            // FIXME: Implement this!
-            return 0;
+            if(PHashTable) ClearHashTable();
+            THashBucket<T> *PBuck = Buckets.ReserveMem();
+            auto obj = PBuck;
+            obj->NextBucket = nullptr;
+            obj->StrNr = FCount; // before it was added!
+            int res{FCount + (OneBased ? 1 : 0)};
+            if(SortMap) {
+                (*SortMap)[FCount] = FCount;
+                FSorted = false;
+            }
+            FCount++; // ugly
+            obj->StrP  = gmsobj::NewString(s);
+            obj->Obj = AObj;
+            return res;
         }
 
         std::string GetString(int N) const {
-            // FIXME: Implement this!
-            return {};
+            return Buckets.GetItemPtrIndexConst(N-(OneBased ? 1 : 0))->StrP;
         }
 
         void RenameEntry(int N, const std::string &s) {
-            // FIXME: Implement this!
+            N -= OneBased ? 1 : 0;
+            if(FSorted) {
+                SortMap = nullptr;
+                FSorted = false;
+            }
+            if(PHashTable) {
+                int HV0 {Hash(Buckets.GetItemPtrIndexConst(N)->StrP)};
+                int HV1 {Hash(s)};
+                if(HV0 != HV1) {
+                    THashBucket<T> *PrevBuck{}, *PBuck {PHashTable[HV0]};
+                    while(true) {
+                        if(PBuck->StrNr == N) break;
+                        PrevBuck = PBuck;
+                        PBuck = PBuck->NextBucket;
+                    }
+                    if(!PrevBuck) PHashTable[HV0] = PBuck->NextBucket;
+                    else PrevBuck->NextBucket = PBuck->NextBucket;
+                    PBuck->NextBucket = PHashTable[HV1];
+                    PHashTable[HV1] = PBuck;
+                }
+            }
+            char **strRef = &Buckets.GetItemPtrIndex(N)->StrP;
+            delete [] *strRef;
+            *strRef = gmsobj::NewString(s);
         }
 
         int64_t MemoryUsed() const {
-            // FIXME: Implement this!
-            return 0;
+            int64_t res{};
+            for(int N{}; N<FCount; N++)
+                res += strlen(Buckets.GetItemPtrIndexConst(N)->StrP) + 1;
+            res += Buckets.MemoryUsed();
+            if(PHashTable) res += SizeOfHashTable;
+            if(SortMap) res += SortMap->MemoryUsed();
+            return res;
         }
 
     };

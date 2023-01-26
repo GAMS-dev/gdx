@@ -179,6 +179,11 @@ namespace gdlib::gmsobj {
         return buf;
     }
 
+    inline char *NewString(const std::string &s) {
+        size_t memSize;
+        return NewString(s, memSize);
+    }
+
     class TXStrings : public TXList<char> {
     private:
         size_t FStrMemory;
