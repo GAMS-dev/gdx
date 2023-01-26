@@ -426,7 +426,7 @@ namespace gdlib::strhash {
         THashBucket<T> **PHashTable{};
         std::unique_ptr<gdlib::gmsdata::TXIntList> SortMap{};
         int64_t SizeOfHashTable{};
-        int HashTableSize{}, ReHashCnt{};
+        int ReHashCnt{};
         bool FSorted{};
 
         void ClearHashTable() {
@@ -437,15 +437,23 @@ namespace gdlib::strhash {
         }
 
     protected:
-        int FCount{};
-
-        T *GetObject(int N) {
-            return &Buckets.GetItemPtrIndex(N-(OneBased ? 1 : 0))->Obj;
-        }
-
+        int HashTableSize{}, FCount{};
         gdlib::gmsdata::TGrowArrayFxd<THashBucket<T>> Buckets;
+
     public:
         bool OneBased{};
+
+        T* GetObject(int N) {
+            return &Buckets.GetItemPtrIndex(N - (OneBased ? 1 : 0))->Obj;
+        }
+
+        T* operator[](int N) {
+            return GetObject(N);
+        }
+
+        T& operator[](const std::string& key) {
+            return *GetObject(IndexOf(key));
+        }
 
         virtual ~TXStrHashListLegacy() {
             Clear();
@@ -562,6 +570,10 @@ namespace gdlib::strhash {
             return res;
         }
 
+        int Add(const std::string& s) {
+            return AddObject(s, nullptr);
+        }
+
         int StoreObject(const std::string &s, T AObj) {
             if(PHashTable) ClearHashTable();
             THashBucket<T> *PBuck = Buckets.ReserveMem();
@@ -620,6 +632,66 @@ namespace gdlib::strhash {
             return res;
         }
 
+        int size() const {
+            return FCount;
+        }
+
+        int Count() const {
+            return FCount;
+        }
+
+        bool empty() const {
+            return !FCount;
+        }
+
+        template<typename T2>
+        void SaveToStream(T2& s) {
+            s.WriteInteger(FCount);
+            for (int N{ OneBased ? 1 : 0 }; N < FCount + (OneBased ? 1 : 0); N++)
+                s.WriteString(GetString(N));
+        }
+
+        template<typename T2>
+        void LoadFromStream(T2& s) {
+            Clear();
+            int Cnt{ s.ReadInteger() };
+            for (int N{}; N < Cnt; N++)
+                StoreObject(s.ReadString(), nullptr);
+        }
+    };
+
+    // Specialization when it is not a pointer type
+    template<>
+    inline int TXStrHashListLegacy<uint8_t>::Add(const std::string& s) {
+        return AddObject(s, 0);
+    }
+
+    template<>
+    template<typename T2>
+    inline void TXStrHashListLegacy<uint8_t >::LoadFromStream(T2& s) {
+        Clear();
+        int Cnt{ s.ReadInteger() };
+        for (int N{}; N < Cnt; N++)
+            StoreObject(s.ReadString(), 0);
+    }
+
+    template<typename T>
+    class TXCSStrHashListLegacy : public TXStrHashListLegacy<T> {
+    protected:
+        int Hash(const std::string& s) override {
+            int res{};
+            for (char c : s)
+                res = 211 * res + c;
+            return (res & 0x7FFFFFFF) % this->HashTableSize;
+        }
+
+        bool EntryEqual(const std::string& ps1, const std::string& ps2) override {
+            return ps1 == ps2;
+        }
+
+        bool EntryEqual(const char* ps1, const char* ps2) override {
+            return !strcmp(ps1, ps2);
+        }
     };
 
 }

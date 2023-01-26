@@ -45,6 +45,9 @@
 // TIntegerMapping based on manually managed heap buffer instead of std::vector<int>
 #define TIM_LEGACY
 
+// Only if no other C++-hashmap is chosen, switch to TXStrHash implementation as close as possible to original P3 one
+//#define TSH_LEGACY
+
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
 #if defined(GOOGLE_HASHMAP)
@@ -404,8 +407,18 @@ template<typename K, typename V, typename H, typename E>
 #endif
 
     template<typename T>
-    //using TXStrHashListImpl = gdlib::strhash::TXStrHashListLegacy<T>;
+#ifdef TSH_LEGACY
+    using TXStrHashListImpl = gdlib::strhash::TXStrHashListLegacy<T>;
+#else
     using TXStrHashListImpl = gdlib::strhash::TXStrHashList<T>;
+#endif
+
+    template<typename T>
+#ifdef TSH_LEGACY
+    using TXCSStrHashListImpl = gdlib::strhash::TXCSStrHashListLegacy<T>;
+#else
+    using TXCSStrHashListImpl = gdlib::strhash::TXCSStrHashList<T>;
+#endif
 
     class TUELTableLegacy : public IUELTable, public TXStrHashListImpl<int> {
     public:
@@ -646,15 +659,15 @@ template<typename K, typename V, typename H, typename E>
         // FIXME: Using std::unordered_map based impl of this type until gdlib/gmsobj/TXStrPool is ported fully
         using TSetTextList = WrapCxxUnorderedMap<int, std::hash<std::string>, caseSensitiveStrEquality>;
     #else
-        using TSetTextList = gdlib::strhash::TXCSStrHashList<int>;
+        using TSetTextList = TXCSStrHashListImpl<int>;
     #endif
 
-    using TNameList = gdlib::strhash::TXStrHashList<PgdxSymbRecord>;
+    using TNameList = TXStrHashListImpl<PgdxSymbRecord>;
 #endif
 
     // FIXME: It appears the object field is not actually needed
     // Find a way to use TXStrHashList anyways (w/out wasting a byte per entry as it is right now)
-    using TDomainStrList = gdlib::strhash::TXStrHashList<uint8_t>;
+    using TDomainStrList = TXStrHashListImpl<uint8_t>;
 
     enum tvarvaltype {
         // 1     2           3        4        5
