@@ -13,7 +13,8 @@ namespace tests::gmsdatatests {
         TGrowArrayFxd<int> gaf;
         REQUIRE_EQ(0, gaf.GetCount());
         REQUIRE_EQ(0, gaf.MemoryUsed());
-        const int ub {10};
+        // make sure we need at least three fixed size buffers as storage
+        const int ub {BufSize/sizeof(int)*3+1};
         for(int n{}; n<ub; n++)
             gaf.AddItem(&n); // add item actually copies contents
         REQUIRE_EQ(ub, gaf.GetCount());
