@@ -30,5 +30,22 @@ namespace tests::gmsdatatests {
         REQUIRE_EQ(0, gaf.MemoryUsed());
     }
 
+    TEST_CASE("Test basic usage of TXIntList") {
+        TXIntList lst;
+        REQUIRE_EQ(0, lst.GetCount());
+        REQUIRE_EQ(0, lst.MemoryUsed());
+        for(int i{}; i<100; i++)
+            lst.Add(i);
+        REQUIRE_EQ(100, lst.GetCount());
+        REQUIRE(lst.MemoryUsed() > 0);
+        for(int i{}; i<100; i++)
+            REQUIRE_EQ(i, lst[i]);
+        lst.Exchange(0, 1);
+        REQUIRE_EQ(1, lst[0]);
+        REQUIRE_EQ(0, lst[1]);
+        lst[0] = 24;
+        REQUIRE_EQ(24, lst[0]);
+    }
+
     TEST_SUITE_END();
 }

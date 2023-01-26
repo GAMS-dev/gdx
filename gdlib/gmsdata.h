@@ -46,6 +46,7 @@ namespace gdlib::gmsdata {
         TGADataBuffer** PBase{}; // dynamic heap array of pointers
         TGADataBuffer*  PCurrentBuf{};
         int BaseAllocated{}, BaseUsed{ -1 }, FSize, FStoreFact;
+    protected:
         int64_t FCount{};
     public:
         explicit TGrowArrayFxd() :
@@ -53,7 +54,7 @@ namespace gdlib::gmsdata {
             FStoreFact{ BufSize / FSize }
         {}
 
-        ~TGrowArrayFxd() {
+        virtual ~TGrowArrayFxd() {
             Clear();
         }
 
@@ -107,6 +108,10 @@ namespace gdlib::gmsdata {
             return (T*)&PBase[N / FStoreFact]->Buffer[(N % FStoreFact) * FSize];
         }
 
+        T* GetItemPtrIndexConst(int N) const {
+            return (T*)&PBase[N / FStoreFact]->Buffer[(N % FStoreFact) * FSize];
+        }
+
         void GetItem(int N, T** R) {
             T* PB = GetItemPtrIndex(N);
             std::memcpy(R, PB, FSize);
@@ -119,6 +124,44 @@ namespace gdlib::gmsdata {
         int64_t GetCount() const {
             return FCount;
         }
+    };
+
+    class TXIntList : public TGrowArrayFxd<int> {
+        int &GetItems(int Index) const {
+            return *GetItemPtrIndexConst(Index);
+        }
+
+        void SetItems(int Index, int V) {
+            while(Index >= FCount) ReserveAndClear();
+            *GetItemPtrIndex(Index) = V;
+        }
+
+    public:
+        TXIntList() = default;
+        ~TXIntList() override = default;
+
+        int Add(int Item) {
+            int res{(int)FCount};
+            AddItem(&Item);
+            return res;
+        }
+
+        void Exchange(int Index1, int Index2) {
+            int *p1 {GetItemPtrIndex(Index1)}, *p2 {GetItemPtrIndex(Index2)};
+            int t{*p1};
+            *p1 = *p2;
+            *p2 = t;
+        }
+
+        int &operator[](int Index) const {
+            return GetItems(Index);
+        }
+
+        int &operator[](int Index) {
+            while(Index >= FCount) ReserveAndClear();
+            return *GetItemPtrIndex(Index);
+        }
+
     };
 
     // FIXME: Work in progress!
