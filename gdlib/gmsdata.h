@@ -124,6 +124,14 @@ namespace gdlib::gmsdata {
         int64_t GetCount() const {
             return FCount;
         }
+
+        int64_t size() const {
+            return FCount;
+        }
+
+        T *operator[](int N) const {
+            return GetItemPtrIndexConst(N);
+        }
     };
 
     class TXIntList : public TGrowArrayFxd<int> {

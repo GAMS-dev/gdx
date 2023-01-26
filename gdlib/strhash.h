@@ -3,6 +3,7 @@
 #include "gmsstrm.h"
 #include "../utils.h"
 #include "datastorage.h"
+#include "gmsdata.h"
 
 #include <vector>
 #include <string>
@@ -415,6 +416,145 @@ namespace gdlib::strhash {
         bool EntryEqual(const char *ps1, const char *ps2) override {
             return !strcmp(ps1, ps2);
         }
+    };
+
+    // This port of the central hashmap class used by the GDX object is as
+    // close to the original P3/Delphi implementation as possible
+    // in order to hopefully match its performance and memory characteristics.
+    template<typename T>
+    class TXStrHashListLegacy {
+        THashBucket<T> **PHashTable{};
+        std::unique_ptr<gdlib::gmsdata::TXIntList> SortMap{};
+        int64_t SizeOfHashTable{};
+        int HashTableSize{}, ReHashCnt{};
+        bool FSorted{};
+
+        void ClearHashTable() {
+            if(PHashTable) std::free(PHashTable);
+            PHashTable = nullptr;
+            HashTableSize = ReHashCnt = 0;
+            SizeOfHashTable = 0;
+        }
+
+    protected:
+        int FCount{};
+
+        T *GetObject(int N) {
+            return &Buckets.GetItemPtrIndex(N-(OneBased ? 1 : 0))->Obj;
+        }
+
+        gdlib::gmsdata::TGrowArrayFxd<THashBucket<T>> Buckets;
+    public:
+        bool OneBased{};
+
+        void Clear() {
+            for(int N{OneBased ? 1 : 0}; N<FCount + (OneBased ? 1 : 0); N++)
+                FreeItem(N);
+            for(int N{}; N<FCount; N++)
+                delete [] Buckets.GetItemPtrIndex(N)->StrP;
+            Buckets.Clear();
+            FCount = 0;
+            ClearHashTable();
+            SortMap = nullptr;
+            FSorted = false;
+        }
+
+        virtual void FreeItem(int N) {
+            // noop
+        }
+
+        virtual int Hash(const std::string &s) {
+            int res{};
+            for(char c : s)
+                res = 211 * res + toupper(c);
+            return (res & 0x7FFFFFFF) % HashTableSize;
+        }
+
+        virtual bool EntryEqual(const char *ps1, const char *ps2) {
+#if defined(_WIN32)
+            return !_stricmp(ps1, ps2);
+#else
+            return !strcasecmp(ps1, ps2);
+#endif
+        }
+
+        virtual bool EntryEqual(const std::string &ps1, const std::string &ps2) {
+            return utils::sameText(ps1, ps2);
+        }
+
+        virtual int Compare(const std::string &ps1, const std::string &ps2) {
+            return utils::strCompare(ps1, ps2);
+        }
+
+        void HashTableReset(int ACnt) {
+            const int   HashSize_1 = 997,
+                    HashSize_2 = 9973,
+                    HashSize_3 = 99991,
+                    HashSize_4 = 999979,
+                    HashSize_5 = 9999991,
+                    HashSize_6 = 99999989,
+                    Next_1 = 1500,
+                    Next_2 = 15000,
+                    Next_3 = 150000,
+                    Next_4 = 1500000,
+                    Next_5 = 15000000,
+                    Next_6 = std::numeric_limits<int>::max();
+            if (ACnt >= Next_5) { HashTableSize = HashSize_6; ReHashCnt = Next_6; }
+            else if(ACnt >= Next_4) { HashTableSize = HashSize_5; ReHashCnt = Next_5; }
+            else if(ACnt >= Next_3) { HashTableSize = HashSize_4; ReHashCnt = Next_4; }
+            else if(ACnt >= Next_2) { HashTableSize = HashSize_3; ReHashCnt = Next_3; }
+            else if(ACnt >= Next_1) { HashTableSize = HashSize_2; ReHashCnt = Next_2; }
+            else { HashTableSize = HashSize_1; ReHashCnt = Next_1; }
+            SizeOfHashTable = HashTableSize * sizeof(THashBucket<T>*);
+            PHashTable = (THashBucket<T> **)std::malloc(SizeOfHashTable);
+        }
+
+        void HashAll() {
+            if(PHashTable) std::free(PHashTable);
+            HashTableReset(FCount);
+            for(int N{}; N<FCount; N++) {
+                PHashBucket<T> PBuck = Buckets.GetItemPtrIndex(N);
+                int HV{Hash(PBuck->StrP)};
+                PBuck->NextBucket = PHashTable[HV];
+                PHashTable[HV] = PBuck;
+            }
+        }
+
+        int IndexOf(const std::string &S) {
+            if(!PHashTable) HashAll();
+            int HV{Hash(S)};
+            PHashBucket<T> PBuck {PHashTable[HV]};
+            while(PBuck) {
+                if(!EntryEqual(PBuck->StrP, S)) PBuck = PBuck->NextBucket;
+                else return PBuck->StrNr + (OneBased ? 1 : 0);
+            }
+            return -1;
+        }
+
+        int AddObject(const std::string &s, T AObj) {
+            // FIXME: Implement this!
+            return 0;
+        }
+
+        int StoreObject(const std::string &s, T AObj) {
+            // FIXME: Implement this!
+            return 0;
+        }
+
+        std::string GetString(int N) const {
+            // FIXME: Implement this!
+            return {};
+        }
+
+        void RenameEntry(int N, const std::string &s) {
+            // FIXME: Implement this!
+        }
+
+        int64_t MemoryUsed() const {
+            // FIXME: Implement this!
+            return 0;
+        }
+
     };
 
 }

@@ -4656,8 +4656,8 @@ namespace gxfile {
 
     int TUELTableLegacy::GetMaxUELLength() const {
         int maxLen{};
-        for(auto &bucket : Buckets)
-            maxLen = std::max<int>(static_cast<int>(strlen(bucket->StrP)), maxLen);
+        for(int i{}; i<Buckets.size(); i++)
+            maxLen = std::max<int>(static_cast<int>(strlen(Buckets[i]->StrP)), maxLen);
         return maxLen;
     }
 
@@ -4669,15 +4669,15 @@ namespace gxfile {
     }
 
     int TUELTableLegacy::IndexOf(const std::string &s) {
-        return gdlib::strhash::TXStrHashList<int>::IndexOf(s);
+        return TXStrHashListImpl<int>::IndexOf(s);
     }
 
     int TUELTableLegacy::AddObject(const std::string &id, int mapping) {
-        return gdlib::strhash::TXStrHashList<int>::AddObject(id, mapping);
+        return TXStrHashListImpl<int>::AddObject(id, mapping);
     }
 
     int TUELTableLegacy::StoreObject(const std::string& id, int mapping) {
-        return gdlib::strhash::TXStrHashList<int>::StoreObject(id, mapping);
+        return TXStrHashListImpl<int>::StoreObject(id, mapping);
     }
 
     std::string TUELTableLegacy::operator[](int index) const {
@@ -4685,11 +4685,11 @@ namespace gxfile {
     }
 
     void TUELTableLegacy::RenameEntry(int N, const std::string &s) {
-        gdlib::strhash::TXStrHashList<int>::RenameEntry(N, s);
+        TXStrHashListImpl<int>::RenameEntry(N, s);
     }
 
     int TUELTableLegacy::MemoryUsed() const {
-        return (int)TXStrHashList::MemoryUsed() + UsrUel2Ent->MemoryUsed();
+        return (int)TXStrHashListImpl<int>::MemoryUsed() + UsrUel2Ent->MemoryUsed();
     }
 
     TUELUserMapStatus IUELTable::GetMapToUserStatus() {

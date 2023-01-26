@@ -403,7 +403,11 @@ template<typename K, typename V, typename H, typename E>
     };
 #endif
 
-    class TUELTableLegacy : public IUELTable, public gdlib::strhash::TXStrHashList<int> {
+    template<typename T>
+    //using TXStrHashListImpl = gdlib::strhash::TXStrHashListLegacy<T>;
+    using TXStrHashListImpl = gdlib::strhash::TXStrHashList<T>;
+
+    class TUELTableLegacy : public IUELTable, public TXStrHashListImpl<int> {
     public:
         TUELTableLegacy();
         void clear() override;
