@@ -83,6 +83,7 @@ set(tests
 		tests/pfgdx.cpp
 		tests/gdlib/gmsobjtests.cpp
 		tests/gdlib/gmsdatatests.cpp
+		tests/gdlib/strhashtests.cpp
 )
 
 add_library(gdxcclib64 SHARED ${common_neo})
