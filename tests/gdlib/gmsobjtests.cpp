@@ -81,11 +81,11 @@ namespace tests::gmsobjtests {
 
     TEST_CASE("Simple use of TXStrings") {
         TXStrings lst;
-        lst.Add("First");
-        lst.Add("Second");
-        lst.Add("Third");
-        REQUIRE_EQ(1, lst.IndexOf("Second"));
-        REQUIRE_EQ("First", lst[0]);
+        lst.Add("First"s);
+        lst.Add("Second"s);
+        lst.Add("Third"s);
+        REQUIRE_EQ(1, lst.IndexOf("Second"s));
+        REQUIRE_EQ("First"s, lst[0]);
     }
 
     TEST_SUITE_END();

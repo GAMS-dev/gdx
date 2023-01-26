@@ -1,74 +1,129 @@
 #pragma once
 
+#include "../expertapi/gclgms.h"
+
 #include <map>
 #include <string>
 #include <array>
 #include <vector>
 
-#include "../expertapi/gclgms.h"
-
 #include "gmsobj.h"
 
 namespace gdlib::gmsdata {
-
-	const int BufSize = 1024 * 16;
-
-	struct TGADataBuffer {
-		int BytesUsed{},
-            filler{}; //so a buffer can start on 8 byte boundary
-		std::array<uint8_t, BufSize> Buffer{};
-	};
-
-	using PGADataBuffer = TGADataBuffer *;
-	using PGADataArray = TGADataBuffer *; // dynamic heap array of pointers
-
-	using TXIntList = std::vector<int>;
-
     using IndexKeys = std::array<int, GLOBAL_MAX_INDEX_DIM>;
     using ValueFields = std::array<double, GMS_VAL_MAX>;
 
     // TODO: The port of this class uses C++ standard library collections instead of Paul's custom GAMS colections
     // evalute performance impact of this choice!
-	class TTblGamsData {
+    class TTblGamsData {
         std::map<IndexKeys, ValueFields> mapping;
         std::vector<IndexKeys> keyset;
     public:
-		void GetRecord(int N, int * Inx, int InxCnt, double * Vals);
-        ValueFields &operator[](const IndexKeys &Key);
+        void GetRecord(int N, int* Inx, int InxCnt, double* Vals);
+        ValueFields& operator[](const IndexKeys& Key);
         void clear();
         int size() const;
         std::map<IndexKeys, ValueFields>::iterator begin();
         std::map<IndexKeys, ValueFields>::iterator end();
         bool empty() const;
-		void sort();
+        void sort();
         int MemoryUsed() const {
             // FIXME: Return actual value!
             return 0;
         }
-	};
+    };
 
+    const int BufSize = 1024 * 16;
+
+    struct TGADataBuffer {
+        // filler is needed, so a buffer can start on 8 byte boundary
+        int BytesUsed{}, filler{};
+        std::array<uint8_t, BufSize> Buffer{};
+    };
+
+    template<typename T>
     class TGrowArrayFxd {
-        PGADataArray PBase {};
-        PGADataBuffer PCurrentBuf {};
-        int BaseAllocated {}, BaseUsed {-1}, FSize, FStoreFact;
-        int64_t FCount {};
-
+        TGADataBuffer** PBase{}; // dynamic heap array of pointers
+        TGADataBuffer*  PCurrentBuf{};
+        int BaseAllocated{}, BaseUsed{ -1 }, FSize, FStoreFact;
+        int64_t FCount{};
     public:
-        explicit TGrowArrayFxd(int ASize);
-        ~TGrowArrayFxd();
-        void Clear();
-        void *ReserveMem();
-        void *ReserveAndClear();
-        void *AddItem(const void *R);
-        uint8_t *GetItemPtrIndex(int N);
-        void GetItem(int N, void **R);
-        int64_t MemoryUsed() const;
-        int64_t GetCount() const;
+        explicit TGrowArrayFxd() :
+            FSize{ sizeof(T) },
+            FStoreFact{ BufSize / FSize }
+        {}
+
+        ~TGrowArrayFxd() {
+            Clear();
+        }
+
+        void Clear() {
+            while (BaseUsed >= 0) {
+                delete PBase[BaseUsed];
+                BaseUsed--;
+            }
+            std::free(PBase);
+            PBase = nullptr;
+            BaseAllocated = 0;
+            PCurrentBuf = nullptr;
+            FCount = 0;
+        }
+
+        T* ReserveMem() {
+            if (!PCurrentBuf || PCurrentBuf->BytesUsed + FSize > BufSize) {
+                BaseUsed++;
+                if (BaseUsed >= BaseAllocated) {
+                    if (!BaseAllocated) BaseAllocated = 32;
+                    else BaseAllocated *= 2;
+                    size_t newByteCount{ BaseAllocated * sizeof(uint8_t*) };
+                    if (!PBase) PBase = (TGADataBuffer**)std::malloc(newByteCount);
+                    else PBase = (TGADataBuffer**)std::realloc(PBase, newByteCount);
+                }
+                PCurrentBuf = new TGADataBuffer;
+                assert(BaseUsed >= 0);
+                if (BaseUsed >= 0)
+                    PBase[BaseUsed] = PCurrentBuf;
+                PCurrentBuf->BytesUsed = 0;
+            }
+            auto res = (T*)&PCurrentBuf->Buffer[PCurrentBuf->BytesUsed];
+            PCurrentBuf->BytesUsed += FSize;
+            FCount++;
+            return res;
+        }
+
+        T* ReserveAndClear() {
+            T* res = ReserveMem();
+            memset(res, 0, FSize);
+            return res;
+        }
+
+        T* AddItem(const T* R) {
+            auto* res = ReserveMem();
+            std::memcpy(res, R, FSize);
+            return res;
+        }
+
+        T* GetItemPtrIndex(int N) {
+            return (T*)&PBase[N / FStoreFact]->Buffer[(N % FStoreFact) * FSize];
+        }
+
+        void GetItem(int N, T** R) {
+            T* PB = GetItemPtrIndex(N);
+            std::memcpy(R, PB, FSize);
+        }
+
+        int64_t MemoryUsed() const {
+            return !PCurrentBuf ? 0 : (int64_t)(BaseAllocated * sizeof(uint8_t*) + BaseUsed * BufSize + PCurrentBuf->BytesUsed);
+        }
+
+        int64_t GetCount() const {
+            return FCount;
+        }
     };
 
     // FIXME: Work in progress!
     class TTblGamsDataLegacy {
-        TGrowArrayFxd DS;
+        TGrowArrayFxd<void*> DS;
         gdlib::gmsobj::TXList<uint8_t> FList;
         int FDim, FIndexSize, FDataSize;
         bool FIsSorted;
@@ -76,5 +131,4 @@ namespace gdlib::gmsdata {
 
     public:
     };
-
 }
