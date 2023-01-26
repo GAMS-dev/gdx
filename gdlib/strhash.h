@@ -447,6 +447,12 @@ namespace gdlib::strhash {
     public:
         bool OneBased{};
 
+        virtual ~TXStrHashListLegacy() {
+            Clear();
+            if(PHashTable) std::free(PHashTable);
+            SortMap = nullptr;
+        }
+
         void Clear() {
             for(int N{OneBased ? 1 : 0}; N<FCount + (OneBased ? 1 : 0); N++)
                 FreeItem(N);
