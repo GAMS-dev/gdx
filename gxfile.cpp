@@ -4656,7 +4656,7 @@ namespace gxfile {
 
     int TUELTableLegacy::GetMaxUELLength() const {
         int maxLen{};
-        for(int i{}; i<Buckets.size(); i++)
+        for(int i{}; i<(int)Buckets.size(); i++)
             maxLen = std::max<int>(static_cast<int>(strlen(Buckets[i]->StrP)), maxLen);
         return maxLen;
     }
