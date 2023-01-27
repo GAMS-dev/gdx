@@ -186,67 +186,92 @@ namespace tests::gxfiletests {
 #endif
     }
 
+    void runBenchmarkTimeMemForGDXFile(const std::string &fn);
+
     TEST_CASE("Run pfgdx for suiteName/modelName.gdx in order to debug memory issues (and test pfgdx port)") {
 #ifdef NO_SLOW_TESTS
         return;
 #endif
-        const std::string   suiteName = "lwsup"s, //"src"s,
-                            modelName = "SCUCinput_new"s; //"glcaerwt"s;
+        std::vector<std::pair<std::string, std::string>> suiteModelPairs {
+            /*{"lwsup","modBig"},
+            {"lwsup","modBigx"},
+            {"lwsup","t4716"},*/
+            {"sqagams","dummy42"},
+            /*{"lwsup","10rr"},
+            {"sqagams","t3010"},
+            {"mrb","WSC Fixing"},
+            {"lwsup","modBig8788"},
+            {"lwsup","SCUCinput_new"},
+            {"src","Estimate"},
+            {"lwsup","pShiftFactor"},
+            {"lwsup","test1"},
+            {"src","fnpower"},
+            {"mrb","new6"},
+            {"lwsup","daod4gams"},
+            {"sqagams","times_psi"},
+            {"sqagams","GuaranteeData"},
+            {"sqagams","bearing"}*/
+        };
+
+        auto gdxFilePathCandidates = [](const std::string &suiteName, const std::string &modelName) {
 #if defined(_WIN32)
-        std::array gdxFilePathCandidates{
-            modelName + ".gdx"s,
-            suiteName + "\\"s + modelName + ".gdx"s,
-            R"(C:\dockerhome\)"+suiteName+"\\"s+modelName+".gdx"s
-        };
+            return std::array {
+                modelName + ".gdx"s,
+                suiteName + "\\"s + modelName + ".gdx"s,
+                R"(C:\dockerhome\)"+suiteName+"\\"s+modelName+".gdx"s
+            };
 #else
-        std::array gdxFilePathCandidates {
-            modelName + ".gdx"s,
-            suiteName + "\\"s + modelName + ".gdx"s,
-            "/mnt/c/dockerhome/"s+suiteName+"/"s+modelName+".gdx"s,
-            "/home/andre/dockerhome/distrib/"s+suiteName+"/"s+modelName+".gdx"s
-        };
+            return std::array{
+                modelName + ".gdx"s,
+                suiteName + "\\"s + modelName + ".gdx"s,
+                "/mnt/c/dockerhome/"s + suiteName + "/"s + modelName + ".gdx"s,
+                "/home/andre/dockerhome/distrib/"s + suiteName + "/"s + modelName + ".gdx"s
+            };
 #endif
+        };
+
+        for(const auto &[suiteName, modelName] : suiteModelPairs)
+            for(const auto &fn : gdxFilePathCandidates(suiteName, modelName))
+                if (std::filesystem::exists(fn))
+                    runBenchmarkTimeMemForGDXFile(fn);
+    }
+
+    void runBenchmarkTimeMemForGDXFile(const std::string &fn) {
         const int ntries = 1;
-
         const bool  quiet = false,
-                    onlyPorted = false,
-                    onlyWrapped = false;
+                onlyPorted = false,
+                onlyWrapped = false;
 
-        for(const auto &fn : gdxFilePathCandidates) {
-            if (std::filesystem::exists(fn)) {
-                pfgdx::TimeTriple tWrap, tPort;
-                std::array<double, ntries> slowdowns {};
+        pfgdx::TimeTriple tWrap, tPort;
+        std::array<double, ntries> slowdowns {};
 
-                for (int i = 0; i < ntries; i++) {
-                    int64_t peakRSS;
-                    if (!onlyPorted) {
-                        tWrap = pfgdx::runWithTiming(fn, true, quiet);
-                        peakRSS = queryPeakRSS();
-                        if(!quiet) std::cout << "Peak RSS after wrapped GDX (P3/Delphi): " << peakRSS << std::endl;
-                    }
-                    if (!onlyWrapped) {
-                        tPort = pfgdx::runWithTiming(fn, false, quiet);
-                        if(!onlyPorted) {
-                            auto newPeakRSS = queryPeakRSS();
-                            if(!quiet) std::cout << "Peak RSS after both wrapped and ported GDX: " << peakRSS << std::endl;
-                            if (newPeakRSS > peakRSS) {
-                                if(!quiet)
-                                    std::cout << "Warning: Peak RSS increase by " << newPeakRSS - peakRSS << " bytes ("
-                                              << ((double)newPeakRSS / (double)peakRSS - 1.0) * 100.0 << "%)" << std::endl;
-                            }
-                            REQUIRE_LE(newPeakRSS, peakRSS); // peak rss should not increase after running C++ GDX
-                        }
-                    }
-
-                    slowdowns[i] = tWrap.total_t > 0 ? tPort.total_t / tWrap.total_t : 0;
-                    if (!quiet && !onlyPorted && !onlyWrapped)
-                        std::cout << "Slowdown for " << fn << " = " << slowdowns[i] << std::endl;
-                }
-                if(!quiet)
-                    std::cout << "Average slowdown = " << std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / (double)ntries << std::endl;;
-                return;
+        for (int i = 0; i < ntries; i++) {
+            int64_t peakRSS;
+            if (!onlyPorted) {
+                tWrap = pfgdx::runWithTiming(fn, true, quiet);
+                peakRSS = queryPeakRSS();
+                if(!quiet) std::cout << "Peak RSS after wrapped GDX (P3/Delphi): " << peakRSS << std::endl;
             }
+            if (!onlyWrapped) {
+                tPort = pfgdx::runWithTiming(fn, false, quiet);
+                if(!onlyPorted) {
+                    auto newPeakRSS = queryPeakRSS();
+                    if(!quiet) std::cout << "Peak RSS after both wrapped and ported GDX: " << peakRSS << std::endl;
+                    if (newPeakRSS > peakRSS) {
+                        if(!quiet)
+                            std::cout << "Warning: Peak RSS increase by " << newPeakRSS - peakRSS << " bytes ("
+                                      << ((double)newPeakRSS / (double)peakRSS - 1.0) * 100.0 << "%)" << std::endl;
+                    }
+                    REQUIRE_LE(newPeakRSS, peakRSS); // peak rss should not increase after running C++ GDX
+                }
+            }
+
+            slowdowns[i] = tWrap.total_t > 0 ? tPort.total_t / tWrap.total_t : 0;
+            if (!quiet && !onlyPorted && !onlyWrapped)
+                std::cout << "Slowdown for " << fn << " = " << slowdowns[i] << std::endl;
         }
+        if(!quiet)
+            std::cout << "Average slowdown = " << std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / (double)ntries << std::endl;;
     }
 
     struct BenchResult {

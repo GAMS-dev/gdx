@@ -1992,6 +1992,7 @@ namespace gxfile {
             CurSyPtr->SDomStrings = nullptr;
             CurSyPtr->SSyNr = NameList->StoreObject(S, CurSyPtr);
         }
+        if (ErrorCondition(FFile->ReadString() == MARK_SYMB, ERR_OPEN_SYMBOLMARKER2)) return FileErrorNr();
 
         // reading UEL table
         FFile->SetCompression(DoUncompress);
