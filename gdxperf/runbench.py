@@ -22,7 +22,9 @@ def get_cmd(sysdir_path, fn):
     return f"{sysdir_path}gams {sysdir_path}gdxperf.gms ProcTreeMemMonitor 1 {perf_args} {sf}"
 
 
-def run_single(sysdir_path, fn, ntries=1):
+# the no_retry_runtime_secs_threshold is the maximum total runtime in seconds
+# for a GDX file. If the runtime exceeds this threshold, there won't be any re-tries (just one sample)!
+def run_single(sysdir_path, fn, ntries=4, no_retry_runtime_secs_threshold=4.0):
     cmd = get_cmd(sysdir_path, fn)
     print(cmd)
     total_ts, max_rsss, step_timess = [], [], []
@@ -55,6 +57,8 @@ def run_single(sysdir_path, fn, ntries=1):
         total_ts.append(aggr_secs)
         max_rsss.append(max_rss)
         step_timess.append(step_times)
+        if k == 0 and aggr_secs > no_retry_runtime_secs_threshold:
+            break
     nsteps = len(step_timess[0])
     average_step_times = [sum(ss[i] for ss in step_timess) / len(step_timess) for i in range(nsteps)]
     return dict(total_secs=sum(total_ts) / len(total_ts),
