@@ -1763,10 +1763,8 @@ namespace gxfile {
         else {
             for (int D{}; D < FCurrentDim; D++) {
                 int LED{ LastElem[D] };
-                utils::assignStrToBuf(LED >= 1 && LED <= (UELTable ? UELTable->size() : 0) ?
-                    (*UELTable)[LED-1] :
-                    BADUEL_PREFIX + std::to_string(LED),
-                    KeyStr[D], GLOBAL_UEL_IDENT_SIZE);
+                if(LED >= 1 && LED <= (UELTable ? UELTable->size() : 0)) std::strcpy(KeyStr[D], (*UELTable)[LED-1]);
+                else std::sprintf(KeyStr[D], "%s%d", BADUEL_PREFIX.c_str(), LED);
             }
             return true;
         }
@@ -4102,7 +4100,7 @@ namespace gxfile {
                 for (int D{}; D < FCurrentDim; D++) {
                     int UEL = LastElem[D];
                     if (UEL >= 1 && UEL <= UELTableCount) {
-                        auto L = static_cast<int>((*UELTable)[UEL-1].length());
+                        auto L = static_cast<int>(std::strlen((*UELTable)[UEL-1]));
                         if (L > LengthInfo[D]) LengthInfo[D] = L;
                     }
                 }
@@ -4123,7 +4121,7 @@ namespace gxfile {
     int TGXFileObj::gdxSymbMaxLength() {
         int acc {};
         for(int N{1}; N<=NameList->Count(); N++)
-            acc = std::max<int>(acc, (int)NameList->GetString(N).length());
+            acc = std::max<int>(acc, (int)std::strlen(NameList->GetString(N)));
         return acc;
     }
 
@@ -4680,7 +4678,7 @@ namespace gxfile {
         return TXStrHashListImpl<int>::StoreObject(id, mapping);
     }
 
-    std::string TUELTableLegacy::operator[](int index) const {
+    char *TUELTableLegacy::operator[](int index) const {
         return GetString(index+1);
     }
 

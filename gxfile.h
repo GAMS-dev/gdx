@@ -365,7 +365,7 @@ template<typename K, typename V, typename H, typename E>
         virtual int IndexOf(const std::string &s) = 0;
         virtual int AddObject(const std::string &id, int mapping) = 0;
         virtual int StoreObject(const std::string& id, int mapping) = 0;
-        virtual std::string operator[](int index) const = 0;
+        virtual char *operator[](int index) const = 0;
         virtual int GetUserMap(int i) = 0;
         virtual void SetUserMap(int EN, int N) = 0;
         virtual void ResetMapToUserStatus() = 0;
@@ -436,7 +436,7 @@ template<typename K, typename V, typename H, typename E>
         int IndexOf(const std::string &s) override;
         int AddObject(const std::string &id, int mapping) override;
         int StoreObject(const std::string& id, int mapping) override;
-        std::string operator[](int index) const override;
+        char *operator[](int index) const override;
         void RenameEntry(int N, const std::string &s) override;
         int MemoryUsed() const override;
     };

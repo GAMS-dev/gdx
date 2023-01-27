@@ -298,13 +298,13 @@ namespace gdlib::strhash {
         }
 
         int GetStringLength(int N) {
-            return GetString(N).length();
+            return std::strlen(GetString(N));
         }
 
         int64_t MemoryUsed() const {
             int64_t res{};
             for(int N{}; N<Count(); N++)
-                res += strlen(Buckets[N]->StrP)+1;
+                res += std::strlen(Buckets[N]->StrP)+1;
             res += (int)(Buckets.size() * sizeof(THashBucket<T>));
             if(PHashTable) res += (int)(PHashTable->size() * sizeof(THashBucket<T>));
             if(SortMap) res += (int)(SortMap->size()*sizeof(int));
@@ -346,7 +346,7 @@ namespace gdlib::strhash {
             return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]].Obj;
         }
 
-        const std::string GetString(int N) const {
+        char *GetString(int N) const {
             return Buckets[N-(OneBased ? 1 : 0)]->StrP;
         }
 
@@ -377,10 +377,6 @@ namespace gdlib::strhash {
 
         bool empty() const {
             return !FCount;
-        }
-
-        std::string GetString(int N) {
-            return Buckets[N-(OneBased ? 1 : 0)]->StrP;
         }
     };
 
@@ -592,7 +588,7 @@ namespace gdlib::strhash {
             return res;
         }
 
-        std::string GetString(int N) const {
+        char *GetString(int N) const {
             return Buckets.GetItemPtrIndexConst(N-(OneBased ? 1 : 0))->StrP;
         }
 
@@ -626,7 +622,7 @@ namespace gdlib::strhash {
         int64_t MemoryUsed() const {
             int64_t res{};
             for(int N{}; N<FCount; N++)
-                res += strlen(Buckets.GetItemPtrIndexConst(N)->StrP) + 1;
+                res += std::strlen(Buckets.GetItemPtrIndexConst(N)->StrP) + 1;
             res += Buckets.MemoryUsed();
             if(PHashTable) res += SizeOfHashTable;
             if(SortMap) res += SortMap->MemoryUsed();
