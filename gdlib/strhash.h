@@ -521,7 +521,8 @@ namespace gdlib::strhash {
             else { HashTableSize = HashSize_1; ReHashCnt = Next_1; }
             SizeOfHashTable = HashTableSize * sizeof(THashBucket<T>*);
             PHashTable = (THashBucket<T> **)std::malloc(SizeOfHashTable);
-            std::memset(PHashTable, 0, SizeOfHashTable);
+            if(PHashTable)
+                std::memset(PHashTable, 0, SizeOfHashTable);
         }
 
         void HashAll() {
