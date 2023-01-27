@@ -2030,6 +2030,7 @@ namespace gxfile {
                     MapSetText[N] = TextNum;
                 }
             }
+            if (ErrorCondition(FFile->ReadString() == MARK_SETT,ERR_OPEN_TEXTMARKER2)) return FileErrorNr();
         }
         if (VersionRead >= 7) {
             FFile->SetCompression(DoUncompress);
