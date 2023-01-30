@@ -698,20 +698,18 @@ namespace gxfile {
 
             WRYAML(YFile->AddKeyItem("symbol_domains"));
             WRYAML(YFile->IncIndentLevel());
-            int ix{1};
             for(int N{1}; N<=NameList->Count(); N++) {
                 const auto PSy = *(*NameList)[N];
                 if(PSy->SDomStrings) {
                     WRYAML(YFile->AddKeyItem(NameList->GetString(N)));
                     WRYAML(YFile->IncIndentLevel());
-                    FFile->WriteInteger(ix);
+                    FFile->WriteInteger(N);
                     for(const auto &i : (*PSy->SDomStrings)) {
                         FFile->WriteInteger(i);
                         WRYAML(YFile->AddItem(std::to_string(i)));
                     }
                     WRYAML(YFile->DecIndentLevel());
                 }
-                ix++;
             }
             FFile->WriteInteger(-1);
             FFile->WriteString(MARK_DOMS);
@@ -1834,7 +1832,7 @@ namespace gxfile {
     int TGXFileObj::gdxSymbolInfo(int SyNr, char *SyId, int &Dim, int &Typ) {
         if (!SyNr) {
             SyId[0] = '*';
-            SyId[1] = '\0';;
+            SyId[1] = '\0';
             Dim = 1;
             Typ = dt_set;
             return true;
