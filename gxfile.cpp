@@ -1763,8 +1763,20 @@ namespace gxfile {
         else {
             for (int D{}; D < FCurrentDim; D++) {
                 int LED{ LastElem[D] };
-                if(LED >= 1 && LED <= (UELTable ? UELTable->size() : 0)) std::strcpy(KeyStr[D], (*UELTable)[LED-1]);
-                else std::sprintf(KeyStr[D], "%s%d", BADUEL_PREFIX.c_str(), LED);
+                if(LED >= 1 && LED <= (UELTable ? UELTable->size() : 0)) {
+#if defined(_WIN32)
+                    strcpy_s(KeyStr[D], GMS_UEL_IDENT_SIZE, (*UELTable)[LED-1]);
+#else
+                    std::strcpy(KeyStr[D], (*UELTable)[LED-1]);
+#endif
+                }
+                else {
+#if defined(_WIN32)
+                    sprintf_s(KeyStr[D], GMS_UEL_IDENT_SIZE, "%s%d", BADUEL_PREFIX.c_str(), LED);
+#else
+                    std::sprintf(KeyStr[D], "%s%d", BADUEL_PREFIX.c_str(), LED);
+#endif
+                }
             }
             return true;
         }

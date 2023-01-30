@@ -195,10 +195,10 @@ namespace tests::gxfiletests {
         std::vector<std::pair<std::string, std::string>> suiteModelPairs {
             /*{"lwsup","modBig"},
             {"lwsup","modBigx"},
-            {"lwsup","t4716"},*/
-            {"sqagams","dummy42"},
-            /*{"lwsup","10rr"},
-            {"sqagams","t3010"},
+            {"lwsup","t4716"},
+            {"sqagams","dummy42"},*/
+            {"lwsup","10rr"},
+            /*{"sqagams","t3010"},
             {"mrb","WSC Fixing"},
             {"lwsup","modBig8788"},
             {"lwsup","SCUCinput_new"},
