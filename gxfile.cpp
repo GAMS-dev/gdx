@@ -970,7 +970,6 @@ namespace gxfile {
     int TGXFileObj::PrepareSymbolRead(const std::string& Caller, int SyNr, const int *ADomainNrs, TgxFileMode newmode) {
         if (utils::in(fmode, fr_str_data, fr_map_data, fr_mapr_data, fr_raw_data))
             gdxDataReadDone();
-        int res{-1};
         NrMappedAdded = 0;
         TIntegerMappingImpl ExpndList;
         ErrorList.clear();
@@ -1035,7 +1034,7 @@ namespace gxfile {
                     if(obj.DFilter) obj.DAction = dm_filter;
                     else {
                         ReportError(ERR_UNKNOWNFILTER);
-                        return res;
+                        return -1;
                     }
                     break;
             }
@@ -1065,13 +1064,14 @@ namespace gxfile {
         }
         bool AllocOk{true};
 
+        int res{-1};
         if(utils::in(newmode, fr_raw_data, fr_str_data, fr_slice))
             res = NrRecs;
         else {
             assert(newmode == fr_map_data && "Expect to read mapped data");
             if(ResultWillBeSorted(ADomainNrs)) {
                 //WriteLn('Changing mapped read to raw read');
-                res = NrRecs;
+                res = NrRecs; // ignores filtering etc
                 newmode = fr_mapr_data;
             } else {
                 //WriteLn('Cannot do mapped read fast');
