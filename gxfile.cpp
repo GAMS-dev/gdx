@@ -1086,7 +1086,7 @@ namespace gxfile {
                         if(FIDim < AFDim) AFDim = FIDim;
                         FIDim = FCurrentDim;
                         int D;
-                        for(D=AFDim-1; D<FCurrentDim; D++) {
+                        for(D=AFDim-1; D<FCurrentDim && !AddError; D++) {
                             const auto &obj = DomainList[D];
                             if(LastElem[D] < 0) {
                                 ReportError(ERR_BADELEMENTINDEX);
@@ -1104,7 +1104,6 @@ namespace gxfile {
                                     else {
                                         AddError = true;
                                         FIDim = D;
-                                        break;
                                     }
                                     break;
                                 case dm_strict:
