@@ -658,7 +658,7 @@ namespace gxfile {
             WRYAML(YFile->AddKeyItem("uels"));
             WRYAML(YFile->IncIndentLevel());
             if(UELTable)
-                for(int i=0; i<UELTable->size(); i++)
+                for(int i{1}; i<=UELTable->size(); i++)
                     WRYAML(YFile->AddItem((*UELTable)[i]));
 #endif
             FFile->WriteString(MARK_UEL);
@@ -1761,9 +1761,9 @@ namespace gxfile {
                 int LED{ LastElem[D] };
                 if(LED >= 1 && LED <= (UELTable ? UELTable->size() : 0)) {
 #if defined(_WIN32)
-                    strcpy_s(KeyStr[D], GMS_UEL_IDENT_SIZE, (*UELTable)[LED-1]);
+                    strcpy_s(KeyStr[D], GMS_UEL_IDENT_SIZE, (*UELTable)[LED]);
 #else
-                    std::strcpy(KeyStr[D], (*UELTable)[LED-1]);
+                    std::strcpy(KeyStr[D], (*UELTable)[LED]);
 #endif
                 }
                 else {
@@ -2852,7 +2852,7 @@ namespace gxfile {
     //
     int TGXFileObj::gdxUMUelGet(int UelNr, char *Uel, int &UelMap) {
         if (UELTable && UelNr >= 1 && UelNr <= UELTable->size()) {
-            utils::assignStrToBuf((*UELTable)[UelNr-1], Uel, GLOBAL_UEL_IDENT_SIZE);
+            utils::assignStrToBuf((*UELTable)[UelNr], Uel, GLOBAL_UEL_IDENT_SIZE);
             UelMap = UELTable->GetUserMap(UelNr);
             return true;
         }
@@ -2969,7 +2969,7 @@ namespace gxfile {
             return false;
         }
         int EN = UELTable->UsrUel2Ent->GetMapping(uelNr);
-        utils::assignStrToBuf(EN >= 1 ? (*UELTable)[EN-1] : BADUEL_PREFIX + std::to_string(uelNr), Uel, GLOBAL_UEL_IDENT_SIZE);
+        utils::assignStrToBuf(EN >= 1 ? (*UELTable)[EN] : BADUEL_PREFIX + std::to_string(uelNr), Uel, GLOBAL_UEL_IDENT_SIZE);
         return EN >= 1;
     }
 
@@ -4110,7 +4110,7 @@ namespace gxfile {
                 for (int D{}; D < FCurrentDim; D++) {
                     int UEL = LastElem[D];
                     if (UEL >= 1 && UEL <= UELTableCount) {
-                        auto L = static_cast<int>(std::strlen((*UELTable)[UEL-1]));
+                        auto L = static_cast<int>(std::strlen((*UELTable)[UEL]));
                         if (L > LengthInfo[D]) LengthInfo[D] = L;
                     }
                 }
@@ -4689,7 +4689,7 @@ namespace gxfile {
     }
 
     char *TUELTableLegacy::operator[](int index) const {
-        return GetString(index+1);
+        return GetString(index);
     }
 
     void TUELTableLegacy::RenameEntry(int N, const std::string &s) {
