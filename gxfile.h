@@ -376,6 +376,7 @@ template<typename K, typename V, typename H, typename E>
         virtual void RenameEntry(int N, const std::string &s) = 0;
         virtual int GetMaxUELLength() const = 0;
         virtual int MemoryUsed() const = 0;
+        virtual void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) = 0;
     };
 
 #ifdef CPP_HASHMAP
@@ -439,6 +440,7 @@ template<typename K, typename V, typename H, typename E>
         char *operator[](int index) const override;
         void RenameEntry(int N, const std::string &s) override;
         int MemoryUsed() const override;
+        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
     };
 
     std::string MakeGoodExplText(const std::string& s);

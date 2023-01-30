@@ -653,16 +653,14 @@ namespace gxfile {
             auto UELPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_UEL);
+            UELTable->SaveToStream(*FFile);
+#ifdef YAML
             WRYAML(YFile->AddKeyItem("uels"));
             WRYAML(YFile->IncIndentLevel());
-            FFile->WriteInteger(UELTable ? UELTable->size() : 0);
-            if(UELTable) {
-                for(int i=0; i<UELTable->size(); i++) {
-                    const std::string &uelName = (*UELTable)[i];
-                    FFile->WriteString(uelName);
-                    WRYAML(YFile->AddItem(uelName));
-                }
-            }
+            if(UELTable)
+                for(int i=0; i<UELTable->size(); i++)
+                    WRYAML(YFile->AddItem((*UELTable)[i]));
+#endif
             FFile->WriteString(MARK_UEL);
             WRYAML(YFile->DecIndentLevel());
 
@@ -4700,6 +4698,10 @@ namespace gxfile {
 
     int TUELTableLegacy::MemoryUsed() const {
         return (int)TXStrHashListImpl<int>::MemoryUsed() + UsrUel2Ent->MemoryUsed();
+    }
+
+    void TUELTableLegacy::SaveToStream(TXStreamDelphi &S) {
+        TXStrHashListImpl<int>::SaveToStream(S);
     }
 
     TUELUserMapStatus IUELTable::GetMapToUserStatus() {
