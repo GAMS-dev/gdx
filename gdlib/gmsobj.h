@@ -101,7 +101,7 @@ namespace gdlib::gmsobj {
                 // Delete item, do not call FreeItem
                 FCount--;
                 if(I < FCount)
-                    std::memcpy(&FList[I], &FList[I+1], (FCount-I)*sizeof(T *));
+                    std::memcpy(&FList[I], &FList[I+1], (FCount-I)*sizeof(T*));
             }
             return res;
         }
@@ -173,9 +173,10 @@ namespace gdlib::gmsobj {
     };
 
     inline char *NewString(const std::string &s, size_t &memSize) {
-        memSize = s.length()+1;
-        char *buf {new char[memSize]};
-        memcpy(buf, s.c_str(), memSize);
+        auto l{s.length()+1};
+        char *buf {new char[l]};
+        std::memcpy(buf, s.c_str(), l);
+        memSize += l;
         return buf;
     }
 
@@ -214,7 +215,7 @@ namespace gdlib::gmsobj {
 
         int IndexOf(const std::string &Item) {
             for(int N{}; N<FCount; N++)
-                if(utils::sameText(FList[N], Item))
+                if(utils::sameTextPChar(FList[N], Item.c_str()))
                     return N + (OneBased ? 1 : 0);
             return -1;
         }
@@ -264,7 +265,7 @@ namespace gdlib::gmsobj {
                     auto NewMem = new uint8_t[NewMemSize];
                     memset(NewMem, 0, NewMemSize);
                     if(FAllocated) {
-                        memcpy(NewMem, PData, FAllocated);
+                        std::memcpy(NewMem, PData, FAllocated);
                         delete [] PData;
                     }
                     PData = NewMem;
@@ -294,6 +295,173 @@ namespace gdlib::gmsobj {
 
         int MemoryUsed() const {
             return FAllocated;
+        }
+    };
+
+    class TQuickSortClass {
+        void QuickSort(int L, int R);
+    public:
+        bool OneBased {};
+        virtual void Exchange(int Index1, int Index2) = 0;
+        virtual int Compare(int Index1, int Index2) = 0;
+        void SortN(int n);
+    };
+
+    template<typename T>
+    struct TStringItem {
+        char *FString;
+        T *FObject;
+    };
+
+    // This seems very much redundant to TXStrings
+    // TODO: Should be refactored. Work out the differences to TXStrings and try merging code
+    template<typename T>
+    class TXCustomStringList : public TQuickSortClass {
+        int FCount{};
+        TStringItem<T> *FList{};
+        int FCapacity{};
+        size_t FStrMemory{}, FListMemory{};
+
+        char *GetName(int Index) {
+            return FList[Index-(OneBased?1:0)];
+        }
+
+        void SetName(int Index, const std::string &v) {
+            char **sref = FList[Index-(OneBased?1:0)]->FString;
+            delete [] *sref;
+            *sref = NewString(v, FStrMemory);
+        }
+
+        void SetCapacity(int NewCapacity) {
+            if(NewCapacity == FCapacity) return;
+            if(NewCapacity < FCount) NewCapacity = FCount;
+            FListMemory = sizeof(TStringItem<T>) * NewCapacity;
+            if(!FList) FList = (TStringItem<T> *)std::malloc(FListMemory);
+            else FList = (TStringItem<T> *)std::realloc(FList, FListMemory);
+            FCapacity = NewCapacity;
+        }
+
+    protected:
+        virtual void Grow() {
+            int delta{FCapacity >= 1024*1024 ? FCapacity / 4 : (!FCapacity ? 16 : 7 * FCapacity)};
+            int64_t i64{FCapacity};
+            i64 += delta;
+            if(i64 <= std::numeric_limits<int>::max())
+                SetCapacity((int)i64);
+            else {
+                delta = std::numeric_limits<int>::max();
+                if(FCapacity < delta) SetCapacity(delta);
+                else assert(i64 <= std::numeric_limits<int>::max() && "TXCustromStringList.grow(): max capacity reached");
+            }
+        }
+
+    public:
+        ~TXCustomStringList() {
+            Clear();
+        }
+
+        void Delete(int Index) {
+            FreeItem(Index);
+            if(OneBased) Index--;
+            FCount--;
+            if(Index < FCount)
+                std::memcpy(&FList[Index], &FList[Index+1], (FCount-Index) * sizeof(TStringItem<T>));
+        }
+
+        void InsertItem(int Index, const std::string &S, T *APointer) {
+            if(FCount == FCapacity) Grow();
+            if(OneBased) Index--;
+            if(Index < FCount)
+                std::memcpy(&FList[Index+1], &FList[Index], (FCount-Index)*sizeof(TStringItem<T>));
+            FList[Index].FString = NewString(S, FStrMemory);
+            FList[Index].FObject = APointer;
+            FCount++;
+        }
+
+        int AddObject(const std::string &S, T *APointer) {
+            int res{FCount+(OneBased?1:0)};
+            InsertItem(res, S, APointer);
+            return res;
+        }
+
+        int Add(const std::string &S) {
+            return AddObject(S, nullptr);
+        }
+
+        void FreeObject(int Index) {
+            // noop
+        }
+
+        void FreeItem(int Index) {
+            delete [] FList[Index-(OneBased?1:0)].FString;
+            FreeObject(Index);
+        }
+
+        void Clear() {
+            for(int N{FCount-(OneBased?1:0)}; N >=(OneBased ? 1 : 0); N--)
+                FreeItem(N);
+            FCount = 0;
+            SetCapacity(0);
+        }
+
+        char *GetName(int Index) const {
+            return FList[Index].FString;
+        }
+
+        char *operator[](int Index) const  {
+            return GetName(Index);
+        }
+
+        void Exchange(int Index1, int Index2) override {
+            if(OneBased) {
+                Index1--;
+                Index2--;
+            }
+            TStringItem<T> Item = FList[Index1];
+            std::memcpy(&FList[Index1], &FList[Index2], sizeof(TStringItem<T>));
+            std::memcpy(&FList[Index2], &Item, sizeof(TStringItem<T>));
+        }
+
+        int Compare(int Index1, int Index2) {
+            char *s1 = FList[Index1-(OneBased?1:0)].FString;
+            char *s2 = FList[Index2-(OneBased?1:0)].FString;
+            return utils::sameText(s1, s2);
+        }
+
+        int Count() const {
+            return FCount;
+        }
+
+        size_t MemoryUsed() const {
+            return FListMemory + FStrMemory;
+        }
+
+        int IndexOf(const std::string &S) {
+            for(int N{}; N<FCount; N++)
+                if(utils::sameTextPChar(FList[N].FString, S.c_str())) return N + (OneBased ? 1 : 0);
+            return -1;
+        }
+    };
+
+    template<typename T>
+    class TXHashedStringList : public TXCustomStringList<T> {
+    public:
+        int AddObject(const std::string &s, T *APointer) {
+            // FIXME: Implement this!
+            return 0;
+        }
+
+        int Add(const std::string &S) {
+            return AddObject(S, nullptr);
+        }
+    };
+
+    template<typename T>
+    class TXStrPool : public TXHashedStringList<T> {
+    public:
+        int Compare(int Index1, int Index2) override {
+            // FIXME: Implement this!
+            return 0;
         }
     };
 

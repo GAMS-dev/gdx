@@ -242,6 +242,17 @@ namespace utils {
     bool sameTextAsAny(const std::string &a, const std::initializer_list<std::string> &bs);
     bool sameTextPrefix(const std::string &s, const std::string &prefix);
 
+    // Port of PStr(U)Equal
+    bool sameTextPChar(const char *a, const char *b, bool caseInvariant = true);
+
+    inline bool PStrUEqual(const char *P1, const char *P2) {
+        return sameTextPChar(P1, P2, true);
+    }
+
+    inline bool PStrEqual(const char *P1, const char *P2) {
+        return sameTextPChar(P1, P2, false);
+    }
+
     std::string getLineWithSep(std::fstream &fs);
 
     std::string trim(const std::string& s);

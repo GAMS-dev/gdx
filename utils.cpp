@@ -529,4 +529,13 @@ namespace utils {
         memcpy(&delphistr[1], s.c_str(), l);
         return 0;
     }
+
+    bool sameTextPChar(const char *a, const char *b, bool caseInvariant) {
+        if(!a || !b) return !a && !b;
+        for(int k{}; k<256; k++) {
+            if(a[k] == '\0' && b[k] == '\0') return true;
+            if(std::tolower(a[k]) != std::tolower(b[k])) return false;
+        }
+        return false;
+    }
 }

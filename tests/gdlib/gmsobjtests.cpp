@@ -88,6 +88,15 @@ namespace tests::gmsobjtests {
         REQUIRE_EQ("First"s, lst[0]);
     }
 
+    TEST_CASE("Simple use TXCustomStringList") {
+        TXCustomStringList<uint8_t> lst;
+        lst.Add("First"s);
+        lst.Add("Second"s);
+        lst.Add("Third"s);
+        REQUIRE_EQ(1, lst.IndexOf("Second"s));
+        REQUIRE_EQ("First"s, lst[0]);
+    }
+
     TEST_SUITE_END();
 
 }
