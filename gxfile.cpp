@@ -642,7 +642,7 @@ namespace gxfile {
             FFile->WriteInteger(static_cast<int>(SetTextList ? SetTextList->size() : 0));
             if(SetTextList) {
                 for (int N{}; N < static_cast<int>(SetTextList->Count()); N++) {
-                    const std::string& SetText = SetTextList->GetString(N);
+                    const char *SetText = SetTextList->GetName(N);
                     FFile->WriteString(SetText);
                     WRYAML(YFile->AddItem(SetText));
                 }
@@ -2374,7 +2374,7 @@ namespace gxfile {
             utils::assignStrToBuf(BADStr_PREFIX + std::to_string(TxtNr), Txt, GMS_SSSIZE);
             return false;
         } else {
-            utils::assignStrToBuf(SetTextList->GetString(TxtNr), Txt, GMS_SSSIZE);
+            utils::assignStrToBuf(SetTextList->GetName(TxtNr), Txt, GMS_SSSIZE);
             Node = *SetTextList->GetObject(TxtNr);
             return true;
         }

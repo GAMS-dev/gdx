@@ -350,6 +350,10 @@ namespace gdlib::strhash {
             return Buckets[N-(OneBased ? 1 : 0)]->StrP;
         }
 
+        char *GetName(int N) const {
+            return GetString(N);
+        }
+
         void SetString(int N, const std::string s) {
             auto bucket = Buckets[N-(OneBased ? 1 : 0)];
 #ifdef TLD_BATCH_ALLOCS

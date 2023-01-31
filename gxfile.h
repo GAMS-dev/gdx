@@ -48,6 +48,9 @@
 // Only if no other C++-hashmap is chosen, switch to TXStrHash implementation as close as possible to original P3 one
 //#define TSH_LEGACY
 
+// Use TXStrPool port for SetTextList
+//#define TXSPOOL_LEGACY
+
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
 #if defined(GOOGLE_HASHMAP)
@@ -656,10 +659,12 @@ template<typename K, typename V, typename H, typename E>
     using TNameList = WrapCxxUnorderedMap<PgdxSymbRecord>;
 #else
 
-    #ifdef SLOW_SET_TEXT_LIST
+    #if defined(SLOW_SET_TEXT_LIST)
         //using TSetTextList = VecSetTextList;
         // FIXME: Using std::unordered_map based impl of this type until gdlib/gmsobj/TXStrPool is ported fully
         using TSetTextList = WrapCxxUnorderedMap<int, std::hash<std::string>, caseSensitiveStrEquality>;
+    #elif defined(TXSPOOL_LEGACY)
+        using TSetTextList = gdlib::gmsobj::TXStrPool<int>;
     #else
         using TSetTextList = TXCSStrHashListImpl<int>;
     #endif

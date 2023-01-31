@@ -39,4 +39,12 @@ namespace gdlib::gmsobj {
         }
     }
 
+    int getSCHashSize(int itemCount) {
+        int k{itemCount / SCHASH_FACTOR_MIN};
+        int res{SCHASHSIZE0};
+        for(int i{5}; i>=0; i--)
+            if(k >= schashSizes[i])
+                res = schashSizes[i+1];
+        return res;
+    }
 }

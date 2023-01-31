@@ -317,6 +317,7 @@ namespace gdlib::gmsobj {
     // TODO: Should be refactored. Work out the differences to TXStrings and try merging code
     template<typename T>
     class TXCustomStringList : public TQuickSortClass {
+    protected:
         int FCount{};
         TStringItem<T> *FList{};
         int FCapacity{};
@@ -341,9 +342,9 @@ namespace gdlib::gmsobj {
             FCapacity = NewCapacity;
         }
 
-    protected:
+    public:
         char *GetName(int Index) {
-            return FList[Index-(OneBased?1:0)];
+            return FList[Index-(OneBased?1:0)].FString;
         }
 
         T *GetObject(int Index) {
@@ -354,6 +355,7 @@ namespace gdlib::gmsobj {
             FList[Index-(OneBased ? 1 : 0)].FObject = AObject;
         }
 
+    protected:
         virtual void Grow() {
             int delta{FCapacity >= 1024*1024 ? FCapacity / 4 : (!FCapacity ? 16 : 7 * FCapacity)};
             int64_t i64{FCapacity};
@@ -371,6 +373,7 @@ namespace gdlib::gmsobj {
             // noop
         }
 
+    public:
         void InsertItem(int Index, const std::string &S, T *APointer) {
             if(FCount == FCapacity) Grow();
             if(OneBased) Index--;
@@ -457,6 +460,10 @@ namespace gdlib::gmsobj {
             return FCount;
         }
 
+        int size() const {
+            return FCount;
+        }
+
         size_t MemoryUsed() const {
             return FListMemory + FStrMemory;
         }
@@ -472,6 +479,22 @@ namespace gdlib::gmsobj {
     const int   SCHASH_FACTOR_MAX = 13,
                 SCHASH_FACTOR_MIN = 6;
 
+    const int   SCHASHSIZE0 =     10007,
+            SCHASHSIZE1 =     77317,
+            SCHASHSIZE2 =    598363,
+            SCHASHSIZE3 =   4631287,
+            SCHASHSIZE4 =  35846143,
+            SCHASHSIZE5 = 277449127,
+    // SCHASHSIZE6 =2147483647;
+    // we do not need it so big as maxint32: maxint32 / SCHASH_FACTOR_MIN is big enough
+    SCHASHSIZE6 = 357913951;
+
+    const std::array<int, 7> schashSizes {
+            SCHASHSIZE0, SCHASHSIZE1, SCHASHSIZE2, SCHASHSIZE3, SCHASHSIZE4, SCHASHSIZE5, SCHASHSIZE6
+    };
+
+    int getSCHashSize(int itemCount);
+
     struct THashRecord {
         THashRecord *PNext;
         int RefNr;
@@ -480,6 +503,7 @@ namespace gdlib::gmsobj {
 
     template<typename T>
     class TXHashedStringList : public TXCustomStringList<T> {
+    protected:
         PHashRecord *pHashSC{};
         int hashCount{}, trigger{-1};
         size_t hashBytes{};
@@ -506,16 +530,10 @@ namespace gdlib::gmsobj {
                 hashCount = 0;
                 trigger = -1;
                 hashBytes = 0;
-
             }
         }
 
-        int getSCHashSize(int itemCount) {
-            // ...
-            return 0;
-        }
-
-        void setHashSize(int newCount) {
+        void SetHashSize(int newCount) {
             int newSiz { newCount >= trigger ? getSCHashSize(newCount) : 0 };
             if(newSiz == hashCount) return; // no bump made
             hashCount = newSiz;
@@ -525,9 +543,14 @@ namespace gdlib::gmsobj {
             hashBytes = sizeof(PHashRecord) * hashCount;
             pHashSC = (PHashRecord *)std::malloc(hashBytes);
             std::memset(pHashSC, 0, hashBytes);
-
-
-            // ...
+            for(int n{this->OneBased?1:0}; n<=this->FCount-1+(this->OneBased?1:0); n++) {
+                auto hv {hashValue(this->GetName(n))};
+                auto PH = (PHashRecord)std::malloc(sizeof(THashRecord));
+                PH->PNext = pHashSC[hv];
+                PH->RefNr = n - (this->OneBased?1:0);
+                pHashSC[hv] = PH;
+            }
+            hashBytes += sizeof(THashRecord) * this->FCount;
         }
 
         virtual uint32_t hashValue(const std::string &s) {
@@ -555,7 +578,7 @@ namespace gdlib::gmsobj {
         }
 
         int AddObject(const std::string &s, T *APointer) {
-            if(!pHashSC || this->FCount > trigger) setHashSize(this->FCount);
+            if(!pHashSC || this->FCount > trigger) SetHashSize(this->FCount);
             auto hv { hashValue(s) };
             PHashRecord PH;
             for(PH=pHashSC[hv]; PH && compareEntry(s, PH->RefNr); PH = PH->PNext);
