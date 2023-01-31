@@ -462,6 +462,16 @@ namespace gdlib::gmsobj {
         }
     };
 
+    const char NON_EMPTY {'='};
+    const int   HASHMULT = 31,
+                HASHMULT_6 = 887503681,
+                HASHMULT2 = 71,
+                HASHMOD2 = 32;
+    const double    HASH2_MAXFULLRATIO = 0.75,
+                    HASH2_NICEFULLRATIO = 0.55;
+    const int   SCHASH_FACTOR_MAX = 13,
+                SCHASH_FACTOR_MIN = 6;
+
     struct THashRecord {
         THashRecord *PNext;
         int RefNr;
@@ -470,24 +480,61 @@ namespace gdlib::gmsobj {
 
     template<typename T>
     class TXHashedStringList : public TXCustomStringList<T> {
-        PHashRecord *pHashSC;
-        int hashCount, trigger;
-        size_t hashBytes;
+        PHashRecord *pHashSC{};
+        int hashCount{}, trigger{-1};
+        size_t hashBytes{};
 
         virtual int compareEntry(const std::string &s, int EN) {
-            return 0;
+            auto p { FList[EN].FString };
+            return !p ? (!s.empty() ? 1 : 0) : utils::sameTextPChar(s.c_str(), p);
         }
 
         void ClearHashList() {
+            if(pHashSC) {
+                for(int n{}; n<hashCount; n++) {
+                    PHashRecord p1 {pHashSC[n]};
+                    pHashSC[n] = nullptr;
+                    while(p1) {
+                        p2 = p1->PNext;
+                        delete p1;
+                        p1 = p2;
+                    }
+                }
+                //int64_t nBytes = sizeof(PHashRecord) * hashCount;
+                delete pHashSC;
+                pHashSC = nullptr;
+                hashCount = 0;
+                trigger = -1;
+                hashBytes = 0;
 
+            }
+        }
+
+        int getSCHashSize(int itemCount) {
+            // ...
+            return 0;
         }
 
         void setHashSize(int newCount) {
-
+            int newSiz { newCount >= trigger ? getSCHashSize(newCount) : 0 };
+            if(newSiz == hashCount) return; // no bump made
+            hashCount = newSiz;
+            int64_t i64 = hashCount * SCHASH_FACTOR_MAX;
+            // ...
         }
 
         virtual uint32_t hashValue(const std::string &s) {
-            return 0;
+            int64_t r {};
+            int i{1}, n{(int)s.length()};
+            while(i+5 <= n) {
+                uint32_t t {(uint32_t)std::toupper(s[i++])};
+                for(int j{}; j<5; j++)
+                    t = (HASHMULT * t) + (uint32_t)std::toupper(s[i++]);
+                r = (HASHMULT_6 * r + t) % hashCount;
+            }
+            while(i <= n)
+                r = (HASHMULT * r + (uint32_t)std::toupper(s[i++])) % hashCount;
+            return (uint32_t)r;
         }
 
     public:
@@ -496,12 +543,26 @@ namespace gdlib::gmsobj {
         }
 
         void Clear() {
-
+            ClearHashList();
+            TXCustomStringList<T>::Clear();
         }
 
         int AddObject(const std::string &s, T *APointer) {
-            // FIXME: Implement this!
-            return 0;
+            if(!pHashSC || FCount > trigger) setHashSize(FCount);
+            auto hv { hashValue(s) };
+            PHashRecord PH;
+            for(PH=pHashSC[hv]; PH && compareEntry(s, PH->RefNr); PH = PH->PNext);
+            if(PH) return PH->RefNr + (OneBased?1:0);
+            else {
+                int res{FCount+(OneBased?1:0)};
+                InsertItem(res, S, APointer);
+                PH = new THashRecord;
+                hashBytes += sizeof(THashRecord);
+                PH->PNext = pHashSC[hv];
+                PH->RefNr = res - (OneBased ? 1 : 0);
+                pHashSC[hv] = PH;
+                return res;
+            }
         }
 
         int Add(const std::string &S) {
@@ -511,10 +572,21 @@ namespace gdlib::gmsobj {
 
     template<typename T>
     class TXStrPool : public TXHashedStringList<T> {
+        int compareEntry(const std::string &s, int EN) override {
+            auto p {FList[EN].FString};
+            return !p ? (!s.empty() ? 1 : 0) : utils::sameTextPChar(s.c_str(), p, false);
+        }
+
+        uint32_t hashValue(const std::string &s) override {
+            // TODO: How does this method differ from the base class implementation?
+            return TXHashedStringList<T>::hashValue(s);
+        }
+
     public:
         int Compare(int Index1, int Index2) override {
-            // FIXME: Implement this!
-            return 0;
+            char    *s1 {FList[Index1-(OneBased?1:0)].FString},
+                    *s2 {FList[Index2-(OneBased?1:0)].FString};
+            return utils::sameTextPChar(s1, s2, false);
         }
     };
 
