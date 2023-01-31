@@ -447,7 +447,7 @@ namespace gdlib::gmsobj {
             std::memcpy(&FList[Index2], &Item, sizeof(TStringItem<T>));
         }
 
-        int Compare(int Index1, int Index2) {
+        int Compare(int Index1, int Index2) override {
             char *s1 = FList[Index1-(OneBased?1:0)].FString;
             char *s2 = FList[Index2-(OneBased?1:0)].FString;
             return utils::sameText(s1, s2);
@@ -485,7 +485,7 @@ namespace gdlib::gmsobj {
         size_t hashBytes{};
 
         virtual int compareEntry(const std::string &s, int EN) {
-            auto p { FList[EN].FString };
+            auto p { this->FList[EN].FString };
             return !p ? (!s.empty() ? 1 : 0) : utils::sameTextPChar(s.c_str(), p);
         }
 
@@ -495,7 +495,7 @@ namespace gdlib::gmsobj {
                     PHashRecord p1 {pHashSC[n]};
                     pHashSC[n] = nullptr;
                     while(p1) {
-                        p2 = p1->PNext;
+                        auto p2 = p1->PNext;
                         delete p1;
                         p1 = p2;
                     }
@@ -555,18 +555,18 @@ namespace gdlib::gmsobj {
         }
 
         int AddObject(const std::string &s, T *APointer) {
-            if(!pHashSC || FCount > trigger) setHashSize(FCount);
+            if(!pHashSC || this->FCount > trigger) setHashSize(this->FCount);
             auto hv { hashValue(s) };
             PHashRecord PH;
             for(PH=pHashSC[hv]; PH && compareEntry(s, PH->RefNr); PH = PH->PNext);
-            if(PH) return PH->RefNr + (OneBased?1:0);
+            if(PH) return PH->RefNr + (this->OneBased?1:0);
             else {
-                int res{FCount+(OneBased?1:0)};
-                InsertItem(res, S, APointer);
+                int res{this->FCount+(this->OneBased?1:0)};
+                InsertItem(res, s, APointer);
                 PH = new THashRecord;
                 hashBytes += sizeof(THashRecord);
                 PH->PNext = pHashSC[hv];
-                PH->RefNr = res - (OneBased ? 1 : 0);
+                PH->RefNr = res - (this->OneBased ? 1 : 0);
                 pHashSC[hv] = PH;
                 return res;
             }
@@ -580,7 +580,7 @@ namespace gdlib::gmsobj {
     template<typename T>
     class TXStrPool : public TXHashedStringList<T> {
         int compareEntry(const std::string &s, int EN) override {
-            auto p {FList[EN].FString};
+            auto p {this->FList[EN].FString};
             return !p ? (!s.empty() ? 1 : 0) : utils::sameTextPChar(s.c_str(), p, false);
         }
 
@@ -591,8 +591,8 @@ namespace gdlib::gmsobj {
 
     public:
         int Compare(int Index1, int Index2) override {
-            char    *s1 {FList[Index1-(OneBased?1:0)].FString},
-                    *s2 {FList[Index2-(OneBased?1:0)].FString};
+            char    *s1 {this->FList[Index1-(this->OneBased?1:0)].FString},
+                    *s2 {this->FList[Index2-(this->OneBased?1:0)].FString};
             return utils::sameTextPChar(s1, s2, false);
         }
     };
