@@ -322,10 +322,6 @@ namespace gdlib::gmsobj {
         int FCapacity{};
         size_t FStrMemory{}, FListMemory{};
 
-        char *GetName(int Index) {
-            return FList[Index-(OneBased?1:0)];
-        }
-
         void SetName(int Index, const std::string &v) {
             char **sref = FList[Index-(OneBased?1:0)]->FString;
             delete [] *sref;
@@ -337,11 +333,27 @@ namespace gdlib::gmsobj {
             if(NewCapacity < FCount) NewCapacity = FCount;
             FListMemory = sizeof(TStringItem<T>) * NewCapacity;
             if(!FList) FList = (TStringItem<T> *)std::malloc(FListMemory);
+            else if(!FListMemory) { // TODO: Isn't std::realloc(FList, 0) doing the same?
+                std::free(FList);
+                FList = nullptr;
+            }
             else FList = (TStringItem<T> *)std::realloc(FList, FListMemory);
             FCapacity = NewCapacity;
         }
 
     protected:
+        char *GetName(int Index) {
+            return FList[Index-(OneBased?1:0)];
+        }
+
+        T *GetObject(int Index) {
+            return FList[Index-(OneBased?1:0)].FObject;
+        }
+
+        void PutObject(int Index, T *AObject) {
+            FList[Index-(OneBased ? 1 : 0)].FObject = AObject;
+        }
+
         virtual void Grow() {
             int delta{FCapacity >= 1024*1024 ? FCapacity / 4 : (!FCapacity ? 16 : 7 * FCapacity)};
             int64_t i64{FCapacity};
@@ -353,6 +365,20 @@ namespace gdlib::gmsobj {
                 if(FCapacity < delta) SetCapacity(delta);
                 else assert(i64 <= std::numeric_limits<int>::max() && "TXCustromStringList.grow(): max capacity reached");
             }
+        }
+
+        void FreeObject(int Index) {
+            // noop
+        }
+
+        void InsertItem(int Index, const std::string &S, T *APointer) {
+            if(FCount == FCapacity) Grow();
+            if(OneBased) Index--;
+            if(Index < FCount)
+                std::memcpy(&FList[Index+1], &FList[Index], (FCount-Index)*sizeof(TStringItem<T>));
+            FList[Index].FString = NewString(S, FStrMemory);
+            FList[Index].FObject = APointer;
+            FCount++;
         }
 
     public:
@@ -368,14 +394,20 @@ namespace gdlib::gmsobj {
                 std::memcpy(&FList[Index], &FList[Index+1], (FCount-Index) * sizeof(TStringItem<T>));
         }
 
-        void InsertItem(int Index, const std::string &S, T *APointer) {
-            if(FCount == FCapacity) Grow();
-            if(OneBased) Index--;
-            if(Index < FCount)
-                std::memcpy(&FList[Index+1], &FList[Index], (FCount-Index)*sizeof(TStringItem<T>));
-            FList[Index].FString = NewString(S, FStrMemory);
-            FList[Index].FObject = APointer;
-            FCount++;
+        void FreeItem(int Index) {
+            delete [] FList[Index-(OneBased?1:0)].FString;
+            FreeObject(Index);
+        }
+
+        void Clear() {
+            for(int N{FCount-1+(OneBased?1:0)}; N >=(OneBased ? 1 : 0); N--)
+                FreeItem(N);
+            FCount = 0;
+            SetCapacity(0);
+        }
+
+        int Add(const std::string &S) {
+            return AddObject(S, nullptr);
         }
 
         int AddObject(const std::string &S, T *APointer) {
@@ -384,24 +416,17 @@ namespace gdlib::gmsobj {
             return res;
         }
 
-        int Add(const std::string &S) {
-            return AddObject(S, nullptr);
+        int IndexOf(const std::string &S) {
+            for(int N{}; N<FCount; N++)
+                if(utils::sameTextPChar(FList[N].FString, S.c_str())) return N + (OneBased ? 1 : 0);
+            return -1;
         }
 
-        void FreeObject(int Index) {
-            // noop
-        }
-
-        void FreeItem(int Index) {
-            delete [] FList[Index-(OneBased?1:0)].FString;
-            FreeObject(Index);
-        }
-
-        void Clear() {
-            for(int N{FCount-(OneBased?1:0)}; N >=(OneBased ? 1 : 0); N--)
-                FreeItem(N);
-            FCount = 0;
-            SetCapacity(0);
+        int IndexOfObject(const T &AObject) {
+            for(int N{}; N<FCount; N++)
+                if(FList[N].FObject == AObject)
+                    return N+(OneBased?1:0);
+            return -1;
         }
 
         char *GetName(int Index) const {
@@ -435,17 +460,45 @@ namespace gdlib::gmsobj {
         size_t MemoryUsed() const {
             return FListMemory + FStrMemory;
         }
-
-        int IndexOf(const std::string &S) {
-            for(int N{}; N<FCount; N++)
-                if(utils::sameTextPChar(FList[N].FString, S.c_str())) return N + (OneBased ? 1 : 0);
-            return -1;
-        }
     };
+
+    struct THashRecord {
+        THashRecord *PNext;
+        int RefNr;
+    };
+    using PHashRecord = THashRecord*;
 
     template<typename T>
     class TXHashedStringList : public TXCustomStringList<T> {
+        PHashRecord *pHashSC;
+        int hashCount, trigger;
+        size_t hashBytes;
+
+        virtual int compareEntry(const std::string &s, int EN) {
+            return 0;
+        }
+
+        void ClearHashList() {
+
+        }
+
+        void setHashSize(int newCount) {
+
+        }
+
+        virtual uint32_t hashValue(const std::string &s) {
+            return 0;
+        }
+
     public:
+        ~TXHashedStringList() {
+            Clear();
+        }
+
+        void Clear() {
+
+        }
+
         int AddObject(const std::string &s, T *APointer) {
             // FIXME: Implement this!
             return 0;
