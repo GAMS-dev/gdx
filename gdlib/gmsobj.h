@@ -520,6 +520,13 @@ namespace gdlib::gmsobj {
             if(newSiz == hashCount) return; // no bump made
             hashCount = newSiz;
             int64_t i64 = hashCount * SCHASH_FACTOR_MAX;
+            i64 = std::min<int64_t>(std::numeric_limits<int>::max(), i64);
+            trigger = (int)i64;
+            hashBytes = sizeof(PHashRecord) * hashCount;
+            pHashSC = (PHashRecord *)std::malloc(hashBytes);
+            std::memset(pHashSC, 0, hashBytes);
+
+
             // ...
         }
 
