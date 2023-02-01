@@ -448,10 +448,8 @@ namespace utils {
         std::memcpy(cp, s.c_str(), s.length()+1);
     }
 
-    inline int b2i(bool b) { return b ? 1 : 0; }
-
     int strCompare(const std::string &S1, const std::string &S2, bool caseInsensitive) {
-        if(S1.empty() || S2.empty()) return b2i(!S1.empty()) - b2i(!S2.empty());
+        if(S1.empty() || S2.empty()) return !S1.empty() - !S2.empty();
         auto L = S1.length();
         if(L > S2.length()) L = S2.length();
         for(size_t K{}; K<L; K++) {

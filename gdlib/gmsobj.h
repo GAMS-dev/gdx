@@ -16,12 +16,12 @@ namespace gdlib::gmsobj {
         size_t FListMemory;
 
         T *Get(int Index) {
-            return FList[Index - (OneBased ? 1 : 0)];
+            return FList[Index - OneBased];
         }
 
         void Put(int Index, T *Item) {
             FreeItem(Index);
-            FList[Index-(OneBased?1:0)] = Item;
+            FList[Index-OneBased] = Item;
         }
 
         void SetCount(int NewCount) {
@@ -78,7 +78,7 @@ namespace gdlib::gmsobj {
         }
 
         void Clear() {
-            for(int N{FCount-1+(OneBased?1:0)}; N>=(OneBased?1:0); N--) FreeItem(N);
+            for(int N{FCount-1+OneBased}; N>=OneBased; N--) FreeItem(N);
             FCount = 0;
             SetCapacity(0);
         }
@@ -109,7 +109,7 @@ namespace gdlib::gmsobj {
         int IndexOf(const T *Item) const {
             for(int N{}; N<FCount; N++)
                 if(FList[N] == Item)
-                    return N+(OneBased ? 1 : 0);
+                    return N+OneBased;
             return -1;
         }
 
@@ -125,7 +125,7 @@ namespace gdlib::gmsobj {
         int Remove(const T *Item) {
             int res{FCount-1};
             while(res >= 0 && FList[res] != Item) res--;
-            if(res >= (OneBased ? 1 : 0)) Delete(res);
+            if(res >= OneBased) Delete(res);
             return res;
         }
 
@@ -160,7 +160,7 @@ namespace gdlib::gmsobj {
         }
 
         const T *GetConst(int Index) const {
-            return FList[Index - (OneBased ? 1 : 0)];
+            return FList[Index - OneBased];
         }
 
         T *GetLast() {
@@ -191,11 +191,11 @@ namespace gdlib::gmsobj {
 
         void Put(int Index, const std::string &Item) {
             FreeItem(Index);
-            FList[Index-(OneBased ? 1 : 0)] = NewString(Item, FStrMemory);
+            FList[Index-OneBased] = NewString(Item, FStrMemory);
         }
 
         std::string Get(int Index) {
-            return FList[Index-(OneBased ? 1 : 0)];
+            return FList[Index-OneBased];
         }
 
     protected:
@@ -216,7 +216,7 @@ namespace gdlib::gmsobj {
         int IndexOf(const std::string &Item) {
             for(int N{}; N<FCount; N++)
                 if(utils::sameTextPChar(FList[N], Item.c_str()))
-                    return N + (OneBased ? 1 : 0);
+                    return N + OneBased;
             return -1;
         }
 
@@ -324,7 +324,7 @@ namespace gdlib::gmsobj {
         size_t FStrMemory{}, FListMemory{};
 
         void SetName(int Index, const std::string &v) {
-            char **sref = FList[Index-(OneBased?1:0)]->FString;
+            char **sref = FList[Index-OneBased]->FString;
             delete [] *sref;
             *sref = NewString(v, FStrMemory);
         }
@@ -344,15 +344,15 @@ namespace gdlib::gmsobj {
 
     public:
         char *GetName(int Index) {
-            return FList[Index-(OneBased?1:0)].FString;
+            return FList[Index-OneBased].FString;
         }
 
         T *GetObject(int Index) {
-            return FList[Index-(OneBased?1:0)].FObject;
+            return FList[Index-OneBased].FObject;
         }
 
         void PutObject(int Index, T *AObject) {
-            FList[Index-(OneBased ? 1 : 0)].FObject = AObject;
+            FList[Index-OneBased].FObject = AObject;
         }
 
     protected:
@@ -398,12 +398,12 @@ namespace gdlib::gmsobj {
         }
 
         void FreeItem(int Index) {
-            delete [] FList[Index-(OneBased?1:0)].FString;
+            delete [] FList[Index-OneBased].FString;
             FreeObject(Index);
         }
 
         void Clear() {
-            for(int N{FCount-1+(OneBased?1:0)}; N >=(OneBased ? 1 : 0); N--)
+            for(int N{FCount-1+OneBased}; N >=OneBased; N--)
                 FreeItem(N);
             FCount = 0;
             SetCapacity(0);
@@ -414,21 +414,21 @@ namespace gdlib::gmsobj {
         }
 
         int AddObject(const std::string &S, T *APointer) {
-            int res{FCount+(OneBased?1:0)};
+            int res{FCount+OneBased};
             InsertItem(res, S, APointer);
             return res;
         }
 
         int IndexOf(const std::string &S) {
             for(int N{}; N<FCount; N++)
-                if(utils::sameTextPChar(FList[N].FString, S.c_str())) return N + (OneBased ? 1 : 0);
+                if(utils::sameTextPChar(FList[N].FString, S.c_str())) return N + OneBased;
             return -1;
         }
 
         int IndexOfObject(const T &AObject) {
             for(int N{}; N<FCount; N++)
                 if(FList[N].FObject == AObject)
-                    return N+(OneBased?1:0);
+                    return N+OneBased;
             return -1;
         }
 
@@ -451,8 +451,8 @@ namespace gdlib::gmsobj {
         }
 
         int Compare(int Index1, int Index2) override {
-            char *s1 = FList[Index1-(OneBased?1:0)].FString;
-            char *s2 = FList[Index2-(OneBased?1:0)].FString;
+            char *s1 = FList[Index1-OneBased].FString;
+            char *s2 = FList[Index2-OneBased].FString;
             return utils::sameText(s1, s2);
         }
 
@@ -543,11 +543,11 @@ namespace gdlib::gmsobj {
             hashBytes = sizeof(PHashRecord) * hashCount;
             pHashSC = (PHashRecord *)std::malloc(hashBytes);
             std::memset(pHashSC, 0, hashBytes);
-            for(int n{this->OneBased?1:0}; n<=this->FCount-1+(this->OneBased?1:0); n++) {
+            for(int n{this->OneBased}; n<=this->FCount-1+(this->OneBased); n++) {
                 auto hv {hashValue(this->GetName(n))};
                 auto PH = (PHashRecord)std::malloc(sizeof(THashRecord));
                 PH->PNext = pHashSC[hv];
-                PH->RefNr = n - (this->OneBased?1:0);
+                PH->RefNr = n - (this->OneBased);
                 pHashSC[hv] = PH;
             }
             hashBytes += sizeof(THashRecord) * this->FCount;
@@ -582,14 +582,14 @@ namespace gdlib::gmsobj {
             auto hv { hashValue(s) };
             PHashRecord PH;
             for(PH=pHashSC[hv]; PH && compareEntry(s, PH->RefNr); PH = PH->PNext);
-            if(PH) return PH->RefNr + (this->OneBased?1:0);
+            if(PH) return PH->RefNr + this->OneBased;
             else {
-                int res{this->FCount+(this->OneBased?1:0)};
+                int res{this->FCount+this->OneBased};
                 InsertItem(res, s, APointer);
                 PH = new THashRecord;
                 hashBytes += sizeof(THashRecord);
                 PH->PNext = pHashSC[hv];
-                PH->RefNr = res - (this->OneBased ? 1 : 0);
+                PH->RefNr = res - this->OneBased;
                 pHashSC[hv] = PH;
                 return res;
             }
@@ -614,8 +614,8 @@ namespace gdlib::gmsobj {
 
     public:
         int Compare(int Index1, int Index2) override {
-            char    *s1 {this->FList[Index1-(this->OneBased?1:0)].FString},
-                    *s2 {this->FList[Index2-(this->OneBased?1:0)].FString};
+            char    *s1 {this->FList[Index1-this->OneBased].FString},
+                    *s2 {this->FList[Index2-this->OneBased].FString};
             return utils::sameTextPChar(s1, s2, false);
         }
     };
