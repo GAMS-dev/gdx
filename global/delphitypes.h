@@ -8,10 +8,60 @@
 #include <functional>
 #include <set>
 #include <cmath>
+#include <array>
+#include <cassert>
 
 
 // Interface
 namespace global::delphitypes {
+
+    class ShortString {
+        uint8_t length;
+        std::array<char, 255> buf;
+
+    public:
+        ShortString(const char *s) : length{(uint8_t)std::strlen(s)} {
+            assert(std::strlen(s) <= 254);
+            std::memcpy(buf.data(), s, length+1);
+        }
+
+        ShortString(const std::string &s) : ShortString(s.c_str()) {
+        }
+
+        std::string string() const {
+            return buf.data();
+        }
+
+        char *c_str() {
+            return buf.data();
+        }
+
+        char *d_str() {
+            return (char *)&length;
+        }
+
+        uint8_t size() const {
+            return length;
+        }
+
+        bool empty() const {
+            return !length;
+        }
+
+        bool operator==(const std::string &s) const {
+            if(s.length() != length) return false;
+            for(int i{}; i<length; i++)
+                if(s[i] != buf[i]) return false;
+            return true;
+        }
+
+        ShortString &operator=(const std::string &s) {
+            length = (uint8_t)s.length();
+            std::memcpy(buf.data(), s.c_str(), length);
+            return *this;
+        }
+    };
+
     template<typename T>
     inline void FreeAndNil(T* &ptr) {
         if (ptr) {
