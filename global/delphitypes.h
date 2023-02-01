@@ -10,6 +10,7 @@
 #include <cmath>
 #include <array>
 #include <cassert>
+#include <cstring>
 
 
 // Interface
