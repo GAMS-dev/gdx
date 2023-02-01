@@ -15,6 +15,54 @@
 // Interface
 namespace global::delphitypes {
 
+    class ShortStringHeap {
+        char *buf;
+    public:
+        ShortStringHeap(const char *s) {
+            auto l { std::strlen(s) };
+            buf = new char[l+2];
+            buf[0] = (uint8_t)l;
+            std::memcpy(&buf[1], s, l+1);
+        }
+
+        ~ShortStringHeap() {
+            delete [] buf;
+        }
+
+        std::string string() const {
+            return &buf[1];
+        }
+
+        char *c_str() const {
+            return &buf[1];
+        }
+
+        char *d_str() {
+            return buf;
+        }
+
+        uint8_t size() const {
+            return (uint8_t)buf[0];
+        }
+
+        bool empty() const {
+            return !(uint8_t)buf[0];
+        }
+
+        bool operator==(const std::string &s) const {
+            if(s.length() != size()) return false;
+            for(int i{}; i<size(); i++)
+                if(s[i] != buf[i+1]) return false;
+            return true;
+        }
+
+        ShortStringHeap &operator=(const std::string &s) {
+            buf[0] = (uint8_t)s.length();
+            std::memcpy(&buf[1], s.c_str(), s.length()+1);
+            return *this;
+        }
+    };
+
     class ShortString {
         uint8_t length;
         std::array<char, 255> buf;
@@ -57,7 +105,7 @@ namespace global::delphitypes {
 
         ShortString &operator=(const std::string &s) {
             length = (uint8_t)s.length();
-            std::memcpy(buf.data(), s.c_str(), length);
+            std::memcpy(buf.data(), s.c_str(), length+1);
             return *this;
         }
     };
