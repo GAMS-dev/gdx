@@ -4,7 +4,7 @@ namespace gdlib::gmsobj {
 
     void TQuickSortClass::SortN(int n) {
         if(n > 1)
-            QuickSort(OneBased, n - 1 + OneBased);
+            QuickSort((OneBased ? 1 : 0), n - 1 + (OneBased ? 1 : 0));
     }
 
     void TQuickSortClass::QuickSort(int L, int R) {

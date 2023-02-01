@@ -173,7 +173,7 @@ namespace gdlib::gmsdata {
     };
 
     // FIXME: Work in progress!
-    /*class TTblGamsDataLegacy {
+    class TTblGamsDataLegacy {
         TGrowArrayFxd<void*> DS;
         gdlib::gmsobj::TXList<uint8_t> FList;
         int FDim, FIndexSize, FDataSize;
@@ -181,5 +181,5 @@ namespace gdlib::gmsdata {
         int FLastIndex;
 
     public:
-    };*/
+    };
 }

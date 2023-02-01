@@ -884,7 +884,8 @@ void ZLIB_INTERNAL _tr_stored_block(s, buf, stored_len, last)
 /* ===========================================================================
  * Flush the bits in the bit buffer to pending output (leaves at most 7 bits)
  */
-void ZLIB_INTERNAL _tr_flush_bits(deflate_state *s)
+void ZLIB_INTERNAL _tr_flush_bits(s)
+    deflate_state *s;
 {
     bi_flush(s);
 }
@@ -893,7 +894,8 @@ void ZLIB_INTERNAL _tr_flush_bits(deflate_state *s)
  * Send one empty static block to give enough lookahead for inflate.
  * This takes 10 bits, of which 7 may remain in the bit buffer.
  */
-void ZLIB_INTERNAL _tr_align(deflate_state *s)
+void ZLIB_INTERNAL _tr_align(s)
+    deflate_state *s;
 {
     send_bits(s, STATIC_TREES<<1, 3);
     send_code(s, END_BLOCK, static_ltree);

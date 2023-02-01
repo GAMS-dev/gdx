@@ -611,7 +611,7 @@ template<typename K, typename V, typename H, typename E>
         }
 
         int StoreObject(const std::string& key, T val) {
-            int ix = static_cast<int>(insertOrder.size()) + OneBased;
+            int ix = static_cast<int>(insertOrder.size()) + (OneBased ? 1 : 0);
 #ifdef STABLE_REFS
             auto [it, wasNew] = dict.emplace(key, PayloadIndex<T> {ix, val});
             assert(wasNew);
@@ -625,9 +625,9 @@ template<typename K, typename V, typename H, typename E>
 
         std::string GetString(int ix) const {
 #ifdef STABLE_REFS
-            return (*insertOrder[ix - OneBased]).first;
+            return (*insertOrder[ix - (OneBased ? 1 : 0)]).first;
 #else
-            return insertOrder[ix - OneBased];
+            return insertOrder[ix - (OneBased ? 1 : 0)];
 #endif
         }
 
@@ -636,9 +636,9 @@ template<typename K, typename V, typename H, typename E>
 
         T *GetObject(int ix) {
 #ifdef STABLE_REFS
-            return &((*insertOrder[ix - OneBased]).second.payload);
+            return &((*insertOrder[ix - (OneBased ? 1 : 0)]).second.payload);
 #else
-            return &(dict[insertOrder[ix - OneBased]].payload);
+            return &(dict[insertOrder[ix - (OneBased ? 1 : 0)]].payload);
 #endif
         }
 
