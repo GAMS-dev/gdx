@@ -487,7 +487,7 @@ namespace gxfile {
             for(int D{}; D<FCurrentDim; D++)
                 std::cout << " " << KeyStr[D] << (D+1 < FCurrentDim ? "," : "") << "\n";
         }
-        std::string SV;
+        static std::string SV;
         SV.reserve(GLOBAL_UEL_IDENT_SIZE);
         for(int D{}; D<FCurrentDim; D++) {
             utils::trimRight(KeyStr[D], SV);
