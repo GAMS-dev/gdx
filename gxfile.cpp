@@ -492,7 +492,8 @@ namespace gxfile {
         static std::string SVstorage;
         SVstorage.reserve(GLOBAL_UEL_IDENT_SIZE);
         for(int D{}; D<FCurrentDim; D++) {
-            const std::string &SV = utils::trimRight(KeyStr[D], SVstorage);
+            //const std::string &SV = utils::trimRight(KeyStr[D], SVstorage);
+            std::string SV {utils::trimRight(KeyStr[D])};
             if(!LastStrElem[D] || SV != (*LastStrElem[D])) {
                 // -1=not found, >=1 found
                 int KD {UELTable->IndexOf(SV)};
