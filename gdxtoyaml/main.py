@@ -1,7 +1,13 @@
 import copy
+import json
 import os
 import struct
-import yaml
+use_yaml = True
+try:
+    import yaml
+except ImportError as err:
+    print(f'Unable to find yaml module: {err.msg}!')
+    use_yaml = False
 import sys
 import platform
 
@@ -211,7 +217,10 @@ def read_gdx(fn):
 
 
 def to_yaml(obj):
-    return yaml.dump(obj, sort_keys=False, default_flow_style=False)
+    if use_yaml:
+        return yaml.dump(obj, sort_keys=False, default_flow_style=False)
+    else:
+        return json.dumps(obj, sort_keys=False, indent=4)
 
 
 def spit(s, fn):
