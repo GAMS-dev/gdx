@@ -257,6 +257,7 @@ namespace utils {
 
     std::string trim(const std::string& s);
     std::string trimRight(const std::string &s);
+    const std::string& trimRight(const std::string& s, std::string& storage);
     std::optional<std::string> maybeTrimRight(const std::string &s);
     std::string trimZeroesRight(const std::string& s, char DecimalSep = '.');
 

@@ -113,6 +113,17 @@ namespace utils {
         return s.substr(0, lastNonBlank+1);
     }
 
+    // No trim needed? -> reference to input str
+    // Re-use supplied storage to store trimmed copy of string
+    const std::string &trimRight(const std::string& s, std::string &storage) {
+        if (s.empty() || !isblank(s.back())) return s;
+        const auto ub = s.find_last_not_of(" \t") + 1;
+        //storage = s.substr(0, ub);
+        storage.replace(0, ub, s, 0, ub);
+        storage.resize(ub);
+        return storage;
+    }
+
     std::optional<std::string> maybeTrimRight(const std::string &s) {
         if(s.empty() || !isblank(s.back())) return std::nullopt;
         const auto lastNonBlank = s.find_last_not_of(" \t");

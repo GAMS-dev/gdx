@@ -487,8 +487,12 @@ namespace gxfile {
             for(int D{}; D<FCurrentDim; D++)
                 std::cout << " " << KeyStr[D] << (D+1 < FCurrentDim ? "," : "") << "\n";
         }
+        // AS: Avoid creating a new SV string object for dim
+        // Instead once allocate max UEL length str and reuse that one
+        static std::string SVstorage;
+        SVstorage.reserve(GLOBAL_UEL_IDENT_SIZE);
         for(int D{}; D<FCurrentDim; D++) {
-            std::string SV {utils::trimRight(KeyStr[D])};
+            const std::string &SV = utils::trimRight(KeyStr[D], SVstorage);
             if(!LastStrElem[D] || SV != (*LastStrElem[D])) {
                 // -1=not found, >=1 found
                 int KD {UELTable->IndexOf(SV)};

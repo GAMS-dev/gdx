@@ -193,24 +193,24 @@ namespace tests::gxfiletests {
         return;
 #endif
         std::vector<std::pair<std::string, std::string>> suiteModelPairs {
-            /*{"lwsup","modBig"},
-            {"lwsup","modBigx"},
-            {"lwsup","t4716"},
-            {"sqagams","dummy42"},*/
+//            {"lwsup","modBig"},
+//            {"lwsup","modBigx"},
+//            {"lwsup","t4716"},
+//            {"sqagams","dummy42"},
             {"lwsup","10rr"},
-            /*{"sqagams","t3010"},
-            {"mrb","WSC Fixing"},
-            {"lwsup","modBig8788"},
-            {"lwsup","SCUCinput_new"},
-            {"src","Estimate"},
-            {"lwsup","pShiftFactor"},
-            {"lwsup","test1"},
-            {"src","fnpower"},
-            {"mrb","new6"},
-            {"lwsup","daod4gams"},
-            {"sqagams","times_psi"},
-            {"sqagams","GuaranteeData"},
-            {"sqagams","bearing"}*/
+//            {"sqagams","t3010"},
+//            {"mrb","WSC Fixing"},
+//            {"lwsup","modBig8788"},
+//            {"lwsup","SCUCinput_new"},
+//            {"src","Estimate"},
+//            {"lwsup","pShiftFactor"},
+//            {"lwsup","test1"},
+//            {"src","fnpower"},
+//            {"mrb","new6"},
+//            {"lwsup","daod4gams"},
+//            {"sqagams","times_psi"},
+//            {"sqagams","GuaranteeData"},
+//            {"sqagams","bearing"}
         };
 
         auto gdxFilePathCandidates = [](const std::string &suiteName, const std::string &modelName) {
