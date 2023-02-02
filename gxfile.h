@@ -263,19 +263,19 @@ template<typename K, typename V, typename H, typename E>
     };
 
     class TgxModeSet : public utils::IContainsPredicate<TgxFileMode> {
-        std::vector<bool> modeActive;
-        uint8_t count;
+        std::array<bool, tgxfilemode_count> modeActive{};
+        uint8_t count{};
     public:
-        TgxModeSet(std::initializer_list<TgxFileMode> modes);
+        TgxModeSet(const std::initializer_list<TgxFileMode> &modes);
+        virtual ~TgxModeSet() = default;
         bool contains(const TgxFileMode& mode) const override;
         bool empty() const;
     };
-    //using TgxModeSet = std::unordered_map<TgxFileMode>;
 
     const TgxModeSet    AnyWriteMode {fw_init,fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data,fw_map_data,fw_str_data},
                         AnyReadMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data,fr_str_data};
 
-    enum TgdxElemSize {
+    enum class TgdxElemSize {
         sz_byte,
         sz_word,
         sz_integer
@@ -880,7 +880,7 @@ template<typename K, typename V, typename H, typename E>
         int gdxSetHasText(int SyNr);
         int gdxSetReadSpecialValues(const double *AVals);
         int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) override;
-        int gdxSymbMaxLength();
+        int gdxSymbMaxLength() const;
         int gdxSymbolAddComment(int SyNr, const std::string& Txt) override;
         int gdxSymbolGetComment(int SyNr, int N, char *Txt) override;
         int gdxUELMaxLength() override;

@@ -27,7 +27,7 @@ namespace utils {
         return res;
     }
 
-    inline void insertAllChars(std::set<char>& charset, const std::string& chars) {
+    inline void insertAllChars(std::set<char>& charset, const std::string_view chars) {
         charset.insert(chars.begin(), chars.end());
     }
 
@@ -70,6 +70,7 @@ namespace utils {
     template<typename T>
     class IContainsPredicate {
     public:
+        virtual ~IContainsPredicate() = default;
         virtual bool contains(const T& elem) const = 0;
     };
 
@@ -186,21 +187,11 @@ namespace utils {
     template<typename T>
     void append(std::list<T>& l, const std::initializer_list<T>& elems) {
         std::copy(elems.begin(), elems.end(), std::back_inserter(l));
-        /*for (const auto& elem : elems)
-            l.push_back(elem);*/
     }
 
     template<typename T>
     T min(const T a, const T b) {
         return a < b ? a : b;
-    }
-
-    template<typename T>
-    T adder(T v) { return v; }
-
-    template<typename T, typename... Args>
-    T adder(T first, Args... args) {
-        return first + adder(args...);
     }
 
     template<typename... Args>

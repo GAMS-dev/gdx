@@ -49,13 +49,13 @@ namespace gxfile {
 #ifdef GAMSBUILD
     static std::string gdlSetSystemName() {
         palHandle_t pal;
-        char msg[256];
-        if (!palCreate(&pal, msg, sizeof(msg)))
+        std::array<char, 256> msg {};
+        if (!palCreate(&pal, msg.data(), msg.size()))
             printf("error");
         palSetSystemName(pal, "GDX Library");
-        palGetAuditLine(pal, msg);
+        palGetAuditLine(pal, msg.data());
         palFree(&pal);
-        return msg;
+        return msg.data();
     }
     static std::string auditLine { gdlSetSystemName() };
 #else
@@ -275,10 +275,10 @@ namespace gxfile {
     }
 
     static TgdxElemSize GetIntegerSize(int N) {
-        if (N <= 0) return sz_integer;
-        else if (N <= 255) return sz_byte;
-        else if (N <= 65535) return sz_word;
-        return sz_integer;
+        if (N <= 0) return TgdxElemSize::sz_integer;
+        else if (N <= 255) return TgdxElemSize::sz_byte;
+        else if (N <= 65535) return TgdxElemSize::sz_word;
+        return TgdxElemSize::sz_integer;
     }
 
     union TI64Rec {
@@ -491,7 +491,6 @@ namespace gxfile {
         SV.reserve(GLOBAL_UEL_IDENT_SIZE);
         for(int D{}; D<FCurrentDim; D++) {
             utils::trimRight(KeyStr[D], SV);
-            //std::string SV {utils::trimRight(KeyStr[D])};
             if(!LastStrElem[D] || SV != (*LastStrElem[D])) {
                 // -1=not found, >=1 found
                 int KD {UELTable->IndexOf(SV)};
@@ -1340,9 +1339,9 @@ namespace gxfile {
                 for (int D{ FDim - 1 }; D < FCurrentDim; D++) {
                     int v{ AElements[D] - MinElem[D] };
                     switch (ElemType[D]) {
-                    case sz_integer: FFile->WriteInteger(v); break;
-                    case sz_word: FFile->WriteWord(v); break;
-                    case sz_byte: FFile->WriteByte(v); break;
+                        case TgdxElemSize::sz_integer: FFile->WriteInteger(v); break;
+                        case TgdxElemSize::sz_word: FFile->WriteWord(v); break;
+                        case TgdxElemSize::sz_byte: FFile->WriteByte(v); break;
                     }
                     LastElem[D] = AElements[D];
                 }
@@ -1424,9 +1423,9 @@ namespace gxfile {
             for(int D{AFDim-1}; D <FCurrentDim; D++) {
                 assert(D>=0);
                 switch(ElemType[D]) {
-                    case sz_integer: LastElem[D] = FFile->ReadInteger() + MinElem[D]; break;
-                    case sz_word: LastElem[D] = FFile->ReadWord() + MinElem[D]; break;
-                    case sz_byte: LastElem[D] = FFile->ReadByte() + MinElem[D]; break;
+                    case TgdxElemSize::sz_integer: LastElem[D] = FFile->ReadInteger() + MinElem[D]; break;
+                    case TgdxElemSize::sz_word: LastElem[D] = FFile->ReadWord() + MinElem[D]; break;
+                    case TgdxElemSize::sz_byte: LastElem[D] = FFile->ReadByte() + MinElem[D]; break;
                 }
             }
         }
@@ -4130,7 +4129,7 @@ namespace gxfile {
     // Arguments:
     // Returns:
     //   The length of the longest symbol name
-    int TGXFileObj::gdxSymbMaxLength() {
+    int TGXFileObj::gdxSymbMaxLength() const {
         int acc {};
         for(int N{1}; N<=NameList->Count(); N++)
             acc = std::max<int>(acc, (int)std::strlen(NameList->GetString(N)));
@@ -4757,9 +4756,7 @@ namespace gxfile {
         entries.reserve(n);
     }
 
-    TgxModeSet::TgxModeSet(const std::initializer_list<TgxFileMode> modes) : modeActive(tgxfilemode_count) {
-        std::fill(modeActive.begin(), modeActive.end(), false);
-        count = 0;
+    TgxModeSet::TgxModeSet(const std::initializer_list<TgxFileMode> &modes) {
         for (const auto mode : modes) {
             modeActive[mode] = true;
             count++;
