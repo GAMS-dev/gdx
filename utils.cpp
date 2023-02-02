@@ -118,9 +118,9 @@ namespace utils {
     const std::string &trimRight(const std::string& s, std::string &storage) {
         if (s.empty() || !isblank(s.back())) return s;
         const auto ub = s.find_last_not_of(" \t") + 1;
-        //storage = s.substr(0, ub);
-        storage.replace(0, ub, s, 0, ub);
-        storage.resize(ub);
+        storage = s.substr(0, ub);
+        //storage.replace(0, ub, s, 0, ub);
+        //storage.resize(ub);
         return storage;
     }
 
