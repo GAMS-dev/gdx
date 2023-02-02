@@ -85,6 +85,10 @@ namespace gdlib::strhash {
             return utils::sameText(ps1, ps2);
         }
 
+        virtual bool EntryEqualPChar(const char *ps1, const char *ps2) {
+            return utils::sameTextPChar(ps1, ps2);
+        }
+
         virtual int Compare(const std::string &ps1, const std::string &ps2) {
             return utils::strCompare(ps1, ps2);
         }
@@ -276,7 +280,7 @@ namespace gdlib::strhash {
             int HV {Hash(s)};
             PHashBucket<T> PBuck = GetBucketByHash(HV);
             while(PBuck) {
-                if(!EntryEqual(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
+                if(!EntryEqualPChar(PBuck->StrP, s.c_str())) PBuck = PBuck->NextBucket;
                 else return PBuck->StrNr + (OneBased ? 1 : 0);
             }
             return -1;
