@@ -213,8 +213,8 @@ namespace tests::utilstests {
         std::string s {"  surrounded by blanks  "s};
         REQUIRE_EQ(expectedStr, utils::trimRight(s));
         std::string storage(64, 'x');
-        const std::string &ref = utils::trimRight(s, storage);
-        REQUIRE_EQ(expectedStr, ref);
+        utils::trimRight(s, storage);
+        REQUIRE_EQ(expectedStr, storage);
     }
 
     TEST_SUITE_END();
