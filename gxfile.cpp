@@ -50,7 +50,7 @@ namespace gxfile {
     static std::string gdlSetSystemName() {
         palHandle_t pal;
         std::array<char, 256> msg {};
-        if (!palCreate(&pal, msg.data(), msg.size()))
+        if (!palCreate(&pal, msg.data(), static_cast<int>(msg.size())))
             printf("error");
         palSetSystemName(pal, "GDX Library");
         palGetAuditLine(pal, msg.data());
@@ -4328,11 +4328,10 @@ namespace gxfile {
         return "tgxfileobj"s;
     }
 
-#ifdef CPP_HASHMAP
-    void TUELTable::clear() {
-        UsrUel2Ent->clear();
+    /*void TUELTable::clear() {
+        UsrUel2Ent
         nameToIndexNum.clear();
-    }
+    }*/
 
     int TUELTable::size() const {
         return static_cast<int>(nameToIndexNum.size());
@@ -4375,11 +4374,11 @@ namespace gxfile {
         return !size();
     }
 
-    std::string TUELTable::operator[](int index) const {
+    const char *TUELTable::operator[](int index) const {
 #ifdef STABLE_REFS
-        return insertOrder[index]->first;
+        return insertOrder[index]->first.c_str();
 #else
-        return insertOrder[index];
+        return insertOrder[index].c_str();
 #endif
     }
 
@@ -4479,12 +4478,9 @@ namespace gxfile {
 #ifdef GOOGLE_HASHMAP
         nameToIndexNum.set_empty_key("");
 #endif
-        Reserve(10000);
         UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
     }
-#endif
 
-#ifndef TAL_LEGACY
     int TAcronymList::FindEntry(int Map) const {
         const auto it = std::find_if(begin(), end(), [&](const auto &item) {
             return item.AcrMap == Map;
@@ -4527,9 +4523,7 @@ namespace gxfile {
     int TAcronymList::MemoryUsed() {
         return (int)(sizeof(TAcronym) * this->size());
     }
-#endif
 
-#ifndef TFL_LEGACY
     TDFilter *TFilterList::FindFilter(int Nr) {
         const auto it = std::find_if(begin(), end(), [&Nr](const auto *f) { return f->FiltNumber == Nr; });
         return it == end() ? nullptr : *it;
@@ -4555,9 +4549,7 @@ namespace gxfile {
     TFilterList::~TFilterList() {
         clear();
     }
-#endif
 
-#ifndef TIM_LEGACY
     int TIntegerMapping::GetHighestIndex() const {
         return FHighestIndex;
     }
@@ -4599,12 +4591,11 @@ namespace gxfile {
         }
         Map.resize(currCap, -1);
     }
-#endif
 
-    void TUELTableLegacy::clear() {
+    /*void TUELTableLegacy::clear() {
         Clear();
         UsrUel2Ent = nullptr;
-    }
+    }*/
 
     int TUELTableLegacy::size() const {
         return FCount;
@@ -4689,7 +4680,7 @@ namespace gxfile {
         return TXStrHashListImpl<int>::StoreObject(id, mapping);
     }
 
-    char *TUELTableLegacy::operator[](int index) const {
+    const char *TUELTableLegacy::operator[](int index) const {
         return GetString(index);
     }
 
@@ -4867,7 +4858,6 @@ namespace gxfile {
     }
 #endif // TFL_LEGACY
 
-#ifdef TIM_LEGACY
     void TIntegerMappingLegacy::growMapping(int F) {
         assert(FCapacity < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
         int64_t currCap {FCapacity}, prevCap{currCap};
@@ -4920,7 +4910,6 @@ namespace gxfile {
     bool TIntegerMappingLegacy::empty() const {
         return !FCapacity;
     }
-#endif
 
     TAcronym::TAcronym(std::string Name, const std::string &Text, int Map) :
         AcrName { std::move(Name) },

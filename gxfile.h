@@ -179,8 +179,10 @@ template<typename K, typename V, typename H, typename E>
 
 #ifdef USE_BBARRAY
     using TDFilter = TDFilterLegacy;
+    using TSetBitMap = gdlib::gmsobj::TBooleanBitArray;
 #else
     using TDFilter = TDFilterBoolVec;
+    using TSetBitMap = std::vector<bool>;
 #endif
 
     enum TgdxDAction {
@@ -193,12 +195,6 @@ template<typename K, typename V, typename H, typename E>
     };
 
     using TDomainList = std::array<TDomain, GLOBAL_MAX_INDEX_DIM>;
-
-#ifdef USE_BBARRAY
-    using TSetBitMap = gdlib::gmsobj::TBooleanBitArray;
-#else
-    using TSetBitMap = std::vector<bool>;
-#endif
 
     //using TCommentsList = std::vector<std::string>;
     using TCommentsList = gdlib::gmsobj::TXStrings;
@@ -281,7 +277,6 @@ template<typename K, typename V, typename H, typename E>
         sz_integer
     };
 
-#ifndef TIM_LEGACY
     // N.B.: we store integers in [0..high(integer)] in TIntegerMapping, so
     // FMAXCAPACITY = high(integer) + 1 is all we will ever need, and we will
     // never get a request to grow any larger.  The checks and code
@@ -300,8 +295,7 @@ template<typename K, typename V, typename H, typename E>
         bool empty() const;
         void reserve(int n);
     };
-    using TIntegerMappingImpl = TIntegerMapping;
-#else
+
     class TIntegerMappingLegacy {
         int64_t FCapacity {}, FMapBytes {};
         int64_t FMAXCAPACITY {std::numeric_limits<int>::max() + static_cast<int64_t>(1)};
@@ -319,6 +313,10 @@ template<typename K, typename V, typename H, typename E>
         int size() const;
         bool empty() const;
     };
+
+#ifndef TIM_LEGACY
+    using TIntegerMappingImpl = TIntegerMapping;
+#else
     using TIntegerMappingImpl = TIntegerMappingLegacy;
 #endif
 
@@ -345,7 +343,6 @@ template<typename K, typename V, typename H, typename E>
     using caseSensitiveStrEquality = std::equal_to<std::string>;
 
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
-#ifdef CPP_HASHMAP
     struct IndexNumPair {
         int index, num;
         IndexNumPair() : index{}, num{} {}
@@ -354,7 +351,6 @@ template<typename K, typename V, typename H, typename E>
     };
     //static IndexNumPair unmappedPair {-1};
     using utablemaptype = umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>;
-#endif
 
     class IUELTable {
     protected:
@@ -362,13 +358,12 @@ template<typename K, typename V, typename H, typename E>
     public:
         std::unique_ptr<TIntegerMappingImpl> UsrUel2Ent {}; // from user uelnr to table entry
         virtual ~IUELTable() = default;
-        virtual void clear() = 0;
         virtual int size() const = 0;
         virtual bool empty() const = 0;
         virtual int IndexOf(const std::string &s) = 0;
         virtual int AddObject(const std::string &id, int mapping) = 0;
         virtual int StoreObject(const std::string& id, int mapping) = 0;
-        virtual char *operator[](int index) const = 0;
+        virtual const char *operator[](int index) const = 0;
         virtual int GetUserMap(int i) = 0;
         virtual void SetUserMap(int EN, int N) = 0;
         virtual void ResetMapToUserStatus() = 0;
@@ -382,7 +377,6 @@ template<typename K, typename V, typename H, typename E>
         virtual void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) = 0;
     };
 
-#ifdef CPP_HASHMAP
     class TUELTable : public IUELTable {
         utablemaptype nameToIndexNum{};
 #ifdef STABLE_REFS
@@ -392,13 +386,12 @@ template<typename K, typename V, typename H, typename E>
 #endif
     public:
         TUELTable();
-        void clear() override;
         int size() const override;
         bool empty() const override;
         int IndexOf(const std::string &s) override;
         int AddObject(const std::string &id, int mapping) override;
         int StoreObject(const std::string& id, int mapping) override;
-        std::string operator[](int index) const override;
+        const char *operator[](int index) const override;
         int GetUserMap(int i) override;
         void SetUserMap(int EN, int N) override;
         void ResetMapToUserStatus() override;
@@ -408,7 +401,6 @@ template<typename K, typename V, typename H, typename E>
         void RenameEntry(int N, const std::string &s) override;
         int GetMaxUELLength() const override;
     };
-#endif
 
     template<typename T>
 #ifdef TSH_LEGACY
@@ -427,7 +419,7 @@ template<typename K, typename V, typename H, typename E>
     class TUELTableLegacy : public IUELTable, public TXStrHashListImpl<int> {
     public:
         TUELTableLegacy();
-        void clear() override;
+        virtual ~TUELTableLegacy() = default;
         int size() const override;
         bool empty() const override;
         int GetUserMap(int i) override;
@@ -440,7 +432,7 @@ template<typename K, typename V, typename H, typename E>
         int IndexOf(const std::string &s) override;
         int AddObject(const std::string &id, int mapping) override;
         int StoreObject(const std::string& id, int mapping) override;
-        char *operator[](int index) const override;
+        const char *operator[](int index) const override;
         void RenameEntry(int N, const std::string &s) override;
         int MemoryUsed() const override;
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
@@ -461,7 +453,6 @@ template<typename K, typename V, typename H, typename E>
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) const;
     };
 
-#ifndef TAL_LEGACY
     class TAcronymList : public std::vector<TAcronym> {
     public:
         int FindEntry(int Map) const;
@@ -472,24 +463,7 @@ template<typename K, typename V, typename H, typename E>
         void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S);
         int MemoryUsed();
     };
-    using TAcronymListImpl = TAcronymList;
-#endif
 
-#ifndef TFL_LEGACY
-    class TFilterList : public std::vector<TDFilter *> {
-    public:
-        virtual ~TFilterList();
-        void Clear();
-        TDFilter *FindFilter(int Nr);
-        void AddFilter(TDFilter *F);
-        int MemoryUsed() const {
-            return (int)(sizeof(TDFilter) * size());
-        }
-    };
-    using TFilterListImpl = TFilterList;
-#endif
-
-#ifdef TAL_LEGACY
     class TAcronymListLegacy {
         gdlib::gmsobj::TXList<TAcronym> FList;
     public:
@@ -505,10 +479,18 @@ template<typename K, typename V, typename H, typename E>
         int size() const;
         TAcronym &operator[](int Index);
     };
-    using TAcronymListImpl = TAcronymListLegacy;
-#endif
 
-#ifdef TFL_LEGACY
+    class TFilterList : public std::vector<TDFilter *> {
+    public:
+        virtual ~TFilterList();
+        void Clear();
+        TDFilter *FindFilter(int Nr);
+        void AddFilter(TDFilter *F);
+        int MemoryUsed() const {
+            return (int)(sizeof(TDFilter) * size());
+        }
+    };
+
     class TFilterListLegacy {
         gdlib::gmsobj::TXList<TDFilter> FList;
     public:
@@ -519,6 +501,16 @@ template<typename K, typename V, typename H, typename E>
         TDFilter *FindFilter(int Nr);
         int MemoryUsed() const;
     };
+
+#ifdef TAL_LEGACY
+    using TAcronymListImpl = TAcronymListLegacy;
+#else
+    using TAcronymListImpl = TAcronymList;
+#endif
+
+#ifndef TFL_LEGACY
+    using TFilterListImpl = TFilterList;
+#else
     using TFilterListImpl = TFilterListLegacy;
 #endif
 
@@ -658,7 +650,6 @@ template<typename K, typename V, typename H, typename E>
     using TSetTextList = WrapCxxUnorderedMap<int>;
     using TNameList = WrapCxxUnorderedMap<PgdxSymbRecord>;
 #else
-
     #if defined(SLOW_SET_TEXT_LIST)
         //using TSetTextList = VecSetTextList;
         // FIXME: Using std::unordered_map based impl of this type until gdlib/gmsobj/TXStrPool is ported fully
@@ -694,13 +685,13 @@ template<typename K, typename V, typename H, typename E>
         int fComprLev{};
         std::unique_ptr<IUELTable> UELTable;
         std::unique_ptr<TSetTextList> SetTextList {};
-        std::vector<int> MapSetText; // TODO: Overhead to raw int * heap array relevant here?
+        // TODO: Overhead to raw int * heap array relevant here?
+        std::vector<int> MapSetText;
         int FCurrentDim{};
         std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem{}, PrevElem{}, MinElem{}, MaxElem{};
         std::array<std::optional<std::string>, GLOBAL_MAX_INDEX_DIM> LastStrElem;
         int DataSize{};
         tvarvaltype LastDataField{};
-        // FIXME: TODO: AS: Actually should be gdlib::gmsobj::TXStrPool!!!
         std::unique_ptr<TNameList> NameList;
         std::unique_ptr<TDomainStrList> DomainStrList;
         std::unique_ptr<LinkedDataType> SortList;
@@ -714,7 +705,7 @@ template<typename K, typename V, typename H, typename E>
         TDomainList DomainList{};
         bool StoreDomainSets{true};
         TIntlValueMapDbl intlValueMapDbl{}, readIntlValueMapDbl{};
-        TIntlValueMapI64  intlValueMapI64{};
+        TIntlValueMapI64 intlValueMapI64{};
         enum class TraceLevels { trl_none, trl_errors, trl_some, trl_all } TraceLevel;
         std::string TraceStr;
         int VersionRead{};
@@ -727,7 +718,6 @@ template<typename K, typename V, typename H, typename E>
         std::array<std::optional<TIntegerMappingImpl>, GLOBAL_MAX_INDEX_DIM> SliceIndxs, SliceRevMap;
         int SliceSyNr{};
         gdxinterface::TgdxStrIndex SliceElems;
-        //void *ReadPtr{};
         bool    DoUncompress{}, // when reading
                 CompressOut{}; // when writing
         int DeltaForWrite{}; // delta for last dimension or first changed dimension

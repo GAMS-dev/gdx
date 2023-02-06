@@ -432,4 +432,6 @@ namespace utils {
         strcpy(buf, s.c_str());
 #endif
     }
+
+    int64_t queryPeakRSS();
 }

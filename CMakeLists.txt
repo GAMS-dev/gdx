@@ -86,6 +86,7 @@ set(tests
 		tests/gdlib/strhashtests.cpp
 		tests/global/shortstringtests.cpp
 		tests/utilstests.cpp
+		tests/benchmarks.cpp
 )
 
 add_library(gdxcclib64 SHARED ${common_neo})

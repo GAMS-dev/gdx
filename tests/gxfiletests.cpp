@@ -7,13 +7,6 @@
 
 #include "pfgdx.hpp"
 
-// Needed for peak working set size query
-#if defined(_WIN32)
-#include <windows.h>
-#include <Psapi.h>
-#include <processthreadsapi.h>
-#endif
-
 using namespace gxfile;
 using namespace std::literals::string_literals;
 
@@ -163,29 +156,6 @@ namespace tests::gxfiletests {
         rmfiles({"trnsport.gms", "trnsport.gdx", "log.txt", "lf.txt"});
     }
 
-    static int64_t queryPeakRSS() {
-#if defined(_WIN32)
-        PROCESS_MEMORY_COUNTERS info;
-        if(!GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info)))
-            return 0;
-        return (int64_t)info.PeakWorkingSetSize;
-#elif defined(__linux)
-        std::ifstream ifs {"/proc/self/status"};
-        if(!ifs.is_open()) return 0;
-        std::string line;
-        while(!ifs.eof()) {
-            std::getline(ifs, line);
-            if(utils::starts_with(line, "VmHWM")) {
-                auto parts = utils::split(line);
-                return std::stoi(utils::nth(parts, 1));
-            }
-        }
-        return 0;
-#elif defined(__APPLE__)
-        return 0;
-#endif
-    }
-
     void runBenchmarkTimeMemForGDXFile(const std::string &fn);
 
     TEST_CASE("Run pfgdx for suiteName/modelName.gdx in order to debug memory issues (and test pfgdx port)") {
@@ -249,13 +219,13 @@ namespace tests::gxfiletests {
             int64_t peakRSS;
             if (!onlyPorted) {
                 tWrap = pfgdx::runWithTiming(fn, true, quiet);
-                peakRSS = queryPeakRSS();
+                peakRSS = utils::queryPeakRSS();
                 if(!quiet) std::cout << "Peak RSS after wrapped GDX (P3/Delphi): " << peakRSS << std::endl;
             }
             if (!onlyWrapped) {
                 tPort = pfgdx::runWithTiming(fn, false, quiet);
                 if(!onlyPorted) {
-                    auto newPeakRSS = queryPeakRSS();
+                    auto newPeakRSS = utils::queryPeakRSS();
                     if(!quiet) std::cout << "Peak RSS after both wrapped and ported GDX: " << peakRSS << std::endl;
                     if (newPeakRSS > peakRSS) {
                         if(!quiet)
@@ -272,51 +242,6 @@ namespace tests::gxfiletests {
         }
         if(!quiet)
             std::cout << "Average slowdown = " << std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / (double)ntries << std::endl;;
-    }
-
-    struct BenchResult {
-        double time;
-        int64_t peakRSS;
-        BenchResult(double time, int64_t peakRss) : time(time), peakRSS(peakRss) {}
-        BenchResult() : time {}, peakRSS {} {}
-    };
-
-    template<class T>
-    BenchResult benchmarkFilterClass() {
-        const int ntries {100};
-        std::array<BenchResult, ntries> results{};
-        double avgTime {}, avgPeakRSS {};
-        for(int k{}; k<ntries; k++) {
-            std::mt19937 sgen{23};
-            const int n {100000};
-            std::uniform_int_distribution<int> dist(0, n - 1);
-            auto tstart = std::chrono::high_resolution_clock::now();
-            T obj{1, 1};
-            for (int i{}; i < n; i++)
-                obj.SetFilter(dist(sgen), 1);
-            int cnt{};
-            sgen.seed(23);
-            for (int i{}; i < n; i++)
-                cnt += obj.InFilter(dist(sgen)) ? 1 : 0;
-            auto tend = std::chrono::high_resolution_clock::now();
-            REQUIRE(cnt > 0);
-            results[k] = BenchResult {std::chrono::duration<double>(tend - tstart).count(), queryPeakRSS()};
-            avgTime += results[k].time;
-            avgPeakRSS += (double)results[k].peakRSS;
-        }
-        avgTime /= ntries;
-        avgPeakRSS /= ntries;
-        return BenchResult {avgTime, (int)std::round(avgPeakRSS)};
-    };
-
-    TEST_CASE("Benchmark filter performance (set, lookup) for boolean bit array vs. std::vector<bool> internally") {
-        const bool quiet {true};
-        auto resBBA = benchmarkFilterClass<TDFilterLegacy>();
-        auto resBoolVec = benchmarkFilterClass<TDFilterBoolVec>();
-        if(!quiet) {
-            std::cout << "BBA:\nTime = " << resBBA.time << " peak RSS = " << resBBA.peakRSS << std::endl;
-            std::cout << "Bool vec:\nTime = " << resBoolVec.time << " peak RSS = " << resBoolVec.peakRSS << std::endl;
-        }
     }
 
     TEST_SUITE_END();
