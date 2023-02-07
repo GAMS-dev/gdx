@@ -3,6 +3,7 @@
 #include <random>
 #include <chrono>
 #include <memory>
+
 #include "doctest.h"
 #include "../gxfile.h"
 
@@ -31,8 +32,8 @@ namespace tests::benchmarks {
         }
     };
 
+    // Just to silence no previous declaration warning from GCC
     BenchResult benchmarkFrame(const std::function<void(void)> &op);
-
     BenchResult benchmarkFrame(const std::function<void(void)> &op) {
         const int ntries{100};
         std::array<BenchResult, ntries> results{};
@@ -54,10 +55,10 @@ namespace tests::benchmarks {
         return utils::blanks(targetLen - (int)s.length()) + s;
     }
 
+    // Just to silence no previous declaration warning from GCC
     void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,
                              const std::string &name2, const std::function<void(void)> &op2,
                              int ntries = 8);
-
     void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,
                              const std::string &name2, const std::function<void(void)> &op2,
                              int ntries) {
@@ -112,18 +113,11 @@ namespace tests::benchmarks {
             cnt += obj.InFilter(rg.Sample()) ? 1 : 0;
         REQUIRE(cnt > 0);
     }
+
     TEST_CASE("Benchmark filter performance (set, lookup) for boolean bit array vs. std::vector<bool> internally") {
         benchmarkTwoClasses("gdlib-filter"s, filterTest<gxfile::TDFilterLegacy>,
                 "cxx-filter"s, filterTest<gxfile::TDFilterBoolVec>);
     }
-
-    // Futher Benchmarks to conduct:
-    // TODO: TLinkedData vs. TLinkedDatLegacy
-    // TODO: Multiple set text list variants:
-    // - WrapCxxUnorderedMap<int>
-    // - VecSetTextList
-    // - TXStrPool<int>
-    // - TXCSStrHashListImpl<int>
 
     /*
      * TIntegerMapping (vec<int>) vs. TIntegerMappingLegacy (heap int *)
@@ -141,6 +135,7 @@ namespace tests::benchmarks {
             cnt += obj.GetMapping(rg.Sample()) ? 1 : 0;
         REQUIRE(cnt > 0);
     }
+
     TEST_CASE("Benchmark variants of TIntegerMapping") {
         benchmarkTwoClasses("cxx-imap"s, integerMappingTest<gxfile::TIntegerMapping>,
                 "gdlib-imap"s, integerMappingTest<gxfile::TIntegerMappingLegacy>);
@@ -157,6 +152,7 @@ namespace tests::benchmarks {
         for (int i{n-1}; i>=0; i--)
             cnt += obj.FindName("acr" + std::to_string(i));
     }
+
     TEST_CASE("Benchmark variants of TAcronymList") {
         benchmarkTwoClasses("cxx-acro"s, acronymListTest<gxfile::TAcronymList>,
                 "gdlib-acro"s, acronymListTest<gxfile::TAcronymListLegacy>);
@@ -173,6 +169,7 @@ namespace tests::benchmarks {
         for (int i{ n - 1 }; i >= 0; i--)
             cnt += obj.FindFilter(i)->FiltNumber;
     }
+
     TEST_CASE("Benchmark variants of TAcronymList") {
         benchmarkTwoClasses("cxx-filterlist"s, filterListTest<gxfile::TFilterList>,
             "gdlib-filterlist"s, filterListTest<gxfile::TFilterListLegacy>);
@@ -189,6 +186,7 @@ namespace tests::benchmarks {
         for (int i{ n - 1 }; i >= 0; i--)
             cnt += (*obj.GetObject(i))->SSyNr;
     }
+
     TEST_CASE("Benchmark variants of TAcronymList") {
         benchmarkTwoClasses("cxx-namelist"s, nameListTest<gxfile::WrapCxxUnorderedMap<gxfile::PgdxSymbRecord>>,
             "gdlib-namelist"s, nameListTest<gxfile::TXStrHashListImpl<gxfile::PgdxSymbRecord>>);
@@ -205,9 +203,61 @@ namespace tests::benchmarks {
         for (int i{ n - 1 }; i >= 0; i--)
             cnt += obj.IndexOf("uel" + std::to_string(i));
     }
+
     TEST_CASE("Benchmark variants of TAcronymList") {
         benchmarkTwoClasses("cxx-ueltbl"s, uelTableTest<gxfile::TUELTable>, "gdlib-ueltbl"s, uelTableTest<gxfile::TUELTableLegacy>);
     }
+
+    // TLinkedData vs. TLinkedDatLegacy
+    template<typename T>
+    class LinkedDataTest {
+        static const int nkeys{ 3 }, nvals{ 2 }, n{ 1000 };
+        std::array<int, nkeys> keys{};
+        std::array<double, nvals> values{};
+        void linkedDataIterate(T& obj, int n) {}
+    public:
+        void linkedDataTest() {
+            T obj{ nkeys, sizeof(double) * nvals };
+            for (int i{}; i < n; i++) {
+                keys.front() = i;
+                values.front() = 3.142;
+                obj.AddItem(keys.data(), values.data());
+            }
+            linkedDataIterate(obj, n);
+        }
+    };
+
+    template<>
+    void LinkedDataTest<gdlib::datastorage::TLinkedData<int, double>>::linkedDataIterate(gdlib::datastorage::TLinkedData<int, double>& obj, int n) {
+        auto it = obj.StartRead();
+        for (int i{}; i < n; i++)
+            obj.GetNextRecord(it, keys.data(), values.data());
+    }
+
+    template<>
+    void LinkedDataTest<gdlib::datastorage::TLinkedDataLegacy<int, double>>::linkedDataIterate(gdlib::datastorage::TLinkedDataLegacy<int, double>& obj, int n) {
+        auto it = obj.StartRead();
+        for (int i{}; i < n; i++)
+            obj.GetNextRecord(&*it, keys.data(), values.data());
+    }
+
+    template<typename T>
+    void linkedDataTest() {
+        LinkedDataTest<T> ldt;
+        ldt.linkedDataTest();
+    }
+
+    TEST_CASE("Benchmark variants of linked data") {
+        benchmarkTwoClasses("cxx-tld"s, linkedDataTest<gdlib::datastorage::TLinkedData<int,double>>,
+                            "gdlib-tld"s, linkedDataTest<gdlib::datastorage::TLinkedDataLegacy<int,double>>);
+    }
+
+    // Further benchmarks to conduct:
+    // TODO: Multiple set text list variants:
+    // - WrapCxxUnorderedMap<int>
+    // - VecSetTextList
+    // - TXStrPool<int>
+    // - TXCSStrHashListImpl<int>
 
     TEST_SUITE_END();
 }
