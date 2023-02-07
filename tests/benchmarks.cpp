@@ -214,7 +214,7 @@ namespace tests::benchmarks {
         static const int nkeys{ 3 }, nvals{ 2 }, n{ 1000 };
         std::array<int, nkeys> keys{};
         std::array<double, nvals> values{};
-        void linkedDataIterate(T& obj, int n) {}
+        void linkedDataIterate(T& obj) {}
     public:
         void linkedDataTest() {
             T obj{ nkeys, sizeof(double) * nvals };
@@ -223,19 +223,19 @@ namespace tests::benchmarks {
                 values.front() = 3.142;
                 obj.AddItem(keys.data(), values.data());
             }
-            linkedDataIterate(obj, n);
+            linkedDataIterate(obj);
         }
     };
 
     template<>
-    void LinkedDataTest<gdlib::datastorage::TLinkedData<int, double>>::linkedDataIterate(gdlib::datastorage::TLinkedData<int, double>& obj, int n) {
+    void LinkedDataTest<gdlib::datastorage::TLinkedData<int, double>>::linkedDataIterate(gdlib::datastorage::TLinkedData<int, double>& obj) {
         auto it = obj.StartRead();
         for (int i{}; i < n; i++)
             obj.GetNextRecord(it, keys.data(), values.data());
     }
 
     template<>
-    void LinkedDataTest<gdlib::datastorage::TLinkedDataLegacy<int, double>>::linkedDataIterate(gdlib::datastorage::TLinkedDataLegacy<int, double>& obj, int n) {
+    void LinkedDataTest<gdlib::datastorage::TLinkedDataLegacy<int, double>>::linkedDataIterate(gdlib::datastorage::TLinkedDataLegacy<int, double>& obj) {
         auto it = obj.StartRead();
         for (int i{}; i < n; i++)
             obj.GetNextRecord(&*it, keys.data(), values.data());
