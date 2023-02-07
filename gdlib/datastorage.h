@@ -95,7 +95,7 @@ namespace gdlib::datastorage {
         // hence data bytes start at offset FKeySize
         // when RecKeys is used corresponds directly to key entries (as integers)
         union {
-            uint8_t RecData[5];
+            uint8_t RecData[20*4];
             int RecKeys[20];
         };
 #endif

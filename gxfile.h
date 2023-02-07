@@ -560,8 +560,8 @@ template<typename K, typename V, typename H, typename E>
         int Add(const std::string& s) {
             return AddObject(s, 0);
         }
-        const std::string &GetString(int i) const;
-        const std::string& operator[](int i) const {
+        const char *GetString(int i) const;
+        const char *operator[](int i) const {
             return GetString(i);
         }
         int *GetObject(int i);
@@ -630,11 +630,11 @@ template<typename K, typename V, typename H, typename E>
             return ix;
         }
 
-        std::string GetString(int ix) const {
+        const char *GetString(int ix) const {
 #ifdef STABLE_REFS
-            return (*insertOrder[ix - (OneBased ? 1 : 0)]).first;
+            return (*insertOrder[ix - (OneBased ? 1 : 0)]).first.c_str();
 #else
-            return insertOrder[ix - (OneBased ? 1 : 0)];
+            return insertOrder[ix - (OneBased ? 1 : 0)].c_str();
 #endif
         }
 

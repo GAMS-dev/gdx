@@ -4747,8 +4747,8 @@ namespace gxfile {
         return ix;
     }
 
-    const std::string &VecSetTextList::GetString(int i) const {
-        return entries[i].text;
+    const char *VecSetTextList::GetString(int i) const {
+        return entries[i].text.c_str();
     }
 
     int *VecSetTextList::GetObject(int i) {

@@ -33,10 +33,9 @@ namespace tests::benchmarks {
     };
 
     // Just to silence no previous declaration warning from GCC
-    BenchResult benchmarkFrame(const std::function<void(void)> &op);
-    BenchResult benchmarkFrame(const std::function<void(void)> &op) {
-        const int ntries{100};
-        std::array<BenchResult, ntries> results{};
+    BenchResult benchmarkFrame(const std::function<void(void)> &op, int ntries = 10);
+    BenchResult benchmarkFrame(const std::function<void(void)> &op, int ntries) {
+        std::vector<BenchResult> results(ntries);
         double avgTime{}, avgPeakRSS{};
         for (int k{}; k < ntries; k++) {
             auto tstart = std::chrono::high_resolution_clock::now();
@@ -68,11 +67,7 @@ namespace tests::benchmarks {
         std::vector<std::string> names(classes.size());
         int i{};
         for(const auto &clz : classes) {
-            for (int n{}; n <= ntries; n++) {
-                auto res = benchmarkFrame(clz.op);
-                aggrRes[i] += res;
-            }
-            aggrRes[i] /= ntries;
+            aggrRes[i] = benchmarkFrame(clz.op, ntries);
             if(!quiet)
                 bres << fbl(clz.name) << "\t\t" << aggrRes[i].time << "s\t\t" << aggrRes[i].peakRSS << " bytes" << std::endl;
             names[i++] = clz.name;
@@ -92,7 +87,7 @@ namespace tests::benchmarks {
 
     void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,
                              const std::string &name2, const std::function<void(void)> &op2,
-                             int ntries = 8);
+                             int ntries = 10);
     void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,
                              const std::string &name2, const std::function<void(void)> &op2,
                              int ntries) {
@@ -231,7 +226,7 @@ namespace tests::benchmarks {
     // TLinkedData vs. TLinkedDatLegacy
     template<typename T>
     class LinkedDataTest {
-        static const int nkeys{ 3 }, nvals{ 2 }, n{ 1000 };
+        static const int nkeys{ 3 }, nvals{ 2 }, n{ 100000 };
         std::array<int, nkeys> keys{};
         std::array<double, nvals> values{};
         void linkedDataIterate(T& obj) {}
@@ -275,13 +270,14 @@ namespace tests::benchmarks {
     template<typename T>
     void testSetTextList() {
         T obj;
-        const int n{100};
+        const int n{10000};
         obj.SetCapacity(n);
         for(int i{}; i<n; i++)
             obj.Add("set_text_"+std::to_string(i+1));
         std::string s;
-        for(int i{}; i<n; i++)
-            s = obj.GetString(i);
+        for(int i{}; i<n; i++) {
+            const char *cs = obj.GetString(i);
+        }
     }
 
     TEST_CASE("Benchmark various set text list implementations") {
