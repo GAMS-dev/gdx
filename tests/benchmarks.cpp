@@ -11,6 +11,8 @@ namespace tests::benchmarks {
 
     TEST_SUITE_BEGIN("benchmarks");
 
+    static std::ofstream bres {"class_benchmarks.txt"s};
+
     struct BenchResult {
         double time;
         int64_t peakRSS;
@@ -50,18 +52,24 @@ namespace tests::benchmarks {
         return BenchResult{avgTime, (int) std::round(avgPeakRSS)};
     };
 
+    static std::string fbl(const std::string &s, int targetLen = 15) {
+        return utils::blanks(targetLen - (int)s.length()) + s;
+    }
+
     void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,
                              const std::string &name2, const std::function<void(void)> &op2) {
-        const bool quiet{true};
+        const bool quiet{false};
         BenchResult res1 = benchmarkFrame(op1), res2 = benchmarkFrame(op2);
         if (!quiet) {
-            std::cout << name1 << ":\nTime = " << res1.time << " peak RSS = " << res1.peakRSS << std::endl;
-            std::cout << name2 << ":\nTime = " << res2.time << " peak RSS = " << res2.peakRSS << std::endl;
+            bres << fbl(name1) << "\t\t" << res1.time << "s\t\t" << res1.peakRSS << " bytes" << std::endl;
+            bres << fbl(name2) << "\t\t" << res2.time << "s\t\t" << res2.peakRSS << " bytes" << std::endl;
+            bres << "Winner: " << (res1.time < res2.time ? name1 : name2) << std::endl << std::endl;
         }
     };
 
     TEST_CASE("Benchmark filter performance (set, lookup) for boolean bit array vs. std::vector<bool> internally") {
-        benchmarkTwoClasses("BBA"s, filterTest<gxfile::TDFilterLegacy>, "Bool vec"s, filterTest<gxfile::TDFilterBoolVec>);
+        benchmarkTwoClasses("gdlib-filter"s, filterTest<gxfile::TDFilterLegacy>,
+                "cxx-filter"s, filterTest<gxfile::TDFilterBoolVec>);
     }
 
     // Benchmarks to conduct:
@@ -95,8 +103,8 @@ namespace tests::benchmarks {
     }
 
     TEST_CASE("Benchmark variants of TIntegerMapping") {
-        benchmarkTwoClasses("TIM"s, integerMappingTest<gxfile::TIntegerMapping>,
-                "TIM Legacy"s, integerMappingTest<gxfile::TIntegerMappingLegacy>);
+        benchmarkTwoClasses("cxx-imap"s, integerMappingTest<gxfile::TIntegerMapping>,
+                "gdlib-imap"s, integerMappingTest<gxfile::TIntegerMappingLegacy>);
     }
 
     TEST_SUITE_END();
