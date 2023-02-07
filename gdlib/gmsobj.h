@@ -329,6 +329,23 @@ namespace gdlib::gmsobj {
             *sref = NewString(v, FStrMemory);
         }
 
+    public:
+        char *GetName(int Index) {
+            return FList[Index-(OneBased?1:0)].FString;
+        }
+
+        char* GetString(int Index) {
+            return GetName(Index);
+        }
+
+        T *GetObject(int Index) {
+            return FList[Index-(OneBased?1:0)].FObject;
+        }
+
+        void PutObject(int Index, T *AObject) {
+            FList[Index-(OneBased ? 1 : 0)].FObject = AObject;
+        }
+
         void SetCapacity(int NewCapacity) {
             if(NewCapacity == FCapacity) return;
             if(NewCapacity < FCount) NewCapacity = FCount;
@@ -340,19 +357,6 @@ namespace gdlib::gmsobj {
             }
             else FList = (TStringItem<T> *)std::realloc(FList, FListMemory);
             FCapacity = NewCapacity;
-        }
-
-    public:
-        char *GetName(int Index) {
-            return FList[Index-(OneBased?1:0)].FString;
-        }
-
-        T *GetObject(int Index) {
-            return FList[Index-(OneBased?1:0)].FObject;
-        }
-
-        void PutObject(int Index, T *AObject) {
-            FList[Index-(OneBased ? 1 : 0)].FObject = AObject;
         }
 
     protected:
@@ -585,7 +589,7 @@ namespace gdlib::gmsobj {
             if(PH) return PH->RefNr + (this->OneBased?1:0);
             else {
                 int res{this->FCount+(this->OneBased?1:0)};
-                InsertItem(res, s, APointer);
+                TXCustomStringList<T>::InsertItem(res, s, APointer);
                 PH = new THashRecord;
                 hashBytes += sizeof(THashRecord);
                 PH->PNext = pHashSC[hv];

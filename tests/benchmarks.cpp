@@ -56,27 +56,47 @@ namespace tests::benchmarks {
     }
 
     // Just to silence no previous declaration warning from GCC
+    struct BenchClass {
+        std::string name;
+        std::function<void(void)> op;
+    };
+
+    void benchmarkNClasses(int ntries, const std::initializer_list<BenchClass> &classes);
+    void benchmarkNClasses(int ntries, const std::initializer_list<BenchClass> &classes) {
+        const bool quiet{false};
+        std::vector<BenchResult> aggrRes(classes.size());
+        std::vector<std::string> names(classes.size());
+        int i{};
+        for(const auto &clz : classes) {
+            for (int n{}; n <= ntries; n++) {
+                auto res = benchmarkFrame(clz.op);
+                aggrRes[i] += res;
+            }
+            aggrRes[i] /= ntries;
+            if(!quiet)
+                bres << fbl(clz.name) << "\t\t" << aggrRes[i].time << "s\t\t" << aggrRes[i].peakRSS << " bytes" << std::endl;
+            names[i++] = clz.name;
+        }
+        double minTime {std::numeric_limits<double>::max()};
+        int winnerIx {-1};
+        for(int j{}; j<(int)aggrRes.size(); j++) {
+            const BenchResult &br = aggrRes[j];
+            if (br.time < minTime) {
+                minTime = br.time;
+                winnerIx = j;
+            }
+        }
+        if(!quiet)
+            bres << "Winner: " << names[winnerIx] << std::endl << std::endl;
+    }
+
     void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,
                              const std::string &name2, const std::function<void(void)> &op2,
                              int ntries = 8);
     void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,
                              const std::string &name2, const std::function<void(void)> &op2,
                              int ntries) {
-        const bool quiet{false};
-        BenchResult aggrRes1{}, aggrRes2{};
-        for (int n{}; n <= ntries; n++) {
-            auto res1 = benchmarkFrame(op1);
-            auto res2 = benchmarkFrame(op2);
-            aggrRes1 += res1;
-            aggrRes2 += res2;
-        }
-        aggrRes1 /= ntries;
-        aggrRes2 /= ntries;
-        if (!quiet) {
-            bres << fbl(name1) << "\t\t" << aggrRes1.time << "s\t\t" << aggrRes1.peakRSS << " bytes" << std::endl;
-            bres << fbl(name2) << "\t\t" << aggrRes2.time << "s\t\t" << aggrRes2.peakRSS << " bytes" << std::endl;
-            bres << "Winner: " << (aggrRes1.time < aggrRes2.time ? name1 : name2) << std::endl << std::endl;
-        }
+        benchmarkNClasses(ntries, {BenchClass{name1, op1}, BenchClass{name2, op2}});
     };
 
     // Tiny helper for random sampling
@@ -252,12 +272,26 @@ namespace tests::benchmarks {
                             "gdlib-tld"s, linkedDataTest<gdlib::datastorage::TLinkedDataLegacy<int,double>>);
     }
 
-    // Further benchmarks to conduct:
-    // TODO: Multiple set text list variants:
-    // - WrapCxxUnorderedMap<int>
-    // - VecSetTextList
-    // - TXStrPool<int>
-    // - TXCSStrHashListImpl<int>
+    template<typename T>
+    void testSetTextList() {
+        T obj;
+        const int n{100};
+        obj.SetCapacity(n);
+        for(int i{}; i<n; i++)
+            obj.Add("set_text_"+std::to_string(i+1));
+        std::string s;
+        for(int i{}; i<n; i++)
+            s = obj.GetString(i);
+    }
+
+    TEST_CASE("Benchmark various set text list implementations") {
+        benchmarkNClasses(10, {
+            BenchClass {"VecSetList"s, testSetTextList<gxfile::VecSetTextList>},
+            BenchClass {"WrapCxxUnorderedMap", testSetTextList<gxfile::WrapCxxUnorderedMap<int>>},
+            BenchClass {"TXStrPool", testSetTextList<gdlib::gmsobj::TXStrPool<int>>},
+            BenchClass {"TXCSStrHashListImpl", testSetTextList<gxfile::TXStrHashListImpl<int*>>}
+        });
+    }
 
     TEST_SUITE_END();
 }

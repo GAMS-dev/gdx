@@ -415,7 +415,7 @@ namespace gxfile {
         for(int N{1}; N<=10; N++) FFile->WriteInt64(0);
         SetTextList = std::make_unique<TSetTextList>();
         SetTextList->OneBased = false;
-        SetTextList->AddObject(""s, 0);
+        SetTextList->Add(""s);
         gdxResetSpecialValues();
         NextWritePosition = FFile->GetPosition();
         fmode = fw_init;
@@ -2028,9 +2028,10 @@ namespace gxfile {
             SetTextList->OneBased = false;
             if(ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1)) return FileErrorNr();
             NrElem = FFile->ReadInteger();
+            SetTextList->SetCapacity(NrElem);
             //SetTextList->reserve(NrElem);
             for (int N{}; N < NrElem; N++) {
-                int TextNum{ SetTextList->AddObject(FFile->ReadString(), 0) };
+                int TextNum{ SetTextList->Add(FFile->ReadString()) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
                     MapSetText.resize(NrElem);
                     // TODO: Could this be replaced by std::iota?
@@ -2137,7 +2138,7 @@ namespace gxfile {
     int TGXFileObj::gdxAddSetText(const std::string &Txt, int &TxtNr) {
         if(!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText")))
             return false;
-        TxtNr = SetTextList->AddObject(MakeGoodExplText(Txt), 0);
+        TxtNr = SetTextList->Add(MakeGoodExplText(Txt));
         return true;
     }
 

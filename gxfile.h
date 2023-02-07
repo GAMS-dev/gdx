@@ -557,8 +557,17 @@ template<typename K, typename V, typename H, typename E>
         int Count() const;
         void resize(int n);
         int AddObject(const std::string &s, int n);
+        int Add(const std::string& s) {
+            return AddObject(s, 0);
+        }
         const std::string &GetString(int i) const;
+        const std::string& operator[](int i) const {
+            return GetString(i);
+        }
         int *GetObject(int i);
+        void SetCapacity(int n) {
+            entries.reserve(n);
+        }
     };
 
     template<typename T>
@@ -604,6 +613,10 @@ template<typename K, typename V, typename H, typename E>
             return elem.i;
         }
 
+        int Add(const std::string& key) {
+            return AddObject(key, 0);
+        }
+
         int StoreObject(const std::string& key, T val) {
             int ix = static_cast<int>(insertOrder.size()) + (OneBased ? 1 : 0);
 #ifdef STABLE_REFS
@@ -646,6 +659,11 @@ template<typename K, typename V, typename H, typename E>
         }
 
         bool empty() const { return !size(); }
+
+        void SetCapacity(int n) {
+            dict.reserve(n);
+            insertOrder.reserve(n);
+        }
     };
 
 #ifdef CPP_HASHMAP
@@ -655,11 +673,11 @@ template<typename K, typename V, typename H, typename E>
     #if defined(SLOW_SET_TEXT_LIST)
         //using TSetTextList = VecSetTextList;
         // FIXME: Using std::unordered_map based impl of this type until gdlib/gmsobj/TXStrPool is ported fully
-        using TSetTextList = WrapCxxUnorderedMap<int, std::hash<std::string>, caseSensitiveStrEquality>;
+        using TSetTextList = WrapCxxUnorderedMap<uint8_t, std::hash<std::string>, caseSensitiveStrEquality>;
     #elif defined(TXSPOOL_LEGACY)
-        using TSetTextList = gdlib::gmsobj::TXStrPool<int>;
+        using TSetTextList = gdlib::gmsobj::TXStrPool<uint8_t>;
     #else
-        using TSetTextList = TXCSStrHashListImpl<int>;
+        using TSetTextList = TXCSStrHashListImpl<uint8_t>;
     #endif
 
     using TNameList = TXStrHashListImpl<PgdxSymbRecord>;

@@ -386,11 +386,20 @@ namespace gdlib::strhash {
         bool empty() const {
             return !FCount;
         }
+
+        void SetCapacity(int n) {
+            Buckets.reserve(n);
+        }
     };
 
     // Specialization when it is not a pointer type
     template<>
     inline int TXStrHashList<uint8_t>::Add(const std::string &s) {
+        return AddObject(s, 0);
+    }
+
+    template<>
+    inline int TXStrHashList<int>::Add(const std::string &s) {
         return AddObject(s, 0);
     }
 
