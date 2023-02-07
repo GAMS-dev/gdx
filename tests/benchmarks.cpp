@@ -2,6 +2,7 @@
 #include <array>
 #include <random>
 #include <chrono>
+#include <memory>
 #include "doctest.h"
 #include "../gxfile.h"
 
@@ -19,21 +20,6 @@ namespace tests::benchmarks {
         BenchResult(double time, int64_t peakRss) : time(time), peakRSS(peakRss) {}
         BenchResult() : time{}, peakRSS{} {}
     };
-
-    template<typename T>
-    void filterTest() {
-        std::mt19937 sgen{23};
-        const int n{100000};
-        std::uniform_int_distribution<int> dist(0, n - 1);
-        T obj{1, 1};
-        for (int i{}; i < n; i++)
-            obj.SetFilter(dist(sgen), 1);
-        int cnt{};
-        sgen.seed(23);
-        for (int i{}; i < n; i++)
-            cnt += obj.InFilter(dist(sgen)) ? 1 : 0;
-        REQUIRE(cnt > 0);
-    }
 
     BenchResult benchmarkFrame(const std::function<void(void)> &op) {
         const int ntries{100};
@@ -67,15 +53,46 @@ namespace tests::benchmarks {
         }
     };
 
+    // Tiny helper for random sampling
+    const int defaultSeed = 23;
+    template<typename T>
+    class RanGen {
+        std::mt19937 sgen{defaultSeed};
+        std::uniform_int_distribution<T> dist;
+    public:
+        RanGen(int lbIncl, int ubIncl) :
+            dist(lbIncl, ubIncl+1) {}
+        void Reset(int seed = defaultSeed) {
+            sgen.seed(seed);
+        }
+        T Sample() {
+            return dist(sgen);
+        }
+    };
+
+    /*
+     * TDFilter based on boolean bit array vs. std::vector<bool>
+     * -> TDFilterBoolVec vs. TDFilterLegacy
+     */
+    template<typename T>
+    void filterTest() {
+        const int n{100000};
+        RanGen<int> rg{0,n};
+        T obj{1, 1};
+        for (int i{}; i < n; i++)
+            obj.SetFilter(rg.Sample(), 1);
+        int cnt{};
+        rg.Reset();
+        for (int i{}; i < n; i++)
+            cnt += obj.InFilter(rg.Sample()) ? 1 : 0;
+        REQUIRE(cnt > 0);
+    }
     TEST_CASE("Benchmark filter performance (set, lookup) for boolean bit array vs. std::vector<bool> internally") {
         benchmarkTwoClasses("gdlib-filter"s, filterTest<gxfile::TDFilterLegacy>,
                 "cxx-filter"s, filterTest<gxfile::TDFilterBoolVec>);
     }
 
-    // Benchmarks to conduct:
-    // Done: TDFilter based on boolean bit array vs. std::vector<bool>
-    //       -> TDFilterBoolVec vs. TDFilterLegacy
-    // TODO: TIntegerMapping (vec<int>) vs. TIntegerMappingLegacy (heap int *)
+    // Futher Benchmarks to conduct:
     // TODO: TUELTable (C++ hashmap) vs. TUELTableLegacy (TXStrHashList)
     // TODO: TAcronymList (vec<TAcronym>) vs. TAcronymListLegacy (TXList<TAcronym>)
     // TODO: TFilterList (vec<TDFilter*>) vs. TFilterListLegacy (TXList<TDFilter>)
@@ -87,21 +104,22 @@ namespace tests::benchmarks {
     // - TXCSStrHashListImpl<int>
     // TODO: Name list variants: WrapCxxUnorderedMap<PgdxSymbRecord> vs. TXStrHashListImpl<PgdxSymbRecord>
 
+    /*
+     * TIntegerMapping (vec<int>) vs. TIntegerMappingLegacy (heap int *)
+     */
     template<typename T>
     void integerMappingTest() {
-        std::mt19937 sgen{23};
         const int n{100000};
-        std::uniform_int_distribution<int> dist(0, n - 1);
+        RanGen<int> rg{0, n};
         T obj;
         for (int i{}; i < n; i++)
-            obj.SetMapping(dist(sgen), 1);
+            obj.SetMapping(rg.Sample(), 1);
         int cnt{};
-        sgen.seed(23);
+        rg.Reset();
         for (int i{}; i < n; i++)
-            cnt += obj.GetMapping(dist(sgen)) ? 1 : 0;
+            cnt += obj.GetMapping(rg.Sample()) ? 1 : 0;
         REQUIRE(cnt > 0);
     }
-
     TEST_CASE("Benchmark variants of TIntegerMapping") {
         benchmarkTwoClasses("cxx-imap"s, integerMappingTest<gxfile::TIntegerMapping>,
                 "gdlib-imap"s, integerMappingTest<gxfile::TIntegerMappingLegacy>);
