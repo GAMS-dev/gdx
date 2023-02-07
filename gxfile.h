@@ -400,6 +400,8 @@ template<typename K, typename V, typename H, typename E>
         int AddUsrIndxNew(const std::string &s, int UelNr) override;
         void RenameEntry(int N, const std::string &s) override;
         int GetMaxUELLength() const override;
+        int MemoryUsed() const override;
+        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
     };
 
     template<typename T>

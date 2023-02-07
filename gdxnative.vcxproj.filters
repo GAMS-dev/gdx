@@ -151,6 +151,12 @@
     <ClCompile Include="tests\gdlib\gmsobjtests.cpp">
       <Filter>tests\gdlib</Filter>
     </ClCompile>
+    <ClCompile Include="tests\gdlib\strhashtests.cpp">
+      <Filter>tests\gdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\benchmarks.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">

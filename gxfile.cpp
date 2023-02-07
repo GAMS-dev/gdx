@@ -4481,6 +4481,17 @@ namespace gxfile {
         UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
     }
 
+    // FIXME: Not very accurate
+    int TUELTable::MemoryUsed() const {
+        return size() * sizeof(IndexNumPair);
+    }
+
+    void TUELTable::SaveToStream(TXStreamDelphi &S) {
+        S.WriteInteger(size());
+        for(int N{}; N<size(); N++)
+            S.WriteString((*this)[N]);
+    }
+
     int TAcronymList::FindEntry(int Map) const {
         const auto it = std::find_if(begin(), end(), [&](const auto &item) {
             return item.AcrMap == Map;

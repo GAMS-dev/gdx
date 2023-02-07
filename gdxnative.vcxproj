@@ -37,9 +37,11 @@
     <ClCompile Include="gxfile.cpp" />
     <ClCompile Include="rtl\p3utils.cpp" />
     <ClCompile Include="rtl\sysutils_p3.cpp" />
+    <ClCompile Include="tests\benchmarks.cpp" />
     <ClCompile Include="tests\doctestmain.cpp" />
     <ClCompile Include="tests\gdlib\gmsdatatests.cpp" />
     <ClCompile Include="tests\gdlib\gmsobjtests.cpp" />
+    <ClCompile Include="tests\gdlib\strhashtests.cpp" />
     <ClCompile Include="tests\gdxinterfacetests.cpp" />
     <ClCompile Include="tests\gxfiletests.cpp" />
     <ClCompile Include="tests\pfgdx.cpp" />

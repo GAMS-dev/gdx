@@ -19,6 +19,16 @@ namespace tests::benchmarks {
         int64_t peakRSS;
         BenchResult(double time, int64_t peakRss) : time(time), peakRSS(peakRss) {}
         BenchResult() : time{}, peakRSS{} {}
+
+        void operator/=(int scalar) {
+            time /= scalar;
+            peakRSS /= scalar;
+        }
+
+        void operator+=(const BenchResult& other) {
+            time += other.time;
+            peakRSS += other.peakRSS;
+        }
     };
 
     BenchResult benchmarkFrame(const std::function<void(void)> &op) {
@@ -38,18 +48,27 @@ namespace tests::benchmarks {
         return BenchResult{avgTime, (int) std::round(avgPeakRSS)};
     };
 
-    static std::string fbl(const std::string &s, int targetLen = 15) {
+    static std::string fbl(const std::string &s, int targetLen = 20) {
         return utils::blanks(targetLen - (int)s.length()) + s;
     }
 
     void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,
-                             const std::string &name2, const std::function<void(void)> &op2) {
+                             const std::string &name2, const std::function<void(void)> &op2,
+                             int ntries = 8) {
         const bool quiet{false};
-        BenchResult res1 = benchmarkFrame(op1), res2 = benchmarkFrame(op2);
+        BenchResult aggrRes1{}, aggrRes2{};
+        for (int n{}; n <= ntries; n++) {
+            auto res1 = benchmarkFrame(op1);
+            auto res2 = benchmarkFrame(op2);
+            aggrRes1 += res1;
+            aggrRes2 += res2;
+        }
+        aggrRes1 /= ntries;
+        aggrRes2 /= ntries;
         if (!quiet) {
-            bres << fbl(name1) << "\t\t" << res1.time << "s\t\t" << res1.peakRSS << " bytes" << std::endl;
-            bres << fbl(name2) << "\t\t" << res2.time << "s\t\t" << res2.peakRSS << " bytes" << std::endl;
-            bres << "Winner: " << (res1.time < res2.time ? name1 : name2) << std::endl << std::endl;
+            bres << fbl(name1) << "\t\t" << aggrRes1.time << "s\t\t" << aggrRes1.peakRSS << " bytes" << std::endl;
+            bres << fbl(name2) << "\t\t" << aggrRes2.time << "s\t\t" << aggrRes2.peakRSS << " bytes" << std::endl;
+            bres << "Winner: " << (aggrRes1.time < aggrRes2.time ? name1 : name2) << std::endl << std::endl;
         }
     };
 
@@ -93,16 +112,12 @@ namespace tests::benchmarks {
     }
 
     // Futher Benchmarks to conduct:
-    // TODO: TUELTable (C++ hashmap) vs. TUELTableLegacy (TXStrHashList)
-    // TODO: TAcronymList (vec<TAcronym>) vs. TAcronymListLegacy (TXList<TAcronym>)
-    // TODO: TFilterList (vec<TDFilter*>) vs. TFilterListLegacy (TXList<TDFilter>)
     // TODO: TLinkedData vs. TLinkedDatLegacy
     // TODO: Multiple set text list variants:
     // - WrapCxxUnorderedMap<int>
     // - VecSetTextList
     // - TXStrPool<int>
     // - TXCSStrHashListImpl<int>
-    // TODO: Name list variants: WrapCxxUnorderedMap<PgdxSymbRecord> vs. TXStrHashListImpl<PgdxSymbRecord>
 
     /*
      * TIntegerMapping (vec<int>) vs. TIntegerMappingLegacy (heap int *)
@@ -123,6 +138,69 @@ namespace tests::benchmarks {
     TEST_CASE("Benchmark variants of TIntegerMapping") {
         benchmarkTwoClasses("cxx-imap"s, integerMappingTest<gxfile::TIntegerMapping>,
                 "gdlib-imap"s, integerMappingTest<gxfile::TIntegerMappingLegacy>);
+    }
+
+    // TAcronymList (vec<TAcronym>) vs. TAcronymListLegacy (TXList<TAcronym>)
+    template<typename T>
+    void acronymListTest() {
+        const int n{ 100 };
+        T obj;
+        for (int i{}; i<n; i++)
+            obj.AddEntry("acr" + std::to_string(i), "AcronymText" + std::to_string(i), i+1);
+        int cnt{};
+        for (int i{n-1}; i>=0; i--)
+            cnt += obj.FindName("acr" + std::to_string(i));
+    }
+    TEST_CASE("Benchmark variants of TAcronymList") {
+        benchmarkTwoClasses("cxx-acro"s, acronymListTest<gxfile::TAcronymList>,
+                "gdlib-acro"s, acronymListTest<gxfile::TAcronymListLegacy>);
+    }
+
+    // TFilterList (vec<TDFilter*>) vs. TFilterListLegacy (TXList<TDFilter>)
+    template<typename T>
+    void filterListTest() {
+        const int n{ 1000 };
+        T obj;
+        for (int i{}; i < n; i++)
+            obj.AddFilter(new gxfile::TDFilter{ i, 0 });
+        int cnt{};
+        for (int i{ n - 1 }; i >= 0; i--)
+            cnt += obj.FindFilter(i)->FiltNumber;
+    }
+    TEST_CASE("Benchmark variants of TAcronymList") {
+        benchmarkTwoClasses("cxx-filterlist"s, filterListTest<gxfile::TFilterList>,
+            "gdlib-filterlist"s, filterListTest<gxfile::TFilterListLegacy>);
+    }
+
+    // Name list variants: WrapCxxUnorderedMap<PgdxSymbRecord> vs. TXStrHashListImpl<PgdxSymbRecord>
+    template<typename T>
+    void nameListTest() {
+        const int n{ 1000 };
+        T obj;
+        for (int i{}; i < n; i++)
+            obj.AddObject("sym" + std::to_string(i), new gxfile::TgdxSymbRecord{});
+        int cnt{};
+        for (int i{ n - 1 }; i >= 0; i--)
+            cnt += (*obj.GetObject(i))->SSyNr;
+    }
+    TEST_CASE("Benchmark variants of TAcronymList") {
+        benchmarkTwoClasses("cxx-namelist"s, nameListTest<gxfile::WrapCxxUnorderedMap<gxfile::PgdxSymbRecord>>,
+            "gdlib-namelist"s, nameListTest<gxfile::TXStrHashListImpl<gxfile::PgdxSymbRecord>>);
+    }
+
+    // TUELTable (C++ hashmap) vs. TUELTableLegacy (TXStrHashList)
+    template<typename T>
+    void uelTableTest() {
+        const int n{ 1000 };
+        T obj;
+        for (int i{}; i < n; i++)
+            obj.AddObject("uel" + std::to_string(i), i);
+        int cnt{};
+        for (int i{ n - 1 }; i >= 0; i--)
+            cnt += obj.IndexOf("uel" + std::to_string(i));
+    }
+    TEST_CASE("Benchmark variants of TAcronymList") {
+        benchmarkTwoClasses("cxx-ueltbl"s, uelTableTest<gxfile::TUELTable>, "gdlib-ueltbl"s, uelTableTest<gxfile::TUELTableLegacy>);
     }
 
     TEST_SUITE_END();
