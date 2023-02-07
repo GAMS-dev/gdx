@@ -31,6 +31,8 @@ namespace tests::benchmarks {
         }
     };
 
+    BenchResult benchmarkFrame(const std::function<void(void)> &op);
+
     BenchResult benchmarkFrame(const std::function<void(void)> &op) {
         const int ntries{100};
         std::array<BenchResult, ntries> results{};
@@ -54,7 +56,11 @@ namespace tests::benchmarks {
 
     void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,
                              const std::string &name2, const std::function<void(void)> &op2,
-                             int ntries = 8) {
+                             int ntries = 8);
+
+    void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,
+                             const std::string &name2, const std::function<void(void)> &op2,
+                             int ntries) {
         const bool quiet{false};
         BenchResult aggrRes1{}, aggrRes2{};
         for (int n{}; n <= ntries; n++) {
