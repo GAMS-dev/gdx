@@ -275,9 +275,8 @@ namespace tests::benchmarks {
         for(int i{}; i<n; i++)
             obj.Add("set_text_"+std::to_string(i+1));
         std::string s;
-        for(int i{}; i<n; i++) {
-            const char *cs = obj.GetString(i);
-        }
+        for(int i{}; i<n; i++)
+            obj.GetString(i);
     }
 
     TEST_CASE("Benchmark various set text list implementations") {
