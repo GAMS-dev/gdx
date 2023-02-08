@@ -214,16 +214,19 @@ namespace tests::gxfiletests {
 
         pfgdx::TimeTriple tWrap, tPort;
         std::array<double, ntries> slowdowns {};
+        double totWrap{}, totPort{};
 
         for (int i = 0; i < ntries; i++) {
             int64_t peakRSS;
             if (!onlyPorted) {
                 tWrap = pfgdx::runWithTiming(fn, true, quiet);
+                totWrap += tWrap.total_t;
                 peakRSS = utils::queryPeakRSS();
                 if(!quiet) std::cout << "Peak RSS after wrapped GDX (P3/Delphi): " << peakRSS << std::endl;
             }
             if (!onlyWrapped) {
                 tPort = pfgdx::runWithTiming(fn, false, quiet);
+                totPort += tPort.total_t;
                 if(!onlyPorted) {
                     auto newPeakRSS = utils::queryPeakRSS();
                     if(!quiet) std::cout << "Peak RSS after both wrapped and ported GDX: " << peakRSS << std::endl;
@@ -240,8 +243,11 @@ namespace tests::gxfiletests {
             if (!quiet && !onlyPorted && !onlyWrapped)
                 std::cout << "Slowdown for " << fn << " = " << slowdowns[i] << std::endl;
         }
-        if(!quiet)
-            std::cout << "Average slowdown = " << std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / (double)ntries << std::endl;;
+        if (!quiet) {
+            std::cout << "Average slowdown = " << std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / (double)ntries << std::endl;
+            std::cout << "Total runtime wrapped = " << totWrap << std::endl;
+            std::cout << "Total runtime ported = " << totPort << std::endl;
+        }
     }
 
     TEST_SUITE_END();
