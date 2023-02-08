@@ -209,10 +209,11 @@ namespace gdlib::datastorage {
         void Sort(const int *AMap = nullptr) {
             if(!FHead || IsSorted()) return;
             const int AllocCount = FMaxKey - FMinKey + 1;
-            std::vector<RecType *> Head(AllocCount), Tail(AllocCount);
-            int KeyBase {FMinKey};
+            const int KeyBase{ FMinKey };
+            auto Head = new RecType*[AllocCount],
+                 Tail = new RecType*[AllocCount];
+            std::memset(Head, 0, sizeof(RecType*) * AllocCount);
             // Perform radix sort
-            std::fill_n(Head.begin(), FMaxKey-KeyBase, nullptr);
             for(int D{FDimension-1}; D>=0; D--) {
                 RecType *R = FHead;
                 while(R) {
@@ -233,6 +234,8 @@ namespace gdlib::datastorage {
                 FHead = R;
             }
             FTail = nullptr; // what is the tail???
+            delete [] Head;
+            delete [] Tail;
         }
 
         std::optional<RecType*> StartRead(const int *AMap = nullptr) {
