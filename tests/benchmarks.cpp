@@ -291,5 +291,21 @@ namespace tests::benchmarks {
         });
     }
 
+    // TXStrHashList variants
+    template<typename T>
+    void testStrHashList() {
+        T obj;
+        const int n{ 10000 };
+        for (int i{}; i<n; i++)
+            obj.Add("entry_" + std::to_string(i+1));
+        for (int i{}; i < n; i++)
+            obj.IndexOf("entry_" + std::to_string(i + 1));
+    }
+
+    TEST_CASE("Benchmark variants of TXStrHashList") {
+        benchmarkTwoClasses("TXStrHashList"s, testStrHashList<gdlib::strhash::TXStrHashList<uint8_t>>,
+                "TXStrHashListLegacy"s, testStrHashList<gdlib::strhash::TXStrHashListLegacy<uint8_t>>);
+    }
+
     TEST_SUITE_END();
 }
