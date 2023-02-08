@@ -185,7 +185,7 @@ namespace tests::benchmarks {
             cnt += obj.FindFilter(i)->FiltNumber;
     }
 
-    TEST_CASE("Benchmark variants of TAcronymList") {
+    TEST_CASE("Benchmark variants of filter list") {
         benchmarkTwoClasses("cxx-filterlist"s, filterListTest<gxfile::TFilterList>,
             "gdlib-filterlist"s, filterListTest<gxfile::TFilterListLegacy>);
     }
@@ -205,7 +205,7 @@ namespace tests::benchmarks {
         }
     }
 
-    TEST_CASE("Benchmark variants of TAcronymList") {
+    TEST_CASE("Benchmark variants of name lists") {
         benchmarkTwoClasses("cxx-namelist"s, nameListTest<gxfile::WrapCxxUnorderedMap<gxfile::PgdxSymbRecord>>,
             "gdlib-namelist"s, nameListTest<gxfile::TXStrHashListImpl<gxfile::PgdxSymbRecord>>);
     }
@@ -222,7 +222,7 @@ namespace tests::benchmarks {
             cnt += obj.IndexOf("uel" + std::to_string(i));
     }
 
-    TEST_CASE("Benchmark variants of TAcronymList") {
+    TEST_CASE("Benchmark variants of UEL table implementations") {
         benchmarkTwoClasses("cxx-ueltbl"s, uelTableTest<gxfile::TUELTable>, "gdlib-ueltbl"s, uelTableTest<gxfile::TUELTableLegacy>);
     }
 
