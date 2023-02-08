@@ -191,7 +191,7 @@ namespace tests::benchmarks {
     }
 
     // Name list variants: WrapCxxUnorderedMap<PgdxSymbRecord> vs. TXStrHashListImpl<PgdxSymbRecord>
-    template<typename T, bool cleanup>
+    template<typename T>
     void nameListTest() {
         const int n{ 1000 };
         T obj;
@@ -201,14 +201,13 @@ namespace tests::benchmarks {
         for (int i{ n - 1 }; i >= 0; i--) {
             auto oi = *obj.GetObject(i);
             cnt += oi->SSyNr;
-            if(cleanup)
-                delete oi;
+            delete oi;
         }
     }
 
     TEST_CASE("Benchmark variants of TAcronymList") {
-        benchmarkTwoClasses("cxx-namelist"s, nameListTest<gxfile::WrapCxxUnorderedMap<gxfile::PgdxSymbRecord>, true>,
-            "gdlib-namelist"s, nameListTest<gxfile::TXStrHashListImpl<gxfile::PgdxSymbRecord>, false>);
+        benchmarkTwoClasses("cxx-namelist"s, nameListTest<gxfile::WrapCxxUnorderedMap<gxfile::PgdxSymbRecord>>,
+            "gdlib-namelist"s, nameListTest<gxfile::TXStrHashListImpl<gxfile::PgdxSymbRecord>>);
     }
 
     // TUELTable (C++ hashmap) vs. TUELTableLegacy (TXStrHashList)
