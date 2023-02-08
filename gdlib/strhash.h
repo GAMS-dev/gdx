@@ -405,7 +405,16 @@ namespace gdlib::strhash {
 
     template<>
     template<typename T2>
-    inline void TXStrHashList<uint8_t >::LoadFromStream(T2 &s) {
+    inline void TXStrHashList<uint8_t>::LoadFromStream(T2 &s) {
+        Clear();
+        int Cnt{s.ReadInteger()};
+        for(int N{}; N<Cnt; N++)
+            StoreObject(s.ReadString(), 0);
+    }
+
+    template<>
+    template<typename T2>
+    inline void TXStrHashList<int>::LoadFromStream(T2 &s) {
         Clear();
         int Cnt{s.ReadInteger()};
         for(int N{}; N<Cnt; N++)

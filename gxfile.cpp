@@ -4493,6 +4493,23 @@ namespace gxfile {
             S.WriteString((*this)[N]);
     }
 
+    void TUELTable::LoadFromStream(TXStreamDelphi &S) {
+        Clear();
+        int Cnt{S.ReadInteger()};
+        for(int N{}; N<Cnt; N++) {
+            StoreObject(S.ReadString(), 0);
+        }
+        if(UsrUel2Ent) UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
+        for(auto &[name,indexNum] : nameToIndexNum)
+            indexNum.num = -1;
+        ResetMapToUserStatus();
+    }
+
+    void TUELTable::Clear() {
+        nameToIndexNum.clear();
+        insertOrder.clear();
+    }
+
     int TAcronymList::FindEntry(int Map) const {
         const auto it = std::find_if(begin(), end(), [&](const auto &item) {
             return item.AcrMap == Map;
@@ -4706,6 +4723,14 @@ namespace gxfile {
 
     void TUELTableLegacy::SaveToStream(TXStreamDelphi &S) {
         TXStrHashListImpl<int>::SaveToStream(S);
+    }
+
+    void TUELTableLegacy::LoadFromStream(TXStreamDelphi &S) {
+        TXStrHashListImpl<int>::LoadFromStream(S);
+        if(UsrUel2Ent) UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
+        for(int N{1}; N<=FCount; N++)
+            *GetObject(N) = -1;
+        ResetMapToUserStatus();
     }
 
     TUELUserMapStatus IUELTable::GetMapToUserStatus() {

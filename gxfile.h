@@ -375,6 +375,7 @@ template<typename K, typename V, typename H, typename E>
         virtual int GetMaxUELLength() const = 0;
         virtual int MemoryUsed() const = 0;
         virtual void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) = 0;
+        virtual void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S) = 0;
     };
 
     class TUELTable : public IUELTable {
@@ -386,6 +387,7 @@ template<typename K, typename V, typename H, typename E>
 #endif
     public:
         TUELTable();
+        void Clear();
         int size() const override;
         bool empty() const override;
         int IndexOf(const std::string &s) override;
@@ -402,6 +404,7 @@ template<typename K, typename V, typename H, typename E>
         int GetMaxUELLength() const override;
         int MemoryUsed() const override;
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
+        void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
     };
 
     template<typename T>
@@ -438,6 +441,8 @@ template<typename K, typename V, typename H, typename E>
         void RenameEntry(int N, const std::string &s) override;
         int MemoryUsed() const override;
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
+
+        void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
     };
 
     std::string MakeGoodExplText(const std::string& s);
