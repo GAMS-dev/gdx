@@ -524,12 +524,12 @@ namespace gdlib::gmsobj {
                     pHashSC[n] = nullptr;
                     while(p1) {
                         auto p2 = p1->PNext;
-                        delete p1;
+                        std::free(p1);
                         p1 = p2;
                     }
                 }
                 //int64_t nBytes = sizeof(PHashRecord) * hashCount;
-                delete pHashSC;
+                std::free(pHashSC);
                 pHashSC = nullptr;
                 hashCount = 0;
                 trigger = -1;
@@ -590,7 +590,7 @@ namespace gdlib::gmsobj {
             else {
                 int res{this->FCount+(this->OneBased?1:0)};
                 TXCustomStringList<T>::InsertItem(res, s, APointer);
-                PH = new THashRecord;
+                PH = (PHashRecord)std::malloc(sizeof(THashRecord));
                 hashBytes += sizeof(THashRecord);
                 PH->PNext = pHashSC[hv];
                 PH->RefNr = res - (this->OneBased ? 1 : 0);
