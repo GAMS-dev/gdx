@@ -52,6 +52,7 @@ set(common
 		gdlib/datastorage.cpp gdlib/datastorage.h
 		gdlib/strhash.h gdlib/strhash.cpp
 		gdlib/gmsobj.h gdlib/gmsobj.cpp
+		gdlib/gmsheapnew.h gdlib/gmsheapnew.cpp
 
 		gdxinterface.h gdxinterface.cpp
 		utils.h utils.cpp
