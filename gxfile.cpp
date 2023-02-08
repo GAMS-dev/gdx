@@ -4559,7 +4559,7 @@ namespace gxfile {
     }
 
     TFilterList::~TFilterList() {
-        clear();
+        Clear();
     }
 
     int TIntegerMapping::GetHighestIndex() const {
