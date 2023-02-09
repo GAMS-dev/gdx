@@ -35,7 +35,7 @@ namespace gdlib::gmsheapnew {
     class TBigBlockMgr {
         std::string spName;
         int64_t OtherMemory{}, HighMark{};
-        gdlib::gmsobj::TXList<void *> FreeList{};
+        std::vector<void *> FreeList{};
         double MemoryLimit{1e200}, TotalMemory{}, TotalHighMark{};
         TMemoryReportProc MemoryReportProc{};
         int showOSMem{};
@@ -45,7 +45,7 @@ namespace gdlib::gmsheapnew {
         void ReduceMemorySize(int64_t Delta);
         void IncreaseMemorySize(int64_t Delta);
     public:
-        TBigBlockMgr(std::string  Name);
+        explicit TBigBlockMgr(std::string Name);
         ~TBigBlockMgr();
         double MemoryUsedMB();
         double MemoryLimitMB();

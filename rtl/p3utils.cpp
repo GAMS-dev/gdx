@@ -140,4 +140,45 @@ namespace rtl::p3utils {
     }
 #endif
 
+    bool p3GetMemoryInfo(int64_t& rss, int64_t& vss)
+    {
+#if defined(_WIN32)
+        PROCESS_MEMORY_COUNTERS info;
+        int ok = GetProcessMemoryInfo (GetCurrentProcess( ), &info, sizeof(info));
+        if (!ok)
+            return false;  /* failure */
+        rss = (int64_t) info.WorkingSetSize;
+        vss = (int64_t) info.PagefileUsage;
+        return true; /* success */
+#elif defined(__linux)
+        size_t sz;
+        FILE *fp = fopen("/proc/self/statm", "r");
+        if (!fp)
+            return false;  /* failure */
+        /* first two are VmSize, VmRSS */
+        unsigned long urss, uvss;
+        int n = fscanf (fp, "%lu %lu", &uvss, &urss);
+        fclose(fp);
+        if (2 != n)
+            return false;  /* failure */
+        sz = sysconf(_SC_PAGESIZE);
+        rss = sz * urss;
+        vss = sz * uvss;
+        return true; /* success */
+#elif defined(__APPLE__)
+        int ret;
+        struct proc_taskinfo procTaskInfo;
+        ret = proc_pidinfo ((int) getpid(), PROC_PIDTASKINFO, 0,
+                            (void *) &procTaskInfo, sizeof(procTaskInfo));
+        if (ret < (int)sizeof(procTaskInfo))
+            return false;  /* failure */
+        rss = (int64_t) procTaskInfo.pti_resident_size;
+        vss = (int64_t) procTaskInfo.pti_virtual_size;
+        return true; /* success */
+#else
+        throw std::runtime_error("Unknown platform for getMemoryInfo!");
+        return false; /* fail */
+#endif
+    }
+
 }

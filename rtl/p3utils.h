@@ -21,4 +21,6 @@ namespace rtl::p3utils {
     int p3FileOpen(const std::string& fName, Tp3FileOpenAction mode, Tp3FileHandle h);
     int p3FileRead(Tp3FileHandle h, char* buffer, uint32_t buflen, uint32_t& numRead);
     int p3FileGetSize(Tp3FileHandle h, int64_t& fileSize);
+
+    bool p3GetMemoryInfo(int64_t& rss, int64_t& vss);
 }
