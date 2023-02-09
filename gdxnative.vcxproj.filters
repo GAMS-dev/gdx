@@ -157,6 +157,9 @@
     <ClCompile Include="tests\benchmarks.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="gdlib\gmsheapnew.cpp">
+      <Filter>gdlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">
@@ -256,6 +259,9 @@
       <Filter>tests</Filter>
     </ClInclude>
     <ClInclude Include="gdlib\gmsobj.h">
+      <Filter>gdlib</Filter>
+    </ClInclude>
+    <ClInclude Include="gdlib\gmsheapnew.h">
       <Filter>gdlib</Filter>
     </ClInclude>
   </ItemGroup>
