@@ -76,6 +76,13 @@ namespace gdlib::gmsheapnew {
         FreeList.clear();
     }
 
+    void TBigBlockMgr::GetBigStats(uint64_t& sizeOtherMemory, uint64_t& sizeHighMark, uint64_t& cntFree)
+    {
+        sizeOtherMemory = OtherMemory;
+        sizeHighMark = HighMark;
+        cntFree = FreeList.size();
+    }
+
     std::string TBigBlockMgr::GetName() const {
         return spName;
     }
@@ -86,23 +93,50 @@ namespace gdlib::gmsheapnew {
 
     PLargeBlock THeapMgr::GetWorkBuffer()
     {
-        return PLargeBlock();
+        void* p = BlockMgr.GetBigBlock();
+        return new TLargeBlock{BIGBLOCKSIZE / HEAPGRANULARITY, p, p };
     }
 
     void THeapMgr::ReleaseWorkBuffer(PLargeBlock P)
     {
+        BlockMgr.ReleaseBigBlock(P->InitialPtr);
+        const auto pit = std::find(WrkBuffs.begin(), WrkBuffs.end(), P);
+        if (pit != WrkBuffs.end()) WrkBuffs.erase(pit);
+        std::free(P);
     }
 
     void THeapMgr::ReduceMemorySize(uint64_t Delta)
     {
+        BlockMgr.ReduceMemorySize(Delta);
+        OtherMemory -= Delta;
     }
 
     void THeapMgr::IncreaseMemorySize(uint64_t Delta)
     {
+        BlockMgr.IncreaseMemorySize(Delta);
+        OtherMemory += Delta;
+        if (OtherMemory > HighMark) HighMark = OtherMemory;
     }
 
     void THeapMgr::prvClear()
     {
+        while (!WrkBuffs.empty())
+            ReleaseWorkBuffer(WrkBuffs.back());
+        WrkBuffs.clear();
+        WorkBuffer = nullptr;
+        for (const auto act : Active)
+            std::free(act);
+        Active.clear();
+        for (THeapSlotNr Slot{ 1 }; Slot <= LastSlot; Slot++) {
+            auto& obj = Slots[Slot];
+            obj.GetCount = obj.FreeCount = obj.ListCount = 0;
+            obj.FirstFree = nullptr;
+        }
+        ReduceMemorySize(OtherMemory);
+        OtherGet = OtherFree = 0;
+        OtherGet64 = OtherFree64 = 0;
+        ReAllocCnt = ReAllocUsed = 0;
+        ReAllocCnt64 = ReAllocUsed64 = 0;
     }
 
     void* THeapMgr::prvGMSGetMem(uint16_t slot)
@@ -141,16 +175,18 @@ namespace gdlib::gmsheapnew {
     {
     }
 
-    THeapMgr::THeapMgr(const std::string& Name)
-    {
+    THeapMgr::THeapMgr(const std::string& Name) : BlockMgr{"BBMgr_"s + Name}, spName{Name} {
+        prvClear();
     }
 
     THeapMgr::~THeapMgr()
     {
+        prvClear();
     }
 
     void THeapMgr::Clear()
     {
+        prvClear();
     }
 
     void* THeapMgr::GMSGetMem(uint16_t slot)

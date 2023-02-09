@@ -29,8 +29,10 @@ namespace gdlib::gmsheapnew {
     struct TLargeBlock {
         int FreeSlots;
         void *InitialPtr, *CurrPtr;
+
+        TLargeBlock(int freeSlots, void* initialPtr, void* currPtr) : FreeSlots{ freeSlots }, InitialPtr {initialPtr }, CurrPtr{currPtr} {}
     };
-    using PLargeBlock = TLargeBlock;
+    using PLargeBlock = TLargeBlock*;
 
     class TBigBlockMgr {
         std::string spName;
@@ -39,17 +41,21 @@ namespace gdlib::gmsheapnew {
         double MemoryLimit{1e200}, TotalMemory{}, TotalHighMark{};
         TMemoryReportProc MemoryReportProc{};
         int showOSMem{};
-
-        void* GetBigBlock();
+        
         void ReleaseBigBlock(void* P);
         void ReduceMemorySize(uint64_t Delta);
         void IncreaseMemorySize(uint64_t Delta);
+        void* GetBigBlock();
     public:
+        friend class THeapMgr;
+
         explicit TBigBlockMgr(std::string Name);
         virtual ~TBigBlockMgr();
+
         double MemoryUsedMB();
         double MemoryLimitMB();
         void XClear();
+        void GetBigStats(uint64_t& sizeOtherMemory, uint64_t& sizeHighMark, uint64_t& cntFree);
         std::string GetName() const;
         void SetOSMemory(int v);
     };
@@ -59,13 +65,14 @@ namespace gdlib::gmsheapnew {
     //      another public class. This was done to allow for an easier/more
     //      maintainable way to mutex/protect critical sections.
     class THeapMgr {
-        PLargeBlock WorkBuffer;
+        PLargeBlock WorkBuffer{};
         TBigBlockMgr BlockMgr;
         std::array<TSlotRecord, LastSlot> Slots;
         uint64_t HighMark, OtherMemory, OtherGet, OtherFree;
         uint64_t OtherGet64, OtherFree64;
         uint64_t ReAllocCnt, ReAllocUsed, ReAllocCnt64, ReAllocUsed64;
-        std::vector<void *> WrkBuffs, Active;
+        std::vector<PLargeBlock> WrkBuffs;
+        std::vector<void *> Active;
         std::string spName;
 
         PLargeBlock GetWorkBuffer();
