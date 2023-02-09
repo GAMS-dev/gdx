@@ -52,8 +52,8 @@ namespace gdlib::gmsheapnew {
         explicit TBigBlockMgr(std::string Name);
         virtual ~TBigBlockMgr();
 
-        double MemoryUsedMB();
-        double MemoryLimitMB();
+        double MemoryUsedMB() const;
+        double MemoryLimitMB() const;
         void XClear();
         void GetBigStats(uint64_t& sizeOtherMemory, uint64_t& sizeHighMark, uint64_t& cntFree);
         std::string GetName() const;
@@ -117,11 +117,8 @@ namespace gdlib::gmsheapnew {
         bool SetMemoryLimit(double limit);
         void SetMemoryReportProc(const TMemoryReportProc &F);
 
-        std::string GetName() const { return spName; }
-
-        TBigBlockMgr &GetBBMgr() {
-            return BlockMgr;
-        }
+        std::string GetName() const;
+        TBigBlockMgr &GetBBMgr();
     };
 
 };

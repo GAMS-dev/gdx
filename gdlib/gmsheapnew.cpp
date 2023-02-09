@@ -51,7 +51,7 @@ namespace gdlib::gmsheapnew {
     // Brief:
     //   Return the amount of memory used by all active heaps. The amount returned is the total memory use
     //   divided by 1,000,000
-    double TBigBlockMgr::MemoryUsedMB() {
+    double TBigBlockMgr::MemoryUsedMB() const {
         int64_t rss{}, vss{};
         if(showOSMem == 1 && rtl::p3utils::p3GetMemoryInfo(rss, vss))
             return (double)rss / 1e6;
@@ -65,7 +65,7 @@ namespace gdlib::gmsheapnew {
     //   Returns the current memory limit specified by calling SetMemoryLimit
     // Returns:
     //   Returns the value specified when calling SetMemoryLimit divided by 1,000,000
-    double TBigBlockMgr::MemoryLimitMB() {
+    double TBigBlockMgr::MemoryLimitMB() const {
         return MemoryLimit / 1e6;
     }
 
@@ -127,7 +127,7 @@ namespace gdlib::gmsheapnew {
         for (const auto act : Active)
             std::free(act);
         Active.clear();
-        for (THeapSlotNr Slot{ 1 }; Slot <= LastSlot; Slot++) {
+        for (THeapSlotNr Slot{ 1 }; Slot <= LastSlot; ++Slot) {
             auto& obj = Slots[Slot];
             obj.GetCount = obj.FreeCount = obj.ListCount = 0;
             obj.FirstFree = nullptr;
@@ -191,11 +191,20 @@ namespace gdlib::gmsheapnew {
 
     void* THeapMgr::GMSGetMem(uint16_t slot)
     {
-        return nullptr;
+#ifdef BYPASSHEAPMGR
+        return std::malloc(Slot * HEAPGRANULARITY);
+#else
+        return prvGMSGetMem(slot);
+#endif
     }
 
     void THeapMgr::GMSFreeMem(void* p, uint16_t slot)
     {
+#ifdef BYPASSHEAPMGR
+        std::free(p);
+#else
+        prvGMSFreeMem(p, slot);
+#endif
     }
 
     void* THeapMgr::XGetMem(int Size)
@@ -272,16 +281,26 @@ namespace gdlib::gmsheapnew {
 
     uint64_t THeapMgr::GetFreeSlotSpace()
     {
+        uint64_t res{};
+        // ...
         return 0;
     }
 
     bool THeapMgr::SetMemoryLimit(double limit)
     {
-        return false;
+        BlockMgr.MemoryLimit = limit;
+        return limit >= BlockMgr.TotalMemory;
     }
 
     void THeapMgr::SetMemoryReportProc(const TMemoryReportProc& F)
     {
+        BlockMgr.MemoryReportProc = F;
+    }
+
+    std::string THeapMgr::GetName() const { return spName; }
+
+    TBigBlockMgr &THeapMgr::GetBBMgr() {
+        return BlockMgr;
     }
 
 }
