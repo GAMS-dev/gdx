@@ -20,7 +20,7 @@ namespace gdlib::gmsheapnew {
 
     struct TSlotRecord {
         PSmallBlock FirstFree;
-        uint64_t GetCount, FreeCount, ListCount;
+        int64_t GetCount, FreeCount, ListCount;
     };
 
     // I do not like the small block to point to the big block
@@ -36,15 +36,15 @@ namespace gdlib::gmsheapnew {
 
     class TBigBlockMgr {
         std::string spName;
-        uint64_t OtherMemory{}, HighMark{};
+        int64_t OtherMemory{}, HighMark{};
         std::vector<void *> FreeList{};
         double MemoryLimit{1e200}, TotalMemory{}, TotalHighMark{};
         TMemoryReportProc MemoryReportProc{};
         int showOSMem{};
         
         void ReleaseBigBlock(void* P);
-        void ReduceMemorySize(uint64_t Delta);
-        void IncreaseMemorySize(uint64_t Delta);
+        void ReduceMemorySize(int64_t Delta);
+        void IncreaseMemorySize(int64_t Delta);
         void* GetBigBlock();
     public:
         friend class THeapMgr;
@@ -55,7 +55,7 @@ namespace gdlib::gmsheapnew {
         double MemoryUsedMB() const;
         double MemoryLimitMB() const;
         void XClear();
-        void GetBigStats(uint64_t& sizeOtherMemory, uint64_t& sizeHighMark, uint64_t& cntFree);
+        void GetBigStats(int64_t& sizeOtherMemory, int64_t& sizeHighMark, int64_t& cntFree);
         std::string GetName() const;
         void SetOSMemory(int v);
     };
@@ -68,27 +68,27 @@ namespace gdlib::gmsheapnew {
         PLargeBlock WorkBuffer{};
         TBigBlockMgr BlockMgr;
         std::array<TSlotRecord, LastSlot> Slots;
-        uint64_t HighMark, OtherMemory, OtherGet, OtherFree;
-        uint64_t OtherGet64, OtherFree64;
-        uint64_t ReAllocCnt, ReAllocUsed, ReAllocCnt64, ReAllocUsed64;
+        int64_t HighMark, OtherMemory, OtherGet, OtherFree;
+        int64_t OtherGet64, OtherFree64;
+        int64_t ReAllocCnt, ReAllocUsed, ReAllocCnt64, ReAllocUsed64;
         std::vector<PLargeBlock> WrkBuffs;
         std::vector<void *> Active;
         std::string spName;
 
         PLargeBlock GetWorkBuffer();
         void ReleaseWorkBuffer(PLargeBlock P);
-        void ReduceMemorySize(uint64_t Delta);
-        void IncreaseMemorySize(uint64_t Delta);
+        void ReduceMemorySize(int64_t Delta);
+        void IncreaseMemorySize(int64_t Delta);
 
         void prvClear();
         void *prvGMSGetMem(uint16_t slot);
         void prvGMSFreeMem(void *p, uint16_t slot);
         void *prvXGetMem(int Size);
         void *prvXGetMemNC(int Size);
-        void *prvXGetMem64(uint64_t Size);
+        void *prvXGetMem64(int64_t Size);
         void prvXFreeMem(void *P, int Size);
         void prvXFreeMem64(void *P, int64_t Size);
-        void prvGetSlotCnts(THeapSlotNr Slot, uint64_t &cntGet, uint64_t cntFree, uint64_t cntAvail);
+        void prvGetSlotCnts(THeapSlotNr Slot, int64_t &cntGet, int64_t &cntFree, int64_t &cntAvail);
 
     public:
         explicit THeapMgr(const std::string &Name);
@@ -97,23 +97,23 @@ namespace gdlib::gmsheapnew {
         void *GMSGetMem(uint16_t slot);
         void GMSFreeMem(void *p, uint16_t slot);
         void *XGetMem(int Size);
-        void XGetMemNC(int Size);
+        void *XGetMemNC(int Size);
         void *XAllocMem(int Size);
         void *XAllocMemNC(int Size);
-        void XGetMem64(uint64_t Size);
-        void *XAllocMem64(uint64_t Size);
+        void *XGetMem64(int64_t Size);
+        void *XAllocMem64(int64_t Size);
         void XFreeMem(void *P, int Size);
         void XFreeMemNC(void *P, int Size);
-        void XFreeMemandNil(void **P, int Size);
-        void XFreeMem64(void *P, uint64_t Size);
-        void XFreeMem64andNil(void *P, uint64_t Size);
+        void XFreeMemAndNil(void **P, int Size);
+        void XFreeMem64(void *P, int64_t Size);
+        void XFreeMem64andNil(void **P, int64_t Size);
         void XReAllocMem(void **P, int OldSize, int NewSize);
         void XReAllocMemNC(void **P, int OldSize, int NewSize);
-        void XReAllocMem64(void **P, uint64_t OldSize, uint64_t NewSize);
-        void GetSlotCnts(THeapSlotNr Slot, uint64_t &cntGet, uint64_t &cntFree, uint64_t &cntAvail);
-        void GetBlockStats(uint64_t &cntWrkBuffs, uint64_t &cntActive, uint64_t &sizeOtherMemory, uint64_t &sizeHighMark);
-        void GetOtherStats(bool do64, uint64_t &cntGet, uint64_t &cntFree, uint64_t &cntReAlloc, uint64_t &sizeRUsed);
-        uint64_t GetFreeSlotSpace();
+        void XReAllocMem64(void **P, int64_t OldSize, int64_t NewSize);
+        void GetSlotCnts(THeapSlotNr Slot, int64_t &cntGet, int64_t &cntFree, int64_t &cntAvail);
+        void GetBlockStats(int64_t &cntWrkBuffs, int64_t &cntActive, int64_t &sizeOtherMemory, int64_t &sizeHighMark);
+        void GetOtherStats(bool do64, int64_t &cntGet, int64_t &cntFree, int64_t &cntReAlloc, int64_t &sizeRUsed);
+        int64_t GetFreeSlotSpace();
         bool SetMemoryLimit(double limit);
         void SetMemoryReportProc(const TMemoryReportProc &F);
 
