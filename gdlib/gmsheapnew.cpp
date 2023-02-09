@@ -25,13 +25,13 @@ namespace gdlib::gmsheapnew {
         FreeList.push_back(P);
     }
 
-    void TBigBlockMgr::ReduceMemorySize(int64_t Delta) {
+    void TBigBlockMgr::ReduceMemorySize(uint64_t Delta) {
         OtherMemory -= Delta;
         TotalMemory -= (double)Delta;
         if(MemoryReportProc) MemoryReportProc(MemoryUsedMB());
     }
 
-    void TBigBlockMgr::IncreaseMemorySize(int64_t Delta) {
+    void TBigBlockMgr::IncreaseMemorySize(uint64_t Delta) {
         if(TotalMemory + (double)Delta > MemoryLimit)
             throw std::runtime_error("Requested memory exceeds assigned HeapLimit"s);
         OtherMemory += Delta;
@@ -82,6 +82,170 @@ namespace gdlib::gmsheapnew {
 
     void TBigBlockMgr::SetOSMemory(int v) {
         showOSMem = v;
+    }
+
+    PLargeBlock THeapMgr::GetWorkBuffer()
+    {
+        return PLargeBlock();
+    }
+
+    void THeapMgr::ReleaseWorkBuffer(PLargeBlock P)
+    {
+    }
+
+    void THeapMgr::ReduceMemorySize(uint64_t Delta)
+    {
+    }
+
+    void THeapMgr::IncreaseMemorySize(uint64_t Delta)
+    {
+    }
+
+    void THeapMgr::prvClear()
+    {
+    }
+
+    void* THeapMgr::prvGMSGetMem(uint16_t slot)
+    {
+        return nullptr;
+    }
+
+    void THeapMgr::prvGMSFreeMem(void* p, uint16_t slot)
+    {
+    }
+
+    void* THeapMgr::prvXGetMem(int Size)
+    {
+        return nullptr;
+    }
+
+    void* THeapMgr::prvXGetMemNC(int Size)
+    {
+        return nullptr;
+    }
+
+    void* THeapMgr::prvXGetMem64(uint64_t Size)
+    {
+        return nullptr;
+    }
+
+    void THeapMgr::prvXFreeMem(void* P, int Size)
+    {
+    }
+
+    void THeapMgr::prvXFreeMem64(void* P, int64_t Size)
+    {
+    }
+
+    void THeapMgr::prvGetSlotCnts(THeapSlotNr Slot, uint64_t& cntGet, uint64_t cntFree, uint64_t cntAvail)
+    {
+    }
+
+    THeapMgr::THeapMgr(const std::string& Name)
+    {
+    }
+
+    THeapMgr::~THeapMgr()
+    {
+    }
+
+    void THeapMgr::Clear()
+    {
+    }
+
+    void* THeapMgr::GMSGetMem(uint16_t slot)
+    {
+        return nullptr;
+    }
+
+    void THeapMgr::GMSFreeMem(void* p, uint16_t slot)
+    {
+    }
+
+    void* THeapMgr::XGetMem(int Size)
+    {
+        return nullptr;
+    }
+
+    void THeapMgr::XGetMemNC(int Size)
+    {
+    }
+
+    void* THeapMgr::XAllocMem(int Size)
+    {
+        return nullptr;
+    }
+
+    void* THeapMgr::XAllocMemNC(int Size)
+    {
+        return nullptr;
+    }
+
+    void THeapMgr::XGetMem64(uint64_t Size)
+    {
+    }
+
+    void* THeapMgr::XAllocMem64(uint64_t Size)
+    {
+        return nullptr;
+    }
+
+    void THeapMgr::XFreeMem(void* P, int Size)
+    {
+    }
+
+    void THeapMgr::XFreeMemNC(void* P, int Size)
+    {
+    }
+
+    void THeapMgr::XFreeMemandNil(void** P, int Size)
+    {
+    }
+
+    void THeapMgr::XFreeMem64(void* P, uint64_t Size)
+    {
+    }
+
+    void THeapMgr::XFreeMem64andNil(void* P, uint64_t Size)
+    {
+    }
+
+    void THeapMgr::XReAllocMem(void** P, int OldSize, int NewSize)
+    {
+    }
+
+    void THeapMgr::XReAllocMemNC(void** P, int OldSize, int NewSize)
+    {
+    }
+
+    void THeapMgr::XReAllocMem64(void** P, uint64_t OldSize, uint64_t NewSize)
+    {
+    }
+
+    void THeapMgr::GetSlotCnts(THeapSlotNr Slot, uint64_t& cntGet, uint64_t& cntFree, uint64_t& cntAvail)
+    {
+    }
+
+    void THeapMgr::GetBlockStats(uint64_t& cntWrkBuffs, uint64_t& cntActive, uint64_t& sizeOtherMemory, uint64_t& sizeHighMark)
+    {
+    }
+
+    void THeapMgr::GetOtherStats(bool do64, uint64_t& cntGet, uint64_t& cntFree, uint64_t& cntReAlloc, uint64_t& sizeRUsed)
+    {
+    }
+
+    uint64_t THeapMgr::GetFreeSlotSpace()
+    {
+        return 0;
+    }
+
+    bool THeapMgr::SetMemoryLimit(double limit)
+    {
+        return false;
+    }
+
+    void THeapMgr::SetMemoryReportProc(const TMemoryReportProc& F)
+    {
     }
 
 }
