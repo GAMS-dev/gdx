@@ -10,6 +10,8 @@
 #include <cstdint>
 #include <cassert>
 
+#include "gmsheapnew.h"
+
 // TLinkedData dynamic array toggle
 // iff. defined? Use std::vector with actual dimension and value counts,
 // otherwise std::array with fixed maximum sizes, see below.
@@ -31,6 +33,9 @@
 #define TLD_TEMPLATE_HEADER template<typename KeyType, int maxKeySize, typename ValueType, int maxValueSize>
 #define TLD_REC_TYPE TLinkedDataRec<KeyType, maxKeySize, ValueType, maxValueSize>
 #endif
+
+// Instead of using builtin C++ heap functionality new/delete, use custom GAMS big block heap from gdlib/gmsheapnew
+//#define USE_GMSHEAP
 
 namespace gdlib::datastorage {
 
@@ -113,8 +118,10 @@ namespace gdlib::datastorage {
         using RecType = TLD_REC_TYPE;
         RecType *FHead, *FTail;
 
-#ifdef TLD_BATCH_ALLOCS
+#if defined(TLD_BATCH_ALLOCS)
         BatchAllocator<960> batchAllocator;
+#elif defined(USE_GMSHEAP)
+        gdlib::gmsheapnew::THeapMgr MyHeap {"TLinkedData"};
 #endif
 
         bool IsSorted() {
@@ -163,7 +170,11 @@ namespace gdlib::datastorage {
             RecType *P {FHead};
             while(P) {
                 auto Pn = P->RecNext;
+#ifdef USE_GMSHEAP
+                MyHeap.XFreeMem(P, FTotalSize);
+#else
                 delete P;
+#endif
                 P = Pn;
             }
 #endif
@@ -178,8 +189,10 @@ namespace gdlib::datastorage {
 
         RecType *AddItem(const KeyType *AKey, const ValueType *AData) {
 #ifdef TLD_DYN_ARRAYS
-    #ifdef TLD_BATCH_ALLOCS
+    #if defined(TLD_BATCH_ALLOCS)
             auto* node = reinterpret_cast<RecType *>(batchAllocator.GetBytes(FTotalSize));
+    #elif defined(USE_GMSHEAP)
+            auto *node = reinterpret_cast<RecType *>(MyHeap.XGetMem(FTotalSize));
     #else
             auto* node = reinterpret_cast<RecType *>(new uint8_t[FTotalSize]);
     #endif

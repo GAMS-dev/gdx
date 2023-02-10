@@ -5,6 +5,8 @@
 
 #include "../rtl/p3utils.h"
 
+//#define BYPASSHEAPMGR
+
 using namespace std::literals::string_literals;
 
 namespace gdlib::gmsheapnew {
@@ -135,7 +137,7 @@ namespace gdlib::gmsheapnew {
     void* THeapMgr::prvGMSGetMem(uint16_t slot)
     {
         {
-            auto &obj = Slots[slot];
+            auto &obj = Slots[slot-1];
             obj.GetCount++;
             void *res{obj.FirstFree};
             if (res) {
@@ -156,7 +158,7 @@ namespace gdlib::gmsheapnew {
                 return res;
             }
             if (wb->FreeSlots > 0) {
-                auto &fs = Slots[wb->FreeSlots];
+                auto &fs = Slots[wb->FreeSlots-1];
                 fs.ListCount++;
                 static_cast<PSmallBlock>(wb->CurrPtr)->NextSmallBlock = fs.FirstFree;
                 fs.FirstFree = static_cast<PSmallBlock>(wb->CurrPtr);
@@ -175,7 +177,7 @@ namespace gdlib::gmsheapnew {
     }
 
     void THeapMgr::prvGMSFreeMem(void* p, uint16_t slot) {
-        auto &obj = Slots[slot];
+        auto &obj = Slots[slot-1];
         obj.FreeCount++;
         obj.ListCount++;
         static_cast<PSmallBlock>(p)->NextSmallBlock = obj.FirstFree;
@@ -187,7 +189,7 @@ namespace gdlib::gmsheapnew {
             return nullptr;
 
         if(Size <= LastSlot * HEAPGRANULARITY)
-            return prvGMSGetMem((uint16_t)((Size-1) / HEAPGRANULARITY));
+            return prvGMSGetMem((uint16_t)((Size-1) / HEAPGRANULARITY) + 1);
 
         OtherGet++;
         IncreaseMemorySize(Size);
@@ -208,7 +210,7 @@ namespace gdlib::gmsheapnew {
             return nullptr;
 
         if(Size <= LastSlot * HEAPGRANULARITY)
-            return prvGMSGetMem((uint16_t)((Size-1) / HEAPGRANULARITY));
+            return prvGMSGetMem((uint16_t)((Size-1) / HEAPGRANULARITY) + 1);
 
         OtherGet64++;
         IncreaseMemorySize(Size);
@@ -218,7 +220,7 @@ namespace gdlib::gmsheapnew {
 
     void THeapMgr::prvXFreeMem(void* P, int Size) {
         if(Size > 0) {
-            if(Size <= LastSlot * HEAPGRANULARITY) prvGMSFreeMem(P, static_cast<uint16_t>( (Size-1) / HEAPGRANULARITY ));
+            if(Size <= LastSlot * HEAPGRANULARITY) prvGMSFreeMem(P, static_cast<uint16_t>( (Size-1) / HEAPGRANULARITY + 1 ));
             else {
                 OtherFree++;
                 Active.erase(std::find(Active.begin(), Active.end(), P));
@@ -231,7 +233,7 @@ namespace gdlib::gmsheapnew {
     void THeapMgr::prvXFreeMem64(void* P, int64_t Size) {
         if(Size > 0) {
             if(Size <= LastSlot * HEAPGRANULARITY)
-                prvGMSFreeMem(P, static_cast<uint16_t>( (Size-1) / HEAPGRANULARITY ));
+                prvGMSFreeMem(P, static_cast<uint16_t>( (Size-1) / HEAPGRANULARITY + 1));
             else {
                 OtherFree64++;
                 Active.erase(std::find(Active.begin(), Active.end(), P));
@@ -242,7 +244,7 @@ namespace gdlib::gmsheapnew {
     }
 
     void THeapMgr::prvGetSlotCnts(THeapSlotNr Slot, int64_t& cntGet, int64_t &cntFree, int64_t &cntAvail) {
-        const auto &obj = Slots[Slot];
+        const auto &obj = Slots[Slot-1];
         cntGet = obj.GetCount;
         cntFree = obj.FreeCount;
         cntAvail = obj.ListCount;
@@ -263,7 +265,7 @@ namespace gdlib::gmsheapnew {
     void* THeapMgr::GMSGetMem(uint16_t slot)
     {
 #ifdef BYPASSHEAPMGR
-        return std::malloc(Slot * HEAPGRANULARITY);
+        return std::malloc(slot * HEAPGRANULARITY);
 #else
         return prvGMSGetMem(slot);
 #endif
@@ -330,7 +332,7 @@ namespace gdlib::gmsheapnew {
     void* THeapMgr::XAllocMem64(int64_t Size)
     {
 #ifdef BYPASSHEAPMGR
-        return std::malloc(size);
+        return std::malloc(Size);
 #else
         void *res{ prvXGetMem64(Size) };
         if(res)
@@ -390,16 +392,16 @@ namespace gdlib::gmsheapnew {
 
     void THeapMgr::XReAllocMem(void** P, int OldSize, int NewSize)
     {
-        void *PNew{};
 #ifdef BYPASSHEAPMGR
         if(NewSize <= 0) {
             if(OldSize > 0 && P && *P) std::free(*P);
             *P = nullptr;
         }
         else if(!P || !*P || OldSize <= 0) {
-            P = std::malloc(NewSize);
-        } else P = std::realloc(P, NewSize);
+            *P = std::malloc(NewSize);
+        } else *P = std::realloc(*P, NewSize);
 #else
+        void *PNew{};
         ReAllocCnt++;
         ReAllocUsed -= OldSize;
         ReAllocUsed += NewSize;
@@ -435,7 +437,7 @@ namespace gdlib::gmsheapnew {
         } else if(!P || OldSize <= 0)
             *P = std::malloc(NewSize);
         else
-            *P = std::realloc(P, NewSize);
+            *P = std::realloc(*P, NewSize);
 #else
         ReAllocCnt++;
         ReAllocUsed -= OldSize;
