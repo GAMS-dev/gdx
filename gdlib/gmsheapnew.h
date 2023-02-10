@@ -68,9 +68,9 @@ namespace gdlib::gmsheapnew {
         PLargeBlock WorkBuffer{};
         TBigBlockMgr BlockMgr;
         std::array<TSlotRecord, LastSlot> Slots;
-        int64_t HighMark, OtherMemory, OtherGet, OtherFree;
-        int64_t OtherGet64, OtherFree64;
-        int64_t ReAllocCnt, ReAllocUsed, ReAllocCnt64, ReAllocUsed64;
+        int64_t HighMark{}, OtherMemory{}, OtherGet{}, OtherFree{};
+        int64_t OtherGet64{}, OtherFree64{};
+        int64_t ReAllocCnt{}, ReAllocUsed{}, ReAllocCnt64{}, ReAllocUsed64{};
         std::vector<PLargeBlock> WrkBuffs;
         std::vector<void *> Active;
         std::string spName;

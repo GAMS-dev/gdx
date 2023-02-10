@@ -160,6 +160,9 @@
     <ClCompile Include="gdlib\gmsheapnew.cpp">
       <Filter>gdlib</Filter>
     </ClCompile>
+    <ClCompile Include="tests\gdlib\gmsheapnewtests.cpp">
+      <Filter>tests\gdlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gdlib\gmsstrm.h">

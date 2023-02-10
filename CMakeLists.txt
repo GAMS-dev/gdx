@@ -85,6 +85,7 @@ set(tests
 		tests/gdlib/gmsobjtests.cpp
 		tests/gdlib/gmsdatatests.cpp
 		tests/gdlib/strhashtests.cpp
+		tests/gdlib/gmsheapnewtests.cpp
 		tests/global/shortstringtests.cpp
 		tests/utilstests.cpp
 		tests/benchmarks.cpp

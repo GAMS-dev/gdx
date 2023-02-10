@@ -10,7 +10,7 @@ using namespace std::literals::string_literals;
 namespace gdlib::gmsheapnew {
 
     void* TBigBlockMgr::GetBigBlock() {
-        void *res {FreeList.back()};
+        void *res {FreeList.empty() ? nullptr : FreeList.back()};
         if(res) {
             FreeList.pop_back();
             return res;
@@ -71,17 +71,16 @@ namespace gdlib::gmsheapnew {
     }
 
     void TBigBlockMgr::XClear() {
-        for(int N{}; N<FreeList.size(); N++)
+        for(size_t N{}; N<FreeList.size(); N++)
             std::free(FreeList[N]);
         ReduceMemorySize(static_cast<int64_t>( FreeList.size() * BIGBLOCKSIZE ));
         FreeList.clear();
     }
 
-    void TBigBlockMgr::GetBigStats(int64_t& sizeOtherMemory, int64_t& sizeHighMark, int64_t& cntFree) const
-    {
+    void TBigBlockMgr::GetBigStats(int64_t& sizeOtherMemory, int64_t& sizeHighMark, int64_t& cntFree) const {
         sizeOtherMemory = OtherMemory;
         sizeHighMark = HighMark;
-        cntFree = FreeList.size();
+        cntFree = (int64_t)FreeList.size();
     }
 
     std::string TBigBlockMgr::GetName() const {
@@ -92,35 +91,32 @@ namespace gdlib::gmsheapnew {
         showOSMem = v;
     }
 
-    PLargeBlock THeapMgr::GetWorkBuffer()
-    {
+    PLargeBlock THeapMgr::GetWorkBuffer() {
         void* p = BlockMgr.GetBigBlock();
-        return new TLargeBlock{BIGBLOCKSIZE / HEAPGRANULARITY, p, p };
+        auto res = new TLargeBlock{BIGBLOCKSIZE / HEAPGRANULARITY, p, p};
+        WrkBuffs.push_back(res);
+        return res;
     }
 
-    void THeapMgr::ReleaseWorkBuffer(PLargeBlock P)
-    {
+    void THeapMgr::ReleaseWorkBuffer(PLargeBlock P) {
         BlockMgr.ReleaseBigBlock(P->InitialPtr);
         if (const auto pit = std::find(WrkBuffs.begin(), WrkBuffs.end(), P); pit != WrkBuffs.end())
             WrkBuffs.erase(pit);
-        std::free(P);
+        delete P;
     }
 
-    void THeapMgr::ReduceMemorySize(int64_t Delta)
-    {
+    void THeapMgr::ReduceMemorySize(int64_t Delta) {
         BlockMgr.ReduceMemorySize(Delta);
         OtherMemory -= Delta;
     }
 
-    void THeapMgr::IncreaseMemorySize(int64_t Delta)
-    {
+    void THeapMgr::IncreaseMemorySize(int64_t Delta) {
         BlockMgr.IncreaseMemorySize(Delta);
         OtherMemory += Delta;
         if (OtherMemory > HighMark) HighMark = OtherMemory;
     }
 
-    void THeapMgr::prvClear()
-    {
+    void THeapMgr::prvClear() {
         while (!WrkBuffs.empty())
             ReleaseWorkBuffer(WrkBuffs.back());
         WrkBuffs.clear();
@@ -128,16 +124,12 @@ namespace gdlib::gmsheapnew {
         for (const auto act : Active)
             std::free(act);
         Active.clear();
-        for (THeapSlotNr Slot{ 1 }; Slot <= LastSlot; ++Slot) {
-            auto& obj = Slots[Slot];
-            obj.GetCount = obj.FreeCount = obj.ListCount = 0;
-            obj.FirstFree = nullptr;
+        for (auto &slot : Slots) {
+            slot.GetCount = slot.FreeCount = slot.ListCount = 0;
+            slot.FirstFree = nullptr;
         }
         ReduceMemorySize(OtherMemory);
-        OtherGet = OtherFree = 0;
-        OtherGet64 = OtherFree64 = 0;
-        ReAllocCnt = ReAllocUsed = 0;
-        ReAllocCnt64 = ReAllocUsed64 = 0;
+        OtherGet = OtherFree = OtherGet64 = OtherFree64 = ReAllocCnt = ReAllocUsed = ReAllocCnt64 = ReAllocUsed64 = 0;
     }
 
     void* THeapMgr::prvGMSGetMem(uint16_t slot)
@@ -182,8 +174,7 @@ namespace gdlib::gmsheapnew {
         }
     }
 
-    void THeapMgr::prvGMSFreeMem(void* p, uint16_t slot)
-    {
+    void THeapMgr::prvGMSFreeMem(void* p, uint16_t slot) {
         auto &obj = Slots[slot];
         obj.FreeCount++;
         obj.ListCount++;
@@ -191,13 +182,12 @@ namespace gdlib::gmsheapnew {
         obj.FirstFree = static_cast<PSmallBlock>(p);
     }
 
-    void* THeapMgr::prvXGetMem(int Size)
-    {
+    void* THeapMgr::prvXGetMem(int Size) {
         if(Size <= 0)
             return nullptr;
 
         if(Size <= LastSlot * HEAPGRANULARITY)
-            return prvGMSGetMem((uint16_t)((Size-1) / HEAPGRANULARITY + 1));
+            return prvGMSGetMem((uint16_t)((Size-1) / HEAPGRANULARITY));
 
         OtherGet++;
         IncreaseMemorySize(Size);
@@ -206,21 +196,19 @@ namespace gdlib::gmsheapnew {
         return res;
     }
 
-    void* THeapMgr::prvXGetMemNC(int Size)
-    {
+    void* THeapMgr::prvXGetMemNC(int Size) {
         if(Size <= 0) return nullptr;
         OtherGet++;
         IncreaseMemorySize(Size);
         return std::malloc(Size);
     }
 
-    void* THeapMgr::prvXGetMem64(int64_t Size)
-    {
+    void* THeapMgr::prvXGetMem64(int64_t Size) {
         if(Size <= 0)
             return nullptr;
 
         if(Size <= LastSlot * HEAPGRANULARITY)
-            return prvGMSGetMem((uint16_t)((Size-1) / HEAPGRANULARITY + 1));
+            return prvGMSGetMem((uint16_t)((Size-1) / HEAPGRANULARITY));
 
         OtherGet64++;
         IncreaseMemorySize(Size);
@@ -228,10 +216,9 @@ namespace gdlib::gmsheapnew {
         return Active.back();
     }
 
-    void THeapMgr::prvXFreeMem(void* P, int Size)
-    {
+    void THeapMgr::prvXFreeMem(void* P, int Size) {
         if(Size > 0) {
-            if(Size <= LastSlot * HEAPGRANULARITY) prvGMSFreeMem(P, static_cast<uint16_t>( (Size-1) / HEAPGRANULARITY+1 ));
+            if(Size <= LastSlot * HEAPGRANULARITY) prvGMSFreeMem(P, static_cast<uint16_t>( (Size-1) / HEAPGRANULARITY ));
             else {
                 OtherFree++;
                 Active.erase(std::find(Active.begin(), Active.end(), P));
@@ -241,11 +228,10 @@ namespace gdlib::gmsheapnew {
         }
     }
 
-    void THeapMgr::prvXFreeMem64(void* P, int64_t Size)
-    {
+    void THeapMgr::prvXFreeMem64(void* P, int64_t Size) {
         if(Size > 0) {
             if(Size <= LastSlot * HEAPGRANULARITY)
-                prvGMSFreeMem(P, static_cast<uint16_t>( (Size-1) / HEAPGRANULARITY + 1 ));
+                prvGMSFreeMem(P, static_cast<uint16_t>( (Size-1) / HEAPGRANULARITY ));
             else {
                 OtherFree64++;
                 Active.erase(std::find(Active.begin(), Active.end(), P));
@@ -255,8 +241,7 @@ namespace gdlib::gmsheapnew {
         }
     }
 
-    void THeapMgr::prvGetSlotCnts(THeapSlotNr Slot, int64_t& cntGet, int64_t &cntFree, int64_t &cntAvail)
-    {
+    void THeapMgr::prvGetSlotCnts(THeapSlotNr Slot, int64_t& cntGet, int64_t &cntFree, int64_t &cntAvail) {
         const auto &obj = Slots[Slot];
         cntGet = obj.GetCount;
         cntFree = obj.FreeCount;
@@ -267,13 +252,11 @@ namespace gdlib::gmsheapnew {
         prvClear();
     }
 
-    THeapMgr::~THeapMgr()
-    {
+    THeapMgr::~THeapMgr() {
         prvClear();
     }
 
-    void THeapMgr::Clear()
-    {
+    void THeapMgr::Clear() {
         prvClear();
     }
 
