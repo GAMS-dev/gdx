@@ -55,7 +55,7 @@ namespace gdlib::gmsheapnew {
         double MemoryUsedMB() const;
         double MemoryLimitMB() const;
         void XClear();
-        void GetBigStats(int64_t& sizeOtherMemory, int64_t& sizeHighMark, int64_t& cntFree);
+        void GetBigStats(int64_t& sizeOtherMemory, int64_t& sizeHighMark, int64_t& cntFree) const;
         std::string GetName() const;
         void SetOSMemory(int v);
     };
@@ -111,8 +111,8 @@ namespace gdlib::gmsheapnew {
         void XReAllocMemNC(void **P, int OldSize, int NewSize);
         void XReAllocMem64(void **P, int64_t OldSize, int64_t NewSize);
         void GetSlotCnts(THeapSlotNr Slot, int64_t &cntGet, int64_t &cntFree, int64_t &cntAvail);
-        void GetBlockStats(int64_t &cntWrkBuffs, int64_t &cntActive, int64_t &sizeOtherMemory, int64_t &sizeHighMark);
-        void GetOtherStats(bool do64, int64_t &cntGet, int64_t &cntFree, int64_t &cntReAlloc, int64_t &sizeRUsed);
+        void GetBlockStats(int64_t &cntWrkBuffs, int64_t &cntActive, int64_t &sizeOtherMemory, int64_t &sizeHighMark) const;
+        void GetOtherStats(bool do64, int64_t &cntGet, int64_t &cntFree, int64_t &cntReAlloc, int64_t &sizeRUsed) const;
         int64_t GetFreeSlotSpace();
         bool SetMemoryLimit(double limit);
         void SetMemoryReportProc(const TMemoryReportProc &F);

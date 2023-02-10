@@ -52,13 +52,14 @@ namespace gdlib::gmsheapnew {
     //   Return the amount of memory used by all active heaps. The amount returned is the total memory use
     //   divided by 1,000,000
     double TBigBlockMgr::MemoryUsedMB() const {
-        int64_t rss{}, vss{};
-        if(showOSMem == 1 && rtl::p3utils::p3GetMemoryInfo(rss, vss))
-            return (double)rss / 1e6;
-        else if(showOSMem == 2 && rtl::p3utils::p3GetMemoryInfo(rss, vss))
-            return (double)vss / 1e6;
-        else
-            return TotalMemory/1e6;
+        {
+            int64_t rss{}, vss{};
+            if (showOSMem == 1 && rtl::p3utils::p3GetMemoryInfo(rss, vss))
+                return (double) rss / 1e6;
+            if (showOSMem == 2 && rtl::p3utils::p3GetMemoryInfo(rss, vss))
+                return (double) vss / 1e6;
+        }
+        return TotalMemory/1e6;
     }
 
     // Brief:
@@ -72,11 +73,11 @@ namespace gdlib::gmsheapnew {
     void TBigBlockMgr::XClear() {
         for(int N{}; N<FreeList.size(); N++)
             std::free(FreeList[N]);
-        ReduceMemorySize(FreeList.size() * BIGBLOCKSIZE);
+        ReduceMemorySize(static_cast<int64_t>( FreeList.size() * BIGBLOCKSIZE ));
         FreeList.clear();
     }
 
-    void TBigBlockMgr::GetBigStats(int64_t& sizeOtherMemory, int64_t& sizeHighMark, int64_t& cntFree)
+    void TBigBlockMgr::GetBigStats(int64_t& sizeOtherMemory, int64_t& sizeHighMark, int64_t& cntFree) const
     {
         sizeOtherMemory = OtherMemory;
         sizeHighMark = HighMark;
@@ -192,34 +193,66 @@ namespace gdlib::gmsheapnew {
 
     void* THeapMgr::prvXGetMem(int Size)
     {
-        return nullptr;
+        if(Size <= 0)
+            return nullptr;
+
+        if(Size <= LastSlot * HEAPGRANULARITY)
+            return prvGMSGetMem((uint16_t)((Size-1) / HEAPGRANULARITY + 1));
+
+        OtherGet++;
+        IncreaseMemorySize(Size);
+        void *res {std::malloc(Size)};
+        Active.push_back(res);
+        return res;
     }
 
     void* THeapMgr::prvXGetMemNC(int Size)
     {
-        return nullptr;
+        if(Size <= 0) return nullptr;
+        OtherGet++;
+        IncreaseMemorySize(Size);
+        return std::malloc(Size);
     }
 
     void* THeapMgr::prvXGetMem64(int64_t Size)
     {
         if(Size <= 0)
             return nullptr;
-        else if(Size <= LastSlot * HEAPGRANULARITY)
+
+        if(Size <= LastSlot * HEAPGRANULARITY)
             return prvGMSGetMem((uint16_t)((Size-1) / HEAPGRANULARITY + 1));
-        else {
-            OtherGet64++;
-            IncreaseMemorySize(Size);
-            Active.push_back(std::malloc(Size));
-            return Active.back();
-        }
+
+        OtherGet64++;
+        IncreaseMemorySize(Size);
+        Active.push_back(std::malloc(Size));
+        return Active.back();
     }
 
     void THeapMgr::prvXFreeMem(void* P, int Size)
     {
+        if(Size > 0) {
+            if(Size <= LastSlot * HEAPGRANULARITY) prvGMSFreeMem(P, static_cast<uint16_t>( (Size-1) / HEAPGRANULARITY+1 ));
+            else {
+                OtherFree++;
+                Active.erase(std::find(Active.begin(), Active.end(), P));
+                ReduceMemorySize(Size);
+                std::free(P);
+            }
+        }
     }
 
     void THeapMgr::prvXFreeMem64(void* P, int64_t Size)
     {
+        if(Size > 0) {
+            if(Size <= LastSlot * HEAPGRANULARITY)
+                prvGMSFreeMem(P, static_cast<uint16_t>( (Size-1) / HEAPGRANULARITY + 1 ));
+            else {
+                OtherFree64++;
+                Active.erase(std::find(Active.begin(), Active.end(), P));
+                ReduceMemorySize(Size);
+                std::free(P);
+            }
+        }
     }
 
     void THeapMgr::prvGetSlotCnts(THeapSlotNr Slot, int64_t& cntGet, int64_t &cntFree, int64_t &cntAvail)
@@ -476,14 +509,14 @@ namespace gdlib::gmsheapnew {
         prvGetSlotCnts(Slot, cntGet, cntFree, cntAvail);
     }
 
-    void THeapMgr::GetBlockStats(int64_t& cntWrkBuffs, int64_t& cntActive, int64_t& sizeOtherMemory, int64_t& sizeHighMark) {
+    void THeapMgr::GetBlockStats(int64_t& cntWrkBuffs, int64_t& cntActive, int64_t& sizeOtherMemory, int64_t& sizeHighMark) const {
         cntWrkBuffs = (int64_t)WrkBuffs.size();
         cntActive = (int64_t)Active.size();
         sizeOtherMemory = OtherMemory;
         sizeHighMark = HighMark;
     }
 
-    void THeapMgr::GetOtherStats(bool do64, int64_t& cntGet, int64_t& cntFree, int64_t& cntReAlloc, int64_t& sizeRUsed) {
+    void THeapMgr::GetOtherStats(bool do64, int64_t& cntGet, int64_t& cntFree, int64_t& cntReAlloc, int64_t& sizeRUsed) const {
         if(do64) {
             cntGet = OtherGet64;
             cntFree = OtherFree64;
