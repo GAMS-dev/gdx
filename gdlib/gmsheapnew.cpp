@@ -345,16 +345,20 @@ namespace gdlib::gmsheapnew {
             if(OldSize > 0 && P) prvXFreeMem(P, OldSize);
             PNew = nullptr;
         } else if(!P || OldSize <= 0) {
+            PNew = prvXGetMem(NewSize);
+        } else if(OldSize == NewSize) {
             PNew = P;
-
+        } else if(OldSize > LastSlot * HEAPGRANULARITY && NewSize > LastSlot * HEAPGRANULARITY) {
+            PNew = P;
+            Active.erase(std::find(Active.begin(), Active.end(), P));
+            PNew = std::realloc(PNew, NewSize);
+            Active.push_back(PNew);
             if(NewSize > OldSize) IncreaseMemorySize(NewSize-OldSize);
             else ReduceMemorySize(OldSize-NewSize);
-        } else if(OldSize == NewSize) {
-
-        } else if(OldSize > LastSlot * HEAPGRANULARITY && NewSize > LastSlot * HEAPGRANULARITY) {
-
         } else {
-
+            PNew = prvXGetMem(NewSize);
+            std::memcpy(PNew, P, OldSize <= NewSize ? OldSize : NewSize);
+            prvXFreeMem(P, OldSize);
         }
         *P = PNew;
 #endif
