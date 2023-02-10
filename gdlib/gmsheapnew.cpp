@@ -440,7 +440,7 @@ namespace gdlib::gmsheapnew {
         ReAllocCnt++;
         ReAllocUsed -= OldSize;
         ReAllocUsed += NewSize;
-        *P = std::realloc(P, NewSize);
+        *P = std::realloc(*P, NewSize);
 #endif
     }
 
