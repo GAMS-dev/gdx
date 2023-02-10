@@ -100,8 +100,8 @@ namespace gdlib::gmsheapnew {
     void THeapMgr::ReleaseWorkBuffer(PLargeBlock P)
     {
         BlockMgr.ReleaseBigBlock(P->InitialPtr);
-        const auto pit = std::find(WrkBuffs.begin(), WrkBuffs.end(), P);
-        if (pit != WrkBuffs.end()) WrkBuffs.erase(pit);
+        if (const auto pit = std::find(WrkBuffs.begin(), WrkBuffs.end(), P); pit != WrkBuffs.end())
+            WrkBuffs.erase(pit);
         std::free(P);
     }
 
@@ -141,11 +141,53 @@ namespace gdlib::gmsheapnew {
 
     void* THeapMgr::prvGMSGetMem(uint16_t slot)
     {
-        return nullptr;
+        {
+            auto &obj = Slots[slot];
+            obj.GetCount++;
+            void *res{obj.FirstFree};
+            if (res) {
+                obj.FirstFree = static_cast<PSmallBlock>(res)->NextSmallBlock;
+                obj.ListCount--;
+                return res;
+            }
+        }
+
+        if(!WorkBuffer) WorkBuffer = GetWorkBuffer();
+
+        {
+            auto wb = WorkBuffer;
+            if (wb->FreeSlots >= slot) {
+                void *res {wb->CurrPtr};
+                wb->CurrPtr = &((std::uint8_t *) wb->CurrPtr)[slot * HEAPGRANULARITY];
+                wb->FreeSlots -= slot;
+                return res;
+            }
+            if (wb->FreeSlots > 0) {
+                auto &fs = Slots[wb->FreeSlots];
+                fs.ListCount++;
+                static_cast<PSmallBlock>(wb->CurrPtr)->NextSmallBlock = fs.FirstFree;
+                fs.FirstFree = static_cast<PSmallBlock>(wb->CurrPtr);
+            }
+        }
+
+        WorkBuffer = GetWorkBuffer();
+
+        {
+            auto wb = WorkBuffer;
+            void *res {wb->CurrPtr};
+            wb->CurrPtr = &((std::uint8_t *)wb->CurrPtr)[slot * HEAPGRANULARITY];
+            wb->FreeSlots -= slot;
+            return res;
+        }
     }
 
     void THeapMgr::prvGMSFreeMem(void* p, uint16_t slot)
     {
+        auto &obj = Slots[slot];
+        obj.FreeCount++;
+        obj.ListCount++;
+        static_cast<PSmallBlock>(p)->NextSmallBlock = obj.FirstFree;
+        obj.FirstFree = static_cast<PSmallBlock>(p);
     }
 
     void* THeapMgr::prvXGetMem(int Size)
@@ -182,6 +224,10 @@ namespace gdlib::gmsheapnew {
 
     void THeapMgr::prvGetSlotCnts(THeapSlotNr Slot, int64_t& cntGet, int64_t &cntFree, int64_t &cntAvail)
     {
+        const auto &obj = Slots[Slot];
+        cntGet = obj.GetCount;
+        cntFree = obj.FreeCount;
+        cntAvail = obj.ListCount;
     }
 
     THeapMgr::THeapMgr(const std::string& Name) : BlockMgr{"BBMgr_"s + Name}, spName{Name} {
