@@ -249,6 +249,7 @@ namespace utils {
     std::string trim(const std::string& s);
     std::string trimRight(const std::string &s);
     void trimRight(const std::string& s, std::string& storage);
+    const char *trimRight(const char *s, char *storage, int &slen);
     std::optional<std::string> maybeTrimRight(const std::string &s);
     std::string trimZeroesRight(const std::string& s, char DecimalSep = '.');
 
@@ -431,6 +432,11 @@ namespace utils {
 #else
         strcpy(buf, s.c_str());
 #endif
+    }
+
+    inline void assignPCharToBuf(const char *s, size_t slen, char *buf, size_t outBufSize = 256) {
+        if(slen > outBufSize) return;
+        memcpy(buf, s, slen+1);
     }
 
     int64_t queryPeakRSS();

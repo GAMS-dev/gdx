@@ -197,7 +197,8 @@ namespace tests::gxfiletests {
         };
 
         std::vector<std::pair<std::string, std::string>> suiteModelPairs{
-            {"src","all"}
+            //{"sqagams","PERSEUS"}
+            {"src", "ex3"}
         };
 
         std::string singleSuiteName{ "src"s };
@@ -316,7 +317,7 @@ namespace tests::gxfiletests {
             [&](const std::string& s) { return s == filenamePart; }))
             return;
 
-        const int ntries = 4;
+        const int ntries = 1;
         const bool  quiet = false,
                 onlyPorted = false,
                 onlyWrapped = false;

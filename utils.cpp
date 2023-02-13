@@ -114,6 +114,20 @@ namespace utils {
         return s.substr(0, lastNonBlank + 1);
     }
 
+    const char *trimRight(const char *s, char *storage, int &slen) {
+        int i;
+        for(i=0; s[i] != '\0'; i++) {
+            if(std::isspace(s[i])) {
+                std::memcpy(storage, s, i);
+                storage[i+1] = '\0';
+                slen = i;
+                return storage;
+            }
+        }
+        slen = i;
+        return s;
+    }
+
     void trimRight(const std::string &s, std::string &storage) {
         if (s.empty() || !isblank(s.back())) {
             storage = s;

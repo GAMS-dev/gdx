@@ -73,6 +73,16 @@ namespace gdlib::strhash {
             return (res & 0x7FFFFFFF) % HashTableSize;
         }
 
+        virtual int Hash(const char *s) {
+            int res{};
+            for(int i{}; true; i++) {
+                char c {s[i]};
+                if(c == '\0') break;
+                res = 211 * res + std::toupper(c);
+            }
+            return (res & 0x7FFFFFFF) % HashTableSize;
+        }
+
         virtual bool EntryEqual(const char *ps1, const char *ps2) {
 #if defined(_WIN32)
             return !_stricmp(ps1, ps2);
@@ -267,6 +277,41 @@ namespace gdlib::strhash {
             return res;
         }
 
+        int AddObject(const char *s, T AObj) {
+            assert(FCount < std::numeric_limits<int>::max());
+            if(FCount >= ReHashCnt) HashAll();
+            int HV {Hash(s)};
+            PHashBucket<T> PBuck = GetBucketByHash(HV);
+            while(PBuck) {
+                if(!EntryEqualPChar(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
+                else return PBuck->StrNr + (OneBased ? 1 : 0);
+            }
+#ifdef TLD_BATCH_ALLOCS
+            PBuck = reinterpret_cast<PHashBucket<T>>(batchAllocator.GetBytes(sizeof(THashBucket<T>)));
+#else
+            PBuck = new THashBucket<T>{};
+#endif
+            Buckets.push_back(PBuck);
+            PBuck->NextBucket = GetBucketByHash(HV);
+            (*PHashTable)[HV] = PBuck;
+            PBuck->StrNr = FCount; // before it was added! zero based
+            int res {FCount + (OneBased ? 1 : 0)};
+            if(SortMap) {
+                (*SortMap)[FCount] = FCount;
+                FSorted = false;
+            }
+            FCount++; // ugly
+            auto slen {std::strlen(s)};
+#ifdef TLD_BATCH_ALLOCS
+            PBuck->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(slen+1));
+#else
+            PBuck->StrP = new char[s.length()+1];
+#endif
+            utils::assignPCharToBuf(s, slen, PBuck->StrP, slen+1);
+            PBuck->Obj = std::move(AObj);
+            return res;
+        }
+
         virtual void FreeItem(int N) {
             // noop by default
         }
@@ -281,6 +326,17 @@ namespace gdlib::strhash {
             PHashBucket<T> PBuck = GetBucketByHash(HV);
             while(PBuck) {
                 if(!EntryEqualPChar(PBuck->StrP, s.c_str())) PBuck = PBuck->NextBucket;
+                else return PBuck->StrNr + (OneBased ? 1 : 0);
+            }
+            return -1;
+        }
+
+        int IndexOf(const char *s) {
+            if(!PHashTable) HashAll();
+            int HV {Hash(s)};
+            PHashBucket<T> PBuck = GetBucketByHash(HV);
+            while(PBuck) {
+                if(!EntryEqualPChar(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
                 else return PBuck->StrNr + (OneBased ? 1 : 0);
             }
             return -1;

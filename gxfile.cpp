@@ -23,6 +23,8 @@ namespace gxfile {
 
     bool CanBeQuoted(const std::string &s);
     bool GoodUELString(const std::string &s);
+    bool CanBeQuoted(const char *s);
+    bool GoodUELString(const char *s, size_t slen);
     int64_t dblToI64(double x);
 
     bool CanBeQuoted(const std::string &s) {
@@ -39,8 +41,28 @@ namespace gxfile {
         return true;
     }
 
+    bool CanBeQuoted(const char *s) {
+        bool saw_single{}, saw_double{};
+        for(int i{}; true; i++) {
+            char Ch = s[i];
+            if(s[i] == '\0') return true;
+            if(Ch == '\'') {
+                if(saw_double) return false;
+                saw_single = true;
+            } else if(Ch == '\"') {
+                if(saw_single) return false;
+                saw_double = true;
+            } else if(static_cast<unsigned char>(Ch) < ' ') return false;
+        }
+        return true;
+    }
+
     bool GoodUELString(const std::string &s) {
         return s.length() <= GLOBAL_UEL_IDENT_SIZE-1 && CanBeQuoted(s); // also checks Ch < '
+    }
+
+    bool GoodUELString(const char *s, size_t slen) {
+        return slen <= GLOBAL_UEL_IDENT_SIZE-1 && CanBeQuoted(s); // also checks Ch < '
     }
 
     const int MaxDimV148 = 10;
@@ -488,19 +510,19 @@ namespace gxfile {
             for(int D{}; D<FCurrentDim; D++)
                 std::cout << " " << KeyStr[D] << (D+1 < FCurrentDim ? "," : "") << "\n";
         }
-        static std::string SV;
-        SV.reserve(GLOBAL_UEL_IDENT_SIZE);
+        static std::array<char, GLOBAL_UEL_IDENT_SIZE> SVstorage;
         for(int D{}; D<FCurrentDim; D++) {
-            utils::trimRight(KeyStr[D], SV);
-            if(LastStrElem[D].front() == std::numeric_limits<char>::max() || std::strcmp(SV.c_str(), LastStrElem[D].data())) {
+            int SVlen;
+            const char *SV {utils::trimRight(KeyStr[D], SVstorage.data(), SVlen)};
+            if(LastStrElem[D].front() == std::numeric_limits<char>::max() || std::strcmp(SV, LastStrElem[D].data())) {
                 // -1=not found, >=1 found
                 int KD {UELTable->IndexOf(SV)};
                 if(KD == -1) {
-                    if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
+                    if(ErrorCondition(GoodUELString(SV, SVlen), ERR_BADUELSTR)) return false;
                     KD = UELTable->AddObject(SV, -1);
                 }
                 LastElem[D] = KD;
-                utils::assignStrToBuf(SV, LastStrElem[D].data());
+                utils::assignPCharToBuf(SV, SVlen, LastStrElem[D].data(), LastStrElem[D].size());
                 if(KD < MinElem[D]) MinElem[D] = KD;
                 if(KD > MaxElem[D]) MaxElem[D] = KD;
             }
@@ -4345,6 +4367,11 @@ namespace gxfile {
         return it == nameToIndexNum.end() ? -1 : it->second.index;
     }
 
+    int TUELTable::IndexOf(const char *s) {
+        const auto it = nameToIndexNum.find(s);
+        return it == nameToIndexNum.end() ? -1 : it->second.index;
+    }
+
     int TUELTable::AddObject(const std::string &id, int mapping) {
         const auto &[it, wasNew] = nameToIndexNum.try_emplace(id, IndexNumPair{mapping});
         int ix;
@@ -4358,6 +4385,10 @@ namespace gxfile {
         }
         else ix = it->second.index;
         return ix;
+    }
+
+    int TUELTable::AddObject(const char *id, int mapping) {
+        return AddObject(std::string {id}, mapping);
     }
 
     int TUELTable::StoreObject(const std::string& id, int mapping) {
@@ -4703,7 +4734,15 @@ namespace gxfile {
         return TXStrHashListImpl<int>::IndexOf(s);
     }
 
+    int TUELTableLegacy::IndexOf(const char *s) {
+        return TXStrHashListImpl<int>::IndexOf(s);
+    }
+
     int TUELTableLegacy::AddObject(const std::string &id, int mapping) {
+        return TXStrHashListImpl<int>::AddObject(id, mapping);
+    }
+
+    int TUELTableLegacy::AddObject(const char *id, int mapping) {
         return TXStrHashListImpl<int>::AddObject(id, mapping);
     }
 

@@ -361,7 +361,9 @@ template<typename K, typename V, typename H, typename E>
         virtual int size() const = 0;
         virtual bool empty() const = 0;
         virtual int IndexOf(const std::string &s) = 0;
+        virtual int IndexOf(const char *s) = 0;
         virtual int AddObject(const std::string &id, int mapping) = 0;
+        virtual int AddObject(const char *id, int mapping) = 0;
         virtual int StoreObject(const std::string& id, int mapping) = 0;
         virtual const char *operator[](int index) const = 0;
         virtual int GetUserMap(int i) = 0;
@@ -391,7 +393,9 @@ template<typename K, typename V, typename H, typename E>
         int size() const override;
         bool empty() const override;
         int IndexOf(const std::string &s) override;
+        int IndexOf(const char *s) override;
         int AddObject(const std::string &id, int mapping) override;
+        int AddObject(const char *id, int mapping) override;
         int StoreObject(const std::string& id, int mapping) override;
         const char *operator[](int index) const override;
         int GetUserMap(int i) override;
@@ -435,7 +439,9 @@ template<typename K, typename V, typename H, typename E>
         int AddUsrIndxNew(const std::string &s, int UelNr) override;
         int GetMaxUELLength() const override;
         int IndexOf(const std::string &s) override;
+        int IndexOf(const char *s) override;
         int AddObject(const std::string &id, int mapping) override;
+        int AddObject(const char *id, int mapping) override;
         int StoreObject(const std::string& id, int mapping) override;
         const char *operator[](int index) const override;
         void RenameEntry(int N, const std::string &s) override;
