@@ -175,6 +175,7 @@ namespace tests::gxfiletests {
 
     static const std::string benchOutFileName{ "gdxbench_collected.txt"s };
 
+    std::list<std::string> gdxFilesInPath(const std::string& path);
     std::list<std::string> gdxFilesInPath(const std::string& path) {
         std::list<std::string> res{};
         for (const auto& entry : std::filesystem::directory_iterator{ path }) {
