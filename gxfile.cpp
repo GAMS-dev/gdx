@@ -3823,19 +3823,17 @@ namespace gxfile {
 
         TgdxValues Values;
         int FDim;
-        for(int D{1}; D<GLOBAL_MAX_INDEX_DIM; D++) {
+        for(int D{}; D<FCurrentDim; D++) {
             SliceIndxs[D] = std::make_optional<TIntegerMappingImpl>();
             SliceRevMap[D] = std::make_optional<TIntegerMappingImpl>();
         }
-        // FIXME: Are indices ported correctly here?
-        // In Delphi the array starts at 1 and not 0 (as here)
         while (DoRead(Values.data(), FDim))
-            for (int D{ 1 }; D <= FCurrentDim; D++)
+            for (int D{}; D < FCurrentDim; D++)
                 SliceIndxs[D]->SetMapping(LastElem[D], 1);
 
         gdxDataReadDone();
 
-        for (int D{ 1 }; D <= FCurrentDim; D++) {
+        for (int D{}; D < FCurrentDim; D++) {
             auto& obj = *SliceIndxs[D];
             int Cnt{};
             for (int N{}; N <= obj.GetHighestIndex(); N++) {
@@ -3876,7 +3874,7 @@ namespace gxfile {
         bool GoodIndx {true};
         Dimen = 0;
         TgdxUELIndex ElemNrs;
-        for (int D{ 1 }; D <= FCurrentDim; D++) {
+        for (int D{}; D < FCurrentDim; D++) {
             SliceElems[D] = UelFilterStr[D];
             if (!strlen(UelFilterStr[D])) {
                 ElemNrs[D] = -1;
@@ -3897,7 +3895,7 @@ namespace gxfile {
         while (DoRead(Values.data(), FDim)) {
             GoodIndx = true;
             int HisDim = 0;
-            for (int D{ 1 }; D <= FCurrentDim; D++) {
+            for (int D {}; D < FCurrentDim; D++) {
                 if (ElemNrs[D] == -1) {
                     HisDim++;
                     HisIndx[HisDim] = SliceIndxs[D]->GetMapping(LastElem[D]);
@@ -3926,7 +3924,7 @@ namespace gxfile {
     int TGXFileObj::gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr) {
         if (!MajorCheckMode("DataSliceUELS"s, fr_slice)) return false;
         int HisDim{};
-        for (int D{ 1 }; D <= FCurrentDim; D++) {
+        for (int D {}; D <= FCurrentDim; D++) {
             if (!SliceElems[D].empty())
                 utils::assignStrToBuf(SliceElems[D], KeyStr[D]);
             else {
@@ -4283,7 +4281,7 @@ namespace gxfile {
                 int AFDim;
                 while(DoRead(Values.data(), AFDim)) {
                     GoodIndx = true;
-                    for(int D{1}; D<=FiltDim; D++) {
+                    for(int D{}; D<FiltDim; D++) {
                         if(LastElem[ElemDim[D]] != ElemNrs[D]) {
                             GoodIndx = false;
                             break;
