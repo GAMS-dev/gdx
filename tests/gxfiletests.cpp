@@ -156,7 +156,7 @@ namespace tests::gxfiletests {
         rmfiles({"trnsport.gms", "trnsport.gdx", "log.txt", "lf.txt"});
     }
 
-    void runBenchmarkTimeMemForGDXFile(const std::string &fn);
+    void runBenchmarkTimeMemForGDXFile(const std::string& suiteName, const std::string& modelName, const std::string& fn);
 
     enum class BatchBenchModes {
         SUITE_MODEL_PAIRS,
@@ -180,8 +180,8 @@ namespace tests::gxfiletests {
         for (const auto& entry : std::filesystem::directory_iterator{ path }) {
             const auto fn = entry.path().filename().string();
             if (utils::ends_with(fn, ".gdx")) {
-                auto entry = fn.substr(0, fn.size() - 4);
-                res.push_back(entry);
+                auto name = fn.substr(0, fn.size() - 4);
+                res.push_back(name);
             }
         }
         return res;
@@ -196,24 +196,7 @@ namespace tests::gxfiletests {
         };
 
         std::vector<std::pair<std::string, std::string>> suiteModelPairs{
-//            {"lwsup","modBig"},
-//            {"lwsup","modBigx"},
-//            {"lwsup","t4716"},
-//            {"sqagams","dummy42"},
-              {"lwsup","10rr"},
-//            {"sqagams","t3010"},
-//            {"mrb","WSC Fixing"},
-//            {"lwsup","modBig8788"},
-//            {"lwsup","SCUCinput_new"},
-//            {"src","Estimate"},
-//            {"lwsup","pShiftFactor"},
-//            {"lwsup","test1"},
-//            {"src","fnpower"},
-//            {"mrb","new6"},
-//            {"lwsup","daod4gams"},
-//            {"sqagams","times_psi"},
-//            {"sqagams","GuaranteeData"},
-//            {"sqagams","bearing"}
+            {"src","all"}
         };
 
         std::string singleSuiteName{ "src"s };
@@ -238,7 +221,7 @@ namespace tests::gxfiletests {
         auto runBenchmarkForSuiteModel = [&](const std::string& suiteName, const std::string& modelName) {
             for (const auto& fn : gdxFilePathCandidates(suiteName, modelName))
                 if (std::filesystem::exists(fn))
-                    runBenchmarkTimeMemForGDXFile(fn);
+                    runBenchmarkTimeMemForGDXFile(suiteName, modelName, fn);
         };
 
         std::string suitePrefixPath;
@@ -318,7 +301,7 @@ namespace tests::gxfiletests {
         "xyz.gdx"
     };
 
-    void runBenchmarkTimeMemForGDXFile(const std::string &fn) {
+    void runBenchmarkTimeMemForGDXFile(const std::string &suiteName, const std::string &modelName, const std::string &fn) {
 #if defined(_WIN32)
         const char sep { '\\' };
 #else
@@ -332,7 +315,7 @@ namespace tests::gxfiletests {
             [&](const std::string& s) { return s == filenamePart; }))
             return;
 
-        const int ntries = 1;
+        const int ntries = 4;
         const bool  quiet = false,
                 onlyPorted = false,
                 onlyWrapped = false;
@@ -375,7 +358,7 @@ namespace tests::gxfiletests {
             std::cout << "Average slowdown = " << avgSlowdown << std::endl;
             std::cout << "Total runtime wrapped = " << totWrap << std::endl;
             std::cout << "Total runtime ported = " << totPort << std::endl;
-            textout << filenameStem << ";" << avgSlowdown << std::endl;
+            textout << suiteName << "/" << modelName << ";" << avgSlowdown << std::endl;
         }
     }
 

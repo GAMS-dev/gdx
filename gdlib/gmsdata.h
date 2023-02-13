@@ -16,10 +16,13 @@ namespace gdlib::gmsdata {
     // TODO: The port of this class uses C++ standard library collections instead of Paul's custom GAMS colections
     // evalute performance impact of this choice!
     class TTblGamsData {
+        int FDim, FDataSize;
         std::map<IndexKeys, ValueFields> mapping;
         std::vector<IndexKeys> keyset;
     public:
-        void GetRecord(int N, int* Inx, int InxCnt, double* Vals);
+        TTblGamsData(int ADim, int ADataSize);
+        void GetRecord(int N, int* Inx, double* Vals);
+        void AddRecord(const int* AElements, const double* AVals);
         ValueFields& operator[](const IndexKeys& Key);
         void clear();
         int size() const;
@@ -31,6 +34,7 @@ namespace gdlib::gmsdata {
             // FIXME: Return actual value!
             return 0;
         }
+        int GetDimension() const;
     };
 
     const int BufSize = 1024 * 16;

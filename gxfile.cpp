@@ -756,7 +756,7 @@ namespace gxfile {
         SortList = nullptr;
         DomainStrList = nullptr;
 
-        ErrorList.clear();
+        ErrorList = nullptr;
         FilterList = nullptr;
         AcronymList = nullptr;
         MapSetText.clear();
@@ -829,7 +829,7 @@ namespace gxfile {
                                         int AType,
                                         int AUserInfo) {
         CurSyPtr = nullptr;
-        ErrorList.clear();
+        ErrorList = nullptr;
         SortList = nullptr;
 
         if(!MajorCheckMode(Caller, fw_init)) return false;
@@ -974,7 +974,7 @@ namespace gxfile {
             gdxDataReadDone();
         NrMappedAdded = 0;
         TIntegerMappingImpl ExpndList;
-        ErrorList.clear();
+        ErrorList = nullptr;
         CurSyPtr = nullptr;
         SortList = nullptr;
 
@@ -1489,20 +1489,21 @@ namespace gxfile {
     }
 
     void TGXFileObj::AddToErrorListDomErrs(const std::array<int, GLOBAL_MAX_INDEX_DIM> &AElements, const double * AVals) {
-        if (ErrorList.size() >= 11) return;
+        if (!ErrorList) ErrorList = std::make_unique<gdlib::gmsdata::TTblGamsData>(FCurrentDim, (int)(DataSize*sizeof(double)));
+        else if (ErrorList->size() >= 11) return;
 
         for (int D{}; D < FCurrentDim; D++) {
             int EN{ AElements[D] };
             if (EN < 0) {
                 bool Found{};
-                for (const auto& [keys, vals] : ErrorList) {
+                for (const auto& [keys, vals] : *ErrorList) {
                     if (keys[D] == EN) {
                         Found = true;
                         break;
                     }
                 }
                 if (!Found) {
-                    ErrorList[AElements] = utils::asArray<double, 5>(AVals);
+                    (*ErrorList)[AElements] = utils::asArray<double, 5>(AVals);
                     return;
                 }
             }
@@ -1510,9 +1511,11 @@ namespace gxfile {
     }
 
     void TGXFileObj::AddToErrorList(const int *AElements, const double *AVals) {
-        if (ErrorList.size() >= 11) // avoid storing too many errors
+        if (!ErrorList)
+            ErrorList = std::make_unique<gdlib::gmsdata::TTblGamsData>(FCurrentDim, (int)(DataSize * sizeof(double)));
+        else if (ErrorList->size() >= 11) // avoid storing too many errors
             return;
-        ErrorList[ utils::asArrayN<int, GLOBAL_MAX_INDEX_DIM>(AElements, FCurrentDim) ] = utils::asArray<double, 5>(AVals);
+        ErrorList->AddRecord(AElements, AVals);
     }
 
     bool TGXFileObj::ResultWillBeSorted(const int *ADomainNrs) {
@@ -2159,7 +2162,7 @@ namespace gxfile {
     //   filter are added the error list.
     int TGXFileObj::gdxDataErrorCount()
     {
-        return static_cast<int>(ErrorList.size());
+        return !ErrorList ? 0 : static_cast<int>(ErrorList->size());
     }
 
     // Brief:
@@ -2176,7 +2179,7 @@ namespace gxfile {
     {
         int res{ gdxDataErrorRecordX(RecNr, KeyInt, Values) };
         if (res) {
-            for (int D{}; D < FCurrentDim; D++) {
+            for (int D{}; D < ErrorList->GetDimension(); D++) {
                 if (KeyInt[D] < 0) KeyInt[D] = -KeyInt[D];
             }
         }
@@ -2199,12 +2202,12 @@ namespace gxfile {
         if ((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataErrorRecord", AllowedModes))
             return false;
 
-        if (!ErrorList.empty()) {
-            if (RecNr < 1 || RecNr > ErrorList.size()) {
+        if (ErrorList) {
+            if (RecNr < 1 || RecNr > ErrorList->size()) {
                 ReportError(ERR_BADERRORRECORD);
             }
             else {
-                ErrorList.GetRecord(RecNr - 1, KeyInt, FCurrentDim, Values);
+                ErrorList->GetRecord(RecNr - 1, KeyInt, Values);
                 return true;
             }
         }
@@ -3616,7 +3619,7 @@ namespace gxfile {
                 if (DomainIndxs.GetMapping(N) == 1) NrElem++;
         }
         else { //should we have an option to return indices in Raw order or in Mapped order?
-            gdlib::gmsdata::TTblGamsData SortL;
+            gdlib::gmsdata::TTblGamsData SortL{ 1, sizeof(int) };
             std::array<double, 5> vf{};
             for (int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++) {
                 if (DomainIndxs.GetMapping(N) == 1) {
@@ -3628,7 +3631,7 @@ namespace gxfile {
             }
             SortL.sort();
             for (int N{}; N < SortL.size(); N++) {
-                SortL.GetRecord(N, Index.data(), (int)Index.size(), vf.data());
+                SortL.GetRecord(N, Index.data(), vf.data());
                 DP(static_cast<int>(vf.front()), Index.front(), UPtr);
             }
         }
@@ -3953,7 +3956,7 @@ namespace gxfile {
         if(NameList) res += NameList->MemoryUsed();
         if(DomainStrList) res += DomainStrList->MemoryUsed();
         if(SortList) res += SortList->MemoryUsed();
-        res += ErrorList.MemoryUsed();
+        if(ErrorList) res += ErrorList->MemoryUsed();
         if(FilterList) res += FilterList->MemoryUsed();
         return res;
     }

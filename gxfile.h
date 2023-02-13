@@ -721,7 +721,7 @@ template<typename K, typename V, typename H, typename E>
         std::unique_ptr<TDomainStrList> DomainStrList;
         std::unique_ptr<LinkedDataType> SortList;
         std::optional<LinkedDataIteratorType> ReadPtr;
-        gdlib::gmsdata::TTblGamsData ErrorList;
+        std::unique_ptr<gdlib::gmsdata::TTblGamsData> ErrorList;
         PgdxSymbRecord CurSyPtr{};
         int ErrCnt{}, ErrCntTotal{};
         int LastError{}, LastRepError{};
