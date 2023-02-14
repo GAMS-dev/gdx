@@ -277,7 +277,7 @@ namespace gdlib::strhash {
             return res;
         }
 
-        int AddObject(const char *s, T AObj) {
+        int AddObject(const char *s, size_t slen, T AObj) {
             assert(FCount < std::numeric_limits<int>::max());
             if(FCount >= ReHashCnt) HashAll();
             int HV {Hash(s)};
@@ -301,7 +301,6 @@ namespace gdlib::strhash {
                 FSorted = false;
             }
             FCount++; // ugly
-            auto slen {std::strlen(s)};
 #ifdef TLD_BATCH_ALLOCS
             PBuck->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(slen+1));
 #else

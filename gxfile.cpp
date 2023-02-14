@@ -519,7 +519,7 @@ namespace gxfile {
                 int KD {UELTable->IndexOf(SV)};
                 if(KD == -1) {
                     if(ErrorCondition(GoodUELString(SV, SVlen), ERR_BADUELSTR)) return false;
-                    KD = UELTable->AddObject(SV, -1);
+                    KD = UELTable->AddObject(SV, SVlen, -1);
                 }
                 LastElem[D] = KD;
                 utils::assignPCharToBuf(SV, SVlen, LastStrElem[D].data(), LastStrElem[D].size());
@@ -2815,6 +2815,19 @@ namespace gxfile {
         return true;
     }
 
+    int TGXFileObj::gdxUELRegisterRaw(const char *Uel) {
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
+            std::cout << "Uel=" << Uel << '\n';
+        if ((TraceLevel >= TraceLevels::trl_all || fmode != f_raw_elem) && !CheckMode("UELRegisterRaw", f_raw_elem))
+            return false;
+        static std::array<char, GLOBAL_UEL_IDENT_SIZE> svStorage;
+        int svLen;
+        const char *SV { utils::trimRight(Uel, svStorage.data(), svLen) };
+        if (ErrorCondition(GoodUELString(SV, svLen), ERR_BADUELSTR)) return false;
+        UELTable->AddObject(SV, svLen, -1); // should about existing mapping?
+        return true;
+    }
+
     // Brief:
     //   Start registering unique elements in raw mode
     // Returns:
@@ -3097,6 +3110,19 @@ namespace gxfile {
         }
         if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR) ||
             ErrorCondition(UELTable->AddUsrIndxNew(SV, UMap) >= 0, ERR_UELCONFLICT)) return false;
+        return true;
+    }
+
+    int TGXFileObj::gdxUELRegisterMap(int UMap, const char *Uel) {
+        int svLen;
+        static std::array<char, GLOBAL_UEL_IDENT_SIZE> svStorage;
+        const char *SV{ utils::trimRight(Uel, svStorage.data(), svLen) };
+        if(TraceLevel >= TraceLevels::trl_all || fmode != f_map_elem) {
+            if(!CheckMode("UELRegisterMap", f_map_elem)) return false;
+            std::cout << "   Enter UEL: " << SV << " with number " << UMap << "\n";
+        }
+        if(ErrorCondition(GoodUELString(SV, svLen), ERR_BADUELSTR) ||
+           ErrorCondition(UELTable->AddUsrIndxNew(SV, svLen, UMap) >= 0, ERR_UELCONFLICT)) return false;
         return true;
     }
 
@@ -4387,7 +4413,7 @@ namespace gxfile {
         return ix;
     }
 
-    int TUELTable::AddObject(const char *id, int mapping) {
+    int TUELTable::AddObject(const char *id, size_t idlen, int mapping) {
         return AddObject(std::string {id}, mapping);
     }
 
@@ -4492,6 +4518,24 @@ namespace gxfile {
 
     int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
         int EN {AddObject(s, -1)};
+#ifdef STABLE_REFS
+        auto& itsNum = insertOrder[EN - 1]->second.num;
+#else
+        auto& itsNum = nameToIndexNum[insertOrder[EN-1]].num;
+#endif
+        int res {itsNum};
+        if (res < 0) {
+            itsNum = res = UelNr;
+            UsrUel2Ent->SetMapping(res, EN);
+        }
+        else if (res != UelNr)
+            res = -1;
+        ResetMapToUserStatus();
+        return res;
+    }
+
+    int TUELTable::AddUsrIndxNew(const char *s, size_t slen, int UelNr) {
+        int EN {AddObject(s, slen, -1)};
 #ifdef STABLE_REFS
         auto& itsNum = insertOrder[EN - 1]->second.num;
 #else
@@ -4716,6 +4760,20 @@ namespace gxfile {
         return res;
     }
 
+    int TUELTableLegacy::AddUsrIndxNew(const char *s, size_t slen, int UelNr) {
+        int EN { AddObject(s, slen, -1) };
+        int res { *GetObject(EN) };
+        if(res < 0) {
+            res = UelNr;
+            *GetObject(EN) = res;
+            UsrUel2Ent->SetMapping(res, EN);
+        } else if(res != UelNr) {
+            res = -1;
+        }
+        ResetMapToUserStatus();
+        return res;
+    }
+
     int TUELTableLegacy::GetMaxUELLength() const {
         int maxLen{};
         for(int i{}; i<(int)Buckets.size(); i++)
@@ -4742,8 +4800,8 @@ namespace gxfile {
         return TXStrHashListImpl<int>::AddObject(id, mapping);
     }
 
-    int TUELTableLegacy::AddObject(const char *id, int mapping) {
-        return TXStrHashListImpl<int>::AddObject(id, mapping);
+    int TUELTableLegacy::AddObject(const char *id, size_t idlen, int mapping) {
+        return TXStrHashListImpl<int>::AddObject(id, idlen, mapping);
     }
 
     int TUELTableLegacy::StoreObject(const std::string& id, int mapping) {

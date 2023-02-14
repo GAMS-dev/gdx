@@ -363,7 +363,7 @@ template<typename K, typename V, typename H, typename E>
         virtual int IndexOf(const std::string &s) = 0;
         virtual int IndexOf(const char *s) = 0;
         virtual int AddObject(const std::string &id, int mapping) = 0;
-        virtual int AddObject(const char *id, int mapping) = 0;
+        virtual int AddObject(const char *id, size_t idlen, int mapping) = 0;
         virtual int StoreObject(const std::string& id, int mapping) = 0;
         virtual const char *operator[](int index) const = 0;
         virtual int GetUserMap(int i) = 0;
@@ -372,6 +372,7 @@ template<typename K, typename V, typename H, typename E>
         virtual int NewUsrUel(int EN) = 0;
         virtual int AddUsrNew(const std::string& s) = 0;
         virtual int AddUsrIndxNew(const std::string &s, int UelNr) = 0;
+        virtual int AddUsrIndxNew(const char *s, size_t slen, int UelNr) = 0;
         virtual TUELUserMapStatus GetMapToUserStatus();
         virtual void RenameEntry(int N, const std::string &s) = 0;
         virtual int GetMaxUELLength() const = 0;
@@ -395,7 +396,7 @@ template<typename K, typename V, typename H, typename E>
         int IndexOf(const std::string &s) override;
         int IndexOf(const char *s) override;
         int AddObject(const std::string &id, int mapping) override;
-        int AddObject(const char *id, int mapping) override;
+        int AddObject(const char *id, size_t idlen, int mapping) override;
         int StoreObject(const std::string& id, int mapping) override;
         const char *operator[](int index) const override;
         int GetUserMap(int i) override;
@@ -404,6 +405,7 @@ template<typename K, typename V, typename H, typename E>
         int NewUsrUel(int EN) override;
         int AddUsrNew(const std::string& s) override;
         int AddUsrIndxNew(const std::string &s, int UelNr) override;
+        int AddUsrIndxNew(const char *s, size_t slen, int UelNr) override;
         void RenameEntry(int N, const std::string &s) override;
         int GetMaxUELLength() const override;
         int MemoryUsed() const override;
@@ -437,11 +439,12 @@ template<typename K, typename V, typename H, typename E>
         int NewUsrUel(int EN) override;
         int AddUsrNew(const std::string &s) override;
         int AddUsrIndxNew(const std::string &s, int UelNr) override;
+        int AddUsrIndxNew(const char *s, size_t slen, int UelNr) override;
         int GetMaxUELLength() const override;
         int IndexOf(const std::string &s) override;
         int IndexOf(const char *s) override;
         int AddObject(const std::string &id, int mapping) override;
-        int AddObject(const char *id, int mapping) override;
+        int AddObject(const char *id, size_t idlen, int mapping) override;
         int StoreObject(const std::string& id, int mapping) override;
         const char *operator[](int index) const override;
         void RenameEntry(int N, const std::string &s) override;
@@ -810,6 +813,7 @@ template<typename K, typename V, typename H, typename E>
         int gdxDataWriteDone() override;
         int gdxUELRegisterMapStart() override;
         int gdxUELRegisterMap(int UMap, const std::string &Uel) override;
+        int gdxUELRegisterMap(int UMap, const char *Uel) override;
         int gdxClose() override;
         int gdxResetSpecialValues();
         int gdxErrorStr(int ErrNr, char *ErrMsg) override;
@@ -845,6 +849,7 @@ template<typename K, typename V, typename H, typename E>
         int gdxSystemInfo(int &SyCnt, int &UelCnt) override;
         int gdxUELRegisterDone() override;
         int gdxUELRegisterRaw(const std::string &Uel) override;
+        int gdxUELRegisterRaw(const char *Uel) override;
         int gdxUELRegisterRawStart() override;
         int gdxUELRegisterStr(const std::string &Uel, int &UelNr) override;
         int gdxUELRegisterStrStart() override;

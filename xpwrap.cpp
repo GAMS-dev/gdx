@@ -177,6 +177,10 @@ namespace xpwrap {
         return ::gdxUELRegisterRaw(pgx, Uel.c_str());
     }
 
+    int GDXFile::gdxUELRegisterRaw(const char *Uel) {
+        return ::gdxUELRegisterRaw(pgx, Uel);
+    }
+
     int GDXFile::gdxUELRegisterRawStart() {
         return ::gdxUELRegisterRawStart(pgx);
     }
@@ -229,6 +233,10 @@ namespace xpwrap {
 
     int GDXFile::gdxUELRegisterMap(int UMap, const std::string &Uel) {
         return ::gdxUELRegisterMap(pgx, UMap, Uel.c_str());
+    }
+
+    int GDXFile::gdxUELRegisterMap(int UMap, const char *Uel) {
+        return ::gdxUELRegisterMap(pgx, UMap, Uel);
     }
 
     int GDXFile::gdxDataReadMapStart(int SyNr, int &NrRecs) {

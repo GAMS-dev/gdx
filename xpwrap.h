@@ -83,6 +83,7 @@ namespace xpwrap {
         int gdxUELRegisterDone() override;
 
         int gdxUELRegisterRaw(const std::string &Uel) override;
+        int gdxUELRegisterRaw(const char *Uel) override;
 
         int gdxUELRegisterRawStart() override;
 
@@ -110,6 +111,7 @@ namespace xpwrap {
         int gdxUELRegisterMapStart() override;
 
         int gdxUELRegisterMap(int UMap, const std::string &Uel) override;
+        int gdxUELRegisterMap(int UMap, const char *Uel) override;
 
         int gdxDataReadMapStart(int SyNr, int &NrRecs) override;
 

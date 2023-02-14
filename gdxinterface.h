@@ -168,10 +168,12 @@ namespace gdxinterface {
         // region UEL register
         virtual int gdxUELRegisterRawStart() = 0;
         virtual int gdxUELRegisterRaw(const std::string &Uel) = 0;
+        virtual int gdxUELRegisterRaw(const char *Uel) = 0;
         virtual int gdxUELRegisterStrStart() = 0;
         virtual int gdxUELRegisterStr(const std::string &Uel, int &UelNr) = 0;
         virtual int gdxUELRegisterMapStart() = 0;
         virtual int gdxUELRegisterMap(int UMap, const std::string &Uel) = 0;
+        virtual int gdxUELRegisterMap(int UMap, const char *Uel) = 0;
         virtual int gdxUELRegisterDone() = 0;
         // endregion
 
