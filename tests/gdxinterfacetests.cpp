@@ -1675,6 +1675,7 @@ namespace tests::gdxinterfacetests {
     }
 
     // For BondIndexData.gdx
+    double extractValueForDemExchangeRate(GDXInterface &pgdx, const std::string &fn);
     double extractValueForDemExchangeRate(GDXInterface &pgdx, const std::string &fn) {
         int ErrNr{};
         pgdx.gdxOpenRead(fn, ErrNr);
