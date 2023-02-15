@@ -724,6 +724,7 @@ template<typename K, typename V, typename H, typename E>
         int FCurrentDim{};
         std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem{}, PrevElem{}, MinElem{}, MaxElem{};
         std::array<std::array<char, GLOBAL_UEL_IDENT_SIZE>, GLOBAL_MAX_INDEX_DIM> LastStrElem;
+        // TODO: Get rid of this again!
         std::array<bool, GLOBAL_MAX_INDEX_DIM> LastStrElemUsed{};
         int DataSize{};
         tvarvaltype LastDataField{};

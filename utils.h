@@ -435,7 +435,7 @@ namespace utils {
     }
 
     inline void assignPCharToBuf(const char *s, size_t slen, char *buf, size_t outBufSize = 256) {
-        if(slen > outBufSize) return;
+        if(slen + 1 > outBufSize) return;
         memcpy(buf, s, slen+1);
     }
 

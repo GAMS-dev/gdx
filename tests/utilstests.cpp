@@ -215,6 +215,20 @@ namespace tests::utilstests {
         std::string storage(64, 'x');
         utils::trimRight(s, storage);
         REQUIRE_EQ(expectedStr, storage);
+
+        int len;
+        std::array<char, 256> buf {};
+        const char *out = utils::trimRight(s.c_str(), buf.data(), len);
+        REQUIRE_EQ(expectedStr.length(), len);
+        REQUIRE(!strcmp(expectedStr.c_str(), out));
+
+        out = utils::trimRight(" ", buf.data(), len);
+        REQUIRE_EQ(0, len);
+        REQUIRE_EQ('\0', out[0]);
+
+        out = utils::trimRight("1", buf.data(), len);
+        REQUIRE_EQ(1, len);
+        REQUIRE(!strcmp("1", out));
     }
 
     TEST_SUITE_END();
