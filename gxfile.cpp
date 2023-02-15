@@ -1462,7 +1462,7 @@ namespace gxfile {
             if(!MapSetText.empty() && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set) { // remap settext number
                 double X {AVals[GMS_VAL_LEVEL]};
                 int D {static_cast<int>(std::round(X))};
-                if(std::abs(X-D) < 1e-12 && D >= 0 && D < SetTextList->size())
+                if(std::abs(X-D) < 1e-12 && D >= 0 && D <= SetTextList->GetCapacity())
                     AVals[GMS_VAL_LEVEL] = MapSetText[D];
             }
             if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
@@ -1504,8 +1504,8 @@ namespace gxfile {
             return V;
         else {
             if(V == 0.0) return 0.0;
-            if(std::isnan(V)) return vm_valna;
-            if(std::isinf(V)) return V < 0.0 ? vm_valmin : vm_valpin;
+            if(std::isnan(V)) return intlValueMapDbl[vm_valna];
+            if(std::isinf(V)) return V < 0.0 ? intlValueMapDbl[vm_valmin] : intlValueMapDbl[vm_valpin];
             if(std::isnormal(V)) return V < 0.0 ? V : GetAsAcronym(V);
             return intlValueMapDbl[vm_valna];
         }
@@ -4159,7 +4159,7 @@ namespace gxfile {
             TgdxValues AVals;
             int AFDim;
             while (DoRead(AVals.data(), AFDim)) {
-                for (int D{}; D < FCurrentDim; D++) {
+                for (int D{AFDim-1}; D < FCurrentDim; D++) {
                     int UEL = LastElem[D];
                     if (UEL >= 1 && UEL <= UELTableCount) {
                         auto L = static_cast<int>(std::strlen((*UELTable)[UEL]));

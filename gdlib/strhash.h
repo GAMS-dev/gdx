@@ -445,6 +445,10 @@ namespace gdlib::strhash {
         void SetCapacity(int n) {
             Buckets.reserve(n);
         }
+
+        int GetCapacity() {
+            return (int)Buckets.capacity();
+        }
     };
 
     // Specialization when it is not a pointer type
