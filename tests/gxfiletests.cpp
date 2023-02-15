@@ -188,9 +188,24 @@ namespace tests::gxfiletests {
         return res;
     }
 
+    std::list<std::string> extractModelNames(const std::string &textFilename);
+    std::list<std::string> extractModelNames(const std::string &textFilename) {
+        std::list<std::string> res{};
+        std::ifstream ifs{textFilename};
+        std::string line;
+        while(!ifs.eof()) {
+            std::getline(ifs, line);
+            if(line.length() > 0 && line.front() != ' ')
+                res.push_back(line);
+        }
+        return res;
+    }
+
     void batchRunBenchmarks(BatchBenchModes mode) {
-        if(std::filesystem::exists(benchOutFileName))
-            std::filesystem::remove(benchOutFileName);
+        std::list<std::string> alreadyKnownResults;
+        if(std::filesystem::exists(benchOutFileName)) {
+            alreadyKnownResults = extractModelNames(benchOutFileName);
+        }
 
         std::array<std::string, 4> suites{
             "sqagams"s, "lwsup"s, "src"s, "mrb"s
@@ -223,7 +238,7 @@ namespace tests::gxfiletests {
 
         auto runBenchmarkForSuiteModel = [&](const std::string& suiteName, const std::string& modelName) {
             for (const auto& fn : gdxFilePathCandidates(suiteName, modelName))
-                if (std::filesystem::exists(fn))
+                if (std::filesystem::exists(fn) && std::find(alreadyKnownResults.begin(), alreadyKnownResults.end(), modelName) == alreadyKnownResults.end())
                     runBenchmarkTimeMemForGDXFile(suiteName, modelName, fn);
         };
 
@@ -320,7 +335,7 @@ namespace tests::gxfiletests {
 
         const int ntries = 1;
         const bool  quiet = false,
-                onlyPorted = true,
+                onlyPorted = false,
                 onlyWrapped = false;
 
         pfgdx::TimeTriple tWrap, tPort;
