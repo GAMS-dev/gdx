@@ -115,15 +115,14 @@ namespace utils {
     }
 
     const char *trimRight(const char *s, char *storage, int &slen) {
-        slen = (int)std::strlen(s);
-        if(!std::isspace(s[slen-1])) return s;
         int i;
-        for(i=slen-1; i>=0; i--)
+        slen = -1; // all whitespace? => slen=0!
+        for(i=0; s[i] != '\0'; i++)
             if(!std::isspace(s[i]))
-                break;
-        std::memcpy(storage, s, ++i);
-        storage[i] = '\0';
-        slen = i;
+                slen = i;
+        if(slen == i) return s;
+        std::memcpy(storage, s, ++slen);
+        storage[slen] = '\0';
         return storage;
     }
 
