@@ -82,12 +82,11 @@ namespace xpwrap {
 
         int gdxUELRegisterDone() override;
 
-        int gdxUELRegisterRaw(const std::string &Uel) override;
         int gdxUELRegisterRaw(const char *Uel) override;
 
         int gdxUELRegisterRawStart() override;
 
-        int gdxUELRegisterStr(const std::string &Uel, int &UelNr) override;
+        int gdxUELRegisterStr(const char *Uel, int &UelNr) override;
 
         int gdxUELRegisterStrStart() override;
 
@@ -97,7 +96,7 @@ namespace xpwrap {
 
         int gdxCurrentDim() override;
 
-        int gdxRenameUEL(const std::string &OldName, const std::string &NewName) override;
+        int gdxRenameUEL(const char *OldName, const char *NewName) override;
 
         int gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) override;
 
@@ -110,7 +109,6 @@ namespace xpwrap {
 
         int gdxUELRegisterMapStart() override;
 
-        int gdxUELRegisterMap(int UMap, const std::string &Uel) override;
         int gdxUELRegisterMap(int UMap, const char *Uel) override;
 
         int gdxDataReadMapStart(int SyNr, int &NrRecs) override;

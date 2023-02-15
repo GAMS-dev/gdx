@@ -432,7 +432,7 @@ namespace tests::gdxinterfacetests {
 
         REQUIRE(pgx.gdxUELRegisterMapStart());
         for(const auto &pair : userUelMapping) {
-            REQUIRE(pgx.gdxUELRegisterMap(pair.first, pair.second));
+            REQUIRE(pgx.gdxUELRegisterMap(pair.first, pair.second.c_str()));
         }
         REQUIRE(pgx.gdxUELRegisterDone());
 
@@ -1104,7 +1104,7 @@ namespace tests::gdxinterfacetests {
         // no set text
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
-            REQUIRE(pgx.gdxUELRegisterRaw("seattle"s));
+            REQUIRE(pgx.gdxUELRegisterRaw("seattle"));
             REQUIRE(pgx.gdxUELRegisterDone());
 
             pgx.gdxDataWriteRawStart("i", "cities", 1, dt_set, 0);
@@ -1147,7 +1147,7 @@ namespace tests::gdxinterfacetests {
             pgx.gdxStoreDomainSetsSet(false);
             pgx.gdxUELRegisterRawStart();
             for(int i=0; i<50; i++)
-                pgx.gdxUELRegisterRaw(("uel_"s+std::to_string(i+1)));
+                pgx.gdxUELRegisterRaw(("uel_"s+std::to_string(i+1)).c_str());
             pgx.gdxUELRegisterDone();
 
             pgx.gdxDataWriteRawStart("j", "", 1, dt_set, 0);
@@ -1213,11 +1213,11 @@ namespace tests::gdxinterfacetests {
         basicTest([&](GDXInterface &pgx) {
             pgx.gdxOpenWrite(getfn(cnt), prod, errNr);
             pgx.gdxUELRegisterRawStart();
-            pgx.gdxUELRegisterRaw("a"s);
+            pgx.gdxUELRegisterRaw("a");
             pgx.gdxUELRegisterDone();
             pgx.gdxClose();
             pgx.gdxOpenAppend(getfn(cnt), prod, errNr);
-            pgx.gdxRenameUEL("a"s, "b");
+            pgx.gdxRenameUEL("a", "b");
             pgx.gdxClose();
             cnt++;
         });
@@ -1407,7 +1407,7 @@ namespace tests::gdxinterfacetests {
             // Register many UELs
             REQUIRE(pgx.gdxUELRegisterRawStart());
             for (int i{}; i<count; i++)
-                REQUIRE(pgx.gdxUELRegisterRaw("i"s + std::to_string(nums[i])));
+                REQUIRE(pgx.gdxUELRegisterRaw(("i"s + std::to_string(nums[i])).c_str()));
             REQUIRE(pgx.gdxUELRegisterDone());
             // Write set symbol "i" with many records referencing the large number of UELs for its elements
             REQUIRE(pgx.gdxDataWriteRawStart("i"s, "a set"s, 1, dt_set, 0));
@@ -1484,7 +1484,7 @@ namespace tests::gdxinterfacetests {
             std::shuffle(uelIds.begin(), uelIds.end(), std::default_random_engine(42));
             REQUIRE(pgx.gdxUELRegisterMapStart());
             for(int i{}; i<count; i++)
-                REQUIRE(pgx.gdxUELRegisterMap(nums[i], uelIds[i]));
+                REQUIRE(pgx.gdxUELRegisterMap(nums[i], uelIds[i].c_str()));
             REQUIRE(pgx.gdxUELRegisterDone());
         }
 

@@ -173,10 +173,6 @@ namespace xpwrap {
         return ::gdxUELRegisterDone(pgx);
     }
 
-    int GDXFile::gdxUELRegisterRaw(const std::string &Uel) {
-        return ::gdxUELRegisterRaw(pgx, Uel.c_str());
-    }
-
     int GDXFile::gdxUELRegisterRaw(const char *Uel) {
         return ::gdxUELRegisterRaw(pgx, Uel);
     }
@@ -185,8 +181,8 @@ namespace xpwrap {
         return ::gdxUELRegisterRawStart(pgx);
     }
 
-    int GDXFile::gdxUELRegisterStr(const std::string &Uel, int &UelNr) {
-        return ::gdxUELRegisterStr(pgx, Uel.c_str(), &UelNr);
+    int GDXFile::gdxUELRegisterStr(const char *Uel, int &UelNr) {
+        return ::gdxUELRegisterStr(pgx, Uel, &UelNr);
     }
 
     int GDXFile::gdxUELRegisterStrStart() {
@@ -205,8 +201,8 @@ namespace xpwrap {
         return ::gdxCurrentDim(pgx);
     }
 
-    int GDXFile::gdxRenameUEL(const std::string &OldName, const std::string &NewName) {
-        return ::gdxRenameUEL(pgx, OldName.c_str(), NewName.c_str());
+    int GDXFile::gdxRenameUEL(const char *OldName, const char *NewName) {
+        return ::gdxRenameUEL(pgx, OldName, NewName);
     }
 
     int GDXFile::gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) {
@@ -229,10 +225,6 @@ namespace xpwrap {
 
     int GDXFile::gdxUELRegisterMapStart() {
         return ::gdxUELRegisterMapStart(pgx);
-    }
-
-    int GDXFile::gdxUELRegisterMap(int UMap, const std::string &Uel) {
-        return ::gdxUELRegisterMap(pgx, UMap, Uel.c_str());
     }
 
     int GDXFile::gdxUELRegisterMap(int UMap, const char *Uel) {

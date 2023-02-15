@@ -198,7 +198,8 @@ namespace tests::gxfiletests {
 
         std::vector<std::pair<std::string, std::string>> suiteModelPairs{
             //{"sqagams","PERSEUS"}
-            {"src", "ex3"}
+            //{"src", "ex3"}
+            {"lwsup","pShiftFactor"}
         };
 
         std::string singleSuiteName{ "src"s };
@@ -319,7 +320,7 @@ namespace tests::gxfiletests {
 
         const int ntries = 1;
         const bool  quiet = false,
-                onlyPorted = false,
+                onlyPorted = true,
                 onlyWrapped = false;
 
         pfgdx::TimeTriple tWrap, tPort;

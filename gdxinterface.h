@@ -167,12 +167,10 @@ namespace gdxinterface {
 
         // region UEL register
         virtual int gdxUELRegisterRawStart() = 0;
-        virtual int gdxUELRegisterRaw(const std::string &Uel) = 0;
         virtual int gdxUELRegisterRaw(const char *Uel) = 0;
         virtual int gdxUELRegisterStrStart() = 0;
-        virtual int gdxUELRegisterStr(const std::string &Uel, int &UelNr) = 0;
+        virtual int gdxUELRegisterStr(const char *Uel, int &UelNr) = 0;
         virtual int gdxUELRegisterMapStart() = 0;
-        virtual int gdxUELRegisterMap(int UMap, const std::string &Uel) = 0;
         virtual int gdxUELRegisterMap(int UMap, const char *Uel) = 0;
         virtual int gdxUELRegisterDone() = 0;
         // endregion
@@ -182,7 +180,7 @@ namespace gdxinterface {
         virtual int gdxUMUelInfo(int &UelCnt, int &HighMap) = 0;
 
         virtual int gdxCurrentDim() = 0;
-        virtual int gdxRenameUEL(const std::string &OldName, const std::string &NewName) = 0;
+        virtual int gdxRenameUEL(const char *OldName, const char *NewName) = 0;
 
         // region deprecated functions
         virtual int gdxAcronymCount() const = 0;

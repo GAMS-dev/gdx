@@ -21,25 +21,9 @@ using namespace std::literals::string_literals;
 
 namespace gxfile {
 
-    bool CanBeQuoted(const std::string &s);
-    bool GoodUELString(const std::string &s);
     bool CanBeQuoted(const char *s);
     bool GoodUELString(const char *s, size_t slen);
     int64_t dblToI64(double x);
-
-    bool CanBeQuoted(const std::string &s) {
-        bool saw_single{}, saw_double{};
-        for(auto Ch : s) {
-            if(Ch == '\'') {
-                if(saw_double) return false;
-                saw_single = true;
-            } else if(Ch == '\"') {
-                if(saw_single) return false;
-                saw_double = true;
-            } else if(static_cast<unsigned char>(Ch) < ' ') return false;
-        }
-        return true;
-    }
 
     bool CanBeQuoted(const char *s) {
         bool saw_single{}, saw_double{};
@@ -55,10 +39,6 @@ namespace gxfile {
             } else if(static_cast<unsigned char>(Ch) < ' ') return false;
         }
         return true;
-    }
-
-    bool GoodUELString(const std::string &s) {
-        return s.length() <= GLOBAL_UEL_IDENT_SIZE-1 && CanBeQuoted(s); // also checks Ch < '
     }
 
     bool GoodUELString(const char *s, size_t slen) {
@@ -2802,19 +2782,6 @@ namespace gxfile {
     //  The unique element is registered in raw mode, i.e. the internally
     //  assigned integer index is determined by the system
     //  Can only be used while writing to a gdx file
-    int TGXFileObj::gdxUELRegisterRaw(const std::string &Uel) {
-        if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
-            std::cout << "Uel=" << Uel << '\n';
-        if ((TraceLevel >= TraceLevels::trl_all || fmode != f_raw_elem) && !CheckMode("UELRegisterRaw", f_raw_elem))
-            return false;
-        // AS: Directly use passed UEL if trimming is not needed (empty or last actual char is non-blank)
-        auto optTrimmed = utils::maybeTrimRight(Uel);
-        const std::string &SV = optTrimmed ? *optTrimmed : Uel;
-        if (ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
-        UELTable->AddObject(SV, -1); // should about existing mapping?
-        return true;
-    }
-
     int TGXFileObj::gdxUELRegisterRaw(const char *Uel) {
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
             std::cout << "Uel=" << Uel << '\n';
@@ -2855,12 +2822,14 @@ namespace gxfile {
     //   A unique element must follow the GAMS rules when it contains quote characters.
     // See Also:
     //   gdxUELRegisterStrStart, gdxUELRegisterDone
-    int TGXFileObj::gdxUELRegisterStr(const std::string &Uel, int &UelNr) {
+    int TGXFileObj::gdxUELRegisterStr(const char *Uel, int &UelNr) {
         if ((TraceLevel >= TraceLevels::trl_all || fmode != f_str_elem) && !CheckMode("UELRegisterStr", f_str_elem))
             return false;
-        std::string SV{ utils::trimRight(Uel) };
-        if (ErrorCondition(GoodUELString(SV), ERR_BADUELSTR)) return false;
-        UelNr = UELTable->AddUsrNew(SV);
+        static std::array<char, GLOBAL_UEL_IDENT_SIZE> SVstorage;
+        int svlen;
+        const char *SV{ utils::trimRight(Uel, SVstorage.data(), svlen) };
+        if (ErrorCondition(GoodUELString(SV, svlen), ERR_BADUELSTR)) return false;
+        UelNr = UELTable->AddUsrNew(SV, svlen);
         return true;
     }
 
@@ -2947,12 +2916,19 @@ namespace gxfile {
     //   NewName: New name for the UEL
     // Returns:
     //   Zero if the renaming was possible; non-zero is an error indicator
-    int TGXFileObj::gdxRenameUEL(const std::string &OldName, const std::string &NewName) {
+    int TGXFileObj::gdxRenameUEL(const char *OldName, const char *NewName) {
         if(!UELTable) return -1;
-        std::string S{utils::trimRight(NewName)};
-        if(!GoodUELString(S))
+
+        int slen;
+        std::array<char, GLOBAL_UEL_IDENT_SIZE> Sstorage;
+        const char *S { utils::trimRight(NewName, Sstorage.data(), slen) };
+
+        if(!GoodUELString(S, slen))
             return ERR_BADUELSTR;
-        int N{UELTable->IndexOf(utils::trimRight(OldName))};
+
+        int oldNameLen;
+        std::array<char, GLOBAL_UEL_IDENT_SIZE> oldNameStorage;
+        int N{UELTable->IndexOf(utils::trimRight(OldName, oldNameStorage.data(), oldNameLen))};
         if(N < 0)
             return 2;
         else if(UELTable->IndexOf(S) >= 0)
@@ -3102,17 +3078,6 @@ namespace gxfile {
     //  with the same UMap value is an error.
     //   A unique element
     //   must follow the GAMS rules when it contains quote characters.
-    int TGXFileObj::gdxUELRegisterMap(int UMap, const std::string &Uel) {
-        std::string SV {utils::trimRight(Uel)};
-        if(TraceLevel >= TraceLevels::trl_all || fmode != f_map_elem) {
-            if(!CheckMode("UELRegisterMap", f_map_elem)) return false;
-            std::cout << "   Enter UEL: " << SV << " with number " << UMap << "\n";
-        }
-        if(ErrorCondition(GoodUELString(SV), ERR_BADUELSTR) ||
-            ErrorCondition(UELTable->AddUsrIndxNew(SV, UMap) >= 0, ERR_UELCONFLICT)) return false;
-        return true;
-    }
-
     int TGXFileObj::gdxUELRegisterMap(int UMap, const char *Uel) {
         int svLen;
         static std::array<char, GLOBAL_UEL_IDENT_SIZE> svStorage;
@@ -4254,13 +4219,15 @@ namespace gxfile {
     //         the element was never mapped
     // Returns:
     //   Non-zero if the element was found, zero otherwise
-    int TGXFileObj::gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap) {
+    int TGXFileObj::gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap) {
         UelMap = -1;
         if (!UELTable) {
             UelNr = -1;
             return false;
         }
-        UelNr = UELTable->IndexOf(utils::trimRight(Uel));
+        static std::array<char, GLOBAL_UEL_IDENT_SIZE> trimmedUelStorage;
+        int trimmedUelLen;
+        UelNr = UELTable->IndexOf(utils::trimRight(Uel, trimmedUelStorage.data(), trimmedUelLen));
         if (UelNr < 0) return false;
         UelMap = UELTable->GetUserMap(UelNr);
         return true;
@@ -4473,8 +4440,8 @@ namespace gxfile {
         return res;
     }
 
-    int TUELTable::AddUsrNew(const std::string &s) {
-        int EN{ AddObject(s, -1) };
+    int TUELTable::AddUsrNew(const char *s, size_t slen) {
+        int EN{ AddObject(s, slen, -1) };
 #ifdef STABLE_REFS
         int res{ insertOrder[EN-1]->second.num };
 #else
@@ -4491,7 +4458,7 @@ namespace gxfile {
 
     // FIXME: How does this affect the ordering / sort list?
     // Should renaming change the index?
-    void TUELTable::RenameEntry(int N, const std::string &s) {
+    void TUELTable::RenameEntry(int N, const char *s) {
 
 #ifdef STABLE_REFS
         auto old = insertOrder[N-1];
@@ -4514,24 +4481,6 @@ namespace gxfile {
             maxUelLength = std::max<int>((int)pair.first.length(), maxUelLength);
         }
         return maxUelLength;
-    }
-
-    int TUELTable::AddUsrIndxNew(const std::string &s, int UelNr) {
-        int EN {AddObject(s, -1)};
-#ifdef STABLE_REFS
-        auto& itsNum = insertOrder[EN - 1]->second.num;
-#else
-        auto& itsNum = nameToIndexNum[insertOrder[EN-1]].num;
-#endif
-        int res {itsNum};
-        if (res < 0) {
-            itsNum = res = UelNr;
-            UsrUel2Ent->SetMapping(res, EN);
-        }
-        else if (res != UelNr)
-            res = -1;
-        ResetMapToUserStatus();
-        return res;
     }
 
     int TUELTable::AddUsrIndxNew(const char *s, size_t slen, int UelNr) {
@@ -4734,27 +4683,13 @@ namespace gxfile {
         return res;
     }
 
-    int TUELTableLegacy::AddUsrNew(const std::string &s) {
-        int EN {AddObject(s, -1)};
+    int TUELTableLegacy::AddUsrNew(const char *s, size_t slen) {
+        int EN {AddObject(s, slen, -1)};
         int res { *GetObject(EN)};
         if(res < 0) {
             res = UsrUel2Ent->GetHighestIndex() + 1;
             *GetObject(EN) = res;
             UsrUel2Ent->SetMapping(res, EN);
-        }
-        ResetMapToUserStatus();
-        return res;
-    }
-
-    int TUELTableLegacy::AddUsrIndxNew(const std::string &s, int UelNr) {
-        int EN {AddObject(s, -1)};
-        int res { *GetObject(EN)};
-        if(res < 0) {
-            res = UelNr;
-            *GetObject(EN) = res;
-            UsrUel2Ent->SetMapping(res, EN);
-        } else if(res != UelNr) {
-            res = -1;
         }
         ResetMapToUserStatus();
         return res;
@@ -4812,7 +4747,7 @@ namespace gxfile {
         return GetString(index);
     }
 
-    void TUELTableLegacy::RenameEntry(int N, const std::string &s) {
+    void TUELTableLegacy::RenameEntry(int N, const char *s) {
         TXStrHashListImpl<int>::RenameEntry(N, s);
     }
 

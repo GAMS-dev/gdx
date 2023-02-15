@@ -370,11 +370,10 @@ template<typename K, typename V, typename H, typename E>
         virtual void SetUserMap(int EN, int N) = 0;
         virtual void ResetMapToUserStatus() = 0;
         virtual int NewUsrUel(int EN) = 0;
-        virtual int AddUsrNew(const std::string& s) = 0;
-        virtual int AddUsrIndxNew(const std::string &s, int UelNr) = 0;
+        virtual int AddUsrNew(const char *s, size_t slen) = 0;
         virtual int AddUsrIndxNew(const char *s, size_t slen, int UelNr) = 0;
         virtual TUELUserMapStatus GetMapToUserStatus();
-        virtual void RenameEntry(int N, const std::string &s) = 0;
+        virtual void RenameEntry(int N, const char *s) = 0;
         virtual int GetMaxUELLength() const = 0;
         virtual int MemoryUsed() const = 0;
         virtual void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) = 0;
@@ -403,10 +402,9 @@ template<typename K, typename V, typename H, typename E>
         void SetUserMap(int EN, int N) override;
         void ResetMapToUserStatus() override;
         int NewUsrUel(int EN) override;
-        int AddUsrNew(const std::string& s) override;
-        int AddUsrIndxNew(const std::string &s, int UelNr) override;
+        int AddUsrNew(const char *s, size_t slen) override;
         int AddUsrIndxNew(const char *s, size_t slen, int UelNr) override;
-        void RenameEntry(int N, const std::string &s) override;
+        void RenameEntry(int N, const char *s) override;
         int GetMaxUELLength() const override;
         int MemoryUsed() const override;
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
@@ -437,8 +435,7 @@ template<typename K, typename V, typename H, typename E>
         void SetUserMap(int EN, int N) override;
         void ResetMapToUserStatus() override;
         int NewUsrUel(int EN) override;
-        int AddUsrNew(const std::string &s) override;
-        int AddUsrIndxNew(const std::string &s, int UelNr) override;
+        int AddUsrNew(const char *s, size_t slen) override;
         int AddUsrIndxNew(const char *s, size_t slen, int UelNr) override;
         int GetMaxUELLength() const override;
         int IndexOf(const std::string &s) override;
@@ -447,7 +444,7 @@ template<typename K, typename V, typename H, typename E>
         int AddObject(const char *id, size_t idlen, int mapping) override;
         int StoreObject(const std::string& id, int mapping) override;
         const char *operator[](int index) const override;
-        void RenameEntry(int N, const std::string &s) override;
+        void RenameEntry(int N, const char *s) override;
         int MemoryUsed() const override;
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
 
@@ -814,7 +811,6 @@ template<typename K, typename V, typename H, typename E>
         int gdxDataWriteStr(const char **KeyStr, const double *Values) override;
         int gdxDataWriteDone() override;
         int gdxUELRegisterMapStart() override;
-        int gdxUELRegisterMap(int UMap, const std::string &Uel) override;
         int gdxUELRegisterMap(int UMap, const char *Uel) override;
         int gdxClose() override;
         int gdxResetSpecialValues();
@@ -850,15 +846,14 @@ template<typename K, typename V, typename H, typename E>
         int gdxSymbolSetDomainX(int SyNr, const char **DomainIDs) override;
         int gdxSystemInfo(int &SyCnt, int &UelCnt) override;
         int gdxUELRegisterDone() override;
-        int gdxUELRegisterRaw(const std::string &Uel) override;
         int gdxUELRegisterRaw(const char *Uel) override;
         int gdxUELRegisterRawStart() override;
-        int gdxUELRegisterStr(const std::string &Uel, int &UelNr) override;
+        int gdxUELRegisterStr(const char *Uel, int &UelNr) override;
         int gdxUELRegisterStrStart() override;
         int gdxUMUelGet(int UelNr, char *Uel, int &UelMap) override;
         int gdxUMUelInfo(int &UelCnt, int &HighMap) override;
         int gdxCurrentDim() override;
-        int gdxRenameUEL(const std::string &OldName, const std::string &NewName) override;
+        int gdxRenameUEL(const char *OldName, const char *NewName) override;
         int gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) override;
         int gdxGetUEL(int uelNr, char *Uel) override;
         int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
@@ -912,7 +907,8 @@ template<typename K, typename V, typename H, typename E>
         int gdxSymbolAddComment(int SyNr, const std::string& Txt) override;
         int gdxSymbolGetComment(int SyNr, int N, char *Txt) override;
         int gdxUELMaxLength() override;
-        int gdxUMFindUEL(const std::string& Uel, int& UelNr, int& UelMap);
+        // FIXME: This method is not covered by unit tests yet!
+        int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap);
         int gdxStoreDomainSets() override;
         void gdxStoreDomainSetsSet(int x) override;
 
