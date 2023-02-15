@@ -283,7 +283,7 @@ namespace tests::benchmarks {
     }
 
     TEST_CASE("Benchmark various set text list implementations") {
-        benchmarkNClasses(10, {
+        benchmarkNClasses(4, {
             BenchClass {"VecSetList"s, testSetTextList<gxfile::VecSetTextList>},
             BenchClass {"WrapCxxUnorderedMap", testSetTextList<gxfile::WrapCxxUnorderedMap<int>>},
             BenchClass {"TXStrPool", testSetTextList<gdlib::gmsobj::TXStrPool<int>>},

@@ -1674,6 +1674,37 @@ namespace tests::gdxinterfacetests {
         }
     }
 
+    // For BondIndexData.gdx
+    double extractValueForDemExchangeRate(GDXInterface &pgdx, const std::string &fn) {
+        int ErrNr{};
+        pgdx.gdxOpenRead(fn, ErrNr);
+        int nrecs{};
+        pgdx.gdxDataReadMapStart(38, nrecs);
+        REQUIRE_EQ(3, nrecs);
+        int dimFrst{}, key{};
+        std::array<double, GMS_VAL_MAX> vals{};
+        pgdx.gdxDataReadMap(0, &key, vals.data(), dimFrst);
+        pgdx.gdxDataReadDone();
+        pgdx.gdxClose();
+        return vals.front();
+    }
+
+    TEST_CASE("Correct parameter values for BondIndexData") {
+        std::string bidFn {"BondIndexData.gdx"s};
+        if(!std::filesystem::exists(bidFn)) return;
+        double expectedValue;
+        std::string ErrMsg;
+        {
+            xpwrap::GDXFile pgdx {ErrMsg};
+            expectedValue = extractValueForDemExchangeRate(pgdx, bidFn);
+        }
+        {
+            gxfile::TGXFileObj pgdx {ErrMsg};
+            double actualValue = extractValueForDemExchangeRate(pgdx, bidFn);
+            REQUIRE_EQ(expectedValue, actualValue);
+        }
+    }
+
     TEST_SUITE_END();
 
 }
