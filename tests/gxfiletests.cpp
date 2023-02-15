@@ -185,6 +185,10 @@ namespace tests::gxfiletests {
                 res.push_back(name);
             }
         }
+        res.sort([&](const std::string &a, const std::string &b) {
+            std::filesystem::path pa {path+"/"+a+".gdx"}, pb {path+"/"+b+".gdx"};
+            return std::filesystem::file_size(pa) < std::filesystem::file_size(pb);
+        });
         return res;
     }
 
