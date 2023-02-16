@@ -22,6 +22,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <cstring>
+#include <variant>
 
 //======================================================================================================================
 // Various switches for container/data structure implementation choices:
@@ -783,9 +784,8 @@ template<typename K, typename V, typename H, typename E>
         bool ErrorCondition(bool cnd, int N);
         bool MajorCheckMode(const std::string& Routine, TgxFileMode m);
         bool MajorCheckMode(const std::string &Routine, const TgxModeSet &MS);
-        bool CheckMode(const std::string &Routine);
-        bool CheckMode(const std::string& Routine, TgxFileMode m);
-        bool CheckMode(const std::string &Routine, const TgxModeSet &MS);
+        bool CheckMode(const std::string& Routine, std::variant<TgxModeSet, TgxFileMode> MSvar = tgxfilemode_count);
+
         void WriteTrace(const std::string &s);
         void InitDoWrite(int NrRecs);
         bool DoWrite(const int *AElements, const double *AVals);
