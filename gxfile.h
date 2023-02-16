@@ -784,7 +784,7 @@ template<typename K, typename V, typename H, typename E>
         bool ErrorCondition(bool cnd, int N);
         bool MajorCheckMode(const std::string& Routine, TgxFileMode m);
         bool MajorCheckMode(const std::string &Routine, const TgxModeSet &MS);
-        bool CheckMode(const std::string& Routine, std::variant<TgxModeSet, TgxFileMode> MSvar = tgxfilemode_count);
+        bool CheckMode(const std::string& Routine, std::variant<const TgxModeSet*, TgxFileMode> MSvar = (TgxFileMode)tgxfilemode_count);
 
         void WriteTrace(const std::string &s);
         void InitDoWrite(int NrRecs);
