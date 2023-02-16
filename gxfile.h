@@ -264,6 +264,7 @@ template<typename K, typename V, typename H, typename E>
         uint8_t count{};
     public:
         TgxModeSet(const std::initializer_list<TgxFileMode> &modes);
+        TgxModeSet(const TgxFileMode mode);
         virtual ~TgxModeSet() = default;
         bool contains(const TgxFileMode& mode) const override;
         bool empty() const;
@@ -784,7 +785,10 @@ template<typename K, typename V, typename H, typename E>
         bool ErrorCondition(bool cnd, int N);
         bool MajorCheckMode(const std::string& Routine, TgxFileMode m);
         bool MajorCheckMode(const std::string &Routine, const TgxModeSet &MS);
-        bool CheckMode(const std::string& Routine, std::variant<const TgxModeSet*, TgxFileMode> MSvar = (TgxFileMode)tgxfilemode_count);
+        bool CheckMode(const std::string& Routine);
+        bool CheckMode(const std::string& Routine, TgxFileMode m);
+        bool CheckMode(const std::string& Routine, const TgxModeSet &MS);
+
 
         void WriteTrace(const std::string &s);
         void InitDoWrite(int NrRecs);

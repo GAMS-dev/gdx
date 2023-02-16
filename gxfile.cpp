@@ -891,7 +891,7 @@ namespace gxfile {
     bool TGXFileObj::MajorCheckMode(const std::string &Routine, const TgxModeSet &MS) {
         MajContext = Routine;
         LastRepError = ERR_NOERROR;
-        return !((TraceLevel >= TraceLevels::trl_some || !utils::in(fmode, MS)) && !CheckMode(Routine, &MS));
+        return !((TraceLevel >= TraceLevels::trl_some || !utils::in(fmode, MS)) && !CheckMode(Routine, MS));
     }
 
     void TGXFileObj::WriteTrace(const std::string &s) {
@@ -921,34 +921,33 @@ namespace gxfile {
         LastRepError = N;
     }
 
-    bool TGXFileObj::CheckMode(const std::string& Routine, std::variant<const TgxModeSet*, TgxFileMode> MSvar) {
-        bool singleMode = std::holds_alternative<TgxFileMode>(MSvar);
-        TgxFileMode *m { singleMode ? &std::get<TgxFileMode>(MSvar) : nullptr };
-        const TgxModeSet *MS { singleMode ? nullptr : std::get<const TgxModeSet*>(MSvar) };
-        if(m && *m == TgxFileMode::tgxfilemode_count) m = nullptr;
+    bool TGXFileObj::CheckMode(const std::string& Routine) {
+        static TgxModeSet empty{};
+        return CheckMode(Routine, empty);
+    }
 
-        if((singleMode && (!m || *m == fmode)) || (!singleMode && (MS->empty() || utils::in(fmode, *MS)))) {
+    bool TGXFileObj::CheckMode(const std::string& Routine, TgxFileMode m) {
+        TgxModeSet singleMode{m};
+        return CheckMode(Routine, singleMode);
+    }
+
+    bool TGXFileObj::CheckMode(const std::string& Routine, const TgxModeSet &MS) {
+        if(MS.empty() || utils::in(fmode, MS)) {
             WriteTrace(Routine);
             return true;
         }
-
         SetError(ERR_BADMODE);
         std::cout << "**** Error: " << Routine << " called out of context\n";
         if(!MajContext.empty() && !utils::sameText(MajContext, Routine))
             std::cout << "     Previous major function called was " << MajContext << '\n';
         std::cout << "     Current context = " << fmode_str[fmode] << '\n';
         std::cout << "     Allowed = {";
-        if(singleMode) {
-            std::cout << fmode_str[*m];
-        }
-        else {
-            bool f{true};
-            for (int M{}; M < tgxfilemode_count; M++) {
-                if (utils::in(static_cast<TgxFileMode>(M), *MS)) {
-                    if (f) f = false;
-                    else std::cout << ',';
-                    std::cout << fmode_str[M];
-                }
+        bool f{true};
+        for (int M{}; M < tgxfilemode_count; M++) {
+            if (utils::in(static_cast<TgxFileMode>(M), MS)) {
+                if (f) f = false;
+                else std::cout << ',';
+                std::cout << fmode_str[M];
             }
         }
         std::cout << "}\n";
@@ -2185,7 +2184,7 @@ namespace gxfile {
     int TGXFileObj::gdxDataErrorRecordX(int RecNr, int * KeyInt,  double * Values)
     {
         static const TgxModeSet AllowedModes{ fr_init,fw_init,fr_map_data, fr_mapr_data, fw_raw_data, fw_map_data,fw_str_data };
-        if ((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataErrorRecord", &AllowedModes))
+        if ((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataErrorRecord", AllowedModes))
             return false;
 
         if (ErrorList) {
@@ -3103,7 +3102,7 @@ namespace gxfile {
     // Description:
     int TGXFileObj::gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst) {
         static const TgxModeSet AllowedModes{fr_map_data, fr_mapr_data};
-        if((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadMap", &AllowedModes)) return false;
+        if((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadMap", AllowedModes)) return false;
         if(CurSyPtr && CurSyPtr->SScalarFrst) {
             CurSyPtr->SScalarFrst = false;
             GetDefaultRecord(Values);
@@ -4814,6 +4813,11 @@ namespace gxfile {
 
     inline bool TgxModeSet::empty() const {
         return !count;
+    }
+
+    TgxModeSet::TgxModeSet(const TgxFileMode mode) {
+        modeActive[mode] = true;
+        count=1;
     }
 
 #ifdef TAL_LEGACY
