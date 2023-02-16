@@ -925,7 +925,7 @@ namespace gxfile {
         bool singleMode = std::holds_alternative<TgxFileMode>(MSvar);
         TgxFileMode *m { singleMode ? &std::get<TgxFileMode>(MSvar) : nullptr };
         const TgxModeSet *MS { singleMode ? nullptr : std::get<const TgxModeSet*>(MSvar) };
-        if(*m == TgxFileMode::tgxfilemode_count) m = nullptr;
+        if(m && *m == TgxFileMode::tgxfilemode_count) m = nullptr;
 
         if((singleMode && (!m || *m == fmode)) || (!singleMode && (MS->empty() || utils::in(fmode, *MS)))) {
             WriteTrace(Routine);
