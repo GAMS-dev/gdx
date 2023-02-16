@@ -921,17 +921,35 @@ namespace gxfile {
         LastRepError = N;
     }
 
-    bool TGXFileObj::CheckMode(const std::string& Routine) {
-        static TgxModeSet empty{};
-        return CheckMode(Routine, empty);
-    }
-
     bool TGXFileObj::CheckMode(const std::string& Routine, TgxFileMode m) {
-        TgxModeSet singleMode{m};
-        return CheckMode(Routine, singleMode);
+        if (fmode == m) {
+            WriteTrace(Routine);
+            return true;
+        }
+        SetError(ERR_BADMODE);
+        std::cout << "**** Error: " << Routine << " called out of context\n";
+        if (!MajContext.empty() && !utils::sameText(MajContext, Routine))
+            std::cout << "     Previous major function called was " << MajContext << '\n';
+        std::cout << "     Current context = " << fmode_str[fmode] << '\n';
+        std::cout << "     Allowed = {";
+        bool f{ true };
+        for (int M{}; M < tgxfilemode_count; M++) {
+            if (static_cast<TgxFileMode>(M) == m) {
+                if (f) f = false;
+                else std::cout << ',';
+                std::cout << fmode_str[M];
+            }
+        }
+        std::cout << "}\n";
+        return false;
     }
 
-    bool TGXFileObj::CheckMode(const std::string& Routine, const TgxModeSet &MS) {
+    bool TGXFileObj::CheckMode(const std::string &Routine) {
+        WriteTrace(Routine);
+        return true;
+    }
+
+    bool TGXFileObj::CheckMode(const std::string &Routine, const TgxModeSet &MS) {
         if(MS.empty() || utils::in(fmode, MS)) {
             WriteTrace(Routine);
             return true;
@@ -943,9 +961,9 @@ namespace gxfile {
         std::cout << "     Current context = " << fmode_str[fmode] << '\n';
         std::cout << "     Allowed = {";
         bool f{true};
-        for (int M{}; M < tgxfilemode_count; M++) {
-            if (utils::in(static_cast<TgxFileMode>(M), MS)) {
-                if (f) f = false;
+        for(int M{}; M<tgxfilemode_count; M++) {
+            if(utils::in(static_cast<TgxFileMode>(M), MS)) {
+                if(f) f = false;
                 else std::cout << ',';
                 std::cout << fmode_str[M];
             }
