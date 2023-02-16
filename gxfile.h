@@ -907,7 +907,6 @@ template<typename K, typename V, typename H, typename E>
         int gdxSymbolAddComment(int SyNr, const std::string& Txt) override;
         int gdxSymbolGetComment(int SyNr, int N, char *Txt) override;
         int gdxUELMaxLength() override;
-        // FIXME: This method is not covered by unit tests yet!
         int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap);
         int gdxStoreDomainSets() override;
         void gdxStoreDomainSetsSet(int x) override;

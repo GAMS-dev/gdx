@@ -94,6 +94,8 @@ namespace xpwrap {
 
         int gdxUMUelInfo(int &UelCnt, int &HighMap) override;
 
+        int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap) override;
+
         int gdxCurrentDim() override;
 
         int gdxRenameUEL(const char *OldName, const char *NewName) override;

@@ -197,6 +197,10 @@ namespace xpwrap {
         return ::gdxUMUelInfo(pgx, &UelCnt, &HighMap);
     }
 
+    int GDXFile::gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap) {
+        return ::gdxUMFindUEL(pgx, Uel, &UelNr, &UelMap);
+    }
+
     int GDXFile::gdxCurrentDim() {
         return ::gdxCurrentDim(pgx);
     }

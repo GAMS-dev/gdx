@@ -244,6 +244,10 @@ namespace tests::gdxinterfacetests {
             REQUIRE_FALSE(pgx.gdxUMUelGet(23, uel, uelMap));
             REQUIRE_EQ("?L__23"s, uel);
             REQUIRE_EQ(-1, uelMap);
+            int uelNr;
+            REQUIRE(pgx.gdxUMFindUEL("New-York", uelNr, uelMap));
+            REQUIRE_EQ(2, uelNr);
+            REQUIRE_EQ(-1, uelMap);
         });
         for (const auto& fn : filenames)
             std::filesystem::remove(fn);

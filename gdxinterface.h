@@ -178,6 +178,7 @@ namespace gdxinterface {
         virtual int gdxGetUEL(int uelNr, char *Uel) = 0;
         virtual int gdxUMUelGet(int UelNr, char *Uel, int &UelMap) = 0;
         virtual int gdxUMUelInfo(int &UelCnt, int &HighMap) = 0;
+        virtual int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap) = 0;
 
         virtual int gdxCurrentDim() = 0;
         virtual int gdxRenameUEL(const char *OldName, const char *NewName) = 0;
