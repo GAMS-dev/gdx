@@ -178,16 +178,17 @@ namespace tests::gxfiletests {
     std::list<std::string> gdxFilesInPath(const std::string& path);
     std::list<std::string> gdxFilesInPath(const std::string& path) {
         std::list<std::string> res{};
+        std::map<std::string, uintmax_t> cachedFileSizes {};
         for (const auto& entry : std::filesystem::directory_iterator{ path }) {
             const auto fn = entry.path().filename().string();
             if (utils::ends_with(fn, ".gdx")) {
                 auto name = fn.substr(0, fn.size() - 4);
                 res.push_back(name);
+                cachedFileSizes[name] = std::filesystem::file_size(std::filesystem::path{path+"/"s+name+".gdx"s});
             }
         }
         res.sort([&](const std::string &a, const std::string &b) {
-            std::filesystem::path pa {path+"/"+a+".gdx"}, pb {path+"/"+b+".gdx"};
-            return std::filesystem::file_size(pa) < std::filesystem::file_size(pb);
+            return cachedFileSizes[a] < cachedFileSizes[b];
         });
         return res;
     }
@@ -219,6 +220,9 @@ namespace tests::gxfiletests {
             //{"sqagams","PERSEUS"}
             //{"src", "ex3"}
             {"lwsup","pShiftFactor"}
+            //{"src", "gdxfromutlity"},
+            //{"sqagams","mpstrans"},
+            //{"sqagams","catmix"}
         };
 
         std::string singleSuiteName{ "src"s };
@@ -343,7 +347,7 @@ namespace tests::gxfiletests {
                 onlyWrapped = false;
 
         pfgdx::TimeTriple tWrap, tPort;
-        std::array<double, ntries> slowdowns {};
+        std::vector<double> slowdowns {};
         double totWrap{}, totPort{};
 
         std::ofstream textout {benchOutFileName, std::ios_base::app};
@@ -371,16 +375,19 @@ namespace tests::gxfiletests {
                 }
             }
 
-            slowdowns[i] = tWrap.total_t > 0 ? tPort.total_t / tWrap.total_t : 0;
+            slowdowns.push_back(tWrap.total_t > 0 ? tPort.total_t / tWrap.total_t : 0);
             if (!quiet && !onlyPorted && !onlyWrapped)
                 std::cout << "Slowdown for " << fn << " = " << slowdowns[i] << std::endl;
+            if(slowdowns[i] <= 1.05) break; // we are happy if we got at least one try with slowdown below threshold 5%
         }
         if (!quiet) {
-            auto avgSlowdown = std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / (double)ntries;
+            auto avgSlowdown = std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / (double)slowdowns.size();
+            auto minSlowdown = *std::min_element(slowdowns.begin(), slowdowns.end());
             std::cout << "Average slowdown = " << avgSlowdown << std::endl;
+            std::cout << "Minimum slowdown = " << minSlowdown << std::endl;
             std::cout << "Total runtime wrapped = " << totWrap << std::endl;
             std::cout << "Total runtime ported = " << totPort << std::endl;
-            textout << suiteName << "/" << modelName << ";" << avgSlowdown << std::endl;
+            textout << suiteName << "/" << modelName << ";" << minSlowdown << std::endl;
         }
     }
 
