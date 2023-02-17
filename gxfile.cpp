@@ -460,7 +460,8 @@ namespace gxfile {
     //   gdxDataWriteStr, gdxDataWriteDone
     int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) {
         if(!PrepareSymbolWrite("DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
-        std::fill_n(LastStrElemUsed.begin(), FCurrentDim, false);
+        for (int D{}; D<FCurrentDim; D++)
+            LastStrElem[D].front() = std::numeric_limits<char>::max();
         SortList = std::make_unique<LinkedDataType>(FCurrentDim, DataSize * static_cast<int>(sizeof(double)));
         fmode = fw_dom_str;
         return true;
@@ -494,7 +495,7 @@ namespace gxfile {
         for(int D{}; D<FCurrentDim; D++) {
             int SVlen;
             const char *SV {utils::trimRight(KeyStr[D], SVstorage.data(), SVlen)};
-            if(!LastStrElemUsed[D] || std::strcmp(SV, LastStrElem[D].data())) {
+            if(LastStrElem[D].front() == std::numeric_limits<char>::max() || std::strcmp(SV, LastStrElem[D].data())) {
                 // -1=not found, >=1 found
                 int KD {UELTable->IndexOf(SV)};
                 if(KD == -1) {
@@ -503,7 +504,6 @@ namespace gxfile {
                 }
                 LastElem[D] = KD;
                 utils::assignPCharToBuf(SV, SVlen, LastStrElem[D].data(), LastStrElem[D].size());
-                LastStrElemUsed[D] = true;
                 if(KD < MinElem[D]) MinElem[D] = KD;
                 if(KD > MaxElem[D]) MaxElem[D] = KD;
             }
