@@ -489,7 +489,8 @@ namespace gxfile {
             for(int D{}; D<FCurrentDim; D++)
                 std::cout << " " << KeyStr[D] << (D+1 < FCurrentDim ? "," : "") << "\n";
         }
-        static std::array<char, GLOBAL_UEL_IDENT_SIZE> SVstorage;
+        // Could actually be GLOBAL_UEL_IDENT_SIZE but is ShortString in Delphi
+        static std::array<char, GMS_SSSIZE> SVstorage;
         for(int D{}; D<FCurrentDim; D++) {
             int SVlen;
             const char *SV {utils::trimRight(KeyStr[D], SVstorage.data(), SVlen)};
@@ -913,9 +914,9 @@ namespace gxfile {
         if(TraceLevel >= TraceLevels::trl_errors && N != LastRepError) {
             if(!MajContext.empty())
                 std::cout << "Error after call to " << MajContext << '\n';
-            char s[GMS_SSSIZE];
-            this->gdxErrorStr(N, s);
-            std::cout << "Error = " << N << " : " << s << "\n";
+            std::array<char, GMS_SSSIZE> s;
+            this->gdxErrorStr(N, s.data());
+            std::cout << "Error = " << N << " : " << s.data() << "\n";
         }
         SetError(N);
         LastRepError = N;
@@ -2787,7 +2788,7 @@ namespace gxfile {
             std::cout << "Uel=" << Uel << '\n';
         if ((TraceLevel >= TraceLevels::trl_all || fmode != f_raw_elem) && !CheckMode("UELRegisterRaw", f_raw_elem))
             return false;
-        static std::array<char, GLOBAL_UEL_IDENT_SIZE> svStorage;
+        static std::array<char, GMS_SSSIZE> svStorage;
         int svLen;
         const char *SV { utils::trimRight(Uel, svStorage.data(), svLen) };
         if (ErrorCondition(GoodUELString(SV, svLen), ERR_BADUELSTR)) return false;
@@ -2825,7 +2826,7 @@ namespace gxfile {
     int TGXFileObj::gdxUELRegisterStr(const char *Uel, int &UelNr) {
         if ((TraceLevel >= TraceLevels::trl_all || fmode != f_str_elem) && !CheckMode("UELRegisterStr", f_str_elem))
             return false;
-        static std::array<char, GLOBAL_UEL_IDENT_SIZE> SVstorage;
+        static std::array<char, GMS_SSSIZE> SVstorage;
         int svlen;
         const char *SV{ utils::trimRight(Uel, SVstorage.data(), svlen) };
         if (ErrorCondition(GoodUELString(SV, svlen), ERR_BADUELSTR)) return false;
@@ -2862,12 +2863,12 @@ namespace gxfile {
     //
     int TGXFileObj::gdxUMUelGet(int UelNr, char *Uel, int &UelMap) {
         if (UELTable && UelNr >= 1 && UelNr <= UELTable->size()) {
-            utils::assignStrToBuf((*UELTable)[UelNr], Uel, GLOBAL_UEL_IDENT_SIZE);
+            utils::assignStrToBuf((*UELTable)[UelNr], Uel);
             UelMap = UELTable->GetUserMap(UelNr);
             return true;
         }
         else {
-            utils::assignStrToBuf(BADUEL_PREFIX + std::to_string(UelNr), Uel, GLOBAL_UEL_IDENT_SIZE);
+            utils::assignStrToBuf(BADUEL_PREFIX + std::to_string(UelNr), Uel);
             UelMap = -1;
             return false;
         }
@@ -2920,14 +2921,14 @@ namespace gxfile {
         if(!UELTable) return -1;
 
         int slen;
-        std::array<char, GLOBAL_UEL_IDENT_SIZE> Sstorage;
+        std::array<char, GMS_SSSIZE> Sstorage;
         const char *S { utils::trimRight(NewName, Sstorage.data(), slen) };
 
         if(!GoodUELString(S, slen))
             return ERR_BADUELSTR;
 
         int oldNameLen;
-        std::array<char, GLOBAL_UEL_IDENT_SIZE> oldNameStorage;
+        std::array<char, GMS_SSSIZE> oldNameStorage;
         int N{UELTable->IndexOf(utils::trimRight(OldName, oldNameStorage.data(), oldNameLen))};
         if(N < 0)
             return 2;
@@ -2986,7 +2987,7 @@ namespace gxfile {
             return false;
         }
         int EN = UELTable->UsrUel2Ent->GetMapping(uelNr);
-        utils::assignStrToBuf(EN >= 1 ? (*UELTable)[EN] : BADUEL_PREFIX + std::to_string(uelNr), Uel, GLOBAL_UEL_IDENT_SIZE);
+        utils::assignStrToBuf(EN >= 1 ? (*UELTable)[EN] : BADUEL_PREFIX + std::to_string(uelNr), Uel);
         return EN >= 1;
     }
 
@@ -3080,7 +3081,7 @@ namespace gxfile {
     //   must follow the GAMS rules when it contains quote characters.
     int TGXFileObj::gdxUELRegisterMap(int UMap, const char *Uel) {
         int svLen;
-        static std::array<char, GLOBAL_UEL_IDENT_SIZE> svStorage;
+        static std::array<char, GMS_SSSIZE> svStorage;
         const char *SV{ utils::trimRight(Uel, svStorage.data(), svLen) };
         if(TraceLevel >= TraceLevels::trl_all || fmode != f_map_elem) {
             if(!CheckMode("UELRegisterMap", f_map_elem)) return false;
@@ -3951,7 +3952,7 @@ namespace gxfile {
                     KeyStr[D][0] = '?';
                     KeyStr[D][1] = '\0';
                 }
-                else utils::assignStrToBuf((*UELTable)[N], KeyStr[D], GLOBAL_UEL_IDENT_SIZE);
+                else utils::assignStrToBuf((*UELTable)[N], KeyStr[D]);
             }
         }
         return true;
@@ -4225,7 +4226,7 @@ namespace gxfile {
             UelNr = -1;
             return false;
         }
-        static std::array<char, GLOBAL_UEL_IDENT_SIZE> trimmedUelStorage;
+        static std::array<char, GMS_SSSIZE> trimmedUelStorage;
         int trimmedUelLen;
         UelNr = UELTable->IndexOf(utils::trimRight(Uel, trimmedUelStorage.data(), trimmedUelLen));
         if (UelNr < 0) return false;

@@ -373,6 +373,11 @@ namespace tests::gdxinterfacetests {
             const char *keyptrs[] = {keyNames[0].c_str()};
             REQUIRE(pgx.gdxDataWriteStr(keyptrs, values.data()));
 
+            std::string oneCharTooLong(64, 'i');
+            keyNames[0] = oneCharTooLong;
+            keyptrs[0] = keyNames[0].c_str();
+            REQUIRE_FALSE(pgx.gdxDataWriteStr(keyptrs, values.data()));
+
             REQUIRE(pgx.gdxDataWriteDone());
         });
         testReads(f1, f2, [&](GDXInterface &pgx) {

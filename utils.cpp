@@ -120,8 +120,8 @@ namespace utils {
         for(i=0; s[i] != '\0'; i++)
             if(!std::isspace(s[i]))
                 slen = i;
-        if(slen == i) return s;
-        std::memcpy(storage, s, ++slen);
+        if(++slen == i) return s;
+        std::memcpy(storage, s, slen);
         storage[slen] = '\0';
         return storage;
     }

@@ -229,6 +229,14 @@ namespace tests::utilstests {
         out = utils::trimRight("1", buf.data(), len);
         REQUIRE_EQ(1, len);
         REQUIRE(!strcmp("1", out));
+
+        std::string _64_chars(64, 'i');
+        const char *backing = _64_chars.c_str();
+        out = utils::trimRight(backing, buf.data(), len);
+        REQUIRE_EQ(64, len);
+        REQUIRE(!strcmp(_64_chars.c_str(), out));
+        // no blanks at end of this i*64 ('iii...iii') str, so should not create new buffer!
+        REQUIRE_EQ(backing, out);
     }
 
     TEST_SUITE_END();
