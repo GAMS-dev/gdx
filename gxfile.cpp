@@ -914,7 +914,7 @@ namespace gxfile {
         if(TraceLevel >= TraceLevels::trl_errors && N != LastRepError) {
             if(!MajContext.empty())
                 std::cout << "Error after call to " << MajContext << '\n';
-            std::array<char, GMS_SSSIZE> s;
+            std::array<char, GMS_SSSIZE> s {};
             this->gdxErrorStr(N, s.data());
             std::cout << "Error = " << N << " : " << s.data() << "\n";
         }
@@ -923,31 +923,13 @@ namespace gxfile {
     }
 
     bool TGXFileObj::CheckMode(const std::string& Routine, TgxFileMode m) {
-        if (fmode == m) {
-            WriteTrace(Routine);
-            return true;
-        }
-        SetError(ERR_BADMODE);
-        std::cout << "**** Error: " << Routine << " called out of context\n";
-        if (!MajContext.empty() && !utils::sameText(MajContext, Routine))
-            std::cout << "     Previous major function called was " << MajContext << '\n';
-        std::cout << "     Current context = " << fmode_str[fmode] << '\n';
-        std::cout << "     Allowed = {";
-        bool f{ true };
-        for (int M{}; M < tgxfilemode_count; M++) {
-            if (static_cast<TgxFileMode>(M) == m) {
-                if (f) f = false;
-                else std::cout << ',';
-                std::cout << fmode_str[M];
-            }
-        }
-        std::cout << "}\n";
-        return false;
+        const TgxModeSet singleMode{m};
+        return CheckMode(Routine, singleMode);
     }
 
     bool TGXFileObj::CheckMode(const std::string &Routine) {
-        WriteTrace(Routine);
-        return true;
+        static const TgxModeSet noMode{};
+        return CheckMode(Routine, noMode);
     }
 
     bool TGXFileObj::CheckMode(const std::string &Routine, const TgxModeSet &MS) {
