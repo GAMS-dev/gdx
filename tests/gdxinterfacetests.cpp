@@ -225,6 +225,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw(""));
             REQUIRE(pgx.gdxUELRegisterRaw("New-York"));
+            std::string stillOk(63, 'i'), tooLong(64, 'i');
+            REQUIRE(pgx.gdxUELRegisterRaw(stillOk.c_str()));
+            REQUIRE_FALSE(pgx.gdxUELRegisterRaw(tooLong.c_str()));
             REQUIRE(pgx.gdxUELRegisterDone());
         });
         testReads(f1, f2, [](GDXInterface &pgx) {
@@ -232,7 +235,7 @@ namespace tests::gdxinterfacetests {
             char uel[GMS_SSSIZE];
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
             REQUIRE_EQ(0, highMap);
-            REQUIRE_EQ(2, uelCnt);
+            REQUIRE_EQ(3, uelCnt);
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
             REQUIRE(uel[0] == '\0');
             REQUIRE_EQ(-1, uelMap);
@@ -261,6 +264,9 @@ namespace tests::gdxinterfacetests {
             int uelNr;
             REQUIRE(pgx.gdxUELRegisterStr("TheOnlyUEL", uelNr));
             REQUIRE_EQ(1, uelNr);
+            std::string stillOk(63, 'i'), tooLong(64, 'i');
+            REQUIRE(pgx.gdxUELRegisterStr(stillOk.c_str(), uelNr));
+            REQUIRE_FALSE(pgx.gdxUELRegisterStr(tooLong.c_str(), uelNr));
             REQUIRE(pgx.gdxUELRegisterDone());
         });
         testReads(f1, f2, [](GDXInterface& pgx) {
@@ -268,7 +274,7 @@ namespace tests::gdxinterfacetests {
             char uel[GMS_SSSIZE];
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
             REQUIRE_EQ(0, highMap);
-            REQUIRE_EQ(1, uelCnt);
+            REQUIRE_EQ(2, uelCnt);
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
             REQUIRE(!strcmp("TheOnlyUEL", uel));
             REQUIRE_EQ(-1, uelMap);
@@ -284,7 +290,9 @@ namespace tests::gdxinterfacetests {
         auto [f1, f2] = filenames;
         testMatchingWrites(f1, f2, [](GDXInterface& pgx) {
             REQUIRE(pgx.gdxUELRegisterMapStart());
+            REQUIRE_FALSE(pgx.gdxUELRegisterMap(3, std::string(64, 'i').c_str()));
             REQUIRE(pgx.gdxUELRegisterMap(3, "TheOnlyUEL"));
+            REQUIRE(pgx.gdxUELRegisterMap(8, std::string(63, 'i').c_str()));
             REQUIRE(pgx.gdxUELRegisterDone());
         });
         testReads(f1, f2, [](GDXInterface& pgx) {
@@ -296,7 +304,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(-1, uelMap);
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
             REQUIRE_EQ(0, highMap);
-            REQUIRE_EQ(1, uelCnt);
+            REQUIRE_EQ(2, uelCnt);
 
             REQUIRE(pgx.gdxUELRegisterMapStart());
             REQUIRE(pgx.gdxUELRegisterMap(3, "TheOnlyUEL"));
@@ -308,7 +316,7 @@ namespace tests::gdxinterfacetests {
 
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
             REQUIRE_EQ(3, highMap);
-            REQUIRE_EQ(1, uelCnt);
+            REQUIRE_EQ(2, uelCnt);
             
             REQUIRE(pgx.gdxGetUEL(3, uel));
             REQUIRE(!strcmp("TheOnlyUEL", uel));
@@ -373,6 +381,11 @@ namespace tests::gdxinterfacetests {
             const char *keyptrs[] = {keyNames[0].c_str()};
             REQUIRE(pgx.gdxDataWriteStr(keyptrs, values.data()));
 
+            std::string almostTooLongButStillOk(63, 'i');
+            keyNames[0] = almostTooLongButStillOk;
+            keyptrs[0] = keyNames[0].c_str();
+            REQUIRE(pgx.gdxDataWriteStr(keyptrs, values.data()));
+
             std::string oneCharTooLong(64, 'i');
             keyNames[0] = oneCharTooLong;
             keyptrs[0] = keyNames[0].c_str();
@@ -383,7 +396,7 @@ namespace tests::gdxinterfacetests {
         testReads(f1, f2, [&](GDXInterface &pgx) {
             int NrRecs;
             REQUIRE(pgx.gdxDataReadStrStart(1, NrRecs));
-            REQUIRE_EQ(2, NrRecs);
+            REQUIRE_EQ(3, NrRecs);
 
             int dimFrst;
             REQUIRE(pgx.gdxDataReadStr(keyNames.ptrs(), values.data(), dimFrst));
@@ -392,6 +405,10 @@ namespace tests::gdxinterfacetests {
 
             REQUIRE(pgx.gdxDataReadStr(keyNames.ptrs(), values.data(), dimFrst));
             REQUIRE_EQ("TheOnlyUEL"s, keyNames[0].str());
+            REQUIRE_EQ(3.141, values[GMS_VAL_LEVEL]);
+
+            REQUIRE(pgx.gdxDataReadStr(keyNames.ptrs(), values.data(), dimFrst));
+            REQUIRE_EQ(std::string(63, 'i'), keyNames[0].str());
             REQUIRE_EQ(3.141, values[GMS_VAL_LEVEL]);
 
             REQUIRE(pgx.gdxDataReadDone());
