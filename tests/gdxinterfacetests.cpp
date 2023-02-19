@@ -1119,6 +1119,8 @@ namespace tests::gdxinterfacetests {
             char commentStrGot[GMS_SSSIZE];
             REQUIRE(pgx.gdxSymbolGetComment(1, 1, commentStrGot));
             REQUIRE_EQ(commentStrExp, commentStrGot);
+            REQUIRE_FALSE(pgx.gdxSymbolAddComment(-5, "should not work"));
+            REQUIRE_FALSE(pgx.gdxSymbolAddComment(std::numeric_limits<int>::max(), "should not work"));
         });
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);
