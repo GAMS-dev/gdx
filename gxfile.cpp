@@ -3612,7 +3612,7 @@ namespace gxfile {
         TIndex Index;
         if (!DP) { // we only count
             for (int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++)
-                // N-1?
+                // TODO: N-1?
                 if (DomainIndxs.GetMapping(N) == 1) NrElem++;
         }
         else { //should we have an option to return indices in Raw order or in Mapped order?
