@@ -4149,7 +4149,7 @@ namespace gxfile {
         if (!MajorCheckMode("SymbolAddComment"s, AnyWriteMode)) return false;
         PgdxSymbRecord SyPtr;
         if (SyNr <= 0) SyPtr = CurSyPtr;
-        else SyPtr = NameList && !NameList->empty() && SyNr <= NameList->size() ? *NameList->GetObject(SyNr) : nullptr;
+        else SyPtr = NameList && !NameList->empty() && SyNr >= 1 && SyNr <= NameList->size() ? *NameList->GetObject(SyNr) : nullptr;
         if (!SyPtr) {
             ReportError(ERR_NOSYMBOLFORCOMMENT);
             return false;
