@@ -745,10 +745,10 @@ namespace gdlib::strhash {
     template<typename T>
     class TXCSStrHashListLegacy : public TXStrHashListLegacy<T> {
     protected:
-        int Hash(const std::string& s) override {
+        int Hash(const char *s) override {
             int res{};
-            for (char c : s)
-                res = 211 * res + c;
+            for (int i{}; s[i] != '\n'; i++)
+                res = 211 * res + s[i];
             return (res & 0x7FFFFFFF) % this->HashTableSize;
         }
 

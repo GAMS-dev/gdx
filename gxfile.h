@@ -50,7 +50,7 @@
 #define TSH_LEGACY
 
 // Use TXStrPool port for SetTextList
-#define TXSPOOL_LEGACY
+//#define TXSPOOL_LEGACY
 
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
