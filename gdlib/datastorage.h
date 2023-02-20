@@ -35,7 +35,7 @@
 #endif
 
 // Instead of using builtin C++ heap functionality new/delete, use custom GAMS big block heap from gdlib/gmsheapnew
-//#define USE_GMSHEAP
+#define USE_GMSHEAP
 
 namespace gdlib::datastorage {
 

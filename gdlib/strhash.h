@@ -565,6 +565,16 @@ namespace gdlib::strhash {
             return (res & 0x7FFFFFFF) % HashTableSize;
         }
 
+        virtual int Hash(const char* s) {
+            int res{};
+            for (int i{}; true; i++) {
+                char c{ s[i] };
+                if (c == '\0') break;
+                res = 211 * res + std::toupper(c);
+            }
+            return (res & 0x7FFFFFFF) % HashTableSize;
+        }
+
         virtual bool EntryEqual(const char *ps1, const char *ps2) {
 #if defined(_WIN32)
             return !_stricmp(ps1, ps2);
@@ -628,6 +638,17 @@ namespace gdlib::strhash {
             return -1;
         }
 
+        int IndexOf(const char *S) {
+            if (!PHashTable) HashAll();
+            int HV{ Hash(S) };
+            PHashBucket<T> PBuck{ PHashTable[HV] };
+            while (PBuck) {
+                if (!EntryEqual(PBuck->StrP, S)) PBuck = PBuck->NextBucket;
+                else return PBuck->StrNr + (OneBased ? 1 : 0);
+            }
+            return -1;
+        }
+
         int AddObject(const std::string &s, T AObj) {
             if(FCount >= ReHashCnt) HashAll();
             int HV{Hash(s)};
@@ -648,6 +669,30 @@ namespace gdlib::strhash {
             }
             FCount++; // ugly
             obj->StrP = gmsobj::NewString(s);
+            obj->Obj = AObj;
+            return res;
+        }
+
+        int AddObject(const char *s, size_t slen, T AObj) {
+            if(FCount >= ReHashCnt) HashAll();
+            int HV{Hash(s)};
+            THashBucket<T> *PBuck {PHashTable[HV]};
+            while(PBuck) {
+                if(!EntryEqual(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
+                else return PBuck->StrNr + (OneBased ? 1 : 0);
+            }
+            PBuck = Buckets.ReserveMem();
+            auto obj = PBuck;
+            obj->NextBucket = PHashTable[HV];
+            PHashTable[HV] = PBuck;
+            obj->StrNr = FCount; // before it was added! zero based
+            int res{FCount + (OneBased ? 1 : 0)};
+            if(SortMap) {
+                (*SortMap)[FCount] = FCount;
+                FSorted = false;
+            }
+            FCount++; // ugly
+            obj->StrP = gmsobj::NewString(s, slen);
             obj->Obj = AObj;
             return res;
         }
@@ -673,8 +718,29 @@ namespace gdlib::strhash {
             return res;
         }
 
+        int StoreObject(const char *s, size_t slen, T AObj) {
+            if(PHashTable) ClearHashTable();
+            THashBucket<T> *PBuck = Buckets.ReserveMem();
+            auto obj = PBuck;
+            obj->NextBucket = nullptr;
+            obj->StrNr = FCount; // before it was added!
+            int res{FCount + (OneBased ? 1 : 0)};
+            if(SortMap) {
+                (*SortMap)[FCount] = FCount;
+                FSorted = false;
+            }
+            FCount++; // ugly
+            obj->StrP  = gmsobj::NewString(s, slen);
+            obj->Obj = AObj;
+            return res;
+        }
+
         char *GetString(int N) const {
             return Buckets.GetItemPtrIndexConst(N-(OneBased ? 1 : 0))->StrP;
+        }
+
+        char *GetName(int N) const {
+            return GetString(N);
         }
 
         void RenameEntry(int N, const std::string &s) {
@@ -722,6 +788,14 @@ namespace gdlib::strhash {
             return FCount;
         }
 
+        int GetCapacity() {
+            return (int)Buckets.size();
+        }
+
+        void SetCapacity(size_t cap) {
+            // FIXME: Should do something!
+        }
+
         bool empty() const {
             return !FCount;
         }
@@ -737,8 +811,10 @@ namespace gdlib::strhash {
         void LoadFromStream(T2& s) {
             Clear();
             int Cnt{ s.ReadInteger() };
-            for (int N{}; N < Cnt; N++)
-                StoreObject(s.ReadString(), nullptr);
+            for (int N{}; N < Cnt; N++) {
+                auto k {s.ReadString()};
+                StoreObject(k.c_str(), k.length(), nullptr);
+            }
         }
     };
 
@@ -753,8 +829,21 @@ namespace gdlib::strhash {
     inline void TXStrHashListLegacy<uint8_t >::LoadFromStream(T2& s) {
         Clear();
         int Cnt{ s.ReadInteger() };
-        for (int N{}; N < Cnt; N++)
-            StoreObject(s.ReadString(), 0);
+        for (int N{}; N < Cnt; N++) {
+            auto k{ s.ReadString() };
+            StoreObject(k.c_str(), k.length(), 0);
+        }
+    }
+
+    template<>
+    template<typename T2>
+    inline void TXStrHashListLegacy<int>::LoadFromStream(T2& s) {
+        Clear();
+        int Cnt{ s.ReadInteger() };
+        for (int N{}; N < Cnt; N++) {
+            auto k {s.ReadString()};
+            StoreObject(k.c_str(), k.length(), 0);
+        }
     }
 
     template<typename T>

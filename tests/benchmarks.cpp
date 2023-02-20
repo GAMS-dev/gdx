@@ -274,7 +274,7 @@ namespace tests::benchmarks {
     void testSetTextList() {
         T obj;
         const int n{10000};
-        obj.SetCapacity(n);
+        //obj.SetCapacity(n);
         for(int i{}; i<n; i++)
             obj.Add("set_text_"+std::to_string(i+1));
         std::string s;

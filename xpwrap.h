@@ -137,6 +137,8 @@ namespace xpwrap {
 
         int gdxDataReadFilteredStart(int SyNr, const int *FilterAction, int &NrRecs) override;
 
+        int gdxSetTraceLevel(int N, const std::string &s) override;
+
         int gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) override;
 
         int gdxAcronymIndex(double V) const override;

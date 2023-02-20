@@ -2367,7 +2367,8 @@ namespace gxfile {
             return false;
         } else {
             utils::assignStrToBuf(SetTextList->GetName(TxtNr), Txt, GMS_SSSIZE);
-            Node = *SetTextList->GetObject(TxtNr);
+            auto obj = SetTextList->GetObject(TxtNr);
+            Node = obj ? *obj : 0;
             return true;
         }
     }

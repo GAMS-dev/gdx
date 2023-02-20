@@ -183,8 +183,14 @@ namespace gdlib::gmsobj {
     }
 
     inline char *NewString(const std::string &s) {
-        size_t memSize;
+        size_t memSize{};
         return NewString(s, memSize);
+    }
+
+    inline char *NewString(const char *s, size_t slen) {
+        char *buf{new char[slen+1]};
+        utils::assignPCharToBuf(s, slen, buf, slen+1);
+        return buf;
     }
 
     class TXStrings : public TXList<char> {
@@ -468,6 +474,10 @@ namespace gdlib::gmsobj {
 
         int size() const {
             return FCount;
+        }
+
+        int GetCapacity() const {
+            return FCapacity;
         }
 
         size_t MemoryUsed() const {

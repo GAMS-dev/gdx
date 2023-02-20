@@ -47,10 +47,10 @@
 #define TIM_LEGACY
 
 // Only if no other C++-hashmap is chosen, switch to TXStrHash implementation as close as possible to original P3 one
-//#define TSH_LEGACY
+#define TSH_LEGACY
 
 // Use TXStrPool port for SetTextList
-//#define TXSPOOL_LEGACY
+#define TXSPOOL_LEGACY
 
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
@@ -430,7 +430,7 @@ template<typename K, typename V, typename H, typename E>
     class TUELTableLegacy : public IUELTable, public TXStrHashListImpl<int> {
     public:
         TUELTableLegacy();
-        virtual ~TUELTableLegacy() = default;
+        ~TUELTableLegacy() override = default;
         int size() const override;
         bool empty() const override;
         int GetUserMap(int i) override;
@@ -708,6 +708,9 @@ template<typename K, typename V, typename H, typename E>
     // Description:
     //    Class for reading and writing gdx files
     class TGXFileObj : public gdxinterface::GDXInterface {
+    public:
+        enum class TraceLevels { trl_none, trl_errors, trl_some, trl_all };
+    private:
 #ifdef YAML
         std::unique_ptr<yaml::TYAMLFile> YFile;
 #endif
@@ -739,7 +742,7 @@ template<typename K, typename V, typename H, typename E>
         bool StoreDomainSets{true};
         TIntlValueMapDbl intlValueMapDbl{}, readIntlValueMapDbl{};
         TIntlValueMapI64 intlValueMapI64{};
-        enum class TraceLevels { trl_none, trl_errors, trl_some, trl_all } TraceLevel;
+        TraceLevels TraceLevel;
         std::string TraceStr;
         int VersionRead{};
         std::string FProducer, FProducer2, FileSystemID;
@@ -886,7 +889,7 @@ template<typename K, typename V, typename H, typename E>
 
         int gdxSetTextNodeNr(int TxtNr, int Node);
         int gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int& NrElem, void* UPtr);
-        int gdxSetTraceLevel(int N, const std::string &s);
+        int gdxSetTraceLevel(int N, const std::string &s) override;
         int gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) override;
         int gdxAcronymIndex(double V) const override;
         int gdxAcronymName(double V, char *AName) override;

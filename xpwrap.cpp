@@ -330,4 +330,8 @@ namespace xpwrap {
     std::string GDXFile::getImplName() const {
         return "xpwrap"s;
     }
+
+    int GDXFile::gdxSetTraceLevel(int N, const std::string &s) {
+        return ::gdxSetTraceLevel(pgx, N, s.c_str());
+    }
 }

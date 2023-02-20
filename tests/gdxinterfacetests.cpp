@@ -1734,6 +1734,25 @@ namespace tests::gdxinterfacetests {
         }
     }
 
+    TEST_CASE("Test setting trace level") {
+        std::string f1 {"trace_wrapper.gdx"s},
+                    f2 {"trace_port.gdx"s};
+        testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
+            REQUIRE(pgx.gdxSetTraceLevel((int)gxfile::TGXFileObj::TraceLevels::trl_all, "tracestr"s));
+            REQUIRE(pgx.gdxUELRegisterRawStart());
+            REQUIRE(pgx.gdxUELRegisterRaw("TheOnlyUEL"));
+            REQUIRE(pgx.gdxUELRegisterDone());
+            REQUIRE(pgx.gdxDataWriteRawStart("mysym", "This is my symbol!", 1, dt_par, 0));
+            int key {1};
+            TgdxValues values{};
+            values[GMS_VAL_LEVEL] = 3.141;
+            REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
+            REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE(pgx.gdxDataWriteRawStart("myscalar", "This is a scalar!", 0, dt_par, 0));
+            REQUIRE(pgx.gdxDataWriteDone());
+        });
+    }
+
     TEST_SUITE_END();
 
 }
