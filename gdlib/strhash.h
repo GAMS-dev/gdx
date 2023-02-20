@@ -747,7 +747,7 @@ namespace gdlib::strhash {
     protected:
         int Hash(const char *s) override {
             int res{};
-            for (int i{}; s[i] != '\n'; i++)
+            for (int i{}; s[i] != '\0'; i++)
                 res = 211 * res + s[i];
             return (res & 0x7FFFFFFF) % this->HashTableSize;
         }
