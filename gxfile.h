@@ -362,11 +362,9 @@ template<typename K, typename V, typename H, typename E>
         virtual ~IUELTable() = default;
         virtual int size() const = 0;
         virtual bool empty() const = 0;
-        virtual int IndexOf(const std::string &s) = 0;
         virtual int IndexOf(const char *s) = 0;
-        virtual int AddObject(const std::string &id, int mapping) = 0;
         virtual int AddObject(const char *id, size_t idlen, int mapping) = 0;
-        virtual int StoreObject(const std::string& id, int mapping) = 0;
+        virtual int StoreObject(const char *id, size_t idlen, int mapping) = 0;
         virtual const char *operator[](int index) const = 0;
         virtual int GetUserMap(int i) = 0;
         virtual void SetUserMap(int EN, int N) = 0;
@@ -394,11 +392,9 @@ template<typename K, typename V, typename H, typename E>
         void Clear();
         int size() const override;
         bool empty() const override;
-        int IndexOf(const std::string &s) override;
         int IndexOf(const char *s) override;
-        int AddObject(const std::string &id, int mapping) override;
         int AddObject(const char *id, size_t idlen, int mapping) override;
-        int StoreObject(const std::string& id, int mapping) override;
+        int StoreObject(const char *id, size_t idlen, int mapping) override;
         const char *operator[](int index) const override;
         int GetUserMap(int i) override;
         void SetUserMap(int EN, int N) override;
@@ -440,11 +436,9 @@ template<typename K, typename V, typename H, typename E>
         int AddUsrNew(const char *s, size_t slen) override;
         int AddUsrIndxNew(const char *s, size_t slen, int UelNr) override;
         int GetMaxUELLength() const override;
-        int IndexOf(const std::string &s) override;
         int IndexOf(const char *s) override;
-        int AddObject(const std::string &id, int mapping) override;
         int AddObject(const char *id, size_t idlen, int mapping) override;
-        int StoreObject(const std::string& id, int mapping) override;
+        int StoreObject(const char *id, size_t idlen, int mapping) override;
         const char *operator[](int index) const override;
         void RenameEntry(int N, const char *s) override;
         int MemoryUsed() const override;
@@ -561,28 +555,6 @@ template<typename K, typename V, typename H, typename E>
         SetText() : text{}, node{} {}
     };
 
-    class VecSetTextList {
-        std::vector<SetText> entries;
-    public:
-        bool OneBased;
-        void reserve(int n);
-        int size() const;
-        int Count() const;
-        void resize(int n);
-        int AddObject(const std::string &s, int n);
-        int Add(const std::string& s) {
-            return AddObject(s, 0);
-        }
-        const char *GetString(int i) const;
-        const char *operator[](int i) const {
-            return GetString(i);
-        }
-        int *GetObject(int i);
-        void SetCapacity(int n) {
-            entries.reserve(n);
-        }
-    };
-
     template<typename T>
     struct PayloadIndex {
         int i;
@@ -612,7 +584,7 @@ template<typename K, typename V, typename H, typename E>
         }
 #endif
 
-        int AddObject(const std::string &key, T val) {
+        int AddObject(const char *key, size_t keylen, T val) {
             auto [it, wasNew] = dict.try_emplace(key, PayloadIndex<T> {-1, val});
             auto &elem = (*it).second;
             if(wasNew) {
@@ -626,8 +598,8 @@ template<typename K, typename V, typename H, typename E>
             return elem.i;
         }
 
-        int Add(const std::string& key) {
-            return AddObject(key, 0);
+        int Add(const char *key, size_t keylen) {
+            return AddObject(key, keylen, 0);
         }
 
         int StoreObject(const std::string& key, T val) {
@@ -666,7 +638,7 @@ template<typename K, typename V, typename H, typename E>
             return GetObject(N);
         }
 
-        int IndexOf(const std::string &s) const {
+        int IndexOf(const char *s) const {
             auto it = dict.find(s);
             return it == dict.end() ? -1 : (*it).second.i;
         }
@@ -829,7 +801,7 @@ template<typename K, typename V, typename H, typename E>
         int gdxSymbolInfo(int SyNr, char *SyId, int &Dim, int &Typ) override;
         int gdxDataReadStrStart(int SyNr, int &NrRecs) override;
         int gdxAddAlias(const std::string &Id1, const std::string &Id2) override;
-        int gdxAddSetText(const std::string &Txt, int &TxtNr) override;
+        int gdxAddSetText(const char *Txt, int &TxtNr) override;
         int gdxDataErrorCount() override;
         int gdxDataErrorRecord(int RecNr,  int *KeyInt, double * Values) override;
         int gdxDataErrorRecordX(int RecNr,  int *KeyInt,  double *Values) override;
@@ -909,7 +881,7 @@ template<typename K, typename V, typename H, typename E>
         int gdxSetReadSpecialValues(const double *AVals);
         int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) override;
         int gdxSymbMaxLength() const;
-        int gdxSymbolAddComment(int SyNr, const std::string& Txt) override;
+        int gdxSymbolAddComment(int SyNr, const char* Txt) override;
         int gdxSymbolGetComment(int SyNr, int N, char *Txt) override;
         int gdxUELMaxLength() override;
         int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap);

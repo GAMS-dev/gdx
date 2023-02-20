@@ -1115,7 +1115,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteStrStart("i", "expl text", 1, dt_set, 0));
             REQUIRE(pgx.gdxDataWriteDone());
             const auto commentStrExp {"A fancy comment!"s};
-            REQUIRE(pgx.gdxSymbolAddComment(1, commentStrExp));
+            REQUIRE(pgx.gdxSymbolAddComment(1, commentStrExp.c_str()));
             char commentStrGot[GMS_SSSIZE];
             REQUIRE(pgx.gdxSymbolGetComment(1, 1, commentStrGot));
             REQUIRE_EQ(commentStrExp, commentStrGot);
@@ -1751,6 +1751,8 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteRawStart("myscalar", "This is a scalar!", 0, dt_par, 0));
             REQUIRE(pgx.gdxDataWriteDone());
         });
+        std::filesystem::remove(f1);
+        std::filesystem::remove(f2);
     }
 
     TEST_SUITE_END();

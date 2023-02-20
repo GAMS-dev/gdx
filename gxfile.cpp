@@ -417,7 +417,7 @@ namespace gxfile {
         for(int N{1}; N<=10; N++) FFile->WriteInt64(0);
         SetTextList = std::make_unique<TSetTextList>();
         SetTextList->OneBased = false;
-        SetTextList->Add(""s);
+        SetTextList->Add("", 0);
         gdxResetSpecialValues();
         NextWritePosition = FFile->GetPosition();
         fmode = fw_init;
@@ -860,7 +860,7 @@ namespace gxfile {
         obj->SSetBitMap = utils::in((gdxSyType)AType, dt_set, dt_alias) && ADim == 1 && StoreDomainSets ?
                 std::make_unique<TSetBitMap>() : nullptr;
 
-        CurSyPtr->SSyNr = NameList->AddObject(AName, CurSyPtr); // +1 for universe
+        CurSyPtr->SSyNr = NameList->AddObject(AName.c_str(), AName.length(), CurSyPtr); // +1 for universe
         FCurrentDim = ADim;
         // old case; we never write V6
         // V = 0..Dim which dimension changed
@@ -900,7 +900,7 @@ namespace gxfile {
     }
 
     bool TGXFileObj::IsGoodNewSymbol(const std::string &s) {
-        return !(ErrorCondition(NameList->IndexOf(s) < 1, ERR_DUPLICATESYMBOL) ||
+        return !(ErrorCondition(NameList->IndexOf(s.c_str()) < 1, ERR_DUPLICATESYMBOL) ||
                  ErrorCondition(AcronymList->FindName(s) < 0, ERR_DUPLICATESYMBOL) ||
                  ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT));
     }
@@ -1719,7 +1719,7 @@ namespace gxfile {
             return true;
         }
         if(NameList) {
-            SyNr = NameList->IndexOf(SyId);
+            SyNr = NameList->IndexOf(SyId.c_str());
             return SyNr >= 1;
         }
         return false;
@@ -1981,14 +1981,15 @@ namespace gxfile {
                 if(NrElem > 0) {
                     CurSyPtr->SCommentsList = std::make_optional<TCommentsList>();
                     while(NrElem > 0) {
-                        CurSyPtr->SCommentsList->Add(FFile->ReadString());
+                        auto s{FFile->ReadString()};
+                        CurSyPtr->SCommentsList->Add(s.c_str(), s.length());
                         NrElem--;
                     }
                 }
             }
             CurSyPtr->SSetBitMap = nullptr;
             CurSyPtr->SDomStrings = nullptr;
-            CurSyPtr->SSyNr = NameList->StoreObject(S, CurSyPtr);
+            CurSyPtr->SSyNr = NameList->StoreObject(S.c_str(), S.length(), CurSyPtr);
         }
         if (ErrorCondition(FFile->ReadString() == MARK_SYMB, ERR_OPEN_SYMBOLMARKER2)) return FileErrorNr();
 
@@ -2005,7 +2006,8 @@ namespace gxfile {
         if (utils::substr(FileSystemID, 15, 4) == "2001") NrElem--;
 
         while (UELTable->size() < NrElem) {
-            UELTable->StoreObject(FFile->ReadString(), -1);
+            auto s{FFile->ReadString()};
+            UELTable->StoreObject(s.c_str(), s.length(), -1);
         }
         UelCntOrig = UELTable->size(); // needed when reading universe
 
@@ -2020,7 +2022,8 @@ namespace gxfile {
             SetTextList->SetCapacity(NrElem);
             //SetTextList->reserve(NrElem);
             for (int N{}; N < NrElem; N++) {
-                int TextNum{ SetTextList->Add(FFile->ReadString()) };
+                auto s{FFile->ReadString()};
+                int TextNum{ SetTextList->Add(s.c_str(), s.length()) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
                     MapSetText.resize(NrElem);
                     // TODO: Could this be replaced by std::iota?
@@ -2082,8 +2085,8 @@ namespace gxfile {
     //   gdxSymbolSetDomain
     int TGXFileObj::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
         if(!MajorCheckMode("AddAlias", AnyWriteMode)) return false;
-        int SyNr1 { Id1 == "*" ? std::numeric_limits<int>::max() : NameList->IndexOf(Id1) };
-        int SyNr2 { Id2 == "*" ? std::numeric_limits<int>::max() : NameList->IndexOf(Id2) };
+        int SyNr1 { Id1 == "*" ? std::numeric_limits<int>::max() : NameList->IndexOf(Id1.c_str()) };
+        int SyNr2 { Id2 == "*" ? std::numeric_limits<int>::max() : NameList->IndexOf(Id2.c_str()) };
         if(ErrorCondition((SyNr1 >= 0) != (SyNr2 >= 0), ERR_ALIASSETEXPECTED)) return false;
         int SyNr;
         std::string AName;
@@ -2107,7 +2110,7 @@ namespace gxfile {
             SyPtr->SDim = (*NameList->GetObject(SyNr))->SDim;
             SyPtr->SExplTxt = "Aliased with "s + NameList->GetString(SyNr);
         }
-        NameList->AddObject(AName, SyPtr);
+        NameList->AddObject(AName.c_str(), AName.length(), SyPtr);
         return true;
     }
 
@@ -2124,10 +2127,11 @@ namespace gxfile {
     //  Register a string in the string table and return the integer number assigned to this string.
     //  The integer value can be used to set the associated text of a set element.
     //  The string must follow the GAMS syntax rules for explanatory text.
-    int TGXFileObj::gdxAddSetText(const std::string &Txt, int &TxtNr) {
+    int TGXFileObj::gdxAddSetText(const char *Txt, int &TxtNr) {
         if(!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText")))
             return false;
-        TxtNr = SetTextList->Add(MakeGoodExplText(Txt));
+        auto s{MakeGoodExplText(Txt)};
+        TxtNr = SetTextList->Add(s.c_str(), s.length());
         return true;
     }
 
@@ -2717,9 +2721,9 @@ namespace gxfile {
                 const std::string &S { DomainIDs[D] };
                 if (S.empty() || S == "*" || !IsGoodIdent(S)) (*SyPtr->SDomStrings)[D] = 0;
                 else {
-                    (*SyPtr->SDomStrings)[D] = DomainStrList->IndexOf(S); // one based
+                    (*SyPtr->SDomStrings)[D] = DomainStrList->IndexOf(S.c_str()); // one based
                     if ((*SyPtr->SDomStrings)[D] <= 0) {
-                        DomainStrList->Add(S);
+                        DomainStrList->Add(S.c_str(), S.length());
                         (*SyPtr->SDomStrings)[D] = (int) DomainStrList->size();
                     }
                 }
@@ -4145,7 +4149,7 @@ namespace gxfile {
     //   Non-zero if the operation is possible, zero otherwise
     // See Also:
     //   gdxSymbolGetComment
-    int TGXFileObj::gdxSymbolAddComment(int SyNr, const std::string& Txt)
+    int TGXFileObj::gdxSymbolAddComment(int SyNr, const char *Txt)
     {
         if (!MajorCheckMode("SymbolAddComment"s, AnyWriteMode)) return false;
         PgdxSymbRecord SyPtr;
@@ -4157,7 +4161,7 @@ namespace gxfile {
         }
         if(!SyPtr->SCommentsList)
             SyPtr->SCommentsList = std::make_optional<TCommentsList>();
-        SyPtr->SCommentsList->Add(Txt);
+        SyPtr->SCommentsList->Add(Txt, std::strlen(Txt));
         return true;
     }
 
@@ -4339,17 +4343,12 @@ namespace gxfile {
         return static_cast<int>(nameToIndexNum.size());
     }
 
-    int TUELTable::IndexOf(const std::string &s) {
-        const auto it = nameToIndexNum.find(s);
-        return it == nameToIndexNum.end() ? -1 : it->second.index;
-    }
-
     int TUELTable::IndexOf(const char *s) {
         const auto it = nameToIndexNum.find(s);
         return it == nameToIndexNum.end() ? -1 : it->second.index;
     }
 
-    int TUELTable::AddObject(const std::string &id, int mapping) {
+    int TUELTable::AddObject(const char *id, size_t idlen, int mapping) {
         const auto &[it, wasNew] = nameToIndexNum.try_emplace(id, IndexNumPair{mapping});
         int ix;
         if (wasNew) {
@@ -4364,11 +4363,7 @@ namespace gxfile {
         return ix;
     }
 
-    int TUELTable::AddObject(const char *id, size_t idlen, int mapping) {
-        return AddObject(std::string {id}, mapping);
-    }
-
-    int TUELTable::StoreObject(const std::string& id, int mapping) {
+    int TUELTable::StoreObject(const char *id, size_t idlen, int mapping) {
         int ix{static_cast<int>(nameToIndexNum.size())+1};
 #ifdef STABLE_REFS
         auto [it,wasNew] = nameToIndexNum.emplace(id, IndexNumPair{ ix, mapping });
@@ -4507,7 +4502,8 @@ namespace gxfile {
         Clear();
         int Cnt{S.ReadInteger()};
         for(int N{}; N<Cnt; N++) {
-            StoreObject(S.ReadString(), 0);
+            auto s{S.ReadString()};
+            StoreObject(s.c_str(), s.length(), 0);
         }
         if(UsrUel2Ent) UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
         for(auto &[name,indexNum] : nameToIndexNum)
@@ -4707,24 +4703,16 @@ namespace gxfile {
         ResetMapToUserStatus();
     }
 
-    int TUELTableLegacy::IndexOf(const std::string &s) {
-        return TXStrHashListImpl<int>::IndexOf(s);
-    }
-
     int TUELTableLegacy::IndexOf(const char *s) {
         return TXStrHashListImpl<int>::IndexOf(s);
-    }
-
-    int TUELTableLegacy::AddObject(const std::string &id, int mapping) {
-        return TXStrHashListImpl<int>::AddObject(id, mapping);
     }
 
     int TUELTableLegacy::AddObject(const char *id, size_t idlen, int mapping) {
         return TXStrHashListImpl<int>::AddObject(id, idlen, mapping);
     }
 
-    int TUELTableLegacy::StoreObject(const std::string& id, int mapping) {
-        return TXStrHashListImpl<int>::StoreObject(id, mapping);
+    int TUELTableLegacy::StoreObject(const char *id, size_t idlen, int mapping) {
+        return TXStrHashListImpl<int>::StoreObject(id, idlen, mapping);
     }
 
     const char *TUELTableLegacy::operator[](int index) const {
@@ -4771,35 +4759,6 @@ namespace gxfile {
                 FMapToUserStatus = map_sortfull;
         }
         return FMapToUserStatus;
-    }
-
-    int VecSetTextList::size() const { return (int)entries.size(); }
-
-    int VecSetTextList::Count() const { return (int)entries.size(); }
-
-    void VecSetTextList::resize(int n) { entries.resize(n); }
-
-    int VecSetTextList::AddObject(const std::string &s, int n) {
-        int ix = utils::indexOf<SetText>(entries, [&s](const SetText &elem) {
-            return elem.text == s;
-        });
-        if(ix == -1) {
-            entries.emplace_back(s, n);
-            return (int) entries.size() - 1;
-        }
-        return ix;
-    }
-
-    const char *VecSetTextList::GetString(int i) const {
-        return entries[i].text.c_str();
-    }
-
-    int *VecSetTextList::GetObject(int i) {
-        return &entries[i].node;
-    }
-
-    void VecSetTextList::reserve(int n) {
-        entries.reserve(n);
     }
 
     TgxModeSet::TgxModeSet(const std::initializer_list<TgxFileMode> &modes) {

@@ -341,7 +341,7 @@ namespace tests::gxfiletests {
             [&](const std::string& s) { return s == filenamePart; }))
             return;
 
-        const int ntries = 1;
+        const int ntries = 4;
         const bool  quiet = false,
                 onlyPorted = false,
                 onlyWrapped = false;

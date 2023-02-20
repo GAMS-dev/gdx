@@ -145,7 +145,7 @@ namespace gdxinterface {
         virtual int gdxSymbolDim(int SyNr) = 0;
 
         virtual int gdxAddAlias(const std::string &Id1, const std::string &Id2) = 0;
-        virtual int gdxAddSetText(const std::string &Txt, int &TxtNr) = 0;
+        virtual int gdxAddSetText(const char *Txt, int &TxtNr) = 0;
         virtual int gdxGetElemText(int TxtNr, char *Txt, int &Node) = 0;
 
         //region Error handling
@@ -199,7 +199,7 @@ namespace gdxinterface {
         virtual int gdxAcronymIndex(double V) const = 0;
         virtual int gdxAcronymName(double V, char *AName) = 0;
         virtual double gdxAcronymValue(int AIndx) const = 0;
-        virtual int gdxSymbolAddComment(int SyNr, const std::string& Txt) = 0;
+        virtual int gdxSymbolAddComment(int SyNr, const char* Txt) = 0;
         virtual int gdxSymbolGetComment(int SyNr, int N, char *Txt) = 0;
         virtual int gdxStoreDomainSets() = 0;
         virtual void gdxStoreDomainSetsSet(int x) = 0;

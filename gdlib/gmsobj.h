@@ -193,13 +193,21 @@ namespace gdlib::gmsobj {
         return buf;
     }
 
+    inline char *NewString(const char *s, size_t slen, size_t &memSize) {
+        const auto l = slen+1;
+        char *buf{new char[l]};
+        utils::assignPCharToBuf(s, slen, buf, l);
+        memSize += l;
+        return buf;
+    }
+
     class TXStrings : public TXList<char> {
     private:
         size_t FStrMemory;
 
-        void Put(int Index, const std::string &Item) {
+        void Put(int Index, const char *Item, size_t itemLen) {
             FreeItem(Index);
-            FList[Index-(OneBased ? 1 : 0)] = NewString(Item, FStrMemory);
+            FList[Index-(OneBased ? 1 : 0)] = NewString(Item, itemLen, FStrMemory);
         }
 
         std::string Get(int Index) {
@@ -217,13 +225,13 @@ namespace gdlib::gmsobj {
             Clear();
         }
 
-        int Add(const std::string &Item) {
-            return TXList<char>::Add(NewString(Item, FStrMemory));
+        int Add(const char *Item, size_t ItemLen) {
+            return TXList<char>::Add(NewString(Item, ItemLen, FStrMemory));
         }
 
-        int IndexOf(const std::string &Item) {
+        int IndexOf(const char *Item) {
             for(int N{}; N<FCount; N++)
-                if(utils::sameTextPChar(FList[N], Item.c_str()))
+                if(utils::sameTextPChar(FList[N], Item))
                     return N + (OneBased ? 1 : 0);
             return -1;
         }
@@ -386,12 +394,12 @@ namespace gdlib::gmsobj {
         }
 
     public:
-        void InsertItem(int Index, const std::string &S, T *APointer) {
+        void InsertItem(int Index, const char *S, size_t slen, T *APointer) {
             if(FCount == FCapacity) Grow();
             if(OneBased) Index--;
             if(Index < FCount)
                 std::memcpy(&FList[Index+1], &FList[Index], (FCount-Index)*sizeof(TStringItem<T>));
-            FList[Index].FString = NewString(S, FStrMemory);
+            FList[Index].FString = NewString(S, slen, FStrMemory);
             FList[Index].FObject = APointer;
             FCount++;
         }
@@ -421,19 +429,19 @@ namespace gdlib::gmsobj {
             SetCapacity(0);
         }
 
-        int Add(const std::string &S) {
-            return AddObject(S, nullptr);
+        int Add(const char *S, size_t slen) {
+            return AddObject(S, slen, nullptr);
         }
 
-        int AddObject(const std::string &S, T *APointer) {
+        int AddObject(const char *S, size_t slen, T *APointer) {
             int res{FCount+(OneBased?1:0)};
-            InsertItem(res, S, APointer);
+            InsertItem(res, S, slen, APointer);
             return res;
         }
 
-        int IndexOf(const std::string &S) {
+        int IndexOf(const char *S) {
             for(int N{}; N<FCount; N++)
-                if(utils::sameTextPChar(FList[N].FString, S.c_str())) return N + (OneBased ? 1 : 0);
+                if(utils::sameTextPChar(FList[N].FString, S)) return N + (OneBased ? 1 : 0);
             return -1;
         }
 
@@ -524,9 +532,9 @@ namespace gdlib::gmsobj {
         int hashCount{}, trigger{-1};
         size_t hashBytes{};
 
-        virtual int compareEntry(const std::string &s, int EN) {
+        virtual int compareEntry(const char *s, int EN) {
             auto p { this->FList[EN].FString };
-            return !p ? (!s.empty() ? 1 : 0) : utils::sameTextPChar(s.c_str(), p);
+            return !p ? (!(!s || s[0] == '\0') ? 1 : 0) : utils::sameTextPChar(s, p);
         }
 
         void ClearHashList() {
@@ -560,7 +568,8 @@ namespace gdlib::gmsobj {
             pHashSC = (PHashRecord *)std::malloc(hashBytes);
             std::memset(pHashSC, 0, hashBytes);
             for(int n{this->OneBased?1:0}; n<=this->FCount-1+(this->OneBased?1:0); n++) {
-                auto hv {hashValue(this->GetName(n))};
+                auto name{this->GetName(n)};
+                auto hv {hashValue(name, std::strlen(name))};
                 auto PH = (PHashRecord)std::malloc(sizeof(THashRecord));
                 PH->PNext = pHashSC[hv];
                 PH->RefNr = n - (this->OneBased?1:0);
@@ -569,16 +578,16 @@ namespace gdlib::gmsobj {
             hashBytes += sizeof(THashRecord) * this->FCount;
         }
 
-        virtual uint32_t hashValue(const std::string &s) {
+        virtual uint32_t hashValue(const char *s, size_t slen) {
             int64_t r {};
-            int i{1}, n{(int)s.length()};
-            while(i+5 <= n) {
+            int i{}, n{(int)slen};
+            while(i+5 < n) {
                 uint32_t t {(uint32_t)std::toupper(s[i++])};
                 for(int j{}; j<5; j++)
                     t = (HASHMULT * t) + (uint32_t)std::toupper(s[i++]);
                 r = (HASHMULT_6 * r + t) % hashCount;
             }
-            while(i <= n)
+            while(i < n)
                 r = (HASHMULT * r + (uint32_t)std::toupper(s[i++])) % hashCount;
             return (uint32_t)r;
         }
@@ -593,15 +602,15 @@ namespace gdlib::gmsobj {
             TXCustomStringList<T>::Clear();
         }
 
-        int AddObject(const std::string &s, T *APointer) {
+        int AddObject(const char *s, size_t slen, T *APointer) {
             if(!pHashSC || this->FCount > trigger) SetHashSize(this->FCount);
-            auto hv { hashValue(s) };
+            auto hv { hashValue(s, slen) };
             PHashRecord PH;
             for(PH=pHashSC[hv]; PH && compareEntry(s, PH->RefNr); PH = PH->PNext);
             if(PH) return PH->RefNr + (this->OneBased?1:0);
             else {
                 int res{this->FCount+(this->OneBased?1:0)};
-                TXCustomStringList<T>::InsertItem(res, s, APointer);
+                TXCustomStringList<T>::InsertItem(res, s, slen, APointer);
                 PH = (PHashRecord)std::malloc(sizeof(THashRecord));
                 hashBytes += sizeof(THashRecord);
                 PH->PNext = pHashSC[hv];
@@ -611,21 +620,21 @@ namespace gdlib::gmsobj {
             }
         }
 
-        int Add(const std::string &S) {
-            return AddObject(S, nullptr);
+        int Add(const char *S, size_t slen) {
+            return AddObject(S, slen, nullptr);
         }
     };
 
     template<typename T>
     class TXStrPool : public TXHashedStringList<T> {
-        int compareEntry(const std::string &s, int EN) override {
+        int compareEntry(const char *s, int EN) override {
             auto p {this->FList[EN].FString};
-            return !p ? (!s.empty() ? 1 : 0) : utils::sameTextPChar(s.c_str(), p, false);
+            return !p ? (!(!s || s[0]=='\0') ? 1 : 0) : utils::sameTextPChar(s, p, false);
         }
 
-        uint32_t hashValue(const std::string &s) override {
+        uint32_t hashValue(const char *s, size_t slen) override {
             // TODO: How does this method differ from the base class implementation?
-            return TXHashedStringList<T>::hashValue(s);
+            return TXHashedStringList<T>::hashValue(s, slen);
         }
 
     public:

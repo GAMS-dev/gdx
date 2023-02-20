@@ -243,40 +243,6 @@ namespace gdlib::strhash {
             return res;
         }
 
-        int AddObject(const std::string &s, T AObj) {
-            assert(FCount < std::numeric_limits<int>::max());
-            if(FCount >= ReHashCnt) HashAll();
-            int HV {Hash(s)};
-            PHashBucket<T> PBuck = GetBucketByHash(HV);
-            while(PBuck) {
-                if(!EntryEqual(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
-                else return PBuck->StrNr + (OneBased ? 1 : 0);
-            }
-#ifdef TLD_BATCH_ALLOCS
-            PBuck = reinterpret_cast<PHashBucket<T>>(batchAllocator.GetBytes(sizeof(THashBucket<T>)));
-#else
-            PBuck = new THashBucket<T>{};
-#endif
-            Buckets.push_back(PBuck);
-            PBuck->NextBucket = GetBucketByHash(HV);
-            (*PHashTable)[HV] = PBuck;
-            PBuck->StrNr = FCount; // before it was added! zero based
-            int res {FCount + (OneBased ? 1 : 0)};
-            if(SortMap) {
-                (*SortMap)[FCount] = FCount;
-                FSorted = false;
-            }
-            FCount++; // ugly
-#ifdef TLD_BATCH_ALLOCS
-            PBuck->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(s.length()+1));
-#else
-            PBuck->StrP = new char[s.length()+1];
-#endif
-            utils::assignStrToBuf(s, PBuck->StrP, (int)s.length()+1);
-            PBuck->Obj = std::move(AObj);
-            return res;
-        }
-
         int AddObject(const char *s, size_t slen, T AObj) {
             assert(FCount < std::numeric_limits<int>::max());
             if(FCount >= ReHashCnt) HashAll();
@@ -315,19 +281,8 @@ namespace gdlib::strhash {
             // noop by default
         }
 
-        int Add(const std::string &s) {
-            return AddObject(s, nullptr);
-        }
-
-        int IndexOf(const std::string &s) {
-            if(!PHashTable) HashAll();
-            int HV {Hash(s)};
-            PHashBucket<T> PBuck = GetBucketByHash(HV);
-            while(PBuck) {
-                if(!EntryEqualPChar(PBuck->StrP, s.c_str())) PBuck = PBuck->NextBucket;
-                else return PBuck->StrNr + (OneBased ? 1 : 0);
-            }
-            return -1;
+        int Add(const char *s, size_t slen) {
+            return AddObject(s, slen, nullptr);
         }
 
         int IndexOf(const char *s) {
@@ -453,13 +408,13 @@ namespace gdlib::strhash {
 
     // Specialization when it is not a pointer type
     template<>
-    inline int TXStrHashList<uint8_t>::Add(const std::string &s) {
-        return AddObject(s, 0);
+    inline int TXStrHashList<uint8_t>::Add(const char *s, size_t slen) {
+        return AddObject(s, slen, 0);
     }
 
     template<>
-    inline int TXStrHashList<int>::Add(const std::string &s) {
-        return AddObject(s, 0);
+    inline int TXStrHashList<int>::Add(const char *s, size_t slen) {
+        return AddObject(s, slen, 0);
     }
 
     template<>
@@ -558,13 +513,6 @@ namespace gdlib::strhash {
             // noop
         }
 
-        virtual int Hash(const std::string &s) {
-            int res{};
-            for(char c : s)
-                res = 211 * res + toupper(c);
-            return (res & 0x7FFFFFFF) % HashTableSize;
-        }
-
         virtual int Hash(const char* s) {
             int res{};
             for (int i{}; true; i++) {
@@ -627,17 +575,6 @@ namespace gdlib::strhash {
             }
         }
 
-        int IndexOf(const std::string &S) {
-            if(!PHashTable) HashAll();
-            int HV{Hash(S)};
-            PHashBucket<T> PBuck {PHashTable[HV]};
-            while(PBuck) {
-                if(!EntryEqual(PBuck->StrP, S)) PBuck = PBuck->NextBucket;
-                else return PBuck->StrNr + (OneBased ? 1 : 0);
-            }
-            return -1;
-        }
-
         int IndexOf(const char *S) {
             if (!PHashTable) HashAll();
             int HV{ Hash(S) };
@@ -647,30 +584,6 @@ namespace gdlib::strhash {
                 else return PBuck->StrNr + (OneBased ? 1 : 0);
             }
             return -1;
-        }
-
-        int AddObject(const std::string &s, T AObj) {
-            if(FCount >= ReHashCnt) HashAll();
-            int HV{Hash(s)};
-            THashBucket<T> *PBuck {PHashTable[HV]};
-            while(PBuck) {
-                if(!EntryEqual(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
-                else return PBuck->StrNr + (OneBased ? 1 : 0);
-            }
-            PBuck = Buckets.ReserveMem();
-            auto obj = PBuck;
-            obj->NextBucket = PHashTable[HV];
-            PHashTable[HV] = PBuck;
-            obj->StrNr = FCount; // before it was added! zero based
-            int res{FCount + (OneBased ? 1 : 0)};
-            if(SortMap) {
-                (*SortMap)[FCount] = FCount;
-                FSorted = false;
-            }
-            FCount++; // ugly
-            obj->StrP = gmsobj::NewString(s);
-            obj->Obj = AObj;
-            return res;
         }
 
         int AddObject(const char *s, size_t slen, T AObj) {
@@ -697,25 +610,8 @@ namespace gdlib::strhash {
             return res;
         }
 
-        int Add(const std::string& s) {
-            return AddObject(s, nullptr);
-        }
-
-        int StoreObject(const std::string &s, T AObj) {
-            if(PHashTable) ClearHashTable();
-            THashBucket<T> *PBuck = Buckets.ReserveMem();
-            auto obj = PBuck;
-            obj->NextBucket = nullptr;
-            obj->StrNr = FCount; // before it was added!
-            int res{FCount + (OneBased ? 1 : 0)};
-            if(SortMap) {
-                (*SortMap)[FCount] = FCount;
-                FSorted = false;
-            }
-            FCount++; // ugly
-            obj->StrP  = gmsobj::NewString(s);
-            obj->Obj = AObj;
-            return res;
+        int Add(const char *s, size_t slen) {
+            return AddObject(s, slen, nullptr);
         }
 
         int StoreObject(const char *s, size_t slen, T AObj) {
@@ -743,7 +639,7 @@ namespace gdlib::strhash {
             return GetString(N);
         }
 
-        void RenameEntry(int N, const std::string &s) {
+        void RenameEntry(int N, const char *s) {
             N -= OneBased ? 1 : 0;
             if(FSorted) {
                 SortMap = nullptr;
@@ -820,8 +716,8 @@ namespace gdlib::strhash {
 
     // Specialization when it is not a pointer type
     template<>
-    inline int TXStrHashListLegacy<uint8_t>::Add(const std::string& s) {
-        return AddObject(s, 0);
+    inline int TXStrHashListLegacy<uint8_t>::Add(const char *s, size_t slen) {
+        return AddObject(s, slen, 0);
     }
 
     template<>

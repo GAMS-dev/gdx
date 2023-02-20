@@ -85,8 +85,8 @@ namespace xpwrap {
         return ::gdxAddAlias(pgx, Id1.c_str(), Id2.c_str());
     }
 
-    int GDXFile::gdxAddSetText(const std::string &Txt, int &TxtNr) {
-        return ::gdxAddSetText(pgx, Txt.c_str(), &TxtNr);
+    int GDXFile::gdxAddSetText(const char *Txt, int &TxtNr) {
+        return ::gdxAddSetText(pgx, Txt, &TxtNr);
     }
 
     int GDXFile::gdxDataErrorCount() {
@@ -299,8 +299,8 @@ namespace xpwrap {
         return ::gdxAcronymValue(pgx, AIndx);
     }
 
-    int GDXFile::gdxSymbolAddComment(int SyNr, const std::string &Txt) {
-        return ::gdxSymbolAddComment(pgx, SyNr, Txt.c_str());
+    int GDXFile::gdxSymbolAddComment(int SyNr, const char *Txt) {
+        return ::gdxSymbolAddComment(pgx, SyNr, Txt);
     }
 
     int GDXFile::gdxSymbolGetComment(int SyNr, int N, char *Txt) {

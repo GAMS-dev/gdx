@@ -15,9 +15,10 @@ namespace tests::strhashtests {
         T shlst;
         // 0-based
         for(const int &n : nums) {
-            REQUIRE_EQ(n-1, shlst.AddObject("i" + std::to_string(n), n));
+            auto s {"i" + std::to_string(n)};
+            REQUIRE_EQ(n-1, shlst.AddObject(s.c_str(), s.length(), n));
         }
-        REQUIRE_EQ(2, shlst.IndexOf("i3"s));
+        REQUIRE_EQ(2, shlst.IndexOf("i3"));
     };
 
     TEST_CASE("Adding some set element names that are mapped to numbers") {

@@ -195,8 +195,10 @@ namespace tests::benchmarks {
     void nameListTest() {
         const int n{ 1000 };
         T obj;
-        for (int i{}; i < n; i++)
-            obj.AddObject("sym" + std::to_string(i), new gxfile::TgdxSymbRecord{});
+        for (int i{}; i < n; i++) {
+            auto s{"sym" + std::to_string(i)};
+            obj.AddObject(s.c_str(), s.length(), new gxfile::TgdxSymbRecord{});
+        }
         int cnt{};
         for (int i{ n - 1 }; i >= 0; i--) {
             auto oi = *obj.GetObject(i);
@@ -215,11 +217,13 @@ namespace tests::benchmarks {
     void uelTableTest() {
         const int n{ 1000 };
         T obj;
-        for (int i{}; i < n; i++)
-            obj.AddObject("uel" + std::to_string(i), i);
+        for (int i{}; i < n; i++) {
+            auto s{"uel" + std::to_string(i)};
+            obj.AddObject(s.c_str(), s.length(), i);
+        }
         int cnt{};
         for (int i{ n - 1 }; i >= 0; i--)
-            cnt += obj.IndexOf("uel" + std::to_string(i));
+            cnt += obj.IndexOf(("uel" + std::to_string(i)).c_str());
     }
 
     TEST_CASE("Benchmark variants of UEL table implementations") {
@@ -275,8 +279,10 @@ namespace tests::benchmarks {
         T obj;
         const int n{10000};
         //obj.SetCapacity(n);
-        for(int i{}; i<n; i++)
-            obj.Add("set_text_"+std::to_string(i+1));
+        for(int i{}; i<n; i++) {
+            auto s{"set_text_" + std::to_string(i + 1)};
+            obj.Add(s.c_str(), s.length());
+        }
         std::string s;
         for(int i{}; i<n; i++)
             obj.GetString(i);
@@ -284,7 +290,6 @@ namespace tests::benchmarks {
 
     TEST_CASE("Benchmark various set text list implementations") {
         benchmarkNClasses(4, {
-            BenchClass {"VecSetList"s, testSetTextList<gxfile::VecSetTextList>},
             BenchClass {"WrapCxxUnorderedMap", testSetTextList<gxfile::WrapCxxUnorderedMap<int>>},
             BenchClass {"TXStrPool", testSetTextList<gdlib::gmsobj::TXStrPool<int>>},
             BenchClass {"TXCSStrHashListImpl", testSetTextList<gxfile::TXStrHashListImpl<int*>>}
@@ -296,10 +301,14 @@ namespace tests::benchmarks {
     void testStrHashList() {
         T obj;
         const int n{ 10000 };
-        for (int i{}; i<n; i++)
-            obj.Add("entry_" + std::to_string(i+1));
-        for (int i{}; i < n; i++)
-            obj.IndexOf("entry_" + std::to_string(i + 1));
+        for (int i{}; i<n; i++) {
+            auto s{"entry_"s + std::to_string(i + 1)};
+            obj.Add(s.c_str(), s.length());
+        }
+        for (int i{}; i < n; i++) {
+            auto s{"entry_"s + std::to_string(i + 1)};
+            obj.IndexOf(s.c_str());
+        }
     }
 
     TEST_CASE("Benchmark variants of TXStrHashList") {

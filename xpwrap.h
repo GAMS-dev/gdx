@@ -37,7 +37,7 @@ namespace xpwrap {
 
         int gdxAddAlias(const std::string &Id1, const std::string &Id2) override;
 
-        int gdxAddSetText(const std::string &Txt, int &TxtNr) override;
+        int gdxAddSetText(const char *Txt, int &TxtNr) override;
 
         int gdxDataErrorCount() override;
 
@@ -147,7 +147,7 @@ namespace xpwrap {
 
         double gdxAcronymValue(int AIndx) const override;
 
-        int gdxSymbolAddComment(int SyNr, const std::string &Txt) override;
+        int gdxSymbolAddComment(int SyNr, const char *Txt) override;
 
         int gdxSymbolGetComment(int SyNr, int N, char *Txt) override;
 
