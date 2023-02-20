@@ -118,10 +118,10 @@ namespace gdlib::datastorage {
         using RecType = TLD_REC_TYPE;
         RecType *FHead, *FTail;
 
-#if defined(TLD_BATCH_ALLOCS)
-        BatchAllocator<960> batchAllocator;
-#elif defined(USE_GMSHEAP)
+#if defined(USE_GMSHEAP)
         gdlib::gmsheapnew::THeapMgr MyHeap {"TLinkedData"};
+#elif defined(TLD_BATCH_ALLOCS)
+        BatchAllocator<960> batchAllocator;
 #endif
 
         bool IsSorted() {
@@ -164,7 +164,7 @@ namespace gdlib::datastorage {
         }
 
         void Clear() {
-#ifdef TLD_BATCH_ALLOCS
+#if defined(TLD_BATCH_ALLOCS) && !defined(USE_GMSHEAP)
             batchAllocator.clear();
 #else
             RecType *P {FHead};
@@ -189,10 +189,10 @@ namespace gdlib::datastorage {
 
         RecType *AddItem(const KeyType *AKey, const ValueType *AData) {
 #ifdef TLD_DYN_ARRAYS
-    #if defined(TLD_BATCH_ALLOCS)
-            auto* node = reinterpret_cast<RecType *>(batchAllocator.GetBytes(FTotalSize));
-    #elif defined(USE_GMSHEAP)
+    #if defined(USE_GMSHEAP)
             auto *node = reinterpret_cast<RecType *>(MyHeap.XGetMem(FTotalSize));
+    #elif defined(TLD_BATCH_ALLOCS)
+            auto* node = reinterpret_cast<RecType *>(batchAllocator.GetBytes(FTotalSize));
     #else
             auto* node = reinterpret_cast<RecType *>(new uint8_t[FTotalSize]);
     #endif

@@ -270,7 +270,7 @@ namespace gdlib::strhash {
 #ifdef TLD_BATCH_ALLOCS
             PBuck->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(slen+1));
 #else
-            PBuck->StrP = new char[s.length()+1];
+            PBuck->StrP = new char[slen+1];
 #endif
             utils::assignPCharToBuf(s, slen, PBuck->StrP, slen+1);
             PBuck->Obj = std::move(AObj);
