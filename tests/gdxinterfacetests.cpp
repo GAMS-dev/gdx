@@ -775,6 +775,9 @@ namespace tests::gdxinterfacetests {
             int txtNr;
             REQUIRE(pgx.gdxAddSetText("set text", txtNr));
             REQUIRE_EQ(1, txtNr);
+            // Check adding twice: Should give same text number!
+            REQUIRE(pgx.gdxAddSetText("set text", txtNr));
+            REQUIRE_EQ(1, txtNr);
             int elemNode;
             char elemTxt[GMS_SSSIZE];
             REQUIRE(pgx.gdxGetElemText(txtNr, elemTxt, elemNode));
