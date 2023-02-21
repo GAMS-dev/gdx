@@ -783,6 +783,11 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxGetElemText(txtNr, elemTxt, elemNode));
             REQUIRE(!strcmp("set text", elemTxt));
             REQUIRE_EQ(0, elemNode);
+            REQUIRE_FALSE(pgx.gdxSetTextNodeNr(200, 42));
+            REQUIRE(pgx.gdxSetTextNodeNr(1, 23));
+            REQUIRE(pgx.gdxGetElemText(1, elemTxt, elemNode));
+            REQUIRE(!strcmp("set text", elemTxt));
+            REQUIRE_EQ(23, elemNode);
         });
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);

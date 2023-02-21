@@ -859,7 +859,7 @@ template<typename K, typename V, typename H, typename E>
         int gdxDataReadFilteredStart(int SyNr, const int* FilterAction, int& NrRecs) override;
         // endregion
 
-        int gdxSetTextNodeNr(int TxtNr, int Node);
+        int gdxSetTextNodeNr(int TxtNr, int Node) override;
         int gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int& NrElem, void* UPtr);
         int gdxSetTraceLevel(int N, const std::string &s) override;
         int gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) override;

@@ -162,6 +162,8 @@ namespace xpwrap {
         int gdxUELMaxLength() override;
 
         std::string getImplName() const override;
+
+        int gdxSetTextNodeNr(int TxtNr, int Node) override;
     };
 
 }

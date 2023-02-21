@@ -195,6 +195,7 @@ namespace gdxinterface {
         virtual int gdxFilterRegisterDone() = 0;
         virtual int gdxDataReadFilteredStart(int SyNr, const int *FilterAction, int &NrRecs) = 0;
         virtual int gdxSetTraceLevel(int N, const std::string &s) = 0;
+        virtual int gdxSetTextNodeNr(int TxtNr, int Node) = 0;
         virtual int gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) = 0;
         virtual int gdxAcronymIndex(double V) const = 0;
         virtual int gdxAcronymName(double V, char *AName) = 0;

@@ -2372,7 +2372,7 @@ namespace gxfile {
         } else {
             utils::assignStrToBuf(SetTextList->GetName(TxtNr), Txt, GMS_SSSIZE);
             auto obj = SetTextList->GetObject(TxtNr);
-            Node = obj ? *obj : 0;
+            Node = obj ? (int)reinterpret_cast<long long>(obj) : 0;
             return true;
         }
     }
@@ -3531,8 +3531,8 @@ namespace gxfile {
     {
         if (!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("SetTextNodeNr"))) return false;
         auto& obj = *SetTextList;
-        if (TxtNr >= 0 && TxtNr < obj.size() && !*obj.GetObject(TxtNr)) {
-            *obj.GetObject(TxtNr) = Node;
+        if (TxtNr >= 0 && TxtNr < obj.size() && !obj.GetObject(TxtNr)) {
+            obj.PutObject(TxtNr, reinterpret_cast<uint8_t*>((long long)Node));
             return true;
         }
         return false;

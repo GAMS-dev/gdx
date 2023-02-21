@@ -334,4 +334,8 @@ namespace xpwrap {
     int GDXFile::gdxSetTraceLevel(int N, const std::string &s) {
         return ::gdxSetTraceLevel(pgx, N, s.c_str());
     }
+
+    int GDXFile::gdxSetTextNodeNr(int TxtNr, int Node) {
+        return ::gdxSetTextNodeNr(pgx, TxtNr, Node);
+    }
 }
