@@ -338,4 +338,65 @@ namespace xpwrap {
     int GDXFile::gdxSetTextNodeNr(int TxtNr, int Node) {
         return ::gdxSetTextNodeNr(pgx, TxtNr, Node);
     }
+
+    int GDXFile::gdxResetSpecialValues() {
+        return ::gdxResetSpecialValues(pgx);
+    }
+
+    int
+    GDXFile::gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int &NrElem, void *UPtr) {
+        return ::gdxGetDomainElements(pgx, SyNr, DimPos, FilterNr, DP, &NrElem, UPtr);
+    }
+
+    int GDXFile::gdxAutoConvert(int nv) {
+        return ::gdxAutoConvert(pgx, nv);
+    }
+
+    int GDXFile::gdxGetDLLVersion(char *V) const {
+        return ::gdxGetDLLVersion(pgx, V);
+    }
+
+    int GDXFile::gdxFileInfo(int &FileVer, int &ComprLev) const {
+        return ::gdxFileInfo(pgx, &FileVer, &ComprLev);
+    }
+
+    int GDXFile::gdxDataReadSliceStart(int SyNr, int *ElemCounts) {
+        return ::gdxDataReadSliceStart(pgx, SyNr, ElemCounts);
+    }
+
+    int GDXFile::gdxDataReadSlice(const char **UelFilterStr, int &Dimen, TDataStoreProc_t DP) {
+        return ::gdxDataReadSlice(pgx, UelFilterStr, &Dimen, DP);
+    }
+
+    int GDXFile::gdxDataSliceUELS(const int *SliceKeyInt, char **KeyStr) {
+        return ::gdxDataSliceUELS(pgx, SliceKeyInt, KeyStr);
+    }
+
+    int64_t GDXFile::gdxGetMemoryUsed() {
+        return ::gdxGetMemoryUsed(pgx);
+    }
+
+    int GDXFile::gdxMapValue(double D, int &sv) {
+        return ::gdxMapValue(pgx, D, &sv);
+    }
+
+    int GDXFile::gdxSetHasText(int SyNr) {
+        return ::gdxSetHasText(pgx, SyNr);
+    }
+
+    int GDXFile::gdxSetReadSpecialValues(const double *AVals) {
+        return ::gdxSetReadSpecialValues(pgx, AVals);
+    }
+
+    int GDXFile::gdxSymbMaxLength() const {
+        return ::gdxSymbMaxLength(pgx);
+    }
+
+    int GDXFile::gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP) {
+        return ::gdxDataReadRawFastFilt(pgx, SyNr, UelFilterStr, DP);
+    }
+
+    int GDXFile::gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs) {
+        return ::gdxDataReadRawFast(pgx, SyNr, DP, &NrRecs);
+    }
 }

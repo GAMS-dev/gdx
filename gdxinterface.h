@@ -12,6 +12,10 @@ namespace gdxinterface {
     using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
     using TgdxValues = std::array<double, GMS_VAL_SCALE+ 1>;
 
+    using TDomainIndexProc_t = void(*)(int RawIndex, int MappedIndex, void* Uptr);
+    using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
+    using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
+
     class CharBuf {
         std::array<char, 256> buf;
 
@@ -114,6 +118,7 @@ namespace gdxinterface {
         virtual int gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) = 0;
         // endregion
         virtual int gdxClose() = 0;
+        virtual int gdxResetSpecialValues() = 0;
 
         // region Data write
         virtual int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) = 0;
@@ -208,6 +213,23 @@ namespace gdxinterface {
         virtual int gdxSymbIndxMaxLength(int SyNr, int *LengthInfo) = 0;
         virtual int gdxUELMaxLength() = 0;
         // endregion
+
+        virtual int gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int& NrElem, void* UPtr) = 0;
+        virtual int gdxAutoConvert(int nv) = 0;
+
+        virtual int gdxGetDLLVersion(char *V) const = 0;
+        virtual int gdxFileInfo(int &FileVer, int &ComprLev) const = 0;
+
+        virtual int gdxDataReadSliceStart(int SyNr, int* ElemCounts) = 0;
+        virtual int gdxDataReadSlice(const char** UelFilterStr, int& Dimen, TDataStoreProc_t DP) = 0;
+        virtual int gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr) = 0;
+        virtual int64_t gdxGetMemoryUsed() = 0;
+        virtual int gdxMapValue(double D, int& sv) = 0;
+        virtual int gdxSetHasText(int SyNr) = 0;
+        virtual int gdxSetReadSpecialValues(const double *AVals) = 0;
+        virtual int gdxSymbMaxLength() const = 0;
+        virtual int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP) = 0;
+        virtual int gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs) = 0;
 
         virtual std::string getImplName() const = 0;
     };

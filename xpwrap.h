@@ -164,6 +164,22 @@ namespace xpwrap {
         std::string getImplName() const override;
 
         int gdxSetTextNodeNr(int TxtNr, int Node) override;
+        int gdxResetSpecialValues() override;
+        int gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, gdxinterface::TDomainIndexProc_t DP, int &NrElem,
+                                 void *UPtr) override;
+        int gdxAutoConvert(int nv) override;
+        int gdxGetDLLVersion(char *V) const override;
+        int gdxFileInfo(int &FileVer, int &ComprLev) const override;
+        int gdxDataReadSliceStart(int SyNr, int *ElemCounts) override;
+        int gdxDataReadSlice(const char **UelFilterStr, int &Dimen, gdxinterface::TDataStoreProc_t DP) override;
+        int gdxDataSliceUELS(const int *SliceKeyInt, char **KeyStr) override;
+        int64_t gdxGetMemoryUsed() override;
+        int gdxMapValue(double D, int &sv) override;
+        int gdxSetHasText(int SyNr) override;
+        int gdxSetReadSpecialValues(const double *AVals) override;
+        int gdxSymbMaxLength() const override;
+        int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, gdxinterface::TDataStoreFiltProc_t DP) override;
+        int gdxDataReadRawFast(int SyNr, gdxinterface::TDataStoreProc_t DP, int &NrRecs) override;
     };
 
 }

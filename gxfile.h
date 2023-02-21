@@ -526,10 +526,6 @@ template<typename K, typename V, typename H, typename E>
     using TIntlValueMapDbl = std::array<double, vm_count>;
     using TIntlValueMapI64 = std::array<int64_t, vm_count>;
 
-    using TDomainIndexProc_t = void(*)(int RawIndex, int MappedIndex, void* Uptr);
-    using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
-    using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
-
 #ifndef TLD_LEGACY
     #ifndef TLD_DYN_ARRAYS
         using LinkedDataType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>;
@@ -790,7 +786,7 @@ template<typename K, typename V, typename H, typename E>
         int gdxUELRegisterMapStart() override;
         int gdxUELRegisterMap(int UMap, const char *Uel) override;
         int gdxClose() override;
-        int gdxResetSpecialValues();
+        int gdxResetSpecialValues() override;
         int gdxErrorStr(int ErrNr, char *ErrMsg) override;
         static int gdxErrorStrStatic(int ErrNr, char *ErrMsg);
         int gdxOpenRead(const std::string &FileName, int &ErrNr) override;
@@ -860,36 +856,33 @@ template<typename K, typename V, typename H, typename E>
         // endregion
 
         int gdxSetTextNodeNr(int TxtNr, int Node) override;
-        int gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int& NrElem, void* UPtr);
+        int gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, gdxinterface::TDomainIndexProc_t DP, int& NrElem, void* UPtr) override;
         int gdxSetTraceLevel(int N, const std::string &s) override;
         int gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) override;
         int gdxAcronymIndex(double V) const override;
         int gdxAcronymName(double V, char *AName) override;
         double gdxAcronymValue(int AIndx) const override;
-        int gdxAutoConvert(int nv);
-
-        int gdxGetDLLVersion(char *V) const;
-        int gdxFileInfo(int &FileVer, int &ComprLev) const;
-
-        int gdxDataReadSliceStart(int SyNr, int* ElemCounts);
-        int gdxDataReadSlice(const char** UelFilterStr, int& Dimen, TDataStoreProc_t DP);
-        int gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr);
-        int64_t gdxGetMemoryUsed();
-        int gdxMapValue(double D, int& sv);
+        int gdxAutoConvert(int nv) override;
+        int gdxGetDLLVersion(char *V) const override;
+        int gdxFileInfo(int &FileVer, int &ComprLev) const override;
+        int gdxDataReadSliceStart(int SyNr, int* ElemCounts) override;
+        int gdxDataReadSlice(const char** UelFilterStr, int& Dimen, gdxinterface::TDataStoreProc_t DP) override;
+        int gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr) override;
+        int64_t gdxGetMemoryUsed() override;
+        int gdxMapValue(double D, int& sv) override;
         int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr) override;
-        int gdxSetHasText(int SyNr);
-        int gdxSetReadSpecialValues(const double *AVals);
+        int gdxSetHasText(int SyNr) override;
+        int gdxSetReadSpecialValues(const double *AVals) override;
         int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) override;
-        int gdxSymbMaxLength() const;
+        int gdxSymbMaxLength() const override;
         int gdxSymbolAddComment(int SyNr, const char* Txt) override;
         int gdxSymbolGetComment(int SyNr, int N, char *Txt) override;
         int gdxUELMaxLength() override;
         int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap);
         int gdxStoreDomainSets() override;
         void gdxStoreDomainSetsSet(int x) override;
-
-        int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP);
-        int gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs);
+        int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, gdxinterface::TDataStoreFiltProc_t DP) override;
+        int gdxDataReadRawFast(int SyNr, gdxinterface::TDataStoreProc_t DP, int &NrRecs) override;
 
         std::string getImplName() const override;
 
