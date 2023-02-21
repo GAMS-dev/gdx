@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <string>
 #include <cassert>
-//#include "datastorage.h"
 #include <limits>
 #include "../utils.h"
 
@@ -139,9 +138,9 @@ namespace gdlib::gmsobj {
             if (NewCapacity == FCapacity) return;
             else if (NewCapacity < FCount) NewCapacity = FCount;
             FListMemory = sizeof(T*) * NewCapacity;
-            if (!FList) FList = (T**)std::malloc(FListMemory);
+            if (!FList) FList = static_cast<T**>(std::malloc(FListMemory));
             else if (!NewCapacity) std::free(FList);
-            else FList = (T**)std::realloc(FList, FListMemory);
+            else FList = static_cast<T**>(std::realloc(FList, FListMemory));
             FCapacity = NewCapacity;
         }
 
@@ -157,7 +156,7 @@ namespace gdlib::gmsobj {
             return !FCount;
         }
 
-        T *operator[](int Index) {
+        virtual T *operator[](int Index) {
             return Get(Index);
         }
 
@@ -221,7 +220,8 @@ namespace gdlib::gmsobj {
 
     public:
         TXStrings() : FStrMemory{} {}
-        virtual ~TXStrings() {
+
+        ~TXStrings() override {
             Clear();
         }
 
@@ -234,10 +234,6 @@ namespace gdlib::gmsobj {
                 if(utils::sameTextPChar(FList[N], Item))
                     return N + (OneBased ? 1 : 0);
             return -1;
-        }
-
-        std::string operator[](int Index) {
-            return Get(Index);
         }
     };
 
@@ -317,6 +313,7 @@ namespace gdlib::gmsobj {
     class TQuickSortClass {
         void QuickSort(int L, int R);
     public:
+        virtual ~TQuickSortClass() = default;
         bool OneBased {};
         virtual void Exchange(int Index1, int Index2) = 0;
         virtual int Compare(int Index1, int Index2) = 0;
@@ -404,8 +401,7 @@ namespace gdlib::gmsobj {
             FCount++;
         }
 
-    public:
-        ~TXCustomStringList() {
+        ~TXCustomStringList() override {
             Clear();
         }
 
@@ -422,18 +418,18 @@ namespace gdlib::gmsobj {
             FreeObject(Index);
         }
 
-        void Clear() {
+        virtual void Clear() {
             for(int N{FCount-1+(OneBased?1:0)}; N >=(OneBased ? 1 : 0); N--)
                 FreeItem(N);
             FCount = 0;
             SetCapacity(0);
         }
 
-        int Add(const char *S, size_t slen) {
+        virtual int Add(const char *S, size_t slen) {
             return AddObject(S, slen, nullptr);
         }
 
-        int AddObject(const char *S, size_t slen, T *APointer) {
+        virtual int AddObject(const char *S, size_t slen, T *APointer) {
             int res{FCount+(OneBased?1:0)};
             InsertItem(res, S, slen, APointer);
             return res;
@@ -565,7 +561,7 @@ namespace gdlib::gmsobj {
             i64 = std::min<int64_t>(std::numeric_limits<int>::max(), i64);
             trigger = (int)i64;
             hashBytes = sizeof(PHashRecord) * hashCount;
-            pHashSC = (PHashRecord *)std::malloc(hashBytes);
+            pHashSC = static_cast<PHashRecord *>(std::malloc(hashBytes));
             std::memset(pHashSC, 0, hashBytes);
             for(int n{this->OneBased?1:0}; n<=this->FCount-1+(this->OneBased?1:0); n++) {
                 auto name{this->GetName(n)};
@@ -593,16 +589,16 @@ namespace gdlib::gmsobj {
         }
 
     public:
-        ~TXHashedStringList() {
+        virtual ~TXHashedStringList() {
             Clear();
         }
 
-        void Clear() {
+        void Clear() override {
             ClearHashList();
             TXCustomStringList<T>::Clear();
         }
 
-        int AddObject(const char *s, size_t slen, T *APointer) {
+        int AddObject(const char *s, size_t slen, T *APointer) override {
             if(!pHashSC || this->FCount > trigger) SetHashSize(this->FCount);
             auto hv { hashValue(s, slen) };
             PHashRecord PH;
@@ -620,7 +616,7 @@ namespace gdlib::gmsobj {
             }
         }
 
-        int Add(const char *S, size_t slen) {
+        int Add(const char *S, size_t slen) override {
             return AddObject(S, slen, nullptr);
         }
     };
@@ -638,6 +634,8 @@ namespace gdlib::gmsobj {
         }
 
     public:
+        virtual ~TXStrPool() = default;
+
         int Compare(int Index1, int Index2) override {
             char    *s1 {this->FList[Index1-(this->OneBased?1:0)].FString},
                     *s2 {this->FList[Index2-(this->OneBased?1:0)].FString};
