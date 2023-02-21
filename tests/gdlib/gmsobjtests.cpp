@@ -97,6 +97,34 @@ namespace tests::gmsobjtests {
         REQUIRE_EQ("First"s, lst[0]);
     }
 
+    TEST_CASE("Extensive use of TXStrPool") {
+        TXStrPool<uint8_t> lst;
+        REQUIRE_FALSE(lst.OneBased);
+        REQUIRE_EQ(0, lst.Count());
+        REQUIRE_EQ(0, lst.GetCapacity());
+        REQUIRE_EQ(0, lst.size());
+        REQUIRE_EQ(0, lst.MemoryUsed());
+        const int n{100};
+        lst.SetCapacity(n);
+        std::list<int> knownIndices{};
+        for(int i{}; i<n; i++) {
+            std::string s{"i"+std::to_string(i+1)};
+            int ix{lst.Add(s.c_str(), s.length())};
+            REQUIRE_GT(ix, -1);
+            REQUIRE_EQ(-1, utils::indexOf(knownIndices, ix));
+            knownIndices.push_back(ix);
+        }
+        REQUIRE_LE(n, lst.GetCapacity());
+        REQUIRE_EQ(n, lst.size());
+        REQUIRE(!std::strcmp("i1",lst.GetName(0)));
+        REQUIRE(!lst.GetObject(0));
+        lst.Delete(0);
+        REQUIRE_EQ(n-1,lst.size());
+        REQUIRE(!std::strcmp("i2", lst.GetName(0)));
+        REQUIRE_GT(lst.MemoryUsed(), 0);
+        REQUIRE_GT(lst.Add("", 0), -1);
+    }
+
     TEST_SUITE_END();
 
 }

@@ -281,11 +281,12 @@ namespace tests::benchmarks {
         //obj.SetCapacity(n);
         for(int i{}; i<n; i++) {
             auto s{"set_text_" + std::to_string(i + 1)};
-            obj.Add(s.c_str(), s.length());
+            REQUIRE(obj.Add(s.c_str(), s.length()) > -1);
         }
+        REQUIRE_EQ(n, obj.size());
         std::string s;
         for(int i{}; i<n; i++)
-            obj.GetString(i);
+            REQUIRE(std::strlen(obj.GetString(i)) > 0);
     }
 
     TEST_CASE("Benchmark various set text list implementations") {
