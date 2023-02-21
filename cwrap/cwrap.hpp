@@ -274,7 +274,7 @@ GDX_INLINE int gdxDataReadRawStart(TGXFileRec_t *TGXFile, int SyNr, int *NrRecs)
 }
 
 GDX_INLINE int gdxDataReadSlice(TGXFileRec_t *TGXFile, const char *UelFilterStr[], int *Dimen, ::TDataStoreProc_t DP) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadSlice(UelFilterStr, *Dimen, (gxfile::TDataStoreProc_t)DP);
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadSlice(UelFilterStr, *Dimen, (gdxinterface::TDataStoreProc_t)DP);
 }
 
 GDX_INLINE int gdxDataReadSliceStart(TGXFileRec_t *TGXFile, int SyNr, int ElemCounts[]) {
@@ -502,7 +502,7 @@ GDX_INLINE int gdxUMUelInfo(TGXFileRec_t *TGXFile, int *UelCnt, int *HighMap) {
 }
 
 GDX_INLINE int gdxGetDomainElements(TGXFileRec_t *TGXFile, int SyNr, int DimPos, int FilterNr, ::TDomainIndexProc_t DP, int *NrElem, void *Uptr) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetDomainElements(SyNr, DimPos, FilterNr, (gxfile::TDomainIndexProc_t)DP, *NrElem, Uptr);
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxGetDomainElements(SyNr, DimPos, FilterNr, (gdxinterface::TDomainIndexProc_t)DP, *NrElem, Uptr);
 }
 
 GDX_INLINE int gdxCurrentDim(TGXFileRec_t *TGXFile) {
@@ -550,11 +550,11 @@ GDX_INLINE void gdxCreateD(TGXFileRec_t **TGXFile, const char *sysDir, char *msg
 }
 
 GDX_INLINE int gdxDataReadRawFast(TGXFileRec_t *TGXFile, int SyNr, ::TDataStoreProc_t DP, int *NrRecs) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadRawFast(SyNr, (gxfile::TDataStoreProc_t)DP, *NrRecs);
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadRawFast(SyNr, (gdxinterface::TDataStoreProc_t)DP, *NrRecs);
 }
 
 GDX_INLINE int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char **UelFilterStr, ::TDataStoreFiltProc_t DP) {
-    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadRawFastFilt(SyNr, UelFilterStr, (gxfile::TDataStoreFiltProc_t)DP);
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadRawFastFilt(SyNr, UelFilterStr, (gdxinterface::TDataStoreFiltProc_t)DP);
 }
 
 void setCallByRef(const char *FuncName, int cbrValue) {
