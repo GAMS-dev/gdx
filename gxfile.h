@@ -775,9 +775,9 @@ template<typename K, typename V, typename H, typename E>
         int gdxOpenReadXX(const std::string &Afn, int filemode, int ReadMode, int &ErrNr);
 
     public:
-        bool    gdxGetDomainElements_DP_CallByRef,
-                gdxDataReadRawFastFilt_DP_CallByRef,
-                gdxDataReadRawFastEx_DP_CallByRef;
+        bool    gdxGetDomainElements_DP_CallByRef{},
+                gdxDataReadRawFastFilt_DP_CallByRef{},
+                gdxDataReadRawFastEx_DP_CallByRef{};
 
         explicit TGXFileObj(std::string &ErrMsg);
         ~TGXFileObj() override;

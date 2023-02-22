@@ -66,6 +66,7 @@ namespace tests::gdxinterfacetests {
         const std::string fn {"create.gdx"};
         basicTest([&](GDXInterface &pgx) {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
+
             int ErrNr;
             REQUIRE_FALSE(pgx.gdxOpenWrite(""s, "gdxinterfacetest", ErrNr));
             REQUIRE_NE(0, ErrNr);
@@ -74,7 +75,15 @@ namespace tests::gdxinterfacetests {
             char msg[GMS_SSSIZE];
             REQUIRE(pgx.gdxErrorStr(pgx.gdxGetLastError(), msg));
             REQUIRE(!strcmp("File name is empty", msg));
+
             REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
+            REQUIRE_FALSE(ErrNr);
+            REQUIRE_EQ(0, pgx.gdxErrorCount());
+            pgx.gdxClose();
+            REQUIRE(std::filesystem::exists(fn));
+
+            std::filesystem::remove(fn);
+            REQUIRE(pgx.gdxOpenWriteEx(fn, "gdxinterfacetest", 1, ErrNr));
             REQUIRE_FALSE(ErrNr);
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             pgx.gdxClose();
@@ -85,13 +94,18 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test trying to open a file for reading that does not exist") {
         basicTest([&](GDXInterface &pgx) {
+            auto checksAfterOpenAttempt = [&](int ErrNr) {
+                REQUIRE_EQ(2, ErrNr);
+                char errMsg[GMS_SSSIZE];
+                REQUIRE(pgx.gdxErrorStr(ErrNr, errMsg));
+                REQUIRE(!strcmp("No such file or directory", errMsg));
+                pgx.gdxClose();
+            };
             int ErrNr;
             REQUIRE_FALSE(pgx.gdxOpenRead("doesNotExist", ErrNr));
-            REQUIRE_EQ(2, ErrNr);
-            char errMsg[GMS_SSSIZE];
-            REQUIRE(pgx.gdxErrorStr(ErrNr, errMsg));
-            REQUIRE(!strcmp("No such file or directory", errMsg));
-            pgx.gdxClose();
+            checksAfterOpenAttempt(ErrNr);
+            REQUIRE_FALSE(pgx.gdxOpenReadEx("doesNotExist", gdlib::gmsstrm::fmOpenRead, ErrNr));
+            checksAfterOpenAttempt(ErrNr);
         });
     }
 
@@ -977,7 +991,7 @@ namespace tests::gdxinterfacetests {
 
             pgx.gdxClose();
 
-            REQUIRE(pgx.gdxOpenRead(fn, errNr));
+            REQUIRE(pgx.gdxOpenReadEx(fn, gdlib::gmsstrm::fmOpenRead, errNr));
 
             REQUIRE(pgx.gdxSymbolInfoX(0, recCnt, userInfo, explText));
             REQUIRE(pgx.gdxFindSymbol("*", symNr));
@@ -1205,7 +1219,9 @@ namespace tests::gdxinterfacetests {
         std::string f1{ "domaincheck_wrapper.gdx" },
                     f2 {"domaincheck_port.gdx"};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
+            REQUIRE(pgx.gdxStoreDomainSets());
             pgx.gdxStoreDomainSetsSet(false);
+            REQUIRE_FALSE(pgx.gdxStoreDomainSets());
             pgx.gdxUELRegisterRawStart();
             for(int i=0; i<50; i++)
                 pgx.gdxUELRegisterRaw(("uel_"s+std::to_string(i+1)).c_str());
