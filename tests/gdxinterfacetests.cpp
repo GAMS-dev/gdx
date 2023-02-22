@@ -167,6 +167,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteRawStart("mysym", "Some explanatory text.", 2, dt_par, 0));
             REQUIRE_EQ(2, pgx.gdxCurrentDim());
             REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE_EQ(5, pgx.gdxSymbMaxLength());
             pgx.gdxClose();
         });
         std::filesystem::remove(fn);
@@ -811,7 +812,7 @@ namespace tests::gdxinterfacetests {
             TgdxUELIndex keys;
             TgdxValues values;
             keys[0] = 1;
-            values[GMS_VAL_LEVEL] = 1;
+            values[GMS_VAL_LEVEL] = 1; // this determines first record/elem of set i has set text with textnr=1
             REQUIRE(pgx.gdxDataWriteRaw(keys.data(), values.data()));
             REQUIRE(pgx.gdxDataWriteDone());
             int txtNr;
@@ -830,6 +831,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxGetElemText(1, elemTxt, elemNode));
             REQUIRE(!strcmp("set text", elemTxt));
             REQUIRE_EQ(23, elemNode);
+            REQUIRE(pgx.gdxSetHasText(1));
         });
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);
@@ -988,6 +990,8 @@ namespace tests::gdxinterfacetests {
                 {1,1}, {2,2}
             };
             REQUIRE_EQ(expectedCallArgs, callArgs);
+
+            REQUIRE_EQ(6, pgx.gdxSymbMaxLength());
         });
         std::filesystem::remove(gdxfn);
     }
@@ -1534,6 +1538,8 @@ namespace tests::gdxinterfacetests {
                 REQUIRE(pgx.gdxDataWriteRaw(keys.data(), values.data()));
             }
             REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE_FALSE(pgx.gdxSetHasText(1));
+            REQUIRE_FALSE(pgx.gdxSetHasText(23));
             // Write a many dimensional parameter symbol "d(i,...,i)" with many records
             const int paramDim {16};
             REQUIRE(pgx.gdxDataWriteRawStart("d"s, "a parameter"s, paramDim, dt_par, 0));
