@@ -443,7 +443,6 @@ template<typename K, typename V, typename H, typename E>
         void RenameEntry(int N, const char *s) override;
         int MemoryUsed() const override;
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
-
         void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
     };
 

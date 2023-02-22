@@ -3955,7 +3955,7 @@ namespace gxfile {
     int64_t TGXFileObj::gdxGetMemoryUsed() {
         int64_t res{};
         if(UELTable) res += UELTable->MemoryUsed();
-        if(SetTextList) res += SetTextList->MemoryUsed();
+        if(SetTextList) res += static_cast<int64_t>(SetTextList->MemoryUsed());
         if(NameList) res += NameList->MemoryUsed();
         if(DomainStrList) res += DomainStrList->MemoryUsed();
         if(SortList) res += SortList->MemoryUsed();
@@ -4528,7 +4528,7 @@ namespace gxfile {
 
     // FIXME: Not very accurate
     int TUELTable::MemoryUsed() const {
-        return size() * sizeof(IndexNumPair);
+        return static_cast<int>(size() * sizeof(IndexNumPair));
     }
 
     void TUELTable::SaveToStream(TXStreamDelphi &S) {

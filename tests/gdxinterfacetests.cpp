@@ -1863,6 +1863,33 @@ namespace tests::gdxinterfacetests {
         });
     }
 
+    TEST_CASE("Test setting/getting auto convert flag") {
+        basicTest([](GDXInterface &pgx) {
+            // default is AutoConvert=1/true
+            REQUIRE(pgx.gdxAutoConvert(0));
+            REQUIRE_FALSE(pgx.gdxAutoConvert(1));
+            REQUIRE(pgx.gdxAutoConvert(1));
+        });
+        basicTest([](GDXInterface &pgx) {
+            rtl::p3utils::P3SetEnv("GDXCOMPRESS", "1"s);
+            rtl::p3utils::P3SetEnv("GDXCONVERT", "v5");
+            int ErrNr;
+            const std::string fn {"autoconv.gdx"s};
+            REQUIRE(pgx.gdxAutoConvert(0)); // disable auto convert
+            REQUIRE(pgx.gdxOpenWriteEx(fn, "gdxinterfacetest"s, 0, ErrNr));
+            pgx.gdxClose();
+            REQUIRE(pgx.gdxOpenRead(fn, ErrNr));
+            int fileVer, comprLevel;
+            REQUIRE(pgx.gdxFileInfo(fileVer, comprLevel));
+            REQUIRE_EQ(7, fileVer);
+            REQUIRE_EQ(0, comprLevel);
+            pgx.gdxClose();
+            rtl::p3utils::P3UnSetEnv("GDXCOMPRESS");
+            rtl::p3utils::P3UnSetEnv("GDXCONVERT");
+            std::filesystem::remove(fn);
+        });
+    }
+
     TEST_SUITE_END();
 
 }

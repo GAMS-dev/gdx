@@ -9,3 +9,5 @@
 .idea/
 .vs/
 /slowdown.txt
+/class_benchmarks.txt
+/gdxbench_collected.txt
