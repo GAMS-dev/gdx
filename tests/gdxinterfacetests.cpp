@@ -62,6 +62,14 @@ namespace tests::gdxinterfacetests {
         });
     }
 
+    TEST_CASE("Check DLL version") {
+        basicTest([](GDXInterface &pgx) {
+            std::array<char, GMS_SSSIZE> versionStr {};
+            REQUIRE(pgx.gdxGetDLLVersion(versionStr.data()));
+            REQUIRE(utils::starts_with(versionStr.data(), "GDX Library"s));
+        });
+    }
+
     TEST_CASE("Just create a file") {
         const std::string fn {"create.gdx"};
         basicTest([&](GDXInterface &pgx) {
