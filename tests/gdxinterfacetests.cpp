@@ -59,6 +59,7 @@ namespace tests::gdxinterfacetests {
     TEST_CASE("Simple setup and teardown of a GDX object") {
         basicTest([](GDXInterface &pgx) {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
+            REQUIRE_EQ(0, pgx.gdxGetMemoryUsed());
         });
     }
 
@@ -905,6 +906,7 @@ namespace tests::gdxinterfacetests {
         };
         const std::string gdxfn = acquireGDXforModel("trnsport"s);
         testReads(gdxfn, gdxfn, [&](GDXInterface &pgx) {
+            REQUIRE_GT(pgx.gdxGetMemoryUsed(), 0);
             int numSymbols, numUels;
             pgx.gdxSystemInfo(numSymbols, numUels);
             std::list<std::string> uelsSeen {}, symbolsSeen {};
