@@ -1851,6 +1851,18 @@ namespace tests::gdxinterfacetests {
         std::filesystem::remove(f2);
     }
 
+    TEST_CASE("Test classifying a map value as potential specval") {
+        basicTest([](GDXInterface &pgx) {
+            int sv;
+            REQUIRE_FALSE(pgx.gdxMapValue(23, sv));
+            REQUIRE_EQ(sv_normal, sv);
+            REQUIRE(pgx.gdxMapValue(GMS_SV_UNDEF, sv));
+            REQUIRE_EQ(sv_valund, sv);
+            REQUIRE(pgx.gdxMapValue(GMS_SV_EPS, sv));
+            REQUIRE_EQ(sv_valeps, sv);
+        });
+    }
+
     TEST_SUITE_END();
 
 }
