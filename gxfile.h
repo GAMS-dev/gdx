@@ -775,6 +775,10 @@ template<typename K, typename V, typename H, typename E>
         int gdxOpenReadXX(const std::string &Afn, int filemode, int ReadMode, int &ErrNr);
 
     public:
+        bool    gdxGetDomainElements_DP_CallByRef,
+                gdxDataReadRawFastFilt_DP_CallByRef,
+                gdxDataReadRawFastEx_DP_CallByRef;
+
         explicit TGXFileObj(std::string &ErrMsg);
         ~TGXFileObj() override;
 
@@ -883,12 +887,18 @@ template<typename K, typename V, typename H, typename E>
         void gdxStoreDomainSetsSet(int x) override;
         int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, gdxinterface::TDataStoreFiltProc_t DP) override;
         int gdxDataReadRawFast(int SyNr, gdxinterface::TDataStoreProc_t DP, int &NrRecs) override;
+        int gdxDataReadRawFastEx(int SyNr, gdxinterface::TDataStoreExProc_t DP, int &NrRecs, void *Uptr) override;
 
         std::string getImplName() const override;
 
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from
+
+    union uInt64 {
+        int64_t i;
+        void *p;
+    };
 
     bool IsGoodIdent(const std::string &S);
 

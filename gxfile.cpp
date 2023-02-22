@@ -4330,6 +4330,44 @@ namespace gxfile {
         return NrRecs >= 0;
     }
 
+    // Brief:
+    //   Read a symbol in Raw mode using a callback procedure
+    // Arguments:
+    //   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
+    //   DP: Procedure that will be called for each data record
+    //   NrRecs: The number of records available for reading
+    //   Uptr: pointer to user memory that will be passed back with the callback
+    // Returns:
+    //   Non-zero if the operation is possible, zero otherwise
+    // See Also:
+    //   gdxDataReadRawFast
+    // Description:
+    //   Use a callback function to read a symbol in raw mode. Using a callback procedure
+    //   to read the data is faster because we no longer have to check the context for each
+    //   call to read a record.
+    int TGXFileObj::gdxDataReadRawFastEx(int SyNr, TDataStoreExProc_t DP, int &NrRecs, void *Uptr) {
+        //-- Note: PrepareSymbolRead checks for the correct status
+        TgdxUELIndex XDomains;
+        //do not know dimension yet
+        std::fill(XDomains.begin(), XDomains.end(), DOMC_UNMAPPED);
+        NrRecs = PrepareSymbolRead("gdxDataReadRawFastEx"s, SyNr, XDomains.data(), fr_raw_data);
+        std::array<double, valscale + 1> AVals {};
+        int AFDim;
+        if(gdxDataReadRawFastEx_DP_CallByRef) {
+            TDataStoreExProc_F local_DP {(TDataStoreExProc_F)DP};
+            uInt64 local_Uptr {};
+            local_Uptr.i = 0;
+            local_Uptr.p = Uptr;
+            while(DoRead(AVals.data(), AFDim))
+                local_DP(LastElem.data(), AVals.data(), AFDim, local_Uptr.i);
+        } else {
+            while(DoRead(AVals.data(), AFDim))
+                DP(LastElem.data(), AVals.data(), AFDim, Uptr);
+        }
+        gdxDataReadDone();
+        return NrRecs >= 0;
+    }
+
     std::string TGXFileObj::getImplName() const {
         return "tgxfileobj"s;
     }

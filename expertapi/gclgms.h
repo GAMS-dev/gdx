@@ -1,8 +1,8 @@
 /* global constants (symbol dimensions, symbol layout, etc.)
  * that might ultimately come from global
  *
- * Copyright (c) 2017-2022 GAMS Development Corp. <support@gams.com>
- * Copyright (c) 2017-2022 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,8 +28,8 @@
 #if ! defined(_GCLGMS_H_)
 #     define  _GCLGMS_H_
 
-#define GAMSVERSION 4000
-#define GAMSMAJOR   40
+#define GAMSVERSION 4300
+#define GAMSMAJOR   43
 #define GAMSMINOR   0
 #define GAMSGOLD    0
 

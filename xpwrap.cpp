@@ -399,4 +399,8 @@ namespace xpwrap {
     int GDXFile::gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs) {
         return ::gdxDataReadRawFast(pgx, SyNr, DP, &NrRecs);
     }
+
+    int GDXFile::gdxDataReadRawFastEx(int SyNr, TDataStoreExProc_t DP, int &NrRecs, void *Uptr) {
+        return ::gdxDataReadRawFastEx(pgx, SyNr, DP, &NrRecs, Uptr);
+    }
 }

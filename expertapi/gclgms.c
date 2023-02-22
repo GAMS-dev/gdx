@@ -2,8 +2,8 @@
  * that might ultimately come from global
  * created: Steve Dirkse, July 2007
  *
- * Copyright (c) 2017-2022 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2022 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

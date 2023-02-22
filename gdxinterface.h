@@ -15,6 +15,9 @@ namespace gdxinterface {
     using TDomainIndexProc_t = void(*)(int RawIndex, int MappedIndex, void* Uptr);
     using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
     using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
+    using TDataStoreExProc_t = void (*)(const int *Indx, const double *Vals, const int afdim, void *Uptr);
+
+    using TDataStoreExProc_F = void (*)(const int *Indx, const double *Vals, const int afdim, int64_t Uptr);
 
     class CharBuf {
         std::array<char, 256> buf;
@@ -230,6 +233,7 @@ namespace gdxinterface {
         virtual int gdxSymbMaxLength() const = 0;
         virtual int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP) = 0;
         virtual int gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs) = 0;
+        virtual int gdxDataReadRawFastEx(int SyNr, TDataStoreExProc_t DP, int &NrRecs, void *Uptr) = 0;
 
         virtual std::string getImplName() const = 0;
     };

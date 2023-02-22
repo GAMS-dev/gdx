@@ -180,6 +180,8 @@ namespace xpwrap {
         int gdxSymbMaxLength() const override;
         int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, gdxinterface::TDataStoreFiltProc_t DP) override;
         int gdxDataReadRawFast(int SyNr, gdxinterface::TDataStoreProc_t DP, int &NrRecs) override;
+
+        int gdxDataReadRawFastEx(int SyNr, gdxinterface::TDataStoreExProc_t DP, int &NrRecs, void *Uptr) override;
     };
 
 }

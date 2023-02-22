@@ -30,7 +30,7 @@ namespace tests::xpwraptests {
 
         // Write data
         {
-            GDXFile pgx{ ErrMsg };
+            GDXFile pgx { ErrMsg };
             REQUIRE(ErrMsg.empty());
             REQUIRE(pgx.gdxOpenWrite(fn, "xptests", ErrNr));
             REQUIRE_EQ(0, ErrNr);
