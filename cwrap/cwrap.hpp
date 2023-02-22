@@ -15,6 +15,7 @@ extern "C" {
 typedef struct TGXFileRec TGXFileRec_t;
 
 typedef void (GDX_CALLCONV *TDataStoreProc_t) (const int Indx[], const double Vals[]);
+typedef void (GDX_CALLCONV *TDataStoreExProc_t) (const int Indx[], const double Vals[], int DimFrst, void *Uptr);
 typedef void (GDX_CALLCONV *TDataStoreProc_F_t) (const int Indx[], const double Vals[]);
 typedef int (GDX_CALLCONV *TDataStoreFiltProc_t) (const int Indx[], const double Vals[], void *Uptr);
 typedef void (GDX_CALLCONV *TDomainIndexProc_t) (int RawIndex, int MappedIndex, void *Uptr);
@@ -555,6 +556,10 @@ GDX_INLINE int gdxDataReadRawFast(TGXFileRec_t *TGXFile, int SyNr, ::TDataStoreP
 
 GDX_INLINE int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char **UelFilterStr, ::TDataStoreFiltProc_t DP) {
     return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadRawFastFilt(SyNr, UelFilterStr, (gdxinterface::TDataStoreFiltProc_t)DP);
+}
+
+GDX_INLINE int gdxDataReadRawFastEx(TGXFileRec_t *TGXFile, int SyNr, ::TDataStoreExProc_t DP, int *NrRecs, void *Uptr) {
+    return reinterpret_cast<gxfile::TGXFileObj *>(TGXFile)->gdxDataReadRawFastEx(SyNr, (gdxinterface::TDataStoreExProc_t)DP, *NrRecs, Uptr);
 }
 
 void setCallByRef(const char *FuncName, int cbrValue) {
