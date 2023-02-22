@@ -3,6 +3,7 @@
 /build/
 /x64/
 /cmake-build-debug-coverage/
+/cmake-build-release-coverage/
 /cmake-build-release/
 /cmake-build-debug/
 .idea/
