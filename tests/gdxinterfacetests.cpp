@@ -950,6 +950,18 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxSymbolGetDomainX(5, domainIds.ptrs()));
             REQUIRE_EQ("i"s, domainIds[0].str());
             REQUIRE_EQ("j"s, domainIds[1].str());
+
+            auto domIndexCallback = [](int rawIndex, int mappedIndex, void *uptr) {
+                ((std::list<std::pair<int,int>>*)uptr)->emplace_back(rawIndex,mappedIndex);
+            };
+
+            int nrElem{};
+            std::list<std::pair<int,int>> callArgs{};
+            REQUIRE(pgx.gdxGetDomainElements(5, 1, gxfile::DOMC_EXPAND, domIndexCallback, nrElem, (void *)&callArgs));
+            const std::list<std::pair<int,int>> expectedCallArgs {
+                {1,1}, {2,2}
+            };
+            REQUIRE_EQ(expectedCallArgs, callArgs);
         });
         std::filesystem::remove(gdxfn);
     }
