@@ -371,12 +371,19 @@ namespace tests::gdxinterfacetests {
         TgdxValues values{};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
-            REQUIRE(pgx.gdxUELRegisterRaw("TheOnlyUEL"));
+            REQUIRE(pgx.gdxUELRegisterRaw("TheFirstUEL"));
+            REQUIRE(pgx.gdxUELRegisterRaw("TheSecondUEL"));
             REQUIRE(pgx.gdxUELRegisterDone());
             REQUIRE(pgx.gdxDataWriteRawStart("mysym", "This is my symbol!", 1, dt_par, 0));
+
             key = 1;
             values[GMS_VAL_LEVEL] = 3.141;
             REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
+
+            key = 2;
+            values[GMS_VAL_LEVEL] = 42.1987;
+            REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
+
             REQUIRE(pgx.gdxDataWriteDone());
 
             REQUIRE(pgx.gdxDataWriteRawStart("myscalar", "This is a scalar!", 0, dt_par, 0));
@@ -386,16 +393,34 @@ namespace tests::gdxinterfacetests {
             char uel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE(!strcmp("TheOnlyUEL", uel));
+            REQUIRE(!strcmp("TheFirstUEL", uel));
             REQUIRE_EQ(-1, uelMap);
+            REQUIRE(pgx.gdxUMUelGet(2, uel, uelMap));
+            REQUIRE(!strcmp("TheSecondUEL", uel));
+            REQUIRE_EQ(-1, uelMap);
+
             int NrRecs;
             REQUIRE(pgx.gdxDataReadRawStart(1, NrRecs));
-            REQUIRE_EQ(1, NrRecs);
+            REQUIRE_EQ(2, NrRecs);
+
             int dimFrst;
             REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
-            REQUIRE(pgx.gdxDataReadDone());
             REQUIRE_EQ(1, key);
             REQUIRE_EQ(3.141, values[GMS_VAL_LEVEL]);
+
+            REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
+            REQUIRE_EQ(2, key);
+            REQUIRE_EQ(42.1987, values[GMS_VAL_LEVEL]);
+
+            REQUIRE(pgx.gdxDataReadDone());
+
+            auto recordCallback = [](const int *keys, const double *vals) {
+                static int cnt{};
+                REQUIRE_EQ(++cnt, keys[0]);
+                REQUIRE_EQ(keys[0] == 1 ? 3.141 : 42.1987, vals[GMS_VAL_LEVEL]);
+                cnt %= 2;
+            };
+            REQUIRE(pgx.gdxDataReadRawFast(1, recordCallback, NrRecs));
 
             REQUIRE(pgx.gdxDataReadRawStart(2, NrRecs));
             REQUIRE_EQ(1, NrRecs);
@@ -485,6 +510,10 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxResetSpecialValues());
             REQUIRE(pgx.gdxGetSpecialValues(queriedSpecVals.data()));
             REQUIRE_EQ(GMS_SV_PINF, queriedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin]);
+            std::copy(queriedSpecVals.begin(), queriedSpecVals.end(), moddedSpecVals.begin());
+            moddedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin] = 0.0;
+            REQUIRE(pgx.gdxSetReadSpecialValues(moddedSpecVals.data()));
+            // TODO: Actually check somehow the previous call had an effect!
         });
     }
 
