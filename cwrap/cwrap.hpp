@@ -135,6 +135,7 @@ int gdxStoreDomainSets(TGXFileRec_t *pgdx);
 void gdxStoreDomainSetsSet(TGXFileRec_t *pgdx, int x);
 int gdxDataReadRawFast(TGXFileRec_t *TGXFile, int SyNr, TDataStoreProc_t DP, int *NrRecs);
 int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char *UelFilterStr[], TDataStoreFiltProc_t DP);
+int gdxDataReadRawFastEx(TGXFileRec_t *TGXFile, int SyNr, ::TDataStoreExProc_t DP, int *NrRecs, void *Uptr);
 void setCallByRef(const char *FuncName, int cbrValue);
 // PROTOTYPES END
 
