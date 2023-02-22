@@ -4276,15 +4276,15 @@ namespace gxfile {
                                        utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED).data(),
                                        fr_raw_data) };
         if(NrRecs >= 0) {
-            bool GoodIndx = true;
+            bool GoodIndx {true};
             int FiltDim {};
             TgdxUELIndex ElemDim, ElemNrs;
             for(int D{}; D<FCurrentDim; D++) {
-                if(strlen(UelFilterStr[D])) {
-                    FiltDim++;
-                    ElemDim[FiltDim] = D+1;
+                if(std::strlen(UelFilterStr[D])) {
+                    ElemDim[FiltDim] = D;
                     ElemNrs[FiltDim] = UELTable->IndexOf(UelFilterStr[D]);
                     if(ElemNrs[FiltDim] < 0) GoodIndx = false;
+                    FiltDim++;
                 }
             }
             if(GoodIndx) {
