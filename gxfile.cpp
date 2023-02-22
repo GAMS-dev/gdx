@@ -421,6 +421,7 @@ namespace gxfile {
         gdxResetSpecialValues();
         NextWritePosition = FFile->GetPosition();
         fmode = fw_init;
+        fstatus = stat_write;
         DomainStrList = std::make_unique<TDomainStrList>();
         DomainStrList->OneBased = true;
 

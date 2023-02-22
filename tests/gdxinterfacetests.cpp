@@ -84,9 +84,16 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxErrorStr(pgx.gdxGetLastError(), msg));
             REQUIRE(!strcmp("File name is empty", msg));
 
+            int fileVer, comprLev;
+
             REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
             REQUIRE_FALSE(ErrNr);
             REQUIRE_EQ(0, pgx.gdxErrorCount());
+
+            REQUIRE(pgx.gdxFileInfo(fileVer, comprLev));
+            REQUIRE_EQ(7, fileVer);
+            REQUIRE_EQ(0, comprLev);
+
             pgx.gdxClose();
             REQUIRE(std::filesystem::exists(fn));
 
@@ -94,8 +101,17 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxOpenWriteEx(fn, "gdxinterfacetest", 1, ErrNr));
             REQUIRE_FALSE(ErrNr);
             REQUIRE_EQ(0, pgx.gdxErrorCount());
+
+            REQUIRE(pgx.gdxFileInfo(fileVer, comprLev));
+            REQUIRE_EQ(7, fileVer);
+            REQUIRE_EQ(1, comprLev);
+
             pgx.gdxClose();
             REQUIRE(std::filesystem::exists(fn));
+
+            REQUIRE(pgx.gdxFileInfo(fileVer, comprLev));
+            REQUIRE_EQ(0, fileVer);
+            REQUIRE_EQ(0, comprLev);
         });
         std::filesystem::remove(fn);
     }
