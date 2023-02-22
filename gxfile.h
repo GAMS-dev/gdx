@@ -742,6 +742,10 @@ template<typename K, typename V, typename H, typename E>
         const bool verboseTrace {true};
 #endif
 
+        //api wrapper magic for Fortran
+        gdxinterface::TDataStoreFiltProc_t gdxDataReadRawFastFilt_DP{};
+        gdxinterface::TDomainIndexProc_t gdxGetDomainElements_DP{};
+
         bool PrepareSymbolWrite(const std::string &Caller, const std::string &AName, const std::string &AText, int ADim,
                                 int AType, int AUserInfo);
 
@@ -772,6 +776,10 @@ template<typename K, typename V, typename H, typename E>
         // ...
 
         int gdxOpenReadXX(const std::string &Afn, int filemode, int ReadMode, int &ErrNr);
+
+        // This one is a helper function for a callback from a Fortran client
+        void gdxGetDomainElements_DP_FC(int RawIndex, int MappedIndex, void* Uptr);
+        int gdxDataReadRawFastFilt_DP_FC(const int* Indx, const double* Vals, void* Uptr);
 
     public:
         bool    gdxGetDomainElements_DP_CallByRef{},

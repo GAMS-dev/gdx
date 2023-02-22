@@ -3580,6 +3580,7 @@ namespace gxfile {
     // </CODE>
     int TGXFileObj::gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int& NrElem, void* UPtr)
     {
+        gdxGetDomainElements_DP = DP;
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return false;
         int Dim{ (*NameList->GetObject(SyNr))->SDim };
         if (!Dim || ErrorCondition(DimPos >= 1 && DimPos <= Dim, ERR_BADDIMENSION)) return false;
@@ -3635,7 +3636,8 @@ namespace gxfile {
             SortL.sort();
             for (int N{}; N < SortL.size(); N++) {
                 SortL.GetRecord(N, Index.data(), vf.data());
-                DP(static_cast<int>(vf.front()), Index.front(), UPtr);
+                //DP(static_cast<int>(vf.front()), Index.front(), UPtr);
+                gdxGetDomainElements_DP_FC(static_cast<int>(vf.front()), Index.front(), UPtr);
             }
         }
         return NrElem >= 0;
@@ -4267,6 +4269,7 @@ namespace gxfile {
     // gdxDataReadRawFastFilt(pgx, 1, IndxS, DPCallBack);
     // </CODE>
     int TGXFileObj::gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP) {
+        gdxDataReadRawFastFilt_DP = DP;
         bool res{};
         // -- Note: PrepareSymbolRead checks for the correct status
         int NrRecs { PrepareSymbolRead("gdxDataReadRawFastFilt", SyNr,
@@ -4295,8 +4298,7 @@ namespace gxfile {
                             break;
                         }
                     }
-                    // FIXME: Actual call here needed?
-                    if(GoodIndx && false/* && !gdxDataReadRawFastFilt_DP_FC(LastElem, Values, this)*/) {
+                    if(GoodIndx && !gdxDataReadRawFastFilt_DP_FC(LastElem.data(), Values.data(), this)) {
                         break;
                     }
                 }
@@ -4371,6 +4373,28 @@ namespace gxfile {
 
     std::string TGXFileObj::getImplName() const {
         return "tgxfileobj"s;
+    }
+
+    void TGXFileObj::gdxGetDomainElements_DP_FC(int RawIndex, int MappedIndex, void* Uptr) {
+        if (gdxGetDomainElements_DP_CallByRef) {
+            TDomainIndexProc_F local_gdxGetDomainElements_DP{ (TDomainIndexProc_F)gdxGetDomainElements_DP };
+            uInt64 local_Uptr;
+            local_Uptr.i = 0;
+            local_Uptr.p = Uptr;
+            return local_gdxGetDomainElements_DP(RawIndex, MappedIndex, local_Uptr.i);
+        }
+        return gdxGetDomainElements_DP(RawIndex, MappedIndex, Uptr);
+    }
+
+    int TGXFileObj::gdxDataReadRawFastFilt_DP_FC(const int* Indx, const double* Vals, void* Uptr) {
+        if (gdxDataReadRawFastEx_DP_CallByRef) {
+            TDataStoreFiltProc_F local_gdxDataReadRawFastFilt_DP{ (TDataStoreFiltProc_F)gdxDataReadRawFastFilt_DP };
+            uInt64 local_Uptr;
+            local_Uptr.i = 0;
+            local_Uptr.p = Uptr;
+            return local_gdxDataReadRawFastFilt_DP(Indx, Vals, local_Uptr.i);
+        }
+        return gdxDataReadRawFastFilt_DP(Indx, Vals, Uptr);
     }
 
     /*void TUELTable::clear() {

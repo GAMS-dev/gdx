@@ -18,6 +18,8 @@ namespace gdxinterface {
     using TDataStoreExProc_t = void (*)(const int *Indx, const double *Vals, const int afdim, void *Uptr);
 
     using TDataStoreExProc_F = void (*)(const int *Indx, const double *Vals, const int afdim, int64_t Uptr);
+    using TDataStoreFiltProc_F = int(*)(const int *Indx, const double *Vals, int64_t Uptr);
+    using TDomainIndexProc_F = void(*)(int RawIndex, int MappedIndex, int64_t Uptr);
 
     class CharBuf {
         std::array<char, 256> buf;

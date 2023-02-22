@@ -422,6 +422,25 @@ namespace tests::gdxinterfacetests {
             };
             REQUIRE(pgx.gdxDataReadRawFast(1, recordCallback, NrRecs));
 
+            auto recordCallbackEx = [](const int* keys, const double* vals, int afdim, void* uptr) {
+                static_cast<std::list<std::tuple<int, double, int>>*>(uptr)->emplace_back(keys[0], vals[0], afdim);
+            };
+            std::list<std::tuple<int, double, int>>
+                collectedRecords{},
+                expectedRecords{{1,3.141,1},{2,42.1987,1}};
+            REQUIRE(pgx.gdxDataReadRawFastEx(1, recordCallbackEx, NrRecs, static_cast<void *>(&collectedRecords)));
+            REQUIRE_EQ(expectedRecords, collectedRecords);
+
+            auto recordCallbackFiltered = [](const int* keys, const double* vals, void* uptr) {
+                REQUIRE(uptr);
+                REQUIRE_EQ(1, keys[0]);
+                REQUIRE_EQ(3.141, vals[0]);
+                return 1;
+            };
+            std::string uelFilterName{"TheFirstUEL"s};
+            std::array<const char*, 1> uelFilterNames{ uelFilterName.c_str() };
+            REQUIRE(pgx.gdxDataReadRawFastFilt(1, uelFilterNames.data(), recordCallbackFiltered));
+
             REQUIRE(pgx.gdxDataReadRawStart(2, NrRecs));
             REQUIRE_EQ(1, NrRecs);
             REQUIRE(pgx.gdxDataReadDone());

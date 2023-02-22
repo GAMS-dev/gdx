@@ -14,7 +14,7 @@ extern "C" {
 
     typedef void (GDX_CALLCONV *TDataStoreProc_t) (const int Indx[], const double Vals[]);
     typedef void (GDX_CALLCONV *TDataStoreExProc_t) (const int Indx[], const double Vals[], int DimFrst, void *Uptr);
-    typedef void (GDX_CALLCONV *TDataStoreExProc_F_t) (const int Indx[], const double Vals[], int afdim, int64_t Uptr);
+    typedef void (GDX_CALLCONV *TDataStoreExProc_F_t) (const int Indx[], const double Vals[], int afdim, long long Uptr);
     typedef void (GDX_CALLCONV *TDataStoreProc_F_t) (const int Indx[], const double Vals[]);
     typedef int (GDX_CALLCONV *TDataStoreFiltProc_t) (const int Indx[], const double Vals[], void *Uptr);
     typedef void (GDX_CALLCONV *TDomainIndexProc_t) (int RawIndex, int MappedIndex, void *Uptr);
