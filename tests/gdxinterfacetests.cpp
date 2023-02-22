@@ -1104,6 +1104,31 @@ namespace tests::gdxinterfacetests {
 
             REQUIRE(pgx.gdxAcronymAdd("anotherOne"s, "my second acronym"s, 2));
             REQUIRE_EQ(2, pgx.gdxAcronymCount());
+
+            int oldNextAutoAcronym = pgx.gdxAcronymNextNr(23);
+            REQUIRE_EQ(0, oldNextAutoAcronym);
+            REQUIRE_EQ(23, pgx.gdxAcronymNextNr(0));
+
+            int orgIx, newIx, autoIx;
+            REQUIRE(pgx.gdxAcronymGetMapping(1, orgIx, newIx, autoIx));
+            REQUIRE_EQ(0, autoIx);
+            REQUIRE_EQ(23, newIx);
+            REQUIRE_EQ(23, orgIx);
+
+            REQUIRE_EQ(0, pgx.gdxAcronymValue(0));
+            REQUIRE_EQ(GMS_SV_ACR, pgx.gdxAcronymValue(1));
+            REQUIRE_EQ(GMS_SV_ACR * 23, pgx.gdxAcronymValue(23));
+
+            REQUIRE_EQ(0, pgx.gdxAcronymIndex(0));
+            REQUIRE_EQ(1, pgx.gdxAcronymIndex(pgx.gdxAcronymValue(1)));
+            REQUIRE_EQ(2, pgx.gdxAcronymIndex(pgx.gdxAcronymValue(2)));
+
+            REQUIRE_FALSE(pgx.gdxAcronymName(0, acroName));
+            REQUIRE_EQ(""s, acroName);
+            REQUIRE(pgx.gdxAcronymName(pgx.gdxAcronymValue(1), acroName));
+            REQUIRE_EQ("UnknownAcronym1"s, acroName);
+            REQUIRE(pgx.gdxAcronymName(pgx.gdxAcronymValue(23), acroName));
+            REQUIRE_EQ("myacr_mod"s, acroName);
         });
         testReads(f1, f2, [](GDXInterface &pgx) {
             REQUIRE_EQ(2, pgx.gdxAcronymCount());
