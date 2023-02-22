@@ -448,14 +448,17 @@ namespace tests::gdxinterfacetests {
         }
     }
 
-    TEST_CASE("Test setting special values") {
+    TEST_CASE("Test setting and resetting special values") {
         basicTest([&](GDXInterface &pgx) {
             std::array<double, GMS_SVIDX_MAX> moddedSpecVals {}, queriedSpecVals {};
-            pgx.gdxGetSpecialValues(moddedSpecVals.data());
+            REQUIRE(pgx.gdxGetSpecialValues(moddedSpecVals.data()));
             moddedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin] = 0.0;
-            pgx.gdxSetSpecialValues(moddedSpecVals.data());
-            pgx.gdxGetSpecialValues(queriedSpecVals.data());
+            REQUIRE(pgx.gdxSetSpecialValues(moddedSpecVals.data()));
+            REQUIRE(pgx.gdxGetSpecialValues(queriedSpecVals.data()));
             REQUIRE_EQ(0.0, queriedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin]);
+            REQUIRE(pgx.gdxResetSpecialValues());
+            REQUIRE(pgx.gdxGetSpecialValues(queriedSpecVals.data()));
+            REQUIRE_EQ(GMS_SV_PINF, queriedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin]);
         });
     }
 
