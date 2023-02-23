@@ -3930,12 +3930,11 @@ namespace gxfile {
     int TGXFileObj::gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr) {
         if (!MajorCheckMode("DataSliceUELS"s, fr_slice)) return false;
         int HisDim{};
-        for (int D {}; D <= FCurrentDim; D++) {
+        for (int D {}; D < FCurrentDim; D++) {
             if (!SliceElems[D].empty())
                 utils::assignStrToBuf(SliceElems[D], KeyStr[D]);
             else {
-                HisDim++;
-                int N = SliceRevMap[D]->GetMapping(SliceKeyInt[HisDim]);
+                int N = SliceRevMap[D]->GetMapping(SliceKeyInt[HisDim++]);
                 if (N < 0) {
                     KeyStr[D][0] = '?';
                     KeyStr[D][1] = '\0';

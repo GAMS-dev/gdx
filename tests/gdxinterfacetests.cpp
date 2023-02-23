@@ -1965,6 +1965,13 @@ namespace tests::gdxinterfacetests {
                 expKey %= 3;
             };
             REQUIRE(pgx.gdxDataReadSlice(uelFilterStrs.cptrs(), dim, recordCallback));
+
+            TgdxUELIndex keyIndices{};
+            keyIndices.front() = 1;
+            StrIndexBuffers uelNames;
+            REQUIRE(pgx.gdxDataSliceUELS(keyIndices.data(), uelNames.ptrs()));
+            REQUIRE_EQ("i2"s, uelNames.front().str());
+
             REQUIRE(pgx.gdxDataReadDone());
         });
         std::filesystem::remove(f1);
