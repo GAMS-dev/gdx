@@ -1938,6 +1938,39 @@ namespace tests::gdxinterfacetests {
         });
     }
 
+    TEST_CASE("Test reading methods with slices") {
+        std::string f1{ "slice_wrapper.gdx"s }, f2{ "slice_port.gdx"s };
+        testMatchingWrites(f1, f2, [&](GDXInterface& pgx) {
+            StrIndexBuffers keys;
+            TgdxValues values{};
+            REQUIRE(pgx.gdxDataWriteStrStart("i"s, "three element set"s, 1, dt_set, 0));
+            for (int i{}; i < 3; i++) {
+                keys.front() = "i"s + std::to_string(i+1);
+                REQUIRE(pgx.gdxDataWriteStr(keys.cptrs(), values.data()));
+            }
+            REQUIRE(pgx.gdxDataWriteDone());
+        });
+        testReads(f1, f2, [&](GDXInterface& pgx) {
+            TgdxUELIndex elemCountsPerDim{}, expectedCounts{};
+            expectedCounts.front() = 3;
+            REQUIRE(pgx.gdxDataReadSliceStart(1, elemCountsPerDim.data()));
+            REQUIRE_EQ(expectedCounts, elemCountsPerDim);
+            int dim;
+            StrIndexBuffers uelFilterStrs;
+            uelFilterStrs.front() = ""s;
+            auto recordCallback = [](const int* keyIndices, const double* vals) {
+                static int expKey{};
+                REQUIRE_EQ(expKey, keyIndices[0]);
+                expKey++;
+                expKey %= 3;
+            };
+            REQUIRE(pgx.gdxDataReadSlice(uelFilterStrs.cptrs(), dim, recordCallback));
+            REQUIRE(pgx.gdxDataReadDone());
+        });
+        std::filesystem::remove(f1);
+        std::filesystem::remove(f2);
+    }
+
     TEST_SUITE_END();
 
 }

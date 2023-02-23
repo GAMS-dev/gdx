@@ -3884,7 +3884,7 @@ namespace gxfile {
         TgdxUELIndex ElemNrs;
         for (int D{}; D < FCurrentDim; D++) {
             SliceElems[D] = UelFilterStr[D];
-            if (!strlen(UelFilterStr[D])) {
+            if (!std::strlen(UelFilterStr[D])) {
                 ElemNrs[D] = -1;
                 Dimen++;
             }
@@ -3902,12 +3902,10 @@ namespace gxfile {
         int FDim;
         while (DoRead(Values.data(), FDim)) {
             GoodIndx = true;
-            int HisDim = 0;
+            int HisDim{};
             for (int D {}; D < FCurrentDim; D++) {
-                if (ElemNrs[D] == -1) {
-                    HisDim++;
-                    HisIndx[HisDim] = SliceIndxs[D]->GetMapping(LastElem[D]);
-                }
+                if (ElemNrs[D] == -1)
+                    HisIndx[HisDim++] = SliceIndxs[D]->GetMapping(LastElem[D]);
                 else if(ElemNrs[D] != LastElem[D])
                     GoodIndx = false;
             }

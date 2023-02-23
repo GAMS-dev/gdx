@@ -3,7 +3,6 @@
 #include <string>
 #include <array>
 #include <cstring>
-#include <vector>
 #include "expertapi/gclgms.h"
 
 namespace gdxinterface {
@@ -22,7 +21,7 @@ namespace gdxinterface {
     using TDomainIndexProc_F = void(*)(int RawIndex, int MappedIndex, int64_t Uptr);
 
     class CharBuf {
-        std::array<char, 256> buf;
+        std::array<char, GMS_SSSIZE> buf;
 
     public:
         char* get() { return buf.data(); }
@@ -73,8 +72,8 @@ namespace gdxinterface {
     };
 
     class StrIndexBuffers {
-        std::array<std::array<char, 256>, 20> bufContents{};
-        std::array<char*, 20> bufPtrs{};
+        std::array<std::array<char, GMS_SSSIZE>, GMS_MAX_INDEX_DIM> bufContents{};
+        std::array<char*, GMS_MAX_INDEX_DIM> bufPtrs{};
     public:
         explicit StrIndexBuffers(const TgdxStrIndex *strIndex = nullptr) {
             for (int i{}; i < (int)bufPtrs.size(); i++) {
@@ -130,8 +129,6 @@ namespace gdxinterface {
         virtual int gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ, int UserInfo) = 0;
         virtual int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ, int UserInfo) = 0;
         virtual int gdxDataWriteStr(const char **KeyStr, const double *Values) = 0;
-
-        int gdxDataWriteStr(const std::vector<std::string> &KeyStr, const double *Values);
 
         virtual int gdxDataWriteRaw(const int *KeyInt, const double *Values) = 0;
         virtual int gdxDataWriteMap(const int *KeyInt, const double *Values) = 0;
