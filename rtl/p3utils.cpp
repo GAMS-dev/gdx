@@ -124,7 +124,7 @@ namespace rtl::p3utils {
     {
         auto savedPos = h->tellg();
         h->seekg(0, h->end);
-        numRead = std::min<int>((int)(h->tellg()-savedPos), buflen);
+        numRead = std::min<uint32_t>(static_cast<uint32_t>(h->tellg()-savedPos), buflen);
         h->seekg(savedPos);
         h->read(buffer, numRead);
         return h->bad() ? 1 : 0;
