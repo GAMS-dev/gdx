@@ -212,20 +212,20 @@ namespace tests::gxfiletests {
             alreadyKnownResults = extractModelNames(benchOutFileName);
         }
 
-        std::array<std::string, 4> suites{
-            "sqagams"s, "lwsup"s, "src"s, "mrb"s
+        std::array suites{
+            "sqagams"s, "lwsup"s, "src"s, "mrb"s, "apc"s
         };
 
         std::vector<std::pair<std::string, std::string>> suiteModelPairs{
             //{"sqagams","PERSEUS"}
             //{"src", "ex3"}
-            {"lwsup","pShiftFactor"}
+            {"lwsup","agg"}
             //{"src", "gdxfromutlity"},
             //{"sqagams","mpstrans"},
             //{"sqagams","catmix"}
         };
 
-        std::string singleSuiteName{ "src"s };
+        std::string singleSuiteName{ "apc"s };
 
         auto gdxFilePathCandidates = [](const std::string& suiteName, const std::string& modelName) {
 #if defined(_WIN32)
@@ -254,7 +254,8 @@ namespace tests::gxfiletests {
 #if defined(_WIN32)
         suitePrefixPath = R"(C:\dockerhome\)";
 #else
-        suitePrefixPath = "/mnt/c/dockerhome/";
+        //suitePrefixPath = "/mnt/c/dockerhome/";
+        suitePrefixPath = "/home/andre/dockerhome/distrib/"s;
 #endif
 
         switch (mode) {

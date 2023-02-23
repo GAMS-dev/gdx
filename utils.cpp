@@ -561,7 +561,12 @@ namespace utils {
         if (!a || !b) return !a && !b;
         for (int k{}; k < 256; k++) {
             if (a[k] == '\0' && b[k] == '\0') return true;
-            if (std::tolower(a[k]) != std::tolower(b[k])) return false;
+            if(caseInvariant) {
+                if (std::tolower(a[k]) != std::tolower(b[k])) return false;
+            }
+            else {
+                if(a[k] != b[k]) return false;
+            }
         }
         return false;
     }

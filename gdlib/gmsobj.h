@@ -530,7 +530,7 @@ namespace gdlib::gmsobj {
 
         virtual int compareEntry(const char *s, int EN) {
             auto p { this->FList[EN].FString };
-            return !p ? (!(!s || s[0] == '\0') ? 1 : 0) : !utils::sameTextPChar(s, p);
+            return !p ? (!(!s || s[0] == '\0') ? 1 : 0) : utils::sameTextPChar(s, p, false);
         }
 
         void ClearHashList() {
@@ -602,7 +602,7 @@ namespace gdlib::gmsobj {
             if(!pHashSC || this->FCount > trigger) SetHashSize(this->FCount);
             auto hv { hashValue(s, slen) };
             PHashRecord PH;
-            for(PH=pHashSC[hv]; PH && compareEntry(s, PH->RefNr); PH = PH->PNext);
+            for(PH=pHashSC[hv]; PH && !compareEntry(s, PH->RefNr); PH = PH->PNext);
             if(PH) return PH->RefNr + (this->OneBased?1:0);
             else {
                 int res{this->FCount+(this->OneBased?1:0)};
@@ -625,7 +625,7 @@ namespace gdlib::gmsobj {
     class TXStrPool : public TXHashedStringList<T> {
         int compareEntry(const char *s, int EN) override {
             auto p {this->FList[EN].FString};
-            return !p ? (!(!s || s[0]=='\0') ? 1 : 0) : !utils::sameTextPChar(s, p, false);
+            return !p ? (!(!s || s[0]=='\0') ? 1 : 0) : utils::sameTextPChar(s, p, false);
         }
 
         uint32_t hashValue(const char *s, size_t slen) override {

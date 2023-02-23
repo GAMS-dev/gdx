@@ -3533,7 +3533,11 @@ namespace gxfile {
         if (!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("SetTextNodeNr"))) return false;
         auto& obj = *SetTextList;
         if (TxtNr >= 0 && TxtNr < obj.size() && !obj.GetObject(TxtNr)) {
+#ifdef TXSPOOL_LEGACY
             obj.PutObject(TxtNr, reinterpret_cast<uint8_t*>((long long)Node));
+#else
+            *obj.GetObject(TxtNr) = Node;
+#endif
             return true;
         }
         return false;
