@@ -96,6 +96,8 @@ namespace tests::utilstests {
     TEST_CASE("Comparing strings the Delphi way") {
         REQUIRE(utils::sameText("aBc", "AbC"));
         REQUIRE_FALSE(utils::sameText("aBc", "AbC", false));
+        REQUIRE(utils::sameTextPChar("aBc", "AbC"));
+        REQUIRE_FALSE(utils::sameTextPChar("aBc", "AbC", false));
     }
 
     TEST_CASE("Arbitrary size blank strings") {
