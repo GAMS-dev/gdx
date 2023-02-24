@@ -252,6 +252,32 @@ namespace tests::utilstests {
         REQUIRE_EQ(backing, out);
     }
 
+    TEST_CASE("Test conversion of string view into Delphi-format ShortString") {
+        std::array<char, 256> buf{};
+        
+        REQUIRE_FALSE(utils::strConvCppToDelphi("abc", buf.data()));
+        REQUIRE_EQ(3, buf.front());
+        REQUIRE_EQ('a', buf[1]);
+        REQUIRE_EQ('b', buf[2]);
+        REQUIRE_EQ('c', buf[3]);
+
+        REQUIRE_FALSE(utils::strConvCppToDelphi("", buf.data()));
+        REQUIRE_EQ(0, buf.front());
+
+        REQUIRE_FALSE(utils::strConvCppToDelphi(std::string(255, 'x'), buf.data()));
+        REQUIRE_EQ(255, (uint8_t)buf.front());
+        for (int i{}; i < 255; i++)
+            REQUIRE_EQ('x', buf[i + 1]);
+
+        REQUIRE(utils::strConvCppToDelphi(std::string(256, 'x'), buf.data()));
+        REQUIRE_GT(buf.front(), 0);
+        REQUIRE_EQ('E', buf[1]);
+        REQUIRE_EQ('r', buf[2]);
+        REQUIRE_EQ('r', buf[3]);
+        REQUIRE_EQ('o', buf[4]);
+        REQUIRE_EQ('r', buf[5]);
+    }
+
     TEST_SUITE_END();
 
 }
