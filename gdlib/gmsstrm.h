@@ -120,6 +120,11 @@ namespace gdlib::gmsstrm {
         virtual uint32_t Write(const void *Buffer, uint32_t Count) = 0;
 
         void WriteString(std::string_view s);
+
+        inline void WriteString(const char *s) {
+            WriteString(std::string_view{s, std::strlen(s)});
+        }
+
         void WriteDouble(double x);
         void WriteInteger(int n);
         void WriteInt64(int64_t N);

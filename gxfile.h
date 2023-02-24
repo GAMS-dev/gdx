@@ -220,7 +220,6 @@ template<typename K, typename V, typename H, typename E>
 
     using TDomainList = std::array<TDomain, GLOBAL_MAX_INDEX_DIM>;
 
-    //using TCommentsList = std::vector<std::string>;
     using TCommentsList = gdlib::gmsobj::TXStrings;
 
     struct TgdxSymbRecord {
@@ -469,7 +468,7 @@ template<typename K, typename V, typename H, typename E>
         void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
     };
 
-    std::string MakeGoodExplText(const std::string& s);
+    std::string MakeGoodExplText(std::string_view s);
 
     struct TAcronym {
         std::string AcrName{}, AcrText{};
@@ -487,7 +486,7 @@ template<typename K, typename V, typename H, typename E>
     class TAcronymList : public std::vector<TAcronym> {
     public:
         int FindEntry(int Map) const;
-        int FindName(const std::string &Name) const;
+        int FindName(const char *Name) const;
         int AddEntry(const std::string &Name, const std::string &Text, int Map);
         void CheckEntry(int Map);
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S);
@@ -501,7 +500,7 @@ template<typename K, typename V, typename H, typename E>
         TAcronymListLegacy() = default;
         ~TAcronymListLegacy();
         int FindEntry(int Map);
-        int FindName(const std::string& Name);
+        int FindName(const char *Name);
         int AddEntry(const std::string& Name, const std::string& Text, int Map);
         void CheckEntry(int Map);
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi& S);
@@ -780,23 +779,23 @@ template<typename K, typename V, typename H, typename E>
         gdxinterface::TDataStoreFiltProc_t gdxDataReadRawFastFilt_DP{};
         gdxinterface::TDomainIndexProc_t gdxGetDomainElements_DP{};
 
-        bool PrepareSymbolWrite(const std::string &Caller, const std::string &AName, const std::string &AText, int ADim,
-                                int AType, int AUserInfo);
-
-        int PrepareSymbolRead(const std::string &Caller, int SyNr, const int *ADomainNrs, TgxFileMode newmode);
+        bool PrepareSymbolWrite(const std::string_view Caller, const char *AName, const std::string_view AText, int ADim, int AType, int AUserInfo);
+        int PrepareSymbolRead(std::string_view Caller, int SyNr, const int *ADomainNrs, TgxFileMode newmode);
 
         void InitErrors();
         void SetError(int N);
         void ReportError(int N);
         bool ErrorCondition(bool cnd, int N);
-        bool MajorCheckMode(const std::string& Routine, TgxFileMode m);
-        bool MajorCheckMode(const std::string &Routine, const TgxModeSet &MS);
-        bool CheckMode(const std::string& Routine);
-        bool CheckMode(const std::string& Routine, TgxFileMode m);
-        bool CheckMode(const std::string& Routine, const TgxModeSet &MS);
+
+        bool MajorCheckMode(std::string_view Routine, TgxFileMode m);
+        bool MajorCheckMode(std::string_view Routine, const TgxModeSet &MS);
+
+        bool CheckMode(std::string_view Routine);
+        bool CheckMode(std::string_view Routine, TgxFileMode m);
+        bool CheckMode(std::string_view Routine, const TgxModeSet &MS);
 
 
-        void WriteTrace(const std::string &s);
+        void WriteTrace(std::string_view s);
         void InitDoWrite(int NrRecs);
         bool DoWrite(const int *AElements, const double *AVals);
         bool DoRead(double *AVals, int &AFDim);
@@ -804,7 +803,7 @@ template<typename K, typename V, typename H, typename E>
         void AddToErrorList(const int *AElements, const double *AVals);
         void GetDefaultRecord(double *Avals);
         double AcronymRemap(double V);
-        bool IsGoodNewSymbol(const std::string &s);
+        bool IsGoodNewSymbol(const char *s);
         bool ResultWillBeSorted(const int *ADomainNrs);
 
         // ...
@@ -941,7 +940,7 @@ template<typename K, typename V, typename H, typename E>
         void *p;
     };
 
-    bool IsGoodIdent(const std::string &S);
+    bool IsGoodIdent(std::string_view S);
 
     int ConvertGDXFile(const std::string &fn, const std::string &MyComp);
 

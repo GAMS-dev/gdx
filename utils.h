@@ -229,7 +229,7 @@ namespace utils {
     std::string uppercase(std::string_view s);
     std::string lowercase(std::string_view s);
 
-    bool sameText(const std::string& a, const std::string& b, bool caseInvariant = true);
+    bool sameText(std::string_view a, std::string_view b, bool caseInvariant = true);
     bool sameTextAsAny(const std::string &a, const std::initializer_list<std::string> &bs);
     bool sameTextPrefix(const std::string &s, const std::string &prefix);
 

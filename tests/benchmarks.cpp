@@ -165,7 +165,7 @@ namespace tests::benchmarks {
             obj.AddEntry("acr" + std::to_string(i), "AcronymText" + std::to_string(i), i+1);
         int cnt{};
         for (int i{n-1}; i>=0; i--)
-            cnt += obj.FindName("acr" + std::to_string(i));
+            cnt += obj.FindName(("acr" + std::to_string(i)).c_str());
     }
 
     TEST_CASE("Benchmark variants of TAcronymList") {

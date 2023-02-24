@@ -60,7 +60,7 @@ namespace utils {
         return out;
     }
 
-    bool sameTextInvariant(const std::string &a, const std::string &b) {
+    bool sameTextInvariant(const std::string_view a, const std::string_view b) {
         const auto l = a.length();
         if (b.length() != a.length()) return false;
         for (size_t i{}; i < l; i++) {
@@ -70,7 +70,7 @@ namespace utils {
         return true;
     }
 
-    bool sameText(const std::string &a, const std::string &b, bool caseInvariant) {
+    bool sameText(const std::string_view a, const std::string_view b, bool caseInvariant) {
         return caseInvariant ? sameTextInvariant(a, b) : a == b;
     }
 

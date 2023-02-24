@@ -109,9 +109,9 @@ namespace tests::gxfiletests {
     }
 
     TEST_CASE("Test function for making a good explanatory text") {
-        REQUIRE_EQ("x", MakeGoodExplText("x"));
-        REQUIRE_EQ("Das hier ist ein Test?", MakeGoodExplText("Das hier ist ein Test\r"));
-        REQUIRE_EQ("Ein \"gemischter\" \"Text\"!", MakeGoodExplText("Ein \"gemischter\" 'Text'!"));
+        REQUIRE_EQ("x", MakeGoodExplText("x"s));
+        REQUIRE_EQ("Das hier ist ein Test?", MakeGoodExplText("Das hier ist ein Test\r"s));
+        REQUIRE_EQ("Ein \"gemischter\" \"Text\"!", MakeGoodExplText("Ein \"gemischter\" 'Text'!"s));
     }
 
     TEST_CASE("Test checking whether an identifier is well-formed (good)") {
