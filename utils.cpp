@@ -137,12 +137,6 @@ namespace utils {
         storage.resize(ub);
     }
 
-    std::optional<std::string> maybeTrimRight(const std::string &s) {
-        if (s.empty() || !isblank(s.back())) return std::nullopt;
-        const auto lastNonBlank = s.find_last_not_of(" \t");
-        return s.substr(0, lastNonBlank + 1);
-    }
-
     std::string trimZeroesRight(const std::string &s, char DecimalSep) {
         if (s.find(DecimalSep) == std::string::npos) return s;
         int i{static_cast<int>(s.length()) - 1};
@@ -151,7 +145,7 @@ namespace utils {
         return s.substr(0, i + 1);
     }
 
-    bool hasCharLt(const std::string &s, int n) {
+    bool hasCharLt(const std::string_view s, int n) {
         return anychar([&n](char c) { return (int) c < n; }, s);
     }
 
@@ -255,7 +249,7 @@ namespace utils {
         return repeatChar(n, '0');
     }
 
-    int lastOccurence(const std::string &s, char c) {
+    int lastOccurence(std::string_view s, char c) {
         for (int i = (int) s.length() - 1; i >= 0; i--)
             if (s[i] == c) return i;
         return -1;

@@ -250,10 +250,9 @@ namespace utils {
     std::string trimRight(const std::string &s);
     void trimRight(const std::string& s, std::string& storage);
     const char *trimRight(const char *s, char *storage, int &slen);
-    std::optional<std::string> maybeTrimRight(const std::string &s);
     std::string trimZeroesRight(const std::string& s, char DecimalSep = '.');
 
-    bool hasCharLt(const std::string &s, int n);
+    bool hasCharLt(std::string_view s, int n);
 
     double round(double n, int ndigits);
 
@@ -265,7 +264,7 @@ namespace utils {
     std::string blanks(int n);
     std::string zeros(int n);
 
-    int lastOccurence(const std::string& s, char c);
+    int lastOccurence(std::string_view s, char c);
 
     // This is a frequent pattern in the CMEX source: temporarily add some elements to a set and remove them afterwords
     // Enclose an object of this type in its own scope such that the object lifetime inserts/removes where appropriate

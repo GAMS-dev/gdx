@@ -308,6 +308,52 @@ namespace tests::utilstests {
         REQUIRE_EQ(expectLowercase, utils::lowercase(s));
     }
 
+    TEST_CASE("Test checking if a string case-insensitive matches at least one element from a string list") {
+        REQUIRE_FALSE(utils::sameTextAsAny("test", { "abc", "aBc","test X" }));
+        REQUIRE(utils::sameTextAsAny("test", { "abc", "TEST" }));
+        REQUIRE_FALSE(utils::sameTextAsAny("", {}));
+    }
+
+    TEST_CASE("Test if a string starts with a prefix") {
+        REQUIRE(utils::sameTextPrefix("test", "te"));
+        REQUIRE_FALSE(utils::sameTextPrefix("asset", "te"));
+        REQUIRE_FALSE(utils::sameTextPrefix("test", "testing"));
+    }
+
+    TEST_CASE("Test trimming zeroes from string from the right/back but only for decimals (not integers)") {
+        REQUIRE_EQ("1230.045"s, utils::trimZeroesRight("1230.045000"s));
+        REQUIRE_EQ("1230,045"s, utils::trimZeroesRight("1230,045000"s, ','));
+        REQUIRE_EQ("1230045000"s, utils::trimZeroesRight("1230045000"s));
+    }
+
+    TEST_CASE("Test checking if a string contains a char with code less than given integer") {
+        REQUIRE(utils::hasCharLt("a", 'b'));
+        REQUIRE_FALSE(utils::hasCharLt("b", 'a'));
+    }
+
+    TEST_CASE("Test rounding to n-digits") {
+        const double eps{1e-4};
+        REQUIRE_LT(23.42 - utils::round(23.4242, 2), eps);
+        REQUIRE_LT(23.4 - utils::round(23.4242, 1), eps);
+        REQUIRE_LT(23.0 - utils::round(23.4242, 0), eps);
+    }
+
+    TEST_CASE("Test replacing specific char with another one in a string (in place)") {
+        std::string s{ "Letter X"s };
+        utils::replaceChar('X', 'Y', s);
+        REQUIRE_EQ("Letter Y"s, s);
+    }
+
+    TEST_CASE("Test generating string of repeating zeroes") {
+        REQUIRE_EQ("0000"s, utils::zeros(4));
+        REQUIRE(utils::zeros(0).empty());
+    }
+
+    TEST_CASE("Test getting index of last occurence of character in string") {
+        REQUIRE_EQ(13, utils::lastOccurence("abcdefabcdefabcdef", 'b'));
+        REQUIRE_EQ(-1, utils::lastOccurence(std::string(23, 'a'), 'b'));
+    }
+
     TEST_SUITE_END();
 
 }
