@@ -880,6 +880,9 @@ namespace tests::gdxinterfacetests {
             REQUIRE(!strcmp("set text", elemTxt));
             REQUIRE_EQ(23, elemNode);
             REQUIRE(pgx.gdxSetHasText(1));
+            // Set texts are case-sensitive so adding it with different casing should be a new text!
+            REQUIRE(pgx.gdxAddSetText("sEt text", txtNr));
+            REQUIRE_EQ(2, txtNr);
         });
         for (const auto& fn : { f1, f2 })
             std::filesystem::remove(fn);
