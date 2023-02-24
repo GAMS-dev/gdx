@@ -119,7 +119,7 @@ namespace gdlib::gmsstrm {
         virtual uint32_t Read(void *Buffer, uint32_t Count) = 0;
         virtual uint32_t Write(const void *Buffer, uint32_t Count) = 0;
 
-        void WriteString(const std::string &s);
+        void WriteString(std::string_view s);
         void WriteDouble(double x);
         void WriteInteger(int n);
         void WriteInt64(int64_t N);
@@ -370,7 +370,7 @@ namespace gdlib::gmsstrm {
 
         void WriteByte(uint8_t B);
         void ParWrite(RWType T);
-        void WriteString(const std::string &s);
+        void WriteString(std::string_view s);
 
         void SetPassword(const std::string &s);
         void ApplyPassword(std::string &PR, std::string &PW, int64_t Offs);

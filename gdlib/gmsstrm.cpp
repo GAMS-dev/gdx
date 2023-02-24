@@ -387,7 +387,7 @@ namespace gdlib::gmsstrm {
         FS->write((const char *)&B, 1);
     }
 
-    void TBinaryTextFileIO::WriteString(const std::string &s) {
+    void TBinaryTextFileIO::WriteString(const std::string_view s) {
         static std::array<char, 256> buf {};
         if(Paranoid) ParWrite(rw_string);
         utils::strConvCppToDelphi(s, buf.data());
@@ -502,7 +502,7 @@ namespace gdlib::gmsstrm {
                 + (B > RWType::rw_count ? ("???" + std::to_string(B)) : RWTypeText[B]));
     }
 
-    void TXStreamDelphi::WriteString(const std::string &s) {
+    void TXStreamDelphi::WriteString(const std::string_view s) {
         static int cnt{};
         static std::array<char, 256> buf{};
         if(fstext)

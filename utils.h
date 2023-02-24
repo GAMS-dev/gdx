@@ -423,7 +423,7 @@ namespace utils {
     const int maxBOMLen = 4;
     using tBomIndic = std::array<uint8_t, maxBOMLen>;
     bool checkBOMOffset(const tBomIndic &potBOM, int &BOMOffset, std::string &msg);
-    int strConvCppToDelphi(const std::string &s, char *delphistr);
+    int strConvCppToDelphi(std::string_view s, char *delphistr);
 
     inline void assignStrToBuf(const std::string &s, char *buf, int outBufSize = 256) {
         if((int)s.length() > outBufSize) return;

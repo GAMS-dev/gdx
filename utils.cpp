@@ -545,7 +545,7 @@ namespace utils {
      **/
 
     // Convert C++ standard library string to Delphi short string
-    int strConvCppToDelphi(const std::string &s, char *delphistr) {
+    int strConvCppToDelphi(const std::string_view s, char *delphistr) {
         if (s.length() > std::numeric_limits<uint8_t>::max()) {
             const std::string errorMessage{"Error: Maximum short string length is 255 characters!"s};
             memcpy(&delphistr[1], errorMessage.c_str(), errorMessage.length() + 1);
@@ -553,7 +553,7 @@ namespace utils {
         }
         const auto l = static_cast<uint8_t>(s.length());
         delphistr[0] = static_cast<char>(l);
-        memcpy(&delphistr[1], s.c_str(), l);
+        memcpy(&delphistr[1], s.data(), l);
         return 0;
     }
 
