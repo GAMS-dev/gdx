@@ -226,8 +226,8 @@ namespace utils {
     std::string strInflateWidth(int num, int targetStrLen, char inflateChar = ' ');
     void removeTrailingCarriageReturnOrLineFeed(std::string &s);
 
-    std::string uppercase(const std::string &s);
-    std::string lowercase(const std::string& s);
+    std::string uppercase(std::string_view s);
+    std::string lowercase(std::string_view s);
 
     bool sameText(const std::string& a, const std::string& b, bool caseInvariant = true);
     bool sameTextAsAny(const std::string &a, const std::initializer_list<std::string> &bs);

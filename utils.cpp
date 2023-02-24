@@ -41,21 +41,21 @@ namespace utils {
         return std::string(targetStrLen - l, inflateChar) + s;
     }
 
+    // Shouldn't this operate on a std::string_view instead?
     void removeTrailingCarriageReturnOrLineFeed(std::string &s) {
         char lchar = s[s.length() - 1];
         if (lchar == '\r' || lchar == '\n')
             s = s.substr(0, s.length() - 1);
     }
 
-    std::string uppercase(const std::string &s) {
-        std::string out = s;
+    std::string uppercase(const std::string_view s) {
+        std::string out{ s };
         std::transform(s.begin(), s.end(), out.begin(), ::toupper);
         return out;
     }
 
-    std::string lowercase(const std::string &s) {
-        if (s.empty()) return s;
-        std::string out = s;
+    std::string lowercase(const std::string_view s) {
+        std::string out{ s };
         std::transform(s.begin(), s.end(), out.begin(), ::tolower);
         return out;
     }

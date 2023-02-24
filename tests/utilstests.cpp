@@ -291,6 +291,23 @@ namespace tests::utilstests {
         REQUIRE_EQ("abc"s, dest);
     }
 
+    TEST_CASE("Test removing line ending marker") {
+        std::string s1{ "First line\r\nSecond line\r"s },
+                    s2{ "First line\r\nSecond line\n"s };
+        utils::removeTrailingCarriageReturnOrLineFeed(s1);
+        REQUIRE_EQ("First line\r\nSecond line"s, s1);
+        utils::removeTrailingCarriageReturnOrLineFeed(s2);
+        REQUIRE_EQ("First line\r\nSecond line"s, s2);
+    }
+
+    TEST_CASE("Test upper-/lowercasing of strings (copy)") {
+        std::string s{ "This is a Test!"s },
+                    expectUppercase{ "THIS IS A TEST!" },
+                    expectLowercase{ "this is a test!" };
+        REQUIRE_EQ(expectUppercase, utils::uppercase(s));
+        REQUIRE_EQ(expectLowercase, utils::lowercase(s));
+    }
+
     TEST_SUITE_END();
 
 }
