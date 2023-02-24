@@ -2541,7 +2541,7 @@ namespace gxfile {
         if (SyPtr->SDomStrings) {
             for (int D{}; D<SyPtr->SDim; D++)
                 if((*SyPtr->SDomStrings)[D])
-                    utils::stocp(DomainStrList->GetString((*SyPtr->SDomStrings)[D]), DomainIDs[D]);
+                    utils::assignPCharToBuf(DomainStrList->GetString((*SyPtr->SDomStrings)[D]), DomainIDs[D], GMS_SSSIZE);
             res = 2;
         }
         else if (!SyPtr->SDomSymbols)
@@ -2549,7 +2549,7 @@ namespace gxfile {
         else {
             for (int D{}; D < SyPtr->SDim; D++)
                 if ((*SyPtr->SDomSymbols)[D])
-                    utils::stocp(NameList->GetString((*SyPtr->SDomSymbols)[D]), DomainIDs[D]);
+                    utils::assignPCharToBuf(NameList->GetString((*SyPtr->SDomSymbols)[D]), DomainIDs[D], GMS_SSSIZE);
             res = 3;
         }
 

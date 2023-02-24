@@ -438,5 +438,12 @@ namespace utils {
         memcpy(buf, s, slen+1);
     }
 
+    inline void assignPCharToBuf(const char *s, char *buf, size_t outBufSize = 256) {
+        int i;
+        for(i=0; s[i] != '\0' && i < outBufSize; i++)
+            buf[i] = s[i];
+        buf[i == outBufSize ? i - 1 : i] = '\0';
+    }
+
     int64_t queryPeakRSS();
 }

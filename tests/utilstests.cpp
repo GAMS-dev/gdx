@@ -360,7 +360,7 @@ namespace tests::utilstests {
         REQUIRE_EQ(0, utils::strLenNoWhitespace(std::string(10, ' ')));
     }
 
-    TEST_CASE("Test getting a ref to char in a str at index pos with \0-tail enforcement") {
+    TEST_CASE("Test getting a ref to char in a str at index pos with null-terminator-tail enforcement") {
         std::string s{ "test"s };
         REQUIRE_EQ(s.front(), utils::getCharAtIndexOrAppend(s, 0));
         REQUIRE_EQ('\0', utils::getCharAtIndexOrAppend(s, 4));
@@ -406,6 +406,15 @@ namespace tests::utilstests {
         REQUIRE_EQ(1, utils::strCompare("Beta", "Alpha"));
         REQUIRE_EQ(0, utils::strCompare("alpha", "Alpha"));
         REQUIRE_EQ(32, utils::strCompare("alpha", "Alpha", false));
+    }
+
+    TEST_CASE("Test copying the contents of a pchar into a char buffer") {
+        std::array<char, 256> buf {};
+        utils::assignPCharToBuf("abc", buf.data(), buf.size());
+        REQUIRE(!std::strcmp("abc", buf.data()));
+        std::string tooLong(256, 'x');
+        utils::assignPCharToBuf(tooLong.c_str(), buf.data(), buf.size());
+        REQUIRE_EQ('\0', buf.back());
     }
 
     TEST_SUITE_END();
