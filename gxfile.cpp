@@ -3629,7 +3629,7 @@ namespace gxfile {
         }
         gdxDataReadDone();
         NrElem = 0;
-        TIndex Index;
+        TIndex Index{};
         if (!DP) { // we only count
             for (int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++)
                 // TODO: N-1?
