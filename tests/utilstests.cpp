@@ -94,10 +94,21 @@ namespace tests::utilstests {
     }
 
     TEST_CASE("Comparing strings the Delphi way") {
-        REQUIRE(utils::sameText("aBc", "AbC"));
-        REQUIRE_FALSE(utils::sameText("aBc", "AbC", false));
+        // With std::string
+        REQUIRE(utils::sameText(""s, ""s));
+        REQUIRE(utils::sameText("aBc"s, "AbC"s));
+        REQUIRE_FALSE(utils::sameText("aBc"s, "AbC"s, false));
+
+        // With pchars (pointer to char -> char *)
+        // Case-insensitive
+        REQUIRE(utils::sameTextPChar(nullptr, nullptr));
+        REQUIRE(utils::sameTextPChar("", ""));
         REQUIRE(utils::sameTextPChar("aBc", "AbC"));
+        REQUIRE(utils::sameTextPChar("abc", "abc"));
+        // Case-sensitive
+        REQUIRE_FALSE(utils::sameTextPChar("aBc", "AbC "));
         REQUIRE_FALSE(utils::sameTextPChar("aBc", "AbC", false));
+        REQUIRE(utils::sameTextPChar("abc", "abc", false));
     }
 
     TEST_CASE("Arbitrary size blank strings") {

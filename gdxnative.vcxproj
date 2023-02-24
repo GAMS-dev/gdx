@@ -45,8 +45,11 @@
     <ClCompile Include="tests\gdlib\gmsobjtests.cpp" />
     <ClCompile Include="tests\gdlib\strhashtests.cpp" />
     <ClCompile Include="tests\gdxinterfacetests.cpp" />
+    <ClCompile Include="tests\global\shortstringtests.cpp" />
     <ClCompile Include="tests\gxfiletests.cpp" />
     <ClCompile Include="tests\pfgdx.cpp" />
+    <ClCompile Include="tests\serializetests.cpp" />
+    <ClCompile Include="tests\utilstests.cpp" />
     <ClCompile Include="tests\xptests.cpp" />
     <ClCompile Include="tests\xpwraptests.cpp" />
     <ClCompile Include="tests\xp_example1.cpp" />

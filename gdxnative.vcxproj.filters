@@ -29,6 +29,9 @@
     <Filter Include="tests\gdlib">
       <UniqueIdentifier>{69ef5b5f-0e5b-45ba-8895-1ef66cce5787}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tests\global">
+      <UniqueIdentifier>{329b07e4-1799-4ab7-9458-5b8da8fa664b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gxfile.cpp">
@@ -162,6 +165,15 @@
     </ClCompile>
     <ClCompile Include="tests\gdlib\gmsheapnewtests.cpp">
       <Filter>tests\gdlib</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\global\shortstringtests.cpp">
+      <Filter>tests\global</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\serializetests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\utilstests.cpp">
+      <Filter>tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
