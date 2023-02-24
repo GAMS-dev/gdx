@@ -548,8 +548,7 @@ namespace utils {
     int strConvCppToDelphi(const std::string_view s, char *delphistr) {
         if (s.length() > std::numeric_limits<uint8_t>::max()) {
             const std::string errorMessage{"Error: Maximum short string length is 255 characters!"s};
-            memcpy(&delphistr[1], errorMessage.c_str(), errorMessage.length() + 1);
-            delphistr[0] = errorMessage.length();
+            strConvCppToDelphi(errorMessage, delphistr);
             return static_cast<int>(errorMessage.length());
         }
         const auto l = static_cast<uint8_t>(s.length());
