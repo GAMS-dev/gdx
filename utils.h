@@ -100,7 +100,7 @@ namespace utils {
         return std::any_of(std::cbegin(elems), std::cend(elems), predicate);
     }
 
-    bool anychar(const std::function<bool(char)>& predicate, const std::string& s);
+    bool anychar(const std::function<bool(char)>& predicate, std::string_view s);
 
     template<typename T, int count>
     int indexOf(const std::array<T, count> &arr, const T& elem, int notFound = -1) {

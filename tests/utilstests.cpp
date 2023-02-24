@@ -278,6 +278,19 @@ namespace tests::utilstests {
         REQUIRE_EQ('r', buf[5]);
     }
 
+    TEST_CASE("Test checking if any character from a string satisfies a given predicate") {
+        REQUIRE(utils::anychar([](char c) { return c == 's';  }, "test"));
+        REQUIRE_FALSE(utils::anychar([](char c) { return c == 'x';  }, "test"));
+        REQUIRE_FALSE(utils::anychar([](char c) { return true;  }, ""));
+    }
+
+    TEST_CASE("Test permutated assigned of string characters") {
+        std::string dest(3, ' '), src{"cab"};
+        std::vector<int> readIndices{1,2,0}, writeIndices{0,1,2};
+        utils::permutAssign(dest, src, writeIndices, readIndices);
+        REQUIRE_EQ("abc"s, dest);
+    }
+
     TEST_SUITE_END();
 
 }

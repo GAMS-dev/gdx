@@ -23,7 +23,7 @@ namespace utils {
 
     bool determineCode(const std::string &s, const std::function<bool(char)> &charIsLegalPredicate, int &code);
 
-    bool anychar(const std::function<bool(char)> &predicate, const std::string &s) {
+    bool anychar(const std::function<bool(char)> &predicate, const std::string_view s) {
         return std::any_of(std::cbegin(s), std::cend(s), predicate);
     }
 
