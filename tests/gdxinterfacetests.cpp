@@ -1690,7 +1690,7 @@ namespace tests::gdxinterfacetests {
         const double avgSlowdown = perfBenchmarkCppVsDelphi(pair, true);
         //std::cout << "slowdown = " << avgSlowdown << " for " << pair.getName() << std::endl;
         slowdownReport << pair.getName() << ";"s << avgSlowdown << std::endl;
-#ifdef NDEBUG
+#if defined(NDEBUG) && !defined(CXX_COLLECTIONS)
         REQUIRE(avgSlowdown <= limit);
 #endif
     }

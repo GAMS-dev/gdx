@@ -2373,7 +2373,11 @@ namespace gxfile {
         } else {
             utils::assignStrToBuf(SetTextList->GetName(TxtNr), Txt, GMS_SSSIZE);
             auto obj = SetTextList->GetObject(TxtNr);
+#ifdef TXSPOOL_LEGACY
             Node = obj ? (int)reinterpret_cast<long long>(obj) : 0;
+#else
+            Node = obj ? (int)*obj : 0;
+#endif
             return true;
         }
     }
@@ -3532,13 +3536,18 @@ namespace gxfile {
     {
         if (!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("SetTextNodeNr"))) return false;
         auto& obj = *SetTextList;
-        if (TxtNr >= 0 && TxtNr < obj.size() && !obj.GetObject(TxtNr)) {
+        if (TxtNr >= 0 && TxtNr < obj.size())  {
 #ifdef TXSPOOL_LEGACY
-            obj.PutObject(TxtNr, reinterpret_cast<uint8_t*>((long long)Node));
+            if(!obj.GetObject(TxtNr)) {
+                obj.PutObject(TxtNr, reinterpret_cast<uint8_t*>((long long)Node));
+                return true;
+            }
 #else
-            *obj.GetObject(TxtNr) = Node;
+            if(!*obj.GetObject(TxtNr)) {
+                *obj.GetObject(TxtNr) = Node;
+                return true;
+            }
 #endif
-            return true;
         }
         return false;
     }
@@ -4446,9 +4455,9 @@ namespace gxfile {
 
     const char *TUELTable::operator[](int index) const {
 #ifdef STABLE_REFS
-        return insertOrder[index]->first.c_str();
+        return insertOrder[index-1]->first.c_str();
 #else
-        return insertOrder[index].c_str();
+        return insertOrder[index-1].c_str();
 #endif
     }
 
@@ -4558,7 +4567,7 @@ namespace gxfile {
 
     void TUELTable::SaveToStream(TXStreamDelphi &S) {
         S.WriteInteger(size());
-        for(int N{}; N<size(); N++)
+        for(int N{1}; N<=size(); N++)
             S.WriteString((*this)[N]);
     }
 
@@ -4845,7 +4854,6 @@ namespace gxfile {
         count=1;
     }
 
-#ifdef TAL_LEGACY
     TAcronymListLegacy::~TAcronymListLegacy() {
         for (int N{}; N<FList.GetCount(); N++)
             delete FList[N];
@@ -4902,9 +4910,7 @@ namespace gxfile {
     TAcronym &TAcronymListLegacy::operator[](int Index) {
         return *FList[Index];
     }
-#endif
 
-#ifdef TFL_LEGACY
     void TFilterListLegacy::AddFilter(TDFilter *F) {
         for(int N{}; N<FList.size(); N++) {
             if(FList[N]->FiltNumber == F->FiltNumber) {
@@ -4933,13 +4939,12 @@ namespace gxfile {
         return nullptr;
     }
 
-    int TFilterListLegacy::MemoryUsed() const {
-        int res{(int)(FList.MemoryUsed() + FList.size() * sizeof(TDFilter))};
+    size_t TFilterListLegacy::MemoryUsed() const {
+        size_t res{FList.MemoryUsed() + FList.size() * sizeof(TDFilter)};
         for(int N{}; N<FList.size(); N++)
             res += FList.GetConst(N)->MemoryUsed();
         return res;
     }
-#endif // TFL_LEGACY
 
     void TIntegerMappingLegacy::growMapping(int F) {
         assert(FCapacity < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");

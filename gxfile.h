@@ -31,6 +31,14 @@
 // Some hashmaps have stable references (pointers don't invalidate on insertion/removal) but others have not
 //======================================================================================================================
 
+// Quick settings:
+// P3_COLLECTIONS: Use paul objects as much as possible and gmsheapnew for TLinkedData, most verbatim port
+// CXX_COLLECTIONS: Use C++ standard library as much as possible (including MIT-license fast open source hashmap implementation)
+// MIXED_COLLECTIONS (default): Mix-and-match custom and builtin data structures for best performance
+#if !defined(P3_COLLECTIONS) && !defined(CXX_COLLECTIONS) && !defined(MIX_COLLECTIONS)
+    #define MIX_COLLECTIONS
+#endif
+
 // Use TBooleanBitArray instead of std::vector<bool>
 #define USE_BBARRAY
 
@@ -51,6 +59,21 @@
 
 // Use TXStrPool port for SetTextList
 #define TXSPOOL_LEGACY
+
+#if defined(P3_COLLECTIONS)
+#elif defined(CXX_COLLECTIONS)
+    #undef USE_BBARRAY
+    #undef TLD_LEGACY
+    #undef TAL_LEGACY
+    #undef TFL_LEGACY
+    #undef TIM_LEGACY
+    #undef TSH_LEGACY
+    #undef TXSPOOL_LEGACY
+    #define ANKERL_HASHMAP
+#elif defined(MIX_COLLECTIONS)
+    #undef TSH_LEGACY
+    #undef TXSPOOL_LEGACY
+#endif
 
 // Hashmap choice:
 // Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
@@ -507,7 +530,7 @@ template<typename K, typename V, typename H, typename E>
         void AddFilter(TDFilter *F);
         void DeleteFilter(int ix);
         TDFilter *FindFilter(int Nr);
-        int MemoryUsed() const;
+        size_t MemoryUsed() const;
     };
 
 #ifdef TAL_LEGACY
@@ -597,8 +620,9 @@ template<typename K, typename V, typename H, typename E>
             return AddObject(key, keylen, 0);
         }
 
-        int StoreObject(const std::string& key, T val) {
+        int StoreObject(const char *keyPchar, size_t keylen, T val) {
             int ix = static_cast<int>(insertOrder.size()) + (OneBased ? 1 : 0);
+            std::string key{keyPchar};
 #ifdef STABLE_REFS
             auto [it, wasNew] = dict.emplace(key, PayloadIndex<T> {ix, val});
             assert(wasNew);
@@ -618,8 +642,13 @@ template<typename K, typename V, typename H, typename E>
 #endif
         }
 
+        const char *GetName(int ix) const {
+            return GetString(ix);
+        }
+
         int size() const {  return static_cast<int>(dict.size()); }
         int Count() const { return static_cast<int>(dict.size()); }
+        int GetCapacity() const { return static_cast<int>(dict.size()); }
 
         T *GetObject(int ix) {
 #ifdef STABLE_REFS
@@ -643,6 +672,11 @@ template<typename K, typename V, typename H, typename E>
         void SetCapacity(int n) {
             dict.reserve(n);
             insertOrder.reserve(n);
+        }
+
+        int64_t MemoryUsed() const {
+            // FIXME: This is incorrect and below the actual memory required!
+            return dict.size()*(sizeof(PayloadIndex<T>))+insertOrder.size();
         }
     };
 

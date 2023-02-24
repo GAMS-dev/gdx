@@ -217,10 +217,10 @@ namespace gdlib::strhash {
             return (*PHashTable)[hash];
         }
 
-        int StoreObject(const std::string& s, T AObj) {
+        int StoreObject(const char *s, size_t slen, T AObj) {
             if (PHashTable) ClearHashTable();
 #ifdef TLD_BATCH_ALLOCS
-            PHashBucket<T> PBuck = reinterpret_cast<PHashBucket<T>>(batchAllocator.GetBytes(sizeof(THashBucket<T>)));
+            auto PBuck = reinterpret_cast<PHashBucket<T>>(batchAllocator.GetBytes(sizeof(THashBucket<T>)));
 #else
             PHashBucket<T> PBuck = new THashBucket<T>{};
 #endif
@@ -234,11 +234,11 @@ namespace gdlib::strhash {
             }
             FCount++; // ugly
 #ifdef TLD_BATCH_ALLOCS
-            PBuck->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(s.length()+1));
+            PBuck->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(slen+1));
 #else
             PBuck->StrP = new char[s.length()+1];
 #endif
-            utils::assignStrToBuf(s, PBuck->StrP, (int)s.length()+1);
+            utils::assignPCharToBuf(s, (int)slen, PBuck->StrP, (int)slen+1);
             PBuck->Obj = std::move(AObj);
             return res;
         }
@@ -422,8 +422,10 @@ namespace gdlib::strhash {
     inline void TXStrHashList<uint8_t>::LoadFromStream(T2 &s) {
         Clear();
         int Cnt{s.ReadInteger()};
-        for(int N{}; N<Cnt; N++)
-            StoreObject(s.ReadString(), 0);
+        for(int N{}; N<Cnt; N++) {
+            auto str {s.ReadString()};
+            StoreObject(str.c_str(), str.length(), 0);
+        }
     }
 
     template<>
@@ -431,8 +433,10 @@ namespace gdlib::strhash {
     inline void TXStrHashList<int>::LoadFromStream(T2 &s) {
         Clear();
         int Cnt{s.ReadInteger()};
-        for(int N{}; N<Cnt; N++)
-            StoreObject(s.ReadString(), 0);
+        for(int N{}; N<Cnt; N++) {
+            auto str{s.ReadString()};
+            StoreObject(str.c_str(), str.length(), 0);
+        }
     }
 
     template<typename T>

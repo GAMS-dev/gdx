@@ -34,8 +34,10 @@
 #define TLD_REC_TYPE TLinkedDataRec<KeyType, maxKeySize, ValueType, maxValueSize>
 #endif
 
+#if defined(P3_COLLECTIONS)
 // Instead of using builtin C++ heap functionality new/delete, use custom GAMS big block heap from gdlib/gmsheapnew
 #define USE_GMSHEAP
+#endif
 
 namespace gdlib::datastorage {
 
