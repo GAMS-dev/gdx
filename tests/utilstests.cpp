@@ -354,6 +354,60 @@ namespace tests::utilstests {
         REQUIRE_EQ(-1, utils::lastOccurence(std::string(23, 'a'), 'b'));
     }
 
+    TEST_CASE("Test computing the length of a string without blanks") {
+        REQUIRE_EQ(4, utils::strLenNoWhitespace(" te s t  "));
+        REQUIRE_EQ(4, utils::strLenNoWhitespace("test"));
+        REQUIRE_EQ(0, utils::strLenNoWhitespace(std::string(10, ' ')));
+    }
+
+    TEST_CASE("Test getting a ref to char in a str at index pos with \0-tail enforcement") {
+        std::string s{ "test"s };
+        REQUIRE_EQ(s.front(), utils::getCharAtIndexOrAppend(s, 0));
+        REQUIRE_EQ('\0', utils::getCharAtIndexOrAppend(s, 4));
+    }
+
+    TEST_CASE("Test if string contains a specific character or a char from a set of chars") {
+        REQUIRE(utils::strContains("test", 't'));
+        REQUIRE_FALSE(utils::strContains("test", 'x'));
+        REQUIRE(utils::strContains("test", { 'f', 'g', 'e'}));
+        REQUIRE_FALSE(utils::strContains("test", { 'x', 'y', 'z'}));
+    }
+
+    TEST_CASE("Test boolean 'exclusive or' (xor) operator") {
+        REQUIRE(utils::excl_or(true, false));
+        REQUIRE(utils::excl_or(false, true));
+        REQUIRE_FALSE(utils::excl_or(false, false));
+        REQUIRE_FALSE(utils::excl_or(true, true));
+    }
+
+    TEST_CASE("Test finding the index of where a substring starts in an enclosing string") {
+        REQUIRE_EQ(4, utils::posOfSubstr("osteron", "testosteron"));
+        REQUIRE_EQ(-1, utils::posOfSubstr("xyz", "test"));
+    }
+
+    TEST_CASE("Test constructing string via lambda with index arg") {
+        std::string s { "test"s };
+        REQUIRE_EQ(s, utils::constructStr((int)s.size(), [&s](int ix) { return s[ix]; }));
+        REQUIRE(utils::constructStr(0, [](int ix) { return 0; }).empty());
+    }
+
+    TEST_CASE("Test quoting a string iff. it contains blanks") {
+        REQUIRE_EQ("nowhitespace", utils::quoteWhitespace("nowhitespace", '\"'));
+        REQUIRE_EQ("\"has whitespace\"", utils::quoteWhitespace("has whitespace", '\"'));
+    }
+
+    TEST_CASE("String to bool") {
+        REQUIRE(utils::strToBool("yes"));
+        REQUIRE_FALSE(utils::strToBool("no"));
+    }
+
+    TEST_CASE("Test lexicographical string comparison (optionally case-sensitive)") {
+        REQUIRE_EQ(-1, utils::strCompare("Alpha", "Beta"));
+        REQUIRE_EQ(1, utils::strCompare("Beta", "Alpha"));
+        REQUIRE_EQ(0, utils::strCompare("alpha", "Alpha"));
+        REQUIRE_EQ(32, utils::strCompare("alpha", "Alpha", false));
+    }
+
     TEST_SUITE_END();
 
 }

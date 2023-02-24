@@ -290,13 +290,13 @@ namespace utils {
 
     void sleep(int milliseconds);
 
-    int strLenNoWhitespace(const std::string &s);
+    int strLenNoWhitespace(std::string_view s);
 
     char& getCharAtIndexOrAppend(std::string& s, int ix);
 
-    bool strContains(const std::string &s, char c);
+    bool strContains(std::string_view s, char c);
 
-    bool strContains(const std::string& s, const std::initializer_list<char>& cs);
+    bool strContains(std::string_view s, const std::initializer_list<char>& cs);
 
     template<typename T>
     int genericCount(T start, std::function<T(T)> next, std::function<bool(T)> predicate) {
@@ -318,11 +318,11 @@ namespace utils {
 
     std::string constructStr(int size, const std::function<char(int)> &charForIndex);
 
-    int posOfSubstr(const std::string& sub, const std::string& s);
+    int posOfSubstr(std::string_view sub, std::string_view s);
 
-    std::list<std::string> split(const std::string &s, char sep = ' ');
+    std::list<std::string> split(std::string_view s, char sep = ' ');
 
-    std::list<std::string> splitWithQuotedItems(const std::string& s);
+    std::list<std::string> splitWithQuotedItems(std::string_view s);
 
     std::string slurp(const std::string& fn);
     void spit(const std::string& fn, const std::string& contents);
@@ -417,7 +417,7 @@ namespace utils {
         return acc;
     }
 
-    int strCompare(const std::string &S1, const std::string &S2, bool caseInsensitive = true);
+    int strCompare(std::string_view S1, std::string_view S2, bool caseInsensitive = true);
 
     const int maxBOMLen = 4;
     using tBomIndic = std::array<uint8_t, maxBOMLen>;

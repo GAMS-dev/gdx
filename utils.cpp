@@ -270,7 +270,7 @@ namespace utils {
         std::this_thread::sleep_for(std::chrono::milliseconds{milliseconds});
     }
 
-    int strLenNoWhitespace(const std::string &s) {
+    int strLenNoWhitespace(const std::string_view s) {
         return (int) std::count_if(s.begin(), s.end(), [](char c) {
             return !std::isspace(c);
         });
@@ -283,11 +283,11 @@ namespace utils {
         return s[ix];
     }
 
-    bool strContains(const std::string &s, char c) {
+    bool strContains(const std::string_view s, char c) {
         return s.find(c) != std::string::npos;
     }
 
-    bool strContains(const std::string &s, const std::initializer_list<char> &cs) {
+    bool strContains(const std::string_view s, const std::initializer_list<char> &cs) {
         return std::any_of(std::cbegin(s), std::cend(s),
                            [&cs](char c) { return std::find(cs.begin(), cs.end(), c) != cs.end(); });
     }
@@ -296,12 +296,12 @@ namespace utils {
         return (a && !b) || (!a && b);
     }
 
-    int posOfSubstr(const std::string &sub, const std::string &s) {
+    int posOfSubstr(const std::string_view sub, const std::string_view s) {
         const auto pos = s.find(sub);
         return pos == std::string::npos ? -1 : (int) pos;
     }
 
-    std::list<std::string> split(const std::string &s, char sep) {
+    std::list<std::string> split(const std::string_view s, char sep) {
         std::list<std::string> res;
         std::string cur;
         for (char c: s) {
@@ -315,7 +315,7 @@ namespace utils {
         return res;
     }
 
-    std::list<std::string> splitWithQuotedItems(const std::string &s) {
+    std::list<std::string> splitWithQuotedItems(const std::string_view s) {
         const char sep = ' ';
         const std::set<char> &quoteChars = {'\"', '\''};
         std::list<std::string> res;
@@ -469,7 +469,7 @@ namespace utils {
 
     inline int b2i(bool b) { return b ? 1 : 0; }
 
-    int strCompare(const std::string &S1, const std::string &S2, bool caseInsensitive) {
+    int strCompare(const std::string_view S1, const std::string_view S2, bool caseInsensitive) {
         if (S1.empty() || S2.empty()) return b2i(!S1.empty()) - b2i(!S2.empty());
         auto L = S1.length();
         if (L > S2.length()) L = S2.length();
