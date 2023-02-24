@@ -456,6 +456,14 @@ namespace gdlib::strhash {
         bool EntryEqual(const char *ps1, const char *ps2) override {
             return !strcmp(ps1, ps2);
         }
+
+        bool EntryEqualPChar(const char *ps1, const char *ps2) override {
+            return utils::sameTextPChar(ps1, ps2, false);
+        }
+
+        int Compare(const std::string &ps1, const std::string &ps2) override {
+            return utils::strCompare(ps1, ps2, false);
+        }
     };
 
     // This port of the central hashmap class used by the GDX object is as

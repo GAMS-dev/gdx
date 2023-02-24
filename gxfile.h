@@ -609,7 +609,7 @@ template<typename K, typename V, typename H, typename E>
 #ifdef STABLE_REFS
                 insertOrder.push_back(it);
 #else
-                insertOrder.push_back(key);
+                insertOrder.emplace_back(key);
 #endif
                 elem.i = static_cast<int>(insertOrder.size()) - (OneBased ? 0 : 1);
             }
@@ -681,7 +681,7 @@ template<typename K, typename V, typename H, typename E>
     };
 
 #ifdef CPP_HASHMAP
-    using TSetTextList = WrapCxxUnorderedMap<int>;
+    using TSetTextList = WrapCxxUnorderedMap<int, caseSensitiveHasher, caseSensitiveStrEquality>;
     using TNameList = WrapCxxUnorderedMap<PgdxSymbRecord>;
 #else
     #if defined(SLOW_SET_TEXT_LIST)
