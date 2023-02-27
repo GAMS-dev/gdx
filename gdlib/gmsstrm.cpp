@@ -49,10 +49,10 @@ namespace gdlib::gmsstrm {
     void reverseBytesMax8(void *psrc, void *pdest, int sz) {
         std::array<uint8_t, 8> orig{}, flip{};
         int n{std::min(sz-1, 7)};
-        memcpy(orig.data(), (const char *)psrc, n+1);
+        std::memcpy(orig.data(), (const char *)psrc, n+1);
         for(int k{}; k<=n; k++)
             flip[k] = orig[n-k];
-        memcpy((char *)pdest, flip.data(), n+1);
+        std::memcpy((char *)pdest, flip.data(), n+1);
     }
 
     TBinaryTextFileIO *TBinaryTextFileIO::FromString(const std::string &contents, int &ErrNr) {
@@ -230,7 +230,7 @@ namespace gdlib::gmsstrm {
             maybeFillReadBuffer();
             int bytesRemaining = (int)(readBuffer.size() - *offsetInBuffer);
             if(bytesRemaining < Count) numBytesRetrieved = bytesRemaining;
-            memcpy(Buffer, &readBuffer.data()[*offsetInBuffer], numBytesRetrieved);
+            std::memcpy(Buffer, &readBuffer.data()[*offsetInBuffer], numBytesRetrieved);
             *offsetInBuffer += numBytesRetrieved;
             NrRead += numBytesRetrieved;
         } else {
@@ -465,7 +465,7 @@ namespace gdlib::gmsstrm {
         };
 
         if(Count <= NrLoaded - NrRead) {
-            memcpy(&Buf[NrRead], buffer, Count);
+            std::memcpy(&Buf[NrRead], buffer, Count);
             NrRead += Count;
             return Count;
         } else {
@@ -474,7 +474,7 @@ namespace gdlib::gmsstrm {
                 if(NrRead >= NrLoaded && !FillBuffer()) break;
                 NrBytes = static_cast<unsigned int>(NrLoaded - NrRead);
                 if(NrBytes > Count) NrBytes = Count;
-                memcpy(&Buf[NrRead], &((uint8_t *)buffer)[UsrReadCnt], NrBytes);
+                std::memcpy(&Buf[NrRead], &((uint8_t *)buffer)[UsrReadCnt], NrBytes);
             }
             return UsrReadCnt;
         }
@@ -863,7 +863,7 @@ namespace gdlib::gmsstrm {
     {
         if(NrWritten > 0) FlushBuffer();
         if(Count <= NrLoaded - NrRead) {
-            memcpy(Buffer, &BufPtr[NrRead], Count);
+            std::memcpy(Buffer, &BufPtr[NrRead], Count);
             NrRead += Count;
             return Count;
         } else {
@@ -872,7 +872,7 @@ namespace gdlib::gmsstrm {
             while(Count > 0) {
                 if(NrRead >= NrLoaded && !FillBuffer()) break;
                 uint32_t NrBytes = std::min(Count, NrLoaded - NrRead);
-                memcpy(&UsrPtr[UsrReadCnt], &BufPtr[NrRead], NrBytes);
+                std::memcpy(&UsrPtr[UsrReadCnt], &BufPtr[NrRead], NrBytes);
                 NrRead += NrBytes;
                 UsrReadCnt += NrBytes;
                 Count -= NrBytes;
@@ -896,7 +896,7 @@ namespace gdlib::gmsstrm {
             NrLoaded = NrRead = 0;
         }
         if(Count <= BufSize - NrWritten) { // the simple case
-            memcpy(&BufPtr[NrWritten], Buffer, Count);
+            std::memcpy(&BufPtr[NrWritten], Buffer, Count);
             NrWritten += Count;
             return Count;
         }
@@ -906,7 +906,7 @@ namespace gdlib::gmsstrm {
             while(Count > 0) {
                 auto NrBytes = std::min(Count, BufSize - NrWritten);
                 if(NrBytes > 0)
-                    memcpy(&BufPtr[NrWritten], &UsrPtr[UsrWriteCnt], NrBytes);
+                    std::memcpy(&BufPtr[NrWritten], &UsrPtr[UsrWriteCnt], NrBytes);
                 NrWritten += NrBytes;
                 UsrWriteCnt += (int)NrBytes;
                 Count -= NrBytes;

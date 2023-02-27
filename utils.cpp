@@ -547,7 +547,7 @@ namespace utils {
         }
         const auto l = static_cast<uint8_t>(s.length());
         delphistr[0] = static_cast<char>(l);
-        memcpy(&delphistr[1], s.data(), l);
+        std::memcpy(&delphistr[1], s.data(), l);
         return 0;
     }
 

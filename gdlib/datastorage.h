@@ -348,8 +348,8 @@ namespace gdlib::datastorage {
 #else
             data.push_back({});
 #endif
-            memcpy(data.back().first, AKey, FKeySize);
-            memcpy(data.back().second, AData, FDataSize);
+            std::memcpy(data.back().first, AKey, FKeySize);
+            std::memcpy(data.back().second, AData, FDataSize);
             return data.back().second;
         }
 
@@ -376,8 +376,8 @@ namespace gdlib::datastorage {
         bool GetNextRecord(typename TLDStorageType::iterator &it, KeyType *AKey, ValType *Data) {
             if(it == data.end()) return false;
             const EntryType & item = *it;
-            memcpy(AKey, item.first, FKeySize);
-            memcpy(Data, item.second, FDataSize);
+            std::memcpy(AKey, item.first, FKeySize);
+            std::memcpy(Data, item.second, FDataSize);
             it++;
             return true;
         }

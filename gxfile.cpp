@@ -1538,11 +1538,11 @@ namespace gxfile {
             break;
         case dt_var:
             ui = CurSyPtr->SUserInfo;
-            memcpy(Avals, ui >= GMS_VARTYPE_UNKNOWN && ui <= GMS_VARTYPE_SEMIINT ? gmsDefRecVar[ui] : gmsDefRecVar[GMS_VARTYPE_UNKNOWN], sizeof(double)*5);
+            std::memcpy(Avals, ui >= GMS_VARTYPE_UNKNOWN && ui <= GMS_VARTYPE_SEMIINT ? gmsDefRecVar[ui] : gmsDefRecVar[GMS_VARTYPE_UNKNOWN], sizeof(double)*5);
             break;
         case dt_equ:
             ui = CurSyPtr->SUserInfo;
-            memcpy(Avals, ui >= GMS_EQUTYPE_E && ui <= GMS_EQUTYPE_E + (GMS_EQUTYPE_B + 1) ? gmsDefRecEqu[ui] : gmsDefRecEqu[GMS_EQUTYPE_E], sizeof(double)*5);
+            std::memcpy(Avals, ui >= GMS_EQUTYPE_E && ui <= GMS_EQUTYPE_E + (GMS_EQUTYPE_B + 1) ? gmsDefRecEqu[ui] : gmsDefRecEqu[GMS_EQUTYPE_E], sizeof(double)*5);
             break;
         default:
             assert(false && "GetDefaultRecord-2");
@@ -2220,7 +2220,7 @@ namespace gxfile {
         if(!DoRead(Values, DimFrst)) gdxDataReadDone();
         else {
             //std::copy(LastElem.begin(), LastElem.begin()+FCurrentDim-1, KeyInt.begin());
-            memcpy(KeyInt, LastElem.data(), FCurrentDim*sizeof(int));
+            std::memcpy(KeyInt, LastElem.data(), FCurrentDim*sizeof(int));
 
             if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
                 std::cout << "DataReadRaw index: "s;

@@ -79,7 +79,7 @@ namespace gdxinterface {
             for (int i{}; i < (int)bufPtrs.size(); i++) {
                 bufPtrs[i] = bufContents[i].data();
                 if (strIndex)
-                    memcpy(bufPtrs[i], (*strIndex)[i].c_str(),(*strIndex)[i].length()+1);
+                    std::memcpy(bufPtrs[i], (*strIndex)[i].c_str(),(*strIndex)[i].length()+1);
             }
         }
 

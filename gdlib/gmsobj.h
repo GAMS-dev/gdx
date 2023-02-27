@@ -89,7 +89,8 @@ namespace gdlib::gmsobj {
             FCount--;
             if(Index<FCount) {
                 if(OneBased) Index--;
-                std::memcpy(&FList[Index], &FList[Index+1], (FCount-Index)*sizeof(T*));
+                // overlap so use memmove instead of memcpy
+                std::memmove(&FList[Index], &FList[Index+1], (FCount-Index)*sizeof(T*));
             }
         }
 
@@ -101,8 +102,8 @@ namespace gdlib::gmsobj {
                 res = Item;
                 // Delete item, do not call FreeItem
                 FCount--;
-                if(I < FCount)
-                    std::memcpy(&FList[I], &FList[I+1], (FCount-I)*sizeof(T*));
+                if(I < FCount) // overlap so use memmove instead of memcpy
+                    std::memmove(&FList[I], &FList[I+1], (FCount-I)*sizeof(T*));
             }
             return res;
         }
@@ -117,8 +118,8 @@ namespace gdlib::gmsobj {
         void Insert(int Index, T *Item) {
             if(FCount == FCapacity) Grow();
             if(OneBased) Index--;
-            if(Index<FCount)
-                std::memcpy(&FList[Index+1], &FList[Index], (FCount-Index)*sizeof(T*));
+            if(Index<FCount) // overlap so use memmove instead of memcpy
+                std::memmove(&FList[Index+1], &FList[Index], (FCount-Index)*sizeof(T*));
             FList[Index] = Item;
             FCount++;
         }
@@ -394,8 +395,8 @@ namespace gdlib::gmsobj {
         void InsertItem(int Index, const char *S, size_t slen, T *APointer) {
             if(FCount == FCapacity) Grow();
             if(OneBased) Index--;
-            if(Index < FCount)
-                std::memcpy(&FList[Index+1], &FList[Index], (FCount-Index)*sizeof(TStringItem<T>));
+            if(Index < FCount) // overlap so use memmove instead of memcpy
+                std::memmove(&FList[Index+1], &FList[Index], (FCount-Index)*sizeof(TStringItem<T>));
             FList[Index].FString = NewString(S, slen, FStrMemory);
             FList[Index].FObject = APointer;
             FCount++;
@@ -409,8 +410,8 @@ namespace gdlib::gmsobj {
             FreeItem(Index);
             if(OneBased) Index--;
             FCount--;
-            if(Index < FCount)
-                std::memcpy(&FList[Index], &FList[Index+1], (FCount-Index) * sizeof(TStringItem<T>));
+            if(Index < FCount) // overlap so use memmove instead of memcpy
+                std::memmove(&FList[Index], &FList[Index+1], (FCount-Index) * sizeof(TStringItem<T>));
         }
 
         void FreeItem(int Index) {

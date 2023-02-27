@@ -8,8 +8,8 @@ namespace gdlib::gmsdata {
 
     void TTblGamsData::GetRecord(int N, int * Inx, double * Vals) {
         const auto InxArr = keyset[N];
-        memcpy(Inx, InxArr.data(), FDim * sizeof(int));
-        memcpy(Vals, mapping[InxArr].data(), GMS_VAL_MAX * sizeof(double));
+        std::memcpy(Inx, InxArr.data(), FDim * sizeof(int));
+        std::memcpy(Vals, mapping[InxArr].data(), GMS_VAL_MAX * sizeof(double));
     }
 
     void TTblGamsData::AddRecord(const int* AElements, const double* AVals) {

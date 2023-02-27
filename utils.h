@@ -427,15 +427,15 @@ namespace utils {
     inline void assignStrToBuf(const std::string &s, char *buf, int outBufSize = 256) {
         if((int)s.length() > outBufSize) return;
 #if defined(_WIN32)
-        memcpy(buf, s.c_str(), s.length()+1);
+        std::memcpy(buf, s.c_str(), s.length()+1);
 #else
-        strcpy(buf, s.c_str());
+        std::strcpy(buf, s.c_str());
 #endif
     }
 
     inline void assignPCharToBuf(const char *s, size_t slen, char *buf, size_t outBufSize = 256) {
         if(slen + 1 > outBufSize) return;
-        memcpy(buf, s, slen+1);
+        std::memcpy(buf, s, slen+1);
     }
 
     inline void assignPCharToBuf(const char *s, char *buf, size_t outBufSize = 256) {
