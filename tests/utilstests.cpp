@@ -21,6 +21,13 @@ namespace tests::utilstests {
         REQUIRE_EQ(utils::unionOp(a, b), expUnionC);
     }
 
+    class ClassWithContains : public utils::IContainsPredicate<int> {
+    public:
+        bool contains(const int &elem) const override {
+            return elem == 23;
+        }
+    };
+
     TEST_CASE("Test inclusion predicate") {
         const std::vector nums = {1, 2, 3, 23, 0};
         REQUIRE(utils::in(23, nums));
@@ -47,6 +54,12 @@ namespace tests::utilstests {
             REQUIRE_FALSE(utils::in("abc"s, m2));
             m2["abc"] = 42;
             REQUIRE(utils::in("abc"s, m2));
+        }
+
+        {
+            ClassWithContains cwc;
+            REQUIRE(utils::in(23, cwc));
+            REQUIRE_FALSE(utils::in(1, cwc));
         }
     }
 
@@ -422,10 +435,44 @@ namespace tests::utilstests {
                     contents{ "First line\nsecond line\nthird line"s };
         {
             std::ofstream ofs{ fn };
-            ofs.write(contents.c_str(), contents.size());
+            ofs.write(contents.c_str(), (long)contents.size());
         }
         REQUIRE_EQ(contents, utils::slurp(fn));
         std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test getting index of element in collection (list, vector, array, ...)") {
+        auto checkForTwo = [](const int &elem) {
+            return elem == 2;
+        };
+
+        // list
+        REQUIRE_EQ(1, utils::indexOf(std::list<int>{1,2,3}, 2));
+        REQUIRE_EQ(-1, utils::indexOf(std::list<int>{1,2,3}, 5));
+        REQUIRE_EQ(-1, utils::indexOf<int>(std::list<int>{}, 2));
+        REQUIRE_EQ(1, utils::indexOf<int>(std::list<int>{1,2,3}, checkForTwo));
+
+        // vector
+        REQUIRE_EQ(1, utils::indexOf(std::vector<int>{1,2,3}, 2));
+        REQUIRE_EQ(-1, utils::indexOf(std::vector<int>{1,2,3}, 5));
+        REQUIRE_EQ(-1, utils::indexOf(std::vector<int>{}, 2));
+        REQUIRE_EQ(1, utils::indexOf<int>(std::vector<int>{1,2,3}, checkForTwo));
+
+        // array
+        REQUIRE_EQ(1, utils::indexOf<int, 3>(std::array<int, 3>{1,2,3}, 2));
+        REQUIRE_EQ(-1, utils::indexOf<int, 3>(std::array<int, 3>{1,2,3}, 5));
+        REQUIRE_EQ(1, utils::indexOf<int, 3>(std::array<int, 3>{1,2,3}, checkForTwo));
+
+        // vector of pairs
+        std::vector<std::pair<int, double>> pairs {
+            {1, 1.0},
+            {2, 2.0},
+            {2, 3.0},
+        };
+        int n{2};
+        REQUIRE_EQ(1, utils::pairIndexOfFirst<int, double>(pairs, n));
+        n = 5;
+        REQUIRE_EQ(-1, utils::pairIndexOfFirst<int, double>(pairs, n));
     }
 
     TEST_SUITE_END();
