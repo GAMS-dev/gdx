@@ -362,9 +362,8 @@ namespace gxfile {
     //      [ ... ]
     // </CODE>
     int TGXFileObj::gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) {
-        if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
-            std::cout << "gdxOpenWrite(" << FileName << ")" << std::endl;
-        }
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
+            std::cout << "gdxOpenWrite("s << FileName << ")\n"s;
 
         if(fmode != f_not_open) {
             ErrNr = ERR_FILEALREADYOPEN;
@@ -558,9 +557,9 @@ namespace gxfile {
     // See Also:
     //   gdxOpenRead, gdxOpenWrite
     int TGXFileObj::gdxClose() {
-        if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
-            std::cout << "gdxClose(" << FFile->GetFileName() << ")" << std::endl;
-        }
+        if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
+            std::cout << "gdxClose("s << FFile->GetFileName() << ")\n"s;
+
         std::string fnConv;
         if(utils::in(fmode, fw_raw_data, fw_map_data, fw_str_data)) // unfinished write
             gdxDataWriteDone();
@@ -815,11 +814,11 @@ namespace gxfile {
         readIntlValueMapDbl = intlValueMapDbl;
 
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
-            std::cout << "reset special vals, dump of readIntlValueMapDbl" << std::endl;
+            std::cout << "reset special vals, dump of readIntlValueMapDbl\n"s;
             std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
             std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
             for(int i=0; i<(int)svNames.size(); i++)
-                std::cout << svNames[i] << "=" << readIntlValueMapDbl[svIndices[i]] << std::endl;
+                std::cout << svNames[i] << "="s << readIntlValueMapDbl[svIndices[i]] << '\n';
         }
 
         copyIntlMapDblToI64(intlValueMapDbl, intlValueMapI64);
@@ -1271,9 +1270,9 @@ namespace gxfile {
     bool TGXFileObj::DoWrite(const int* AElements, const double* AVals)
     {
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
-            std::cout << "DoWrite index: ";
+            std::cout << "DoWrite index: "s;
             for(int D{}; D<FCurrentDim; D++)
-                std::cout << std::to_string(AElements[D]) << (D+1 < FCurrentDim ? "," : "");
+                std::cout << std::to_string(AElements[D]) << (D+1 < FCurrentDim ? ","s : ""s);
             std::cout << '\n';
         }
 
@@ -1358,7 +1357,7 @@ namespace gxfile {
                 }
             }
             if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
-                std::cout << "level=" << AVals[GMS_VAL_LEVEL] << std::endl;
+                std::cout << "level="s << AVals[GMS_VAL_LEVEL] << '\n';
         }
         DataCount++;
         if (utils::in(CurSyPtr->SDataType, dt_set, dt_alias)) {
@@ -1430,7 +1429,7 @@ namespace gxfile {
                     AVals[GMS_VAL_LEVEL] = MapSetText[D];
             }
             if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
-                std::cout << "level=" << AVals[GMS_VAL_LEVEL] << std::endl;
+                std::cout << "level="s << AVals[GMS_VAL_LEVEL] << '\n';
         }
         return true;
     }
@@ -1881,7 +1880,7 @@ namespace gxfile {
         InitErrors();
 
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
-            std::cout << "gdxOpenRead(" << Afn << ")" << std::endl;
+            std::cout << "gdxOpenRead("s << Afn << ")\n"s;
         }
 
         auto FileErrorNr = [&]() {
@@ -2225,9 +2224,9 @@ namespace gxfile {
             memcpy(KeyInt, LastElem.data(), FCurrentDim*sizeof(int));
 
             if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
-                std::cout << "DataReadRaw index: ";
+                std::cout << "DataReadRaw index: "s;
                 for(int D{}; D<FCurrentDim; D++)
-                    std::cout << std::to_string(KeyInt[D]) << (D+1 < FCurrentDim ? "," : "");
+                    std::cout << std::to_string(KeyInt[D]) << (D+1 < FCurrentDim ? ","s : ""s);
                 std::cout << '\n';
             }
 
@@ -2430,7 +2429,7 @@ namespace gxfile {
             std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
             std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
             for(int i=0; i<(int)svNames.size(); i++)
-                std::cout << svNames[i] << "=" << AVals[svIndices[i]] << std::endl;
+                std::cout << svNames[i] << "="s << AVals[svIndices[i]] << '\n';
         }
 
         return true;
@@ -2462,7 +2461,7 @@ namespace gxfile {
             std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
             std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
             for(int i=0; i<(int)svNames.size(); i++)
-                std::cout << svNames[i] << "=" << AVals[svIndices[i]] << std::endl;
+                std::cout << svNames[i] << "="s << AVals[svIndices[i]] << '\n';
         }
 
         TIntlValueMapI64 tmpI64;
@@ -2483,11 +2482,11 @@ namespace gxfile {
         readIntlValueMapDbl = intlValueMapDbl;
 
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
-            std::cout << "Read dump, readIntlValueMapDbl" << std::endl;
+            std::cout << "Read dump, readIntlValueMapDbl\n";
             std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
             std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
             for(int i=0; i<(int)svNames.size(); i++)
-                std::cout << svNames[i] << "=" << readIntlValueMapDbl[svIndices[i]] << std::endl;
+                std::cout << svNames[i] << "="s << readIntlValueMapDbl[svIndices[i]] << '\n';
         }
 
         intlValueMapI64 = tmpI64;
@@ -2554,13 +2553,13 @@ namespace gxfile {
         }
 
         if(verboseTrace && TraceLevel == TraceLevels::trl_all && utils::in(res, 2, 3)) {
-            std::cout << "GetDomain SyNr=" << SyNr << std::endl;
+            std::cout << "GetDomain SyNr="s << SyNr << '\n';
             for (int D{}; D < SyPtr->SDim; D++) {
                 if(res == 2)
-                    std::cout << "SDomStrings[" << D << "]=" << (*SyPtr->SDomStrings)[D] << std::endl;
+                    std::cout << "SDomStrings["s << D << "]="s << (*SyPtr->SDomStrings)[D] << '\n';
                 else if(res == 3)
-                    std::cout << "SDomSymbols[" << D << "]=" << (*SyPtr->SDomSymbols)[D] << std::endl;
-                std::cout << "DomainIDs[" << D << "]=" << DomainIDs[D] << std::endl;
+                    std::cout << "SDomSymbols["s << D << "]="s << (*SyPtr->SDomSymbols)[D] << '\n';
+                std::cout << "DomainIDs["s << D << "]="s << DomainIDs[D] << '\n';
             }
         }
 
@@ -2636,9 +2635,9 @@ namespace gxfile {
         if (!MajorCheckMode("SymbolSetDomain"s, AllowedModes) || !CurSyPtr) return res;
 
         if(verboseTrace && TraceLevel == TraceLevels::trl_all) {
-            std::cout << "SetDomain" << std::endl;
+            std::cout << "SetDomain\n"s;
             for(int D{}; D < CurSyPtr->SDim; D++)
-                std::cout << "DomainID[" << D << "]=" << DomainIDs[D] << std::endl;
+                std::cout << "DomainID["s << D << "]="s << DomainIDs[D] << '\n';
         }
 
         res = true;
@@ -2714,9 +2713,9 @@ namespace gxfile {
         PgdxSymbRecord SyPtr = (*NameList->GetObject(SyNr));
 
         if(verboseTrace && TraceLevel == TraceLevels::trl_all) {
-            std::cout << "SetDomainX SyNr=" << SyNr << std::endl;
+            std::cout << "SetDomainX SyNr="s << SyNr << '\n';
             for(int D{}; D < SyPtr->SDim; D++)
-                std::cout << "DomainID[" << D << "]=" << DomainIDs[D] << std::endl;
+                std::cout << "DomainID["s << D << "]="s << DomainIDs[D] << '\n';
         }
 
         if (SyPtr->SDim > 0) {
@@ -2778,8 +2777,10 @@ namespace gxfile {
     int TGXFileObj::gdxUELRegisterRaw(const char *Uel) {
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
             std::cout << "Uel=" << Uel << '\n';
+
         if ((TraceLevel >= TraceLevels::trl_all || fmode != f_raw_elem) && !CheckMode("UELRegisterRaw"s, f_raw_elem))
             return false;
+
         static std::array<char, GMS_SSSIZE> svStorage;
         int svLen;
         const char *SV { utils::trimRight(Uel, svStorage.data(), svLen) };
@@ -4090,11 +4091,11 @@ namespace gxfile {
         readIntlValueMapDbl[vm_valeps] = AVals[sv_valeps];
 
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
-            std::cout << "gdxSetReadSpecialValues, dump of readIntlValueMapDbl" << std::endl;
+            std::cout << "gdxSetReadSpecialValues, dump of readIntlValueMapDbl\n";
             std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
             std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
             for(int i=0; i<(int)svNames.size(); i++)
-                std::cout << svNames[i] << "=" << readIntlValueMapDbl[svIndices[i]] << std::endl;
+                std::cout << svNames[i] << "="s << readIntlValueMapDbl[svIndices[i]] << '\n';
         }
 
         return true;

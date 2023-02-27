@@ -69,7 +69,7 @@ namespace tests::benchmarks {
         for(const auto &clz : classes) {
             aggrRes[i] = benchmarkFrame(clz.op, ntries);
             if(!quiet)
-                bres << fbl(clz.name) << "\t\t" << aggrRes[i].time << "s\t\t" << aggrRes[i].peakRSS << " bytes" << std::endl;
+                bres << fbl(clz.name) << "\t\t"s << aggrRes[i].time << "s\t\t"s << aggrRes[i].peakRSS << " bytes\n"s;
             names[i++] = clz.name;
         }
         double minTime {std::numeric_limits<double>::max()};
@@ -82,7 +82,7 @@ namespace tests::benchmarks {
             }
         }
         if(!quiet)
-            bres << "Winner: " << names[winnerIx] << std::endl << std::endl;
+            bres << "Winner: "s << names[winnerIx] << "\n\n"s;
     }
 
     void benchmarkTwoClasses(const std::string &name1, const std::function<void(void)> &op1,

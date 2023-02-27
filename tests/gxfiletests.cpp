@@ -360,18 +360,18 @@ namespace tests::gxfiletests {
                 tWrap = pfgdx::runWithTiming(fn, true, quiet);
                 totWrap += tWrap.total_t;
                 peakRSS = utils::queryPeakRSS();
-                if(!quiet) std::cout << "Peak RSS after wrapped GDX (P3/Delphi): " << peakRSS << std::endl;
+                if(!quiet) std::cout << "Peak RSS after wrapped GDX (P3/Delphi): "s << peakRSS << '\n';
             }
             if (!onlyWrapped) {
                 tPort = pfgdx::runWithTiming(fn, false, quiet);
                 totPort += tPort.total_t;
                 if(!onlyPorted) {
                     auto newPeakRSS = utils::queryPeakRSS();
-                    if(!quiet) std::cout << "Peak RSS after both wrapped and ported GDX: " << peakRSS << std::endl;
+                    if(!quiet) std::cout << "Peak RSS after both wrapped and ported GDX: "s << peakRSS << '\n';
                     if (newPeakRSS > peakRSS) {
                         if(!quiet)
-                            std::cout << "Warning: Peak RSS increase by " << newPeakRSS - peakRSS << " bytes ("
-                                      << ((double)newPeakRSS / (double)peakRSS - 1.0) * 100.0 << "%)" << std::endl;
+                            std::cout << "Warning: Peak RSS increase by "s << newPeakRSS - peakRSS << " bytes ("s
+                                      << ((double)newPeakRSS / (double)peakRSS - 1.0) * 100.0 << "%)\n"s;
                     }
                     REQUIRE_LE(newPeakRSS, peakRSS); // peak rss should not increase after running C++ GDX
                 }
@@ -379,17 +379,17 @@ namespace tests::gxfiletests {
 
             slowdowns.push_back(tWrap.total_t > 0 ? tPort.total_t / tWrap.total_t : 0);
             if (!quiet && !onlyPorted && !onlyWrapped)
-                std::cout << "Slowdown for " << fn << " = " << slowdowns[i] << std::endl;
+                std::cout << "Slowdown for "s << fn << " = "s << slowdowns[i] << '\n';
             if(slowdowns[i] <= 1.05) break; // we are happy if we got at least one try with slowdown below threshold 5%
         }
         if (!quiet) {
             auto avgSlowdown = std::accumulate(slowdowns.begin(), slowdowns.end(), 0.0) / (double)slowdowns.size();
             auto minSlowdown = *std::min_element(slowdowns.begin(), slowdowns.end());
-            std::cout << "Average slowdown = " << avgSlowdown << std::endl;
-            std::cout << "Minimum slowdown = " << minSlowdown << std::endl;
-            std::cout << "Total runtime wrapped = " << totWrap << std::endl;
-            std::cout << "Total runtime ported = " << totPort << std::endl;
-            textout << suiteName << "/" << modelName << ";" << minSlowdown << std::endl;
+            std::cout << "Average slowdown = "s << avgSlowdown << '\n';
+            std::cout << "Minimum slowdown = "s << minSlowdown << '\n';
+            std::cout << "Total runtime wrapped = "s << totWrap << '\n';
+            std::cout << "Total runtime ported = "s << totPort << '\n';
+            textout << suiteName << "/"s << modelName << ";"s << minSlowdown << std::endl;
         }
     }
 

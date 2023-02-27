@@ -1342,7 +1342,7 @@ namespace tests::gdxinterfacetests {
                 int errNr = pgx.gdxGetLastError();
                 char errMsg[GMS_SSSIZE];
                 pgx.gdxErrorStr(errNr, errMsg);
-                std::cout << errMsg << std::endl;
+                std::cout << errMsg << '\n';
             }
         });
         for (const auto& fn : { f1, f2 })
@@ -1692,7 +1692,7 @@ namespace tests::gdxinterfacetests {
     void enforceSlowdownLimit(AbstractWriteReadPair &pair, double limit) {
         const double avgSlowdown = perfBenchmarkCppVsDelphi(pair, true);
         //std::cout << "slowdown = " << avgSlowdown << " for " << pair.getName() << std::endl;
-        slowdownReport << pair.getName() << ";"s << avgSlowdown << std::endl;
+        slowdownReport << pair.getName() << ";"s << avgSlowdown << '\n';
 #if defined(NDEBUG) && !defined(CXX_COLLECTIONS)
         REQUIRE(avgSlowdown <= limit);
 #endif
@@ -1785,7 +1785,7 @@ namespace tests::gdxinterfacetests {
         }
 
         double avgSlowdown = averageElapsedForImpl["tgxfileobj"] / averageElapsedForImpl["xpwrap"];
-        slowdownReport << "corporate;" << avgSlowdown << std::endl;
+        slowdownReport << "corporate;" << avgSlowdown << '\n';
 #ifdef NDEBUG
         REQUIRE(avgSlowdown <= 1.2);
 #endif
@@ -1811,9 +1811,8 @@ namespace tests::gdxinterfacetests {
                 pgdx->gdxDataReadRaw(keys.data(), values.data(), dimFrst);
                 if(legacyRun) memorizedSetTextNumbers[i] = static_cast<int>(values[GMS_VAL_LEVEL]);
                 REQUIRE_EQ(memorizedSetTextNumbers[i], values[GMS_VAL_LEVEL]);
-                if(!legacyRun && memorizedSetTextNumbers[i] != values[GMS_VAL_LEVEL]) {
-                    std::cout << "Mismatch at index " << i << std::endl;
-                }
+                if(!legacyRun && memorizedSetTextNumbers[i] != values[GMS_VAL_LEVEL])
+                    std::cout << "Mismatch at index "s << i << '\n';
             }
             pgdx->gdxDataReadDone();
             pgdx->gdxClose();
@@ -1836,7 +1835,7 @@ namespace tests::gdxinterfacetests {
                 std::string &s1 {setElemTxts[n-1]};
                 std::string s2 {text.data()};
                 if (!legacyRun && s1 != s2)
-                    std::cout << "Mismatch \"" << s1 << "\" vs \"" << s2 << "\" at index " << n << std::endl;
+                    std::cout << "Mismatch \"" << s1 << "\" vs \"" << s2 << "\" at index "s << n << '\n';
                 REQUIRE_EQ(s1, s2);
                 n++;
             }
