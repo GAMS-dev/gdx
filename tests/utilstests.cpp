@@ -475,6 +475,25 @@ namespace tests::utilstests {
         REQUIRE_EQ(-1, utils::pairIndexOfFirst<int, double>(pairs, n));
     }
 
+    TEST_CASE("Test ptr to array to std::array conversion helpers") {
+        const int n{3};
+        int nums[n];
+        for(int i{}; i<n; i++)
+            nums[i] = i+1;
+        std::array<int, n>  numsArr = utils::asArray<int, n>(nums),
+                            expArr {1,2,3};
+        REQUIRE_EQ(expArr, numsArr);
+        auto numsArrShort = utils::asArrayN<int, n>(nums, 2);
+        std::array<int, n> expArrShort {1,2,0};
+        REQUIRE_EQ(expArrShort, numsArrShort);
+    }
+
+    TEST_CASE("Test constructing a std::array object filled by repeating a single value") {
+        std::array<int, 3>  arr {utils::arrayWithValue<int, 3>(23)},
+                            expArr {23,23,23};
+        REQUIRE_EQ(expArr, arr);
+    }
+
     TEST_SUITE_END();
 
 }
