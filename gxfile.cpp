@@ -2630,9 +2630,8 @@ namespace gxfile {
     // See Also:
     //   gdxSymbolGetDomain
     int TGXFileObj::gdxSymbolSetDomain(const char **DomainIDs) {
-        int res{ false };
         static const TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
-        if (!MajorCheckMode("SymbolSetDomain"s, AllowedModes) || !CurSyPtr) return res;
+        if (!MajorCheckMode("SymbolSetDomain"s, AllowedModes) || !CurSyPtr) return false;
 
         if(verboseTrace && TraceLevel == TraceLevels::trl_all) {
             std::cout << "SetDomain\n"s;
@@ -2640,7 +2639,7 @@ namespace gxfile {
                 std::cout << "DomainID["s << D << "]="s << DomainIDs[D] << '\n';
         }
 
-        res = true;
+        int res{ true };
         assert(!CurSyPtr->SDomSymbols && "SymbolSetDomain");
         CurSyPtr->SDomSymbols = std::make_unique<std::vector<int>>(CurSyPtr->SDim);
         for (int D{}; D < CurSyPtr->SDim; D++) {
@@ -2685,10 +2684,17 @@ namespace gxfile {
             }
         }
         switch (fmode) {
-        case fw_dom_raw: fmode = fw_raw_data; break;
-        case fw_dom_map: fmode = fw_map_data; break;
-        case fw_dom_str: fmode = fw_str_data; break;
-        default: break;
+        case fw_dom_raw:
+            fmode = fw_raw_data;
+            break;
+        case fw_dom_map:
+            fmode = fw_map_data;
+            break;
+        case fw_dom_str:
+            fmode = fw_str_data;
+            break;
+        default:
+            break;
         }
         return res;
     }

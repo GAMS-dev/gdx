@@ -1980,6 +1980,36 @@ namespace tests::gdxinterfacetests {
         std::filesystem::remove(f2);
     }
 
+    TEST_CASE("Test domain violations more extensively") {
+        std::string f1{ "domviol_wrapper.gdx"s }, f2{ "domviol_port.gdx"s };
+        testMatchingWrites(f1, f2, [&](GDXInterface& pgx) {
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "a set", 1, dt_set, 0));
+            std::string elem{ "i"s };
+            const char* key{ elem.c_str() };
+            std::array<double, GMS_VAL_MAX> vals{};
+            REQUIRE(pgx.gdxDataWriteStr(&key, vals.data()));
+            REQUIRE(pgx.gdxDataWriteDone());
+
+            const int paramDim{ 3 };
+            REQUIRE(pgx.gdxDataWriteStrStart("p", "parameter", paramDim, dt_par, 0));
+            std::array<const char*, paramDim> domainIds, keys;
+            std::fill_n(domainIds.begin(), paramDim, key);
+            REQUIRE(pgx.gdxSymbolSetDomain(domainIds.data()));
+            std::string nf{ "notfound"s };
+            std::fill_n(keys.begin(), paramDim, nf.c_str());
+            REQUIRE(pgx.gdxDataWriteStr(keys.data(), vals.data()));
+            REQUIRE(pgx.gdxDataWriteDone());
+            REQUIRE_EQ(1, pgx.gdxDataErrorCount());
+
+            std::array<int, GMS_MAX_INDEX_DIM> errorKeys{};
+            REQUIRE(pgx.gdxDataErrorRecordX(1, errorKeys.data(), vals.data()));
+            for (int i{}; i < paramDim; i++)
+                REQUIRE_EQ(-2, errorKeys[i]);
+        });
+        std::filesystem::remove(f1);
+        std::filesystem::remove(f2);
+    }
+
     TEST_SUITE_END();
 
 }
