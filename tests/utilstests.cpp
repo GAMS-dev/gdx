@@ -396,7 +396,7 @@ namespace tests::utilstests {
         REQUIRE_EQ("\"has whitespace\"", utils::quoteWhitespace("has whitespace", '\"'));
     }
 
-    TEST_CASE("String to bool") {
+    TEST_CASE("Test string to bool conversion") {
         REQUIRE(utils::strToBool("yes"));
         REQUIRE_FALSE(utils::strToBool("no"));
     }
@@ -415,6 +415,17 @@ namespace tests::utilstests {
         std::string tooLong(256, 'x');
         utils::assignPCharToBuf(tooLong.c_str(), buf.data(), buf.size());
         REQUIRE_EQ('\0', buf.back());
+    }
+
+    TEST_CASE("Test slurping the contents from a text file") {
+        std::string fn{ "tmp.txt"s },
+                    contents{ "First line\nsecond line\nthird line"s };
+        {
+            std::ofstream ofs{ fn };
+            ofs.write(contents.c_str(), contents.size());
+        }
+        REQUIRE_EQ(contents, utils::slurp(fn));
+        std::filesystem::remove(fn);
     }
 
     TEST_SUITE_END();

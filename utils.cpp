@@ -17,8 +17,6 @@ using namespace std::literals::string_literals;
 // ==============================================================================================================
 namespace utils {
 
-    bool sameTextInvariant(const std::string &a, const std::string &b);
-
     void parseHex(const std::string &s, int &num, int &code);
 
     bool determineCode(const std::string &s, const std::function<bool(char)> &charIsLegalPredicate, int &code);
@@ -60,6 +58,12 @@ namespace utils {
         return out;
     }
 
+    bool sameTextInvariant(std::string_view a, std::string_view b);
+
+    bool sameText(const std::string_view a, const std::string_view b, bool caseInvariant) {
+        return caseInvariant ? sameTextInvariant(a, b) : a == b;
+    }
+
     bool sameTextInvariant(const std::string_view a, const std::string_view b) {
         const auto l = a.length();
         if (b.length() != a.length()) return false;
@@ -68,10 +72,6 @@ namespace utils {
                 return false;
         }
         return true;
-    }
-
-    bool sameText(const std::string_view a, const std::string_view b, bool caseInvariant) {
-        return caseInvariant ? sameTextInvariant(a, b) : a == b;
     }
 
     bool sameTextAsAny(const std::string &a, const std::initializer_list<std::string> &bs) {
@@ -355,8 +355,8 @@ namespace utils {
     }
 
     // same as std::string::substr but silent when offset > input size
-    std::string substr(const std::string &s, int offset, int len) {
-        return (s.empty() || offset > (int) s.size() - 1) ? ""s : s.substr(offset, len);
+    std::string_view substr(const std::string_view s, int offset, int len) {
+        return (s.empty() || offset > (int) s.size() - 1) ? std::string_view {} : s.substr(offset, len);
     }
 
     std::string constructStr(int size, const std::function<char(int)> &charForIndex) {

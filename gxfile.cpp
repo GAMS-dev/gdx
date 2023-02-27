@@ -2004,7 +2004,7 @@ namespace gxfile {
 
         NrElem = FFile->ReadInteger();
         //bug for pre 2002
-        if (utils::substr(FileSystemID, 15, 4) == "2001") NrElem--;
+        if (utils::substr(FileSystemID, 15, 4) == "2001"s) NrElem--;
 
         while (UELTable->size() < NrElem) {
             auto s{FFile->ReadString()};

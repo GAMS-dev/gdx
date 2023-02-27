@@ -329,7 +329,7 @@ namespace utils {
 
     void assertOrMsg(bool condition, const std::string& msg);
     
-    std::string substr(const std::string& s, int offset, int len);
+    std::string_view substr(std::string_view s, int offset, int len);
 
     std::string join(char sep, const std::initializer_list<std::string> &parts);
 
@@ -439,7 +439,7 @@ namespace utils {
     }
 
     inline void assignPCharToBuf(const char *s, char *buf, size_t outBufSize = 256) {
-        int i;
+        size_t i;
         for(i=0; s[i] != '\0' && i < outBufSize; i++)
             buf[i] = s[i];
         buf[i == outBufSize ? i - 1 : i] = '\0';
