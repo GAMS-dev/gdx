@@ -3636,8 +3636,8 @@ namespace gxfile {
         TIndex Index{};
         if (!DP) { // we only count
             for (int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++)
-                // TODO: N-1?
-                if (DomainIndxs.GetMapping(N) == 1) NrElem++;
+                if (DomainIndxs.GetMapping(N) == 1)
+                    NrElem++;
         }
         else { //should we have an option to return indices in Raw order or in Mapped order?
             gdlib::gmsdata::TTblGamsData SortL{ 1, sizeof(int) };
@@ -3653,7 +3653,6 @@ namespace gxfile {
             SortL.sort();
             for (int N{}; N < SortL.size(); N++) {
                 SortL.GetRecord(N, Index.data(), vf.data());
-                //DP(static_cast<int>(vf.front()), Index.front(), UPtr);
                 gdxGetDomainElements_DP_FC(static_cast<int>(vf.front()), Index.front(), UPtr);
             }
         }

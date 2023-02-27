@@ -1040,7 +1040,14 @@ namespace tests::gdxinterfacetests {
             const std::list<std::pair<int,int>> expectedCallArgs {
                 {1,1}, {2,2}
             };
+            REQUIRE_EQ(2, nrElem);
             REQUIRE_EQ(expectedCallArgs, callArgs);
+
+            callArgs.clear();
+            nrElem = 0;
+            REQUIRE(pgx.gdxGetDomainElements(5, 1, gxfile::DOMC_EXPAND, nullptr, nrElem, (void *)&callArgs));
+            REQUIRE_EQ(2, nrElem);
+            REQUIRE(callArgs.empty());
 
             REQUIRE_EQ(6, pgx.gdxSymbMaxLength());
         });
@@ -1994,10 +2001,12 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteStrStart("p", "parameter", paramDim, dt_par, 0));
             std::array<const char*, paramDim> domainIds, keys;
             std::fill_n(domainIds.begin(), paramDim, key);
-            REQUIRE(pgx.gdxSymbolSetDomain(domainIds.data()));
+            int rc{pgx.gdxSymbolSetDomain(domainIds.data())};
+            REQUIRE(rc);
             std::string nf{ "notfound"s };
             std::fill_n(keys.begin(), paramDim, nf.c_str());
-            REQUIRE(pgx.gdxDataWriteStr(keys.data(), vals.data()));
+            rc = pgx.gdxDataWriteStr(keys.data(), vals.data());
+            REQUIRE(rc);
             REQUIRE(pgx.gdxDataWriteDone());
             REQUIRE_EQ(1, pgx.gdxDataErrorCount());
 
