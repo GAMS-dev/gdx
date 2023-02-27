@@ -4397,7 +4397,7 @@ namespace gxfile {
     }
 
     int TGXFileObj::gdxDataReadRawFastFilt_DP_FC(const int* Indx, const double* Vals, void* Uptr) {
-        if (gdxDataReadRawFastEx_DP_CallByRef) {
+        if (gdxDataReadRawFastFilt_DP_CallByRef) {
             TDataStoreFiltProc_F local_gdxDataReadRawFastFilt_DP{ (TDataStoreFiltProc_F)gdxDataReadRawFastFilt_DP };
             uInt64 local_Uptr;
             local_Uptr.i = 0;
