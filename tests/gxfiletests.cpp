@@ -115,14 +115,14 @@ namespace tests::gxfiletests {
     }
 
     TEST_CASE("Test checking whether an identifier is well-formed (good)") {
-        REQUIRE_FALSE(IsGoodIdent(""));
+        REQUIRE_FALSE(IsGoodIdent(""s));
         REQUIRE_FALSE(IsGoodIdent(std::string(100, ' ')));
-        REQUIRE_FALSE(IsGoodIdent(" abc"));
-        REQUIRE_FALSE(IsGoodIdent("A!"));
+        REQUIRE_FALSE(IsGoodIdent(" abc"s));
+        REQUIRE_FALSE(IsGoodIdent("A!"s));
 
-        REQUIRE(IsGoodIdent("x"));
-        REQUIRE(IsGoodIdent("abc_123"));
-        REQUIRE(IsGoodIdent("a1"));
+        REQUIRE(IsGoodIdent("x"s));
+        REQUIRE(IsGoodIdent("abc_123"s));
+        REQUIRE(IsGoodIdent("a1"s));
     }
 
     // Temporarily disable to prevent stdout

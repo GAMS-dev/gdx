@@ -611,9 +611,9 @@ namespace gxfile {
                     YFile->AddKeyItem("domain_symbols");
                     YFile->IncIndentLevel();
 #endif
-                    for(const auto &SDomSym : *PSy->SDomSymbols) {
-                        FFile->WriteInteger(SDomSym);
-                        WRYAML(YFile->AddItem(std::to_string(SDomSym)));
+                    for(int D{}; D<PSy->SDim; D++) {
+                        FFile->WriteInteger(PSy->SDomSymbols[D]);
+                        WRYAML(YFile->AddItem(std::to_string(PSy->SDomSymbols[D])));
                     }
                     WRYAML(YFile->DecIndentLevel());
                 }
@@ -708,9 +708,9 @@ namespace gxfile {
                     WRYAML(YFile->AddKeyItem(NameList->GetString(N)));
                     WRYAML(YFile->IncIndentLevel());
                     FFile->WriteInteger(N);
-                    for(const auto &i : (*PSy->SDomStrings)) {
-                        FFile->WriteInteger(i);
-                        WRYAML(YFile->AddItem(std::to_string(i)));
+                    for(int D{}; D<PSy->SDim; D++) {
+                        FFile->WriteInteger(PSy->SDomStrings[D]);
+                        WRYAML(YFile->AddItem(std::to_string(PSy->SDomStrings[D])));
                     }
                     WRYAML(YFile->DecIndentLevel());
                 }
@@ -749,6 +749,8 @@ namespace gxfile {
                 //PSy->SCommentsList = std::nullopt;
                 //PSy->SSetBitMap = nullptr;
                 //PSy->SDomStrings = nullptr;
+                delete [] PSy->SDomSymbols;
+                delete [] PSy->SDomStrings;
                 delete PSy;
             }
             NameList = nullptr;
@@ -763,7 +765,8 @@ namespace gxfile {
         ErrorList = nullptr;
         FilterList = nullptr;
         AcronymList = nullptr;
-        MapSetText.clear();
+        delete [] MapSetText;
+        MapSetText = nullptr;
 
         fmode = f_not_open;
         fstatus = stat_notopen;
@@ -1279,12 +1282,10 @@ namespace gxfile {
             if (WrBitMaps[D] && !accessBitMap(*WrBitMaps[D], AElements[D])) {
                 ReportError(ERR_DOMAINVIOLATION);
                 TgdxUELIndex ErrorUELs{};
-                // FIXME: AS: Are index boundaries right here?
                 for (int DD{}; DD < D; DD++)
                     ErrorUELs[DD] = AElements[DD];
                 ErrorUELs[D] = -AElements[D];
                 // see if there are more domain violations
-                // FIXME: AS: Are index boundaries right here?
                 for (int DD{ D + 1 }; DD < FCurrentDim; DD++) {
                     bool neg{ WrBitMaps[DD] && !accessBitMap(*WrBitMaps[DD],AElements[DD]) };
                     ErrorUELs[DD] = (neg ? -1 : 1) * AElements[DD];
@@ -1420,7 +1421,7 @@ namespace gxfile {
                 TgdxIntlValTyp SV {static_cast<TgdxIntlValTyp>(BSV)};
                 AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap(DV, FFile->ReadDouble());
             }
-            if(!MapSetText.empty() && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set) { // remap settext number
+            if(MapSetText && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set) { // remap settext number
                 double X {AVals[GMS_VAL_LEVEL]};
                 int D {static_cast<int>(std::round(X))};
                 if(std::abs(X-D) < 1e-12 && D >= 0 && D <= SetTextList->GetCapacity())
@@ -1971,9 +1972,9 @@ namespace gxfile {
             CurSyPtr->SCommentsList = std::nullopt;
             if(VersionRead >= 7) {
                 if(FFile->ReadByte()) {
-                    CurSyPtr->SDomSymbols = std::make_unique<std::vector<int>>(CurSyPtr->SDim);
-                    for(auto &SDomSym : *CurSyPtr->SDomSymbols)
-                        SDomSym = FFile->ReadInteger();
+                    CurSyPtr->SDomSymbols = new int [CurSyPtr->SDim];
+                    for(int D{}; D<CurSyPtr->SDim; D++)
+                        CurSyPtr->SDomSymbols[D] = FFile->ReadInteger();
                 }
                 NrElem = FFile->ReadInteger();
                 if(NrElem > 0) {
@@ -2023,10 +2024,11 @@ namespace gxfile {
                 auto s{FFile->ReadString()};
                 int TextNum{ SetTextList->Add(s.c_str(), s.length()) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
-                    MapSetText.resize(NrElem);
-                    // TODO: Could this be replaced by std::iota?
-                    for (int D{}; D < N; D++)
-                        MapSetText[D] = D;
+                    if(!MapSetText) {
+                        MapSetText = new int[NrElem];
+                        for (int D{}; D < N; D++)
+                            MapSetText[D] = D;
+                    }
                     MapSetText[N] = TextNum;
                 }
             }
@@ -2052,9 +2054,9 @@ namespace gxfile {
                 int SyNr = FFile->ReadInteger();
                 if (SyNr <= 0) break;
                 const auto sym = *NameList->GetObject(SyNr);
-                sym->SDomStrings = std::make_unique<std::vector<int>>(sym->SDim);
-                for (auto &SDomString : *sym->SDomStrings)
-                    SDomString = FFile->ReadInteger();
+                sym->SDomStrings = new int[sym->SDim];
+                for (int D{}; D<sym->SDim; D++)
+                    sym->SDomStrings[D] = FFile->ReadInteger();
             }
             if (ErrorCondition(FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER3)) return FileErrorNr();
         }
@@ -2506,7 +2508,7 @@ namespace gxfile {
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return false;
         PgdxSymbRecord SyPtr{ (*NameList->GetObject(SyNr)) };
         for (int D{}; D < SyPtr->SDim; D++)
-            DomainSyNrs[D] = !SyPtr->SDomSymbols || (*SyPtr->SDomSymbols)[D] == 0 ? 0 : (*SyPtr->SDomSymbols)[D];
+            DomainSyNrs[D] = !SyPtr->SDomSymbols ? 0 : SyPtr->SDomSymbols[D];
         return true;
     }
 
@@ -2537,16 +2539,16 @@ namespace gxfile {
 
         if (SyPtr->SDomStrings) {
             for (int D{}; D<SyPtr->SDim; D++)
-                if((*SyPtr->SDomStrings)[D])
-                    utils::assignPCharToBuf(DomainStrList->GetString((*SyPtr->SDomStrings)[D]), DomainIDs[D], GMS_SSSIZE);
+                if(SyPtr->SDomStrings[D])
+                    utils::assignPCharToBuf(DomainStrList->GetString(SyPtr->SDomStrings[D]), DomainIDs[D], GMS_SSSIZE);
             res = 2;
         }
         else if (!SyPtr->SDomSymbols)
             res = 1;
         else {
             for (int D{}; D < SyPtr->SDim; D++)
-                if ((*SyPtr->SDomSymbols)[D])
-                    utils::assignPCharToBuf(NameList->GetString((*SyPtr->SDomSymbols)[D]), DomainIDs[D], GMS_SSSIZE);
+                if (SyPtr->SDomSymbols[D])
+                    utils::assignPCharToBuf(NameList->GetString(SyPtr->SDomSymbols[D]), DomainIDs[D], GMS_SSSIZE);
             res = 3;
         }
 
@@ -2554,9 +2556,9 @@ namespace gxfile {
             std::cout << "GetDomain SyNr="s << SyNr << '\n';
             for (int D{}; D < SyPtr->SDim; D++) {
                 if(res == 2)
-                    std::cout << "SDomStrings["s << D << "]="s << (*SyPtr->SDomStrings)[D] << '\n';
+                    std::cout << "SDomStrings["s << D << "]="s << SyPtr->SDomStrings[D] << '\n';
                 else if(res == 3)
-                    std::cout << "SDomSymbols["s << D << "]="s << (*SyPtr->SDomSymbols)[D] << '\n';
+                    std::cout << "SDomSymbols["s << D << "]="s << SyPtr->SDomSymbols[D] << '\n';
                 std::cout << "DomainIDs["s << D << "]="s << DomainIDs[D] << '\n';
             }
         }
@@ -2639,7 +2641,7 @@ namespace gxfile {
 
         int res{ true };
         assert(!CurSyPtr->SDomSymbols && "SymbolSetDomain");
-        CurSyPtr->SDomSymbols = std::make_unique<std::vector<int>>(CurSyPtr->SDim);
+        CurSyPtr->SDomSymbols = new int[CurSyPtr->SDim];
         for (int D{}; D < CurSyPtr->SDim; D++) {
             bool domap {true};
             int DomSy;
@@ -2672,7 +2674,7 @@ namespace gxfile {
                     break;
                 } while (true);
             }
-            (*CurSyPtr->SDomSymbols)[D] = DomSy;
+            CurSyPtr->SDomSymbols[D] = DomSy;
             if (domap && DomSy > 0) {
                 // this is the case for set i(i)
                 if (CurSyPtr->SDim != 1 || CurSyPtr != *NameList->GetObject(DomSy)) {
@@ -2724,15 +2726,15 @@ namespace gxfile {
 
         if (SyPtr->SDim > 0) {
             if (!SyPtr->SDomStrings)
-                SyPtr->SDomStrings = std::make_unique<std::vector<int>>(SyPtr->SDim);
+                SyPtr->SDomStrings = new int[SyPtr->SDim];
             for (int D{}; D < SyPtr->SDim; D++) {
                 const std::string &S { DomainIDs[D] };
-                if (S.empty() || S == "*" || !IsGoodIdent(S)) (*SyPtr->SDomStrings)[D] = 0;
+                if (S.empty() || S == "*" || !IsGoodIdent(S)) SyPtr->SDomStrings[D] = 0;
                 else {
-                    (*SyPtr->SDomStrings)[D] = DomainStrList->IndexOf(S.c_str()); // one based
-                    if ((*SyPtr->SDomStrings)[D] <= 0) {
+                    SyPtr->SDomStrings[D] = DomainStrList->IndexOf(S.c_str()); // one based
+                    if (SyPtr->SDomStrings[D] <= 0) {
                         DomainStrList->Add(S.c_str(), S.length());
-                        (*SyPtr->SDomStrings)[D] = (int) DomainStrList->size();
+                        SyPtr->SDomStrings[D] = (int) DomainStrList->size();
                     }
                 }
             }

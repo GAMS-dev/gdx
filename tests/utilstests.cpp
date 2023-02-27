@@ -135,11 +135,11 @@ namespace tests::utilstests {
     }
 
     TEST_CASE("Split string into parts using a separating character") {
-        REQUIRE_EQ(utils::split("a;b;c", ';'), std::list {"a"s, "b"s, "c"s});
+        REQUIRE_EQ(utils::split("a;b;c"s, ';'), std::list {"a"s, "b"s, "c"s});
     }
 
     TEST_CASE("Split string into its whitespace separated parts but don't split inside quotes") {
-        REQUIRE_EQ(std::list {"first"s, "\"second part\""s, "\'third part\'"s, "fourth"s}, utils::splitWithQuotedItems(" first   \"second part\" \'third part\' fourth "));
+        REQUIRE_EQ(std::list {"first"s, "\"second part\""s, "\'third part\'"s, "fourth"s}, utils::splitWithQuotedItems(" first   \"second part\" \'third part\' fourth "s));
     }
 
     TEST_CASE("Uppercase all characters in a string") {
@@ -268,13 +268,13 @@ namespace tests::utilstests {
     TEST_CASE("Test conversion of string view into Delphi-format ShortString") {
         std::array<char, 256> buf{};
         
-        REQUIRE_FALSE(utils::strConvCppToDelphi("abc", buf.data()));
+        REQUIRE_FALSE(utils::strConvCppToDelphi("abc"s, buf.data()));
         REQUIRE_EQ(3, buf.front());
         REQUIRE_EQ('a', buf[1]);
         REQUIRE_EQ('b', buf[2]);
         REQUIRE_EQ('c', buf[3]);
 
-        REQUIRE_FALSE(utils::strConvCppToDelphi("", buf.data()));
+        REQUIRE_FALSE(utils::strConvCppToDelphi(""s, buf.data()));
         REQUIRE_EQ(0, buf.front());
 
         REQUIRE_FALSE(utils::strConvCppToDelphi(std::string(255, 'x'), buf.data()));
@@ -292,9 +292,9 @@ namespace tests::utilstests {
     }
 
     TEST_CASE("Test checking if any character from a string satisfies a given predicate") {
-        REQUIRE(utils::anychar([](char c) { return c == 's';  }, "test"));
-        REQUIRE_FALSE(utils::anychar([](char c) { return c == 'x';  }, "test"));
-        REQUIRE_FALSE(utils::anychar([](char c) { return true;  }, ""));
+        REQUIRE(utils::anychar([](char c) { return c == 's';  }, "test"s));
+        REQUIRE_FALSE(utils::anychar([](char c) { return c == 'x';  }, "test"s));
+        REQUIRE_FALSE(utils::anychar([](char c) { return true;  }, ""s));
     }
 
     TEST_CASE("Test permutated assigned of string characters") {
@@ -340,8 +340,8 @@ namespace tests::utilstests {
     }
 
     TEST_CASE("Test checking if a string contains a char with code less than given integer") {
-        REQUIRE(utils::hasCharLt("a", 'b'));
-        REQUIRE_FALSE(utils::hasCharLt("b", 'a'));
+        REQUIRE(utils::hasCharLt("a"s, 'b'));
+        REQUIRE_FALSE(utils::hasCharLt("b"s, 'a'));
     }
 
     TEST_CASE("Test rounding to n-digits") {
@@ -363,13 +363,13 @@ namespace tests::utilstests {
     }
 
     TEST_CASE("Test getting index of last occurence of character in string") {
-        REQUIRE_EQ(13, utils::lastOccurence("abcdefabcdefabcdef", 'b'));
+        REQUIRE_EQ(13, utils::lastOccurence("abcdefabcdefabcdef"s, 'b'));
         REQUIRE_EQ(-1, utils::lastOccurence(std::string(23, 'a'), 'b'));
     }
 
     TEST_CASE("Test computing the length of a string without blanks") {
-        REQUIRE_EQ(4, utils::strLenNoWhitespace(" te s t  "));
-        REQUIRE_EQ(4, utils::strLenNoWhitespace("test"));
+        REQUIRE_EQ(4, utils::strLenNoWhitespace(" te s t  "s));
+        REQUIRE_EQ(4, utils::strLenNoWhitespace("test"s));
         REQUIRE_EQ(0, utils::strLenNoWhitespace(std::string(10, ' ')));
     }
 
@@ -380,10 +380,10 @@ namespace tests::utilstests {
     }
 
     TEST_CASE("Test if string contains a specific character or a char from a set of chars") {
-        REQUIRE(utils::strContains("test", 't'));
-        REQUIRE_FALSE(utils::strContains("test", 'x'));
-        REQUIRE(utils::strContains("test", { 'f', 'g', 'e'}));
-        REQUIRE_FALSE(utils::strContains("test", { 'x', 'y', 'z'}));
+        REQUIRE(utils::strContains("test"s, 't'));
+        REQUIRE_FALSE(utils::strContains("test"s, 'x'));
+        REQUIRE(utils::strContains("test"s, { 'f', 'g', 'e'}));
+        REQUIRE_FALSE(utils::strContains("test"s, { 'x', 'y', 'z'}));
     }
 
     TEST_CASE("Test boolean 'exclusive or' (xor) operator") {
@@ -394,8 +394,8 @@ namespace tests::utilstests {
     }
 
     TEST_CASE("Test finding the index of where a substring starts in an enclosing string") {
-        REQUIRE_EQ(4, utils::posOfSubstr("osteron", "testosteron"));
-        REQUIRE_EQ(-1, utils::posOfSubstr("xyz", "test"));
+        REQUIRE_EQ(4, utils::posOfSubstr("osteron"s, "testosteron"s));
+        REQUIRE_EQ(-1, utils::posOfSubstr("xyz"s, "test"s));
     }
 
     TEST_CASE("Test constructing string via lambda with index arg") {
@@ -405,20 +405,20 @@ namespace tests::utilstests {
     }
 
     TEST_CASE("Test quoting a string iff. it contains blanks") {
-        REQUIRE_EQ("nowhitespace", utils::quoteWhitespace("nowhitespace", '\"'));
-        REQUIRE_EQ("\"has whitespace\"", utils::quoteWhitespace("has whitespace", '\"'));
+        REQUIRE_EQ("nowhitespace"s, utils::quoteWhitespace("nowhitespace"s, '\"'));
+        REQUIRE_EQ("\"has whitespace\""s, utils::quoteWhitespace("has whitespace"s, '\"'));
     }
 
     TEST_CASE("Test string to bool conversion") {
-        REQUIRE(utils::strToBool("yes"));
-        REQUIRE_FALSE(utils::strToBool("no"));
+        REQUIRE(utils::strToBool("yes"s));
+        REQUIRE_FALSE(utils::strToBool("no"s));
     }
 
     TEST_CASE("Test lexicographical string comparison (optionally case-sensitive)") {
-        REQUIRE_EQ(-1, utils::strCompare("Alpha", "Beta"));
-        REQUIRE_EQ(1, utils::strCompare("Beta", "Alpha"));
-        REQUIRE_EQ(0, utils::strCompare("alpha", "Alpha"));
-        REQUIRE_EQ(32, utils::strCompare("alpha", "Alpha", false));
+        REQUIRE_EQ(-1, utils::strCompare("Alpha"s, "Beta"s));
+        REQUIRE_EQ(1, utils::strCompare("Beta"s, "Alpha"s));
+        REQUIRE_EQ(0, utils::strCompare("alpha"s, "Alpha"s));
+        REQUIRE_EQ(32, utils::strCompare("alpha"s, "Alpha"s, false));
     }
 
     TEST_CASE("Test copying the contents of a pchar into a char buffer") {

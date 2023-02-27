@@ -232,10 +232,8 @@ template<typename K, typename V, typename H, typename E>
         std::string SExplTxt;
         bool SIsCompressed;
 
-        // TODO: Maybe also use std::optional here instead of std::unique_ptr
-        // TODO: Is the overhead of a std::vector to a raw heap array (int *) here relevant?
-        std::unique_ptr<std::vector<int>> SDomSymbols, // real domain info
-                                          SDomStrings; //relaxed domain info
+        int *SDomSymbols, // real domain info
+            *SDomStrings; // relaxed domain info
 
         std::optional<TCommentsList> SCommentsList;
 
@@ -684,8 +682,6 @@ template<typename K, typename V, typename H, typename E>
     using TNameList = WrapCxxUnorderedMap<PgdxSymbRecord>;
 #else
     #if defined(SLOW_SET_TEXT_LIST)
-        //using TSetTextList = VecSetTextList;
-        // FIXME: Using std::unordered_map based impl of this type until gdlib/gmsobj/TXStrPool is ported fully
         using TSetTextList = WrapCxxUnorderedMap<uint8_t, std::hash<std::string>, caseSensitiveStrEquality>;
     #elif defined(TXSPOOL_LEGACY)
         using TSetTextList = gdlib::gmsobj::TXStrPool<uint8_t>;
@@ -721,8 +717,7 @@ template<typename K, typename V, typename H, typename E>
         int fComprLev{};
         std::unique_ptr<IUELTable> UELTable;
         std::unique_ptr<TSetTextList> SetTextList {};
-        // TODO: Overhead to raw int * heap array relevant here?
-        std::vector<int> MapSetText;
+        int *MapSetText{};
         int FCurrentDim{};
         std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem{}, PrevElem{}, MinElem{}, MaxElem{};
         std::array<std::array<char, GLOBAL_UEL_IDENT_SIZE>, GLOBAL_MAX_INDEX_DIM> LastStrElem{};
