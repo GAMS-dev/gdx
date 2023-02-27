@@ -225,8 +225,13 @@ namespace gdlib::datastorage {
             if(!FHead || IsSorted()) return;
             const int AllocCount = FMaxKey - FMinKey + 1;
             const int KeyBase{ FMinKey };
-            auto Head = new RecType*[AllocCount],
-                 Tail = new RecType*[AllocCount];
+#if !defined(USE_GMSHEAP)
+            auto Head {new RecType*[AllocCount]}, Tail {new RecType*[AllocCount]};
+#else
+            const int64_t AllocSize {static_cast<int64_t>(AllocCount*sizeof(RecType *))};
+            auto Head {reinterpret_cast<RecType **>(MyHeap.XGetMem64(AllocSize))};
+            auto Tail {reinterpret_cast<RecType **>(MyHeap.XGetMem64(AllocSize))};
+#endif
             std::memset(Head, 0, sizeof(RecType*) * AllocCount);
             // Perform radix sort
             for(int D{FDimension-1}; D>=0; D--) {
@@ -249,8 +254,13 @@ namespace gdlib::datastorage {
                 FHead = R;
             }
             FTail = nullptr; // what is the tail???
+#if !defined(USE_GMSHEAP)
             delete [] Head;
             delete [] Tail;
+#else
+            MyHeap.XFreeMem64(Head, AllocSize);
+            MyHeap.XFreeMem64(Tail, AllocSize);
+#endif
         }
 
         std::optional<RecType*> StartRead(const int *AMap = nullptr) {
