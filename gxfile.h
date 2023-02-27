@@ -286,8 +286,8 @@ template<typename K, typename V, typename H, typename E>
         uint8_t count{};
     public:
         TgxModeSet(const std::initializer_list<TgxFileMode> &modes);
-        TgxModeSet(const TgxFileMode mode);
-        virtual ~TgxModeSet() = default;
+        explicit TgxModeSet(TgxFileMode mode);
+        ~TgxModeSet() override = default;
         bool contains(const TgxFileMode& mode) const override;
         bool empty() const;
     };
@@ -779,7 +779,7 @@ template<typename K, typename V, typename H, typename E>
         gdxinterface::TDataStoreFiltProc_t gdxDataReadRawFastFilt_DP{};
         gdxinterface::TDomainIndexProc_t gdxGetDomainElements_DP{};
 
-        bool PrepareSymbolWrite(const std::string_view Caller, const char *AName, const std::string_view AText, int ADim, int AType, int AUserInfo);
+        bool PrepareSymbolWrite(std::string_view Caller, const char *AName, std::string_view AText, int ADim, int AType, int AUserInfo);
         int PrepareSymbolRead(std::string_view Caller, int SyNr, const int *ADomainNrs, TgxFileMode newmode);
 
         void InitErrors();
@@ -922,7 +922,7 @@ template<typename K, typename V, typename H, typename E>
         int gdxSymbolAddComment(int SyNr, const char* Txt) override;
         int gdxSymbolGetComment(int SyNr, int N, char *Txt) override;
         int gdxUELMaxLength() override;
-        int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap);
+        int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap) override;
         int gdxStoreDomainSets() override;
         void gdxStoreDomainSetsSet(int x) override;
         int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, gdxinterface::TDataStoreFiltProc_t DP) override;
@@ -930,7 +930,6 @@ template<typename K, typename V, typename H, typename E>
         int gdxDataReadRawFastEx(int SyNr, gdxinterface::TDataStoreExProc_t DP, int &NrRecs, void *Uptr) override;
 
         std::string getImplName() const override;
-
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from

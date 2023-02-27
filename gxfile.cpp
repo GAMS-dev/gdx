@@ -530,7 +530,7 @@ namespace gxfile {
 #ifdef TLD_LEGACY
             while (ReadPtr && SortList->GetNextRecord(&*ReadPtr, AElements.data(), AVals.data()))
 #else
-            while(ReadPtr && SortList->GetNextRecord(/*&*/*ReadPtr, AElements.data(), AVals.data()))
+            while(ReadPtr && SortList->GetNextRecord(*ReadPtr, AElements.data(), AVals.data()))
 #endif
                 DoWrite(AElements.data(), AVals.data());
             SortList = nullptr;
@@ -1214,19 +1214,18 @@ namespace gxfile {
 #endif
     }
 
-    /* we have to make these mask "constants" vars since we cannot
-    * have large constants on input
-    */
+    // we have to make these mask "constants" vars since we cannot
+    // have large constants on input
     bool HAVE_MEM {};
     int64_t signMask {(int64_t)0x80000000 << 32},
             expoMask {(int64_t)0x7ff00000 << 32},
             mantMask {~(signMask | expoMask)};
 
     enum TDblClass {
-        DBL_NAN,       /* any sort of NaN */
-        DBL_NINF,      /* negative infinity */
-        DBL_PINF,      /* positive infinity */
-        DBL_FINITE     /* positive infinity */
+        DBL_NAN,       // any sort of NaN
+        DBL_NINF,      // negative infinity
+        DBL_PINF,      // positive infinity
+        DBL_FINITE     // positive infinity
     };
 
     TDblClass dblInfo(double x, int64_t &i);
@@ -3130,7 +3129,7 @@ namespace gxfile {
 #ifdef TLD_LEGACY
             if (!ReadPtr || !SortList->GetNextRecord(&*ReadPtr, KeyInt, Values)) return false;
 #else
-            if (!ReadPtr || !SortList->GetNextRecord(/*&*/*ReadPtr, KeyInt, Values)) return false;
+            if (!ReadPtr || !SortList->GetNextRecord(*ReadPtr, KeyInt, Values)) return false;
 #endif
             // checking mapped values
             for(int D{}; D<FCurrentDim; D++) {
@@ -3977,7 +3976,7 @@ namespace gxfile {
         if(DomainStrList) res += DomainStrList->MemoryUsed();
         if(SortList) res += SortList->MemoryUsed();
         if(ErrorList) res += ErrorList->MemoryUsed();
-        if(FilterList) res += FilterList->MemoryUsed();
+        if(FilterList) res += (int64_t)FilterList->MemoryUsed();
         return res;
     }
 
@@ -4412,11 +4411,6 @@ namespace gxfile {
         return gdxDataReadRawFastFilt_DP(Indx, Vals, Uptr);
     }
 
-    /*void TUELTable::clear() {
-        UsrUel2Ent
-        nameToIndexNum.clear();
-    }*/
-
     int TUELTable::size() const {
         return static_cast<int>(nameToIndexNum.size());
     }
@@ -4704,11 +4698,6 @@ namespace gxfile {
         }
         Map.resize(currCap, -1);
     }
-
-    /*void TUELTableLegacy::clear() {
-        Clear();
-        UsrUel2Ent = nullptr;
-    }*/
 
     int TUELTableLegacy::size() const {
         return FCount;
