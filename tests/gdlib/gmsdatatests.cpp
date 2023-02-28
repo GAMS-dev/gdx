@@ -47,5 +47,19 @@ namespace tests::gmsdatatests {
         REQUIRE_EQ(24, lst[0]);
     }
 
+    TEST_CASE("Test basic usage of TTblGamsDataLegacy") {
+        TTblGamsDataLegacy<double> gdl {2, sizeof(double)*2};
+        std::array<int, GLOBAL_MAX_INDEX_DIM> keys {};
+        std::array<double, 2> vals {};
+        keys.front() = 3;
+        vals.front() = 23.0;
+        gdl.AddRecord(keys, vals.data());
+        std::fill(keys.begin(), keys.end(), 0);
+        std::fill(vals.begin(), vals.end(), 0);
+        gdl.GetRecord(0, keys, vals.data());
+        REQUIRE_EQ(3, keys.front());
+        REQUIRE_EQ(23.0, vals.front());
+    }
+
     TEST_SUITE_END();
 }

@@ -178,7 +178,7 @@ namespace gdlib::gmsdata {
     class TTblGamsDataLegacy {
         using TIndex = IndexKeys;
 
-        TGrowArrayFxd<T*> DS;
+        TGrowArrayFxd<uint8_t> DS;
         gdlib::gmsobj::TXList<uint8_t> FList {};
         int FDim, FIndexSize, FDataSize;
         bool FIsSorted{true};
@@ -244,7 +244,7 @@ namespace gdlib::gmsdata {
             *FList[Index2] = *P;
         }
 
-        void InsertRecord(int N, const TIndex &Inx, const T *Buffer) {
+        void InsertRecord(int N, const TIndex &Inx, T *Buffer) {
             auto P {DS.ReserveMem()};
             std::memcpy(P, Inx.data(), FIndexSize);
             std::memcpy(&P[FIndexSize], Buffer, FDataSize);
