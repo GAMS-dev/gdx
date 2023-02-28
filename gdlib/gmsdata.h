@@ -58,6 +58,9 @@ namespace gdlib::gmsdata {
             FStoreFact{ BufSize / FSize }
         {}
 
+        explicit TGrowArrayFxd(int ASize) : FSize{ASize}, FStoreFact{BufSize/FSize}
+        {}
+
         virtual ~TGrowArrayFxd() {
             Clear();
         }
@@ -178,12 +181,45 @@ namespace gdlib::gmsdata {
 
     // FIXME: Work in progress!
     class TTblGamsDataLegacy {
+        using TIndex = IndexKeys;
+
         TGrowArrayFxd<void*> DS;
-        gdlib::gmsobj::TXList<uint8_t> FList;
+        gdlib::gmsobj::TXList<uint8_t> FList {};
         int FDim, FIndexSize, FDataSize;
-        bool FIsSorted;
-        int FLastIndex;
+        bool FIsSorted{true};
+        int FLastIndex{-1};
+
+        void QuickSort(int L, int R) {}
+        int Compare(int Index1, int Index2) { return 0; }
+        int CompareWithRecord(const TIndex &Inx, int N) { return 0; }
+        int CompareWithRecPtr(int i1, const TIndex *p2) { return 0; }
+        void Exchange(int Index1, int Index2) {}
+        void InsertRecord(int N, const TIndex &Inx, const void *Buffer) {}
 
     public:
+        TTblGamsDataLegacy(int ADim, int ADataSize) :
+            DS{static_cast<int>(ADim*sizeof(int) + ADataSize)},
+            FDim{ADim},
+            FIndexSize{static_cast<int>(FDim * sizeof(int))},
+            FDataSize{ADataSize}
+        {
+        }
+
+        virtual ~TTblGamsDataLegacy() = default;
+
+        void AddRecord(const TIndex &Inx, void *Buffer) {}
+        bool AddUniqueRecord(const TIndex &Inx, void *Buffer) { return false; }
+        void GetRecord(int N, TIndex &Inx, void *Buffer) {}
+        void Sort() {}
+        void GetKeys(int N, TIndex &Inx) {}
+        void GetData(int N, void *Buffer) {}
+        void *GetDataPtr(int N) { return nullptr; }
+        bool SearcdhRecord(const TIndex &Inx, int &RecNr) { return false; }
+        void Clear() {}
+        int64_t MemoryUsed() { return 0; }
+        int GetCount() const { return 0; }
+        int GetCapacity() const { return 0; }
+        void SetCapacity(int N) {}
+        int GetDimension() const { return 0; }
     };
 }
