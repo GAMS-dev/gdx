@@ -174,15 +174,13 @@ template<typename K, typename V, typename H, typename E>
 
     // Uses gdlib::gmsobj::TBooleanBitArray internally
     struct TDFilterLegacy {
-        int FiltNumber, FiltMaxUel;
-        gdlib::gmsobj::TBooleanBitArray FiltMap;
-        bool FiltSorted;
+        int FiltNumber{}, FiltMaxUel{};
+        gdlib::gmsobj::TBooleanBitArray FiltMap{};
+        bool FiltSorted{};
 
         TDFilterLegacy(int Nr, int UserHigh) :
             FiltNumber{Nr},
-            FiltMaxUel{UserHigh},
-            FiltMap{},
-            FiltSorted{}
+            FiltMaxUel{UserHigh}
         {
         }
 
@@ -210,7 +208,10 @@ template<typename K, typename V, typename H, typename E>
 #endif
 
     enum TgdxDAction {
-        dm_unmapped,dm_strict,dm_filter,dm_expand
+        dm_unmapped,
+        dm_strict,
+        dm_filter,
+        dm_expand
     };
 
     struct TDomain {
@@ -231,12 +232,9 @@ template<typename K, typename V, typename H, typename E>
         bool SSetText;
         std::string SExplTxt;
         bool SIsCompressed;
-
-        int *SDomSymbols, // real domain info
-            *SDomStrings; // relaxed domain info
-
+        std::unique_ptr<int[]>  SDomSymbols, // real domain info
+                                SDomStrings; // relaxed domain info
         std::optional<TCommentsList> SCommentsList;
-
         bool SScalarFrst; // not stored
         std::unique_ptr<TSetBitMap> SSetBitMap; // for 1-dim sets only
     };
@@ -366,12 +364,10 @@ template<typename K, typename V, typename H, typename E>
 
     // FIXME: Does this really reflect what TUELTable in Delphi is doing?
     struct IndexNumPair {
-        int index, num;
-        IndexNumPair() : index{}, num{} {}
+        int index{}, num{};
         explicit IndexNumPair(int _index, int _num) : index(_index), num(_num) {}
-        explicit IndexNumPair(int _num) : index{}, num{ _num } {}
+        explicit IndexNumPair(int _num) : num{ _num } {}
     };
-    //static IndexNumPair unmappedPair {-1};
     using utablemaptype = umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>;
 
     class IUELTable {
@@ -388,7 +384,7 @@ template<typename K, typename V, typename H, typename E>
         virtual const char *operator[](int index) const = 0;
         virtual int GetUserMap(int i) = 0;
         virtual void SetUserMap(int EN, int N) = 0;
-        virtual void ResetMapToUserStatus() = 0;
+        void ResetMapToUserStatus();
         virtual int NewUsrUel(int EN) = 0;
         virtual int AddUsrNew(const char *s, size_t slen) = 0;
         virtual int AddUsrIndxNew(const char *s, size_t slen, int UelNr) = 0;
@@ -418,7 +414,6 @@ template<typename K, typename V, typename H, typename E>
         const char *operator[](int index) const override;
         int GetUserMap(int i) override;
         void SetUserMap(int EN, int N) override;
-        void ResetMapToUserStatus() override;
         int NewUsrUel(int EN) override;
         int AddUsrNew(const char *s, size_t slen) override;
         int AddUsrIndxNew(const char *s, size_t slen, int UelNr) override;
@@ -451,7 +446,6 @@ template<typename K, typename V, typename H, typename E>
         bool empty() const override;
         int GetUserMap(int i) override;
         void SetUserMap(int EN, int N) override;
-        void ResetMapToUserStatus() override;
         int NewUsrUel(int EN) override;
         int AddUsrNew(const char *s, size_t slen) override;
         int AddUsrIndxNew(const char *s, size_t slen, int UelNr) override;
@@ -487,9 +481,9 @@ template<typename K, typename V, typename H, typename E>
         int FindName(const char *Name) const;
         int AddEntry(const std::string &Name, const std::string &Text, int Map);
         void CheckEntry(int Map);
-        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S);
+        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) const;
         void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S);
-        int MemoryUsed();
+        int MemoryUsed() const;
     };
 
     class TAcronymListLegacy {
@@ -514,9 +508,7 @@ template<typename K, typename V, typename H, typename E>
         void Clear();
         TDFilter *FindFilter(int Nr);
         void AddFilter(TDFilter *F);
-        int MemoryUsed() const {
-            return (int)(sizeof(TDFilter) * size());
-        }
+        int MemoryUsed() const;
     };
 
     class TFilterListLegacy {
@@ -562,13 +554,6 @@ template<typename K, typename V, typename H, typename E>
         using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, double> *;
     #endif
 #endif
-
-    struct SetText {
-        std::string text;
-        int node;
-        SetText(std::string _text, int _node) : text{std::move(_text)}, node{_node} {}
-        SetText() : text{}, node{} {}
-    };
 
     template<typename T>
     struct PayloadIndex {
@@ -697,8 +682,11 @@ template<typename K, typename V, typename H, typename E>
     using TDomainStrList = TXStrHashListImpl<uint8_t>;
 
     enum tvarvaltype {
-        // 1     2           3        4        5
-        vallevel,valmarginal,vallower,valupper,valscale
+        vallevel, // 1
+        valmarginal, // 2
+        vallower, // 3
+        valupper, // 4
+        valscale // 5
     };
 
     // Description:
@@ -713,11 +701,11 @@ template<typename K, typename V, typename H, typename E>
         bool writeAsYAML{}, writeAsText{};
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
         TgxFileMode fmode {f_not_open}, fmode_AftReg {f_not_open};
-        enum {stat_notopen, stat_read, stat_write} fstatus;
+        enum {stat_notopen, stat_read, stat_write} fstatus {stat_notopen};
         int fComprLev{};
         std::unique_ptr<IUELTable> UELTable;
         std::unique_ptr<TSetTextList> SetTextList {};
-        int *MapSetText{};
+        std::unique_ptr<int[]> MapSetText{};
         int FCurrentDim{};
         std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem{}, PrevElem{}, MinElem{}, MaxElem{};
         std::array<std::array<char, GLOBAL_UEL_IDENT_SIZE>, GLOBAL_MAX_INDEX_DIM> LastStrElem{};
@@ -737,7 +725,7 @@ template<typename K, typename V, typename H, typename E>
         bool StoreDomainSets{true};
         TIntlValueMapDbl intlValueMapDbl{}, readIntlValueMapDbl{};
         TIntlValueMapI64 intlValueMapI64{};
-        TraceLevels TraceLevel;
+        TraceLevels TraceLevel {TraceLevels::trl_none};
         std::string TraceStr;
         int VersionRead{};
         std::string FProducer, FProducer2, FileSystemID;
@@ -790,13 +778,13 @@ template<typename K, typename V, typename H, typename E>
         bool CheckMode(std::string_view Routine, const TgxModeSet &MS);
 
 
-        void WriteTrace(std::string_view s);
+        void WriteTrace(std::string_view s) const;
         void InitDoWrite(int NrRecs);
         bool DoWrite(const int *AElements, const double *AVals);
         bool DoRead(double *AVals, int &AFDim);
         void AddToErrorListDomErrs(const std::array<int, GLOBAL_MAX_INDEX_DIM>& AElements, const double * AVals);
         void AddToErrorList(const int *AElements, const double *AVals);
-        void GetDefaultRecord(double *Avals);
+        void GetDefaultRecord(double *Avals) const;
         double AcronymRemap(double V);
         bool IsGoodNewSymbol(const char *s);
         bool ResultWillBeSorted(const int *ADomainNrs);

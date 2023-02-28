@@ -10,9 +10,9 @@
 
 #ifdef YAML
 #include "yaml.h"
-#define WRYAML(instr) instr;
+#define WRYAML(instr) instr
 #else
-#define WRYAML(instr) ;
+#define WRYAML(instr) /**/
 #endif
 
 using namespace gdxinterface;
@@ -59,9 +59,9 @@ namespace gxfile {
         palFree(&pal);
         return msg.data();
     }
-    static std::string auditLine { gdlSetSystemName() };
+    static const std::string auditLine { gdlSetSystemName() };
 #else
-    static std::string auditLine {"GDX Library      00.0.0 ffffffff May  4, 1970  (AUDIT) XYZ arch xybit/myOS"};
+    static const std::string auditLine {"GDX Library      00.0.0 ffffffff May  4, 1970  (AUDIT) XYZ arch xybit/myOS"};
 #endif
 
 #ifdef CPP_HASHMAP
@@ -304,9 +304,10 @@ namespace gxfile {
 
     int GetEnvCompressFlag() {
         std::string s{ rtl::sysutils_p3::QueryEnvironmentVariable(strGDXCOMPRESS) };
-        s = utils::uppercase(s.substr(0, 1));
         // Note: the default is disabled
-        return s.empty() || s == "N" || s == "0" ? 0 : 1;
+        if(s.empty()) return 0;
+        char c { static_cast<char>(std::toupper(s.front())) };
+        return c == 'N' || c == '0' ? 0 : 1;
     }
 
     // Brief:
@@ -703,7 +704,7 @@ namespace gxfile {
             WRYAML(YFile->AddKeyItem("symbol_domains"));
             WRYAML(YFile->IncIndentLevel());
             for(int N{1}; N<=NameList->Count(); N++) {
-                const auto PSy = *(*NameList)[N];
+                const auto *PSy = *(*NameList)[N];
                 if(PSy->SDomStrings) {
                     WRYAML(YFile->AddKeyItem(NameList->GetString(N)));
                     WRYAML(YFile->IncIndentLevel());
@@ -749,8 +750,6 @@ namespace gxfile {
                 //PSy->SCommentsList = std::nullopt;
                 //PSy->SSetBitMap = nullptr;
                 //PSy->SDomStrings = nullptr;
-                delete [] PSy->SDomSymbols;
-                delete [] PSy->SDomStrings;
                 delete PSy;
             }
             NameList = nullptr;
@@ -765,7 +764,6 @@ namespace gxfile {
         ErrorList = nullptr;
         FilterList = nullptr;
         AcronymList = nullptr;
-        delete [] MapSetText;
         MapSetText = nullptr;
 
         fmode = f_not_open;
@@ -783,7 +781,7 @@ namespace gxfile {
         LastError = LastRepError = ERR_NOERROR;
     }
 
-    TGXFileObj::TGXFileObj(std::string &ErrMsg) : fstatus{stat_notopen}, TraceLevel{TraceLevels::trl_none} {
+    TGXFileObj::TGXFileObj(std::string &ErrMsg) {
         ErrMsg.clear();
         gdxResetSpecialValues();
     }
@@ -898,7 +896,7 @@ namespace gxfile {
         return !((TraceLevel >= TraceLevels::trl_some || !utils::in(fmode, MS)) && !CheckMode(Routine, MS));
     }
 
-    void TGXFileObj::WriteTrace(const std::string_view s) {
+    void TGXFileObj::WriteTrace(const std::string_view s) const {
         std::cout << "gdxTrace " << TraceStr << ": " << s << '\n';
     }
 
@@ -1434,10 +1432,10 @@ namespace gxfile {
     }
 
     double TGXFileObj::AcronymRemap(double V) {
-        auto GetAsAcronym = [&](double V)-> double {
-            int orgIndx {static_cast<int>(std::round(V / Zvalacr))};
-            int N {AcronymList->FindEntry(orgIndx)};
-            int newIndx{};
+        auto GetAsAcronym = [&](double v) {
+            int orgIndx {static_cast<int>(std::round(v / Zvalacr))},
+                N {AcronymList->FindEntry(orgIndx)},
+                newIndx {};
             if(N < 0) { // not found
                 if(NextAutoAcronym <= 0) newIndx = orgIndx;
                 else {
@@ -1520,7 +1518,7 @@ namespace gxfile {
                     break;
                 default:
                     if(UELTable->GetMapToUserStatus() >= map_sorted) continue;
-                    TDFilter *PFilter = FilterList->FindFilter(ADomainNrs[D]);
+                    const TDFilter *PFilter = FilterList->FindFilter(ADomainNrs[D]);
                     if(!PFilter->FiltSorted) return false;
                     break;
             }
@@ -1528,7 +1526,7 @@ namespace gxfile {
         return true;
     }
 
-    void TGXFileObj::GetDefaultRecord(double *Avals) {
+    void TGXFileObj::GetDefaultRecord(double *Avals) const {
         int ui{};
         switch (CurSyPtr->SDataType) {
         case dt_set:
@@ -1826,7 +1824,7 @@ namespace gxfile {
         }
 
         if (NameList && !NameList->empty() && SyNr > 0 && SyNr <= NameList->size()) {
-            const auto sym = *NameList->GetObject(SyNr);
+            const auto *sym = *NameList->GetObject(SyNr);
             utils::assignStrToBuf(NameList->GetString(SyNr), SyId, GMS_SSSIZE);
             Dim = sym->SDim;
             Typ = sym->SDataType;
@@ -1972,7 +1970,7 @@ namespace gxfile {
             CurSyPtr->SCommentsList = std::nullopt;
             if(VersionRead >= 7) {
                 if(FFile->ReadByte()) {
-                    CurSyPtr->SDomSymbols = new int [CurSyPtr->SDim];
+                    CurSyPtr->SDomSymbols = std::make_unique<int[]>(CurSyPtr->SDim);
                     for(int D{}; D<CurSyPtr->SDim; D++)
                         CurSyPtr->SDomSymbols[D] = FFile->ReadInteger();
                 }
@@ -2025,7 +2023,7 @@ namespace gxfile {
                 int TextNum{ SetTextList->Add(s.c_str(), s.length()) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
                     if(!MapSetText) {
-                        MapSetText = new int[NrElem];
+                        MapSetText = std::make_unique<int[]>(NrElem);
                         for (int D{}; D < N; D++)
                             MapSetText[D] = D;
                     }
@@ -2054,7 +2052,7 @@ namespace gxfile {
                 int SyNr = FFile->ReadInteger();
                 if (SyNr <= 0) break;
                 const auto sym = *NameList->GetObject(SyNr);
-                sym->SDomStrings = new int[sym->SDim];
+                sym->SDomStrings = std::make_unique<int[]>(sym->SDim);
                 for (int D{}; D<sym->SDim; D++)
                     sym->SDomStrings[D] = FFile->ReadInteger();
             }
@@ -2506,7 +2504,7 @@ namespace gxfile {
     //   gdxSymbolSetDomain, gdxSymbolGetDomainX
     int TGXFileObj::gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) {
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return false;
-        PgdxSymbRecord SyPtr{ (*NameList->GetObject(SyNr)) };
+        const PgdxSymbRecord SyPtr{ (*NameList->GetObject(SyNr)) };
         for (int D{}; D < SyPtr->SDim; D++)
             DomainSyNrs[D] = !SyPtr->SDomSymbols ? 0 : SyPtr->SDomSymbols[D];
         return true;
@@ -2528,7 +2526,7 @@ namespace gxfile {
     //   gdxSymbolSetDomainX, gdxSymbolSetDomain
     int TGXFileObj::gdxSymbolGetDomainX(int SyNr, char **DomainIDs) {
         if (ErrorCondition(!NameList->empty() && SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return 0;
-        PgdxSymbRecord SyPtr{ (*NameList->GetObject(SyNr)) };
+        const PgdxSymbRecord SyPtr { (*NameList->GetObject(SyNr)) };
 
         for(int D{}; D<SyPtr->SDim; D++) {
             DomainIDs[D][0] = '*';
@@ -2604,7 +2602,7 @@ namespace gxfile {
             return false;
         }
         else {
-            const auto obj = (*NameList->GetObject(SyNr));
+            const auto *obj = (*NameList->GetObject(SyNr));
             RecCnt = !obj->SDim ? 1 : obj->SDataCount; // scalar trick
             UserInfo = obj->SUserInfo;
             utils::assignStrToBuf(obj->SExplTxt, ExplTxt, GMS_SSSIZE);
@@ -2641,7 +2639,7 @@ namespace gxfile {
 
         int res{ true };
         assert(!CurSyPtr->SDomSymbols && "SymbolSetDomain");
-        CurSyPtr->SDomSymbols = new int[CurSyPtr->SDim];
+        CurSyPtr->SDomSymbols = std::make_unique<int[]>(CurSyPtr->SDim);
         for (int D{}; D < CurSyPtr->SDim; D++) {
             bool domap {true};
             int DomSy;
@@ -2678,7 +2676,7 @@ namespace gxfile {
             if (domap && DomSy > 0) {
                 // this is the case for set i(i)
                 if (CurSyPtr->SDim != 1 || CurSyPtr != *NameList->GetObject(DomSy)) {
-                    auto thesym = (*NameList->GetObject(SyNr));
+                    const auto *thesym = *NameList->GetObject(SyNr);
                     WrBitMaps[D] = thesym->SSetBitMap ? thesym->SSetBitMap.get() : nullptr;
                 }
             }
@@ -2726,7 +2724,7 @@ namespace gxfile {
 
         if (SyPtr->SDim > 0) {
             if (!SyPtr->SDomStrings)
-                SyPtr->SDomStrings = new int[SyPtr->SDim];
+                SyPtr->SDomStrings = std::make_unique<int[]>(SyPtr->SDim);
             for (int D{}; D < SyPtr->SDim; D++) {
                 const std::string &S { DomainIDs[D] };
                 if (S.empty() || S == "*" || !IsGoodIdent(S)) SyPtr->SDomStrings[D] = 0;
@@ -3294,7 +3292,7 @@ namespace gxfile {
             AIndx = 0;
             return false;
         }
-        auto &acr = (*AcronymList)[N-1];
+        const auto &acr = (*AcronymList)[N-1];
         utils::assignStrToBuf(acr.AcrName, AName, GMS_SSSIZE);
         utils::assignStrToBuf(acr.AcrText, Txt, GMS_SSSIZE);
         AIndx = acr.AcrMap;
@@ -3603,7 +3601,7 @@ namespace gxfile {
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return false;
         int Dim{ (*NameList->GetObject(SyNr))->SDim };
         if (!Dim || ErrorCondition(DimPos >= 1 && DimPos <= Dim, ERR_BADDIMENSION)) return false;
-        TDFilter *DFilter = FilterNr == DOMC_EXPAND ? nullptr : FilterList->FindFilter(FilterNr);
+        const TDFilter *DFilter = FilterNr == DOMC_EXPAND ? nullptr : FilterList->FindFilter(FilterNr);
         if (FilterNr != DOMC_EXPAND && !DFilter) {
             ReportError(ERR_UNKNOWNFILTER);
             return false;
@@ -3706,7 +3704,7 @@ namespace gxfile {
     //
     int TGXFileObj::gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) {
         for(int N{}; N<(int)AcronymList->size(); N++) {
-            auto &obj = (*AcronymList)[N];
+            const auto &obj = (*AcronymList)[N];
             if(utils::sameText(obj.AcrName, AName)) {
                 if(ErrorCondition(obj.AcrMap == AIndx, ERR_ACROBADADDITION)) return -1;
                 return N;
@@ -4477,10 +4475,6 @@ namespace gxfile {
 #endif
     }
 
-    void TUELTable::ResetMapToUserStatus() {
-        FMapToUserStatus = map_unknown;
-    }
-
     int TUELTable::NewUsrUel(int EN) {
         int res = GetUserMap(EN);
         if (res < 0) {
@@ -4511,7 +4505,6 @@ namespace gxfile {
     // FIXME: How does this affect the ordering / sort list?
     // Should renaming change the index?
     void TUELTable::RenameEntry(int N, const char *s) {
-
 #ifdef STABLE_REFS
         auto old = insertOrder[N-1];
         auto oldPair = old->second;
@@ -4529,9 +4522,8 @@ namespace gxfile {
 
     int TUELTable::GetMaxUELLength() const {
         int maxUelLength {};
-        for(auto &pair : nameToIndexNum) {
-            maxUelLength = std::max<int>((int)pair.first.length(), maxUelLength);
-        }
+        for(const auto &[name,ixNum] : nameToIndexNum)
+            maxUelLength = std::max<int>(static_cast<int>(name.length()), maxUelLength);
         return maxUelLength;
     }
 
@@ -4614,9 +4606,9 @@ namespace gxfile {
             AddEntry("", "", Map);
     }
 
-    void TAcronymList::SaveToStream(TXStreamDelphi &S) {
+    void TAcronymList::SaveToStream(TXStreamDelphi &S) const {
         S.WriteInteger((int)size());
-        for(auto &acr : *this)
+        for(const auto &acr : *this)
             acr.SaveToStream(S);
     }
 
@@ -4628,7 +4620,7 @@ namespace gxfile {
             emplace_back(TAcronym{S});
     }
 
-    int TAcronymList::MemoryUsed() {
+    int TAcronymList::MemoryUsed() const {
         return (int)(sizeof(TAcronym) * this->size());
     }
 
@@ -4656,6 +4648,10 @@ namespace gxfile {
 
     TFilterList::~TFilterList() {
         Clear();
+    }
+
+    int TFilterList::MemoryUsed() const {
+        return (int)(sizeof(TDFilter) * size());
     }
 
     int TIntegerMapping::GetHighestIndex() const {
@@ -4714,10 +4710,6 @@ namespace gxfile {
 
     void TUELTableLegacy::SetUserMap(int EN, int N) {
         *GetObject(EN) = N;
-    }
-
-    void TUELTableLegacy::ResetMapToUserStatus() {
-        FMapToUserStatus = map_unknown;
     }
 
     int TUELTableLegacy::NewUsrUel(int EN) {
@@ -4829,6 +4821,10 @@ namespace gxfile {
         return FMapToUserStatus;
     }
 
+    void IUELTable::ResetMapToUserStatus() {
+        FMapToUserStatus = map_unknown;
+    }
+
     TgxModeSet::TgxModeSet(const std::initializer_list<TgxFileMode> &modes) {
         for (const auto mode : modes) {
             modeActive[mode] = true;
@@ -4844,9 +4840,8 @@ namespace gxfile {
         return !count;
     }
 
-    TgxModeSet::TgxModeSet(const TgxFileMode mode) {
+    TgxModeSet::TgxModeSet(const TgxFileMode mode) : count{1} {
         modeActive[mode] = true;
-        count=1;
     }
 
     TAcronymListLegacy::~TAcronymListLegacy() {
@@ -4998,8 +4993,7 @@ namespace gxfile {
         AcrName { std::move(Name) },
         AcrText { MakeGoodExplText(Text) },
         AcrMap{ Map },
-        AcrReadMap{ -1 },
-        AcrAutoGen{} {
+        AcrReadMap{ -1 } {
     }
 
     TAcronym::TAcronym(TXStreamDelphi &S) : TAcronym("", "", 0) {
