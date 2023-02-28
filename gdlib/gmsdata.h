@@ -13,12 +13,10 @@ namespace gdlib::gmsdata {
     using IndexKeys = std::array<int, GLOBAL_MAX_INDEX_DIM>;
     using ValueFields = std::array<double, GMS_VAL_MAX>;
 
-    // TODO: The port of this class uses C++ standard library collections instead of Paul's custom GAMS colections
-    // evalute performance impact of this choice!
     class TTblGamsData {
         int FDim, FDataSize;
-        std::map<IndexKeys, ValueFields> mapping;
-        std::vector<IndexKeys> keyset;
+        std::map<IndexKeys, ValueFields> mapping {};
+        std::vector<IndexKeys> keyset {};
     public:
         TTblGamsData(int ADim, int ADataSize);
         void GetRecord(int N, int* Inx, double* Vals);
@@ -30,10 +28,7 @@ namespace gdlib::gmsdata {
         std::map<IndexKeys, ValueFields>::iterator end();
         bool empty() const;
         void sort();
-        int MemoryUsed() const {
-            // FIXME: Return actual value!
-            return 0;
-        }
+        int MemoryUsed() const;
         int GetDimension() const;
     };
 
@@ -84,8 +79,8 @@ namespace gdlib::gmsdata {
                     if (!BaseAllocated) BaseAllocated = 32;
                     else BaseAllocated *= 2;
                     size_t newByteCount{ BaseAllocated * sizeof(uint8_t*) };
-                    if (!PBase) PBase = (TGADataBuffer**)std::malloc(newByteCount);
-                    else PBase = (TGADataBuffer**)std::realloc(PBase, newByteCount);
+                    if (!PBase) PBase = static_cast<TGADataBuffer**>(std::malloc(newByteCount));
+                    else PBase = static_cast<TGADataBuffer**>(std::realloc(PBase, newByteCount));
                 }
                 PCurrentBuf = new TGADataBuffer;
                 assert(BaseUsed >= 0);
@@ -179,22 +174,83 @@ namespace gdlib::gmsdata {
 
     };
 
-    // FIXME: Work in progress!
+    template<typename T>
     class TTblGamsDataLegacy {
         using TIndex = IndexKeys;
 
-        TGrowArrayFxd<void*> DS;
+        TGrowArrayFxd<T*> DS;
         gdlib::gmsobj::TXList<uint8_t> FList {};
         int FDim, FIndexSize, FDataSize;
         bool FIsSorted{true};
         int FLastIndex{-1};
 
-        void QuickSort(int L, int R) {}
-        int Compare(int Index1, int Index2) { return 0; }
-        int CompareWithRecord(const TIndex &Inx, int N) { return 0; }
-        int CompareWithRecPtr(int i1, const TIndex *p2) { return 0; }
-        void Exchange(int Index1, int Index2) {}
-        void InsertRecord(int N, const TIndex &Inx, const void *Buffer) {}
+        void QuickSort(int L, int R) {
+            int i{L};
+            while(i < R) {
+                int j{R};
+                int p{(L+R) >> 1};
+                auto pivot {FList[p]};
+                do {
+                    while(CompareWithRecPtr(i, pivot) < 0) i++;
+                    while(CompareWithRecPtr(j, pivot) > 0) j--;
+                    if(i < j)
+                        Exchange(i++, j--);
+                    else if(i == j) {
+                        i++;
+                        j--;
+                    }
+                } while(i <= j);
+                if((j-L) > (R-i)) {
+                    if(i < R) QuickSort(i, R);
+                    i = L;
+                    R = j;
+                } else {
+                    if(L < j) QuickSort(L, j);
+                    L = i;
+                }
+            }
+        }
+
+        int Compare(int Index1, int Index2) {
+            auto P1 {FList[Index1]}, P2 {FList[Index2]};
+            for(int D{}; D<FDim; D++) {
+                int diff {P1[D] - P2[D]};
+                if(diff) return diff;
+            }
+            return 0;
+        }
+
+        int CompareWithRecord(const TIndex &Inx, int N) {
+            auto P1{FList[N]};
+            for(int D{}; D<FDim; D++) {
+                int diff {Inx[D]-P1[D]};
+                if(diff) return diff;
+            }
+            return 0;
+        }
+
+        int CompareWithRecPtr(int i1, const TIndex *p2) {
+            auto P1{FList[i1]};
+            for(int k{}; k<FDim; k++) {
+                int diff {P1[k] - (*p2)[k]};
+                if(diff) return diff;
+            }
+            return 0;
+        }
+
+        void Exchange(int Index1, int Index2) {
+            auto P {FList[Index1]};
+            *FList[Index1] = *FList[Index2];
+            *FList[Index2] = *P;
+        }
+
+        void InsertRecord(int N, const TIndex &Inx, const T *Buffer) {
+            auto P {DS.ReserveMem()};
+            std::memcpy(P, Inx.data(), FIndexSize);
+            std::memcpy(&P[FIndexSize], Buffer, FDataSize);
+            FList.Insert(N, P);
+            FIsSorted = false;
+        }
 
     public:
         TTblGamsDataLegacy(int ADim, int ADataSize) :
@@ -207,19 +263,108 @@ namespace gdlib::gmsdata {
 
         virtual ~TTblGamsDataLegacy() = default;
 
-        void AddRecord(const TIndex &Inx, void *Buffer) {}
-        bool AddUniqueRecord(const TIndex &Inx, void *Buffer) { return false; }
-        void GetRecord(int N, TIndex &Inx, void *Buffer) {}
-        void Sort() {}
-        void GetKeys(int N, TIndex &Inx) {}
-        void GetData(int N, void *Buffer) {}
-        void *GetDataPtr(int N) { return nullptr; }
-        bool SearcdhRecord(const TIndex &Inx, int &RecNr) { return false; }
-        void Clear() {}
-        int64_t MemoryUsed() { return 0; }
-        int GetCount() const { return 0; }
-        int GetCapacity() const { return 0; }
-        void SetCapacity(int N) {}
-        int GetDimension() const { return 0; }
+        inline void AddRecord(const TIndex &Inx, T *Buffer) {
+            InsertRecord(FList.size(), Inx, Buffer);
+        }
+
+        bool AddUniqueRecord(const TIndex &Inx, T *Buffer) {
+            int N;
+            bool res{!SearchRecord(Inx, N)};
+            if(res) InsertRecord(N, Inx, Buffer);
+            return res;
+        }
+
+        void GetRecord(int N, TIndex &Inx, T *Buffer) {
+            auto P {FList[N]};
+            std::memcpy(Inx.data(), P, FIndexSize);
+            std::memcpy(Buffer, &P[FIndexSize], FDataSize);
+        }
+
+        void Sort() {
+            if(!FIsSorted) {
+                bool SortNeeded {};
+                for(int N{}; N<FList.size()-1; N++) {
+                    if(Compare(N, N+1) > 0) {
+                        SortNeeded = true;
+                        break;
+                    }
+                }
+                if(SortNeeded) QuickSort(0, FList.size()-1);
+                FIsSorted = true;
+            }
+        }
+
+        void GetKeys(int N, TIndex &Inx) {
+            std::memcpy(Inx.data(), FList[N], FIndexSize);
+        }
+
+        void GetData(int N, T *Buffer) {
+            std::memcpy(Buffer, FList[N][FIndexSize], FDataSize);
+        }
+
+        T *GetDataPtr(int N) {
+            return FList[N][FDim];
+        }
+
+        bool SearchRecord(const TIndex &Inx, int &RecNr) {
+            int H{FList.size()-1};
+            if(H < 0) {
+                RecNr = 0;
+                FLastIndex = 0;
+                return false;
+            }
+            int L{};
+            FLastIndex++;
+            if(FLastIndex >= 0 && FLastIndex <= H) {
+                int C {CompareWithRecord(Inx.data(), FLastIndex)};
+                if(!C) {
+                    RecNr = FLastIndex;
+                    return true;
+                }
+                if(C < 0) H = FLastIndex - 1;
+                else L = FLastIndex + 1;
+            }
+            // binary search
+            bool res{};
+            while(L <= H) {
+                int I {(L+H) >> 1};
+                int C{CompareWithRecord(Inx.data(), I)};
+                if(C > 0) L = I + 1;
+                else if(C)
+                    H = I - 1;
+                else {
+                    res = true;
+                    L = I;
+                    break;
+                }
+            }
+            RecNr = FLastIndex = L;
+            return res;
+        }
+
+        void Clear() {
+            DS.Clear();
+            FList.Clear();
+        }
+
+        int64_t MemoryUsed() const {
+            return DS.MemoryUsed() + FList.MemoryUsed();
+        }
+
+        int GetCount() const {
+            return FList.size();
+        }
+
+        int GetCapacity() const {
+            return FList.GetCapacity();
+        }
+
+        void SetCapacity(int N) {
+            FList.SetCapacity(N);
+        }
+
+        int GetDimension() const {
+            return FDim;
+        }
     };
 }

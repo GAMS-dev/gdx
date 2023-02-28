@@ -49,4 +49,9 @@ namespace gdlib::gmsdata {
 
     int TTblGamsData::GetDimension() const { return FDim; }
 
+    int TTblGamsData::MemoryUsed() const {
+        // this is just a lower bound!
+        return static_cast<int>(sizeof(int) * 2 + mapping.size() * (GLOBAL_MAX_INDEX_DIM*sizeof(int)*2 + GMS_VAL_MAX*sizeof(double)));
+    }
+
 }
