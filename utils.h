@@ -194,15 +194,6 @@ namespace utils {
         return a < b ? a : b;
     }
 
-    template<typename... Args>
-    void WriteLn(Args... args) {
-        std::cout << adder(args...) << '\n';
-    }
-
-    void WriteLn();
-
-    void WriteLn(std::fstream* s);
-
     void permutAssign(std::string& lhs, const std::string& rhs,
         const std::vector<int> &writeIndices, const std::vector<int> &readIndices);
 

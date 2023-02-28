@@ -367,14 +367,6 @@ namespace utils {
         return s;
     }
 
-    void WriteLn() {
-        std::cout << '\n';
-    }
-
-    void WriteLn(std::fstream *s) {
-        *s << '\n';
-    }
-
     std::string join(char sep, const std::initializer_list<std::string> &parts) {
         const int len = std::accumulate(parts.begin(), parts.end(), (int) parts.size() - 1,
                                         [](int acc, const std::string &s) -> int { return acc + (int) s.length(); });
