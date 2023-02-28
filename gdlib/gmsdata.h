@@ -189,7 +189,7 @@ namespace gdlib::gmsdata {
             while(i < R) {
                 int j{R};
                 int p{(L+R) >> 1};
-                auto pivot {FList[p]};
+                auto pivot {reinterpret_cast<int*>(FList[p])};
                 do {
                     while(CompareWithRecPtr(i, pivot) < 0) i++;
                     while(CompareWithRecPtr(j, pivot) > 0) j--;
@@ -229,10 +229,10 @@ namespace gdlib::gmsdata {
             return 0;
         }
 
-        int CompareWithRecPtr(int i1, const TIndex *p2) {
+        int CompareWithRecPtr(int i1, const int *p2) {
             auto P1{FList[i1]};
             for(int k{}; k<FDim; k++) {
-                int diff {P1[k] - (*p2)[k]};
+                int diff {P1[k] - p2[k]};
                 if(diff) return diff;
             }
             return 0;

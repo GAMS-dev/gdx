@@ -49,16 +49,48 @@ namespace tests::gmsdatatests {
 
     TEST_CASE("Test basic usage of TTblGamsDataLegacy") {
         TTblGamsDataLegacy<double> gdl {2, sizeof(double)*2};
+        REQUIRE_EQ(2, gdl.GetDimension());
+        REQUIRE_EQ(0, gdl.GetCount());
+
         std::array<int, GLOBAL_MAX_INDEX_DIM> keys {};
         std::array<double, 2> vals {};
-        keys.front() = 3;
+
         vals.front() = 23.0;
-        gdl.AddRecord(keys, vals.data());
+        for (int i{}; i < 10; i++) {
+            keys.front() = i + 1;
+            gdl.AddRecord(keys, vals.data());
+        }
+        REQUIRE_EQ(10, gdl.GetCount());
+        REQUIRE_GT(gdl.MemoryUsed(), 0);
+
         std::fill(keys.begin(), keys.end(), 0);
         std::fill(vals.begin(), vals.end(), 0);
-        gdl.GetRecord(0, keys, vals.data());
-        REQUIRE_EQ(3, keys.front());
-        REQUIRE_EQ(23.0, vals.front());
+
+        for (int i{}; i < 10; i++) {
+            gdl.GetRecord(i, keys, vals.data());
+            REQUIRE_EQ(i+1, keys.front());
+            REQUIRE_EQ(23.0, vals.front());
+        }
+
+        gdl.Clear();
+        REQUIRE_EQ(0, gdl.GetCount());
+
+        std::fill(keys.begin(), keys.end(), 0);
+        std::fill(vals.begin(), vals.end(), 0);
+        vals.front() = 23.0;
+
+        // FIXME: Make sort work!
+
+        /*for (int i{9}; i >= 0; i--) {
+            keys.front() = i + 1;
+            gdl.AddRecord(keys, vals.data());
+        }
+        gdl.Sort();
+        for (int i{}; i < 10; i++) {
+            gdl.GetRecord(i, keys, vals.data());
+            REQUIRE_EQ(i + 1, keys.front());
+            REQUIRE_EQ(23.0, vals.front());
+        }*/
     }
 
     TEST_SUITE_END();

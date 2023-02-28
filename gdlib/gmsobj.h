@@ -140,7 +140,10 @@ namespace gdlib::gmsobj {
             else if (NewCapacity < FCount) NewCapacity = FCount;
             FListMemory = sizeof(T*) * NewCapacity;
             if (!FList) FList = static_cast<T**>(std::malloc(FListMemory));
-            else if (!NewCapacity) std::free(FList);
+            else if (!NewCapacity) {
+                std::free(FList);
+                FList = nullptr;
+            }
             else FList = static_cast<T**>(std::realloc(FList, FListMemory));
             FCapacity = NewCapacity;
         }
