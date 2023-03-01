@@ -324,7 +324,7 @@ template<typename K, typename V, typename H, typename E>
 
         void growMapping(int F);
     public:
-        TIntegerMappingLegacy() = default;
+        TIntegerMappingLegacy() {}
         ~TIntegerMappingLegacy();
         int MemoryUsed() const;
         int GetHighestIndex() const;

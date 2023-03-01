@@ -299,11 +299,11 @@ namespace gdlib::gmsdata {
         }
 
         void GetData(int N, T *Buffer) {
-            std::memcpy(Buffer, FList[N][FIndexSize], FDataSize);
+            std::memcpy(Buffer, &FList[N][FIndexSize], FDataSize);
         }
 
         T *GetDataPtr(int N) {
-            return FList[N][FDim];
+            return reinterpret_cast<T*>(&FList[N][FIndexSize]);
         }
 
         bool SearchRecord(const TIndex &Inx, int &RecNr) {

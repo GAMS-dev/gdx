@@ -70,6 +70,13 @@ namespace tests::gmsdatatests {
             gdl.GetRecord(i, keys, vals.data());
             REQUIRE_EQ(i+1, keys.front());
             REQUIRE_EQ(23.0, vals.front());
+            std::fill(keys.begin(), keys.end(), 0);
+            gdl.GetKeys(i, keys);
+            REQUIRE_EQ(i+1, keys.front());
+            std::fill(vals.begin(), vals.end(), 0);
+            gdl.GetData(i, vals.data());
+            REQUIRE_EQ(23.0, vals.front());
+            REQUIRE_EQ(23.0, static_cast<double *>(gdl.GetDataPtr(i))[0]);
         }
 
         gdl.Clear();
