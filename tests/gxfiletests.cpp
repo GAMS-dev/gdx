@@ -24,7 +24,7 @@ namespace tests::gxfiletests {
         std::string msg;
         TGXFileObj pgx{ msg };
         int ErrNr;
-        pgx.gdxOpenWrite(tmp_fn, "TGXFileObj", ErrNr);
+        pgx.gdxOpenWrite(tmp_fn.c_str(), "TGXFileObj", ErrNr);
         pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0);
         auto writeRec = [&pgx](const std::string& s, double v) {
             static std::array<std::string, 20> keys{};
@@ -46,7 +46,7 @@ namespace tests::gxfiletests {
         TGXFileObj pgx{ msg };
 
         int ErrNr{};
-        REQUIRE(pgx.gdxOpenRead(tmp_fn, ErrNr));
+        REQUIRE(pgx.gdxOpenRead(tmp_fn.c_str(), ErrNr));
         REQUIRE_EQ(0, ErrNr);
         //if (ErrNr) ReportIOError(ErrNr, "gdxOpenRead");
         char Producer[GMS_SSSIZE], FileVersion[GMS_SSSIZE];

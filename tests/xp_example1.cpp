@@ -72,7 +72,7 @@ namespace tests::xp_example1 {
 
         // Write demand data
         int ErrNr;
-        REQUIRE(PGX->gdxOpenWrite("demanddata.gdx"s, "xp_example1", ErrNr));
+        REQUIRE(PGX->gdxOpenWrite("demanddata.gdx", "xp_example1", ErrNr));
         if(ErrNr)
             ReportIOError(ErrNr, "gdxOpenWrite"s);
         REQUIRE_EQ(0, ErrNr);

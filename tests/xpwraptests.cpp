@@ -32,7 +32,7 @@ namespace tests::xpwraptests {
         {
             GDXFile pgx { ErrMsg };
             REQUIRE(ErrMsg.empty());
-            REQUIRE(pgx.gdxOpenWrite(fn, "xptests", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "xptests", ErrNr));
             REQUIRE_EQ(0, ErrNr);
             REQUIRE(pgx.gdxDataWriteStrStart("Demand", "Demand data", 1, 1, 0));
             
@@ -52,7 +52,7 @@ namespace tests::xpwraptests {
         {
             GDXFile pgx{ ErrMsg };
             REQUIRE(ErrMsg.empty());
-            REQUIRE(pgx.gdxOpenRead(fn, ErrNr));
+            REQUIRE(pgx.gdxOpenRead(fn.c_str(), ErrNr));
             REQUIRE_EQ(0, ErrNr);
             int nrRecs{};
             REQUIRE(pgx.gdxDataReadStrStart(1, nrRecs));

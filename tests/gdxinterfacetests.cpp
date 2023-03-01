@@ -77,7 +77,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
 
             int ErrNr;
-            REQUIRE_FALSE(pgx.gdxOpenWrite(""s, "gdxinterfacetest", ErrNr));
+            REQUIRE_FALSE(pgx.gdxOpenWrite("", "gdxinterfacetest", ErrNr));
             REQUIRE_NE(0, ErrNr);
             // TODO: Why is this zero?
             REQUIRE_EQ(0, pgx.gdxErrorCount());
@@ -87,7 +87,7 @@ namespace tests::gdxinterfacetests {
 
             int fileVer, comprLev;
 
-            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetest", ErrNr));
             REQUIRE_FALSE(ErrNr);
             REQUIRE_EQ(0, pgx.gdxErrorCount());
 
@@ -99,7 +99,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(std::filesystem::exists(fn));
 
             std::filesystem::remove(fn);
-            REQUIRE(pgx.gdxOpenWriteEx(fn, "gdxinterfacetest", 1, ErrNr));
+            REQUIRE(pgx.gdxOpenWriteEx(fn.c_str(), "gdxinterfacetest", 1, ErrNr));
             REQUIRE_FALSE(ErrNr);
             REQUIRE_EQ(0, pgx.gdxErrorCount());
 
@@ -138,7 +138,7 @@ namespace tests::gdxinterfacetests {
         std::string fn{"rename_uel.gdx"};
         basicTest([&](GDXInterface &pgx) {
             int ErrNr;
-            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetest", ErrNr));
 
             REQUIRE(pgx.gdxUELRegisterStrStart());
             int uelNr;
@@ -163,7 +163,7 @@ namespace tests::gdxinterfacetests {
         std::string fn{"sym_dim.gdx"};
         basicTest([&](GDXInterface &pgx) {
             int ErrNr;
-            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetest", ErrNr));
             REQUIRE(pgx.gdxDataWriteRawStart("mysym", "Some explanatory text.", 2, dt_par, 0));
             REQUIRE_EQ(2, pgx.gdxCurrentDim());
             REQUIRE(pgx.gdxDataWriteDone());
@@ -183,7 +183,7 @@ namespace tests::gdxinterfacetests {
             std::string ErrMsg;
             T pgx{ErrMsg};
             int ErrNr;
-            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetest", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetest", ErrNr));
             cb(pgx);
             pgx.gdxClose();
         }
@@ -201,7 +201,7 @@ namespace tests::gdxinterfacetests {
             std::string ErrMsg;
             T pgx{ErrMsg};
             int ErrNr, rc;
-            rc = pgx.gdxOpenRead(fn, ErrNr);
+            rc = pgx.gdxOpenRead(fn.c_str(), ErrNr);
             REQUIRE(rc);
             cb(pgx);
             rc = pgx.gdxClose();
@@ -896,7 +896,7 @@ namespace tests::gdxinterfacetests {
             if(std::filesystem::exists(fn))
                 std::filesystem::remove(fn);
             int errNr;
-            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetests", errNr));
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw("onlyuel1"));
             REQUIRE(pgx.gdxUELRegisterRaw("onlyuel2"));
@@ -1058,7 +1058,7 @@ namespace tests::gdxinterfacetests {
         basicTest([](GDXInterface &pgx) {
             int errNr;
             auto fn = "universe_tests.gdx"s;
-            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetests", errNr));
             REQUIRE(pgx.gdxDataWriteStrStart("i", "A set", 1, dt_set, 0));
             StrIndexBuffers keys{};
             TgdxValues vals{};
@@ -1094,7 +1094,7 @@ namespace tests::gdxinterfacetests {
 
             pgx.gdxClose();
 
-            REQUIRE(pgx.gdxOpenReadEx(fn, gdlib::gmsstrm::fmOpenRead, errNr));
+            REQUIRE(pgx.gdxOpenReadEx(fn.c_str(), gdlib::gmsstrm::fmOpenRead, errNr));
 
             REQUIRE(pgx.gdxSymbolInfoX(0, recCnt, userInfo, explText));
             REQUIRE(pgx.gdxFindSymbol("*", symNr));
@@ -1119,7 +1119,7 @@ namespace tests::gdxinterfacetests {
         const std::string fn {"xyz.gdx"};
         basicTest([&](GDXInterface &pgx) {
             int errnr;
-            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errnr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetests", errnr));
             REQUIRE(pgx.gdxDataWriteStrStart("i", "expl", 1, dt_set, 0));
             std::string key;
             TgdxValues vals{};
@@ -1172,7 +1172,7 @@ namespace tests::gdxinterfacetests {
         basicTest([](GDXInterface &pgx) {
             int errNr;
             auto fn = "dup.gdx"s;
-            REQUIRE(pgx.gdxOpenWrite(fn, "gdxinterfacetests", errNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetests", errNr));
             REQUIRE(pgx.gdxDataWriteStrStart("i", "A set", 1, dt_set, 0));
             TgdxStrIndex keys{};
             TgdxValues vals{};
@@ -1199,7 +1199,7 @@ namespace tests::gdxinterfacetests {
         testMatchingWrites(f1, f2, [](GDXInterface &pgx) {
             REQUIRE_EQ(0, pgx.gdxAcronymCount());
 
-            REQUIRE(pgx.gdxAcronymAdd("myacr"s, "my acronym"s, 23));
+            REQUIRE(pgx.gdxAcronymAdd("myacr", "my acronym", 23));
             char acroName[GMS_SSSIZE], acroText[GMS_SSSIZE];
             int acroIndex;
             REQUIRE(pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex));
@@ -1208,7 +1208,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(23, acroIndex);
             REQUIRE_EQ(1, pgx.gdxAcronymCount());
 
-            REQUIRE(pgx.gdxAcronymSetInfo(1, "myacr_mod"s, "my acronym_mod"s, 23));
+            REQUIRE(pgx.gdxAcronymSetInfo(1, "myacr_mod", "my acronym_mod", 23));
             REQUIRE(pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex));
             REQUIRE_EQ("myacr_mod"s, acroName);
             REQUIRE_EQ("my acronym_mod"s, acroText);
@@ -1219,7 +1219,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(acroText[0] == '\0');
             REQUIRE_EQ(0, acroIndex);
 
-            REQUIRE(pgx.gdxAcronymAdd("anotherOne"s, "my second acronym"s, 2));
+            REQUIRE(pgx.gdxAcronymAdd("anotherOne", "my second acronym", 2));
             REQUIRE_EQ(2, pgx.gdxAcronymCount());
 
             int oldNextAutoAcronym = pgx.gdxAcronymNextNr(23);
@@ -1391,19 +1391,19 @@ namespace tests::gdxinterfacetests {
         const std::string prod {"gdxinterfacetest"s};
         int errNr, cnt {};
         basicTest([&](GDXInterface &pgx) {
-            pgx.gdxOpenWrite(getfn(cnt), prod, errNr);
+            pgx.gdxOpenWrite(getfn(cnt).c_str(), prod.c_str(), errNr);
             pgx.gdxUELRegisterRawStart();
             pgx.gdxUELRegisterRaw("a");
             pgx.gdxUELRegisterDone();
             pgx.gdxClose();
-            pgx.gdxOpenAppend(getfn(cnt), prod, errNr);
+            pgx.gdxOpenAppend(getfn(cnt).c_str(), prod.c_str(), errNr);
             pgx.gdxRenameUEL("a", "b");
             pgx.gdxClose();
             cnt++;
         });
         cnt = 0;
         basicTest([&](GDXInterface &pgx) {
-            pgx.gdxOpenRead(getfn(cnt), errNr);
+            pgx.gdxOpenRead(getfn(cnt).c_str(), errNr);
             int uelMap;
             char uelStr[GMS_SSSIZE];
             pgx.gdxUMUelGet(1, uelStr, uelMap);
@@ -1548,7 +1548,7 @@ namespace tests::gdxinterfacetests {
                 int errNr;
 
                 std::chrono::time_point startWrite = std::chrono::high_resolution_clock::now();
-                REQUIRE(pgx.gdxOpenWrite(gdxFns[implName], "gdxinterfacetest", errNr));
+                REQUIRE(pgx.gdxOpenWrite(gdxFns[implName].c_str(), "gdxinterfacetest", errNr));
                 pair.reset();
                 pair.write(pgx, upto, nums->data());
                 pgx.gdxClose();
@@ -1560,7 +1560,7 @@ namespace tests::gdxinterfacetests {
                     checkForMismatches(tmpFiles.front(), tmpFiles[1], false);
 
                 std::chrono::time_point startRead = std::chrono::high_resolution_clock::now();
-                REQUIRE(pgx.gdxOpenRead(gdxFns[implName], errNr));
+                REQUIRE(pgx.gdxOpenRead(gdxFns[implName].c_str(), errNr));
                 pair.reset();
                 pair.read(pgx, upto, nums->data());
                 pgx.gdxClose();
@@ -1590,7 +1590,7 @@ namespace tests::gdxinterfacetests {
                 REQUIRE(pgx.gdxUELRegisterRaw(("i"s + std::to_string(nums[i])).c_str()));
             REQUIRE(pgx.gdxUELRegisterDone());
             // Write set symbol "i" with many records referencing the large number of UELs for its elements
-            REQUIRE(pgx.gdxDataWriteRawStart("i"s, "a set"s, 1, dt_set, 0));
+            REQUIRE(pgx.gdxDataWriteRawStart("i", "a set", 1, dt_set, 0));
             for (int i{}; i<count; i++) {
                 keys.front() = i+1;
                 REQUIRE(pgx.gdxDataWriteRaw(keys.data(), values.data()));
@@ -1600,7 +1600,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_FALSE(pgx.gdxSetHasText(23));
             // Write a many dimensional parameter symbol "d(i,...,i)" with many records
             const int paramDim {16};
-            REQUIRE(pgx.gdxDataWriteRawStart("d"s, "a parameter"s, paramDim, dt_par, 0));
+            REQUIRE(pgx.gdxDataWriteRawStart("d", "a parameter", paramDim, dt_par, 0));
             for(int i{}; i<count; i++) {
                 for(int d{}; d<paramDim; d++)
                     keys[d] = i+1;
@@ -1634,7 +1634,7 @@ namespace tests::gdxinterfacetests {
 
     class WriteReadStrPair : public AbstractWriteReadPair {
         void write(GDXInterface &pgx, int count, const int *nums) override {
-            REQUIRE(pgx.gdxDataWriteStrStart("i"s, "a set"s, 1, dt_set, 0));
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "a set", 1, dt_set, 0));
             StrIndexBuffers sib;
             for (int i{}; i<count; i++) {
                 sib[0] = "i"s + std::to_string(nums[i]);
@@ -1672,7 +1672,7 @@ namespace tests::gdxinterfacetests {
 
         void write(GDXInterface &pgx, int count, const int *nums) override {
             registerMappedUels(pgx, count, nums);
-            REQUIRE(pgx.gdxDataWriteMapStart("i"s, "a set"s, 1, dt_set, 0));
+            REQUIRE(pgx.gdxDataWriteMapStart("i", "a set", 1, dt_set, 0));
             for (int i{}; i<count; i++) {
                 keys.front() = nums[i];
                 REQUIRE(pgx.gdxDataWriteMap(keys.data(), values.data()));
@@ -1859,7 +1859,7 @@ namespace tests::gdxinterfacetests {
     double extractValueForDemExchangeRate(GDXInterface &pgdx, const std::string &fn);
     double extractValueForDemExchangeRate(GDXInterface &pgdx, const std::string &fn) {
         int ErrNr{};
-        pgdx.gdxOpenRead(fn, ErrNr);
+        pgdx.gdxOpenRead(fn.c_str(), ErrNr);
         int nrecs{};
         pgdx.gdxDataReadMapStart(38, nrecs);
         REQUIRE_EQ(3, nrecs);
@@ -1891,7 +1891,7 @@ namespace tests::gdxinterfacetests {
         std::string f1 {"trace_wrapper.gdx"s},
                     f2 {"trace_port.gdx"s};
         testMatchingWrites(f1, f2, [&](GDXInterface &pgx) {
-            REQUIRE(pgx.gdxSetTraceLevel((int)gxfile::TGXFileObj::TraceLevels::trl_all, "tracestr"s));
+            REQUIRE(pgx.gdxSetTraceLevel((int)gxfile::TGXFileObj::TraceLevels::trl_all, "tracestr"));
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw("TheOnlyUEL"));
             REQUIRE(pgx.gdxUELRegisterDone());
@@ -1933,9 +1933,9 @@ namespace tests::gdxinterfacetests {
             int ErrNr;
             const std::string fn {"autoconv.gdx"s};
             REQUIRE(pgx.gdxAutoConvert(0)); // disable auto convert
-            REQUIRE(pgx.gdxOpenWriteEx(fn, "gdxinterfacetest"s, 0, ErrNr));
+            REQUIRE(pgx.gdxOpenWriteEx(fn.c_str(), "gdxinterfacetest", 0, ErrNr));
             pgx.gdxClose();
-            REQUIRE(pgx.gdxOpenRead(fn, ErrNr));
+            REQUIRE(pgx.gdxOpenRead(fn.c_str(), ErrNr));
             int fileVer, comprLevel;
             REQUIRE(pgx.gdxFileInfo(fileVer, comprLevel));
             REQUIRE_EQ(7, fileVer);
@@ -1952,7 +1952,7 @@ namespace tests::gdxinterfacetests {
         testMatchingWrites(f1, f2, [&](GDXInterface& pgx) {
             StrIndexBuffers keys;
             TgdxValues values{};
-            REQUIRE(pgx.gdxDataWriteStrStart("i"s, "three element set"s, 1, dt_set, 0));
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "three element set", 1, dt_set, 0));
             for (int i{}; i < 3; i++) {
                 keys.front() = "i"s + std::to_string(i+1);
                 REQUIRE(pgx.gdxDataWriteStr(keys.cptrs(), values.data()));

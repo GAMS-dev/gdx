@@ -13,19 +13,19 @@ namespace xpwrap {
         explicit GDXFile(std::string &ErrMsg);
         ~GDXFile() override;
 
-        int gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
-        int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) override;
-        int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) override;
+        int gdxOpenWrite(const char *FileName, const char *Producer, int &ErrNr) override;
+        int gdxOpenWriteEx(const char *FileName, const char *Producer, int Compr, int &ErrNr) override;
+        int gdxDataWriteStrStart(const char *SyId, const char *ExplTxt, int Dim, int Typ, int UserInfo) override;
         int gdxDataWriteStr(const char **KeyStr, const double *Values) override;
         int gdxDataWriteDone() override;
 
         int gdxClose() override;
 
-        int gdxOpenRead(const std::string &FileName, int &ErrNr) override;
+        int gdxOpenRead(const char *FileName, int &ErrNr) override;
 
         int gdxFileVersion(char *FileStr, char *ProduceStr) override;
 
-        int gdxFindSymbol(const std::string &SyId, int &SyNr) override;
+        int gdxFindSymbol(const char *SyId, int &SyNr) override;
 
         int gdxDataReadStr(char **KeyStr, double *Values, int &DimFrst) override;
 
@@ -35,7 +35,7 @@ namespace xpwrap {
 
         int gdxDataReadStrStart(int SyNr, int &NrRecs) override;
 
-        int gdxAddAlias(const std::string &Id1, const std::string &Id2) override;
+        int gdxAddAlias(const char *Id1, const char *Id2) override;
 
         int gdxAddSetText(const char *Txt, int &TxtNr) override;
 
@@ -51,7 +51,7 @@ namespace xpwrap {
 
         int gdxDataWriteRaw(const int *KeyInt, const double *Values) override;
 
-        int gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+        int gdxDataWriteRawStart(const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
 
         int gdxErrorCount() override;
@@ -100,11 +100,11 @@ namespace xpwrap {
 
         int gdxRenameUEL(const char *OldName, const char *NewName) override;
 
-        int gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) override;
+        int gdxOpenReadEx(const char *FileName, int ReadMode, int &ErrNr) override;
 
         int gdxGetUEL(int uelNr, char *Uel) override;
 
-        int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+        int gdxDataWriteMapStart(const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
 
         int gdxDataWriteMap(const int *KeyInt, const double *Values) override;
@@ -121,7 +121,7 @@ namespace xpwrap {
 
         int gdxAcronymGetInfo(int N, char *AName, char *Txt, int &AIndx) const override;
 
-        int gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) override;
+        int gdxAcronymSetInfo(int N, const char *AName, const char *Txt, int AIndx) override;
 
         int gdxAcronymNextNr(int nv) override;
 
@@ -137,9 +137,9 @@ namespace xpwrap {
 
         int gdxDataReadFilteredStart(int SyNr, const int *FilterAction, int &NrRecs) override;
 
-        int gdxSetTraceLevel(int N, const std::string &s) override;
+        int gdxSetTraceLevel(int N, const char *s) override;
 
-        int gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) override;
+        int gdxAcronymAdd(const char *AName, const char *Txt, int AIndx) override;
 
         int gdxAcronymIndex(double V) const override;
 
@@ -155,7 +155,7 @@ namespace xpwrap {
 
         void gdxStoreDomainSetsSet(int x) override;
 
-        int gdxOpenAppend(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
+        int gdxOpenAppend(const char *FileName, const char *Producer, int &ErrNr) override;
 
         int gdxSymbIndxMaxLength(int SyNr, int *LengthInfo) override;
 

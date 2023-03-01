@@ -791,7 +791,7 @@ template<typename K, typename V, typename H, typename E>
 
         // ...
 
-        int gdxOpenReadXX(const std::string &Afn, int filemode, int ReadMode, int &ErrNr);
+        int gdxOpenReadXX(const char *Afn, int filemode, int ReadMode, int &ErrNr);
 
         // This one is a helper function for a callback from a Fortran client
         void gdxGetDomainElements_DP_FC(int RawIndex, int MappedIndex, void* Uptr);
@@ -805,9 +805,9 @@ template<typename K, typename V, typename H, typename E>
         explicit TGXFileObj(std::string &ErrMsg);
         ~TGXFileObj() override;
 
-        int gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) override;
-        int gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) override;
-        int gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) override;
+        int gdxOpenWrite(const char *FileName, const char *Producer, int &ErrNr) override;
+        int gdxOpenWriteEx(const char *FileName, const char *Producer, int Compr, int &ErrNr) override;
+        int gdxDataWriteStrStart(const char *SyId, const char *ExplTxt, int Dim, int Typ, int UserInfo) override;
         int gdxDataWriteStr(const char **KeyStr, const double *Values) override;
         int gdxDataWriteDone() override;
         int gdxUELRegisterMapStart() override;
@@ -816,14 +816,14 @@ template<typename K, typename V, typename H, typename E>
         int gdxResetSpecialValues() override;
         int gdxErrorStr(int ErrNr, char *ErrMsg) override;
         static int gdxErrorStrStatic(int ErrNr, char *ErrMsg);
-        int gdxOpenRead(const std::string &FileName, int &ErrNr) override;
+        int gdxOpenRead(const char *FileName, int &ErrNr) override;
         int gdxFileVersion(char *FileStr, char *ProduceStr) override;
-        int gdxFindSymbol(const std::string &SyId, int &SyNr) override;
+        int gdxFindSymbol(const char *SyId, int &SyNr) override;
         int gdxDataReadStr(char **KeyStr, double *Values, int &DimFrst) override;
         int gdxDataReadDone() override;
         int gdxSymbolInfo(int SyNr, char *SyId, int &Dim, int &Typ) override;
         int gdxDataReadStrStart(int SyNr, int &NrRecs) override;
-        int gdxAddAlias(const std::string &Id1, const std::string &Id2) override;
+        int gdxAddAlias(const char *Id1, const char *Id2) override;
         int gdxAddSetText(const char *Txt, int &TxtNr) override;
         int gdxDataErrorCount() override;
         int gdxDataErrorRecord(int RecNr,  int *KeyInt, double * Values) override;
@@ -831,7 +831,7 @@ template<typename K, typename V, typename H, typename E>
         int gdxDataReadRaw(int *KeyInt, double *Values, int &DimFrst) override;
         int gdxDataReadRawStart(int SyNr, int &NrRecs) override;
         int gdxDataWriteRaw(const int* KeyInt, const double* Values) override;
-        int gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+        int gdxDataWriteRawStart(const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
         int gdxErrorCount() override;
         int gdxGetElemText(int TxtNr, char *Txt, int &Node) override;
@@ -854,9 +854,9 @@ template<typename K, typename V, typename H, typename E>
         int gdxUMUelInfo(int &UelCnt, int &HighMap) override;
         int gdxCurrentDim() override;
         int gdxRenameUEL(const char *OldName, const char *NewName) override;
-        int gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) override;
+        int gdxOpenReadEx(const char *FileName, int ReadMode, int &ErrNr) override;
         int gdxGetUEL(int uelNr, char *Uel) override;
-        int gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+        int gdxDataWriteMapStart(const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                  int UserInfo) override;
         int gdxDataWriteMap(const int *KeyInt, const double *Values) override;
         int gdxDataReadMapStart(int SyNr, int &NrRecs) override;
@@ -869,7 +869,7 @@ template<typename K, typename V, typename H, typename E>
         // region Acronym handling
         int gdxAcronymCount() const override;
         int gdxAcronymGetInfo(int N, char *AName, char *Txt, int &AIndx) const override;
-        int gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) override;
+        int gdxAcronymSetInfo(int N, const char *AName, const char *Txt, int AIndx) override;
         int gdxAcronymNextNr(int nv) override;
         int gdxAcronymGetMapping(int N, int &orgIndx, int &newIndx, int &autoIndex) override;
         // endregion
@@ -884,8 +884,8 @@ template<typename K, typename V, typename H, typename E>
 
         int gdxSetTextNodeNr(int TxtNr, int Node) override;
         int gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, gdxinterface::TDomainIndexProc_t DP, int& NrElem, void* UPtr) override;
-        int gdxSetTraceLevel(int N, const std::string &s) override;
-        int gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) override;
+        int gdxSetTraceLevel(int N, const char *s) override;
+        int gdxAcronymAdd(const char *AName, const char *Txt, int AIndx) override;
         int gdxAcronymIndex(double V) const override;
         int gdxAcronymName(double V, char *AName) override;
         double gdxAcronymValue(int AIndx) const override;
@@ -897,7 +897,7 @@ template<typename K, typename V, typename H, typename E>
         int gdxDataSliceUELS(const int* SliceKeyInt, char** KeyStr) override;
         int64_t gdxGetMemoryUsed() override;
         int gdxMapValue(double D, int& sv) override;
-        int gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr) override;
+        int gdxOpenAppend(const char * FileName, const char * Producer, int& ErrNr) override;
         int gdxSetHasText(int SyNr) override;
         int gdxSetReadSpecialValues(const double *AVals) override;
         int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) override;

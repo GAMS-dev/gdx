@@ -118,7 +118,7 @@ namespace utils {
         int i;
         slen = -1; // all whitespace? => slen=0!
         for(i=0; s[i] != '\0'; i++)
-            if(!std::isspace(s[i]))
+            if(s[i] > ' ')
                 slen = i;
         if(++slen == i) return s;
         std::memcpy(storage, s, slen);

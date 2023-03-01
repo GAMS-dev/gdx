@@ -322,7 +322,7 @@ namespace gxfile {
     //   See gdxOpenWriteEx
     // See Also:
     //   gdxOpenRead, gdxOpenWriteEx, Destroy
-    int TGXFileObj::gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) {
+    int TGXFileObj::gdxOpenWrite(const char *FileName, const char *Producer, int &ErrNr) {
         return gdxOpenWriteEx(FileName, Producer, GetEnvCompressFlag(), ErrNr);
     }
 
@@ -362,7 +362,7 @@ namespace gxfile {
     //   then
     //      [ ... ]
     // </CODE>
-    int TGXFileObj::gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) {
+    int TGXFileObj::gdxOpenWriteEx(const char *FileName, const char *Producer, int Compr, int &ErrNr) {
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
             std::cout << "gdxOpenWrite("s << FileName << ")\n"s;
 
@@ -370,7 +370,7 @@ namespace gxfile {
             ErrNr = ERR_FILEALREADYOPEN;
             return false;
         }
-        if(FileName.empty()) {
+        if(FileName[0] == '\0') {
             ErrNr = ERR_NOFILE;
             LastError = ErrNr;
             return false;
@@ -459,8 +459,8 @@ namespace gxfile {
     // Description:
     // See Also:
     //   gdxDataWriteStr, gdxDataWriteDone
-    int TGXFileObj::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) {
-        if(!PrepareSymbolWrite("DataWriteStrStart"s, SyId.c_str(), ExplTxt, Dim, Typ, UserInfo)) return false;
+    int TGXFileObj::gdxDataWriteStrStart(const char *SyId, const char *ExplTxt, int Dim, int Typ, int UserInfo) {
+        if(!PrepareSymbolWrite("DataWriteStrStart"s, SyId, ExplTxt, Dim, Typ, UserInfo)) return false;
         for (int D{}; D<FCurrentDim; D++)
             LastStrElem[D].front() = std::numeric_limits<char>::max();
         SortList = std::make_unique<LinkedDataType>(FCurrentDim, DataSize * static_cast<int>(sizeof(double)));
@@ -1675,7 +1675,7 @@ namespace gxfile {
     //      begin
     //      [...]
     // </CODE>
-    int TGXFileObj::gdxOpenRead(const std::string &FileName, int &ErrNr) {
+    int TGXFileObj::gdxOpenRead(const char *FileName, int &ErrNr) {
         return gdxOpenReadXX(FileName, fmOpenRead, 0, ErrNr);
     }
 
@@ -1710,13 +1710,13 @@ namespace gxfile {
     //   returns zero.
     // See Also:
     //   gdxSymbolInfo, gdxSymbolInfoX
-    int TGXFileObj::gdxFindSymbol(const std::string &SyId, int &SyNr) {
+    int TGXFileObj::gdxFindSymbol(const char *SyId, int &SyNr) {
         if(SyId == "*"s) {
             SyNr = 0;
             return true;
         }
         if(NameList) {
-            SyNr = NameList->IndexOf(SyId.c_str());
+            SyNr = NameList->IndexOf(SyId);
             return SyNr >= 1;
         }
         return false;
@@ -1865,7 +1865,7 @@ namespace gxfile {
         return NrRecs >= 0;
     }
 
-    int TGXFileObj::gdxOpenReadXX(const std::string &Afn, int filemode, int ReadMode, int &ErrNr) {
+    int TGXFileObj::gdxOpenReadXX(const char *Afn, int filemode, int ReadMode, int &ErrNr) {
         if(fmode != f_not_open) {
             ErrNr = ERR_FILEALREADYOPEN;
             return false;
@@ -1891,7 +1891,7 @@ namespace gxfile {
             return FileErrorNr();
         };
 
-        if(Afn.empty()) {
+        if(Afn[0] == '\0') {
             ErrNr = ERR_NOFILE;
             return FileNoGood();
         }
@@ -2081,13 +2081,13 @@ namespace gxfile {
     //       associated with the identifier; it is returned as the UserInfo parameter.
     // See Also:
     //   gdxSymbolSetDomain
-    int TGXFileObj::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
+    int TGXFileObj::gdxAddAlias(const char *Id1, const char *Id2) {
         if(!MajorCheckMode("AddAlias"s, AnyWriteMode)) return false;
-        int SyNr1 { Id1 == "*" ? std::numeric_limits<int>::max() : NameList->IndexOf(Id1.c_str()) };
-        int SyNr2 { Id2 == "*" ? std::numeric_limits<int>::max() : NameList->IndexOf(Id2.c_str()) };
+        int SyNr1 { !strcmp(Id1, "*") ? std::numeric_limits<int>::max() : NameList->IndexOf(Id1) };
+        int SyNr2 { !strcmp(Id2, "*") ? std::numeric_limits<int>::max() : NameList->IndexOf(Id2) };
         if(ErrorCondition((SyNr1 >= 0) != (SyNr2 >= 0), ERR_ALIASSETEXPECTED)) return false;
         int SyNr;
-        std::string AName;
+        const char *AName;
         if(SyNr1 > 0) {
             SyNr = SyNr1;
             AName = Id2;
@@ -2097,7 +2097,7 @@ namespace gxfile {
         }
         if(SyNr == std::numeric_limits<int>::max()) SyNr = 0;
         else if(ErrorCondition(utils::in((*NameList->GetObject(SyNr))->SDataType, dt_set, dt_alias), ERR_ALIASSETEXPECTED)) return false;
-        if(!IsGoodNewSymbol(AName.c_str())) return false;
+        if(!IsGoodNewSymbol(AName)) return false;
         auto SyPtr = new TgdxSymbRecord{};
         SyPtr->SDataType = dt_alias;
         SyPtr->SUserInfo = SyNr;
@@ -2108,7 +2108,7 @@ namespace gxfile {
             SyPtr->SDim = (*NameList->GetObject(SyNr))->SDim;
             SyPtr->SExplTxt = "Aliased with "s + NameList->GetString(SyNr);
         }
-        NameList->AddObject(AName.c_str(), AName.length(), SyPtr);
+        NameList->AddObject(AName, std::strlen(AName), SyPtr);
         return true;
     }
 
@@ -2301,9 +2301,9 @@ namespace gxfile {
     //
     // See Also:
     //   gdxDataWriteRaw, gdxDataWriteDone
-    int TGXFileObj::gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+    int TGXFileObj::gdxDataWriteRawStart(const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                          int UserInfo) {
-        if(!PrepareSymbolWrite("DataWriteRawStart"s, SyId.c_str(), ExplTxt, Dimen, Typ, UserInfo)) return false;
+        if(!PrepareSymbolWrite("DataWriteRawStart"s, SyId, ExplTxt, Dimen, Typ, UserInfo)) return false;
         // we overwrite the initialization
         std::fill_n(MinElem.begin(), FCurrentDim, 0); // no assumptions about the range for a uel
         std::fill_n(MaxElem.begin(), FCurrentDim, std::numeric_limits<int>::max());
@@ -2726,12 +2726,13 @@ namespace gxfile {
             if (!SyPtr->SDomStrings)
                 SyPtr->SDomStrings = std::make_unique<int[]>(SyPtr->SDim);
             for (int D{}; D < SyPtr->SDim; D++) {
-                const std::string &S { DomainIDs[D] };
-                if (S.empty() || S == "*" || !IsGoodIdent(S)) SyPtr->SDomStrings[D] = 0;
+                const char *S { DomainIDs[D] };
+                const std::string_view Sview {S, std::strlen(S)};
+                if (Sview.empty() || Sview == "*" || !IsGoodIdent(S)) SyPtr->SDomStrings[D] = 0;
                 else {
-                    SyPtr->SDomStrings[D] = DomainStrList->IndexOf(S.c_str()); // one based
+                    SyPtr->SDomStrings[D] = DomainStrList->IndexOf(S); // one based
                     if (SyPtr->SDomStrings[D] <= 0) {
-                        DomainStrList->Add(S.c_str(), S.length());
+                        DomainStrList->Add(S, Sview.length());
                         SyPtr->SDomStrings[D] = (int) DomainStrList->size();
                     }
                 }
@@ -2963,7 +2964,7 @@ namespace gxfile {
     //      begin
     //      [...]
     // </CODE>
-    int TGXFileObj::gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) {
+    int TGXFileObj::gdxOpenReadEx(const char *FileName, int ReadMode, int &ErrNr) {
         return gdxOpenReadXX(FileName, fmOpenRead, ReadMode, ErrNr);
     }
 
@@ -3001,8 +3002,8 @@ namespace gxfile {
     // Description:
     // See Also:
     //   gdxDataWriteMap, gdxDataWriteDone
-    int TGXFileObj::gdxDataWriteMapStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ, int UserInfo) {
-        if(!PrepareSymbolWrite("DataWriteMapStart"s, SyId.c_str(), ExplTxt, Dimen, Typ, UserInfo)) return false;
+    int TGXFileObj::gdxDataWriteMapStart(const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo) {
+        if(!PrepareSymbolWrite("DataWriteMapStart"s, SyId, ExplTxt, Dimen, Typ, UserInfo)) return false;
         SortList = std::make_unique<LinkedDataType>(FCurrentDim, static_cast<int>(DataSize * sizeof(double)));
         fmode = fw_dom_map;
         return true;
@@ -3315,7 +3316,7 @@ namespace gxfile {
     //     in this case the Indx parameter must match.
     //   When reading a gdx file, this function
     //     is used to provide the acronym index, and the AName parameter must match.
-    int TGXFileObj::gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) {
+    int TGXFileObj::gdxAcronymSetInfo(int N, const char *AName, const char *Txt, int AIndx) {
         auto MapIsUnique = [this](int Indx) {
             for(int i{}; i<(int)AcronymList->size(); i++)
                 if((*AcronymList)[i].AcrReadMap == Indx)
@@ -3329,7 +3330,7 @@ namespace gxfile {
         if(ErrorCondition(N >= 1 || N <= (int)AcronymList->size(), ERR_BADACRONUMBER)) return false;
         auto &obj = (*AcronymList)[N-1];
         if(utils::in(fmode, AnyWriteMode) || obj.AcrAutoGen) {
-            if(ErrorCondition(IsGoodNewSymbol(AName.c_str()), ERR_BADACRONAME)) return false;
+            if(ErrorCondition(IsGoodNewSymbol(AName), ERR_BADACRONAME)) return false;
             if(obj.AcrAutoGen) {
                 assert(obj.AcrReadMap == AIndx && "gdxAcronymSetInfo");
                 obj.AcrAutoGen = false;
@@ -3668,7 +3669,7 @@ namespace gxfile {
     //   Always non-zero
     // Description:
     //
-    int TGXFileObj::gdxSetTraceLevel(int N, const std::string &s) {
+    int TGXFileObj::gdxSetTraceLevel(int N, const char *s) {
         if(N <= 0) TraceLevel = TraceLevels::trl_none;
         else {
             switch(N) {
@@ -3702,7 +3703,7 @@ namespace gxfile {
     //   This function can be used to add entries before data is written. When entries
     //   are added implicitly use gdxAcronymSetInfo to update the table.
     //
-    int TGXFileObj::gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) {
+    int TGXFileObj::gdxAcronymAdd(const char *AName, const char *Txt, int AIndx) {
         for(int N{}; N<(int)AcronymList->size(); N++) {
             const auto &obj = (*AcronymList)[N];
             if(utils::sameText(obj.AcrName, AName)) {
@@ -4041,7 +4042,7 @@ namespace gxfile {
     //   then
     //      [ ... ]
     // </CODE>
-    int TGXFileObj::gdxOpenAppend(const std::string& FileName, const std::string& Producer, int& ErrNr) {
+    int TGXFileObj::gdxOpenAppend(const char *FileName, const char * Producer, int& ErrNr) {
         FProducer2 = Producer;
         AppendActive = true;
         int res{ gdxOpenReadXX(FileName, fmOpenReadWrite, 0, ErrNr) };

@@ -8,16 +8,16 @@ using namespace gdxinterface;
 using namespace std::literals::string_literals;
 
 namespace xpwrap {
-    int GDXFile::gdxOpenWrite(const std::string &FileName, const std::string &Producer, int &ErrNr) {
-        return ::gdxOpenWrite(pgx, FileName.c_str(), Producer.c_str(), &ErrNr);
+    int GDXFile::gdxOpenWrite(const char *FileName, const char *Producer, int &ErrNr) {
+        return ::gdxOpenWrite(pgx, FileName, Producer, &ErrNr);
     }
 
-    int GDXFile::gdxOpenWriteEx(const std::string &FileName, const std::string &Producer, int Compr, int &ErrNr) {
-        return ::gdxOpenWriteEx(pgx, FileName.c_str(), Producer.c_str(), Compr, &ErrNr);
+    int GDXFile::gdxOpenWriteEx(const char *FileName, const char *Producer, int Compr, int &ErrNr) {
+        return ::gdxOpenWriteEx(pgx, FileName, Producer, Compr, &ErrNr);
     }
 
-    int GDXFile::gdxDataWriteStrStart(const std::string &SyId, const std::string &ExplTxt, int Dim, int Typ, int UserInfo) {
-        return ::gdxDataWriteStrStart(pgx, SyId.c_str(), ExplTxt.c_str(), Dim, Typ, UserInfo);
+    int GDXFile::gdxDataWriteStrStart(const char *SyId, const char *ExplTxt, int Dim, int Typ, int UserInfo) {
+        return ::gdxDataWriteStrStart(pgx, SyId, ExplTxt, Dim, Typ, UserInfo);
     }
 
     int GDXFile::gdxDataWriteStr(const char **KeyStr, const double *Values) {
@@ -53,16 +53,16 @@ namespace xpwrap {
         return ::gdxClose(pgx);
     }
 
-    int GDXFile::gdxOpenRead(const std::string &FileName, int &ErrNr) {
-        return ::gdxOpenRead(pgx, FileName.c_str(), &ErrNr);
+    int GDXFile::gdxOpenRead(const char *FileName, int &ErrNr) {
+        return ::gdxOpenRead(pgx, FileName, &ErrNr);
     }
 
     int GDXFile::gdxFileVersion(char *FileStr, char *ProduceStr) {
         return ::gdxFileVersion(pgx, FileStr, ProduceStr);
     }
 
-    int GDXFile::gdxFindSymbol(const std::string &SyId, int &SyNr) {
-        return ::gdxFindSymbol(pgx, SyId.c_str(), &SyNr);
+    int GDXFile::gdxFindSymbol(const char *SyId, int &SyNr) {
+        return ::gdxFindSymbol(pgx, SyId, &SyNr);
     }
 
     int GDXFile::gdxDataReadStr(char **KeyStr, double *Values, int &DimFrst) {
@@ -81,8 +81,8 @@ namespace xpwrap {
         return ::gdxDataReadStrStart(pgx, SyNr, &NrRecs);
     }
 
-    int GDXFile::gdxAddAlias(const std::string &Id1, const std::string &Id2) {
-        return ::gdxAddAlias(pgx, Id1.c_str(), Id2.c_str());
+    int GDXFile::gdxAddAlias(const char *Id1, const char *Id2) {
+        return ::gdxAddAlias(pgx, Id1, Id2);
     }
 
     int GDXFile::gdxAddSetText(const char *Txt, int &TxtNr) {
@@ -112,9 +112,9 @@ namespace xpwrap {
         return ::gdxDataWriteRaw(pgx, KeyInt, Values);
     }
 
-    int GDXFile::gdxDataWriteRawStart(const std::string &SyId, const std::string &ExplTxt, int Dimen, int Typ,
+    int GDXFile::gdxDataWriteRawStart(const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                       int UserInfo) {
-        return ::gdxDataWriteRawStart(pgx, SyId.c_str(), ExplTxt.c_str(), Dimen, Typ, UserInfo);
+        return ::gdxDataWriteRawStart(pgx, SyId, ExplTxt, Dimen, Typ, UserInfo);
     }
 
     int GDXFile::gdxErrorCount() {
@@ -209,18 +209,18 @@ namespace xpwrap {
         return ::gdxRenameUEL(pgx, OldName, NewName);
     }
 
-    int GDXFile::gdxOpenReadEx(const std::string &FileName, int ReadMode, int &ErrNr) {
-        return ::gdxOpenReadEx(pgx, FileName.c_str(), ReadMode, &ErrNr);
+    int GDXFile::gdxOpenReadEx(const char *FileName, int ReadMode, int &ErrNr) {
+        return ::gdxOpenReadEx(pgx, FileName, ReadMode, &ErrNr);
     }
 
     int GDXFile::gdxGetUEL(int uelNr, char *Uel) {
         return ::gdxGetUEL(pgx, uelNr, Uel);
     }
 
-    int GDXFile::gdxDataWriteMapStart(const std::string &SyId,
-                                      const std::string &ExplTxt,
+    int GDXFile::gdxDataWriteMapStart(const char *SyId,
+                                      const char *ExplTxt,
                                       int Dimen, int Typ, int UserInfo) {
-        return ::gdxDataWriteMapStart(pgx, SyId.c_str(), ExplTxt.c_str(), Dimen, Typ, UserInfo);
+        return ::gdxDataWriteMapStart(pgx, SyId, ExplTxt, Dimen, Typ, UserInfo);
     }
 
     int GDXFile::gdxDataWriteMap(const int *KeyInt, const double *Values) {
@@ -251,8 +251,8 @@ namespace xpwrap {
         return ::gdxAcronymGetInfo(pgx, N, AName, Txt, &AIndx);
     }
 
-    int GDXFile::gdxAcronymSetInfo(int N, const std::string &AName, const std::string &Txt, int AIndx) {
-        return ::gdxAcronymSetInfo(pgx, N, AName.c_str(), Txt.c_str(), AIndx);
+    int GDXFile::gdxAcronymSetInfo(int N, const char *AName, const char *Txt, int AIndx) {
+        return ::gdxAcronymSetInfo(pgx, N, AName, Txt, AIndx);
     }
 
     int GDXFile::gdxAcronymNextNr(int nv) {
@@ -283,8 +283,8 @@ namespace xpwrap {
         return ::gdxDataReadFilteredStart(pgx, SyNr, FilterAction, &NrRecs);
     }
 
-    int GDXFile::gdxAcronymAdd(const std::string &AName, const std::string &Txt, int AIndx) {
-        return ::gdxAcronymAdd(pgx, AName.c_str(), Txt.c_str(), AIndx);
+    int GDXFile::gdxAcronymAdd(const char *AName, const char *Txt, int AIndx) {
+        return ::gdxAcronymAdd(pgx, AName, Txt, AIndx);
     }
 
     int GDXFile::gdxAcronymIndex(double V) const {
@@ -315,8 +315,8 @@ namespace xpwrap {
         ::gdxStoreDomainSetsSet(pgx, x);
     }
 
-    int GDXFile::gdxOpenAppend(const std::string &FileName, const std::string &Producer, int &ErrNr) {
-        return ::gdxOpenAppend(pgx, FileName.c_str(), Producer.c_str(), &ErrNr);
+    int GDXFile::gdxOpenAppend(const char *FileName, const char *Producer, int &ErrNr) {
+        return ::gdxOpenAppend(pgx, FileName, Producer, &ErrNr);
     }
 
     int GDXFile::gdxSymbIndxMaxLength(int SyNr, int *LengthInfo) {
@@ -331,8 +331,8 @@ namespace xpwrap {
         return "xpwrap"s;
     }
 
-    int GDXFile::gdxSetTraceLevel(int N, const std::string &s) {
-        return ::gdxSetTraceLevel(pgx, N, s.c_str());
+    int GDXFile::gdxSetTraceLevel(int N, const char *s) {
+        return ::gdxSetTraceLevel(pgx, N, s);
     }
 
     int GDXFile::gdxSetTextNodeNr(int TxtNr, int Node) {

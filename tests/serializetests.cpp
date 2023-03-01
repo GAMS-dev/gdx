@@ -26,7 +26,7 @@ namespace tests::serializetests {
         TGXFileObj obj {msg};
         obj.SetWriteModes(t == TestType::TYAML, t == TestType::TEXT);
         int errNr;
-        obj.gdxOpenWrite(gdx_fn, "serializetests", errNr);
+        obj.gdxOpenWrite(gdx_fn.c_str(), "serializetests", errNr);
         obj.gdxDataWriteStrStart("i", "expl", 1, dt_set, 0);
         TgdxStrIndex keyStrs {};
         TgdxValues vals {};
