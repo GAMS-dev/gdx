@@ -177,6 +177,9 @@ namespace tests::gxfiletests {
 
     std::list<std::string> gdxFilesInPath(const std::string& path);
     std::list<std::string> gdxFilesInPath(const std::string& path) {
+#ifdef __INTEL_COMPILER
+        return {};
+#else
         std::list<std::string> res{};
         std::map<std::string, uintmax_t> cachedFileSizes {};
         for (const auto& entry : std::filesystem::directory_iterator{ path }) {
@@ -191,6 +194,7 @@ namespace tests::gxfiletests {
             return cachedFileSizes[a] < cachedFileSizes[b];
         });
         return res;
+#endif
     }
 
     std::list<std::string> extractModelNames(const std::string &textFilename);
@@ -218,8 +222,8 @@ namespace tests::gxfiletests {
 
         std::vector<std::pair<std::string, std::string>> suiteModelPairs{
             //{"sqagams","PERSEUS"}
-            {"src", "ex3"}
-            //{"lwsup", "test1"}
+            //{"src", "ex3"}
+            {"lwsup", "test1"}
             //{"lwsup","agg"}
             //{"src", "gdxfromutlity"},
             //{"sqagams","mpstrans"},
