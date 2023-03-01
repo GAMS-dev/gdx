@@ -69,17 +69,14 @@ namespace gdlib::strhash {
         virtual int Hash(const std::string &s) {
             int res{};
             for(char c : s)
-                res = 211 * res + toupper(c);
+                res = 211 * res + std::toupper(c);
             return (res & 0x7FFFFFFF) % HashTableSize;
         }
 
         virtual int Hash(const char *s) {
             int res{};
-            for(int i{}; true; i++) {
-                char c {s[i]};
-                if(c == '\0') break;
-                res = 211 * res + std::toupper(c);
-            }
+            for(int i{}; s[i] != '\0'; i++)
+                res = 211 * res + std::toupper(s[i]);
             return (res & 0x7FFFFFFF) % HashTableSize;
         }
 
@@ -527,11 +524,8 @@ namespace gdlib::strhash {
 
         virtual int Hash(const char* s) {
             int res{};
-            for (int i{}; true; i++) {
-                char c{ s[i] };
-                if (c == '\0') break;
-                res = 211 * res + std::toupper(c);
-            }
+            for (int i{}; s[i] != '\0'; i++)
+                res = 211 * res + std::toupper(s[i]);
             return (res & 0x7FFFFFFF) % HashTableSize;
         }
 

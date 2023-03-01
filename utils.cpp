@@ -68,7 +68,7 @@ namespace utils {
         const auto l = a.length();
         if (b.length() != a.length()) return false;
         for (size_t i{}; i < l; i++) {
-            if (::tolower(a[i]) != ::tolower(b[i]))
+            if (std::tolower(a[i]) != std::tolower(b[i]))
                 return false;
         }
         return true;
@@ -466,8 +466,8 @@ namespace utils {
         auto L = S1.length();
         if (L > S2.length()) L = S2.length();
         for (size_t K{}; K < L; K++) {
-            int c1 = caseInsensitive ? ::toupper(S1[K]) : S1[K];
-            int c2 = caseInsensitive ? ::toupper(S2[K]) : S2[K];
+            int c1 = caseInsensitive ? std::toupper(S1[K]) : S1[K];
+            int c2 = caseInsensitive ? std::toupper(S2[K]) : S2[K];
             int d = c1 - c2;
             if (d) return d;
         }
@@ -544,7 +544,7 @@ namespace utils {
     }
 
     bool sameTextPChar(const char *a, const char *b, bool caseInvariant) {
-        if (!a || !b) return !a && !b;
+        /*if (!a || !b) return !a && !b;
         for (int k{}; k < 256; k++) {
             if (a[k] == '\0' && b[k] == '\0') return true;
             if(caseInvariant) {
@@ -554,7 +554,14 @@ namespace utils {
                 if(a[k] != b[k]) return false;
             }
         }
-        return false;
+        return false;*/
+        if (!a || !b) return !a && !b;
+        if(!caseInvariant) return !std::strcmp(a, b);
+#if defined(_WIN32)
+        return !_stricmp(a, b);
+#else
+        return !strcasecmp(a, b);
+#endif
     }
 
 }
