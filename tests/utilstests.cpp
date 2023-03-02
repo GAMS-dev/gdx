@@ -110,7 +110,7 @@ namespace tests::utilstests {
         // With std::string
         REQUIRE(utils::sameText(""s, ""s));
         REQUIRE(utils::sameText("aBc"s, "AbC"s));
-        REQUIRE_FALSE(utils::sameText("aBc"s, "AbC"s, false));
+        REQUIRE_FALSE(utils::sameText<false>("aBc"s, "AbC"s));
 
         // With pchars (pointer to char -> char *)
         // Case-insensitive
@@ -119,9 +119,9 @@ namespace tests::utilstests {
         REQUIRE(utils::sameTextPChar("aBc", "AbC"));
         REQUIRE(utils::sameTextPChar("abc", "abc"));
         // Case-sensitive
-        REQUIRE_FALSE(utils::sameTextPChar("aBc", "AbC "));
-        REQUIRE_FALSE(utils::sameTextPChar("aBc", "AbC", false));
-        REQUIRE(utils::sameTextPChar("abc", "abc", false));
+        REQUIRE_FALSE(utils::sameTextPChar<false>("aBc", "AbC "));
+        REQUIRE_FALSE(utils::sameTextPChar<false>("aBc", "AbC"));
+        REQUIRE(utils::sameTextPChar<false>("abc", "abc"));
     }
 
     TEST_CASE("Arbitrary size blank strings") {

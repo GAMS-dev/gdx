@@ -177,19 +177,6 @@ namespace gdlib::gmsobj {
         }
     };
 
-    inline char *NewString(const std::string &s, size_t &memSize) {
-        auto l{s.length()+1};
-        char *buf {new char[l]};
-        std::memcpy(buf, s.c_str(), l);
-        memSize += l;
-        return buf;
-    }
-
-    inline char *NewString(const std::string &s) {
-        size_t memSize{};
-        return NewString(s, memSize);
-    }
-
     inline char *NewString(const char *s, size_t slen) {
         char *buf{new char[slen+1]};
         utils::assignPCharToBuf(s, slen, buf, slen+1);
@@ -213,7 +200,7 @@ namespace gdlib::gmsobj {
             FList[Index-(OneBased ? 1 : 0)] = NewString(Item, itemLen, FStrMemory);
         }
 
-        std::string Get(int Index) {
+        char *Get(int Index) {
             return FList[Index-(OneBased ? 1 : 0)];
         }
 
@@ -340,10 +327,10 @@ namespace gdlib::gmsobj {
         int FCapacity{};
         size_t FStrMemory{}, FListMemory{};
 
-        void SetName(int Index, const std::string &v) {
+        void SetName(int Index, const char *v) {
             char **sref = FList[Index-(OneBased?1:0)]->FString;
             delete [] *sref;
-            *sref = NewString(v, FStrMemory);
+            *sref = NewString(v, std::strlen(v), FStrMemory);
         }
 
     public:
@@ -534,7 +521,7 @@ namespace gdlib::gmsobj {
 
         virtual int compareEntry(const char *s, int EN) {
             auto p { this->FList[EN].FString };
-            return !p ? (!(!s || s[0] == '\0') ? 1 : 0) : utils::sameTextPChar(s, p, false);
+            return !p ? (!(!s || s[0] == '\0') ? 1 : 0) : utils::sameTextPChar<false>(s, p);
         }
 
         void ClearHashList() {
@@ -629,7 +616,7 @@ namespace gdlib::gmsobj {
     class TXStrPool : public TXHashedStringList<T> {
         int compareEntry(const char *s, int EN) override {
             auto p {this->FList[EN].FString};
-            return !p ? (!(!s || s[0]=='\0') ? 1 : 0) : utils::sameTextPChar(s, p, false);
+            return !p ? (!(!s || s[0]=='\0') ? 1 : 0) : utils::sameTextPChar<false>(s, p);
         }
 
         uint32_t hashValue(const char *s, size_t slen) override {
@@ -643,7 +630,7 @@ namespace gdlib::gmsobj {
         int Compare(int Index1, int Index2) override {
             char    *s1 {this->FList[Index1-(this->OneBased?1:0)].FString},
                     *s2 {this->FList[Index2-(this->OneBased?1:0)].FString};
-            return utils::sameTextPChar(s1, s2, false);
+            return utils::sameTextPChar<false>(s1, s2);
         }
     };
 

@@ -455,7 +455,7 @@ namespace gdlib::strhash {
         }
 
         bool EntryEqualPChar(const char *ps1, const char *ps2) override {
-            return utils::sameTextPChar(ps1, ps2, false);
+            return utils::sameTextPChar<false>(ps1, ps2);
         }
 
         int Compare(const std::string &ps1, const std::string &ps2) override {
@@ -669,7 +669,7 @@ namespace gdlib::strhash {
             }
             char **strRef = &Buckets.GetItemPtrIndex(N)->StrP;
             delete [] *strRef;
-            *strRef = gmsobj::NewString(s);
+            *strRef = gmsobj::NewString(s, std::strlen(s));
         }
 
         int64_t MemoryUsed() const {

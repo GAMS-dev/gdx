@@ -367,6 +367,7 @@ template<typename K, typename V, typename H, typename E>
         int index{}, num{};
         explicit IndexNumPair(int _index, int _num) : index(_index), num(_num) {}
         explicit IndexNumPair(int _num) : num{ _num } {}
+        IndexNumPair() : index{}, num{} {}
     };
     using utablemaptype = umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>;
 

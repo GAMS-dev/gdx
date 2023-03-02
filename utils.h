@@ -102,16 +102,16 @@ namespace utils {
 
     bool anychar(const std::function<bool(char)>& predicate, std::string_view s);
 
-    template<typename T, int count>
-    int indexOf(const std::array<T, count> &arr, const T& elem, int notFound = -1) {
+    template<typename T, int count, int notFound = -1>
+    int indexOf(const std::array<T, count> &arr, const T& elem) {
         for (int i = 0; i < count; i++)
             if (arr[i] == elem)
                 return i;
         return notFound;
     }
 
-    template<typename T>
-    int indexOf(const std::vector<T> &elems, const T& elem, int notFound = -1) {
+    template<typename T, int notFound = -1>
+    int indexOf(const std::vector<T> &elems, const T& elem) {
         int i{};
         for (const T& other : elems) {
             if (other == elem)
@@ -121,8 +121,8 @@ namespace utils {
         return notFound;
     }
 
-    template<typename T>
-    int indexOf(const std::list<T> &elems, const T& elem, int notFound = -1) {
+    template<typename T, int notFound = -1>
+    int indexOf(const std::list<T> &elems, const T& elem) {
         int i{};
         for (const T& other : elems) {
             if (other == elem)
@@ -132,15 +132,15 @@ namespace utils {
         return notFound;
     }
 
-    template<typename T, int count>
-    int indexOf(const std::array<T, count> &arr, std::function<bool(const T&)> predicate, int notFound = -1) {
+    template<typename T, int count, int notFound = -1>
+    int indexOf(const std::array<T, count> &arr, std::function<bool(const T&)> predicate) {
         for (int i{}; i < count; i++)
             if (predicate(arr[i])) return i;
         return notFound;
     }
 
-    template<typename T>
-    int indexOf(const std::vector<T>& elems, std::function<bool(const T&)> predicate, int notFound = -1) {
+    template<typename T, int notFound = -1>
+    int indexOf(const std::vector<T>& elems, std::function<bool(const T&)> predicate) {
         int i{};
         for (const T & elem : elems) {
             if (predicate(elem)) return i;
@@ -149,8 +149,8 @@ namespace utils {
         return notFound;
     }
 
-    template<typename T>
-    int indexOf(const std::list<T>& elems, std::function<bool(const T&)> predicate, int notFound = -1) {
+    template<typename T, int notFound = -1>
+    int indexOf(const std::list<T>& elems, std::function<bool(const T&)> predicate) {
         int i{};
         for (const T & elem : elems) {
             if (predicate(elem)) return i;
@@ -159,8 +159,8 @@ namespace utils {
         return notFound;
     }
 
-    template<typename A, typename B>
-    int pairIndexOfFirst(const std::vector<std::pair<A, B>>& elems, A& a, int notFound = -1) {
+    template<typename A, typename B, int notFound = -1>
+    int pairIndexOfFirst(const std::vector<std::pair<A, B>>& elems, A& a) {
         int i{};
         for (const auto & [aa,b] : elems) {
             if (aa == a) return i;
@@ -214,25 +214,39 @@ namespace utils {
         return res;
     }
 
-    std::string strInflateWidth(int num, int targetStrLen, char inflateChar = ' ');
+    template<char inflateChar = ' '>
+    std::string strInflateWidth(int num, int targetStrLen) {
+        const auto s = std::to_string(num);
+        const auto l = s.length();
+        if (l >= (size_t)targetStrLen) return s;
+        return std::string(targetStrLen - l, inflateChar) + s;
+    }
+
     void removeTrailingCarriageReturnOrLineFeed(std::string &s);
 
     std::string uppercase(std::string_view s);
     std::string lowercase(std::string_view s);
 
-    bool sameText(std::string_view a, std::string_view b, bool caseInvariant = true);
-    bool sameTextAsAny(const std::string &a, const std::initializer_list<std::string> &bs);
-    bool sameTextPrefix(const std::string &s, const std::string &prefix);
+    bool sameTextInvariant(std::string_view a, std::string_view b);
 
-    // Port of PStr(U)Equal
-    bool sameTextPChar(const char *a, const char *b, bool caseInvariant = true);
-
-    inline bool PStrUEqual(const char *P1, const char *P2) {
-        return sameTextPChar(P1, P2, true);
+    template<bool caseInvariant = true>
+    inline bool sameText(std::string_view a, std::string_view b) {
+        return caseInvariant ? sameTextInvariant(a, b) : a == b;
     }
 
-    inline bool PStrEqual(const char *P1, const char *P2) {
-        return sameTextPChar(P1, P2, false);
+    bool sameTextAsAny(std::string_view a, const std::initializer_list<std::string_view> &bs);
+    bool sameTextPrefix(std::string_view s, const std::string_view prefix);
+
+    // Port of PStr(U)Equal
+    template<bool caseInvariant = true>
+    inline bool sameTextPChar(const char *a, const char *b) {
+        if (!a || !b) return !a && !b;
+        if constexpr (!caseInvariant) return !std::strcmp(a, b);
+#if defined(_WIN32)
+        else return !_stricmp(a, b);
+#else
+        else return !strcasecmp(a, b);
+#endif
     }
 
     std::string getLineWithSep(std::fstream &fs);
@@ -249,8 +263,8 @@ namespace utils {
 
 	void replaceChar(char a, char b, std::string &s);
 
-    std::vector<size_t> substrPositions(const std::string &s, const std::string &substr);
-	std::string replaceSubstrs(const std::string &s, const std::string &substr, const std::string &replacement);
+    std::vector<size_t> substrPositions(std::string_view s, std::string_view substr);
+	std::string replaceSubstrs(std::string_view s, std::string_view substr, std::string_view replacement);
 
     std::string blanks(int n);
     std::string zeros(int n);
@@ -332,7 +346,7 @@ namespace utils {
 
     std::string quoteWhitespaceDir(const std::string &s, char sep, char quotechar = '\"');
 
-    bool hasNonBlank(const std::string &s);
+    bool hasNonBlank(std::string_view s);
 
     std::string doubleToString(double v, int width, int precision);
 

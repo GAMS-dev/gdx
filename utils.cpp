@@ -32,13 +32,6 @@ namespace utils {
         }
     }
 
-    std::string strInflateWidth(int num, int targetStrLen, char inflateChar) {
-        auto s = std::to_string(num);
-        const auto l = s.length();
-        if (l >= (size_t) targetStrLen) return s;
-        return std::string(targetStrLen - l, inflateChar) + s;
-    }
-
     // Shouldn't this operate on a std::string_view instead?
     void removeTrailingCarriageReturnOrLineFeed(std::string &s) {
         char lchar = s[s.length() - 1];
@@ -57,13 +50,7 @@ namespace utils {
         std::transform(s.begin(), s.end(), out.begin(), ::tolower);
         return out;
     }
-
-    bool sameTextInvariant(std::string_view a, std::string_view b);
-
-    bool sameText(const std::string_view a, const std::string_view b, bool caseInvariant) {
-        return caseInvariant ? sameTextInvariant(a, b) : a == b;
-    }
-
+    
     bool sameTextInvariant(const std::string_view a, const std::string_view b) {
         const auto l = a.length();
         if (b.length() != a.length()) return false;
@@ -74,11 +61,11 @@ namespace utils {
         return true;
     }
 
-    bool sameTextAsAny(const std::string &a, const std::initializer_list<std::string> &bs) {
-        return any<std::string>([&a](const std::string &b) { return utils::sameText(a, b); }, bs);
+    bool sameTextAsAny(const std::string_view a, const std::initializer_list<std::string_view> &bs) {
+        return any<std::string_view>([&a](const std::string_view b) { return utils::sameText(a, b); }, bs);
     }
 
-    bool sameTextPrefix(const std::string &s, const std::string &prefix) {
+    bool sameTextPrefix(const std::string_view s, const std::string_view prefix) {
         return sameText(s.substr(0, prefix.length()), prefix);
     }
 
@@ -94,7 +81,7 @@ namespace utils {
         return ss.str();
     }
 
-    bool hasNonBlank(const std::string &s) {
+    bool hasNonBlank(const std::string_view s) {
         return std::any_of(s.begin(), s.end(), [](char c) {
             return !utils::in(c, ' ', '\t', '\r', '\n');
         });
@@ -160,16 +147,15 @@ namespace utils {
             if(i == a) i = b;*/
     }
 
-    std::vector<size_t> substrPositions(const std::string &s, const std::string &substr) {
+    std::vector<size_t> substrPositions(const std::string_view s, const std::string_view substr) {
         std::vector<size_t> positions;
-        for (size_t p{s.find(substr)}; p != std::string::npos; p = s.find(substr, p + substr.size())) {
+        for (size_t p{s.find(substr)}; p != std::string::npos; p = s.find(substr, p + substr.size()))
             positions.push_back(p);
-        }
         return positions;
     }
 
-    std::string replaceSubstrs(const std::string &s, const std::string &substr, const std::string &replacement) {
-        if (substr == replacement) return s;
+    std::string replaceSubstrs(const std::string_view s, const std::string_view substr, const std::string_view replacement) {
+        if (substr == replacement) return std::string{ s };
         std::string out{};
         const int ssl = static_cast<int>(substr.length());
         const auto positions = substrPositions(s, substr);
@@ -542,28 +528,6 @@ namespace utils {
         std::memcpy(&delphistr[1], s.data(), l);
         return 0;
     }
-
-    bool sameTextPChar(const char *a, const char *b, bool caseInvariant) {
-        /*if (!a || !b) return !a && !b;
-        for (int k{}; k < 256; k++) {
-            if (a[k] == '\0' && b[k] == '\0') return true;
-            if(caseInvariant) {
-                if (std::tolower(a[k]) != std::tolower(b[k])) return false;
-            }
-            else {
-                if(a[k] != b[k]) return false;
-            }
-        }
-        return false;*/
-        if (!a || !b) return !a && !b;
-        if(!caseInvariant) return !std::strcmp(a, b);
-#if defined(_WIN32)
-        return !_stricmp(a, b);
-#else
-        return !strcasecmp(a, b);
-#endif
-    }
-
 }
 
 // Needed for peak working set size query
