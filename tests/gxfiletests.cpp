@@ -222,9 +222,9 @@ namespace tests::gxfiletests {
 
         std::vector<std::pair<std::string, std::string>> suiteModelPairs{
             //{"sqagams","PERSEUS"}
-            //{"src", "ex3"}
+            {"src", "ex3"}
             //{"lwsup", "test1"}
-            {"src", "2"}
+            //{"src", "2"}
             //{"lwsup","agg"}
             //{"src", "gdxfromutlity"},
             //{"sqagams","mpstrans"},

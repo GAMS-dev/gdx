@@ -1748,18 +1748,12 @@ namespace gxfile {
                 int LED{ LastElem[D] };
                 if(LED >= 1 && LED <= (UELTable ? UELTable->size() : 0)) {
 #if defined(_WIN32)
-                    strcpy_s(KeyStr[D], GMS_UEL_IDENT_SIZE, (*UELTable)[LED]);
+                    utils::assignPCharToBuf((*UELTable)[LED], KeyStr[D], GMS_UEL_IDENT_SIZE);
 #else
                     std::strcpy(KeyStr[D], (*UELTable)[LED]);
 #endif
                 }
-                else {
-#if defined(_WIN32)
-                    sprintf_s(KeyStr[D], GMS_UEL_IDENT_SIZE, "%s%d", BADUEL_PREFIX.c_str(), LED);
-#else
-                    std::sprintf(KeyStr[D], "%s%d", BADUEL_PREFIX.c_str(), LED);
-#endif
-                }
+                else std::sprintf(KeyStr[D], "%s%d", BADUEL_PREFIX.c_str(), LED);
             }
             return true;
         }

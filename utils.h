@@ -431,9 +431,9 @@ namespace utils {
 
     inline void assignPCharToBuf(const char *s, char *buf, size_t outBufSize = 256) {
         size_t i;
-        for(i=0; s[i] != '\0' && i < outBufSize; i++)
+        for(i = 0; i < outBufSize && s[i] != '\0'; i++)
             buf[i] = s[i];
-        buf[i == outBufSize ? i - 1 : i] = '\0';
+        buf[i == outBufSize ? i - 1 : i] = '\0'; // truncate when exceeding
     }
 
     int64_t queryPeakRSS();
