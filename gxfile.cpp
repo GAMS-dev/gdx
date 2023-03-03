@@ -306,7 +306,7 @@ namespace gxfile {
         std::string s{ rtl::sysutils_p3::QueryEnvironmentVariable(strGDXCOMPRESS) };
         // Note: the default is disabled
         if(s.empty()) return 0;
-        char c { static_cast<char>(std::toupper(s.front())) };
+        char c { static_cast<char>(utils::toupper(s.front())) };
         return c == 'N' || c == '0' ? 0 : 1;
     }
 

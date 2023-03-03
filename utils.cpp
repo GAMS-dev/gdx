@@ -41,13 +41,13 @@ namespace utils {
 
     std::string uppercase(const std::string_view s) {
         std::string out{ s };
-        std::transform(s.begin(), s.end(), out.begin(), ::toupper);
+        std::transform(s.begin(), s.end(), out.begin(), utils::toupper);
         return out;
     }
 
     std::string lowercase(const std::string_view s) {
         std::string out{ s };
-        std::transform(s.begin(), s.end(), out.begin(), ::tolower);
+        std::transform(s.begin(), s.end(), out.begin(), utils::tolower);
         return out;
     }
     
@@ -55,7 +55,7 @@ namespace utils {
         const auto l = a.length();
         if (b.length() != a.length()) return false;
         for (size_t i{}; i < l; i++) {
-            if (std::tolower(a[i]) != std::tolower(b[i]))
+            if (utils::tolower(a[i]) != utils::tolower(b[i]))
                 return false;
         }
         return true;
@@ -185,7 +185,7 @@ namespace utils {
 
     void val(const std::string &s, double &num, int &code) {
         auto islegal = [](char c) {
-            return isdigit(c) || c == '.' || toupper(c) == 'E' || c == '-' || c == '+';
+            return isdigit(c) || c == '.' || utils::toupper(c) == 'E' || c == '-' || c == '+';
         };
         if (determineCode(s, islegal, code)) return;
         num = utils::parseNumber(s);

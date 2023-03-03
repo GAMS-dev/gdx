@@ -12,6 +12,15 @@ namespace tests::utilstests {
 
     TEST_SUITE_BEGIN("utils");
 
+    TEST_CASE("Test character upper/lowercase conversion") {
+        REQUIRE_EQ('A', utils::toupper('a'));
+        REQUIRE_EQ('Z', utils::toupper('z'));
+        REQUIRE_EQ('$', utils::toupper('$'));
+        REQUIRE_EQ('a', utils::tolower('A'));
+        REQUIRE_EQ('z', utils::tolower('Z'));
+        REQUIRE_EQ('$', utils::tolower('$'));
+    }
+
     TEST_CASE("Test set operations") {
         const std::set<int> a = { 1, 3, 5 },
                 b = { 3, 5, 8 },
