@@ -222,10 +222,10 @@ namespace tests::gxfiletests {
 
         std::vector<std::pair<std::string, std::string>> suiteModelPairs{
             //{"sqagams","PERSEUS"}
-            {"src", "ex3"}
+            //{"src", "ex3"}
             //{"apc", "20_back"}
             //{"lwsup", "test1"}
-            //{"src", "2"}
+            {"src", "1"}
             //{"lwsup","agg"}
             //{"src", "gdxfromutlity"},
             //{"sqagams","mpstrans"},
@@ -351,7 +351,7 @@ namespace tests::gxfiletests {
 
         const int ntries = 4;
         const bool  quiet = false,
-                onlyPorted = false,
+                onlyPorted = true,
                 onlyWrapped = false;
 
         pfgdx::TimeTriple tWrap, tPort;

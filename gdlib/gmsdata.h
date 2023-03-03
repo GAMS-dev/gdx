@@ -10,26 +10,73 @@
 #include "gmsobj.h"
 
 namespace gdlib::gmsdata {
-    using IndexKeys = std::array<int, GLOBAL_MAX_INDEX_DIM>;
-    using ValueFields = std::array<double, GMS_VAL_MAX>;
-
+    template<typename T>
     class TTblGamsData {
         int FDim, FDataSize;
-        std::map<IndexKeys, ValueFields> mapping {};
-        std::vector<IndexKeys> keyset {};
+        std::vector<std::pair<int *, T *>> keyValues {};
     public:
-        TTblGamsData(int ADim, int ADataSize);
-        void GetRecord(int N, int* Inx, double* Vals);
-        void AddRecord(const int* AElements, const double* AVals);
-        ValueFields& operator[](const IndexKeys& Key);
-        void clear();
-        int size() const;
-        std::map<IndexKeys, ValueFields>::iterator begin();
-        std::map<IndexKeys, ValueFields>::iterator end();
-        bool empty() const;
-        void sort();
-        int MemoryUsed() const;
-        int GetDimension() const;
+        TTblGamsData(int ADim, int ADataSize) : FDim{ADim}, FDataSize{ADataSize} {}
+
+        void GetRecord(int N, int* Inx, T* Vals) {
+            std::memcpy(Inx, keyValues[N].first, FDim * sizeof(int));
+            std::memcpy(Vals, keyValues[N].second, FDataSize);
+        }
+
+        void GetKeys(int N, int *Inx) {
+            std::memcpy(Inx, keyValues[N].first, FDim * sizeof(int));
+        }
+
+        void GetData(int N, T *Vals) {
+            std::memcpy(Vals, keyValues[N].second, FDataSize);
+        }
+        double *GetDataPtr(int N) {
+            return keyValues[N].second;
+        }
+
+        void AddRecord(const int* AElements, const T* AVals) {
+            // TODO: Maybe use batch allocator vs. single new allocs here for performance?
+            auto vals {new T[(size_t)FDataSize/sizeof(T)]};
+            std::memcpy(vals, AVals, FDataSize);
+            auto keys{new int[FDim]};
+            std::memcpy(keys, AElements, FDim*sizeof(int));
+            keyValues.emplace_back(keys, vals);
+        }
+
+        void Clear() {
+            for(auto [k,v] : keyValues) {
+                delete [] k;
+                delete [] v;
+            }
+            keyValues.clear();
+        }
+
+        int size() const {
+            return (int)keyValues.size();
+        }
+
+        int GetCount() const {
+            return size();
+        }
+
+        bool empty() const {
+            return keyValues.empty();
+        }
+
+        void Sort() {
+            std::sort(keyValues.begin(), keyValues.end(), [this](const auto &pair1, const auto &pair2) {
+                for(int i=0; i<FDim; i++)
+                    if(pair1.first[i] > pair2.first[i]) return false;
+                return true;
+            });
+        }
+
+        int MemoryUsed() const {
+            return static_cast<int>(keyValues.size() * (FDim*sizeof(int) + FDataSize*sizeof(T)) + keyValues.capacity());
+        }
+
+        int GetDimension() const {
+            return FDim;
+        }
     };
 
     const int BufSize = 1024 * 16;
@@ -176,8 +223,6 @@ namespace gdlib::gmsdata {
 
     template<typename T>
     class TTblGamsDataLegacy {
-        using TIndex = IndexKeys;
-
         TGrowArrayFxd<uint8_t> DS;
         gdlib::gmsobj::TXList<uint8_t> FList {};
         int FDim, FIndexSize, FDataSize;
@@ -212,7 +257,8 @@ namespace gdlib::gmsdata {
         }
 
         int Compare(int Index1, int Index2) {
-            auto P1 {FList[Index1]}, P2 {FList[Index2]};
+            const int   *P1 {reinterpret_cast<const int *>(FList[Index1])},
+                        *P2 {reinterpret_cast<const int *>(FList[Index2])};
             for(int D{}; D<FDim; D++) {
                 int diff {P1[D] - P2[D]};
                 if(diff) return diff;
@@ -220,8 +266,8 @@ namespace gdlib::gmsdata {
             return 0;
         }
 
-        int CompareWithRecord(const TIndex &Inx, int N) {
-            auto P1{FList[N]};
+        int CompareWithRecord(const int *Inx, int N) {
+            auto P1 {reinterpret_cast<const int *>(FList[N])};
             for(int D{}; D<FDim; D++) {
                 int diff {Inx[D]-P1[D]};
                 if(diff) return diff;
@@ -230,7 +276,7 @@ namespace gdlib::gmsdata {
         }
 
         int CompareWithRecPtr(int i1, const int *p2) {
-            auto P1{FList[i1]};
+            auto P1 {reinterpret_cast<const int *>(FList[i1])};
             for(int k{}; k<FDim; k++) {
                 int diff {P1[k] - p2[k]};
                 if(diff) return diff;
@@ -239,14 +285,14 @@ namespace gdlib::gmsdata {
         }
 
         void Exchange(int Index1, int Index2) {
-            auto P {FList[Index1]};
+            auto P {*FList[Index1]};
             *FList[Index1] = *FList[Index2];
-            *FList[Index2] = *P;
+            *FList[Index2] = P;
         }
 
-        void InsertRecord(int N, const TIndex &Inx, T *Buffer) {
+        void InsertRecord(int N, const int *Inx, const T *Buffer) {
             auto P {DS.ReserveMem()};
-            std::memcpy(P, Inx.data(), FIndexSize);
+            std::memcpy(P, Inx, FIndexSize);
             std::memcpy(&P[FIndexSize], Buffer, FDataSize);
             FList.Insert(N, P);
             FIsSorted = false;
@@ -263,20 +309,20 @@ namespace gdlib::gmsdata {
 
         virtual ~TTblGamsDataLegacy() = default;
 
-        inline void AddRecord(const TIndex &Inx, T *Buffer) {
+        inline void AddRecord(const int *Inx, const T *Buffer) {
             InsertRecord(FList.size(), Inx, Buffer);
         }
 
-        bool AddUniqueRecord(const TIndex &Inx, T *Buffer) {
+        bool AddUniqueRecord(const int *Inx, T *Buffer) {
             int N;
             bool res{!SearchRecord(Inx, N)};
             if(res) InsertRecord(N, Inx, Buffer);
             return res;
         }
 
-        void GetRecord(int N, TIndex &Inx, T *Buffer) {
+        void GetRecord(int N, int *Inx, T *Buffer) {
             auto P {FList[N]};
-            std::memcpy(Inx.data(), P, FIndexSize);
+            std::memcpy(Inx, P, FIndexSize);
             std::memcpy(Buffer, &P[FIndexSize], FDataSize);
         }
 
@@ -294,8 +340,8 @@ namespace gdlib::gmsdata {
             }
         }
 
-        void GetKeys(int N, TIndex &Inx) {
-            std::memcpy(Inx.data(), FList[N], FIndexSize);
+        void GetKeys(int N, int *Inx) {
+            std::memcpy(Inx, FList[N], FIndexSize);
         }
 
         void GetData(int N, T *Buffer) {
@@ -306,7 +352,7 @@ namespace gdlib::gmsdata {
             return reinterpret_cast<T*>(&FList[N][FIndexSize]);
         }
 
-        bool SearchRecord(const TIndex &Inx, int &RecNr) {
+        bool SearchRecord(const int *Inx, int &RecNr) {
             int H{FList.size()-1};
             if(H < 0) {
                 RecNr = 0;
@@ -316,7 +362,7 @@ namespace gdlib::gmsdata {
             int L{};
             FLastIndex++;
             if(FLastIndex >= 0 && FLastIndex <= H) {
-                int C {CompareWithRecord(Inx.data(), FLastIndex)};
+                int C {CompareWithRecord(Inx, FLastIndex)};
                 if(!C) {
                     RecNr = FLastIndex;
                     return true;
@@ -328,7 +374,7 @@ namespace gdlib::gmsdata {
             bool res{};
             while(L <= H) {
                 int I {(L+H) >> 1};
-                int C{CompareWithRecord(Inx.data(), I)};
+                int C{CompareWithRecord(Inx, I)};
                 if(C > 0) L = I + 1;
                 else if(C)
                     H = I - 1;

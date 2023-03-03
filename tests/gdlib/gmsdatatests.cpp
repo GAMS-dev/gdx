@@ -47,8 +47,8 @@ namespace tests::gmsdatatests {
         REQUIRE_EQ(24, lst[0]);
     }
 
-    TEST_CASE("Test basic usage of TTblGamsDataLegacy") {
-        TTblGamsDataLegacy<double> gdl {2, sizeof(double)*2};
+    template<typename T>
+    void commonTTblGamsDataTests(T &gdl) {
         REQUIRE_EQ(2, gdl.GetDimension());
         REQUIRE_EQ(0, gdl.GetCount());
 
@@ -58,7 +58,7 @@ namespace tests::gmsdatatests {
         vals.front() = 23.0;
         for (int i{}; i < 10; i++) {
             keys.front() = i + 1;
-            gdl.AddRecord(keys, vals.data());
+            gdl.AddRecord(keys.data(), vals.data());
         }
         REQUIRE_EQ(10, gdl.GetCount());
         REQUIRE_GT(gdl.MemoryUsed(), 0);
@@ -67,11 +67,11 @@ namespace tests::gmsdatatests {
         std::fill(vals.begin(), vals.end(), 0);
 
         for (int i{}; i < 10; i++) {
-            gdl.GetRecord(i, keys, vals.data());
+            gdl.GetRecord(i, keys.data(), vals.data());
             REQUIRE_EQ(i+1, keys.front());
             REQUIRE_EQ(23.0, vals.front());
             std::fill(keys.begin(), keys.end(), 0);
-            gdl.GetKeys(i, keys);
+            gdl.GetKeys(i, keys.data());
             REQUIRE_EQ(i+1, keys.front());
             std::fill(vals.begin(), vals.end(), 0);
             gdl.GetData(i, vals.data());
@@ -86,18 +86,27 @@ namespace tests::gmsdatatests {
         std::fill(vals.begin(), vals.end(), 0);
         vals.front() = 23.0;
 
-        // FIXME: Make sort work!
-
-        /*for (int i{9}; i >= 0; i--) {
+        for (int i{9}; i >= 0; i--) {
             keys.front() = i + 1;
-            gdl.AddRecord(keys, vals.data());
+            gdl.AddRecord(keys.data(), vals.data());
         }
         gdl.Sort();
         for (int i{}; i < 10; i++) {
-            gdl.GetRecord(i, keys, vals.data());
+            gdl.GetRecord(i, keys.data(), vals.data());
             REQUIRE_EQ(i + 1, keys.front());
             REQUIRE_EQ(23.0, vals.front());
-        }*/
+        }
+    }
+
+    TEST_CASE("Test basic usage of TTblGamsDataLegacy") {
+        {
+            TTblGamsData<double> gdl {2, sizeof(double)*2};
+            commonTTblGamsDataTests<TTblGamsData<double>>(gdl);
+        }
+        {
+            TTblGamsDataLegacy<double> gdl{2, sizeof(double) * 2};
+            commonTTblGamsDataTests<TTblGamsDataLegacy<double>>(gdl);
+        }
     }
 
     TEST_SUITE_END();

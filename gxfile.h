@@ -3,6 +3,14 @@
 // Description:
 //  This unit defines the GDX Object as a C++ object.
 
+// Quick settings:
+// P3_COLLECTIONS: Use paul objects as much as possible and gmsheapnew for TLinkedData, most verbatim port
+// CXX_COLLECTIONS: Use C++ standard library as much as possible (including MIT-license fast open source hashmap implementation)
+// MIXED_COLLECTIONS (default): Mix-and-match custom and builtin data structures for best performance
+#if !defined(P3_COLLECTIONS) && !defined(CXX_COLLECTIONS) && !defined(MIX_COLLECTIONS)
+#define MIX_COLLECTIONS
+#endif
+
 #include "gdxinterface.h"
 
 #include "expertapi/gclgms.h"
@@ -31,14 +39,6 @@
 // Some hashmaps have stable references (pointers don't invalidate on insertion/removal) but others have not
 //======================================================================================================================
 
-// Quick settings:
-// P3_COLLECTIONS: Use paul objects as much as possible and gmsheapnew for TLinkedData, most verbatim port
-// CXX_COLLECTIONS: Use C++ standard library as much as possible (including MIT-license fast open source hashmap implementation)
-// MIXED_COLLECTIONS (default): Mix-and-match custom and builtin data structures for best performance
-#if !defined(P3_COLLECTIONS) && !defined(CXX_COLLECTIONS) && !defined(MIX_COLLECTIONS)
-    #define MIX_COLLECTIONS
-#endif
-
 // Use TBooleanBitArray instead of std::vector<bool>
 #define USE_BBARRAY
 
@@ -60,6 +60,9 @@
 // Use TXStrPool port for SetTextList
 #define TXSPOOL_LEGACY
 
+// Use verbatim port for TTblGamsData
+#define TBL_GMSDATA_LEGACY
+
 #if defined(P3_COLLECTIONS)
 #elif defined(CXX_COLLECTIONS)
     #undef USE_BBARRAY
@@ -69,10 +72,12 @@
     #undef TIM_LEGACY
     #undef TSH_LEGACY
     #undef TXSPOOL_LEGACY
+    #undef TBL_GMSDATA_LEGACY
     #define ANKERL_HASHMAP
 #elif defined(MIX_COLLECTIONS)
     #undef TSH_LEGACY
     #undef TXSPOOL_LEGACY
+    #undef TBL_GMSDATA_LEGACY
 #endif
 
 // Hashmap choice:
@@ -678,6 +683,14 @@ template<typename K, typename V, typename H, typename E>
     using TNameList = TXStrHashListImpl<PgdxSymbRecord>;
 #endif
 
+#ifdef TBL_GMSDATA_LEGACY
+    template<typename T>
+    using TTblGamsDataImpl = gdlib::gmsdata::TTblGamsDataLegacy<T>;
+#else
+    template<typename T>
+    using TTblGamsDataImpl = gdlib::gmsdata::TTblGamsData<T>;
+#endif
+
     // FIXME: It appears the object field is not actually needed
     // Find a way to use TXStrHashList anyways (w/out wasting a byte per entry as it is right now)
     using TDomainStrList = TXStrHashListImpl<uint8_t>;
@@ -716,7 +729,7 @@ template<typename K, typename V, typename H, typename E>
         std::unique_ptr<TDomainStrList> DomainStrList;
         std::unique_ptr<LinkedDataType> SortList;
         std::optional<LinkedDataIteratorType> ReadPtr;
-        std::unique_ptr<gdlib::gmsdata::TTblGamsData> ErrorList;
+        std::unique_ptr<TTblGamsDataImpl<double>> ErrorList;
         PgdxSymbRecord CurSyPtr{};
         int ErrCnt{}, ErrCntTotal{};
         int LastError{}, LastRepError{};

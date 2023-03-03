@@ -1472,21 +1472,25 @@ namespace gxfile {
     }
 
     void TGXFileObj::AddToErrorListDomErrs(const std::array<int, GLOBAL_MAX_INDEX_DIM> &AElements, const double * AVals) {
-        if (!ErrorList) ErrorList = std::make_unique<gdlib::gmsdata::TTblGamsData>(FCurrentDim, (int)(DataSize*sizeof(double)));
-        else if (ErrorList->size() >= 11) return;
+        if (!ErrorList) ErrorList = std::make_unique<TTblGamsDataImpl<double>>(FCurrentDim, (int)(DataSize*sizeof(double)));
+        else if (ErrorList->GetCount() >= 11) return;
+
+        static std::array<int, GLOBAL_MAX_INDEX_DIM> keys{};
+        static std::array<double, GMS_VAL_MAX> vals{};
 
         for (int D{}; D < FCurrentDim; D++) {
             int EN{ AElements[D] };
             if (EN < 0) {
                 bool Found{};
-                for (const auto& [keys, vals] : *ErrorList) {
+                for(int i{}; i<ErrorList->GetCount(); i++) {
+                    ErrorList->GetRecord(i, keys.data(), vals.data());
                     if (keys[D] == EN) {
                         Found = true;
                         break;
                     }
                 }
                 if (!Found) {
-                    (*ErrorList)[AElements] = utils::asArray<double, 5>(AVals);
+                    ErrorList->AddRecord(AElements.data(), AVals);
                     return;
                 }
             }
@@ -1495,8 +1499,8 @@ namespace gxfile {
 
     void TGXFileObj::AddToErrorList(const int *AElements, const double *AVals) {
         if (!ErrorList)
-            ErrorList = std::make_unique<gdlib::gmsdata::TTblGamsData>(FCurrentDim, (int)(DataSize * sizeof(double)));
-        else if (ErrorList->size() >= 11) // avoid storing too many errors
+            ErrorList = std::make_unique<TTblGamsDataImpl<double>>(FCurrentDim, (int)(DataSize * sizeof(double)));
+        else if (ErrorList->GetCount() >= 11) // avoid storing too many errors
             return;
         ErrorList->AddRecord(AElements, AVals);
     }
@@ -2144,7 +2148,7 @@ namespace gxfile {
     //   filter are added the error list.
     int TGXFileObj::gdxDataErrorCount()
     {
-        return !ErrorList ? 0 : static_cast<int>(ErrorList->size());
+        return !ErrorList ? 0 : ErrorList->GetCount();
     }
 
     // Brief:
@@ -2185,7 +2189,7 @@ namespace gxfile {
             return false;
 
         if (ErrorList) {
-            if (RecNr < 1 || RecNr > ErrorList->size()) {
+            if (RecNr < 1 || RecNr > ErrorList->GetCount()) {
                 ReportError(ERR_BADERRORRECORD);
             }
             else {
@@ -3635,20 +3639,19 @@ namespace gxfile {
                     NrElem++;
         }
         else { //should we have an option to return indices in Raw order or in Mapped order?
-            gdlib::gmsdata::TTblGamsData SortL{ 1, sizeof(int) };
-            std::array<double, 5> vf{};
+            TTblGamsDataImpl<int> SortL{ 1, sizeof(int) };
             for (int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++) {
                 if (DomainIndxs.GetMapping(N) == 1) {
                     NrElem++;
                     Index.front() = UELTable->NewUsrUel(N);
-                    vf.front() = N;
-                    SortL[Index] = vf;
+                    SortL.AddRecord(Index.data(), &N);
                 }
             }
-            SortL.sort();
-            for (int N{}; N < SortL.size(); N++) {
-                SortL.GetRecord(N, Index.data(), vf.data());
-                gdxGetDomainElements_DP_FC(static_cast<int>(vf.front()), Index.front(), UPtr);
+            SortL.Sort();
+            int RawNr;
+            for (int N{}; N < SortL.GetCount(); N++) {
+                SortL.GetRecord(N, Index.data(), &RawNr);
+                gdxGetDomainElements_DP_FC(RawNr, Index.front(), UPtr);
             }
         }
         return NrElem >= 0;
