@@ -16,6 +16,10 @@ namespace gdlib::gmsdata {
         std::vector<std::pair<int *, T *>> keyValues {};
     public:
         TTblGamsData(int ADim, int ADataSize) : FDim{ADim}, FDataSize{ADataSize} {}
+        
+        virtual ~TTblGamsData() {
+            Clear();
+        }
 
         void GetRecord(int N, int* Inx, T* Vals) {
             std::memcpy(Inx, keyValues[N].first, FDim * sizeof(int));
