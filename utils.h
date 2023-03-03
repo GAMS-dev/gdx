@@ -102,7 +102,7 @@ namespace utils {
 
     bool anychar(const std::function<bool(char)>& predicate, std::string_view s);
 
-    template<typename T, int count, int notFound = -1>
+    template<typename T, int count, const int notFound = -1>
     int indexOf(const std::array<T, count> &arr, const T& elem) {
         for (int i = 0; i < count; i++)
             if (arr[i] == elem)
@@ -110,7 +110,7 @@ namespace utils {
         return notFound;
     }
 
-    template<typename T, int notFound = -1>
+    template<typename T, const int notFound = -1>
     int indexOf(const std::vector<T> &elems, const T& elem) {
         int i{};
         for (const T& other : elems) {
@@ -121,7 +121,7 @@ namespace utils {
         return notFound;
     }
 
-    template<typename T, int notFound = -1>
+    template<typename T, const int notFound = -1>
     int indexOf(const std::list<T> &elems, const T& elem) {
         int i{};
         for (const T& other : elems) {
@@ -132,14 +132,14 @@ namespace utils {
         return notFound;
     }
 
-    template<typename T, int count, int notFound = -1>
+    template<typename T, int count, const int notFound = -1>
     int indexOf(const std::array<T, count> &arr, std::function<bool(const T&)> predicate) {
         for (int i{}; i < count; i++)
             if (predicate(arr[i])) return i;
         return notFound;
     }
 
-    template<typename T, int notFound = -1>
+    template<typename T, const int notFound = -1>
     int indexOf(const std::vector<T>& elems, std::function<bool(const T&)> predicate) {
         int i{};
         for (const T & elem : elems) {
@@ -149,7 +149,7 @@ namespace utils {
         return notFound;
     }
 
-    template<typename T, int notFound = -1>
+    template<typename T, const int notFound = -1>
     int indexOf(const std::list<T>& elems, std::function<bool(const T&)> predicate) {
         int i{};
         for (const T & elem : elems) {
@@ -159,7 +159,7 @@ namespace utils {
         return notFound;
     }
 
-    template<typename A, typename B, int notFound = -1>
+    template<typename A, typename B, const int notFound = -1>
     int pairIndexOfFirst(const std::vector<std::pair<A, B>>& elems, A& a) {
         int i{};
         for (const auto & [aa,b] : elems) {
@@ -214,7 +214,7 @@ namespace utils {
         return res;
     }
 
-    template<char inflateChar = ' '>
+    template<const char inflateChar = ' '>
     std::string strInflateWidth(int num, int targetStrLen) {
         const auto s = std::to_string(num);
         const auto l = s.length();
@@ -229,7 +229,7 @@ namespace utils {
 
     bool sameTextInvariant(std::string_view a, std::string_view b);
 
-    template<bool caseInvariant = true>
+    template<const bool caseInvariant = true>
     inline bool sameText(std::string_view a, std::string_view b) {
         return caseInvariant ? sameTextInvariant(a, b) : a == b;
     }
@@ -238,14 +238,14 @@ namespace utils {
     bool sameTextPrefix(std::string_view s, const std::string_view prefix);
 
     // Port of PStr(U)Equal
-    template<bool caseInvariant = true>
+    template<const bool caseInvariant = true>
     inline bool sameTextPChar(const char *a, const char *b) {
         if (!a || !b) return !a && !b;
-        if constexpr (!caseInvariant) return !std::strcmp(a, b);
+        if constexpr(!caseInvariant) return !std::strcmp(a, b);
 #if defined(_WIN32)
-        else return !_stricmp(a, b);
+        return !_stricmp(a, b);
 #else
-        else return !strcasecmp(a, b);
+        return !strcasecmp(a, b);
 #endif
     }
 
@@ -371,7 +371,7 @@ namespace utils {
     bool strToBool(const std::string &s);
 
     // TODO: This should be more general and work with any sequential collection
-    template<typename T, int size>
+    template<typename T, const int size>
     void assignRange(std::array<T, size> &arr, int lbIncl, int ubIncl, T value) {
         std::fill_n(arr.begin() + lbIncl, ubIncl - lbIncl + 1, value);
     }
@@ -385,7 +385,7 @@ namespace utils {
 
     std::optional<std::list<BinaryDiffMismatch>> binaryFileDiff(const std::string& filename1, const std::string& filename2, int countLimit = -1);
 
-    template<class T, int size>
+    template<class T, const int size>
     std::array<T, size> arrayWithValue(T v) {
         std::array<T, size> res;
         res.fill(v);
@@ -395,7 +395,7 @@ namespace utils {
     std::string asdelphifmt(double v, int precision = 8);
 
     // Do not use this in inner-loop performance critical code!
-    template<typename T, int card>
+    template<typename T, const int card>
     std::array<T, card> asArray(const T* ptr) {
         std::array<T, card> a{};
         for (int i = 0; i < card; i++)
@@ -403,7 +403,7 @@ namespace utils {
         return a;
     }
 
-    template<typename T, int card>
+    template<typename T, const int card>
     std::array<T, card> asArrayN(const T* ptr, int n) {
         std::array<T, card> a{};
         for (int i = 0; i < std::min<int>(n, card); i++)
