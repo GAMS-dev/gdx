@@ -351,7 +351,7 @@ namespace tests::gxfiletests {
 
         const int ntries = 4;
         const bool  quiet = false,
-                onlyPorted = true,
+                onlyPorted = false,
                 onlyWrapped = false;
 
         pfgdx::TimeTriple tWrap, tPort;
