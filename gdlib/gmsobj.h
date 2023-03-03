@@ -569,13 +569,13 @@ namespace gdlib::gmsobj {
             int64_t r {};
             int i{}, n{(int)slen};
             while(i+5 < n) {
-                uint32_t t {(uint32_t)std::toupper(s[i++])};
+                uint32_t t {(uint32_t)utils::toupper(s[i++])};
                 for(int j{}; j<5; j++)
-                    t = (HASHMULT * t) + (uint32_t)std::toupper(s[i++]);
+                    t = (HASHMULT * t) + (uint32_t)utils::toupper(s[i++]);
                 r = (HASHMULT_6 * r + t) % hashCount;
             }
             while(i < n)
-                r = (HASHMULT * r + (uint32_t)std::toupper(s[i++])) % hashCount;
+                r = (HASHMULT * r + (uint32_t)utils::toupper(s[i++])) % hashCount;
             return (uint32_t)r;
         }
 

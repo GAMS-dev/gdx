@@ -20,6 +20,10 @@
 // ==============================================================================================================
 namespace utils {
 
+    inline char toupper(char c) {
+        return c >= 'a' && c <= 'z' ? c ^ 32 : c;
+    }
+
     template<class T>
     std::set<T> unionOp(const std::set<T>& a, const std::set<T>& b) {
         std::set<T> res = a;

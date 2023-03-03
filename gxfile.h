@@ -351,7 +351,7 @@ template<typename K, typename V, typename H, typename E>
         size_t operator()(const std::string& input) const {
             int res{};
             for(char c : input)
-                res = 211 * res + std::toupper(c);
+                res = 211 * res + utils::toupper(c);
             return res & 0x7fffffff;
         }
     };

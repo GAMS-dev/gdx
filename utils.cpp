@@ -452,8 +452,8 @@ namespace utils {
         auto L = S1.length();
         if (L > S2.length()) L = S2.length();
         for (size_t K{}; K < L; K++) {
-            int c1 = caseInsensitive ? std::toupper(S1[K]) : S1[K];
-            int c2 = caseInsensitive ? std::toupper(S2[K]) : S2[K];
+            int c1 = caseInsensitive ? utils::toupper(S1[K]) : S1[K];
+            int c2 = caseInsensitive ? utils::toupper(S2[K]) : S2[K];
             int d = c1 - c2;
             if (d) return d;
         }
