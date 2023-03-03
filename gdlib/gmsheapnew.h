@@ -91,7 +91,7 @@ namespace gdlib::gmsheapnew {
         void prvGetSlotCnts(THeapSlotNr Slot, int64_t &cntGet, int64_t &cntFree, int64_t &cntAvail);
 
     public:
-        explicit THeapMgr(const std::string &Name);
+        explicit THeapMgr(std::string Name);
         virtual ~THeapMgr();
         void Clear();
         void *GMSGetMem(uint16_t slot);

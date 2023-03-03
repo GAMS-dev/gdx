@@ -66,13 +66,6 @@ namespace gdlib::strhash {
             std::fill_n(PHashTable->begin(), HashTableSize, nullptr);
         }
 
-        virtual int Hash(const std::string &s) {
-            int res{};
-            for(char c : s)
-                res = 211 * res + std::toupper(c);
-            return (res & 0x7FFFFFFF) % HashTableSize;
-        }
-
         virtual int Hash(const char *s) {
             int res{};
             for(int i{}; s[i] != '\0'; i++)
@@ -81,22 +74,10 @@ namespace gdlib::strhash {
         }
 
         virtual bool EntryEqual(const char *ps1, const char *ps2) {
-#if defined(_WIN32)
-            return !_stricmp(ps1, ps2);
-#else
-            return !strcasecmp(ps1, ps2);
-#endif
-        }
-
-        virtual bool EntryEqual(const std::string &ps1, const std::string &ps2) {
-            return utils::sameText(ps1, ps2);
-        }
-
-        virtual bool EntryEqualPChar(const char *ps1, const char *ps2) {
             return utils::sameTextPChar(ps1, ps2);
         }
 
-        virtual int Compare(const std::string &ps1, const std::string &ps2) {
+        virtual int Compare(const std::string_view ps1, const std::string_view ps2) {
             return utils::strCompare(ps1, ps2);
         }
 
@@ -120,7 +101,7 @@ namespace gdlib::strhash {
             Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]]->Obj = &AObj;
         }
 
-        std::string &GetSortedString(int N) {
+        char *GetSortedString(int N) {
             if(FSorted) Sort();
             return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]]->StrP;
         }
@@ -129,7 +110,7 @@ namespace gdlib::strhash {
             int i{L};
             while(i < R) {
                 int j {R}, p {(L+R) >> 1};
-                std::string pPivotStr = Buckets[(*SortMap)[p]]->StrP;
+                char *pPivotStr = Buckets[(*SortMap)[p]]->StrP;
                 do {
                     while(Compare(Buckets[(*SortMap)[i]]->StrP, pPivotStr) < 0) i++;
                     while(Compare(Buckets[(*SortMap)[j]]->StrP, pPivotStr) > 0) j--;
@@ -163,9 +144,9 @@ namespace gdlib::strhash {
             }
             if(!FSorted) {
                 if(FCount >= 2) {
-                    std::string PSN = Buckets[0]->StrP;
+                    char *PSN = Buckets[0]->StrP;
                     for(int N{}; N<FCount-1; N++) {
-                        std::string PSN1 = Buckets[N+1]->StrP;
+                        char *PSN1 = Buckets[N+1]->StrP;
                         if(Compare(PSN, PSN1) > 0) {
                             QuickSort(0, FCount-1);
                             break;
@@ -246,7 +227,7 @@ namespace gdlib::strhash {
             int HV {Hash(s)};
             PHashBucket<T> PBuck = GetBucketByHash(HV);
             while(PBuck) {
-                if(!EntryEqualPChar(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
+                if(!EntryEqual(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
                 else return PBuck->StrNr + (OneBased ? 1 : 0);
             }
 #ifdef TLD_BATCH_ALLOCS
@@ -287,7 +268,7 @@ namespace gdlib::strhash {
             int HV {Hash(s)};
             PHashBucket<T> PBuck = GetBucketByHash(HV);
             while(PBuck) {
-                if(!EntryEqualPChar(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
+                if(!EntryEqual(PBuck->StrP, s)) PBuck = PBuck->NextBucket;
                 else return PBuck->StrNr + (OneBased ? 1 : 0);
             }
             return -1;
@@ -322,7 +303,7 @@ namespace gdlib::strhash {
             return res;
         }
 
-        void RenameEntry(int N, const std::string &s) {
+        void RenameEntry(int N, const char *s) {
             N -= OneBased ? 1 : 0;
             if(FSorted) {
                 SortMap = nullptr;
@@ -341,14 +322,14 @@ namespace gdlib::strhash {
                     (*PHashTable)[HV1] = PBuck;
                 }
             }
-            SetString(N+1, s);
+            SetString(N+1, s, std::strlen(s));
         }
 
         T* operator[](int N) {
             return GetObject(N);
         }
 
-        T& operator[](const std::string &key) {
+        T& operator[](const char *key) {
             return *GetObject(IndexOf(key));
         }
 
@@ -365,19 +346,19 @@ namespace gdlib::strhash {
             return GetString(N);
         }
 
-        void SetString(int N, const std::string s) {
+        void SetString(int N, const char *s, size_t slen) {
             auto bucket = Buckets[N-(OneBased ? 1 : 0)];
 #ifdef TLD_BATCH_ALLOCS
             // Storage for old string will leak temporarily but will be collected by batchAllocator.clear call
-            bucket->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(s.length()+1));
+            bucket->StrP = reinterpret_cast<char *>(batchStrAllocator.GetBytes(slen+1));
 #else
             delete [] bucket->StrP;
-            bucket->StrP = new char[s.length()+1];
+            bucket->StrP = new char[slen+1];
 #endif
-            utils::assignStrToBuf(s, bucket->StrP, (int)s.length()+1);
+            utils::assignPCharToBuf(s, slen, bucket->StrP);
         }
 
-        std::string GetSortedString(int N) const {
+        char *GetSortedString(int N) const {
             if(!FSorted) Sort();
             return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]]->StrP;
         }
@@ -439,26 +420,18 @@ namespace gdlib::strhash {
     template<typename T>
     class TXCSStrHashList : public TXStrHashList<T> {
     protected:
-        int Hash(const std::string &s) override {
+        int Hash(const char *s) override {
             int res{};
-            for(char c : s)
-                res = 211 * res + c;
+            for(int i{}; s[i] != '\0'; i++)
+                res = 211 * res + s[i];
             return (res & 0x7FFFFFFF) % this->HashTableSize;
         }
 
-        bool EntryEqual(const std::string &ps1, const std::string &ps2) override {
-            return ps1 == ps2;
-        }
-
         bool EntryEqual(const char *ps1, const char *ps2) override {
-            return !strcmp(ps1, ps2);
-        }
-
-        bool EntryEqualPChar(const char *ps1, const char *ps2) override {
             return utils::sameTextPChar<false>(ps1, ps2);
         }
 
-        int Compare(const std::string &ps1, const std::string &ps2) override {
+        int Compare(const std::string_view ps1, const std::string_view ps2) override {
             return utils::strCompare(ps1, ps2, false);
         }
     };
@@ -496,7 +469,7 @@ namespace gdlib::strhash {
             return GetObject(N);
         }
 
-        T& operator[](const std::string& key) {
+        T& operator[](const char *key) {
             return *GetObject(IndexOf(key));
         }
 
@@ -530,18 +503,10 @@ namespace gdlib::strhash {
         }
 
         virtual bool EntryEqual(const char *ps1, const char *ps2) {
-#if defined(_WIN32)
-            return !_stricmp(ps1, ps2);
-#else
-            return !strcasecmp(ps1, ps2);
-#endif
+            return utils::sameTextPChar(ps1, ps2);
         }
 
-        virtual bool EntryEqual(const std::string &ps1, const std::string &ps2) {
-            return utils::sameText(ps1, ps2);
-        }
-
-        virtual int Compare(const std::string &ps1, const std::string &ps2) {
+        virtual int Compare(const std::string_view ps1, const std::string_view ps2) {
             return utils::strCompare(ps1, ps2);
         }
 
@@ -756,10 +721,6 @@ namespace gdlib::strhash {
             for (int i{}; s[i] != '\0'; i++)
                 res = 211 * res + s[i];
             return (res & 0x7FFFFFFF) % this->HashTableSize;
-        }
-
-        bool EntryEqual(const std::string& ps1, const std::string& ps2) override {
-            return ps1 == ps2;
         }
 
         bool EntryEqual(const char* ps1, const char* ps2) override {

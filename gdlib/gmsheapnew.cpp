@@ -43,7 +43,7 @@ namespace gdlib::gmsheapnew {
         if(MemoryReportProc) MemoryReportProc(MemoryUsedMB());
     }
 
-    TBigBlockMgr::TBigBlockMgr(std::string  Name) : spName{std::move(Name)} {
+    TBigBlockMgr::TBigBlockMgr(std::string Name) : spName{std::move(Name)} {
     }
 
     TBigBlockMgr::~TBigBlockMgr() {
@@ -250,7 +250,7 @@ namespace gdlib::gmsheapnew {
         cntAvail = obj.ListCount;
     }
 
-    THeapMgr::THeapMgr(const std::string& Name) : BlockMgr{"BBMgr_"s + Name}, spName{Name} {
+    THeapMgr::THeapMgr(const std::string Name) : BlockMgr{"BBMgr_"s + Name}, spName{std::move(Name)} {
         prvClear();
     }
 
