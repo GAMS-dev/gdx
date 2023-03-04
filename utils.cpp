@@ -104,9 +104,14 @@ namespace utils {
     const char *trimRight(const char *s, char *storage, int &slen) {
         int i;
         slen = -1; // all whitespace? => slen=0!
-        for(i=0; s[i] != '\0'; i++)
-            if(/*s[i] > ' '*/ !std::isspace(s[i]))
+        for(i=0; s[i] != '\0'; i++) {
+            bool isspace1 {static_cast<unsigned char>(s[i]) <= 32}, isspace2 {std::isspace(s[i]) != 0};
+            if(isspace1 != isspace2) {
+                std::cout << "When trimming string \"" << s << "\" the 'is a blank'-char methods disagree for char with code=" << (int)s[i] << std::endl;
+            }
+            if (!isspace2)
                 slen = i;
+        }
         if(++slen == i) return s;
         std::memcpy(storage, s, slen);
         storage[slen] = '\0';
