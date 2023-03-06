@@ -43,13 +43,13 @@ set(common
 		expertapi/palmcc.h expertapi/palmcc.c
 
 		gdlib/gmsstrm.h gdlib/gmsstrm.cpp
-		gdlib/gmsdata.h gdlib/gmsdata.cpp
-		gdlib/datastorage.cpp gdlib/datastorage.h
-		gdlib/strhash.h gdlib/strhash.cpp
+		gdlib/gmsdata.h
+		gdlib/datastorage.h
+		gdlib/strhash.h
 		gdlib/gmsobj.h gdlib/gmsobj.cpp
 		gdlib/gmsheapnew.h gdlib/gmsheapnew.cpp
 
-		gdxinterface.h gdxinterface.cpp
+		gdxinterface.h
 		utils.h utils.cpp
 		gxfile.h gxfile.cpp
 
