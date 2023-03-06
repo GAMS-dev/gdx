@@ -10,7 +10,6 @@
 #include <Windows.h>
 #endif
 
-using namespace global::delphitypes;
 using namespace std::literals::chrono_literals;
 using namespace std::literals::string_literals;
 

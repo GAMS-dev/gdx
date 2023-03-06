@@ -12,27 +12,14 @@
 
 #include "gmsheapnew.h"
 
-// TLinkedData dynamic array toggle
-// iff. defined? Use std::vector with actual dimension and value counts,
-// otherwise std::array with fixed maximum sizes, see below.
-// Maximum sizes are usually:
-// - keys:   GLOBAL_MAX_INDEX_DIM = 20
-// - values: GMS_VAL_MAX          = 5
-#define TLD_DYN_ARRAYS
-
 // Batch allocations
 // When TLD_DYN_ARRAYS is active: No single item #TotalSize-bytes new allocations
 // but instead allocate big blocks (potentially wasting a couple bytes if items don't fit tightly)
 // also has space overhead for list of blocks to free it later
 #define TLD_BATCH_ALLOCS
 
-#ifdef TLD_DYN_ARRAYS
 #define TLD_TEMPLATE_HEADER template<typename KeyType, typename ValueType>
 #define TLD_REC_TYPE TLinkedDataRec<KeyType, ValueType>
-#else
-#define TLD_TEMPLATE_HEADER template<typename KeyType, int maxKeySize, typename ValueType, int maxValueSize>
-#define TLD_REC_TYPE TLinkedDataRec<KeyType, maxKeySize, ValueType, maxValueSize>
-#endif
 
 #if defined(P3_COLLECTIONS)
 // Instead of using builtin C++ heap functionality new/delete, use custom GAMS big block heap from gdlib/gmsheapnew
@@ -94,10 +81,6 @@ namespace gdlib::datastorage {
     TLD_TEMPLATE_HEADER
     struct TLinkedDataRec {
         TLinkedDataRec *RecNext{};
-#ifndef TLD_DYN_ARRAYS
-        ValueType RecData[maxValueSize];
-        KeyType RecKeys[maxKeySize];
-#else
         // when RecData is used, first dim * sizeof(int) bytes are keys and then datasize * sizeof(double) bytes for values
         // hence data bytes start at offset FKeySize
         // when RecKeys is used corresponds directly to key entries (as integers)
@@ -105,7 +88,6 @@ namespace gdlib::datastorage {
             uint8_t RecData[20*4];
             int RecKeys[20];
         };
-#endif
     };
 
     TLD_TEMPLATE_HEADER
@@ -190,7 +172,6 @@ namespace gdlib::datastorage {
         }
 
         RecType *AddItem(const KeyType *AKey, const ValueType *AData) {
-#ifdef TLD_DYN_ARRAYS
     #if defined(USE_GMSHEAP)
             auto *node = reinterpret_cast<RecType *>(MyHeap.XGetMem(FTotalSize));
     #elif defined(TLD_BATCH_ALLOCS)
@@ -198,20 +179,12 @@ namespace gdlib::datastorage {
     #else
             auto* node = reinterpret_cast<RecType *>(new uint8_t[FTotalSize]);
     #endif
-#else
-            RecType *node = new RecType { FDimension, FDataSize / (int)sizeof(ValueType) };
-#endif
             if(!FHead) FHead = node;
             else FTail->RecNext = node;
             FTail = node;
             node->RecNext = nullptr;
-#ifndef TLD_DYN_ARRAYS
-            std::memcpy(node->RecKeys, AKey, FKeySize);
-            std::memcpy(node->RecData, AData, FDataSize);
-#else
             std::memcpy(node->RecData, AKey, FKeySize); // first FKeySize bytes for keys (integers)
             std::memcpy(&node->RecData[FKeySize], AData, FDataSize); // rest for actual data (doubles)
-#endif
             FCount++;
             for(int D{}; D<FDimension; D++) {
                 int Key{AKey[D]};
@@ -272,130 +245,13 @@ namespace gdlib::datastorage {
         bool GetNextRecord(RecType **P, KeyType *AKey, ValueType *AData) {
             if(P && *P) {
                 const RecType &it = **P;
-#ifndef TLD_DYN_ARRAYS
-                std::memcpy(AKey, it.RecKeys, FKeySize);
-                std::memcpy(AData, it.RecData, FDataSize);
-#else
                 std::memcpy(AKey, it.RecData, FKeySize); // first FKeySize bytes for keys (integers)
                 std::memcpy(AData, &it.RecData[FKeySize], FDataSize); // rest actual data bytes (doubles)
-#endif
                 *P = it.RecNext;
                 return true;
             }
             return false;
         }
     };
-
-#ifdef TLD_DYN_ARRAYS
-    template<typename KeyType, typename ValType>
-#else
-    template<typename KeyType, int keyMaxSize, typename ValType, int valMaxSize>
-#endif
-    class TLinkedData {
-    public:
-#ifndef TLD_DYN_ARRAYS
-        using KeyArray = std::array<KeyType, keyMaxSize>;
-        using ValArray = std::array<ValType, valMaxSize>;
-#else
-        using KeyArray = KeyType *;
-        using ValArray = ValType *;
-#endif
-        using EntryType = std::pair<KeyArray, ValArray>;
-        using TLDStorageType = std::list<EntryType>;
-
-    private:
-        TLDStorageType data;
-
-        int FDimension, // number of keys / symbol dimension
-            FKeySize,   // byte count for key storage
-            FDataSize;  // byte count for value storage
-
-        bool IsSorted() {
-            const KeyType * PrevKey{};
-            for(const EntryType &pair : data) {
-                const KeyArray &keys = pair.first;
-                if(PrevKey) {
-                    int KD{};
-                    for (int D{}; D < FDimension; D++) {
-                        KD = keys[D] - PrevKey[D];
-                        if (KD) break;
-                    }
-                    if (KD < 0) return false;
-                }
-                PrevKey = keys;
-            }
-            return true;
-        };
-
-    public:
-        TLinkedData(int ADimension, int ADataSize) :
-            FDimension{ADimension},
-            FKeySize{static_cast<int>(ADimension*sizeof(int))},
-            FDataSize{ADataSize}{
-        }
-
-        ~TLinkedData() {
-            Clear();
-        }
-
-        int Count() const {
-            return static_cast<int>(data.size());
-        }
-
-        void Clear() {
-            for (auto &[k,v] : data) {
-                delete[] k;
-                delete[] v;
-            }
-            data.clear();
-        }
-
-        ValArray &AddItem(const KeyType *AKey, const ValType *AData) {
-#ifdef TLD_DYN_ARRAYS
-            KeyArray keys{ new KeyType[FDimension] };
-            ValArray vals{ new ValType[FDataSize / (int)sizeof(double)] };
-            data.emplace_back(std::make_pair(keys, vals));
-#else
-            data.push_back({});
-#endif
-            std::memcpy(data.back().first, AKey, FKeySize);
-            std::memcpy(data.back().second, AData, FDataSize);
-            return data.back().second;
-        }
-
-        void Sort(const int *AMap = nullptr) {
-            if(data.empty() || IsSorted()) return;
-            // FIXME: Should this consider wildcards? =0?
-            data.sort([&](const EntryType & p1, const EntryType & p2) {
-                for (int D{}; D < FDimension; D++) {
-                    if (p1.first[D] < p2.first[D]) return true;
-                    else if (p1.first[D] > p2.first[D]) return false;
-                }
-                return false;
-            });
-        }
-
-        typename TLDStorageType::iterator StartRead(const int *AMap = nullptr) {
-            if (!data.empty()) {
-                Sort(AMap);
-                return data.begin();
-            }
-            return data.end();
-        }
-
-        bool GetNextRecord(typename TLDStorageType::iterator &it, KeyType *AKey, ValType *Data) {
-            if(it == data.end()) return false;
-            const EntryType & item = *it;
-            std::memcpy(AKey, item.first, FKeySize);
-            std::memcpy(Data, item.second, FDataSize);
-            it++;
-            return true;
-        }
-
-        int MemoryUsed() const {
-            return (int)(data.size() * sizeof(EntryType));
-        }
-    };
-
 }
 

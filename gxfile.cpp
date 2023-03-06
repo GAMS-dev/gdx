@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <numeric>
+#include <cmath>
 
 #ifdef YAML
 #include "yaml.h"
@@ -64,11 +65,7 @@ namespace gxfile {
     static const std::string auditLine {"GDX Library      00.0.0 ffffffff May  4, 1970  (AUDIT) XYZ arch xybit/myOS"};
 #endif
 
-#ifdef CPP_HASHMAP
-    using UELTableImplChoice = TUELTable;
-#else
     using UELTableImplChoice = TUELTableLegacy;
-#endif
 
     NullBuffer null_buffer;
 
@@ -528,11 +525,7 @@ namespace gxfile {
             ReadPtr = SortList->StartRead(nullptr);
             TIndex AElements;
             TgdxValues AVals;
-#ifdef TLD_LEGACY
             while (ReadPtr && SortList->GetNextRecord(&*ReadPtr, AElements.data(), AVals.data()))
-#else
-            while(ReadPtr && SortList->GetNextRecord(*ReadPtr, AElements.data(), AVals.data()))
-#endif
                 DoWrite(AElements.data(), AVals.data());
             SortList = nullptr;
         }
@@ -1259,11 +1252,7 @@ namespace gxfile {
     }
 
     inline bool accessBitMap(const TSetBitMap &bmap, int index) {
-#ifdef USE_BBARRAY
         return bmap.GetBit(index);
-#else
-        return !(index < 0 || index >= (int)bmap.size()) && bmap[index];
-#endif
     }
 
     bool TGXFileObj::DoWrite(const int* AElements, const double* AVals)
@@ -1361,13 +1350,7 @@ namespace gxfile {
             if (AVals[GMS_VAL_LEVEL] != 0.0) CurSyPtr->SSetText = true;
             if (FCurrentDim == 1 && CurSyPtr->SSetBitMap) {
                 auto& ssbm = *CurSyPtr->SSetBitMap;
-#ifdef USE_BBARRAY
                 ssbm.SetBit(LastElem.front(), true);
-#else
-                if ((int)ssbm.size() <= LastElem.front())
-                    ssbm.resize(LastElem.front()+1, false);
-                ssbm[LastElem.front()] = true;
-#endif
             }
         }
         return true;
@@ -3125,11 +3108,7 @@ namespace gxfile {
         }
         if(fmode == fr_map_data) {
             DimFrst = 0;
-#ifdef TLD_LEGACY
             if (!ReadPtr || !SortList->GetNextRecord(&*ReadPtr, KeyInt, Values)) return false;
-#else
-            if (!ReadPtr || !SortList->GetNextRecord(*ReadPtr, KeyInt, Values)) return false;
-#endif
             // checking mapped values
             for(int D{}; D<FCurrentDim; D++) {
                 if(KeyInt[D] != PrevElem[D]) {
@@ -4406,292 +4385,6 @@ namespace gxfile {
             return local_gdxDataReadRawFastFilt_DP(Indx, Vals, local_Uptr.i);
         }
         return gdxDataReadRawFastFilt_DP(Indx, Vals, Uptr);
-    }
-
-    int TUELTable::size() const {
-        return static_cast<int>(nameToIndexNum.size());
-    }
-
-    int TUELTable::IndexOf(const char *s) {
-        const auto it = nameToIndexNum.find(s);
-        return it == nameToIndexNum.end() ? -1 : it->second.index;
-    }
-
-    int TUELTable::AddObject(const char *id, size_t idlen, int mapping) {
-        const auto &[it, wasNew] = nameToIndexNum.try_emplace(id, IndexNumPair{mapping});
-        int ix;
-        if (wasNew) {
-            it->second.index = ix = static_cast<int>(nameToIndexNum.size());
-#ifdef STABLE_REFS
-            insertOrder.push_back(it);
-#else
-            insertOrder.push_back(id);
-#endif
-        }
-        else ix = it->second.index;
-        return ix;
-    }
-
-    int TUELTable::StoreObject(const char *id, size_t idlen, int mapping) {
-        int ix{static_cast<int>(nameToIndexNum.size())+1};
-#ifdef STABLE_REFS
-        auto [it,wasNew] = nameToIndexNum.emplace(id, IndexNumPair{ ix, mapping });
-        assert(wasNew);
-        insertOrder.push_back(it);
-#else
-        nameToIndexNum[id] = IndexNumPair{ix, mapping};
-        insertOrder.push_back(id);
-#endif
-        return ix;
-    }
-
-    bool TUELTable::empty() const {
-        return !size();
-    }
-
-    const char *TUELTable::operator[](int index) const {
-#ifdef STABLE_REFS
-        return insertOrder[index-1]->first.c_str();
-#else
-        return insertOrder[index-1].c_str();
-#endif
-    }
-
-    int TUELTable::GetUserMap(int i) {
-#ifdef STABLE_REFS
-        return insertOrder[i-1]->second.num;
-#else
-        return nameToIndexNum[insertOrder[i-1]].num;
-#endif
-    }
-
-    void TUELTable::SetUserMap(int EN, int N) {
-#ifdef STABLE_REFS
-        insertOrder[EN-1]->second.num = N;
-#else
-        nameToIndexNum[insertOrder[EN-1]].num = N;
-#endif
-    }
-
-    int TUELTable::NewUsrUel(int EN) {
-        int res = GetUserMap(EN);
-        if (res < 0) {
-            res = UsrUel2Ent->GetHighestIndex() + 1;
-            SetUserMap(EN, res);
-            UsrUel2Ent->SetMapping(res, EN);
-        }
-        ResetMapToUserStatus();
-        return res;
-    }
-
-    int TUELTable::AddUsrNew(const char *s, size_t slen) {
-        int EN{ AddObject(s, slen, -1) };
-#ifdef STABLE_REFS
-        int res{ insertOrder[EN-1]->second.num };
-#else
-        int res{ nameToIndexNum[insertOrder[EN-1]].num };
-#endif
-        if (res < 0) {
-            res = UsrUel2Ent->GetHighestIndex() + 1;
-            SetUserMap(EN, res);
-            UsrUel2Ent->SetMapping(res, EN);
-        }
-        ResetMapToUserStatus();
-        return res;
-    }
-
-    // FIXME: How does this affect the ordering / sort list?
-    // Should renaming change the index?
-    void TUELTable::RenameEntry(int N, const char *s) {
-#ifdef STABLE_REFS
-        auto old = insertOrder[N-1];
-        auto oldPair = old->second;
-        nameToIndexNum.erase(old->first);
-        auto [it, wasNew] = nameToIndexNum.emplace(s, oldPair);
-        assert(wasNew);
-        insertOrder[N - 1] = it;
-#else
-        auto oldPair = nameToIndexNum[insertOrder[N-1]];
-        nameToIndexNum.erase(insertOrder[N-1]);
-        nameToIndexNum[s] = oldPair;
-        insertOrder[N - 1] = s;
-#endif
-    }
-
-    int TUELTable::GetMaxUELLength() const {
-        int maxUelLength {};
-        for(const auto &[name,ixNum] : nameToIndexNum)
-            maxUelLength = std::max<int>(static_cast<int>(name.length()), maxUelLength);
-        return maxUelLength;
-    }
-
-    int TUELTable::AddUsrIndxNew(const char *s, size_t slen, int UelNr) {
-        int EN {AddObject(s, slen, -1)};
-#ifdef STABLE_REFS
-        auto& itsNum = insertOrder[EN - 1]->second.num;
-#else
-        auto& itsNum = nameToIndexNum[insertOrder[EN-1]].num;
-#endif
-        int res {itsNum};
-        if (res < 0) {
-            itsNum = res = UelNr;
-            UsrUel2Ent->SetMapping(res, EN);
-        }
-        else if (res != UelNr)
-            res = -1;
-        ResetMapToUserStatus();
-        return res;
-    }
-
-    TUELTable::TUELTable() {
-#ifdef GOOGLE_HASHMAP
-        nameToIndexNum.set_empty_key("");
-#endif
-        UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
-    }
-
-    // FIXME: Not very accurate
-    int TUELTable::MemoryUsed() const {
-        return static_cast<int>(size() * sizeof(IndexNumPair));
-    }
-
-    void TUELTable::SaveToStream(TXStreamDelphi &S) {
-        S.WriteInteger(size());
-        for(int N{1}; N<=size(); N++)
-            S.WriteString((*this)[N]);
-    }
-
-    void TUELTable::LoadFromStream(TXStreamDelphi &S) {
-        Clear();
-        int Cnt{S.ReadInteger()};
-        for(int N{}; N<Cnt; N++) {
-            auto s{S.ReadString()};
-            StoreObject(s.c_str(), s.length(), 0);
-        }
-        if(UsrUel2Ent) UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
-        for(auto &[name,indexNum] : nameToIndexNum)
-            indexNum.num = -1;
-        ResetMapToUserStatus();
-    }
-
-    void TUELTable::Clear() {
-        nameToIndexNum.clear();
-        insertOrder.clear();
-    }
-
-    int TAcronymList::FindEntry(int Map) const {
-        const auto it = std::find_if(begin(), end(), [&](const auto &item) {
-            return item.AcrMap == Map;
-        });
-        return it == end() ? -1 : static_cast<int>(std::distance(begin(), it));
-    }
-
-    int TAcronymList::AddEntry(const std::string &Name, const std::string &Text, int Map) {
-        TAcronym acr {Name, Text, Map};
-        emplace_back(acr);
-        return static_cast<int>(size())-1;
-    }
-
-    int TAcronymList::FindName(const char *Name) const {
-        const auto it = std::find_if(begin(), end(), [&](const auto &item) {
-            return utils::sameTextPChar(item.AcrName.c_str(), Name);
-        });
-        return it == end() ? -1 : static_cast<int>(std::distance(begin(), it));
-    }
-
-    void TAcronymList::CheckEntry(int Map) {
-        if(FindEntry(Map) < 0)
-            AddEntry("", "", Map);
-    }
-
-    void TAcronymList::SaveToStream(TXStreamDelphi &S) const {
-        S.WriteInteger((int)size());
-        for(const auto &acr : *this)
-            acr.SaveToStream(S);
-    }
-
-    void TAcronymList::LoadFromStream(TXStreamDelphi &S) {
-        int cnt{S.ReadInteger()};
-        clear();
-        reserve(cnt);
-        for(int i{}; i<cnt; i++)
-            emplace_back(TAcronym{S});
-    }
-
-    int TAcronymList::MemoryUsed() const {
-        return (int)(sizeof(TAcronym) * this->size());
-    }
-
-    TDFilter *TFilterList::FindFilter(int Nr) {
-        const auto it = std::find_if(begin(), end(), [&Nr](const auto *f) { return f->FiltNumber == Nr; });
-        return it == end() ? nullptr : *it;
-    }
-
-    void TFilterList::Clear() {
-        for (TDFilter* f : *this)
-            delete f;
-        std::vector<TDFilter*>::clear();
-    }
-
-    void TFilterList::AddFilter(TDFilter* F) {
-        for (int N{}; N < (int)size(); N++) {
-            if ((*this)[N]->FiltNumber == F->FiltNumber) {
-                delete (*this)[N];
-                this->erase(this->begin() + N);
-                break;
-            }
-        }
-        this->push_back(F);
-    }
-
-    TFilterList::~TFilterList() {
-        Clear();
-    }
-
-    int TFilterList::MemoryUsed() const {
-        return (int)(sizeof(TDFilter) * size());
-    }
-
-    int TIntegerMapping::GetHighestIndex() const {
-        return FHighestIndex;
-    }
-
-    void TIntegerMapping::SetMapping(int F, int T) {
-        if(F >= (int)Map.size())
-            growMapping(F);
-        Map[F] = T;
-        FHighestIndex = std::max<int>(FHighestIndex, F);
-    }
-
-    int TIntegerMapping::GetMapping(int F) const {
-        return F >= 0 && F < (int)Map.size() ? Map[F] : -1;
-    }
-
-    int TIntegerMapping::MemoryUsed() const {
-        return static_cast<int>(Map.size() * sizeof(int));
-    }
-
-    bool TIntegerMapping::empty() const {
-        return Map.empty();
-    }
-
-    void TIntegerMapping::reserve(int n) {
-        Map.reserve(n);
-    }
-
-    void TIntegerMapping::growMapping(int F) {
-#ifndef NDEBUG
-        bool at_max_capacity {FMAXCAPACITY <= (int64_t)Map.size()};
-        assert(!at_max_capacity && "Already at maximum capacity: cannot grow TIntegerMapping");
-#endif
-        int64_t currCap, delta{};
-        for(currCap = (int64_t)Map.size(); F >= currCap;
-            currCap += delta, currCap = std::min<int64_t>(FMAXCAPACITY, currCap)) {
-            if(currCap >= 1024 * 1024) delta = currCap / 2;
-            else if(currCap <= 0) delta = 1024;
-            else delta = currCap;
-        }
-        Map.resize(currCap, -1);
     }
 
     int TUELTableLegacy::size() const {

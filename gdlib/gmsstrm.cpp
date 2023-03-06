@@ -9,10 +9,12 @@
 #include <cassert>
 #include <sstream>
 #include <cstring>
+#include <limits>
 
 #include <string>
 #include <fstream>
 #include <utility>
+#include <cmath>
 
 // only supported by MSVC so far :(
 //#include <format>
@@ -457,7 +459,7 @@ namespace gdlib::gmsstrm {
         gzclose(pgz);
     }
 
-    global::delphitypes::LongWord TGZipInputStream::Read(void *buffer, unsigned int Count) {
+    unsigned TGZipInputStream::Read(void *buffer, unsigned int Count) {
         std::function<bool()> FillBuffer = [&]() {
             NrLoaded = gzread(pgz, Buf.data(), (int)this->Buf.size());
             NrRead = 0;
@@ -1089,7 +1091,7 @@ namespace gdlib::gmsstrm {
         std::array<uint8_t, 5> W{};
         W[0] = B & 15;
         bool Neg = B >= 128;
-        global::delphitypes::Bounded<int, 0, 6> C {(B >> 4) & 7};
+        int C {(B >> 4) & 7};
         if(C > 0) Read(&W[1], C);
         int res{};
         while(C >= 1) {

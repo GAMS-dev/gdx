@@ -8,9 +8,9 @@
 #include <vector>
 #include <array>
 #include <optional>
+#include <cstring>
 
 #include "../rtl/p3utils.h"
-#include "../global/delphitypes.h"
 
 #include "../zlib/zlib.h"
 
@@ -286,13 +286,13 @@ namespace gdlib::gmsstrm {
     class TGZipInputStream {
         gzFile pgz;
         std::vector<uint8_t> Buf;
-        global::delphitypes::LongWord  NrLoaded, NrRead;
+        unsigned NrLoaded, NrRead;
 
     public:
         TGZipInputStream(const std::string& fn, std::string& ErrMsg);
         virtual ~TGZipInputStream();
 
-        global::delphitypes::LongWord Read(void *buffer, unsigned int Count);
+        unsigned Read(void *buffer, unsigned int Count);
 
         void ReadLine(std::vector<uint8_t> &buffer, int MaxInp, char &LastChar);
     };

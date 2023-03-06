@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../global/delphitypes.h"
 #include "../gdlib/gmsobj.h"
 
 namespace gdlib::gmsheapnew {
@@ -11,7 +10,7 @@ namespace gdlib::gmsheapnew {
                 HEAPGRANULARITY = 8,
                 LastSlot = 256 / HEAPGRANULARITY;
 
-    using THeapSlotNr = global::delphitypes::Bounded<int, 1, LastSlot>;
+    using THeapSlotNr = int; //global::delphitypes::Bounded<int, 1, LastSlot>;
 
     struct TSmallBlock {
         TSmallBlock *NextSmallBlock;

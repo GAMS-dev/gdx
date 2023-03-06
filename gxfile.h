@@ -5,9 +5,8 @@
 
 // Quick settings:
 // P3_COLLECTIONS: Use paul objects as much as possible and gmsheapnew for TLinkedData, most verbatim port
-// CXX_COLLECTIONS: Use C++ standard library as much as possible (including MIT-license fast open source hashmap implementation)
 // MIXED_COLLECTIONS (default): Mix-and-match custom and builtin data structures for best performance
-#if !defined(P3_COLLECTIONS) && !defined(CXX_COLLECTIONS) && !defined(MIX_COLLECTIONS)
+#if !defined(P3_COLLECTIONS) && !defined(MIX_COLLECTIONS)
 #define MIX_COLLECTIONS
 #endif
 
@@ -34,25 +33,7 @@
 
 //======================================================================================================================
 // Various switches for container/data structure implementation choices:
-// Either C++ standard library or GAMS custom (paul object)
-// For hashmaps: TXStrHash vs. C++ standard library and compatibles (open source hashmap libraries)
-// Some hashmaps have stable references (pointers don't invalidate on insertion/removal) but others have not
 //======================================================================================================================
-
-// Use TBooleanBitArray instead of std::vector<bool>
-#define USE_BBARRAY
-
-// TLinkedData implementation choice: Enable to use legacy implementation (with radix sort)
-#define TLD_LEGACY
-
-// TAcronymList based on paul object (TXList)
-#define TAL_LEGACY
-
-// TFilterList based on paul object (TXList)
-#define TFL_LEGACY
-
-// TIntegerMapping based on manually managed heap buffer instead of std::vector<int>
-#define TIM_LEGACY
 
 // Only if no other C++-hashmap is chosen, switch to TXStrHash implementation as close as possible to original P3 one
 #define TSH_LEGACY
@@ -63,39 +44,10 @@
 // Use verbatim port for TTblGamsData
 #define TBL_GMSDATA_LEGACY
 
-#if defined(P3_COLLECTIONS)
-#elif defined(CXX_COLLECTIONS)
-    #undef USE_BBARRAY
-    #undef TLD_LEGACY
-    #undef TAL_LEGACY
-    #undef TFL_LEGACY
-    #undef TIM_LEGACY
+#if defined(MIX_COLLECTIONS)
     #undef TSH_LEGACY
     #undef TXSPOOL_LEGACY
     #undef TBL_GMSDATA_LEGACY
-    #define ANKERL_HASHMAP
-#elif defined(MIX_COLLECTIONS)
-    #undef TSH_LEGACY
-    #undef TXSPOOL_LEGACY
-    #undef TBL_GMSDATA_LEGACY
-#endif
-
-// Hashmap choice:
-// Choose at max one of {GOOGLE,ANKERL,STD}_HASHMAP, if none is chosen custom gdlib/TXStrHash is used
-#if defined(GOOGLE_HASHMAP)
-#include "sparsehash/dense_hash_map"
-#elif defined(ANKERL_HASHMAP)
-#include "ankerl/unordered_dense.h"
-#endif
-
-#if defined(GOOGLE_HASHMAP) || defined(ANKERL_HASHMAP) || defined(STD_HASHMAP)
-#define CPP_HASHMAP
-#endif
-
-// std::unordered_map has stable references to nodes (iterators)
-// Ankerl has not for sure, for Google I am not entirely sure
-#if !defined(GOOGLE_HASHMAP) && !defined(ANKERL_HASHMAP)
-#define STABLE_REFS
 #endif
 
 //======================================================================================================================
@@ -121,15 +73,6 @@ namespace gxfile {
                 DOMC_EXPAND = -1, // indicator growing index pos
                 DOMC_STRICT = 0; // indicator mapped index pos
 
-template<typename K, typename V, typename H, typename E>
-#if defined(GOOGLE_HASHMAP)
-    using umaptype = google::dense_hash_map<K, V, H, E>;
-#elif defined(ANKERL_HASHMAP)
-    using umaptype = ankerl::unordered_dense::map<K, V, H, E>;
-#else
-    using umaptype = std::unordered_map<K, V, H, E>;
-#endif
-
     class NullBuffer : public std::streambuf {
     public:
         int overflow(int c) override { return c; }
@@ -140,14 +83,6 @@ template<typename K, typename V, typename H, typename E>
                         BADStr_PREFIX = "?Str__",
                         strGDXCOMPRESS = "GDXCOMPRESS",
                         strGDXCONVERT = "GDXCONVERT";
-
-    using PUELIndex = gdxinterface::TgdxUELIndex*;
-
-    struct strCompCaseInsensitive {
-        bool operator() (const std::string& lhs, const std::string& rhs) const {
-            return strcasecmp(lhs.c_str(), rhs.c_str()) < 0;
-        }
-    };
 
     // Uses std::vector of booleans internally
     struct TDFilterBoolVec {
@@ -204,13 +139,8 @@ template<typename K, typename V, typename H, typename E>
         }
     };
 
-#ifdef USE_BBARRAY
     using TDFilter = TDFilterLegacy;
     using TSetBitMap = gdlib::gmsobj::TBooleanBitArray;
-#else
-    using TDFilter = TDFilterBoolVec;
-    using TSetBitMap = std::vector<bool>;
-#endif
 
     enum TgdxDAction {
         dm_unmapped,
@@ -306,21 +236,6 @@ template<typename K, typename V, typename H, typename E>
     // FMAXCAPACITY = high(integer) + 1 is all we will ever need, and we will
     // never get a request to grow any larger.  The checks and code
     // in growMapping reflect this
-    class TIntegerMapping {
-        // FMAXCAPACITY == number of index positions required to store [0..high(integer)]
-        int64_t FMAXCAPACITY {std::numeric_limits<int>::max() + static_cast<int64_t>(1)};
-        int FHighestIndex{};
-        std::vector<int> Map{};
-        void growMapping(int F);
-    public:
-        int GetHighestIndex() const;
-        void SetMapping(int F, int T);
-        int GetMapping(int F) const;
-        int MemoryUsed() const;
-        bool empty() const;
-        void reserve(int n);
-    };
-
     class TIntegerMappingLegacy {
         int64_t FCapacity {}, FMapBytes {};
         int64_t FMAXCAPACITY {std::numeric_limits<int>::max() + static_cast<int64_t>(1)};
@@ -339,42 +254,9 @@ template<typename K, typename V, typename H, typename E>
         bool empty() const;
     };
 
-#ifndef TIM_LEGACY
-    using TIntegerMappingImpl = TIntegerMapping;
-#else
     using TIntegerMappingImpl = TIntegerMappingLegacy;
-#endif
 
     enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
-
-    struct caseInsensitiveHasher {
-        size_t operator()(const std::string& input) const {
-            int res{};
-            for(char c : input)
-                res = 211 * res + utils::toupper(c);
-            return res & 0x7fffffff;
-        }
-    };
-
-    struct caseInsensitiveStrEquality {
-        bool operator() (const std::string& s1, const std::string& s2) const {
-            return utils::sameText(s1, s2);
-        }
-    };
-
-#ifdef ANKERL_HASHMAP
-    using caseSensitiveHasher = ankerl::unordered_dense::hash<std::string>;
-#endif
-    using caseSensitiveStrEquality = std::equal_to<std::string>;
-
-    // FIXME: Does this really reflect what TUELTable in Delphi is doing?
-    struct IndexNumPair {
-        int index{}, num{};
-        explicit IndexNumPair(int _index, int _num) : index(_index), num(_num) {}
-        explicit IndexNumPair(int _num) : num{ _num } {}
-        IndexNumPair() : index{}, num{} {}
-    };
-    using utablemaptype = umaptype<std::string, IndexNumPair, caseInsensitiveHasher, caseInsensitiveStrEquality>;
 
     class IUELTable {
     protected:
@@ -400,34 +282,6 @@ template<typename K, typename V, typename H, typename E>
         virtual int MemoryUsed() const = 0;
         virtual void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) = 0;
         virtual void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S) = 0;
-    };
-
-    class TUELTable : public IUELTable {
-        utablemaptype nameToIndexNum{};
-#ifdef STABLE_REFS
-        std::vector<typename utablemaptype::iterator> insertOrder {};
-#else
-        std::vector<std::string> insertOrder {};
-#endif
-    public:
-        TUELTable();
-        void Clear();
-        int size() const override;
-        bool empty() const override;
-        int IndexOf(const char *s) override;
-        int AddObject(const char *id, size_t idlen, int mapping) override;
-        int StoreObject(const char *id, size_t idlen, int mapping) override;
-        const char *operator[](int index) const override;
-        int GetUserMap(int i) override;
-        void SetUserMap(int EN, int N) override;
-        int NewUsrUel(int EN) override;
-        int AddUsrNew(const char *s, size_t slen) override;
-        int AddUsrIndxNew(const char *s, size_t slen, int UelNr) override;
-        void RenameEntry(int N, const char *s) override;
-        int GetMaxUELLength() const override;
-        int MemoryUsed() const override;
-        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
-        void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
     };
 
     template<typename T>
@@ -481,17 +335,6 @@ template<typename K, typename V, typename H, typename E>
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) const;
     };
 
-    class TAcronymList : public std::vector<TAcronym> {
-    public:
-        int FindEntry(int Map) const;
-        int FindName(const char *Name) const;
-        int AddEntry(const std::string &Name, const std::string &Text, int Map);
-        void CheckEntry(int Map);
-        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) const;
-        void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S);
-        int MemoryUsed() const;
-    };
-
     class TAcronymListLegacy {
         gdlib::gmsobj::TXList<TAcronym> FList;
     public:
@@ -508,15 +351,6 @@ template<typename K, typename V, typename H, typename E>
         TAcronym &operator[](int Index);
     };
 
-    class TFilterList : public std::vector<TDFilter *> {
-    public:
-        virtual ~TFilterList();
-        void Clear();
-        TDFilter *FindFilter(int Nr);
-        void AddFilter(TDFilter *F);
-        int MemoryUsed() const;
-    };
-
     class TFilterListLegacy {
         gdlib::gmsobj::TXList<TDFilter> FList;
     public:
@@ -528,160 +362,22 @@ template<typename K, typename V, typename H, typename E>
         size_t MemoryUsed() const;
     };
 
-#ifdef TAL_LEGACY
     using TAcronymListImpl = TAcronymListLegacy;
-#else
-    using TAcronymListImpl = TAcronymList;
-#endif
-
-#ifndef TFL_LEGACY
-    using TFilterListImpl = TFilterList;
-#else
     using TFilterListImpl = TFilterListLegacy;
-#endif
 
     using TIntlValueMapDbl = std::array<double, vm_count>;
     using TIntlValueMapI64 = std::array<int64_t, vm_count>;
 
-#ifndef TLD_LEGACY
-    #ifndef TLD_DYN_ARRAYS
-        using LinkedDataType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>;
-        using LinkedDataIteratorType = gdlib::datastorage::TLinkedData<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>::TLDStorageType::iterator;
-    #else
-        using LinkedDataType = gdlib::datastorage::TLinkedData<int, double>;
-        using LinkedDataIteratorType = gdlib::datastorage::TLinkedData<int, double>::TLDStorageType::iterator;
-    #endif
-#else
-    #ifndef TLD_DYN_ARRAYS
-        using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX>;
-        using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, GLOBAL_MAX_INDEX_DIM, double, GMS_VAL_MAX> *;
-    #else
-        using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, double>;
-        using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, double> *;
-    #endif
-#endif
+    using LinkedDataType = gdlib::datastorage::TLinkedDataLegacy<int, double>;
+    using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, double> *;
 
-    template<typename T>
-    struct PayloadIndex {
-        int i;
-        T payload;
-    };
-
-    template<typename T, typename Hasher=caseInsensitiveHasher, typename Equality=caseInsensitiveStrEquality>
-    class WrapCxxUnorderedMap {
-        using strToT = umaptype<std::string, PayloadIndex<T>, Hasher, Equality>;
-#ifdef STABLE_REFS
-        std::vector<typename strToT::iterator> insertOrder {};
-#else
-        std::vector<std::string> insertOrder {};
-#endif
-        strToT dict {};
-    public:
-        bool OneBased{};
-
-        void reserve(int n) {
-            dict.reserve(n);
-        }
-
-#ifdef GOOGLE_HASHMAP
-        WrapCxxUnorderedMap() {
-            // SetTextList needs empty string ("") as key unfortunately!
-            dict.set_empty_key("__EMPTY_KEY__");
-        }
-#endif
-
-        int AddObject(const char *key, size_t keylen, T val) {
-            auto [it, wasNew] = dict.try_emplace(key, PayloadIndex<T> {-1, val});
-            auto &elem = (*it).second;
-            if(wasNew) {
-#ifdef STABLE_REFS
-                insertOrder.push_back(it);
-#else
-                insertOrder.emplace_back(key);
-#endif
-                elem.i = static_cast<int>(insertOrder.size()) - (OneBased ? 0 : 1);
-            }
-            return elem.i;
-        }
-
-        int Add(const char *key, size_t keylen) {
-            return AddObject(key, keylen, 0);
-        }
-
-        int StoreObject(const char *keyPchar, size_t keylen, T val) {
-            int ix = static_cast<int>(insertOrder.size()) + (OneBased ? 1 : 0);
-            std::string key{keyPchar};
-#ifdef STABLE_REFS
-            auto [it, wasNew] = dict.emplace(key, PayloadIndex<T> {ix, val});
-            assert(wasNew);
-            insertOrder.push_back(it);
-#else
-            dict[key] = PayloadIndex<T> {ix, val};
-            insertOrder.push_back(key);
-#endif
-            return ix;
-        }
-
-        const char *GetString(int ix) const {
-#ifdef STABLE_REFS
-            return (*insertOrder[ix - (OneBased ? 1 : 0)]).first.c_str();
-#else
-            return insertOrder[ix - (OneBased ? 1 : 0)].c_str();
-#endif
-        }
-
-        const char *GetName(int ix) const {
-            return GetString(ix);
-        }
-
-        int size() const {  return static_cast<int>(dict.size()); }
-        int Count() const { return static_cast<int>(dict.size()); }
-        int GetCapacity() const { return static_cast<int>(dict.size()); }
-
-        T *GetObject(int ix) {
-#ifdef STABLE_REFS
-            return &((*insertOrder[ix - (OneBased ? 1 : 0)]).second.payload);
-#else
-            return &(dict[insertOrder[ix - (OneBased ? 1 : 0)]].payload);
-#endif
-        }
-
-        T* operator[](int N) {
-            return GetObject(N);
-        }
-
-        int IndexOf(const char *s) const {
-            auto it = dict.find(s);
-            return it == dict.end() ? -1 : (*it).second.i;
-        }
-
-        bool empty() const { return !size(); }
-
-        void SetCapacity(int n) {
-            dict.reserve(n);
-            insertOrder.reserve(n);
-        }
-
-        int64_t MemoryUsed() const {
-            // FIXME: This is incorrect and below the actual memory required!
-            return dict.size()*(sizeof(PayloadIndex<T>))+insertOrder.size();
-        }
-    };
-
-#ifdef CPP_HASHMAP
-    using TSetTextList = WrapCxxUnorderedMap<int, caseSensitiveHasher, caseSensitiveStrEquality>;
-    using TNameList = WrapCxxUnorderedMap<PgdxSymbRecord>;
-#else
-    #if defined(SLOW_SET_TEXT_LIST)
-        using TSetTextList = WrapCxxUnorderedMap<uint8_t, std::hash<std::string>, caseSensitiveStrEquality>;
-    #elif defined(TXSPOOL_LEGACY)
+    #if defined(TXSPOOL_LEGACY)
         using TSetTextList = gdlib::gmsobj::TXStrPool<uint8_t>;
     #else
         using TSetTextList = TXCSStrHashListImpl<uint8_t>;
     #endif
 
     using TNameList = TXStrHashListImpl<PgdxSymbRecord>;
-#endif
 
 #ifdef TBL_GMSDATA_LEGACY
     template<typename T>

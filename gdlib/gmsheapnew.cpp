@@ -517,7 +517,7 @@ namespace gdlib::gmsheapnew {
 
     int64_t THeapMgr::GetFreeSlotSpace() {
         int64_t res{}, cntGet, cntFree, cntAvail;
-        for(THeapSlotNr Slot{THeapSlotNr::getLowerBound()}; Slot<=THeapSlotNr::getUpperBound(); ++Slot) {
+        for(THeapSlotNr Slot{1}; Slot<=LastSlot; ++Slot) {
             prvGetSlotCnts(Slot, cntGet, cntFree, cntAvail);
             int64_t sizeFree {cntAvail * Slot * HEAPGRANULARITY };
             res += sizeFree;
