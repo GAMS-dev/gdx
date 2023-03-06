@@ -559,7 +559,7 @@ namespace gxfile {
     //   gdxOpenRead, gdxOpenWrite
     int TGXFileObj::gdxClose() {
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all)
-            std::cout << "gdxClose("s << FFile->GetFileName() << ")\n"s;
+            std::cout << "gdxClose("s << (FFile ? FFile->GetFileName() : ""s) << ")\n"s;
 
         std::string fnConv;
         if(utils::in(fmode, fw_raw_data, fw_map_data, fw_str_data)) // unfinished write
