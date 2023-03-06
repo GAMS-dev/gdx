@@ -21,28 +21,11 @@
 namespace utils {
 
     inline char toupper(char c) {
-        return c >= 'a' && c <= 'z' ? c ^ 32 : c;
+        return c >= 'a' && c <= 'z' ? static_cast<char>(c ^ 32) : c;
     }
 
     inline char tolower(char c) {
-        return c >= 'A' && c <= 'Z' ? c ^ 32 : c;
-    }
-
-    template<class T>
-    std::set<T> unionOp(const std::set<T>& a, const std::set<T>& b) {
-        std::set<T> res = a;
-        res.insert(b.begin(), b.end());
-        return res;
-    }
-
-    inline void insertAllChars(std::set<char>& charset, const std::string_view chars) {
-        charset.insert(chars.begin(), chars.end());
-    }
-
-    inline void charRangeInsert(std::set<char>& charset, char lbIncl, char ubIncl) {
-        //for (char c : std::ranges::iota_view{ lbIncl, ubIncl + 1 })
-        for (char c = lbIncl; c <= ubIncl; c++)
-            charset.insert(c);
+        return c >= 'A' && c <= 'Z' ? static_cast<char>(c ^ 32) : c;
     }
 
     template<class T>
@@ -88,45 +71,8 @@ namespace utils {
     }
 
     template<class T>
-    std::set<T> intersectionOp(const std::set<T>& a, const std::set<T>& b) {
-        std::set<T> res;
-        for (const T& elem : a)
-            if (utils::in(elem, b))
-                res.insert(elem);
-        return res;
-    }
-
-    inline void charRangeInsertIntersecting(std::set<char>& charset, char lbIncl, char ubIncl, const std::set<char>& other) {
-        //for (char c : std::ranges::iota_view{ lbIncl, ubIncl + 1 })
-        for (char c = lbIncl; c <= ubIncl; c++)
-            if (utils::in<char>(c, other))
-                charset.insert(c);
-    }
-
-    template<class T>
     bool any(std::function<bool(const T&)> predicate, const std::initializer_list<T>& elems) {
         return std::any_of(std::cbegin(elems), std::cend(elems), predicate);
-    }
-
-    bool anychar(const std::function<bool(char)>& predicate, std::string_view s);
-
-    template<typename T, int count, const int notFound = -1>
-    int indexOf(const std::array<T, count> &arr, const T& elem) {
-        for (int i = 0; i < count; i++)
-            if (arr[i] == elem)
-                return i;
-        return notFound;
-    }
-
-    template<typename T, const int notFound = -1>
-    int indexOf(const std::vector<T> &elems, const T& elem) {
-        int i{};
-        for (const T& other : elems) {
-            if (other == elem)
-                return i;
-            i++;
-        }
-        return notFound;
     }
 
     template<typename T, const int notFound = -1>
@@ -135,23 +81,6 @@ namespace utils {
         for (const T& other : elems) {
             if (other == elem)
                 return i;
-            i++;
-        }
-        return notFound;
-    }
-
-    template<typename T, int count, const int notFound = -1>
-    int indexOf(const std::array<T, count> &arr, std::function<bool(const T&)> predicate) {
-        for (int i{}; i < count; i++)
-            if (predicate(arr[i])) return i;
-        return notFound;
-    }
-
-    template<typename T, const int notFound = -1>
-    int indexOf(const std::vector<T>& elems, std::function<bool(const T&)> predicate) {
-        int i{};
-        for (const T & elem : elems) {
-            if (predicate(elem)) return i;
             i++;
         }
         return notFound;
@@ -167,73 +96,7 @@ namespace utils {
         return notFound;
     }
 
-    template<typename A, typename B, const int notFound = -1>
-    int pairIndexOfFirst(const std::vector<std::pair<A, B>>& elems, A& a) {
-        int i{};
-        for (const auto & [aa,b] : elems) {
-            if (aa == a) return i;
-            i++;
-        }
-        return notFound;
-    }
-
-    template<typename T>
-    inline auto nth(const std::list<T> & elems, int n) {
-        return *(std::next(elems.begin(), n));
-    }
-
-    template<typename T>
-    inline auto &nthRef(std::list<T> & elems, int n) {
-        return *(std::next(elems.begin(), n));
-    }
-
-    template<typename T>
-    inline auto nth(const std::initializer_list<T> & elems, int n) {
-        return *(std::next(elems.begin(), n));
-    }
-
-    template<typename T>
-    void append(std::list<T>& l, const std::initializer_list<T>& elems) {
-        std::copy(elems.begin(), elems.end(), std::back_inserter(l));
-    }
-
-    template<typename T>
-    T min(const T a, const T b) {
-        return a < b ? a : b;
-    }
-
-    void permutAssign(std::string& lhs, const std::string& rhs,
-        const std::vector<int> &writeIndices, const std::vector<int> &readIndices);
-
-    template<class T>
-    void enforceNotInSet(std::set<T>& s, const std::initializer_list<T> forbiddenElements) {
-        for (const T& elem : forbiddenElements) {
-            const auto it = s.find(elem);
-            if (it != s.end())
-                s.erase(it);
-        }
-    }
-
-    inline std::set<char> multiCharSetRanges(std::initializer_list<std::pair<char, char>> lbUbInclCharPairs) {
-        std::set<char> res;
-        for(const auto &[lb,ub] : lbUbInclCharPairs) {
-            charRangeInsert(res, lb, ub);
-        }
-        return res;
-    }
-
-    template<const char inflateChar = ' '>
-    std::string strInflateWidth(int num, int targetStrLen) {
-        const auto s = std::to_string(num);
-        const auto l = s.length();
-        if (l >= (size_t)targetStrLen) return s;
-        return std::string(targetStrLen - l, inflateChar) + s;
-    }
-
-    void removeTrailingCarriageReturnOrLineFeed(std::string &s);
-
     std::string uppercase(std::string_view s);
-    std::string lowercase(std::string_view s);
 
     bool sameTextInvariant(std::string_view a, std::string_view b);
 
@@ -241,9 +104,6 @@ namespace utils {
     inline bool sameText(std::string_view a, std::string_view b) {
         return caseInvariant ? sameTextInvariant(a, b) : a == b;
     }
-
-    bool sameTextAsAny(std::string_view a, const std::initializer_list<std::string_view> &bs);
-    bool sameTextPrefix(std::string_view s, const std::string_view prefix);
 
     // Port of PStr(U)Equal
     template<const bool caseInvariant = true>
@@ -257,177 +117,29 @@ namespace utils {
 #endif
     }
 
-    std::string getLineWithSep(std::fstream &fs);
-
-    std::string trim(const std::string& s);
-    std::string trimRight(const std::string &s);
-    void trimRight(const std::string& s, std::string& storage);
+    std::string_view trim(std::string_view s);
     const char *trimRight(const char *s, char *storage, int &slen);
-    std::string trimZeroesRight(const std::string& s, char DecimalSep = '.');
-
-    bool hasCharLt(std::string_view s, int n);
-
-    double round(double n, int ndigits);
-
-	void replaceChar(char a, char b, std::string &s);
 
     std::vector<size_t> substrPositions(std::string_view s, std::string_view substr);
 	std::string replaceSubstrs(std::string_view s, std::string_view substr, std::string_view replacement);
 
-    std::string blanks(int n);
-    std::string zeros(int n);
-
-    int lastOccurence(std::string_view s, char c);
-
-    // This is a frequent pattern in the CMEX source: temporarily add some elements to a set and remove them afterwords
-    // Enclose an object of this type in its own scope such that the object lifetime inserts/removes where appropriate
-    template<typename T>
-    class TempInsert {
-            std::set<T> &set;
-            const std::vector<T> elements;
-        public:
-            TempInsert(std::set<T> &_set, const std::vector<T> &_elements) : set(_set), elements(_elements) {
-                set.insert(elements.begin(), elements.end());
-            }
-
-            ~TempInsert() {
-                for(const auto &elem : elements)
-                    set.erase(elem);
-            }
-    };
-
-    // Mimick val function of System unit in Delphi
-    void val(const std::string &s, double &num, int &code);
-    void val(const std::string &s, int &num, int &code);
-    double parseNumber(const std::string& s);
-
-    void sleep(int milliseconds);
-
-    int strLenNoWhitespace(std::string_view s);
-
-    char& getCharAtIndexOrAppend(std::string& s, int ix);
-
     bool strContains(std::string_view s, char c);
-
-    bool strContains(std::string_view s, const std::initializer_list<char>& cs);
-
-    template<typename T>
-    int genericCount(T start, std::function<T(T)> next, std::function<bool(T)> predicate) {
-        int acc{};
-        for(T it = start; it; it = next(it)) if(predicate(it)) acc++;
-        return acc;
-    }
 
     bool excl_or(bool a, bool b);
 
-    template<typename T>
-    std::vector<T> constructVec(int size, std::function<T(int)> elemForIndex) {
-        std::vector<T> elems(size);
-        for (int i{}; i < size; i++) {
-            elems[i] = elemForIndex(i);
-        }
-        return elems;
-    }
-
     std::string constructStr(int size, const std::function<char(int)> &charForIndex);
 
-    int posOfSubstr(std::string_view sub, std::string_view s);
-
-    std::list<std::string> split(std::string_view s, char sep = ' ');
-
-    std::list<std::string> splitWithQuotedItems(std::string_view s);
-
-    std::string slurp(const std::string& fn);
-    void spit(const std::string& fn, const std::string& contents);
-
-    void assertOrMsg(bool condition, const std::string& msg);
-    
     std::string_view substr(std::string_view s, int offset, int len);
 
-    std::string join(char sep, const std::initializer_list<std::string> &parts);
-
-    bool ends_with(const std::string &s, const std::string &suffix);
-
-    bool starts_with(const std::string &s, const std::string &prefix);
+    bool starts_with(std::string_view s, std::string_view prefix);
 
     std::string quoteWhitespace(const std::string &s, char quotechar = '\'');
-
-    std::string quoteWhitespaceDir(const std::string &s, char sep, char quotechar = '\"');
-
-    bool hasNonBlank(std::string_view s);
-
-    std::string doubleToString(double v, int width, int precision);
-
-    class StringBuffer {
-        std::string s;
-        int bufferSize;
-    public:
-        explicit StringBuffer(int size = BUFSIZ);
-        char *getPtr();
-        std::string *getStr();
-        int getBufferSize() const;
-    };
-
-    template<typename A, typename B>
-    std::optional<A> keyForValue(const std::map<A, B> &mapping, const B& value) {
-        for (const auto& [k, v] : mapping) {
-            if (v == value) return k;
-        }
-        return std::nullopt;
-    }
-
-    bool strToBool(const std::string &s);
-
-    // TODO: This should be more general and work with any sequential collection
-    template<typename T, const int size>
-    void assignRange(std::array<T, size> &arr, int lbIncl, int ubIncl, T value) {
-        std::fill_n(arr.begin() + lbIncl, ubIncl - lbIncl + 1, value);
-    }
-
-    struct BinaryDiffMismatch {
-        BinaryDiffMismatch(uint64_t offset, uint8_t lhs, uint8_t rhs);
-
-        uint64_t offset;
-        uint8_t lhs, rhs;
-    };
-
-    std::optional<std::list<BinaryDiffMismatch>> binaryFileDiff(const std::string& filename1, const std::string& filename2, int countLimit = -1);
 
     template<class T, const int size>
     std::array<T, size> arrayWithValue(T v) {
         std::array<T, size> res;
         res.fill(v);
         return res;
-    }
-
-    std::string asdelphifmt(double v, int precision = 8);
-
-    // Do not use this in inner-loop performance critical code!
-    template<typename T, const int card>
-    std::array<T, card> asArray(const T* ptr) {
-        std::array<T, card> a{};
-        for (int i = 0; i < card; i++)
-            a[i] = ptr[i];
-        return a;
-    }
-
-    template<typename T, const int card>
-    std::array<T, card> asArrayN(const T* ptr, int n) {
-        std::array<T, card> a{};
-        for (int i = 0; i < std::min<int>(n, card); i++)
-            a[i] = ptr[i];
-        return a;
-    }
-
-    void stocp(const std::string &s, char *cp);
-
-    template<typename A, typename B>
-    A reduce(const std::vector<B> &elems, A initial, const std::function<A(A,B)> combine) {
-        A acc {initial};
-        for(const auto &elem : elems) {
-            acc = combine(acc, elem);
-        }
-        return acc;
     }
 
     int strCompare(std::string_view S1, std::string_view S2, bool caseInsensitive = true);
@@ -457,6 +169,4 @@ namespace utils {
             buf[i] = s[i];
         buf[i == outBufSize ? i - 1 : i] = '\0'; // truncate when exceeding
     }
-
-    int64_t queryPeakRSS();
 }

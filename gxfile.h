@@ -97,11 +97,11 @@ namespace gxfile {
 
         ~TDFilterBoolVec() = default;
 
-        int64_t MemoryUsed() const {
+        [[nodiscard]] int64_t MemoryUsed() const {
             return static_cast<int64_t>(FiltMap.capacity());
         }
 
-        bool InFilter(int V) const {
+        [[nodiscard]] bool InFilter(int V) const {
             return V >= 0 && V <= FiltMaxUel && V < (int)FiltMap.size() && FiltMap[V];
         }
 
@@ -126,11 +126,11 @@ namespace gxfile {
 
         ~TDFilterLegacy() = default;
 
-        int MemoryUsed() const {
+        [[nodiscard]] int MemoryUsed() const {
             return FiltMap.MemoryUsed();
         }
 
-        bool InFilter(int V) const {
+        [[nodiscard]] bool InFilter(int V) const {
             return V >= 0 && V <= FiltMaxUel && FiltMap.GetBit(V);
         }
 
@@ -219,8 +219,8 @@ namespace gxfile {
         TgxModeSet(const std::initializer_list<TgxFileMode> &modes);
         explicit TgxModeSet(TgxFileMode mode);
         ~TgxModeSet() override = default;
-        bool contains(const TgxFileMode& mode) const override;
-        bool empty() const;
+        [[nodiscard]] bool contains(const TgxFileMode& mode) const override;
+        [[nodiscard]] bool empty() const;
     };
 
     const TgxModeSet    AnyWriteMode {fw_init,fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data,fw_map_data,fw_str_data},
@@ -246,12 +246,12 @@ namespace gxfile {
     public:
         TIntegerMappingLegacy() {}
         ~TIntegerMappingLegacy();
-        int MemoryUsed() const;
-        int GetHighestIndex() const;
-        int GetMapping(int F) const;
+        [[nodiscard]] int MemoryUsed() const;
+        [[nodiscard]] int GetHighestIndex() const;
+        [[nodiscard]] int GetMapping(int F) const;
         void SetMapping(int F, int T);
-        int size() const;
-        bool empty() const;
+        [[nodiscard]] int size() const;
+        [[nodiscard]] bool empty() const;
     };
 
     using TIntegerMappingImpl = TIntegerMappingLegacy;
@@ -264,8 +264,8 @@ namespace gxfile {
     public:
         std::unique_ptr<TIntegerMappingImpl> UsrUel2Ent {}; // from user uelnr to table entry
         virtual ~IUELTable() = default;
-        virtual int size() const = 0;
-        virtual bool empty() const = 0;
+        [[nodiscard]] virtual int size() const = 0;
+        [[nodiscard]] virtual bool empty() const = 0;
         virtual int IndexOf(const char *s) = 0;
         virtual int AddObject(const char *id, size_t idlen, int mapping) = 0;
         virtual int StoreObject(const char *id, size_t idlen, int mapping) = 0;
@@ -278,8 +278,8 @@ namespace gxfile {
         virtual int AddUsrIndxNew(const char *s, size_t slen, int UelNr) = 0;
         virtual TUELUserMapStatus GetMapToUserStatus();
         virtual void RenameEntry(int N, const char *s) = 0;
-        virtual int GetMaxUELLength() const = 0;
-        virtual int MemoryUsed() const = 0;
+        [[nodiscard]] virtual int GetMaxUELLength() const = 0;
+        [[nodiscard]] virtual int MemoryUsed() const = 0;
         virtual void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) = 0;
         virtual void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S) = 0;
     };
@@ -302,20 +302,20 @@ namespace gxfile {
     public:
         TUELTableLegacy();
         ~TUELTableLegacy() override = default;
-        int size() const override;
-        bool empty() const override;
+        [[nodiscard]] int size() const override;
+        [[nodiscard]] bool empty() const override;
         int GetUserMap(int i) override;
         void SetUserMap(int EN, int N) override;
         int NewUsrUel(int EN) override;
         int AddUsrNew(const char *s, size_t slen) override;
         int AddUsrIndxNew(const char *s, size_t slen, int UelNr) override;
-        int GetMaxUELLength() const override;
+        [[nodiscard]] int GetMaxUELLength() const override;
         int IndexOf(const char *s) override;
         int AddObject(const char *id, size_t idlen, int mapping) override;
         int StoreObject(const char *id, size_t idlen, int mapping) override;
         const char *operator[](int index) const override;
         void RenameEntry(int N, const char *s) override;
-        int MemoryUsed() const override;
+        [[nodiscard]] int MemoryUsed() const override;
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
         void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S) override;
     };
@@ -331,7 +331,7 @@ namespace gxfile {
         explicit TAcronym(gdlib::gmsstrm::TXStreamDelphi &S);
         void FillFromStream(gdlib::gmsstrm::TXStreamDelphi &S);
         TAcronym() = default;
-        int MemoryUsed() const;
+        [[nodiscard]] int MemoryUsed() const;
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) const;
     };
 
@@ -347,7 +347,7 @@ namespace gxfile {
         void SaveToStream(gdlib::gmsstrm::TXStreamDelphi& S);
         void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi& S);
         int MemoryUsed();
-        int size() const;
+        [[nodiscard]] int size() const;
         TAcronym &operator[](int Index);
     };
 
@@ -359,7 +359,7 @@ namespace gxfile {
         void AddFilter(TDFilter *F);
         void DeleteFilter(int ix);
         TDFilter *FindFilter(int Nr);
-        size_t MemoryUsed() const;
+        [[nodiscard]] size_t MemoryUsed() const;
     };
 
     using TAcronymListImpl = TAcronymListLegacy;
@@ -499,8 +499,6 @@ namespace gxfile {
         bool IsGoodNewSymbol(const char *s);
         bool ResultWillBeSorted(const int *ADomainNrs);
 
-        // ...
-
         int gdxOpenReadXX(const char *Afn, int filemode, int ReadMode, int &ErrNr);
 
         // This one is a helper function for a callback from a Fortran client
@@ -577,7 +575,7 @@ namespace gxfile {
         void SetWriteModes(bool asYAML, bool asText);
 
         // region Acronym handling
-        int gdxAcronymCount() const override;
+        [[nodiscard]] int gdxAcronymCount() const override;
         int gdxAcronymGetInfo(int N, char *AName, char *Txt, int &AIndx) const override;
         int gdxAcronymSetInfo(int N, const char *AName, const char *Txt, int AIndx) override;
         int gdxAcronymNextNr(int nv) override;
@@ -596,9 +594,9 @@ namespace gxfile {
         int gdxGetDomainElements(int SyNr, int DimPos, int FilterNr, gdxinterface::TDomainIndexProc_t DP, int& NrElem, void* UPtr) override;
         int gdxSetTraceLevel(int N, const char *s) override;
         int gdxAcronymAdd(const char *AName, const char *Txt, int AIndx) override;
-        int gdxAcronymIndex(double V) const override;
+        [[nodiscard]] int gdxAcronymIndex(double V) const override;
         int gdxAcronymName(double V, char *AName) override;
-        double gdxAcronymValue(int AIndx) const override;
+        [[nodiscard]] double gdxAcronymValue(int AIndx) const override;
         int gdxAutoConvert(int nv) override;
         int gdxGetDLLVersion(char *V) const override;
         int gdxFileInfo(int &FileVer, int &ComprLev) const override;
@@ -611,7 +609,7 @@ namespace gxfile {
         int gdxSetHasText(int SyNr) override;
         int gdxSetReadSpecialValues(const double *AVals) override;
         int gdxSymbIndxMaxLength(int SyNr, int* LengthInfo) override;
-        int gdxSymbMaxLength() const override;
+        [[nodiscard]] int gdxSymbMaxLength() const override;
         int gdxSymbolAddComment(int SyNr, const char* Txt) override;
         int gdxSymbolGetComment(int SyNr, int N, char *Txt) override;
         int gdxUELMaxLength() override;
@@ -622,7 +620,7 @@ namespace gxfile {
         int gdxDataReadRawFast(int SyNr, gdxinterface::TDataStoreProc_t DP, int &NrRecs) override;
         int gdxDataReadRawFastEx(int SyNr, gdxinterface::TDataStoreExProc_t DP, int &NrRecs, void *Uptr) override;
 
-        std::string getImplName() const override;
+        [[nodiscard]] std::string getImplName() const override;
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from

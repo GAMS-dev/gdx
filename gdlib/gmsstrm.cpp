@@ -517,7 +517,7 @@ namespace gdlib::gmsstrm {
     void TXStreamDelphi::WriteDouble(double x) {
         static int cnt {};
         if (fstext)
-            *fstext << "WriteDouble@"<< GetPosition()  << "#" << ++cnt << ": " << utils::asdelphifmt(x, 12) << '\n';
+            *fstext << "WriteDouble@"<< GetPosition()  << "#" << ++cnt << ": " << x << '\n';
         WriteValue(rw_double, x);
     }
 

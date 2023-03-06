@@ -392,6 +392,78 @@ namespace tests::gdxinterfacetests {
         std::filesystem::remove(fn);
     }
 
+    class StrRef {
+        char *s;
+    public:
+        explicit StrRef(char *_s) : s(_s) {}
+
+        StrRef &operator=(const std::string &other) {
+            std::memcpy(s, other.c_str(), sizeof(char)*(other.length()+1));
+            return *this;
+        }
+
+        const char *c_str() {
+            return s;
+        }
+
+        [[nodiscard]] bool empty() const {
+            return s[0] == '\0';
+        }
+
+        explicit operator std::string() const {
+            std::string res;
+            res.assign(s);
+            return res;
+        }
+
+        [[nodiscard]] std::string str() const {
+            std::string res;
+            res.assign(s);
+            return res;
+        }
+
+        bool operator==(const std::string &other) {
+            return !std::strcmp(other.c_str(), s);
+        }
+    };
+
+    class StrIndexBuffers {
+        std::array<std::array<char, GMS_SSSIZE>, GMS_MAX_INDEX_DIM> bufContents{};
+        std::array<char*, GMS_MAX_INDEX_DIM> bufPtrs{};
+    public:
+        explicit StrIndexBuffers(const TgdxStrIndex *strIndex = nullptr) {
+            for (int i{}; i < (int)bufPtrs.size(); i++) {
+                bufPtrs[i] = bufContents[i].data();
+                if (strIndex)
+                    std::memcpy(bufPtrs[i], (*strIndex)[i].c_str(),(*strIndex)[i].length()+1);
+            }
+        }
+
+        StrRef operator[](int index) {
+            return StrRef{bufPtrs[index]};
+        }
+
+        char **ptrs() { return bufPtrs.data(); }
+        const char** cptrs() { return (const char **)bufPtrs.data(); }
+
+        [[nodiscard]] TgdxStrIndex strs() const {
+            TgdxStrIndex res;
+            for (int i{}; i < (int)res.size(); i++) {
+                res[i].assign(bufPtrs[i]);
+            }
+            return res;
+        }
+
+        void clear() {
+            for (int i{}; i < (int)bufContents.size(); i++)
+                bufContents[i].fill(0);
+        }
+
+        StrRef front() {
+            return StrRef{bufPtrs[0]};
+        }
+    };
+
     TEST_CASE("Test write and read record in string mode") {
         std::string fn{"rwrecordstr.gdx"};
         StrIndexBuffers keyNames;
@@ -1437,7 +1509,7 @@ namespace tests::gdxinterfacetests {
     public:
         virtual void write(GDXInterface &pgx, int count, const int *nums) = 0;
         virtual void read(GDXInterface &pgx, int count, const int *nums) = 0;
-        virtual std::string getName() const = 0;
+        [[nodiscard]] virtual std::string getName() const = 0;
 
         virtual void reset() {
             keys.fill(0);
@@ -1549,7 +1621,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataReadDone());
         }
 
-        std::string getName() const override {
+        [[nodiscard]] std::string getName() const override {
             return "raw"s;
         }
     };
@@ -1613,14 +1685,13 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataReadDone());
         }
 
-        std::string getName() const override {
+        [[nodiscard]] std::string getName() const override {
             return "mapped";
         }
     };
 
     void enforceSlowdownLimit(AbstractWriteReadPair &pair, double limit) {
         const double avgSlowdown = perfBenchmarkCppVsDelphi(pair, true);
-        //std::cout << "slowdown = " << avgSlowdown << " for " << pair.getName() << std::endl;
         slowdownReport << pair.getName() << ";"s << avgSlowdown << '\n';
 #if defined(NDEBUG) && !defined(CXX_COLLECTIONS)
         REQUIRE_LE(avgSlowdown, limit);
@@ -1751,7 +1822,7 @@ namespace tests::gdxinterfacetests {
 
             const int paramDim{ 3 };
             REQUIRE(pgx.gdxDataWriteStrStart("p", "parameter", paramDim, dt_par, 0));
-            std::array<const char*, paramDim> domainIds, keys;
+            std::array<const char*, paramDim> domainIds {}, keys {};
             std::fill_n(domainIds.begin(), paramDim, key);
             int rc{pgx.gdxSymbolSetDomain(domainIds.data())};
             REQUIRE(rc);

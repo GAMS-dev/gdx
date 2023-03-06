@@ -20,94 +20,6 @@ namespace gdxinterface {
     using TDataStoreFiltProc_F = int(*)(const int *Indx, const double *Vals, int64_t Uptr);
     using TDomainIndexProc_F = void(*)(int RawIndex, int MappedIndex, int64_t Uptr);
 
-    class CharBuf {
-        std::array<char, GMS_SSSIZE> buf;
-
-    public:
-        char* get() { return buf.data(); }
-        std::string str() const {
-            return buf.data();
-        };
-
-        operator std::string() const {
-            return str();
-        }
-
-        int size() const { return (int)buf.size(); }
-    };
-
-    class StrRef {
-        char *s;
-    public:
-        StrRef(char *_s) : s(_s) {}
-
-        StrRef &operator=(const std::string &other) {
-            std::memcpy(s, other.c_str(), sizeof(char)*(other.length()+1));
-            return *this;
-        }
-
-        const char *c_str() {
-            return s;
-        }
-
-        bool empty() const {
-            return s[0] == '\0';
-        }
-
-        operator std::string() const {
-            std::string res;
-            res.assign(s);
-            return res;
-        }
-
-        std::string str() const {
-            std::string res;
-            res.assign(s);
-            return res;
-        }
-
-        bool operator==(const std::string &other) {
-            return !std::strcmp(other.c_str(), s);
-        }
-    };
-
-    class StrIndexBuffers {
-        std::array<std::array<char, GMS_SSSIZE>, GMS_MAX_INDEX_DIM> bufContents{};
-        std::array<char*, GMS_MAX_INDEX_DIM> bufPtrs{};
-    public:
-        explicit StrIndexBuffers(const TgdxStrIndex *strIndex = nullptr) {
-            for (int i{}; i < (int)bufPtrs.size(); i++) {
-                bufPtrs[i] = bufContents[i].data();
-                if (strIndex)
-                    std::memcpy(bufPtrs[i], (*strIndex)[i].c_str(),(*strIndex)[i].length()+1);
-            }
-        }
-
-        StrRef operator[](int index) {
-            return {bufPtrs[index]};
-        }
-
-        char **ptrs() { return bufPtrs.data(); }
-        const char** cptrs() { return (const char **)bufPtrs.data(); }
-
-        TgdxStrIndex strs() const {
-            TgdxStrIndex res;
-            for (int i{}; i < (int)res.size(); i++) {
-                res[i].assign(bufPtrs[i]);
-            }
-            return res;
-        }
-
-        void clear() {
-            for (int i{}; i < (int)bufContents.size(); i++)
-                bufContents[i].fill(0);
-        }
-
-        StrRef front() {
-            return {bufPtrs[0]};
-        }
-    };
-
     class GDXInterface {
     public:
         virtual ~GDXInterface() = default;
@@ -191,7 +103,7 @@ namespace gdxinterface {
         virtual int gdxRenameUEL(const char *OldName, const char *NewName) = 0;
 
         // region deprecated functions
-        virtual int gdxAcronymCount() const = 0;
+        [[nodiscard]] virtual int gdxAcronymCount() const = 0;
         virtual int gdxAcronymGetInfo(int N, char *AName, char *Txt, int &AIndx) const = 0;
         virtual int gdxAcronymSetInfo(int N, const char *AName, const char *Txt, int AIndx) = 0;
         virtual int gdxAcronymNextNr(int nv) = 0;
@@ -204,9 +116,9 @@ namespace gdxinterface {
         virtual int gdxSetTraceLevel(int N, const char *s) = 0;
         virtual int gdxSetTextNodeNr(int TxtNr, int Node) = 0;
         virtual int gdxAcronymAdd(const char *AName, const char *Txt, int AIndx) = 0;
-        virtual int gdxAcronymIndex(double V) const = 0;
+        [[nodiscard]] virtual int gdxAcronymIndex(double V) const = 0;
         virtual int gdxAcronymName(double V, char *AName) = 0;
-        virtual double gdxAcronymValue(int AIndx) const = 0;
+        [[nodiscard]] virtual double gdxAcronymValue(int AIndx) const = 0;
         virtual int gdxSymbolAddComment(int SyNr, const char* Txt) = 0;
         virtual int gdxSymbolGetComment(int SyNr, int N, char *Txt) = 0;
         virtual int gdxStoreDomainSets() = 0;
@@ -229,12 +141,12 @@ namespace gdxinterface {
         virtual int gdxMapValue(double D, int& sv) = 0;
         virtual int gdxSetHasText(int SyNr) = 0;
         virtual int gdxSetReadSpecialValues(const double *AVals) = 0;
-        virtual int gdxSymbMaxLength() const = 0;
+        [[nodiscard]] virtual int gdxSymbMaxLength() const = 0;
         virtual int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP) = 0;
         virtual int gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs) = 0;
         virtual int gdxDataReadRawFastEx(int SyNr, TDataStoreExProc_t DP, int &NrRecs, void *Uptr) = 0;
 
-        virtual std::string getImplName() const = 0;
+        [[nodiscard]] virtual std::string getImplName() const = 0;
     };
 
 }

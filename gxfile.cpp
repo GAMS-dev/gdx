@@ -1806,7 +1806,7 @@ namespace gxfile {
 
         if (NameList && !NameList->empty() && SyNr > 0 && SyNr <= NameList->size()) {
             const auto *sym = *NameList->GetObject(SyNr);
-            utils::assignStrToBuf(NameList->GetString(SyNr), SyId, GMS_SSSIZE);
+            utils::assignPCharToBuf(NameList->GetString(SyNr), SyId, GMS_SSSIZE);
             Dim = sym->SDim;
             Typ = sym->SDataType;
             return true;
@@ -1877,8 +1877,8 @@ namespace gxfile {
             return FileNoGood();
         }
         FFile = std::make_unique<TMiBufferedStreamDelphi>(Afn, filemode);
-        const std::string FileNameYML = utils::replaceSubstrs(Afn, ".gdx", ".yaml");
 #ifdef YAML
+        const std::string FileNameYML = utils::replaceSubstrs(Afn, ".gdx", ".yaml");
         YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
 #endif
         ErrNr = FFile->GetLastIOResult();
@@ -2349,7 +2349,7 @@ namespace gxfile {
             utils::assignStrToBuf(BADStr_PREFIX + std::to_string(TxtNr), Txt, GMS_SSSIZE);
             return false;
         } else {
-            utils::assignStrToBuf(SetTextList->GetName(TxtNr), Txt, GMS_SSSIZE);
+            utils::assignPCharToBuf(SetTextList->GetName(TxtNr), Txt, GMS_SSSIZE);
             auto obj = SetTextList->GetObject(TxtNr);
 #ifdef TXSPOOL_LEGACY
             Node = obj ? (int)reinterpret_cast<long long>(obj) : 0;
@@ -2485,7 +2485,7 @@ namespace gxfile {
     //   gdxSymbolSetDomain, gdxSymbolGetDomainX
     int TGXFileObj::gdxSymbolGetDomain(int SyNr, int *DomainSyNrs) {
         if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return false;
-        const PgdxSymbRecord SyPtr{ (*NameList->GetObject(SyNr)) };
+        const TgdxSymbRecord *SyPtr{ (*NameList->GetObject(SyNr)) };
         for (int D{}; D < SyPtr->SDim; D++)
             DomainSyNrs[D] = !SyPtr->SDomSymbols ? 0 : SyPtr->SDomSymbols[D];
         return true;
@@ -2507,7 +2507,7 @@ namespace gxfile {
     //   gdxSymbolSetDomainX, gdxSymbolSetDomain
     int TGXFileObj::gdxSymbolGetDomainX(int SyNr, char **DomainIDs) {
         if (ErrorCondition(!NameList->empty() && SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return 0;
-        const PgdxSymbRecord SyPtr { (*NameList->GetObject(SyNr)) };
+        const TgdxSymbRecord *SyPtr { (*NameList->GetObject(SyNr)) };
 
         for(int D{}; D<SyPtr->SDim; D++) {
             DomainIDs[D][0] = '*';
@@ -2574,7 +2574,7 @@ namespace gxfile {
         if (!SyNr) {
             RecCnt = UelCntOrig;
             UserInfo = 0;
-            utils::assignStrToBuf("Universe"s, ExplTxt, GMS_SSSIZE);
+            utils::assignPCharToBuf("Universe", ExplTxt, GMS_SSSIZE);
             return true;
         }
         else if (!NameList || NameList->empty() || SyNr < 1 || SyNr > NameList->size()) {
@@ -2842,7 +2842,7 @@ namespace gxfile {
     //
     int TGXFileObj::gdxUMUelGet(int UelNr, char *Uel, int &UelMap) {
         if (UELTable && UelNr >= 1 && UelNr <= UELTable->size()) {
-            utils::assignStrToBuf((*UELTable)[UelNr], Uel);
+            utils::assignPCharToBuf((*UELTable)[UelNr], Uel);
             UelMap = UELTable->GetUserMap(UelNr);
             return true;
         }
@@ -2966,7 +2966,8 @@ namespace gxfile {
             return false;
         }
         int EN = UELTable->UsrUel2Ent->GetMapping(uelNr);
-        utils::assignStrToBuf(EN >= 1 ? (*UELTable)[EN] : BADUEL_PREFIX + std::to_string(uelNr), Uel);
+        if(EN >= 1) utils::assignPCharToBuf((*UELTable)[EN], Uel);
+        else utils::assignStrToBuf(BADUEL_PREFIX + std::to_string(uelNr), Uel);
         return EN >= 1;
     }
 
@@ -3932,7 +3933,7 @@ namespace gxfile {
                     KeyStr[D][0] = '?';
                     KeyStr[D][1] = '\0';
                 }
-                else utils::assignStrToBuf((*UELTable)[N], KeyStr[D]);
+                else utils::assignPCharToBuf((*UELTable)[N], KeyStr[D]);
             }
         }
         return true;
@@ -4172,7 +4173,7 @@ namespace gxfile {
         if (NameList && !NameList->empty() && SyNr >= 1 && SyNr <= NameList->size()) {
             const auto obj = *NameList->GetObject(SyNr);
             if (obj->SCommentsList && !obj->SCommentsList->empty() && N >= 1 && N <= (int)obj->SCommentsList->size()) {
-                utils::assignStrToBuf((*obj->SCommentsList)[N - 1], Txt, GMS_SSSIZE);
+                utils::assignPCharToBuf((*obj->SCommentsList)[N - 1], Txt, GMS_SSSIZE);
                 return true;
             }
         }

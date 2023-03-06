@@ -17,40 +17,12 @@ using namespace std::literals::string_literals;
 // ==============================================================================================================
 namespace utils {
 
-    void parseHex(const std::string &s, int &num, int &code);
-
-    bool determineCode(const std::string &s, const std::function<bool(char)> &charIsLegalPredicate, int &code);
-
-    bool anychar(const std::function<bool(char)> &predicate, const std::string_view s) {
-        return std::any_of(std::cbegin(s), std::cend(s), predicate);
-    }
-
-    void permutAssign(std::string &lhs, const std::string &rhs,
-                      const std::vector<int> &writeIndices, const std::vector<int> &readIndices) {
-        for (int i = 0; i < (int) writeIndices.size(); i++) {
-            lhs[writeIndices[i]] = rhs[readIndices[i]];
-        }
-    }
-
-    // Shouldn't this operate on a std::string_view instead?
-    void removeTrailingCarriageReturnOrLineFeed(std::string &s) {
-        char lchar = s[s.length() - 1];
-        if (lchar == '\r' || lchar == '\n')
-            s = s.substr(0, s.length() - 1);
-    }
-
     std::string uppercase(const std::string_view s) {
         std::string out{ s };
         std::transform(s.begin(), s.end(), out.begin(), utils::toupper);
         return out;
     }
 
-    std::string lowercase(const std::string_view s) {
-        std::string out{ s };
-        std::transform(s.begin(), s.end(), out.begin(), utils::tolower);
-        return out;
-    }
-    
     bool sameTextInvariant(const std::string_view a, const std::string_view b) {
         const auto l = a.length();
         if (b.length() != a.length()) return false;
@@ -61,44 +33,17 @@ namespace utils {
         return true;
     }
 
-    bool sameTextAsAny(const std::string_view a, const std::initializer_list<std::string_view> &bs) {
-        return any<std::string_view>([&a](const std::string_view b) { return utils::sameText(a, b); }, bs);
-    }
-
-    bool sameTextPrefix(const std::string_view s, const std::string_view prefix) {
-        return sameText(s.substr(0, prefix.length()), prefix);
-    }
-
-    std::string getLineWithSep(std::fstream &fs) {
-        char c;
-        std::stringstream ss;
-        while (true) {
-            fs.read(&c, 1);
-            if (fs.eof() || c == '\0') break;
-            ss << c;
-            if (c == '\n' || c == '\r') break;
+    std::string_view trim(const std::string_view s) {
+        if(s.empty()) return {};
+        int firstNonBlank {-1}, lastNonBlank {};
+        for(int i{}; i<s.length(); i++) {
+            if((unsigned char)s[i] > 32) {
+                if(firstNonBlank == -1) firstNonBlank = i;
+                lastNonBlank = i;
+            }
         }
-        return ss.str();
-    }
-
-    bool hasNonBlank(const std::string_view s) {
-        return std::any_of(s.begin(), s.end(), [](char c) {
-            return !utils::in(c, ' ', '\t', '\r', '\n');
-        });
-    }
-
-    std::string trim(const std::string &s) {
-        if (s.empty()) return s;
-        if (!hasNonBlank(s)) return ""s;
-        const auto firstNonBlank = s.find_first_not_of(" \t\n\r");
-        const auto lastNonBlank = s.find_last_not_of(" \t\n\r");
+        if(firstNonBlank == -1) return {};
         return s.substr(firstNonBlank, (lastNonBlank - firstNonBlank) + 1);
-    }
-
-    std::string trimRight(const std::string &s) {
-        if (s.empty() || !isblank(s.back())) return s;
-        const auto lastNonBlank = s.find_last_not_of(" \t");
-        return s.substr(0, lastNonBlank + 1);
     }
 
     const char *trimRight(const char *s, char *storage, int &slen) {
@@ -111,40 +56,6 @@ namespace utils {
         std::memcpy(storage, s, slen);
         storage[slen] = '\0';
         return storage;
-    }
-
-    void trimRight(const std::string &s, std::string &storage) {
-        if (s.empty() || !isblank(s.back())) {
-            storage = s;
-            return;
-        }
-        const auto ub = s.find_last_not_of(" \t") + 1;
-        //storage = s.substr(0, ub);
-        storage.replace(0, ub, s, 0, ub);
-        storage.resize(ub);
-    }
-
-    std::string trimZeroesRight(const std::string &s, char DecimalSep) {
-        if (s.find(DecimalSep) == std::string::npos) return s;
-        int i{static_cast<int>(s.length()) - 1};
-        for (; i >= 0; i--)
-            if (s[i] != '0') break;
-        return s.substr(0, i + 1);
-    }
-
-    bool hasCharLt(const std::string_view s, int n) {
-        return anychar([&n](char c) { return (int) c < n; }, s);
-    }
-
-    double round(double n, int ndigits) {
-        return std::round(n * std::pow(10, ndigits)) * pow(10, -ndigits);
-    }
-
-    void replaceChar(char a, char b, std::string &s) {
-        if (a == b) return;
-        std::replace_if(s.begin(), s.end(), [a](char i) { return i == a; }, b);
-        /*for(char &i : s)
-            if(i == a) i = b;*/
     }
 
     std::vector<size_t> substrPositions(const std::string_view s, const std::string_view substr) {
@@ -170,174 +81,12 @@ namespace utils {
         return out;
     }
 
-    bool determineCode(const std::string &s, const std::function<bool(char)> &charIsLegalPredicate, int &code) {
-        // first check for offending char and return its position plus one (since 0 is code for "all ok")
-        for (int i{}; i < (int) s.length(); i++) {
-            char c = s[i];
-            if (!charIsLegalPredicate(c)) {
-                code = i + 1;
-                return true;
-            }
-        }
-        code = 0;
-        return false;
-    }
-
-    void val(const std::string &s, double &num, int &code) {
-        auto islegal = [](char c) {
-            return isdigit(c) || c == '.' || utils::toupper(c) == 'E' || c == '-' || c == '+';
-        };
-        if (determineCode(s, islegal, code)) return;
-        num = utils::parseNumber(s);
-    }
-
-    inline uint8_t hexval(char c) {
-        return c <= 9 ? c : c - 'A' + 10;
-    }
-
-    void parseHex(const std::string &s, int &num, int &code) {
-        const int off = s.front() == '$' ? 1 : 2;
-        int v{};
-        for (int exp = 0; exp < (int) s.length() - off; exp++) {
-            int i{(int) s.length() - 1 - exp};
-            char c = s[i];
-            if (!isalnum(c)) {
-                code = i;
-                return;
-            }
-            v += hexval(c) * (int) std::pow(16, exp);
-        }
-        num = v;
-    }
-
-    void val(const std::string &s, int &num, int &code) {
-        if ((s.length() >= 3 && s.front() == '0' && s[1] == 'x')
-            || (s.length() >= 2 && s.front() == '$')) {
-            parseHex(s, num, code);
-            return;
-        }
-        auto islegal = [](char c) {
-            return isdigit(c) || c == '-';
-        };
-        if (determineCode(s, islegal, code)) return;
-        num = std::stoi(s);
-    }
-
-    inline std::string repeatChar(int n, char c) {
-        return n > 0 ? std::string(n, c) : "";
-    }
-
-    std::string blanks(int n) {
-        return repeatChar(n, ' ');
-    }
-
-    std::string zeros(int n) {
-        return repeatChar(n, '0');
-    }
-
-    int lastOccurence(std::string_view s, char c) {
-        for (int i = (int) s.length() - 1; i >= 0; i--)
-            if (s[i] == c) return i;
-        return -1;
-    }
-
-    double parseNumber(const std::string &s) {
-        /*std::istringstream ss(s);
-        double num;
-        ss >> num;
-        return num;*/
-
-        //return std::stod(s);
-
-        return std::strtod(s.c_str(), nullptr);
-    }
-
-    void sleep(int milliseconds) {
-        std::this_thread::sleep_for(std::chrono::milliseconds{milliseconds});
-    }
-
-    int strLenNoWhitespace(const std::string_view s) {
-        return (int) std::count_if(s.begin(), s.end(), [](char c) {
-            return !std::isspace(c);
-        });
-    }
-
-    char &getCharAtIndexOrAppend(std::string &s, int ix) {
-        const auto l = s.length();
-        assert(ix >= 0 && ix <= (int) l && "Index not in valid range");
-        if ((size_t) ix == l) s.push_back('\0');
-        return s[ix];
-    }
-
     bool strContains(const std::string_view s, char c) {
         return s.find(c) != std::string::npos;
     }
 
-    bool strContains(const std::string_view s, const std::initializer_list<char> &cs) {
-        return std::any_of(std::cbegin(s), std::cend(s),
-                           [&cs](char c) { return std::find(cs.begin(), cs.end(), c) != cs.end(); });
-    }
-
     bool excl_or(bool a, bool b) {
         return (a && !b) || (!a && b);
-    }
-
-    int posOfSubstr(const std::string_view sub, const std::string_view s) {
-        const auto pos = s.find(sub);
-        return pos == std::string::npos ? -1 : (int) pos;
-    }
-
-    std::list<std::string> split(const std::string_view s, char sep) {
-        std::list<std::string> res;
-        std::string cur;
-        for (char c: s) {
-            if (c != sep) cur += c;
-            else if (!cur.empty()) {
-                res.push_back(cur);
-                cur.clear();
-            }
-        }
-        if (!cur.empty()) res.push_back(cur);
-        return res;
-    }
-
-    std::list<std::string> splitWithQuotedItems(const std::string_view s) {
-        const char sep = ' ';
-        const std::set<char> &quoteChars = {'\"', '\''};
-        std::list<std::string> res;
-        std::string cur;
-        bool inQuote{};
-        for (char c: s) {
-            if (utils::in(c, quoteChars)) {
-                inQuote = !inQuote;
-            }
-            if (c != sep || inQuote) cur += c;
-            else if (!cur.empty()) {
-                res.push_back(cur);
-                cur.clear();
-            }
-        }
-        if (!cur.empty()) res.push_back(cur);
-        return res;
-    }
-
-    std::string slurp(const std::string &fn) {
-        std::ifstream fp{fn};
-        std::stringstream ss;
-        std::copy(std::istreambuf_iterator<char>(fp),
-                  std::istreambuf_iterator<char>(),
-                  std::ostreambuf_iterator<char>(ss));
-        return ss.str();
-    }
-
-    void spit(const std::string &fn, const std::string &contents) {
-        std::ofstream fp{fn};
-        fp << contents;
-    }
-
-    void assertOrMsg(bool condition, const std::string &msg) {
-        if (!condition)
-            throw std::runtime_error("Assertion failed: " + msg);
     }
 
     // same as std::string::substr but silent when offset > input size
@@ -353,32 +102,10 @@ namespace utils {
         return s;
     }
 
-    std::string join(char sep, const std::initializer_list<std::string> &parts) {
-        const int len = std::accumulate(parts.begin(), parts.end(), (int) parts.size() - 1,
-                                        [](int acc, const std::string &s) -> int { return acc + (int) s.length(); });
-        std::string res(len, sep);
-        int i{};
-        for (const std::string &part: parts) {
-            for (int j{}; j < (int) part.length(); j++)
-                res[i++] = part[j];
-            if (i < len) i++;
-        }
-        return res;
-    }
-
-    bool starts_with(const std::string &s, const std::string &prefix) {
+    bool starts_with(const std::string_view s, const std::string_view prefix) {
         if (prefix.length() > s.length()) return false;
         for (int i = 0; i < (int) prefix.length(); i++) {
             if (s[i] != prefix[i])
-                return false;
-        }
-        return true;
-    }
-
-    bool ends_with(const std::string &s, const std::string &suffix) {
-        if (suffix.length() > s.length()) return false;
-        for (int i = 0; i < (int) suffix.length(); i++) {
-            if (s[s.length() - 1 - i] != suffix[suffix.length() - 1 - i])
                 return false;
         }
         return true;
@@ -388,63 +115,6 @@ namespace utils {
         return utils::strContains(s, ' ') ? ""s + quotechar + s + quotechar : s;
     }
 
-    std::string quoteWhitespaceDir(const std::string &s, char sep, char quotechar) {
-        if (!utils::strContains(s, ' ')) return s;
-        std::string s2{};
-        int ix{};
-        for (const auto &part: utils::split(s, sep)) {
-            if (ix++ > 0 || s.front() == sep) s2 += sep;
-            s2 += utils::strContains(part, ' ') ? quotechar + part + quotechar : part;
-        }
-        return s.back() == sep ? s2 + sep : s2;
-    }
-
-    std::string doubleToString(double v, int width, int precision) {
-        std::stringstream ss;
-        ss.precision(precision);
-        ss << std::fixed << v;
-        std::string res = ss.str();
-        return (int) res.length() >= width ? res : std::string(width - (int) res.length(), ' ') + res;
-    }
-
-    bool strToBool(const std::string &s) {
-        if (s.empty() || s.length() > 4) return false;
-        return utils::in(s, "1"s, "true"s, "on"s, "yes"s);
-    }
-
-    std::optional<std::list<BinaryDiffMismatch>>
-    binaryFileDiff(const std::string &filename1, const std::string &filename2, int countLimit) {
-        if (countLimit == -1) countLimit = std::numeric_limits<int>::max();
-        std::ifstream f1{filename1, std::ios::binary}, f2{filename2, std::ios::binary};
-        std::list<BinaryDiffMismatch> mismatches{};
-        char c1, c2;
-        uint64_t offset{};
-        while (!f1.eof() && !f2.eof()) {
-            f1.get(c1);
-            f2.get(c2);
-            if (c1 != c2) {
-                mismatches.emplace_back(offset, c1, c2);
-                if ((int) mismatches.size() >= countLimit)
-                    break;
-            }
-            offset++;
-        }
-        return mismatches.empty() ? std::nullopt : std::make_optional(mismatches);
-    }
-
-    std::string asdelphifmt(double v, int precision) {
-        std::stringstream ss;
-        ss.precision(precision);
-        ss << v;
-        std::string s{replaceSubstrs(replaceSubstrs(ss.str(), "+", ""), "-0", "-")};
-        replaceChar('e', 'E', s);
-        return s;
-    }
-
-    void stocp(const std::string &s, char *cp) {
-        std::memcpy(cp, s.c_str(), s.length() + 1);
-    }
-
     inline int b2i(bool b) { return b ? 1 : 0; }
 
     int strCompare(const std::string_view S1, const std::string_view S2, bool caseInsensitive) {
@@ -452,27 +122,13 @@ namespace utils {
         auto L = S1.length();
         if (L > S2.length()) L = S2.length();
         for (size_t K{}; K < L; K++) {
-            int c1 = caseInsensitive ? utils::toupper(S1[K]) : S1[K];
-            int c2 = caseInsensitive ? utils::toupper(S2[K]) : S2[K];
+            int c1 = static_cast<unsigned char>(caseInsensitive ? utils::toupper(S1[K]) : S1[K]);
+            int c2 = static_cast<unsigned char>(caseInsensitive ? utils::toupper(S2[K]) : S2[K]);
             int d = c1 - c2;
             if (d) return d;
         }
         return static_cast<int>(S1.length() - S2.length());
     }
-
-    StringBuffer::StringBuffer(int size) : s(size, '\0'), bufferSize{size} {}
-
-    char *StringBuffer::getPtr() { return &s[0]; }
-
-    std::string *StringBuffer::getStr() {
-        s.resize(strlen(s.data()));
-        return &s;
-    }
-
-    int StringBuffer::getBufferSize() const { return bufferSize; }
-
-    BinaryDiffMismatch::BinaryDiffMismatch(uint64_t offset, uint8_t lhs, uint8_t rhs) : offset(offset), lhs(lhs),
-                                                                                        rhs(rhs) {}
 
     bool checkBOMOffset(const tBomIndic &potBOM, int &BOMOffset, std::string &msg) {
         enum tBOM {
@@ -527,37 +183,5 @@ namespace utils {
         delphistr[0] = static_cast<char>(l);
         std::memcpy(&delphistr[1], s.data(), l);
         return 0;
-    }
-}
-
-// Needed for peak working set size query
-#if defined(_WIN32)
-#include <windows.h>
-#include <Psapi.h>
-#include <processthreadsapi.h>
-#endif
-
-namespace utils {
-    int64_t queryPeakRSS() {
-#if defined(_WIN32)
-        PROCESS_MEMORY_COUNTERS info;
-        if(!GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info)))
-            return 0;
-        return (int64_t)info.PeakWorkingSetSize;
-#elif defined(__linux)
-        std::ifstream ifs {"/proc/self/status"};
-        if(!ifs.is_open()) return 0;
-        std::string line;
-        while(!ifs.eof()) {
-            std::getline(ifs, line);
-            if(utils::starts_with(line, "VmHWM")) {
-                auto parts = utils::split(line);
-                return std::stoi(utils::nth(parts, 1));
-            }
-        }
-        return 0;
-#elif defined(__APPLE__)
-        return 0;
-#endif
     }
 }
