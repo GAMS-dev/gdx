@@ -132,12 +132,6 @@ extern "C" {
     int gdxDataReadRawFastEx(TGXFileRec_t *TGXFile, int SyNr, TDataStoreExProc_t DP, int *NrRecs, void *Uptr);
 
     void setCallByRef(const char *FuncName, int cbrValue);
-
-#ifdef PYGDX_EXPERIMENT
-    int create_gdx_file(const char *filename);
-    int gdx_set1d(TGXFileRec_t *pgx, const char *name, const char **elems);
-#endif
-
 #ifdef __cplusplus
 }
 #endif
