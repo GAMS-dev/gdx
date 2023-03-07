@@ -51,11 +51,11 @@ namespace gdlib::gmsheapnew {
         explicit TBigBlockMgr(std::string Name);
         virtual ~TBigBlockMgr();
 
-        double MemoryUsedMB() const;
-        double MemoryLimitMB() const;
+        [[nodiscard]] double MemoryUsedMB() const;
+        [[nodiscard]] double MemoryLimitMB() const;
         void XClear();
         void GetBigStats(int64_t& sizeOtherMemory, int64_t& sizeHighMark, int64_t& cntFree) const;
-        std::string GetName() const;
+        [[nodiscard]] std::string GetName() const;
         void SetOSMemory(int v);
     };
 
@@ -90,7 +90,7 @@ namespace gdlib::gmsheapnew {
         void prvGetSlotCnts(THeapSlotNr Slot, int64_t &cntGet, int64_t &cntFree, int64_t &cntAvail);
 
     public:
-        explicit THeapMgr(std::string Name);
+        explicit THeapMgr(const std::string &Name);
         virtual ~THeapMgr();
         void Clear();
         void *GMSGetMem(uint16_t slot);
@@ -116,7 +116,7 @@ namespace gdlib::gmsheapnew {
         bool SetMemoryLimit(double limit);
         void SetMemoryReportProc(const TMemoryReportProc &F);
 
-        std::string GetName() const;
+        [[nodiscard]] std::string GetName() const;
         TBigBlockMgr &GetBBMgr();
     };
 

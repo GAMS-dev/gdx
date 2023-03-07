@@ -131,7 +131,7 @@ namespace gdlib::gmsobj {
             return res;
         }
 
-        int GetCapacity() const {
+        [[nodiscard]] int GetCapacity() const {
             return FCapacity;
         }
 
@@ -148,15 +148,15 @@ namespace gdlib::gmsobj {
             FCapacity = NewCapacity;
         }
 
-        int GetCount() const {
+        [[nodiscard]] int GetCount() const {
             return FCount;
         }
 
-        int size() const {
+        [[nodiscard]] int size() const {
             return FCount;
         }
 
-        bool empty() const {
+        [[nodiscard]] bool empty() const {
             return !FCount;
         }
 
@@ -164,7 +164,7 @@ namespace gdlib::gmsobj {
             return Get(Index);
         }
 
-        const T *GetConst(int Index) const {
+        [[nodiscard]] const T *GetConst(int Index) const {
             return FList[Index - (OneBased ? 1 : 0)];
         }
 
@@ -172,7 +172,7 @@ namespace gdlib::gmsobj {
             return FCount <= 0 ? nullptr : FList[FCount-1];
         }
 
-        size_t MemoryUsed() const {
+        [[nodiscard]] size_t MemoryUsed() const {
             return FListMemory;
         }
     };
@@ -246,7 +246,7 @@ namespace gdlib::gmsobj {
                 delete [] PData;
         }
 
-        bool GetBit(int N) const {
+        [[nodiscard]] bool GetBit(int N) const {
             if(N < 0 || N > FHighIndex) return false;
             int P;
             uint8_t M;
@@ -278,7 +278,7 @@ namespace gdlib::gmsobj {
             }
         }
 
-        int GetHighIndex() const {
+        [[nodiscard]] int GetHighIndex() const {
             return FHighIndex;
         }
 
@@ -296,7 +296,7 @@ namespace gdlib::gmsobj {
             }
         }
 
-        int MemoryUsed() const {
+        [[nodiscard]] int MemoryUsed() const {
             return FAllocated;
         }
     };
@@ -439,7 +439,7 @@ namespace gdlib::gmsobj {
             return -1;
         }
 
-        char *GetName(int Index) const {
+        [[nodiscard]] char *GetName(int Index) const {
             return FList[Index].FString;
         }
 
@@ -463,19 +463,19 @@ namespace gdlib::gmsobj {
             return utils::sameText(s1, s2);
         }
 
-        int Count() const {
+        [[nodiscard]] int Count() const {
             return FCount;
         }
 
-        int size() const {
+        [[nodiscard]] int size() const {
             return FCount;
         }
 
-        int GetCapacity() const {
+        [[nodiscard]] int GetCapacity() const {
             return FCapacity;
         }
 
-        size_t MemoryUsed() const {
+        [[nodiscard]] size_t MemoryUsed() const {
             return FListMemory + FStrMemory;
         }
     };

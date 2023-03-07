@@ -54,15 +54,15 @@ namespace gdlib::gmsdata {
             keyValues.clear();
         }
 
-        int size() const {
+        [[nodiscard]] int size() const {
             return (int)keyValues.size();
         }
 
-        int GetCount() const {
+        [[nodiscard]] int GetCount() const {
             return size();
         }
 
-        bool empty() const {
+        [[nodiscard]] bool empty() const {
             return keyValues.empty();
         }
 
@@ -74,11 +74,11 @@ namespace gdlib::gmsdata {
             });
         }
 
-        int MemoryUsed() const {
+        [[nodiscard]] int MemoryUsed() const {
             return static_cast<int>(keyValues.size() * (FDim*sizeof(int) + FDataSize*sizeof(T)) + keyValues.capacity());
         }
 
-        int GetDimension() const {
+        [[nodiscard]] int GetDimension() const {
             return FDim;
         }
     };
@@ -161,7 +161,7 @@ namespace gdlib::gmsdata {
             return (T*)&PBase[N / FStoreFact]->Buffer[(N % FStoreFact) * FSize];
         }
 
-        T* GetItemPtrIndexConst(int N) const {
+        [[nodiscard]] T* GetItemPtrIndexConst(int N) const {
             return (T*)&PBase[N / FStoreFact]->Buffer[(N % FStoreFact) * FSize];
         }
 
@@ -170,15 +170,15 @@ namespace gdlib::gmsdata {
             std::memcpy(R, PB, FSize);
         }
 
-        int64_t MemoryUsed() const {
+        [[nodiscard]] int64_t MemoryUsed() const {
             return !PCurrentBuf ? 0 : (int64_t)(BaseAllocated * sizeof(uint8_t*) + BaseUsed * BufSize + PCurrentBuf->BytesUsed);
         }
 
-        int64_t GetCount() const {
+        [[nodiscard]] int64_t GetCount() const {
             return FCount;
         }
 
-        int64_t size() const {
+        [[nodiscard]] int64_t size() const {
             return FCount;
         }
 
@@ -188,7 +188,7 @@ namespace gdlib::gmsdata {
     };
 
     class TXIntList : public TGrowArrayFxd<int> {
-        int &GetItems(int Index) const {
+        [[nodiscard]] int &GetItems(int Index) const {
             return *GetItemPtrIndexConst(Index);
         }
 
@@ -214,7 +214,7 @@ namespace gdlib::gmsdata {
             *p2 = t;
         }
 
-        int &operator[](int Index) const {
+        [[nodiscard]] int &operator[](int Index) const {
             return GetItems(Index);
         }
 
@@ -397,15 +397,15 @@ namespace gdlib::gmsdata {
             FList.Clear();
         }
 
-        int64_t MemoryUsed() const {
+        [[nodiscard]] int64_t MemoryUsed() const {
             return DS.MemoryUsed() + FList.MemoryUsed();
         }
 
-        int GetCount() const {
+        [[nodiscard]] int GetCount() const {
             return FList.size();
         }
 
-        int GetCapacity() const {
+        [[nodiscard]] int GetCapacity() const {
             return FList.GetCapacity();
         }
 
@@ -413,7 +413,7 @@ namespace gdlib::gmsdata {
             FList.SetCapacity(N);
         }
 
-        int GetDimension() const {
+        [[nodiscard]] int GetDimension() const {
             return FDim;
         }
     };

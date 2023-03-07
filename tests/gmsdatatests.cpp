@@ -1,4 +1,3 @@
-#include <string>
 #include <numeric>
 #include "doctest.h"
 #include "../gmsdata.h"

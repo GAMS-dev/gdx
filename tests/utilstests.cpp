@@ -23,7 +23,7 @@ namespace tests::utilstests {
 
     class ClassWithContains : public utils::IContainsPredicate<int> {
     public:
-        bool contains(const int &elem) const override {
+        [[nodiscard]] bool contains(const int &elem) const override {
             return elem == 23;
         }
     };

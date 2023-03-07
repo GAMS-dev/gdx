@@ -143,7 +143,7 @@ namespace gdlib::datastorage {
             Clear();
         }
 
-        int Count() const {
+        [[nodiscard]] int Count() const {
             return FCount;
         }
 

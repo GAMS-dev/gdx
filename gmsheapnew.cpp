@@ -327,7 +327,7 @@ namespace gdlib::gmsheapnew {
         cntAvail = obj.ListCount;
     }
 
-    THeapMgr::THeapMgr(const std::string Name) : BlockMgr{"BBMgr_"s + Name}, spName{std::move(Name)} {
+    THeapMgr::THeapMgr(const std::string &Name) : BlockMgr{"BBMgr_"s + Name}, spName{Name} {
         prvClear();
     }
 
@@ -478,7 +478,7 @@ namespace gdlib::gmsheapnew {
             *P = std::malloc(NewSize);
         } else *P = std::realloc(*P, NewSize);
 #else
-        void *PNew{};
+        void *PNew;
         ReAllocCnt++;
         ReAllocUsed -= OldSize;
         ReAllocUsed += NewSize;
@@ -525,7 +525,7 @@ namespace gdlib::gmsheapnew {
 
     void THeapMgr::XReAllocMem64(void** P, int64_t OldSize, int64_t NewSize)
     {
-        void *PNew{};
+        void *PNew;
 #ifdef BYPASSHEAPMGR
         if(NewSize <= 0) {
             if(OldSize > 0 && P) std::free(P);
