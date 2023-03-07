@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../gdlib/gmsobj.h"
+#include "gmsobj.h"
 
 namespace gdlib::gmsheapnew {
 

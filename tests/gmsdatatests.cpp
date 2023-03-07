@@ -1,7 +1,7 @@
 #include <string>
 #include <numeric>
-#include "../doctest.h"
-#include "../../gdlib/gmsdata.h"
+#include "doctest.h"
+#include "../gmsdata.h"
 
 using namespace std::literals::string_literals;
 using namespace gdlib::gmsdata;

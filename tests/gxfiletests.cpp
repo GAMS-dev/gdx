@@ -1,3 +1,8 @@
+#if defined(_WIN32)
+#include <Windows.h>
+#undef max
+#endif
+
 #include <filesystem>
 #include "doctest.h"
 #include "../gxfile.h"
@@ -6,52 +11,81 @@
 #include <random>
 
 using namespace std::literals::string_literals;
-using namespace gdxinterface;
+using namespace gxfile;
 
-namespace tests::gdxinterfacetests {
-    TEST_SUITE_BEGIN("GDX interface tests");
+namespace tests::gxfiletests {
+    TEST_SUITE_BEGIN("GDX object tests");
 
-    std::list<std::function<GDXInterface*()>> getBuilders();
-    void basicTest(const std::function<void(GDXInterface&)> &cb, int ub = -1);
-    void testReads(const std::string &filename, const std::function<void(GDXInterface&)> &cb);
-    void testWrites(const std::string &filename, const std::function<void(GDXInterface&)> &cb);
-    void writeMappedRecordsOutOfOrder(GDXInterface &pgx);
-    void domainSetGetTestSetupPrefix(GDXInterface &pgx);
+#if !defined(_WIN32)
+    static bool setEnvironmentVariableUnix(const std::string &name, const std::string &value = ""s) {
+        if(name.empty()) return false;
+        if(value.empty()) { // delete name from env
+            unsetenv(name.c_str());
+            return true;
+        }
+        return !setenv(name.c_str(), value.c_str(), 1);
+    }
+#endif
+
+    bool setEnvironmentVar(const std::string& name, const std::string &val);
+    bool setEnvironmentVar(const std::string& name, const std::string &val)
+    {
+#if defined(_WIN32) || defined(_WIN64)
+        return SetEnvironmentVariableA(name.c_str(), val.c_str());
+#else
+        return setEnvironmentVariableUnix(name, val);
+#endif
+    }
+
+    void unsetEnvironmentVar(const std::string& name);
+    void unsetEnvironmentVar(const std::string& name)
+    {
+#if defined(_WIN32) || defined(_WIN64)
+        SetEnvironmentVariableA(name.c_str(), nullptr);
+#else
+        setEnvironmentVariableUnix(name);
+#endif
+    }
+
+    std::list<std::function<TGXFileObj*()>> getBuilders();
+    void basicTest(const std::function<void(TGXFileObj&)> &cb, int ub = -1);
+    void testReads(const std::string &filename, const std::function<void(TGXFileObj&)> &cb);
+    void testWrites(const std::string &filename, const std::function<void(TGXFileObj&)> &cb);
+    void writeMappedRecordsOutOfOrder(TGXFileObj &pgx);
+    void domainSetGetTestSetupPrefix(TGXFileObj &pgx);
     std::string acquireGDXforModel(const std::string &model);
     void commonSetGetDomainTests(const std::vector<std::string> &domainNames,
                                  const std::vector<int> &domainIndices);
-    void testReadModelGDX(const std::string &model, const std::function<void(GDXInterface&)> &func);
+    void testReadModelGDX(const std::string &model, const std::function<void(TGXFileObj&)> &func);
     void testWithCompressConvert(bool compress = false, const std::string &convert = ""s);
 
-    static std::ofstream slowdownReport {"slowdown.txt"};
-
-    std::list<std::function<GDXInterface*()>> getBuilders() {
+    std::list<std::function<TGXFileObj*()>> getBuilders() {
         static std::string ErrMsg;
-        std::list<std::function<GDXInterface*()>> builders {
+        std::list<std::function<TGXFileObj*()>> builders {
                 [&]() { return new gxfile::TGXFileObj{ErrMsg}; }
         };
         return builders;
     }
 
-    void basicTest(const std::function<void(GDXInterface&)> &cb, int ub) {
+    void basicTest(const std::function<void(TGXFileObj&)> &cb, int ub) {
         int i {};
         for(const auto &builder : getBuilders()) {
             if(ub != -1 && i++ >= ub) break;
-            GDXInterface *pgx = builder();
+            TGXFileObj *pgx = builder();
             cb(*pgx);
             delete pgx;
         }
     }
 
     TEST_CASE("Simple setup and teardown of a GDX object") {
-        basicTest([](GDXInterface &pgx) {
+        basicTest([](TGXFileObj &pgx) {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             REQUIRE_EQ(0, pgx.gdxGetMemoryUsed());
         });
     }
 
     TEST_CASE("Check DLL version") {
-        basicTest([](GDXInterface &pgx) {
+        basicTest([](TGXFileObj &pgx) {
             std::array<char, GMS_SSSIZE> versionStr {};
             REQUIRE(pgx.gdxGetDLLVersion(versionStr.data()));
             REQUIRE(utils::starts_with(versionStr.data(), "GDX Library"s));
@@ -60,7 +94,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Just create a file") {
         const std::string fn {"create.gdx"};
-        basicTest([&](GDXInterface &pgx) {
+        basicTest([&](TGXFileObj &pgx) {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
 
             int ErrNr;
@@ -105,7 +139,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test trying to open a file for reading that does not exist") {
-        basicTest([&](GDXInterface &pgx) {
+        basicTest([&](TGXFileObj &pgx) {
             auto checksAfterOpenAttempt = [&](int ErrNr) {
                 REQUIRE_EQ(2, ErrNr);
                 char errMsg[GMS_SSSIZE];
@@ -123,7 +157,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test renaming an UEL") {
         std::string fn{"rename_uel.gdx"};
-        basicTest([&](GDXInterface &pgx) {
+        basicTest([&](TGXFileObj &pgx) {
             int ErrNr;
             REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetest", ErrNr));
 
@@ -148,7 +182,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test get current active symbol dimension") {
         std::string fn{"sym_dim.gdx"};
-        basicTest([&](GDXInterface &pgx) {
+        basicTest([&](TGXFileObj &pgx) {
             int ErrNr;
             REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetest", ErrNr));
             REQUIRE(pgx.gdxDataWriteRawStart("mysym", "Some explanatory text.", 2, dt_par, 0));
@@ -162,7 +196,7 @@ namespace tests::gdxinterfacetests {
 
     template<typename T>
     void testWriteOp(const std::string &fn,
-                     const std::function<void(GDXInterface&)> &cb,
+                     const std::function<void(TGXFileObj&)> &cb,
                      bool cleanup = false) {
         if(fn.empty()) return;
 
@@ -180,7 +214,7 @@ namespace tests::gdxinterfacetests {
 
     template<typename T>
     void testReadOp(const std::string &fn,
-                    const std::function<void(GDXInterface&)> &cb,
+                    const std::function<void(TGXFileObj&)> &cb,
                     bool cleanup = false) {
         if(fn.empty()) return;
 
@@ -197,17 +231,17 @@ namespace tests::gdxinterfacetests {
             std::filesystem::remove(fn);
     }
 
-    void testReads(const std::string &filename, const std::function<void(GDXInterface&)> &cb) {
+    void testReads(const std::string &filename, const std::function<void(TGXFileObj&)> &cb) {
         testReadOp<gxfile::TGXFileObj>(filename, cb);
     }
 
-    void testWrites(const std::string &filename, const std::function<void(GDXInterface&)> &cb) {
+    void testWrites(const std::string &filename, const std::function<void(TGXFileObj&)> &cb) {
         testWriteOp<gxfile::TGXFileObj>(filename, cb);
     }
 
     TEST_CASE("Test adding uels (raw mode)") {
         std::string filename { "uel.gdx"s };
-        testWrites(filename, [](GDXInterface &pgx) {
+        testWrites(filename, [](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw(""));
             REQUIRE(pgx.gdxUELRegisterRaw("New-York"));
@@ -216,7 +250,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_FALSE(pgx.gdxUELRegisterRaw(tooLong.c_str()));
             REQUIRE(pgx.gdxUELRegisterDone());
         });
-        testReads(filename, [](GDXInterface &pgx) {
+        testReads(filename, [](TGXFileObj &pgx) {
             int uelCnt, highMap, uelMap;
             char uel[GMS_SSSIZE];
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
@@ -243,7 +277,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test adding uels (string mode)") {
         auto filename { "uel.gdx"s };
-        testWrites(filename, [](GDXInterface& pgx) {
+        testWrites(filename, [](TGXFileObj& pgx) {
             REQUIRE(pgx.gdxUELRegisterStrStart());
             int uelNr;
             REQUIRE(pgx.gdxUELRegisterStr("TheOnlyUEL", uelNr));
@@ -253,7 +287,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_FALSE(pgx.gdxUELRegisterStr(tooLong.c_str(), uelNr));
             REQUIRE(pgx.gdxUELRegisterDone());
         });
-        testReads(filename, [](GDXInterface& pgx) {
+        testReads(filename, [](TGXFileObj& pgx) {
             int uelCnt, highMap, uelMap;
             char uel[GMS_SSSIZE];
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
@@ -270,14 +304,14 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test adding uels (mapped mode)") {
         auto filename{ "uel_mapped.gdx"s };
-        testWrites(filename, [](GDXInterface& pgx) {
+        testWrites(filename, [](TGXFileObj& pgx) {
             REQUIRE(pgx.gdxUELRegisterMapStart());
             REQUIRE_FALSE(pgx.gdxUELRegisterMap(3, std::string(64, 'i').c_str()));
             REQUIRE(pgx.gdxUELRegisterMap(3, "TheOnlyUEL"));
             REQUIRE(pgx.gdxUELRegisterMap(8, std::string(63, 'i').c_str()));
             REQUIRE(pgx.gdxUELRegisterDone());
         });
-        testReads(filename, [](GDXInterface& pgx) {
+        testReads(filename, [](TGXFileObj& pgx) {
             int uelCnt, highMap, uelMap;
             char uel[GMS_SSSIZE];
 
@@ -310,7 +344,7 @@ namespace tests::gdxinterfacetests {
         std::string fn {"rwrecordraw.gdx"};
         int key;
         TgdxValues values{};
-        testWrites(fn, [&](GDXInterface &pgx) {
+        testWrites(fn, [&](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw("TheFirstUEL"));
             REQUIRE(pgx.gdxUELRegisterRaw("TheSecondUEL"));
@@ -330,7 +364,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxDataWriteRawStart("myscalar", "This is a scalar!", 0, dt_par, 0));
             REQUIRE(pgx.gdxDataWriteDone());
         });
-        testReads(fn, [&](GDXInterface &pgx) {
+        testReads(fn, [&](TGXFileObj &pgx) {
             char uel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
@@ -424,6 +458,8 @@ namespace tests::gdxinterfacetests {
         }
     };
 
+    using TgdxStrIndex = std::array<std::string, GMS_MAX_INDEX_DIM>;
+
     class StrIndexBuffers {
         std::array<std::array<char, GMS_SSSIZE>, GMS_MAX_INDEX_DIM> bufContents{};
         std::array<char*, GMS_MAX_INDEX_DIM> bufPtrs{};
@@ -457,7 +493,7 @@ namespace tests::gdxinterfacetests {
         std::string fn{"rwrecordstr.gdx"};
         StrIndexBuffers keyNames;
         TgdxValues values{};
-        testWrites(fn, [&](GDXInterface &pgx) {
+        testWrites(fn, [&](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxDataWriteStrStart("mysym", "This is my symbol!", 1, dt_par, 0));
             values[GMS_VAL_LEVEL] = 3.141;
 
@@ -481,7 +517,7 @@ namespace tests::gdxinterfacetests {
 
             REQUIRE(pgx.gdxDataWriteDone());
         });
-        testReads(fn, [&](GDXInterface &pgx) {
+        testReads(fn, [&](TGXFileObj &pgx) {
             int NrRecs;
             REQUIRE(pgx.gdxDataReadStrStart(1, NrRecs));
             REQUIRE_EQ(3, NrRecs);
@@ -518,7 +554,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test setting and resetting special values") {
-        basicTest([&](GDXInterface &pgx) {
+        basicTest([&](TGXFileObj &pgx) {
             std::array<double, GMS_SVIDX_MAX> moddedSpecVals {}, queriedSpecVals {};
             REQUIRE(pgx.gdxGetSpecialValues(moddedSpecVals.data()));
             moddedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin] = 0.0;
@@ -535,7 +571,7 @@ namespace tests::gdxinterfacetests {
         });
     }
 
-    void writeMappedRecordsOutOfOrder(GDXInterface &pgx) {
+    void writeMappedRecordsOutOfOrder(TGXFileObj &pgx) {
         // very irregular user uel nr -> uel name mapping
         const std::map<int, std::string> userUelMapping {
                 {3, "z"},
@@ -575,7 +611,7 @@ namespace tests::gdxinterfacetests {
         std::string fn{ "rwrecordmapped_ooo.gdx" };
         int key;
         TgdxValues values{};
-        testWrites(fn, [&](GDXInterface &pgx) {
+        testWrites(fn, [&](TGXFileObj &pgx) {
             int uelCnt, highMap;
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
             REQUIRE_EQ(0, uelCnt);
@@ -605,7 +641,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             REQUIRE_EQ(0, pgx.gdxDataErrorCount());
         });
-        testReads(fn, [&](GDXInterface& pgx) {
+        testReads(fn, [&](TGXFileObj& pgx) {
             char uel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
@@ -655,7 +691,7 @@ namespace tests::gdxinterfacetests {
         std::string fn{ "rwrecordmapped_io.gdx" };
         int key;
         TgdxValues values{};
-        testWrites(fn, [&](GDXInterface &pgx) {
+        testWrites(fn, [&](TGXFileObj &pgx) {
             int uelCnt, highMap;
             REQUIRE(pgx.gdxUMUelInfo(uelCnt, highMap));
             REQUIRE_EQ(0, uelCnt);
@@ -680,7 +716,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             REQUIRE_EQ(0, pgx.gdxDataErrorCount());
         });
-        testReads(fn, [&](GDXInterface& pgx) {
+        testReads(fn, [&](TGXFileObj& pgx) {
             char uel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
@@ -717,7 +753,7 @@ namespace tests::gdxinterfacetests {
         std::filesystem::remove(fn);
     }
 
-    void domainSetGetTestSetupPrefix(GDXInterface &pgx) {
+    void domainSetGetTestSetupPrefix(TGXFileObj &pgx) {
         int numSyms, numUels;
         REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
         REQUIRE_EQ(0, numUels);
@@ -757,7 +793,7 @@ namespace tests::gdxinterfacetests {
             newSymDomainIndices[i] = domainIndices[i];
         }
 
-        auto domainSetGetTestSetupSuffix = [](GDXInterface &pgx) {
+        auto domainSetGetTestSetupSuffix = [](TGXFileObj &pgx) {
             int numSyms, numUels;
             REQUIRE(pgx.gdxDataWriteDone());
             REQUIRE(pgx.gdxSystemInfo(numSyms, numUels));
@@ -768,7 +804,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(4, newSymNr);
         };
 
-        auto testSetGetDomainX = [&](GDXInterface &pgx) {
+        auto testSetGetDomainX = [&](TGXFileObj &pgx) {
             StrIndexBuffers sib {&newSymDomainNames};
             REQUIRE(pgx.gdxSymbolSetDomainX(4, sib.cptrs()));
             StrIndexBuffers domainIds {};
@@ -777,7 +813,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(newSymDomainNames[1], domainIds[1].str());
         };
 
-        auto testSetGetDomain = [&](GDXInterface &pgx) {
+        auto testSetGetDomain = [&](TGXFileObj &pgx) {
             domainSetGetTestSetupPrefix(pgx);
             StrIndexBuffers sib {&newSymDomainNames};
             REQUIRE(pgx.gdxSymbolSetDomain(sib.cptrs()));
@@ -788,20 +824,20 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(newSymDomainIndices[1], domainSyNrs[1]);
         };
 
-        testWrites(fns[0], [&](GDXInterface &pgx) {
+        testWrites(fns[0], [&](TGXFileObj &pgx) {
             domainSetGetTestSetupPrefix(pgx);
             domainSetGetTestSetupSuffix(pgx);
             testSetGetDomainX(pgx);
         });
 
-        testReads(fns[0], [&](GDXInterface &pgx) {
+        testReads(fns[0], [&](TGXFileObj &pgx) {
             StrIndexBuffers domainIds {};
             REQUIRE(pgx.gdxSymbolGetDomainX(4, domainIds.ptrs()));
             REQUIRE_EQ(newSymDomainNames[0], domainIds[0].str());
             REQUIRE_EQ(newSymDomainNames[1], domainIds[1].str());
         });
 
-        testWrites(fns[1],[&](GDXInterface &pgx) {
+        testWrites(fns[1],[&](TGXFileObj &pgx) {
             testSetGetDomain(pgx);
         });
 
@@ -817,7 +853,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test adding a set alias") {
         const std::string fn {"addalias_wrap.gdx"};
-        testWrites(fn, [&](GDXInterface &pgx) {
+        testWrites(fn, [&](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxDataWriteStrStart("i", "A set", 1, dt_set, 0));
             REQUIRE(pgx.gdxDataWriteDone());
             int numSymbols, numUels, symbolCountBefore;
@@ -845,7 +881,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test creating and querying element text for sets") {
         const std::string fn{ "elemtxt_wrap.gdx" }, f2{ "elemtxt_port.gdx" };
-        testWrites(fn, [&](GDXInterface& pgx) {
+        testWrites(fn, [&](TGXFileObj& pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw("onlyuel"));
             REQUIRE(pgx.gdxUELRegisterDone());
@@ -884,7 +920,7 @@ namespace tests::gdxinterfacetests {
         const std::string fn {"tmpfile.gdx"s};
         int key;
         TgdxValues values{};
-        basicTest([&](GDXInterface& pgx) {
+        basicTest([&](TGXFileObj& pgx) {
             if(std::filesystem::exists(fn))
                 std::filesystem::remove(fn);
             int errNr;
@@ -933,7 +969,7 @@ namespace tests::gdxinterfacetests {
         return gdxfn;
     }
 
-    void testReadModelGDX(const std::string &model, const std::function<void(GDXInterface&)> &func) {
+    void testReadModelGDX(const std::string &model, const std::function<void(TGXFileObj&)> &func) {
         const std::string gdxfn = acquireGDXforModel(model);
         testReads(gdxfn, func);
         std::filesystem::remove(gdxfn);
@@ -950,7 +986,7 @@ namespace tests::gdxinterfacetests {
             "seattle"s, "san-diego"s, "new-york"s, "chicago"s, "topeka"s
         };
         const std::string gdxfn = acquireGDXforModel("trnsport"s);
-        testReads(gdxfn, [&](GDXInterface &pgx) {
+        testReads(gdxfn, [&](TGXFileObj &pgx) {
             REQUIRE_GT(pgx.gdxGetMemoryUsed(), 0);
             int numSymbols, numUels;
             pgx.gdxSystemInfo(numSymbols, numUels);
@@ -1047,7 +1083,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Tests related to universe") {
-        basicTest([](GDXInterface &pgx) {
+        basicTest([](TGXFileObj &pgx) {
             int errNr;
             auto fn = "universe_tests.gdx"s;
             REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetests", errNr));
@@ -1109,7 +1145,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test domain checking for subset") {
         const std::string fn {"xyz.gdx"};
-        basicTest([&](GDXInterface &pgx) {
+        basicTest([&](TGXFileObj &pgx) {
             int errnr;
             REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetests", errnr));
             REQUIRE(pgx.gdxDataWriteStrStart("i", "expl", 1, dt_set, 0));
@@ -1161,7 +1197,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test writing a duplicate uel in string mode") {
-        basicTest([](GDXInterface &pgx) {
+        basicTest([](TGXFileObj &pgx) {
             int errNr;
             auto fn = "dup.gdx"s;
             REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetests", errNr));
@@ -1187,7 +1223,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test acronym facilities") {
         auto fn{ "acronyms.gdx"s };
-        testWrites(fn, [](GDXInterface &pgx) {
+        testWrites(fn, [](TGXFileObj &pgx) {
             REQUIRE_EQ(0, pgx.gdxAcronymCount());
 
             REQUIRE(pgx.gdxAcronymAdd("myacr", "my acronym", 23));
@@ -1238,7 +1274,7 @@ namespace tests::gdxinterfacetests {
             REQUIRE(pgx.gdxAcronymName(pgx.gdxAcronymValue(23), acroName));
             REQUIRE_EQ("myacr_mod"s, acroName);
         });
-        testReads(fn, [](GDXInterface &pgx) {
+        testReads(fn, [](TGXFileObj &pgx) {
             REQUIRE_EQ(2, pgx.gdxAcronymCount());
             char acroName[GMS_SSSIZE], acroText[GMS_SSSIZE];
             int acroIndex;
@@ -1251,7 +1287,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test comments addition and querying") {
         auto fn{ "comments.gdx"s };
-        testWrites(fn, [](GDXInterface &pgx) {
+        testWrites(fn, [](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxDataWriteStrStart("i", "expl text", 1, dt_set, 0));
             REQUIRE(pgx.gdxDataWriteDone());
             const auto commentStrExp {"A fancy comment!"s};
@@ -1262,14 +1298,13 @@ namespace tests::gdxinterfacetests {
             REQUIRE_FALSE(pgx.gdxSymbolAddComment(-5, "should not work"));
             REQUIRE_FALSE(pgx.gdxSymbolAddComment(std::numeric_limits<int>::max(), "should not work"));
         });
-        
-            std::filesystem::remove(fn);
+        std::filesystem::remove(fn);
     }
 
     TEST_CASE("Test writing and reading set element texts more exhaustively") {
         std::string fn{ "setelemtxt_wr.gdx" };
         // no set text
-        testWrites(fn, [&](GDXInterface &pgx) {
+        testWrites(fn, [&](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw("seattle"));
             REQUIRE(pgx.gdxUELRegisterDone());
@@ -1281,7 +1316,7 @@ namespace tests::gdxinterfacetests {
             pgx.gdxDataWriteRaw(&key, vals.data());
             pgx.gdxDataWriteDone();
         });
-        testReads(fn, [&](GDXInterface& pgx) {
+        testReads(fn, [&](TGXFileObj& pgx) {
             char txt[GMS_SSSIZE];
             int node;
             REQUIRE(pgx.gdxGetElemText(0, txt, node));
@@ -1291,7 +1326,7 @@ namespace tests::gdxinterfacetests {
         });
         
             std::filesystem::remove(fn);
-        /*testReads("concat.gdx"s, "concat.gdx"s, [&](GDXInterface& pgx) {
+        /*testReads("concat.gdx"s, "concat.gdx"s, [&](TGXFileObj& pgx) {
             std::string txt;
             int node;
             REQUIRE_FALSE(pgx.gdxGetElemText(1, txt, node));
@@ -1309,7 +1344,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Debug issue with SymbolSetDomain and write raw domain check uncovered by emp_oa_gams_jams test") {
         std::string fn{ "domaincheck.gdx" };
-        testWrites(fn, [&](GDXInterface &pgx) {
+        testWrites(fn, [&](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxStoreDomainSets());
             pgx.gdxStoreDomainSetsSet(false);
             REQUIRE_FALSE(pgx.gdxStoreDomainSets());
@@ -1345,14 +1380,14 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test writing and reading some special value scalars") {
         std::string fn{ "sv_scalars.gdx" };
-        testWrites(fn, [&](GDXInterface &pgx) {
+        testWrites(fn, [&](TGXFileObj &pgx) {
             TgdxValues vals {};
             vals[GMS_VAL_LEVEL] = 1e+300;
             REQUIRE(pgx.gdxDataWriteRawStart("undef", "", 0, dt_par, 0));
             REQUIRE(pgx.gdxDataWriteRaw(nullptr, vals.data()));
             REQUIRE(pgx.gdxDataWriteDone());
         });
-        testReads(fn, [&](GDXInterface& pgx) {
+        testReads(fn, [&](TGXFileObj& pgx) {
             int recCnt;
             REQUIRE(pgx.gdxDataReadRawStart(1, recCnt));
             int dimFirst;
@@ -1373,7 +1408,7 @@ namespace tests::gdxinterfacetests {
         };
         const std::string prod {"gdxinterfacetest"s};
         int errNr, cnt {};
-        basicTest([&](GDXInterface &pgx) {
+        basicTest([&](TGXFileObj &pgx) {
             pgx.gdxOpenWrite(getfn(cnt).c_str(), prod.c_str(), errNr);
             pgx.gdxUELRegisterRawStart();
             pgx.gdxUELRegisterRaw("a");
@@ -1385,7 +1420,7 @@ namespace tests::gdxinterfacetests {
             cnt++;
         });
         cnt = 0;
-        basicTest([&](GDXInterface &pgx) {
+        basicTest([&](TGXFileObj &pgx) {
             pgx.gdxOpenRead(getfn(cnt).c_str(), errNr);
             int uelMap;
             char uelStr[GMS_SSSIZE];
@@ -1399,9 +1434,9 @@ namespace tests::gdxinterfacetests {
 
     void testWithCompressConvert(bool compress, const std::string &convert) {
         const std::string fn {"conv_compr_wrap.gdx"}, f2 {"conv_compr_port.gdx"};
-        rtl::p3utils::P3SetEnv("GDXCOMPRESS", compress ? "1"s : "0"s);
-        rtl::p3utils::P3SetEnv("GDXCONVERT", convert);
-        testWrites(fn, [&](GDXInterface &pgx) {
+        setEnvironmentVar("GDXCOMPRESS", compress ? "1"s : "0"s);
+        setEnvironmentVar("GDXCONVERT", convert);
+        testWrites(fn, [&](TGXFileObj &pgx) {
             TgdxValues vals {};
             REQUIRE(pgx.gdxDataWriteRawStart("undef", "", 0, dt_par, 0));
             REQUIRE(pgx.gdxDataWriteRaw(nullptr, vals.data()));
@@ -1409,8 +1444,8 @@ namespace tests::gdxinterfacetests {
         });
         
             std::filesystem::remove(fn);
-        rtl::p3utils::P3UnSetEnv("GDXCOMPRESS");
-        rtl::p3utils::P3UnSetEnv("GDXCONVERT");
+        unsetEnvironmentVar("GDXCOMPRESS");
+        unsetEnvironmentVar("GDXCONVERT");
     }
 
     TEST_CASE("Test convert and compress") {
@@ -1424,7 +1459,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test symbol index max UEL length") {
-        testReadModelGDX("trnsport"s, [&](GDXInterface &pgx) {
+        testReadModelGDX("trnsport"s, [&](TGXFileObj &pgx) {
             std::array<int, GLOBAL_MAX_INDEX_DIM> lengthInfo {};
             int maxUelLen = pgx.gdxSymbIndxMaxLength(7, lengthInfo.data()); // c
             REQUIRE_EQ(9, maxUelLen); // len(san-diego)=9
@@ -1434,13 +1469,13 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test UEL table get max uel length") {
-        testReadModelGDX("trnsport"s, [&](GDXInterface &pgx) {
+        testReadModelGDX("trnsport"s, [&](TGXFileObj &pgx) {
             REQUIRE_EQ(9, pgx.gdxUELMaxLength());
         });
     }
 
     TEST_CASE("Test symbol info out of range") {
-        testReadModelGDX("trnsport"s, [&](GDXInterface &pgx) {
+        testReadModelGDX("trnsport"s, [&](TGXFileObj &pgx) {
             char symId[GMS_SSSIZE];
             int dim, typ;
             REQUIRE_FALSE(pgx.gdxSymbolInfo(99, symId, dim, typ));
@@ -1451,7 +1486,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test filter") {
-        testReadModelGDX("trnsport"s, [](GDXInterface &pgx) {
+        testReadModelGDX("trnsport"s, [](TGXFileObj &pgx) {
             int nrRecs, dimFirst;
             // uels: seattle 1, san-diego 2, new-york 3, chicago 4, topeka 5
             std::array<int, 2> filterAction { gxfile::DOMC_EXPAND, gxfile::DOMC_EXPAND },
@@ -1480,7 +1515,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test setting trace level") {
         std::string fn {"trace.gdx"s};
-        testWrites(fn, [&](GDXInterface &pgx) {
+        testWrites(fn, [&](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxSetTraceLevel((int)gxfile::TGXFileObj::TraceLevels::trl_all, "tracestr"));
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw("TheOnlyUEL"));
@@ -1498,7 +1533,7 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test classifying a map value as potential specval") {
-        basicTest([](GDXInterface &pgx) {
+        basicTest([](TGXFileObj &pgx) {
             int sv;
             REQUIRE_FALSE(pgx.gdxMapValue(23, sv));
             REQUIRE_EQ(sv_normal, sv);
@@ -1510,15 +1545,15 @@ namespace tests::gdxinterfacetests {
     }
 
     TEST_CASE("Test setting/getting auto convert flag") {
-        basicTest([](GDXInterface &pgx) {
+        basicTest([](TGXFileObj &pgx) {
             // default is AutoConvert=1/true
             REQUIRE(pgx.gdxAutoConvert(0));
             REQUIRE_FALSE(pgx.gdxAutoConvert(1));
             REQUIRE(pgx.gdxAutoConvert(1));
         });
-        basicTest([](GDXInterface &pgx) {
-            rtl::p3utils::P3SetEnv("GDXCOMPRESS", "1"s);
-            rtl::p3utils::P3SetEnv("GDXCONVERT", "v5");
+        basicTest([](TGXFileObj &pgx) {
+            setEnvironmentVar("GDXCOMPRESS", "1"s);
+            setEnvironmentVar("GDXCONVERT", "v5");
             int ErrNr;
             const std::string fn {"autoconv.gdx"s};
             REQUIRE(pgx.gdxAutoConvert(0)); // disable auto convert
@@ -1530,15 +1565,15 @@ namespace tests::gdxinterfacetests {
             REQUIRE_EQ(7, fileVer);
             REQUIRE_EQ(0, comprLevel);
             pgx.gdxClose();
-            rtl::p3utils::P3UnSetEnv("GDXCOMPRESS");
-            rtl::p3utils::P3UnSetEnv("GDXCONVERT");
+            unsetEnvironmentVar("GDXCOMPRESS");
+            unsetEnvironmentVar("GDXCONVERT");
             std::filesystem::remove(fn);
         });
     }
 
     TEST_CASE("Test reading methods with slices") {
         std::string fn{ "slice.gdx"s }, f2{ "slice_port.gdx"s };
-        testWrites(fn, [&](GDXInterface& pgx) {
+        testWrites(fn, [&](TGXFileObj& pgx) {
             StrIndexBuffers keys;
             TgdxValues values{};
             REQUIRE(pgx.gdxDataWriteStrStart("i", "three element set", 1, dt_set, 0));
@@ -1548,7 +1583,7 @@ namespace tests::gdxinterfacetests {
             }
             REQUIRE(pgx.gdxDataWriteDone());
         });
-        testReads(fn, [&](GDXInterface& pgx) {
+        testReads(fn, [&](TGXFileObj& pgx) {
             TgdxUELIndex elemCountsPerDim{}, expectedCounts{};
             expectedCounts.front() = 3;
             REQUIRE(pgx.gdxDataReadSliceStart(1, elemCountsPerDim.data()));
@@ -1577,7 +1612,7 @@ namespace tests::gdxinterfacetests {
 
     TEST_CASE("Test domain violations more extensively") {
         std::string fn{ "domviol.gdx"s };
-        testWrites(fn, [&](GDXInterface& pgx) {
+        testWrites(fn, [&](TGXFileObj& pgx) {
             REQUIRE(pgx.gdxDataWriteStrStart("i", "a set", 1, dt_set, 0));
             std::string elem{ "i"s };
             const char* key{ elem.c_str() };

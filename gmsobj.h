@@ -4,7 +4,7 @@
 #include <string>
 #include <cassert>
 #include <limits>
-#include "../utils.h"
+#include "utils.h"
 
 // ==============================================================================================================
 // Interface

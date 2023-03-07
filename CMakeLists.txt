@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 project(gdxnative)
 set(CMAKE_CXX_STANDARD 17)
 
-#set(CMAKE_SHARED_LIBRARY_PREFIX "")
-
 # dump GDX data also as YAML representation
 set(ENABLE_YAML 1)
 
@@ -30,26 +28,19 @@ if(ENABLE_YAML)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DYAML")
 endif(ENABLE_YAML)
 
-# optionally disable slow unit tests
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_SLOW_TESTS")
-
 set(common
-		expertapi/gclgms.h expertapi/gclgms.c
-
-		rtl/p3utils.h rtl/p3utils.cpp
-		rtl/sysutils_p3.h rtl/sysutils_p3.cpp
+		gclgms.h gclgms.c
 
 		# Only needed for -DGAMSBUILD
-		expertapi/palmcc.h expertapi/palmcc.c
+		palmcc.h palmcc.c
 
-		gdlib/gmsstrm.h gdlib/gmsstrm.cpp
-		gdlib/gmsdata.h
-		gdlib/datastorage.h
-		gdlib/strhash.h
-		gdlib/gmsobj.h gdlib/gmsobj.cpp
-		gdlib/gmsheapnew.h gdlib/gmsheapnew.cpp
+		gmsstrm.h gmsstrm.cpp
+		gmsdata.h
+		datastorage.h
+		strhash.h
+		gmsobj.h gmsobj.cpp
+		gmsheapnew.h gmsheapnew.cpp
 
-		gdxinterface.h
 		utils.h utils.cpp
 		gxfile.h gxfile.cpp
 
@@ -60,16 +51,16 @@ if(ENABLE_YAML)
 	set(common ${common} yaml.h yaml.cpp)
 endif(ENABLE_YAML)
 
-set(common_neo ${common} cwrap/cwrap.h cwrap/cwrap.cpp)
+set(common_neo ${common} cwrap.h cwrap.cpp)
 
 set(tests
 		tests/doctestmain.cpp
-		tests/gdxinterfacetests.cpp
+		tests/gxfiletests.cpp
 		tests/utilstests.cpp
-		tests/gdlib/gmsobjtests.cpp
-		tests/gdlib/gmsdatatests.cpp
-		tests/gdlib/strhashtests.cpp
-		tests/gdlib/gmsheapnewtests.cpp
+		tests/gmsobjtests.cpp
+		tests/gmsdatatests.cpp
+		tests/strhashtests.cpp
+		tests/gmsheapnewtests.cpp
 )
 
 add_library(gdxcclib64 SHARED ${common_neo})

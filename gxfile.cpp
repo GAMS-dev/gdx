@@ -1,6 +1,5 @@
-#include "rtl/sysutils_p3.h"
-#include "gdlib/gmsstrm.h"
-#include "expertapi/palmcc.h"
+#include "gmsstrm.h"
+#include "palmcc.h"
 
 #include "gxfile.h"
 #include "utils.h"
@@ -16,11 +15,35 @@
 #define WRYAML(instr) /**/
 #endif
 
-using namespace gdxinterface;
+#if defined(_WIN32)
+#include <Windows.h>
+#undef max
+#undef GetObject
+#endif
+
 using namespace gdlib::gmsstrm;
 using namespace std::literals::string_literals;
 
 namespace gxfile {
+
+    std::string QueryEnvironmentVariable(const std::string &Name) {
+#if defined(_WIN32)
+        int len = GetEnvironmentVariableA(Name.c_str(), nullptr, 0);
+        if (!len) return ""s;
+        else {
+            std::vector<char> buf(len);
+            GetEnvironmentVariableA(Name.c_str(), buf.data(), len);
+            std::string val(buf.begin(), buf.end()-1); // no terminating zero
+            if (val.length() > 255) val = val.substr(0, 255);
+            return val;
+        }
+#else
+        const char* s = std::getenv(Name.c_str());
+        std::string sout = s == nullptr ? ""s : s;
+        if (sout.length() > 255) sout = sout.substr(0, 255);
+        return sout;
+#endif
+    }
 
     bool CanBeQuoted(const char *s);
     bool GoodUELString(const char *s, size_t slen);
@@ -65,9 +88,7 @@ namespace gxfile {
     static const std::string auditLine {"GDX Library      00.0.0 ffffffff May  4, 1970  (AUDIT) XYZ arch xybit/myOS"};
 #endif
 
-    using UELTableImplChoice = TUELTableLegacy;
-
-    NullBuffer null_buffer;
+    using UELTableImplChoice = TUELTable;
 
     //version = 5 has 32 bit offsets and no compression
     //version = 6 introduced compression
@@ -229,7 +250,7 @@ namespace gxfile {
     }
 
     int ConvertGDXFile(const std::string &fn, const std::string &MyComp) {
-        std::string Conv {utils::trim(utils::uppercase(rtl::sysutils_p3::QueryEnvironmentVariable(strGDXCONVERT)))};
+        std::string Conv {utils::trim(utils::uppercase(QueryEnvironmentVariable(strGDXCONVERT)))};
         if(Conv.empty()) Conv = "V7"s;
         std::string Comp = Conv == "V5" ? ""s : (!GetEnvCompressFlag() ? "U" : "C");
         if(utils::sameText(Conv+Comp, "V7"+MyComp)) return 0;
@@ -300,7 +321,7 @@ namespace gxfile {
     }
 
     int GetEnvCompressFlag() {
-        std::string s{ rtl::sysutils_p3::QueryEnvironmentVariable(strGDXCOMPRESS) };
+        std::string s{ QueryEnvironmentVariable(strGDXCOMPRESS) };
         // Note: the default is disabled
         if(s.empty()) return 0;
         char c { static_cast<char>(utils::toupper(s.front())) };
@@ -397,8 +418,8 @@ namespace gxfile {
         NameList = std::make_unique<TNameList>();
         NameList->OneBased = true;
         UELTable = std::make_unique<UELTableImplChoice>();
-        AcronymList = std::make_unique<TAcronymListImpl>();
-        FilterList = std::make_unique<TFilterListImpl>();
+        AcronymList = std::make_unique<TAcronymList>();
+        FilterList = std::make_unique<TFilterList>();
         FFile->WriteByte(gdxHeaderNr);
         FFile->WriteString(gdxHeaderId);
         VersionRead = VERSION;
@@ -953,7 +974,7 @@ namespace gxfile {
         if (utils::in(fmode, fr_str_data, fr_map_data, fr_mapr_data, fr_raw_data))
             gdxDataReadDone();
         NrMappedAdded = 0;
-        TIntegerMappingImpl ExpndList;
+        TIntegerMapping ExpndList;
         ErrorList = nullptr;
         CurSyPtr = nullptr;
         SortList = nullptr;
@@ -1631,7 +1652,7 @@ namespace gxfile {
 
     int TGXFileObj::gdxErrorStrStatic(int ErrNr, char * ErrMsg) {
         const auto it = errorCodeToStr.find(ErrNr);
-        utils::assignStrToBuf(it == errorCodeToStr.end() ? rtl::sysutils_p3::SysErrorMessage(ErrNr) : it->second, ErrMsg, GMS_SSSIZE);
+        utils::assignStrToBuf(it == errorCodeToStr.end() ? SysErrorMessage(ErrNr) : it->second, ErrMsg, GMS_SSSIZE);
         return true;
     }
 
@@ -1930,8 +1951,8 @@ namespace gxfile {
         int NrElem {FFile->ReadInteger()};
         NameList = std::make_unique<TNameList>();
         NameList->OneBased = true;
-        AcronymList = std::make_unique<TAcronymListImpl>();
-        FilterList = std::make_unique<TFilterListImpl>();
+        AcronymList = std::make_unique<TAcronymList>();
+        FilterList = std::make_unique<TFilterList>();
         const int NrElemsOfSym = NrElem;
         for(int N{1}; N<=NrElemsOfSym; N++) {
             std::string S {FFile->ReadString()};
@@ -3586,7 +3607,7 @@ namespace gxfile {
             return false;
         }
 
-        TIntegerMappingImpl DomainIndxs;
+        TIntegerMapping DomainIndxs;
 
         //-- Note: PrepareSymbolRead checks for the correct status
         TIndex XDomains = utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED);
@@ -3826,8 +3847,8 @@ namespace gxfile {
         TgdxValues Values;
         int FDim;
         for(int D{}; D<FCurrentDim; D++) {
-            SliceIndxs[D] = std::make_optional<TIntegerMappingImpl>();
-            SliceRevMap[D] = std::make_optional<TIntegerMappingImpl>();
+            SliceIndxs[D] = std::make_optional<TIntegerMapping>();
+            SliceRevMap[D] = std::make_optional<TIntegerMapping>();
         }
         while (DoRead(Values.data(), FDim))
             for (int D{}; D < FCurrentDim; D++)
@@ -4388,23 +4409,23 @@ namespace gxfile {
         return gdxDataReadRawFastFilt_DP(Indx, Vals, Uptr);
     }
 
-    int TUELTableLegacy::size() const {
+    int TUELTable::size() const {
         return FCount;
     }
 
-    bool TUELTableLegacy::empty() const {
+    bool TUELTable::empty() const {
         return !FCount;
     }
 
-    int TUELTableLegacy::GetUserMap(int i) {
+    int TUELTable::GetUserMap(int i) {
         return *GetObject(i);
     }
 
-    void TUELTableLegacy::SetUserMap(int EN, int N) {
+    void TUELTable::SetUserMap(int EN, int N) {
         *GetObject(EN) = N;
     }
 
-    int TUELTableLegacy::NewUsrUel(int EN) {
+    int TUELTable::NewUsrUel(int EN) {
         int res = *GetObject(EN);
         if(res < 0) {
             res = UsrUel2Ent->GetHighestIndex() + 1;
@@ -4415,7 +4436,7 @@ namespace gxfile {
         return res;
     }
 
-    int TUELTableLegacy::AddUsrNew(const char *s, size_t slen) {
+    int TUELTable::AddUsrNew(const char *s, size_t slen) {
         int EN {AddObject(s, slen, -1)};
         int res { *GetObject(EN)};
         if(res < 0) {
@@ -4427,7 +4448,7 @@ namespace gxfile {
         return res;
     }
 
-    int TUELTableLegacy::AddUsrIndxNew(const char *s, size_t slen, int UelNr) {
+    int TUELTable::AddUsrIndxNew(const char *s, size_t slen, int UelNr) {
         int EN { AddObject(s, slen, -1) };
         int res { *GetObject(EN) };
         if(res < 0) {
@@ -4441,57 +4462,57 @@ namespace gxfile {
         return res;
     }
 
-    int TUELTableLegacy::GetMaxUELLength() const {
+    int TUELTable::GetMaxUELLength() const {
         int maxLen{};
         for(int i{}; i<(int)Buckets.size(); i++)
             maxLen = std::max<int>(static_cast<int>(strlen(Buckets[i]->StrP)), maxLen);
         return maxLen;
     }
 
-    TUELTableLegacy::TUELTableLegacy() {
+    TUELTable::TUELTable() {
         //Buckets.reserve(10000);
         OneBased = true;
-        UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
+        UsrUel2Ent = std::make_unique<TIntegerMapping>();
         ResetMapToUserStatus();
     }
 
-    int TUELTableLegacy::IndexOf(const char *s) {
+    int TUELTable::IndexOf(const char *s) {
         return TXStrHashListImpl<int>::IndexOf(s);
     }
 
-    int TUELTableLegacy::AddObject(const char *id, size_t idlen, int mapping) {
+    int TUELTable::AddObject(const char *id, size_t idlen, int mapping) {
         return TXStrHashListImpl<int>::AddObject(id, idlen, mapping);
     }
 
-    int TUELTableLegacy::StoreObject(const char *id, size_t idlen, int mapping) {
+    int TUELTable::StoreObject(const char *id, size_t idlen, int mapping) {
         return TXStrHashListImpl<int>::StoreObject(id, idlen, mapping);
     }
 
-    const char *TUELTableLegacy::operator[](int index) const {
+    const char *TUELTable::operator[](int index) const {
         return GetString(index);
     }
 
-    void TUELTableLegacy::RenameEntry(int N, const char *s) {
+    void TUELTable::RenameEntry(int N, const char *s) {
         TXStrHashListImpl<int>::RenameEntry(N, s);
     }
 
-    int TUELTableLegacy::MemoryUsed() const {
+    int TUELTable::MemoryUsed() const {
         return (int)TXStrHashListImpl<int>::MemoryUsed() + UsrUel2Ent->MemoryUsed();
     }
 
-    void TUELTableLegacy::SaveToStream(TXStreamDelphi &S) {
+    void TUELTable::SaveToStream(TXStreamDelphi &S) {
         TXStrHashListImpl<int>::SaveToStream(S);
     }
 
-    void TUELTableLegacy::LoadFromStream(TXStreamDelphi &S) {
+    void TUELTable::LoadFromStream(TXStreamDelphi &S) {
         TXStrHashListImpl<int>::LoadFromStream(S);
-        if(UsrUel2Ent) UsrUel2Ent = std::make_unique<TIntegerMappingImpl>();
+        if(UsrUel2Ent) UsrUel2Ent = std::make_unique<TIntegerMapping>();
         for(int N{1}; N<=FCount; N++)
             *GetObject(N) = -1;
         ResetMapToUserStatus();
     }
 
-    TUELUserMapStatus IUELTable::GetMapToUserStatus() {
+    TUELUserMapStatus TUELTable::GetMapToUserStatus() {
         if(FMapToUserStatus == map_unknown) {
             int LV {-1};
             bool C {true};
@@ -4513,7 +4534,7 @@ namespace gxfile {
         return FMapToUserStatus;
     }
 
-    void IUELTable::ResetMapToUserStatus() {
+    void TUELTable::ResetMapToUserStatus() {
         FMapToUserStatus = map_unknown;
     }
 
@@ -4536,41 +4557,41 @@ namespace gxfile {
         modeActive[mode] = true;
     }
 
-    TAcronymListLegacy::~TAcronymListLegacy() {
+    TAcronymList::~TAcronymList() {
         for (int N{}; N<FList.GetCount(); N++)
             delete FList[N];
     }
 
-    int TAcronymListLegacy::FindEntry(int Map) {
+    int TAcronymList::FindEntry(int Map) {
         for (int N{}; N<FList.GetCount(); N++)
             if (FList[N]->AcrMap == Map)
                 return N;
         return -1;
     }
 
-    int TAcronymListLegacy::FindName(const char *Name) {
+    int TAcronymList::FindName(const char *Name) {
         for (int N{}; N<FList.GetCount(); N++)
             if (utils::sameTextPChar(FList[N]->AcrName.c_str(), Name))
                 return N;
         return -1;
     }
     
-    int TAcronymListLegacy::AddEntry(const std::string& Name, const std::string& Text, int Map) {
+    int TAcronymList::AddEntry(const std::string& Name, const std::string& Text, int Map) {
         return FList.Add(new TAcronym{ Name, Text, Map });
     }
     
-    void TAcronymListLegacy::CheckEntry(int Map) {
+    void TAcronymList::CheckEntry(int Map) {
         if (FindEntry(Map) < 0)
             AddEntry("", "", Map);
     }
     
-    void TAcronymListLegacy::SaveToStream(gdlib::gmsstrm::TXStreamDelphi& S) {
+    void TAcronymList::SaveToStream(gdlib::gmsstrm::TXStreamDelphi& S) {
         S.WriteInteger(FList.GetCount());
         for (int N{}; N < FList.GetCount(); N++)
             FList[N]->SaveToStream(S);
     }
     
-    void TAcronymListLegacy::LoadFromStream(gdlib::gmsstrm::TXStreamDelphi& S) {
+    void TAcronymList::LoadFromStream(gdlib::gmsstrm::TXStreamDelphi& S) {
         int Cnt{ S.ReadInteger() };
         FList.Clear();
         FList.SetCapacity(Cnt);
@@ -4578,22 +4599,22 @@ namespace gxfile {
             FList.Add(new TAcronym{ S });
     }
     
-    int TAcronymListLegacy::MemoryUsed() {
+    int TAcronymList::MemoryUsed() {
         int res{ (int)FList.MemoryUsed() + FList.GetCount() * (int)sizeof(TAcronym*) };
         for (int N{}; N < FList.GetCount(); N++)
             res += FList[N]->MemoryUsed();
         return res;
     }
 
-    inline int TAcronymListLegacy::size() const {
+    inline int TAcronymList::size() const {
         return FList.GetCount();
     }
 
-    TAcronym &TAcronymListLegacy::operator[](int Index) {
+    TAcronym &TAcronymList::operator[](int Index) {
         return *FList[Index];
     }
 
-    void TFilterListLegacy::AddFilter(TDFilter *F) {
+    void TFilterList::AddFilter(TDFilter *F) {
         for(int N{}; N<FList.size(); N++) {
             if(FList[N]->FiltNumber == F->FiltNumber) {
                 DeleteFilter(N);
@@ -4603,32 +4624,32 @@ namespace gxfile {
         FList.Add(F);
     }
 
-    TFilterListLegacy::~TFilterListLegacy() {
+    TFilterList::~TFilterList() {
         while(!FList.empty())
             DeleteFilter(FList.size()-1);
         FList.Clear();
     }
 
-    void TFilterListLegacy::DeleteFilter(int ix) {
+    void TFilterList::DeleteFilter(int ix) {
         delete FList[ix];
         FList.Delete(ix);
     }
 
-    TDFilter *TFilterListLegacy::FindFilter(int Nr) {
+    TDFilter *TFilterList::FindFilter(int Nr) {
         for(int N{}; N<FList.size(); N++)
             if(FList[N]->FiltNumber == Nr)
                 return FList[N];
         return nullptr;
     }
 
-    size_t TFilterListLegacy::MemoryUsed() const {
+    size_t TFilterList::MemoryUsed() const {
         size_t res{FList.MemoryUsed() + FList.size() * sizeof(TDFilter)};
         for(int N{}; N<FList.size(); N++)
             res += FList.GetConst(N)->MemoryUsed();
         return res;
     }
 
-    void TIntegerMappingLegacy::growMapping(int F) {
+    void TIntegerMapping::growMapping(int F) {
         assert(FCapacity < FMAXCAPACITY && "Already at maximum capacity: cannot grow TIntegerMapping");
         int64_t currCap {FCapacity}, prevCap{currCap};
         while(F >= currCap) {
@@ -4651,33 +4672,33 @@ namespace gxfile {
             std::memset(&PMap[prevCap], -1, sizeof(int)*(FCapacity-prevCap));
     }
 
-    TIntegerMappingLegacy::~TIntegerMappingLegacy() {
+    TIntegerMapping::~TIntegerMapping() {
         std::free(PMap);
     }
 
-    int TIntegerMappingLegacy::MemoryUsed() const {
+    int TIntegerMapping::MemoryUsed() const {
         return (int)FMapBytes;
     }
 
-    int TIntegerMappingLegacy::GetHighestIndex() const {
+    int TIntegerMapping::GetHighestIndex() const {
         return FHighestIndex;
     }
 
-    int TIntegerMappingLegacy::GetMapping(int F) const {
+    int TIntegerMapping::GetMapping(int F) const {
         return F >= 0 && F < FCapacity ? PMap[F] : -1;
     }
 
-    void TIntegerMappingLegacy::SetMapping(int F, int T) {
+    void TIntegerMapping::SetMapping(int F, int T) {
         if(F >= FCapacity) growMapping(F);
         PMap[F] = T;
         if(F > FHighestIndex) FHighestIndex = F;
     }
 
-    int TIntegerMappingLegacy::size() const {
+    int TIntegerMapping::size() const {
         return (int)FCapacity;
     }
 
-    bool TIntegerMappingLegacy::empty() const {
+    bool TIntegerMapping::empty() const {
         return !FCapacity;
     }
 

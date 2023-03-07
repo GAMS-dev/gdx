@@ -3,13 +3,90 @@
 #include <utility>
 #include <string>
 
-#include "../rtl/p3utils.h"
-
 //#define BYPASSHEAPMGR
+
+#ifdef _WIN32
+#pragma comment(lib, "iphlpapi.lib")
+//#define _WINSOCK2API_
+#define _WINSOCKAPI_   /* Prevent inclusion of winsock.h in windows.h */
+#include <Windows.h>
+#include <WinSock2.h>
+#include <io.h>
+#include <Psapi.h>  /* enough if we run on Windows 7 or later */
+#include <iphlpapi.h>
+#include <ShlObj.h>
+#include <IPTypes.h>
+#else
+# include <sys/socket.h>
+# if (defined(__linux__) || defined(__APPLE__)) /* at least, maybe for others too */
+#  if defined(__linux__)
+#   include <sys/ioctl.h>
+#   include <net/if.h>
+#  elif defined(__APPLE__)
+#   include <sys/ioctl.h>
+#   include <sys/sysctl.h>
+#   include <net/if.h>
+#   include <net/if_dl.h>
+#  endif
+# endif
+# include <netinet/in.h>
+#include <sys/utsname.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <dlfcn.h>
+#endif
+#if defined(__APPLE__)
+#include <sys/proc_info.h>
+#include <libproc.h>
+#endif
 
 using namespace std::literals::string_literals;
 
 namespace gdlib::gmsheapnew {
+
+    bool getMemoryInfo(int64_t& rss, int64_t& vss);
+
+    bool getMemoryInfo(int64_t& rss, int64_t& vss)
+    {
+#if defined(_WIN32)
+        PROCESS_MEMORY_COUNTERS info;
+        int ok = GetProcessMemoryInfo (GetCurrentProcess( ), &info, sizeof(info));
+        if (!ok)
+            return false;  /* failure */
+        rss = (int64_t) info.WorkingSetSize;
+        vss = (int64_t) info.PagefileUsage;
+        return true; /* success */
+#elif defined(__linux)
+        size_t sz;
+        FILE *fp = fopen("/proc/self/statm", "r");
+        if (!fp)
+            return false;  /* failure */
+        /* first two are VmSize, VmRSS */
+        unsigned long urss, uvss;
+        int n = fscanf (fp, "%lu %lu", &uvss, &urss);
+        fclose(fp);
+        if (2 != n)
+            return false;  /* failure */
+        sz = sysconf(_SC_PAGESIZE);
+        rss = sz * urss;
+        vss = sz * uvss;
+        return true; /* success */
+#elif defined(__APPLE__)
+        int ret;
+        struct proc_taskinfo procTaskInfo;
+        ret = proc_pidinfo ((int) getpid(), PROC_PIDTASKINFO, 0,
+                            (void *) &procTaskInfo, sizeof(procTaskInfo));
+        if (ret < (int)sizeof(procTaskInfo))
+            return false;  /* failure */
+        rss = (int64_t) procTaskInfo.pti_resident_size;
+        vss = (int64_t) procTaskInfo.pti_virtual_size;
+        return true; /* success */
+#else
+        throw std::runtime_error("Unknown platform for getMemoryInfo!");
+        return false; /* fail */
+#endif
+    }
 
     void* TBigBlockMgr::GetBigBlock() {
         void *res {FreeList.empty() ? nullptr : FreeList.back()};
@@ -56,9 +133,9 @@ namespace gdlib::gmsheapnew {
     double TBigBlockMgr::MemoryUsedMB() const {
         {
             int64_t rss{}, vss{};
-            if (showOSMem == 1 && rtl::p3utils::p3GetMemoryInfo(rss, vss))
+            if (showOSMem == 1 && getMemoryInfo(rss, vss))
                 return (double) rss / 1e6;
-            if (showOSMem == 2 && rtl::p3utils::p3GetMemoryInfo(rss, vss))
+            if (showOSMem == 2 && getMemoryInfo(rss, vss))
                 return (double) vss / 1e6;
         }
         return TotalMemory/1e6;

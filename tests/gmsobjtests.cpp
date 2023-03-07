@@ -1,6 +1,6 @@
 #include <string>
-#include "../doctest.h"
-#include "../../gdlib/gmsobj.h"
+#include "doctest.h"
+#include "../gmsobj.h"
 
 using namespace std::literals::string_literals;
 using namespace gdlib::gmsobj;

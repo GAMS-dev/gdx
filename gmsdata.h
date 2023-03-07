@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../expertapi/gclgms.h"
+#include "gclgms.h"
 
 #include <map>
 #include <string>

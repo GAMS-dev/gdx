@@ -91,7 +91,7 @@ namespace gdlib::datastorage {
     };
 
     TLD_TEMPLATE_HEADER
-    class TLinkedDataLegacy {
+    class TLinkedData {
         int FMinKey,
             FMaxKey,
             FDimension, // number of keys / symbol dimension
@@ -126,7 +126,7 @@ namespace gdlib::datastorage {
         }
 
     public:
-        TLinkedDataLegacy(int ADimension, int ADataSize) :
+        TLinkedData(int ADimension, int ADataSize) :
             FMinKey{std::numeric_limits<int>::max()},
             FMaxKey{},
             FDimension{ADimension},
@@ -139,7 +139,7 @@ namespace gdlib::datastorage {
         {
         };
 
-        ~TLinkedDataLegacy() {
+        ~TLinkedData() {
             Clear();
         }
 

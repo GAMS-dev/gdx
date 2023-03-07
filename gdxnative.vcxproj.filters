@@ -1,65 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="gdlib">
-      <UniqueIdentifier>{69b19e72-9ccc-46cc-b0fa-142f406d05d4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="expertapi">
-      <UniqueIdentifier>{7062be8f-60ef-402c-8454-822f2e8eb87b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="root">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="generated">
-      <UniqueIdentifier>{eb84254e-fb9f-4037-b9c8-ed5307d81330}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="global">
-      <UniqueIdentifier>{1d63af84-eb63-415f-bdfa-5b2e349e9d68}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="rtl">
-      <UniqueIdentifier>{bd776488-4312-48dc-80f2-3639cd524d23}</UniqueIdentifier>
-    </Filter>
     <Filter Include="tests">
       <UniqueIdentifier>{52cae6ab-922c-4873-b7dd-d49a95b9e287}</UniqueIdentifier>
     </Filter>
     <Filter Include="zlib">
       <UniqueIdentifier>{c303bda0-311e-4e08-85de-0d4055c40fe1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="tests\gdlib">
-      <UniqueIdentifier>{69ef5b5f-0e5b-45ba-8895-1ef66cce5787}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="tests\global">
-      <UniqueIdentifier>{329b07e4-1799-4ab7-9458-5b8da8fa664b}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="gxfile.cpp">
-      <Filter>root</Filter>
     </ClCompile>
     <ClCompile Include="utils.cpp">
-      <Filter>root</Filter>
-    </ClCompile>
-    <ClCompile Include="xpwrap.cpp">
-      <Filter>root</Filter>
-    </ClCompile>
-    <ClCompile Include="gdlib\gmsstrm.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="expertapi\gdxcc.c">
-      <Filter>expertapi</Filter>
-    </ClCompile>
-    <ClCompile Include="expertapi\gclgms.c">
-      <Filter>expertapi</Filter>
-    </ClCompile>
-    <ClCompile Include="expertapi\gcmt.c">
-      <Filter>expertapi</Filter>
-    </ClCompile>
-    <ClCompile Include="expertapi\palmcc.c">
-      <Filter>expertapi</Filter>
-    </ClCompile>
-    <ClCompile Include="generated\gmsglobx2.inc.cpp">
-      <Filter>generated</Filter>
     </ClCompile>
     <ClCompile Include="tests\doctestmain.cpp">
       <Filter>tests</Filter>
@@ -67,32 +19,7 @@
     <ClCompile Include="tests\gxfiletests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="tests\xptests.cpp">
-      <Filter>tests</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\xpwraptests.cpp">
-      <Filter>tests</Filter>
-    </ClCompile>
-    <ClCompile Include="rtl\p3utils.cpp">
-      <Filter>rtl</Filter>
-    </ClCompile>
-    <ClCompile Include="rtl\sysutils_p3.cpp">
-      <Filter>rtl</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\gdxinterfacetests.cpp">
-      <Filter>tests</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\xp_example1.cpp">
-      <Filter>tests</Filter>
-    </ClCompile>
     <ClCompile Include="yaml.cpp">
-      <Filter>root</Filter>
-    </ClCompile>
-    <ClCompile Include="gdlib\strhash.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="gdlib\datastorage.cpp">
-      <Filter>gdlib</Filter>
     </ClCompile>
     <ClCompile Include="zlib\adler32.c">
       <Filter>zlib</Filter>
@@ -139,103 +66,41 @@
     <ClCompile Include="zlib\zutil.c">
       <Filter>zlib</Filter>
     </ClCompile>
-    <ClCompile Include="gdlib\gmsdata.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\pfgdx.cpp">
-      <Filter>tests</Filter>
-    </ClCompile>
-    <ClCompile Include="gdlib\gmsobj.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\gdlib\gmsdatatests.cpp">
-      <Filter>tests\gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\gdlib\gmsobjtests.cpp">
-      <Filter>tests\gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\gdlib\strhashtests.cpp">
-      <Filter>tests\gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\benchmarks.cpp">
-      <Filter>tests</Filter>
-    </ClCompile>
-    <ClCompile Include="gdlib\gmsheapnew.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\gdlib\gmsheapnewtests.cpp">
-      <Filter>tests\gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\global\shortstringtests.cpp">
-      <Filter>tests\global</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\serializetests.cpp">
-      <Filter>tests</Filter>
-    </ClCompile>
     <ClCompile Include="tests\utilstests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="gclgms.c">
+    </ClCompile>
+    <ClCompile Include="palmcc.c">
+    </ClCompile>
+    <ClCompile Include="gmsheapnew.cpp">
+    </ClCompile>
+    <ClCompile Include="gmsobj.cpp">
+    </ClCompile>
+    <ClCompile Include="gmsstrm.cpp">
+    </ClCompile>
+    <ClCompile Include="tests\strhashtests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\gmsobjtests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\gmsheapnewtests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\gmsdatatests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gdlib\gmsstrm.h">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="expertapi\gclgms.h">
-      <Filter>expertapi</Filter>
-    </ClInclude>
-    <ClInclude Include="expertapi\gcmt.h">
-      <Filter>expertapi</Filter>
-    </ClInclude>
-    <ClInclude Include="expertapi\gdxcc.h">
-      <Filter>expertapi</Filter>
-    </ClInclude>
-    <ClInclude Include="expertapi\palmcc.h">
-      <Filter>expertapi</Filter>
-    </ClInclude>
-    <ClInclude Include="gdxinterface.h">
-      <Filter>root</Filter>
-    </ClInclude>
     <ClInclude Include="gxfile.h">
-      <Filter>root</Filter>
-    </ClInclude>
-    <ClInclude Include="kvbuffers.h">
-      <Filter>root</Filter>
     </ClInclude>
     <ClInclude Include="utils.h">
-      <Filter>root</Filter>
-    </ClInclude>
-    <ClInclude Include="xpwrap.h">
-      <Filter>root</Filter>
-    </ClInclude>
-    <ClInclude Include="generated\gmsglobx1.inc.h">
-      <Filter>generated</Filter>
-    </ClInclude>
-    <ClInclude Include="generated\gmsspecs.inc.h">
-      <Filter>generated</Filter>
-    </ClInclude>
-    <ClInclude Include="global\delphitypes.h">
-      <Filter>global</Filter>
     </ClInclude>
     <ClInclude Include="tests\doctest.h">
       <Filter>tests</Filter>
     </ClInclude>
-    <ClInclude Include="rtl\p3utils.h">
-      <Filter>rtl</Filter>
-    </ClInclude>
-    <ClInclude Include="rtl\sysutils_p3.h">
-      <Filter>rtl</Filter>
-    </ClInclude>
-    <ClInclude Include="gdlib\gmsdata.h">
-      <Filter>gdlib</Filter>
-    </ClInclude>
     <ClInclude Include="yaml.h">
-      <Filter>root</Filter>
-    </ClInclude>
-    <ClInclude Include="gdlib\strhash.h">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="gdlib\datastorage.h">
-      <Filter>gdlib</Filter>
     </ClInclude>
     <ClInclude Include="zlib\crc32.h">
       <Filter>zlib</Filter>
@@ -270,14 +135,13 @@
     <ClInclude Include="zlib\zutil.h">
       <Filter>zlib</Filter>
     </ClInclude>
-    <ClInclude Include="tests\pfgdx.hpp">
-      <Filter>tests</Filter>
-    </ClInclude>
-    <ClInclude Include="gdlib\gmsobj.h">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="gdlib\gmsheapnew.h">
-      <Filter>gdlib</Filter>
-    </ClInclude>
+    <ClInclude Include="gclgms.h" />
+    <ClInclude Include="palmcc.h" />
+    <ClInclude Include="datastorage.h" />
+    <ClInclude Include="gmsdata.h" />
+    <ClInclude Include="gmsheapnew.h" />
+    <ClInclude Include="gmsobj.h" />
+    <ClInclude Include="gmsstrm.h" />
+    <ClInclude Include="strhash.h" />
   </ItemGroup>
 </Project>

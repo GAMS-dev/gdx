@@ -15,26 +15,84 @@
 #include <fstream>
 #include <utility>
 #include <cmath>
+#include <filesystem>
 
 // only supported by MSVC so far :(
 //#include <format>
 
-#include "../expertapi/gclgms.h"
-
-#include "../rtl/p3utils.h"
-#include "../rtl/sysutils_p3.h"
-
-#include "../utils.h"
-
+#include "gclgms.h"
+#include "utils.h"
 #include "gmsstrm.h"
 
-using namespace rtl::p3utils;
 using namespace std::literals::string_literals;
 
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
 namespace gdlib::gmsstrm {
+
+    std::string SysErrorMessage(int errorCode) {
+#if defined(_WIN32)
+        static std::array<char, 256> errMsgBuf;
+        strerror_s(errMsgBuf.data(), (int)errMsgBuf.size(), errorCode);
+        char *errMsg = errMsgBuf.data();
+#else
+        char *errMsg = strerror(errorCode);
+#endif
+        if(!errMsg) return "Unknown error " + std::to_string(errorCode);
+        return errMsg;
+    }
+
+    enum CustomOpenAction {
+        custOpenRead,
+        custOpenWrite,
+        custOpenReadWrite
+    };
+
+    int customFileOpen(const std::string& fName, CustomOpenAction mode, std::fstream * h);
+    int customFileRead(std::fstream * h, char* buffer, uint32_t buflen, uint32_t& numRead);
+    int getFileSize(std::fstream * h, int64_t& fileSize);
+
+    int customFileOpen(const std::string& fName, CustomOpenAction mode, std::fstream * h)
+    {
+        std::ios::openmode itsMode{ std::ios::binary };
+        switch (mode) {
+            case custOpenRead:
+                itsMode |= std::ios::in;
+                break;
+            case custOpenWrite:
+                itsMode |= std::ios::out;
+                break;
+            case custOpenReadWrite:
+                itsMode |= std::ios::in | std::ios::out;
+                break;
+        }
+        h->open(fName, itsMode);
+        bool f = h->fail();
+        return f && !std::filesystem::exists(fName) ? 2 : f;
+    }
+
+    int getFileSize(std::fstream * h, int64_t& fileSize)
+    {
+        if (!h->is_open() || h->bad()) return 1;
+        std::streampos oldpos = h->tellg();
+        h->seekg(0, std::ios::beg);
+        std::streampos start = h->tellg();
+        h->seekg(0, std::ios::end);
+        fileSize = h->tellg() - start;
+        h->seekg(oldpos);
+        return 0;
+    }
+
+    int customFileRead(std::fstream * h, char* buffer, uint32_t buflen, uint32_t& numRead)
+    {
+        auto savedPos = h->tellg();
+        h->seekg(0, h->end);
+        numRead = std::min<uint32_t>(static_cast<uint32_t>(h->tellg()-savedPos), buflen);
+        h->seekg(savedPos);
+        h->read(buffer, numRead);
+        return h->bad() ? 1 : 0;
+    }
 
     const uint8_t signature_header = 0xFF;
     const std::string signature_gams = "*GAMS*"s;
@@ -81,7 +139,7 @@ namespace gdlib::gmsstrm {
         else FLastIOResult = 0;
         ErrNr = FLastIOResult;
         if (ErrNr) {
-            errmsg = rtl::sysutils_p3::SysErrorMessage(ErrNr);
+            errmsg = SysErrorMessage(ErrNr);
             ErrNr = strmErrorIOResult;
             return;
         }
@@ -211,7 +269,7 @@ namespace gdlib::gmsstrm {
         if(!ErrNr) {
             ErrNr = strmErrorNoError;
             errmsg.clear();
-        } else errmsg = rtl::sysutils_p3::SysErrorMessage(ErrNr);
+        } else errmsg = SysErrorMessage(ErrNr);
     }
 
     TBinaryTextFileIO::~TBinaryTextFileIO() = default;
@@ -659,8 +717,8 @@ namespace gdlib::gmsstrm {
 
     int64_t TXFileStreamDelphi::GetSize()
     {
-        int64_t res;
-        SetLastIOResult(rtl::p3utils::p3FileGetSize(FS.get(), res));
+        int64_t res{};
+        SetLastIOResult(getFileSize(FS.get(), res));
         return res;
     }
 
@@ -672,32 +730,30 @@ namespace gdlib::gmsstrm {
     void TXFileStreamDelphi::SetPosition(int64_t P)
     {
         PhysPosition = P;
-        //int64_t NP;
         FS->seekp(P);
         SetLastIOResult(FS->bad() ? 1 : 0);
-        //SetLastIOResult(P3FileSetPointer(FS, P, NP, P3_FILE_BEGIN));
     }
 
     TXFileStreamDelphi::TXFileStreamDelphi(std::string AFileName, const FileAccessMode AMode)
         : FS{}, FFileName{std::move( AFileName )}, FPassWord{}, FLastIOResult{}, PhysPosition{}
     {
-        rtl::p3utils::Tp3FileOpenAction FMode{ p3OpenRead };
+        CustomOpenAction FMode{custOpenRead };
         switch (AMode) {
         case fmCreate:
         case fmOpenWrite:
-            FMode = p3OpenWrite;
+            FMode = custOpenWrite;
             break;
         case fmOpenRead:
-            FMode = p3OpenRead;
+            FMode = custOpenRead;
             break;
         case fmOpenReadWrite:
-            FMode = p3OpenReadWrite;
+            FMode = custOpenReadWrite;
             break;
         default:
             throw std::runtime_error("TXFileStream.Create = "s + std::to_string(AMode));
         }
         FS = std::make_unique<std::fstream>();
-        SetLastIOResult(p3FileOpen(FFileName, FMode, FS.get()));
+        SetLastIOResult(customFileOpen(FFileName, FMode, FS.get()));
         FileIsOpen = !FLastIOResult;
     }
 
@@ -724,11 +780,11 @@ namespace gdlib::gmsstrm {
     {
         uint32_t res;
         if (FPassWord.empty())
-            SetLastIOResult(p3FileRead(FS.get(), (char *)Buffer, Count, res));
+            SetLastIOResult(customFileRead(FS.get(), (char *) Buffer, Count, res));
         else {
             auto PW = (char *)Buffer;
             std::vector<char> PR(Count);
-            SetLastIOResult(p3FileRead(FS.get(), PR.data(), Count, res));
+            SetLastIOResult(customFileRead(FS.get(), PR.data(), Count, res));
             ApplyPassWord(PR.data(), PW, (int)Count, PhysPosition);
         }
         PhysPosition += res;
@@ -1135,7 +1191,7 @@ namespace gdlib::gmsstrm {
         FS = std::make_unique<TBufferedFileStreamDelphi>(fn, fmOpenRead);
         ErrNr = FS->GetLastIOResult();
         if (ErrNr) {
-            errMsg = rtl::sysutils_p3::SysErrorMessage(ErrNr);
+            errMsg = SysErrorMessage(ErrNr);
             ErrNr = strmErrorIOResult;
             return;
         }
@@ -1246,7 +1302,7 @@ namespace gdlib::gmsstrm {
             ErrNr = strmErrorNoError;
             errMsg.clear();
         } else {
-            errMsg = rtl::sysutils_p3::SysErrorMessage(ErrNr);
+            errMsg = SysErrorMessage(ErrNr);
             FS = nullptr;
         }
     }

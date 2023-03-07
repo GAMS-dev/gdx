@@ -1,6 +1,6 @@
 #include <string>
-#include "../doctest.h"
-#include "../../gdlib/gmsheapnew.h"
+#include "doctest.h"
+#include "../gmsheapnew.h"
 #include <numeric>
 
 using namespace std::literals::string_literals;

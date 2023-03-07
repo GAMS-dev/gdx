@@ -37,7 +37,7 @@
 #include "palmcc.h"
 
 #if defined(_WIN32)
-# include <windows.h>
+# include <Windows.h>
   static char winErr[] = "Windows error";
   typedef HINSTANCE soHandle_t;
 #else

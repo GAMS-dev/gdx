@@ -19,42 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="expertapi\gclgms.c" />
-    <ClCompile Include="expertapi\gcmt.c" />
-    <ClCompile Include="expertapi\gdxcc.c" />
-    <ClCompile Include="expertapi\palmcc.c" />
-    <ClCompile Include="gdlib\datastorage.cpp" />
-    <ClCompile Include="gdlib\gmsdata.cpp" />
-    <ClCompile Include="gdlib\gmsheapnew.cpp" />
-    <ClCompile Include="gdlib\gmsobj.cpp" />
-    <ClCompile Include="gdlib\gmsstrm.cpp" />
-    <ClCompile Include="gdlib\strhash.cpp" />
-    <ClCompile Include="generated\gmsglobx2.inc.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="gclgms.c" />
+    <ClCompile Include="palmcc.c" />
+    <ClCompile Include="gmsheapnew.cpp" />
+    <ClCompile Include="gmsobj.cpp" />
+    <ClCompile Include="gmsstrm.cpp" />
     <ClCompile Include="gxfile.cpp" />
-    <ClCompile Include="rtl\p3utils.cpp" />
-    <ClCompile Include="rtl\sysutils_p3.cpp" />
-    <ClCompile Include="tests\benchmarks.cpp" />
     <ClCompile Include="tests\doctestmain.cpp" />
-    <ClCompile Include="tests\gdlib\gmsdatatests.cpp" />
-    <ClCompile Include="tests\gdlib\gmsheapnewtests.cpp" />
-    <ClCompile Include="tests\gdlib\gmsobjtests.cpp" />
-    <ClCompile Include="tests\gdlib\strhashtests.cpp" />
-    <ClCompile Include="tests\gdxinterfacetests.cpp" />
-    <ClCompile Include="tests\global\shortstringtests.cpp" />
+    <ClCompile Include="tests\gmsdatatests.cpp" />
+    <ClCompile Include="tests\gmsheapnewtests.cpp" />
+    <ClCompile Include="tests\gmsobjtests.cpp" />
+    <ClCompile Include="tests\strhashtests.cpp" />
     <ClCompile Include="tests\gxfiletests.cpp" />
-    <ClCompile Include="tests\pfgdx.cpp" />
-    <ClCompile Include="tests\serializetests.cpp" />
     <ClCompile Include="tests\utilstests.cpp" />
-    <ClCompile Include="tests\xptests.cpp" />
-    <ClCompile Include="tests\xpwraptests.cpp" />
-    <ClCompile Include="tests\xp_example1.cpp" />
     <ClCompile Include="utils.cpp" />
-    <ClCompile Include="xpwrap.cpp" />
     <ClCompile Include="yaml.cpp" />
     <ClCompile Include="zlib\adler32.c" />
     <ClCompile Include="zlib\compress.c" />
@@ -73,28 +51,17 @@
     <ClCompile Include="zlib\zutil.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="expertapi\gclgms.h" />
-    <ClInclude Include="expertapi\gcmt.h" />
-    <ClInclude Include="expertapi\gdxcc.h" />
-    <ClInclude Include="expertapi\palmcc.h" />
-    <ClInclude Include="gdlib\datastorage.h" />
-    <ClInclude Include="gdlib\gmsdata.h" />
-    <ClInclude Include="gdlib\gmsheapnew.h" />
-    <ClInclude Include="gdlib\gmsobj.h" />
-    <ClInclude Include="gdlib\gmsstrm.h" />
-    <ClInclude Include="gdlib\strhash.h" />
-    <ClInclude Include="gdxinterface.h" />
-    <ClInclude Include="generated\gmsglobx1.inc.h" />
-    <ClInclude Include="generated\gmsspecs.inc.h" />
-    <ClInclude Include="global\delphitypes.h" />
+    <ClInclude Include="gclgms.h" />
+    <ClInclude Include="palmcc.h" />
+    <ClInclude Include="datastorage.h" />
+    <ClInclude Include="gmsdata.h" />
+    <ClInclude Include="gmsheapnew.h" />
+    <ClInclude Include="gmsobj.h" />
+    <ClInclude Include="gmsstrm.h" />
+    <ClInclude Include="strhash.h" />
     <ClInclude Include="gxfile.h" />
-    <ClInclude Include="kvbuffers.h" />
-    <ClInclude Include="rtl\p3utils.h" />
-    <ClInclude Include="rtl\sysutils_p3.h" />
     <ClInclude Include="tests\doctest.h" />
-    <ClInclude Include="tests\pfgdx.hpp" />
     <ClInclude Include="utils.h" />
-    <ClInclude Include="xpwrap.h" />
     <ClInclude Include="yaml.h" />
     <ClInclude Include="zlib\crc32.h" />
     <ClInclude Include="zlib\deflate.h" />
@@ -198,7 +165,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GAMSBUILD;YAML;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GC_NO_MUTEX;GAMSBUILD;YAML;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -215,7 +182,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GAMSBUILD;YAML;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GC_NO_MUTEX;GAMSBUILD;YAML;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

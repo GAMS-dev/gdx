@@ -1,6 +1,6 @@
 #include <string>
-#include "../doctest.h"
-#include "../../gdlib/strhash.h"
+#include "doctest.h"
+#include "../strhash.h"
 #include <numeric>
 
 using namespace std::literals::string_literals;

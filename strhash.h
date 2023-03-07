@@ -1,7 +1,7 @@
 #pragma once
 
 #include "gmsstrm.h"
-#include "../utils.h"
+#include "utils.h"
 #include "datastorage.h"
 #include "gmsdata.h"
 

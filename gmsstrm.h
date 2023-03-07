@@ -10,14 +10,14 @@
 #include <optional>
 #include <cstring>
 
-#include "../rtl/p3utils.h"
-
-#include "../zlib/zlib.h"
+#include "zlib/zlib.h"
 
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
 namespace gdlib::gmsstrm {
+    std::string SysErrorMessage(int errorCore);
+
     const bool Paranoid = false;
 
     const int
@@ -150,7 +150,7 @@ namespace gdlib::gmsstrm {
     class TXFileStreamDelphi : public TXStreamDelphi {
         friend class TBinaryTextFileIODelphi;
 
-        std::unique_ptr<rtl::p3utils::Tp3File> FS{};
+        std::unique_ptr<std::fstream> FS{};
         bool FileIsOpen{};
         std::string FFileName{}, FPassWord{};
 
