@@ -89,31 +89,31 @@ namespace gdlib::gmsstrm {
     }
 
     void TXStreamDelphi::WriteDouble(double x) {
-        WriteValue(rw_double, x);
+        WriteValue(RWType::rw_double, x);
     }
 
     void TXStreamDelphi::WriteInteger(int n) {
-        WriteValue(rw_integer, n);
+        WriteValue(RWType::rw_integer, n);
     }
 
     void TXStreamDelphi::WriteInt64(int64_t N) {
-        WriteValue(rw_int64, N);
+        WriteValue(RWType::rw_int64, N);
     }
 
     void TXStreamDelphi::WriteByte(uint8_t b) {
-        WriteValue(rw_byte, b);
+        WriteValue(RWType::rw_byte, b);
     }
 
     void TXStreamDelphi::WriteWord(uint16_t W) {
-        WriteValue(rw_word, W);
+        WriteValue(RWType::rw_word, W);
     }
 
     void TXStreamDelphi::WriteBool(bool B) {
-        WriteValue(rw_bool, B);
+        WriteValue(RWType::rw_bool, B);
     }
 
     void TXStreamDelphi::WriteChar(char C) {
-        WriteValue(rw_char, C);
+        WriteValue(RWType::rw_char, C);
     }
 
     void TXStreamDelphi::WritePChar(const char *s, int L) {
@@ -132,31 +132,31 @@ namespace gdlib::gmsstrm {
     }
 
     double TXStreamDelphi::ReadDouble() {
-        return ReadValue<double>(rw_double);
+        return ReadValue<double>(RWType::rw_double);
     }
 
     int TXStreamDelphi::ReadInteger() {
-        return ReadValue<int>(rw_integer);
+        return ReadValue<int>(RWType::rw_integer);
     }
 
     uint8_t TXStreamDelphi::ReadByte() {
-        return ReadValue<uint8_t>(rw_byte);
+        return ReadValue<uint8_t>(RWType::rw_byte);
     }
 
     uint16_t TXStreamDelphi::ReadWord() {
-        return ReadValue<uint16_t>(rw_word);
+        return ReadValue<uint16_t>(RWType::rw_word);
     }
 
     int64_t TXStreamDelphi::ReadInt64() {
-        return ReadValue<int64_t>(rw_int64);
+        return ReadValue<int64_t>(RWType::rw_int64);
     }
 
     bool TXStreamDelphi::ReadBool() {
-        return ReadValue<bool>(rw_bool);
+        return ReadValue<bool>(RWType::rw_bool);
     }
 
     char TXStreamDelphi::ReadChar() {
-        return ReadValue<char>(rw_char);
+        return ReadValue<char>(RWType::rw_char);
     }
 
     void TXStreamDelphi::ReadPChar(char *P, int &L) {
@@ -212,18 +212,18 @@ namespace gdlib::gmsstrm {
     {
         CustomOpenAction FMode{custOpenRead };
         switch (AMode) {
-        case fmCreate:
-        case fmOpenWrite:
-            FMode = custOpenWrite;
-            break;
-        case fmOpenRead:
-            FMode = custOpenRead;
-            break;
-        case fmOpenReadWrite:
-            FMode = custOpenReadWrite;
-            break;
-        default:
-            throw std::runtime_error("TXFileStream.Create = "s + std::to_string(AMode));
+            case FileAccessMode::fmCreate:
+            case FileAccessMode::fmOpenWrite:
+                FMode = custOpenWrite;
+                break;
+            case FileAccessMode::fmOpenRead:
+                FMode = custOpenRead;
+                break;
+            case FileAccessMode::fmOpenReadWrite:
+                FMode = custOpenReadWrite;
+                break;
+            default:
+                throw std::runtime_error("TXFileStream.Create = "s + std::to_string((int)AMode));
         }
         FS = std::make_unique<std::fstream>();
         SetLastIOResult(customFileOpen(FFileName, FMode, FS.get()));
@@ -464,7 +464,7 @@ namespace gdlib::gmsstrm {
     TMiBufferedStreamDelphi::TMiBufferedStreamDelphi(const std::string& FileName, uint16_t Mode) : TBufferedFileStreamDelphi{FileName, Mode}
     {
         if(FLastIOResult) return;
-        if(Mode != fmCreate) DetermineByteOrder(); // we cannot update a mixed environment file!
+        if(Mode != FileAccessMode::fmCreate) DetermineByteOrder(); // we cannot update a mixed environment file!
         else { // avoid using writebyte so Paranoid flag works
             uint8_t B = sizeof(uint16_t); Write(&B, sizeof(uint8_t));
             uint16_t W = PAT_WORD; Write(&W, sizeof(uint16_t));
@@ -505,22 +505,22 @@ namespace gdlib::gmsstrm {
 
     double TMiBufferedStreamDelphi::ReadDouble()
     {
-        return ReadValueOrdered<double>(rw_double, order_double);
+        return ReadValueOrdered<double>(RWType::rw_double, order_double);
     }
 
     int TMiBufferedStreamDelphi::ReadInteger()
     {
-        return ReadValueOrdered<int>(rw_integer, order_integer);
+        return ReadValueOrdered<int>(RWType::rw_integer, order_integer);
     }
 
     uint16_t TMiBufferedStreamDelphi::ReadWord()
     {
-        return ReadValueOrdered<uint16_t>(rw_word, order_word);
+        return ReadValueOrdered<uint16_t>(RWType::rw_word, order_word);
     }
 
     int64_t TMiBufferedStreamDelphi::ReadInt64()
     {
-        return ReadValueOrdered<int64_t>(rw_int64, order_integer);
+        return ReadValueOrdered<int64_t>(RWType::rw_int64, order_integer);
     }
 
     bool TMiBufferedStreamDelphi::WordsNeedFlip() const

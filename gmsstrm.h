@@ -8,7 +8,12 @@
 #include <optional>
 #include <cstring>
 
-#include "zlib/zlib.h"
+#if defined(NO_ZLIB)
+    inline int uncompress(void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen) { return 0; }
+    inline int compress(void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen) { return 0; }
+#else
+    #include "zlib/zlib.h"
+#endif
 
 // ==============================================================================================================
 // Interface
@@ -48,13 +53,13 @@ namespace gdlib::gmsstrm {
 
     // File Mode creation constants
     const std::map<FileAccessMode, std::string> modeStrs = {
-        {fmCreate, "w"},
-        {fmOpenRead, "r"},
-        {fmOpenWrite, "w"},
-        {fmOpenReadWrite, "w+"}
+        {FileAccessMode::fmCreate, "w"},
+        {FileAccessMode::fmOpenRead, "r"},
+        {FileAccessMode::fmOpenWrite, "w"},
+        {FileAccessMode::fmOpenReadWrite, "w+"}
     };
     
-    enum RWType {rw_byte, rw_bool, rw_char, rw_word, rw_integer, rw_int64, rw_double, rw_string, rw_pchar, rw_pstring, rw_count};
+    enum class RWType {rw_byte, rw_bool, rw_char, rw_word, rw_integer, rw_int64, rw_double, rw_string, rw_pchar, rw_pstring, rw_count};
     const std::array<std::string, 10> RWTypeText = { "Byte", "Bool", "Char", "Word", "Integer", "Int64", "Double", "String", "PChar", "PString" };
 
     /**
@@ -78,6 +83,8 @@ namespace gdlib::gmsstrm {
         virtual void SetPosition(int64_t P) = 0;
 
     public:
+        virtual ~TXStreamDelphi() = default;
+
         virtual uint32_t Read(void *Buffer, uint32_t Count) = 0;
         virtual uint32_t Write(const void *Buffer, uint32_t Count) = 0;
 
@@ -123,7 +130,8 @@ namespace gdlib::gmsstrm {
 
     public:
         TXFileStreamDelphi(std::string AFileName, FileAccessMode AMode);
-        virtual ~TXFileStreamDelphi();
+
+        ~TXFileStreamDelphi() override;
         void ApplyPassWord(const char *PR, char *PW, int Len, int64_t Offs);
         uint32_t Read(void *Buffer, uint32_t Count) override;
         uint32_t Write(const void *Buffer, uint32_t Count) override;
@@ -135,7 +143,8 @@ namespace gdlib::gmsstrm {
     };
 
     struct TCompressHeader {
-        uint8_t cxTyp; // 0=no compression, 1=zlib
+        // 0=no compression, 1=zlib
+        uint8_t cxTyp;
         uint8_t cxB1, cxB2;
     };
 
@@ -218,11 +227,5 @@ namespace gdlib::gmsstrm {
         void WriteGmsDouble(double D);
         int ReadGmsInteger();
         double ReadGmsDouble();
-    };
-
-    enum TFileSignature {
-        fsign_text,
-        fsign_blocktext,
-        fsign_gzip
     };
 }

@@ -62,7 +62,7 @@ namespace utils {
     std::string replaceSubstrs(const std::string_view s, const std::string_view substr, const std::string_view replacement) {
         if (substr == replacement) return std::string{ s };
         std::string out{};
-        const int ssl = static_cast<int>(substr.length());
+        const auto ssl = static_cast<int>(substr.length());
         const auto positions = substrPositions(s, substr);
         for (int i = 0; i < (int) s.length(); i++) {
             if (utils::in<size_t>(i, positions)) {

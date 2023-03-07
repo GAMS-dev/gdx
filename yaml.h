@@ -6,10 +6,10 @@
 namespace yaml {
 
     class TYAMLFile {
-        const bool alwaysFlush = true;
+        const bool alwaysFlush {true};
 
         std::ofstream fp;
-        int curDepth;
+        int curDepth{};
         bool active;
 
         void WrIndent();

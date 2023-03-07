@@ -322,7 +322,7 @@ namespace gxfile {
         std::string s{ QueryEnvironmentVariable(strGDXCOMPRESS) };
         // Note: the default is disabled
         if(s.empty()) return 0;
-        char c { static_cast<char>(utils::toupper(s.front())) };
+        char c { utils::toupper(s.front()) };
         return c == 'N' || c == '0' ? 0 : 1;
     }
 
@@ -391,7 +391,7 @@ namespace gxfile {
             LastError = ErrNr;
             return false;
         }
-        FFile = std::make_unique<TMiBufferedStreamDelphi>(FileName, fmCreate);
+        FFile = std::make_unique<TMiBufferedStreamDelphi>(FileName, FileAccessMode::fmCreate);
         ErrNr = FFile->GetLastIOResult();
         if(ErrNr) {
             FFile = nullptr;
@@ -535,7 +535,7 @@ namespace gxfile {
         static const TgxModeSet AllowedModes {fw_raw_data,fw_map_data,fw_str_data, fw_dom_raw, fw_dom_map, fw_dom_str};
         if(!MajorCheckMode("DataWriteDone"s, AllowedModes)) return false;
         if(!utils::in(fmode, fw_raw_data, fw_dom_raw)) {
-            InitDoWrite(static_cast<int>(SortList->Count()));
+            InitDoWrite(SortList->Count());
             ReadPtr = SortList->StartRead(nullptr);
             TIndex AElements;
             TgdxValues AVals;
@@ -762,7 +762,6 @@ namespace gxfile {
         UELTable = nullptr;
         SortList = nullptr;
         DomainStrList = nullptr;
-
         ErrorList = nullptr;
         FilterList = nullptr;
         AcronymList = nullptr;
@@ -1016,12 +1015,12 @@ namespace gxfile {
             auto &obj = DomainList[D];
             obj.DFilter = nullptr;
             switch(ADomainNrs[D]) {
-                case DOMC_UNMAPPED: obj.DAction = dm_unmapped; break;
-                case DOMC_EXPAND: obj.DAction = dm_expand; break;
-                case DOMC_STRICT: obj.DAction = dm_strict; break;
+                case DOMC_UNMAPPED: obj.DAction = TgdxDAction::dm_unmapped; break;
+                case DOMC_EXPAND: obj.DAction = TgdxDAction::dm_expand; break;
+                case DOMC_STRICT: obj.DAction = TgdxDAction::dm_strict; break;
                 default: // filter number
                     obj.DFilter = FilterList->FindFilter(ADomainNrs[D]);
-                    if(obj.DFilter) obj.DAction = dm_filter;
+                    if(obj.DFilter) obj.DAction = TgdxDAction::dm_filter;
                     else {
                         ReportError(ERR_UNKNOWNFILTER);
                         return -1;
@@ -1084,10 +1083,10 @@ namespace gxfile {
                                 break;
                             }
                             switch(obj.DAction) {
-                                case dm_unmapped:
+                                case TgdxDAction::dm_unmapped:
                                     AElements[D] = LastElem[D];
                                     break;
-                                case dm_filter:
+                                case TgdxDAction::dm_filter:
                                     V = UELTable->GetUserMap(LastElem[D]);
                                     if(obj.DFilter->InFilter(V))
                                         AElements[D] = V;
@@ -1096,7 +1095,7 @@ namespace gxfile {
                                         FIDim = D;
                                     }
                                     break;
-                                case dm_strict:
+                                case TgdxDAction::dm_strict:
                                     V = UELTable->GetUserMap(LastElem[D]);
                                     if(V >= 0) AElements[D] = V;
                                     else {
@@ -1104,7 +1103,7 @@ namespace gxfile {
                                         FIDim = D;
                                     }
                                     break;
-                                case dm_expand: {
+                                case TgdxDAction::dm_expand: {
                                         int EN = LastElem[D];
                                         V = ExpndList.GetMapping(EN);
                                         if(V >= 0) AElements[D] = V;
@@ -1192,7 +1191,7 @@ namespace gxfile {
         FFile->SetPosition(NextWritePosition);
         CurSyPtr->SPosition = NextWritePosition;
         FFile->WriteString(MARK_DATA);
-        FFile->WriteByte(FCurrentDim);
+        FFile->WriteByte(static_cast<uint8_t>(FCurrentDim));
         FFile->WriteInteger(NrRecs); // ignores dupes in count
         for (int D{}; D < FCurrentDim; D++) {
             LastElem[D] = INDEX_INITIAL;
@@ -1219,10 +1218,10 @@ namespace gxfile {
 
     // we have to make these mask "constants" vars since we cannot
     // have large constants on input
-    bool HAVE_MEM {};
-    int64_t signMask {(int64_t)0x80000000 << 32},
-            expoMask {(int64_t)0x7ff00000 << 32},
-            mantMask {~(signMask | expoMask)};
+    const int64_t
+        signMask {(int64_t)0x80000000 << 32},
+        expoMask {(int64_t)0x7ff00000 << 32},
+        mantMask {~(signMask | expoMask)};
 
     enum TDblClass {
         DBL_NAN,       // any sort of NaN
@@ -1366,7 +1365,7 @@ namespace gxfile {
     }
 
     bool TGXFileObj::DoRead(double *AVals, int &AFDim) {
-        const auto maybeRemap = [&](int DV, double v) -> double {
+        const auto maybeRemap = [this](double v) {
             return v >= Zvalacr ? AcronymRemap(v) : v;
         };
 
@@ -1409,7 +1408,7 @@ namespace gxfile {
                 uint8_t BSV;
                 FFile->Read(&BSV, 1);
                 TgdxIntlValTyp SV {static_cast<TgdxIntlValTyp>(BSV)};
-                AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap(DV, FFile->ReadDouble());
+                AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap(FFile->ReadDouble());
             }
             if(MapSetText && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set) { // remap settext number
                 double X {AVals[GMS_VAL_LEVEL]};
@@ -1502,18 +1501,18 @@ namespace gxfile {
             switch(ADomainNrs[D]) {
                 case DOMC_UNMAPPED: continue;
                 case DOMC_EXPAND:
-                    if(UELTable->GetMapToUserStatus() == map_unsorted) return false;
+                    if(UELTable->GetMapToUserStatus() == TUELUserMapStatus::map_unsorted) return false;
                     if(!D) {
-                        if(UELTable->GetMapToUserStatus() >= map_sortgrow) continue;
+                        if(UELTable->GetMapToUserStatus() >= TUELUserMapStatus::map_sortgrow) continue;
                         else return false;
-                    } else if(UELTable->GetMapToUserStatus() == map_sortfull) continue;
+                    } else if(UELTable->GetMapToUserStatus() == TUELUserMapStatus::map_sortfull) continue;
                     else return false;
                     break;
                 case DOMC_STRICT:
-                    if(UELTable->GetMapToUserStatus() == map_unsorted) return false;
+                    if(UELTable->GetMapToUserStatus() == TUELUserMapStatus::map_unsorted) return false;
                     break;
                 default:
-                    if(UELTable->GetMapToUserStatus() >= map_sorted) continue;
+                    if(UELTable->GetMapToUserStatus() >= TUELUserMapStatus::map_sorted) continue;
                     const TDFilter *PFilter = FilterList->FindFilter(ADomainNrs[D]);
                     if(!PFilter->FiltSorted) return false;
                     break;
@@ -1634,7 +1633,7 @@ namespace gxfile {
     //
     // See Also:
     //   gdxGetLastError
-    int TGXFileObj::gdxErrorStr(int ErrNr, char *ErrMsg) {
+    int TGXFileObj::gdxErrorStr(int ErrNr, char *ErrMsg) const {
         return gdxErrorStrStatic(ErrNr, ErrMsg);
     }
 
@@ -1686,7 +1685,7 @@ namespace gxfile {
     //   gdxOpenWrite, gdxOpenWriteEx
     // Description:
     //
-    int TGXFileObj::gdxFileVersion(char *FileStr, char *ProduceStr) {
+    int TGXFileObj::gdxFileVersion(char *FileStr, char *ProduceStr) const {
         utils::assignStrToBuf(FileSystemID, FileStr, GMS_SSSIZE);
         utils::assignStrToBuf(FProducer, ProduceStr, GMS_SSSIZE);
         return true;
@@ -2139,8 +2138,7 @@ namespace gxfile {
     //   When reading data using a filtered read operation, data records that were
     //   filtered out because an index is not in the user index space or not in a
     //   filter are added the error list.
-    int TGXFileObj::gdxDataErrorCount()
-    {
+    int TGXFileObj::gdxDataErrorCount() const {
         return !ErrorList ? 0 : ErrorList->GetCount();
     }
 
@@ -2154,8 +2152,7 @@ namespace gxfile {
     //   Non-zero if the record number is valid, zero otherwise
     // See Also:
     //   gdxDataErrorCount
-    int TGXFileObj::gdxDataErrorRecord(int RecNr,  int * KeyInt,  double * Values)
-    {
+    int TGXFileObj::gdxDataErrorRecord(int RecNr,  int * KeyInt,  double * Values) {
         int res{ gdxDataErrorRecordX(RecNr, KeyInt, Values) };
         if (res) {
             for (int D{}; D < ErrorList->GetDimension(); D++) {
@@ -2739,7 +2736,7 @@ namespace gxfile {
     //   UelCnt: Number of unique elements stored in the gdx file
     // Returns:
     //   Returns a non-zero value
-    int TGXFileObj::gdxSystemInfo(int &SyCnt, int &UelCnt) {
+    int TGXFileObj::gdxSystemInfo(int &SyCnt, int &UelCnt) const {
         UelCnt = UELTable ? (int)UELTable->size() : 0;
         SyCnt = NameList ? (int)NameList->size() : 0;
         return true;
@@ -2873,7 +2870,7 @@ namespace gxfile {
     // See Also:
     //  gdxUMUelGet
     // Description:
-    int TGXFileObj::gdxUMUelInfo(int &UelCnt, int &HighMap) {
+    int TGXFileObj::gdxUMUelInfo(int &UelCnt, int &HighMap) const {
         if (!FFile) { // AS: Use FFile != nullptr as proxy for checking open has been called before
             UelCnt = HighMap = 0;
             return false;
@@ -2956,7 +2953,7 @@ namespace gxfile {
     //      [...]
     // </CODE>
     int TGXFileObj::gdxOpenReadEx(const char *FileName, int ReadMode, int &ErrNr) {
-        return gdxOpenReadXX(FileName, fmOpenRead, ReadMode, ErrNr);
+        return gdxOpenReadXX(FileName, FileAccessMode::fmOpenRead, ReadMode, ErrNr);
     }
 
     // Brief:
@@ -2970,7 +2967,7 @@ namespace gxfile {
     //  Retrieve the string for a unique element based on a mapped index number.
     // See Also:
     //   gdxUMUelGet
-    int TGXFileObj::gdxGetUEL(int uelNr, char *Uel) {
+    int TGXFileObj::gdxGetUEL(int uelNr, char *Uel) const {
         if(!UELTable) {
             Uel[0] = '\0';
             return false;
@@ -3108,7 +3105,7 @@ namespace gxfile {
     // See Also:
     //   gdxDataReadMapStart, gdxDataReadFilteredStart, gdxDataReadDone
     // Description:
-    int TGXFileObj::gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst) {
+    int TGXFileObj::gdxDataReadMap([[maybe_unused]] int RecNr, int *KeyInt, double *Values, int &DimFrst) {
         static const TgxModeSet AllowedModes{fr_map_data, fr_mapr_data};
         if((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadMap", AllowedModes)) return false;
         if(CurSyPtr && CurSyPtr->SScalarFrst) {
@@ -3150,10 +3147,10 @@ namespace gxfile {
                 }
                 int V;
                 switch(obj.DAction) {
-                    case dm_unmapped:
+                    case TgdxDAction::dm_unmapped:
                         KeyInt[D] = LastElem[D];
                         break;
-                    case dm_filter:
+                    case TgdxDAction::dm_filter:
                         V = UELTable->GetUserMap(LastElem[D]);
                         if(obj.DFilter->InFilter(V)) KeyInt[D] = V;
                         else {
@@ -3162,7 +3159,7 @@ namespace gxfile {
                             loopDone = true;
                         }
                         break;
-                    case dm_strict:
+                    case TgdxDAction::dm_strict:
                         V = UELTable->GetUserMap(LastElem[D]);
                         if(V >= 0) KeyInt[D] = V;
                         else {
@@ -3171,7 +3168,7 @@ namespace gxfile {
                             loopDone = true;
                         }
                         break;
-                    case dm_expand: // no filter, allow growth of domain
+                    case TgdxDAction::dm_expand: // no filter, allow growth of domain
                         {
                             int EN = LastElem[D];
                             V = UELTable->GetUserMap(EN);
@@ -3197,12 +3194,12 @@ namespace gxfile {
                 }
                 int V;
                 switch(DomainList[D].DAction) {
-                    case dm_filter:
+                    case TgdxDAction::dm_filter:
                         V = UELTable->GetUserMap(LastElem[D]);
                         if(!DomainList[D].DFilter->InFilter(V))
                             LastElem[D] = -LastElem[D];
                         break;
-                    case dm_strict:
+                    case TgdxDAction::dm_strict:
                         V = UELTable->GetUserMap(LastElem[D]);
                         if(V < 0)
                             LastElem[D] = -LastElem[D];
@@ -3457,7 +3454,7 @@ namespace gxfile {
         if(!MajorCheckMode("FilterRegisterDone"s, fr_filter)) return false;
         fmode = fr_init;
         CurFilter->FiltSorted = true;
-        if(UELTable && UELTable->GetMapToUserStatus() == map_unsorted) {
+        if(UELTable && UELTable->GetMapToUserStatus() == TUELUserMapStatus::map_unsorted) {
             int LV {-1};
             for(int N{1}; N<=UELTable->size(); N++) {
                 int V{UELTable->GetUserMap(N)};
@@ -3536,7 +3533,7 @@ namespace gxfile {
             }
 #else
             if(!*obj.GetObject(TxtNr)) {
-                *obj.GetObject(TxtNr) = Node;
+                *obj.GetObject(TxtNr) = static_cast<uint8_t>(Node);
                 return true;
             }
 #endif
@@ -4197,7 +4194,7 @@ namespace gxfile {
     //   The length of the longest UEL name
     // See also:
     //   gdxSymbIndxMaxLength
-    int TGXFileObj::gdxUELMaxLength() {
+    int TGXFileObj::gdxUELMaxLength() const {
         return UELTable->GetMaxUELLength();
     }
 
@@ -4454,7 +4451,6 @@ namespace gxfile {
     }
 
     TUELTable::TUELTable() {
-        //Buckets.reserve(10000);
         OneBased = true;
         UsrUel2Ent = std::make_unique<TIntegerMapping>();
         ResetMapToUserStatus();
@@ -4497,29 +4493,29 @@ namespace gxfile {
     }
 
     TUELUserMapStatus TUELTable::GetMapToUserStatus() {
-        if(FMapToUserStatus == map_unknown) {
+        if(FMapToUserStatus == TUELUserMapStatus::map_unknown) {
             int LV {-1};
             bool C {true};
-            FMapToUserStatus = map_sortgrow;
+            FMapToUserStatus = TUELUserMapStatus::map_sortgrow;
             for(int N{1}; N<=size(); N++) {
                 int V = GetUserMap(N);
                 if(V < 0) C = false;
                 else if(V > LV) {
                     LV = V;
-                    if(!C) FMapToUserStatus = map_sorted;
+                    if(!C) FMapToUserStatus = TUELUserMapStatus::map_sorted;
                 } else {
-                    FMapToUserStatus = map_unsorted;
+                    FMapToUserStatus = TUELUserMapStatus::map_unsorted;
                     break;
                 }
             }
-            if(FMapToUserStatus == map_sortgrow && C)
-                FMapToUserStatus = map_sortfull;
+            if(FMapToUserStatus == TUELUserMapStatus::map_sortgrow && C)
+                FMapToUserStatus = TUELUserMapStatus::map_sortfull;
         }
         return FMapToUserStatus;
     }
 
     void TUELTable::ResetMapToUserStatus() {
-        FMapToUserStatus = map_unknown;
+        FMapToUserStatus = TUELUserMapStatus::map_unknown;
     }
 
     TgxModeSet::TgxModeSet(const std::initializer_list<TgxFileMode> &modes) {

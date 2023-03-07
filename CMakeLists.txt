@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 project(gdxnative)
 set(CMAKE_CXX_STANDARD 17)
 
-# dump GDX data also as YAML representation
-set(ENABLE_YAML 1)
-
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
 	set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
@@ -22,36 +19,25 @@ if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations")
 endif (UNIX)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGAMSBUILD")
-
-if(ENABLE_YAML)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DYAML")
-endif(ENABLE_YAML)
+# Makefile in devel/products/src/gdxio takes care of acquiring sources for zlib, skip in CMake builds so far
+# dump GDX data also as YAML representation
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_ZLIB -DYAML -DGAMSBUILD")
 
 set(common
 		gclgms.h gclgms.c
-
 		# Only needed for -DGAMSBUILD
 		palmcc.h palmcc.c
-
 		gmsstrm.h gmsstrm.cpp
 		gmsdata.h
 		datastorage.h
 		strhash.h
 		gmsobj.h gmsobj.cpp
 		gmsheapnew.h gmsheapnew.cpp
-
 		utils.h utils.cpp
 		gxfile.h gxfile.cpp
-
-		# ZLIB modules
-		zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c zlib/zutil.c
+		yaml.h yaml.cpp
+		cwrap.h cwrap.cpp
 )
-if(ENABLE_YAML)
-	set(common ${common} yaml.h yaml.cpp)
-endif(ENABLE_YAML)
-
-set(common_neo ${common} cwrap.h cwrap.cpp)
 
 set(tests
 		tests/doctestmain.cpp
@@ -63,7 +49,7 @@ set(tests
 		tests/gmsheapnewtests.cpp
 )
 
-add_library(gdxcclib64 SHARED ${common_neo})
+add_library(gdxcclib64 SHARED ${common})
 set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_library(gdxnativeshared STATIC ${common})

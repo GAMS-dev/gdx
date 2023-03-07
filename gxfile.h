@@ -116,7 +116,7 @@ namespace gxfile {
 
     using TSetBitMap = gdlib::gmsobj::TBooleanBitArray;
 
-    enum TgdxDAction {
+    enum class TgdxDAction {
         dm_unmapped,
         dm_strict,
         dm_filter,
@@ -228,7 +228,13 @@ namespace gxfile {
         [[nodiscard]] bool empty() const;
     };
 
-    enum TUELUserMapStatus {map_unknown, map_unsorted, map_sorted, map_sortgrow, map_sortfull};
+    enum class TUELUserMapStatus {
+        map_unknown,
+        map_unsorted,
+        map_sorted,
+        map_sortgrow,
+        map_sortfull
+    };
 
     template<typename T>
 #ifdef TSH_LEGACY
@@ -245,7 +251,7 @@ namespace gxfile {
 #endif
 
     class TUELTable : public TXStrHashListImpl<int> {
-        TUELUserMapStatus FMapToUserStatus {map_unknown};
+        TUELUserMapStatus FMapToUserStatus {TUELUserMapStatus::map_unknown};
     public:
         std::unique_ptr<TIntegerMapping> UsrUel2Ent {}; // from user uelnr to table entry
         TUELTable();
@@ -334,8 +340,6 @@ namespace gxfile {
     using TTblGamsDataImpl = gdlib::gmsdata::TTblGamsData<T>;
 #endif
 
-    // FIXME: It appears the object field is not actually needed
-    // Find a way to use TXStrHashList anyways (w/out wasting a byte per entry as it is right now)
     using TDomainStrList = TXStrHashListImpl<uint8_t>;
 
     enum tvarvaltype {
@@ -469,10 +473,10 @@ namespace gxfile {
         int gdxUELRegisterMap(int UMap, const char *Uel);
         int gdxClose();
         int gdxResetSpecialValues();
-        int gdxErrorStr(int ErrNr, char *ErrMsg);
+        int gdxErrorStr(int ErrNr, char *ErrMsg) const;
         static int gdxErrorStrStatic(int ErrNr, char *ErrMsg);
         int gdxOpenRead(const char *FileName, int &ErrNr);
-        int gdxFileVersion(char *FileStr, char *ProduceStr);
+        int gdxFileVersion(char *FileStr, char *ProduceStr) const;
         int gdxFindSymbol(const char *SyId, int &SyNr);
         int gdxDataReadStr(char **KeyStr, double *Values, int &DimFrst);
         int gdxDataReadDone();
@@ -480,7 +484,7 @@ namespace gxfile {
         int gdxDataReadStrStart(int SyNr, int &NrRecs);
         int gdxAddAlias(const char *Id1, const char *Id2);
         int gdxAddSetText(const char *Txt, int &TxtNr);
-        int gdxDataErrorCount();
+        [[nodiscard]] int gdxDataErrorCount() const;
         int gdxDataErrorRecord(int RecNr,  int *KeyInt, double * Values);
         int gdxDataErrorRecordX(int RecNr,  int *KeyInt,  double *Values);
         int gdxDataReadRaw(int *KeyInt, double *Values, int &DimFrst);
@@ -499,18 +503,18 @@ namespace gxfile {
         int gdxSymbolInfoX(int SyNr, int &RecCnt, int &UserInfo, char *ExplTxt);
         int gdxSymbolSetDomain(const char **DomainIDs);
         int gdxSymbolSetDomainX(int SyNr, const char **DomainIDs);
-        int gdxSystemInfo(int &SyCnt, int &UelCnt);
+        int gdxSystemInfo(int &SyCnt, int &UelCnt) const;
         int gdxUELRegisterDone();
         int gdxUELRegisterRaw(const char *Uel);
         int gdxUELRegisterRawStart();
         int gdxUELRegisterStr(const char *Uel, int &UelNr);
         int gdxUELRegisterStrStart();
         int gdxUMUelGet(int UelNr, char *Uel, int &UelMap);
-        int gdxUMUelInfo(int &UelCnt, int &HighMap);
+        int gdxUMUelInfo(int &UelCnt, int &HighMap) const;
         [[nodiscard]] int gdxCurrentDim() const;
         int gdxRenameUEL(const char *OldName, const char *NewName);
         int gdxOpenReadEx(const char *FileName, int ReadMode, int &ErrNr);
-        int gdxGetUEL(int uelNr, char *Uel);
+        int gdxGetUEL(int uelNr, char *Uel) const;
         int gdxDataWriteMapStart(const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                  int UserInfo);
         int gdxDataWriteMap(const int *KeyInt, const double *Values);
@@ -558,7 +562,7 @@ namespace gxfile {
         [[nodiscard]] int gdxSymbMaxLength() const;
         int gdxSymbolAddComment(int SyNr, const char* Txt);
         int gdxSymbolGetComment(int SyNr, int N, char *Txt);
-        int gdxUELMaxLength();
+        [[nodiscard]] int gdxUELMaxLength() const;
         int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap);
         [[nodiscard]] int gdxStoreDomainSets() const;
         void gdxStoreDomainSetsSet(int x);
