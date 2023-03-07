@@ -12,7 +12,7 @@
     inline int uncompress(void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen) { return 0; }
     inline int compress(void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen) { return 0; }
 #else
-    #include "zlib/zlib.h"
+    #include <zlib.h>
 #endif
 
 // ==============================================================================================================
