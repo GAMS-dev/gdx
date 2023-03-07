@@ -26,6 +26,7 @@ using namespace std::literals::string_literals;
 
 namespace gxfile {
 
+    std::string QueryEnvironmentVariable(const std::string &Name);
     std::string QueryEnvironmentVariable(const std::string &Name) {
 #if defined(_WIN32)
         int len = GetEnvironmentVariableA(Name.c_str(), nullptr, 0);
@@ -268,10 +269,7 @@ namespace gxfile {
         for(char Ch : s) {
             if(!utils::in(Ch, '\"', '\'')) {
                 if(Ch < ' ') Ch = '?';
-            } else {
-                if(q == '\0') q = Ch;
-                Ch = q;
-            }
+            } else Ch = q;
             res += Ch;
         }
         return res;
@@ -400,11 +398,6 @@ namespace gxfile {
             if(ErrNr == strmErrorZLib) ErrNr = ERR_ZLIB_NOT_FOUND;
             LastError = ErrNr;
             return false;
-        }
-
-        if(writeAsText) {
-            const std::string FileNameText = utils::replaceSubstrs(FileName, ".gdx", ".txt");
-            FFile->ActiveWriteOpTextDumping(FileNameText);
         }
 
         Compr &= (FFile->GetCanCompress() ? 1 : 0);
@@ -759,11 +752,6 @@ namespace gxfile {
         if(NameList) {
             for (int N{1}; N <= NameList->Count(); N++) {
                 const auto PSy = *NameList->GetObject(N);
-                //PSy->SDomSymbols = nullptr;
-                //PSy->SCommentsList.clear();
-                //PSy->SCommentsList = std::nullopt;
-                //PSy->SSetBitMap = nullptr;
-                //PSy->SDomStrings = nullptr;
                 delete PSy;
             }
             NameList = nullptr;
@@ -1898,10 +1886,6 @@ namespace gxfile {
             return FileNoGood();
         }
         FFile = std::make_unique<TMiBufferedStreamDelphi>(Afn, filemode);
-#ifdef YAML
-        const std::string FileNameYML = utils::replaceSubstrs(Afn, ".gdx", ".yaml");
-        YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
-#endif
         ErrNr = FFile->GetLastIOResult();
         if(ErrNr) return FileNoGood();
         if(FFile->GoodByteOrder()) {
@@ -1919,6 +1903,11 @@ namespace gxfile {
             ErrNr = ERR_ZLIB_NOT_FOUND;
             return FileNoGood();
         }
+
+#ifdef YAML
+        const std::string FileNameYML = utils::replaceSubstrs(Afn, ".gdx", ".yaml");
+        YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
+#endif
 
         fComprLev = Compr;
         FileSystemID = FFile->ReadString();
@@ -3259,9 +3248,8 @@ namespace gxfile {
         TraceLevel = tl;
     }
 
-    void TGXFileObj::SetWriteModes(bool asYAML, bool asText) {
+    void TGXFileObj::SetWriteAsYAML(bool asYAML) {
         this->writeAsYAML = asYAML;
-        this->writeAsText = asText;
     }
 
     // Summary:

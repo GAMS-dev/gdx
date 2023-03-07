@@ -355,7 +355,7 @@ namespace gxfile {
 #ifdef YAML
         std::unique_ptr<yaml::TYAMLFile> YFile;
 #endif
-        bool writeAsYAML{}, writeAsText{};
+        bool writeAsYAML{};
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
         TgxFileMode fmode {f_not_open}, fmode_AftReg {f_not_open};
         enum {stat_notopen, stat_read, stat_write} fstatus {stat_notopen};
@@ -382,7 +382,7 @@ namespace gxfile {
         bool StoreDomainSets{true};
         TIntlValueMapDbl intlValueMapDbl{}, readIntlValueMapDbl{};
         TIntlValueMapI64 intlValueMapI64{};
-        TraceLevels TraceLevel {TraceLevels::trl_none};
+        TraceLevels TraceLevel {TraceLevels::trl_all};
         std::string TraceStr;
         int VersionRead{};
         std::string FProducer, FProducer2, FileSystemID;
@@ -409,7 +409,7 @@ namespace gxfile {
 
 #ifndef VERBOSE_TRACE
         const TraceLevels defaultTraceLevel {TraceLevels::trl_none};
-        const bool verboseTrace {false};
+        const bool verboseTrace {};
 #else
         const TraceLevels defaultTraceLevel {TraceLevels::trl_all};
         const bool verboseTrace {true};
@@ -488,7 +488,7 @@ namespace gxfile {
         int gdxDataWriteRaw(const int* KeyInt, const double* Values);
         int gdxDataWriteRawStart(const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                  int UserInfo);
-        int gdxErrorCount() const;
+        [[nodiscard]] int gdxErrorCount() const;
         int gdxGetElemText(int TxtNr, char *Txt, int &Node);
         int gdxGetLastError();
         int gdxGetSpecialValues(double *Avals);
@@ -507,7 +507,7 @@ namespace gxfile {
         int gdxUELRegisterStrStart();
         int gdxUMUelGet(int UelNr, char *Uel, int &UelMap);
         int gdxUMUelInfo(int &UelCnt, int &HighMap);
-        int gdxCurrentDim() const;
+        [[nodiscard]] int gdxCurrentDim() const;
         int gdxRenameUEL(const char *OldName, const char *NewName);
         int gdxOpenReadEx(const char *FileName, int ReadMode, int &ErrNr);
         int gdxGetUEL(int uelNr, char *Uel);
@@ -518,8 +518,7 @@ namespace gxfile {
         int gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst);
 
         void SetTraceLevel(TraceLevels tl);
-
-        void SetWriteModes(bool asYAML, bool asText);
+        void SetWriteAsYAML(bool asYAML);
 
         // region Acronym handling
         [[nodiscard]] int gdxAcronymCount() const;
@@ -561,7 +560,7 @@ namespace gxfile {
         int gdxSymbolGetComment(int SyNr, int N, char *Txt);
         int gdxUELMaxLength();
         int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap);
-        int gdxStoreDomainSets() const;
+        [[nodiscard]] int gdxStoreDomainSets() const;
         void gdxStoreDomainSetsSet(int x);
         int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP);
         int gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs);

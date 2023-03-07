@@ -181,12 +181,6 @@ namespace tests::utilstests {
         REQUIRE_FALSE(utils::excl_or(true, true));
     }
 
-    TEST_CASE("Test constructing string via lambda with index arg") {
-        std::string s { "test"s };
-        REQUIRE_EQ(s, utils::constructStr((int)s.size(), [&s](int ix) { return s[ix]; }));
-        REQUIRE(utils::constructStr(0, [](int ix) { return 0; }).empty());
-    }
-
     TEST_CASE("Test quoting a string iff. it contains blanks") {
         REQUIRE_EQ("nowhitespace"s, utils::quoteWhitespace("nowhitespace"s, '\"'));
         REQUIRE_EQ("\"has whitespace\""s, utils::quoteWhitespace("has whitespace"s, '\"'));

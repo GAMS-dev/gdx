@@ -127,8 +127,6 @@ namespace utils {
 
     bool excl_or(bool a, bool b);
 
-    std::string constructStr(int size, const std::function<char(int)> &charForIndex);
-
     std::string_view substr(std::string_view s, int offset, int len);
 
     bool starts_with(std::string_view s, std::string_view prefix);
@@ -144,9 +142,6 @@ namespace utils {
 
     int strCompare(std::string_view S1, std::string_view S2, bool caseInsensitive = true);
 
-    const int maxBOMLen = 4;
-    using tBomIndic = std::array<uint8_t, maxBOMLen>;
-    bool checkBOMOffset(const tBomIndic &potBOM, int &BOMOffset, std::string &msg);
     int strConvCppToDelphi(std::string_view s, char *delphistr);
 
     inline void assignStrToBuf(const std::string &s, char *buf, int outBufSize = 256) {

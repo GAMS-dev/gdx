@@ -1,10 +1,6 @@
-#include <cassert>
 #include <sstream>
 #include <cstring>
-#include <limits>
-
 #include <string>
-#include <fstream>
 #include <utility>
 #include <cmath>
 #include <filesystem>
@@ -40,7 +36,6 @@ namespace gdlib::gmsstrm {
 
     int customFileOpen(const std::string& fName, CustomOpenAction mode, std::fstream * h);
     int customFileRead(std::fstream * h, char* buffer, uint32_t buflen, uint32_t& numRead);
-    int getFileSize(std::fstream * h, int64_t& fileSize);
 
     int customFileOpen(const std::string& fName, CustomOpenAction mode, std::fstream * h)
     {
@@ -61,18 +56,6 @@ namespace gdlib::gmsstrm {
         return f && !std::filesystem::exists(fName) ? 2 : f;
     }
 
-    int getFileSize(std::fstream * h, int64_t& fileSize)
-    {
-        if (!h->is_open() || h->bad()) return 1;
-        std::streampos oldpos = h->tellg();
-        h->seekg(0, std::ios::beg);
-        std::streampos start = h->tellg();
-        h->seekg(0, std::ios::end);
-        fileSize = h->tellg() - start;
-        h->seekg(oldpos);
-        return 0;
-    }
-
     int customFileRead(std::fstream * h, char* buffer, uint32_t buflen, uint32_t& numRead)
     {
         auto savedPos = h->tellg();
@@ -83,10 +66,7 @@ namespace gdlib::gmsstrm {
         return h->bad() ? 1 : 0;
     }
 
-    const std::string signature_gams = "*GAMS*"s;
-
     union TDoubleVar {
-        //bool realNumOrBytes;
         double V;
         std::array<uint8_t, 8> VA;
     };
@@ -96,91 +76,52 @@ namespace gdlib::gmsstrm {
     void reverseBytesMax8(void *psrc, void *pdest, int sz) {
         std::array<uint8_t, 8> orig{}, flip{};
         int n{std::min(sz-1, 7)};
-        std::memcpy(orig.data(), (const char *)psrc, n+1);
+        std::memcpy(orig.data(), static_cast<const char *>(psrc), n+1);
         for(int k{}; k<=n; k++)
             flip[k] = orig[n-k];
-        std::memcpy((char *)pdest, flip.data(), n+1);
-    }
-
-    void TXStreamDelphi::ParWrite(RWType T) {
-        Write(&T, 1);
-    }
-
-    void TXStreamDelphi::ParCheck(RWType T) {
-        uint8_t B;
-        Read(&B, 1);
-        if(B != T)
-            throw std::runtime_error("Stream check failed: Expected = " + RWTypeText[T] + " Read = "
-                + (B > RWType::rw_count ? ("???" + std::to_string(B)) : RWTypeText[B]));
+        std::memcpy(static_cast<char *>(pdest), flip.data(), n+1);
     }
 
     void TXStreamDelphi::WriteString(const std::string_view s) {
-        static int cnt{};
         static std::array<char, 256> buf{};
-        if(fstext)
-            *fstext << "WriteString@" << GetPosition() << "#" << ++cnt << ": " << s << "\n";
-        if (Paranoid) ParWrite(rw_string);
         utils::strConvCppToDelphi(s, buf.data());
         Write(buf.data(), (uint32_t)s.length()+1);
     }
 
     void TXStreamDelphi::WriteDouble(double x) {
-        static int cnt {};
-        if (fstext)
-            *fstext << "WriteDouble@"<< GetPosition()  << "#" << ++cnt << ": " << x << '\n';
         WriteValue(rw_double, x);
     }
 
     void TXStreamDelphi::WriteInteger(int n) {
-        static int cnt {};
-        if (fstext)
-            *fstext << "WriteInteger@"<< GetPosition() << "#" << ++cnt << ": " << n << '\n';
         WriteValue(rw_integer, n);
     }
 
     void TXStreamDelphi::WriteInt64(int64_t N) {
-        static int cnt{};
-        if (fstext)
-            *fstext << "WriteInt64@"<< GetPosition() << "#"<< ++cnt << ": " << N << '\n';
         WriteValue(rw_int64, N);
     }
 
     void TXStreamDelphi::WriteByte(uint8_t b) {
-        static int cnt{};
-        if(fstext)
-            *fstext << "WriteByte@" << GetPosition() << "#" << ++cnt << ": " << std::to_string(b) << '\n';
         WriteValue(rw_byte, b);
     }
 
     void TXStreamDelphi::WriteWord(uint16_t W) {
-        static int cnt{};
-        if (fstext)
-            *fstext << "WriteWord@" << GetPosition() << "#" << ++cnt << ": " << W << '\n';
         WriteValue(rw_word, W);
     }
 
     void TXStreamDelphi::WriteBool(bool B) {
-        static int cnt{};
-        if (fstext)
-            *fstext << "WriteBool@" << GetPosition() << "#" << ++cnt << ": " << (B ? "True" : "False") << '\n';
         WriteValue(rw_bool, B);
     }
 
     void TXStreamDelphi::WriteChar(char C) {
-        static int cnt {};
-        if (fstext)
-            *fstext << "WriteChar@" << GetPosition() << "#" << ++cnt << ": " << C << '\n';
         WriteValue(rw_char, C);
     }
 
     void TXStreamDelphi::WritePChar(const char *s, int L) {
-        if(Paranoid) ParWrite(rw_pchar);
         WriteInteger(L);
         if(L > 0) Write(s, L);
     }
 
     std::string TXStreamDelphi::ReadString() {
-        if(Paranoid) ParCheck(rw_string);
         uint8_t len;
         if(!Read(&len, 1)) return ""s;
         std::string s;
@@ -219,7 +160,6 @@ namespace gdlib::gmsstrm {
     }
 
     void TXStreamDelphi::ReadPChar(char *P, int &L) {
-        if(Paranoid) ParCheck(rw_pchar);
         L = ReadInteger();
         if(L <= 0) P = nullptr;
         else {
@@ -228,9 +168,7 @@ namespace gdlib::gmsstrm {
         }
     }
 
-    void TXStreamDelphi::ActiveWriteOpTextDumping(const std::string &dumpFilename) {
-        fstext = std::make_unique<std::ofstream>(dumpFilename);
-    }
+    void TXStreamDelphi::ActiveWriteOpTextDumping(const std::string &dumpFilename) {}
 
     void TXFileStreamDelphi::SetLastIOResult(int V) {
         if(!FLastIOResult) FLastIOResult = V;
@@ -248,30 +186,13 @@ namespace gdlib::gmsstrm {
             }
             char B = s[K];
             if(!(B & 1)) B >>= 1;
-            else B = 0x80 + (B >> 1);
+            else B = (unsigned char)(0x80 + ((unsigned char)B >> 1));
             FPassWord += B;
         }
     }
 
     bool TXFileStreamDelphi::GetUsesPassWord() {
         return !FPassWord.empty();
-    }
-
-    std::string TXFileStreamDelphi::RandString(int L) {
-        int Seed{};
-        auto RandCh = [&]() {
-            Seed = (Seed * 12347 + 1023) & 0x7FFFFFF;
-            return static_cast<char>(Seed & 0xFF);
-        };
-        Seed = 1234 * L;
-        return utils::constructStr(L, [&](int i) { return RandCh(); });
-    }
-
-    int64_t TXFileStreamDelphi::GetSize()
-    {
-        int64_t res{};
-        SetLastIOResult(getFileSize(FS.get(), res));
-        return res;
     }
 
     int64_t TXFileStreamDelphi::GetPosition()
@@ -332,9 +253,9 @@ namespace gdlib::gmsstrm {
     {
         uint32_t res;
         if (FPassWord.empty())
-            SetLastIOResult(customFileRead(FS.get(), (char *) Buffer, Count, res));
+            SetLastIOResult(customFileRead(FS.get(), static_cast<char *>(Buffer), Count, res));
         else {
-            auto PW = (char *)Buffer;
+            auto PW = static_cast<char *>(Buffer);
             std::vector<char> PR(Count);
             SetLastIOResult(customFileRead(FS.get(), PR.data(), Count, res));
             ApplyPassWord(PR.data(), PW, (int)Count, PhysPosition);
@@ -345,10 +266,10 @@ namespace gdlib::gmsstrm {
 
     uint32_t TXFileStreamDelphi::Write(const void* Buffer, uint32_t Count) {
         if (FPassWord.empty()) {
-            FS->write((const char *)Buffer, Count);
+            FS->write(static_cast<const char *>(Buffer), Count);
         }
         else {
-            auto PR = (const char *)Buffer;
+            auto PR = static_cast<const char *>(Buffer);
             std::vector<char> PW(Count);
             ApplyPassWord(PR, PW.data(), (int)Count, PhysPosition);
         }
@@ -410,12 +331,6 @@ namespace gdlib::gmsstrm {
         }
         TXFileStreamDelphi::SetPosition(p);
         NrLoaded = NrRead = 0;
-    }
-
-    int64_t TBufferedFileStreamDelphi::GetSize() {
-        int64_t res {TXFileStreamDelphi::GetSize()};
-        if(NrWritten > 0) res = std::max(res, (int64_t)(PhysPosition + NrWritten));
-        return res;
     }
 
     TBufferedFileStreamDelphi::TBufferedFileStreamDelphi(const std::string& FileName, uint16_t Mode)
@@ -511,7 +426,7 @@ namespace gdlib::gmsstrm {
             return Count;
         }
         else {
-            const char *UsrPtr = (const char *)Buffer;
+            auto UsrPtr = static_cast<const char *>(Buffer);
             int UsrWriteCnt{}; // total number of bytes written
             while(Count > 0) {
                 auto NrBytes = std::min(Count, BufSize - NrWritten);
@@ -524,10 +439,6 @@ namespace gdlib::gmsstrm {
             }
             return UsrWriteCnt;
         }
-    }
-
-    bool TBufferedFileStreamDelphi::IsEof() {
-        return NrRead >= NrLoaded && GetPosition() >= GetSize();
     }
 
     void TBufferedFileStreamDelphi::SetCompression(bool V)
@@ -570,8 +481,8 @@ namespace gdlib::gmsstrm {
     //note: this only works when src and dest point to different areas
     void TMiBufferedStreamDelphi::ReverseBytes(void* psrc, void* pdest, int sz)
     {
-        char *pdestc = (char *)pdest;
-        char *psrcc = (char *)psrc;
+        auto pdestc = static_cast<char *>(pdest);
+        auto psrcc = static_cast<char *>(psrc);
         pdestc += sz-1;
         for(int k{0}; k<sz; k++) {
             *pdestc = *psrcc;
@@ -673,7 +584,7 @@ namespace gdlib::gmsstrm {
         TDoubleVar Z{};
         Z.V = D;
         if(NormalOrder) {
-            for(auto &cell : Z.VA) {
+            for(const auto &cell : Z.VA) {
                 if(!cell) C++;
                 else break;
             }

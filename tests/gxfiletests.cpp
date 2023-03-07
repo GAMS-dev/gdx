@@ -124,6 +124,8 @@ namespace tests::gxfiletests {
             REQUIRE_FALSE(ErrNr);
             REQUIRE_EQ(0, pgx.gdxErrorCount());
 
+            REQUIRE_FALSE(pgx.gdxOpenWriteEx(fn.c_str(), "gdxinterfacetest", 1, ErrNr));
+
             REQUIRE(pgx.gdxFileInfo(fileVer, comprLev));
             REQUIRE_EQ(7, fileVer);
             REQUIRE_EQ(1, comprLev);
@@ -349,6 +351,8 @@ namespace tests::gxfiletests {
             REQUIRE(pgx.gdxUELRegisterRaw("TheFirstUEL"));
             REQUIRE(pgx.gdxUELRegisterRaw("TheSecondUEL"));
             REQUIRE(pgx.gdxUELRegisterDone());
+            // Called out of context with garbage
+            //REQUIRE_FALSE(pgx.gdxDataWriteRaw(nullptr, nullptr));
             REQUIRE(pgx.gdxDataWriteRawStart("mysym", "This is my symbol!", 1, dt_par, 0));
 
             key = 1;

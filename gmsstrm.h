@@ -16,8 +16,6 @@
 namespace gdlib::gmsstrm {
     std::string SysErrorMessage(int errorCore);
 
-    const bool Paranoid = false;
-
     const int
         // TXStream seek origins
         soFromBeginning  = 0,
@@ -63,20 +61,14 @@ namespace gdlib::gmsstrm {
      * Defines the base class for a stream. Only to be used for defining derived objects.
      */
     class TXStreamDelphi {
-        std::unique_ptr<std::ofstream> fstext {};
     protected:
-        void ParWrite(RWType T);
-        void ParCheck(RWType T);
-
         template<typename T>
         void WriteValue(RWType rwt, T &v) {
-            if(Paranoid) ParWrite(rwt);
             Write(&v, sizeof(T));
         }
 
         template<typename T>
         T ReadValue(RWType rwt) {
-            if(Paranoid) ParCheck(rwt);
             T res;
             Read(&res, sizeof(T));
             return res;
@@ -84,7 +76,6 @@ namespace gdlib::gmsstrm {
     
         virtual int64_t GetPosition() = 0;
         virtual void SetPosition(int64_t P) = 0;
-        virtual int64_t GetSize() = 0;
 
     public:
         virtual uint32_t Read(void *Buffer, uint32_t Count) = 0;
@@ -119,36 +110,27 @@ namespace gdlib::gmsstrm {
     };
 
     class TXFileStreamDelphi : public TXStreamDelphi {
-        friend class TBinaryTextFileIODelphi;
-
         std::unique_ptr<std::fstream> FS{};
         bool FileIsOpen{};
         std::string FFileName{}, FPassWord{};
-
-        static std::string RandString(int L);
 
     protected:
         int FLastIOResult{};
         int64_t PhysPosition{};
 
-        int64_t GetSize() override;
         int64_t GetPosition() override;
         void SetPosition(int64_t P) override;
 
     public:
         TXFileStreamDelphi(std::string AFileName, FileAccessMode AMode);
         virtual ~TXFileStreamDelphi();
-
         void ApplyPassWord(const char *PR, char *PW, int Len, int64_t Offs);
         uint32_t Read(void *Buffer, uint32_t Count) override;
         uint32_t Write(const void *Buffer, uint32_t Count) override;
-
         void SetLastIOResult(int V);
         int GetLastIOResult();
-
         void SetPassWord(const std::string& s);
         bool GetUsesPassWord();
-
         [[nodiscard]] std::string GetFileName() const;
     };
 
@@ -164,19 +146,13 @@ namespace gdlib::gmsstrm {
     using PCompressBuffer = TCompressBuffer*;
 
     class TBufferedFileStreamDelphi : public TXFileStreamDelphi {
-        friend class TBinaryTextFileIODelphi;
-
         uint32_t NrLoaded, NrRead, NrWritten, BufSize, CBufSize;
-
         std::vector<uint8_t> BufPtr;
         PCompressBuffer CBufPtr;
-
         bool FCompress, FCanCompress;
 
         bool FillBuffer();
         
-    protected:
-        int64_t GetSize() override;
     public:
         TBufferedFileStreamDelphi(const std::string &FileName, uint16_t Mode);
         ~TBufferedFileStreamDelphi() override;
@@ -184,13 +160,10 @@ namespace gdlib::gmsstrm {
         uint32_t Read(void *Buffer, uint32_t Count) override;
         char ReadCharacter();
         uint32_t Write(const void *Buffer, uint32_t Count) override;
-        bool IsEof();
         [[nodiscard]] bool GetCompression() const;
         void SetCompression(bool V);
         [[nodiscard]] bool GetCanCompress() const;
-
         int64_t GetPosition() override;
-
         void SetPosition(int64_t p) override;
     };
 
@@ -202,7 +175,6 @@ namespace gdlib::gmsstrm {
 
         template<typename T>
         T ReadValueOrdered(RWType rwt, bool order_type) {
-            if(Paranoid) ParCheck(rwt);
             T res;
             if(!order_type) Read(&res, sizeof(T));
             else {

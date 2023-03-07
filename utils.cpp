@@ -1,10 +1,7 @@
 #include "utils.h"
 
-#include <list>
 #include <algorithm>
 #include <chrono>
-#include <cassert>
-#include <numeric>
 #include <cstring>
 
 using namespace std::literals::string_literals;
@@ -33,7 +30,7 @@ namespace utils {
     std::string_view trim(const std::string_view s) {
         if(s.empty()) return {};
         int firstNonBlank {-1}, lastNonBlank {};
-        for(int i{}; i<s.length(); i++) {
+        for(int i{}; i<static_cast<int>(s.length()); i++) {
             if((unsigned char)s[i] > 32) {
                 if(firstNonBlank == -1) firstNonBlank = i;
                 lastNonBlank = i;
@@ -91,14 +88,6 @@ namespace utils {
         return (s.empty() || offset > (int) s.size() - 1) ? std::string_view {} : s.substr(offset, len);
     }
 
-    std::string constructStr(int size, const std::function<char(int)> &charForIndex) {
-        std::string s;
-        s.resize(size);
-        for (int i{}; i < size; i++)
-            s[i] = charForIndex(i);
-        return s;
-    }
-
     bool starts_with(const std::string_view s, const std::string_view prefix) {
         if (prefix.length() > s.length()) return false;
         for (int i = 0; i < (int) prefix.length(); i++) {
@@ -112,10 +101,8 @@ namespace utils {
         return utils::strContains(s, ' ') ? ""s + quotechar + s + quotechar : s;
     }
 
-    inline int b2i(bool b) { return b ? 1 : 0; }
-
     int strCompare(const std::string_view S1, const std::string_view S2, bool caseInsensitive) {
-        if (S1.empty() || S2.empty()) return b2i(!S1.empty()) - b2i(!S2.empty());
+        if (S1.empty() || S2.empty()) return (!S1.empty() ? 1 : 0) - (!S2.empty() ? 1 : 0);
         auto L = S1.length();
         if (L > S2.length()) L = S2.length();
         for (size_t K{}; K < L; K++) {
@@ -125,41 +112,6 @@ namespace utils {
             if (d) return d;
         }
         return static_cast<int>(S1.length() - S2.length());
-    }
-
-    bool checkBOMOffset(const tBomIndic &potBOM, int &BOMOffset, std::string &msg) {
-        enum tBOM {
-            bUTF8, bUTF16BE, bUTF16LE, bUTF32BE, bUTF32LE, num_tboms
-        };
-        const std::array<std::string, num_tboms> BOMtxt = {"UTF8"s, "UTF16BE"s, "UTF16LE"s, "UTF32BE"s, "UTF32LE"s};
-        const std::array<std::array<uint8_t, maxBOMLen + 1>, num_tboms> BOMS = {
-                {{3, 239, 187, 191, 0},  // UTF8
-                 {2, 254, 255, 0, 0},  // UTF16BE
-                 {2, 255, 254, 0, 0},  // UTF16LE
-                 {4, 0, 0, 254, 255},  // UTF32BE
-                 {4, 255, 254, 0, 0} // UTF32LE
-                }
-        };
-        msg.clear();
-        BOMOffset = 0;
-        for (int b = 0; b < num_tboms; b++) {
-            bool match{true};
-            for (int j{1}; j <= BOMS[b][0]; j++) {
-                if (BOMS[b][j] != potBOM[j - 1]) {
-                    match = false;
-                    break;
-                }
-            }
-            if (!match) continue;
-
-            if (b == bUTF8) BOMOffset = BOMS[b].front(); // UTF8 is the only one, which is OK atm
-            else {
-                msg = BOMtxt[b] + " BOM detected. This is an unsupported encoding.";
-                return false;
-            }
-            break;
-        }
-        return true;
     }
 
     /**
