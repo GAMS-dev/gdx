@@ -16,8 +16,6 @@
     <ClCompile Include="tests\gxfiletests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="yaml.cpp">
-    </ClCompile>
     <ClCompile Include="tests\utilstests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
@@ -51,8 +49,6 @@
     </ClInclude>
     <ClInclude Include="tests\doctest.h">
       <Filter>tests</Filter>
-    </ClInclude>
-    <ClInclude Include="yaml.h">
     </ClInclude>
     <ClInclude Include="gclgms.h" />
     <ClInclude Include="palmcc.h" />

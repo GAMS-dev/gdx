@@ -8,13 +8,6 @@
 #include <numeric>
 #include <cmath>
 
-#ifdef YAML
-#include "yaml.h"
-#define WRYAML(instr) instr
-#else
-#define WRYAML(instr) /**/
-#endif
-
 #if defined(_WIN32)
 #include <Windows.h>
 #undef max
@@ -435,25 +428,6 @@ namespace gxfile {
         fstatus = stat_write;
         DomainStrList = std::make_unique<TDomainStrList>();
         DomainStrList->OneBased = true;
-
-#ifdef YAML
-        const std::string FileNameYML = utils::replaceSubstrs(FileName, ".gdx", ".yaml");
-        YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
-        if(writeAsYAML) {
-            YFile->AddKey("gdxfile");
-            YFile->IncIndentLevel();
-            YFile->AddKeyItem("metadata");
-            YFile->IncIndentLevel();
-            YFile->AddKeyValue("gdx_header_nr", gdxHeaderNr);
-            YFile->AddKeyValue("gdx_header_id", gdxHeaderId);
-            YFile->AddKeyValue("version_read", VersionRead);
-            YFile->AddKeyValue("compression", Compr);
-            YFile->AddKeyValue("filesystem_id", FileSystemID);
-            YFile->AddKeyValue("producer", FProducer);
-            YFile->DecIndentLevel();
-        }
-#endif
-
         return true;
     }
 
@@ -578,10 +552,6 @@ namespace gxfile {
             int64_t SymbPos = NextWritePosition;
             FFile->WriteString(MARK_SYMB);
             FFile->WriteInteger(static_cast<int>(NameList->size()));
-#ifdef YAML
-            YFile->AddKeyItem("symbols");
-            YFile->IncIndentLevel();
-#endif
             for(int N{1}; N<=NameList->Count(); N++) {
                 FFile->WriteString(NameList->GetString(N));
                 const auto PSy = *NameList->GetObject(N);
@@ -594,138 +564,66 @@ namespace gxfile {
                 FFile->WriteByte(PSy->SSetText);
                 FFile->WriteString(PSy->SExplTxt);
                 FFile->WriteByte(PSy->SIsCompressed);
-
-#ifdef YAML
-                if(writeAsYAML) {
-                    YFile->AddKey(NameList->GetString(N));
-                    YFile->IncIndentLevel();
-                    YFile->AddKeyValue("position", static_cast<int>(PSy->SPosition));
-                    YFile->AddKeyValue("dim", PSy->SDim);
-                    YFile->AddKeyValue("type", PSy->SDataType);
-                    YFile->AddKeyValue("user_info", PSy->SUserInfo);
-                    YFile->AddKeyValue("num_records", PSy->SDataCount);
-                    YFile->AddKeyValue("error_count", PSy->SErrors);
-                    YFile->AddKeyValue("set_text", PSy->SSetText);
-                    YFile->AddKeyValue("explanatory_text", PSy->SExplTxt);
-                    YFile->AddKeyValue("compressed", PSy->SIsCompressed);
-                }
-
-                YFile->AddKeyValue("has_domain_symbols", (PSy->SDomSymbols ? "yes"s : "no"s));
-#endif
                 FFile->WriteByte(PSy->SDomSymbols ? 1 : 0);
 
                 if(PSy->SDomSymbols) {
-#ifdef YAML
-                    YFile->AddKeyItem("domain_symbols");
-                    YFile->IncIndentLevel();
-#endif
                     for(int D{}; D<PSy->SDim; D++) {
                         FFile->WriteInteger(PSy->SDomSymbols[D]);
-                        WRYAML(YFile->AddItem(std::to_string(PSy->SDomSymbols[D])));
                     }
-                    WRYAML(YFile->DecIndentLevel());
                 }
 
                 int CommCnt { PSy->SCommentsList ? static_cast<int>(PSy->SCommentsList->size()) : 0 };
                 FFile->WriteInteger(CommCnt);
                 if(CommCnt) {
-#ifdef YAML
-                    YFile->AddKeyItem("comments");
-                    YFile->IncIndentLevel();
-#endif
                     for (int Cnt{}; Cnt < CommCnt; Cnt++) {
                         auto comment = (*PSy->SCommentsList)[Cnt];
                         FFile->WriteString(comment);
-                        WRYAML(YFile->AddItem(comment));
                     }
-                    WRYAML(YFile->DecIndentLevel());
                 }
-
-#ifdef YAML
-                if(writeAsYAML) YFile->DecIndentLevel();
-#endif
             }
             FFile->WriteString(MARK_SYMB);
-            WRYAML(YFile->DecIndentLevel());
 
             auto SetTextPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_SETT);
-            WRYAML(YFile->AddKeyItem("set_texts"));
-            WRYAML(YFile->IncIndentLevel());
             FFile->WriteInteger(static_cast<int>(SetTextList ? SetTextList->size() : 0));
             if(SetTextList) {
                 for (int N{}; N < static_cast<int>(SetTextList->Count()); N++) {
                     const char *SetText = SetTextList->GetName(N);
                     FFile->WriteString(SetText);
-                    WRYAML(YFile->AddItem(SetText));
                 }
             }
             FFile->WriteString(MARK_SETT);
-            WRYAML(YFile->DecIndentLevel());
 
             auto UELPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_UEL);
             UELTable->SaveToStream(*FFile);
-#ifdef YAML
-            WRYAML(YFile->AddKeyItem("uels"));
-            WRYAML(YFile->IncIndentLevel());
-            if(UELTable)
-                for(int i{1}; i<=UELTable->size(); i++)
-                    WRYAML(YFile->AddItem((*UELTable)[i]));
-#endif
             FFile->WriteString(MARK_UEL);
-            WRYAML(YFile->DecIndentLevel());
 
             auto AcronymPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_ACRO);
-#ifdef YAML
-            WRYAML(YFile->AddKeyItem("acronyms"));
-            WRYAML(YFile->IncIndentLevel());
-            for(int N{}; N<(int)AcronymList->size(); N++) {
-                const auto &acro = (*AcronymList)[N];
-                const auto acroName = acro.AcrName.empty() ? "UnknownACRO" + std::to_string(acro.AcrMap) : acro.AcrName;
-                WRYAML(YFile->AddKeyValue(acroName, "{text:"s +  acro.AcrText + ", map:"s + std::to_string(acro.AcrMap) + "}"s));
-            }
-#endif
             AcronymList->SaveToStream(*FFile);
             FFile->WriteString(MARK_ACRO);
-            WRYAML(YFile->DecIndentLevel());
 
             auto DomStrPos {static_cast<int64_t>(FFile->GetPosition())};
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_DOMS);
             DomainStrList->SaveToStream(*FFile);
-            WRYAML(YFile->AddKeyItem("domain_strings"));
-            WRYAML(YFile->IncIndentLevel());
-#ifdef YAML
-            if(DomainStrList)
-                for(int i{1}; i<=DomainStrList->size(); i++)
-                    WRYAML(YFile->AddItem(DomainStrList->GetString(i)));
-#endif
             FFile->WriteString(MARK_DOMS);
-            WRYAML(YFile->DecIndentLevel());
 
-            WRYAML(YFile->AddKeyItem("symbol_domains"));
-            WRYAML(YFile->IncIndentLevel());
             for(int N{1}; N<=NameList->Count(); N++) {
                 const auto *PSy = *(*NameList)[N];
                 if(PSy->SDomStrings) {
-                    WRYAML(YFile->AddKeyItem(NameList->GetString(N)));
-                    WRYAML(YFile->IncIndentLevel());
                     FFile->WriteInteger(N);
                     for(int D{}; D<PSy->SDim; D++) {
                         FFile->WriteInteger(PSy->SDomStrings[D]);
-                        WRYAML(YFile->AddItem(std::to_string(PSy->SDomStrings[D])));
                     }
-                    WRYAML(YFile->DecIndentLevel());
                 }
             }
             FFile->WriteInteger(-1);
             FFile->WriteString(MARK_DOMS);
-            WRYAML(YFile->DecIndentLevel());
 
             // This must be at the very end!!!
             FFile->SetPosition(MajorIndexPosition);
@@ -736,14 +634,6 @@ namespace gxfile {
             const std::array offsetNames = {"symbol_table"s, "uel_table"s, "set_texts"s, "acronyms"s, "next_write"s, "domain_strs"s };
             for(int64_t offset : offsets)
                 FFile->WriteInt64(offset);
-
-#ifdef YAML
-            YFile->AddKeyItem("section_offsets");
-            YFile->IncIndentLevel();
-            for(int i{}; i<(int)offsets.size(); i++)
-                YFile->AddKeyValue(offsetNames[i], (int)offsets[i]);
-            YFile->DecIndentLevel();
-#endif
         }
 
         int res{FFile ? FFile->GetLastIOResult() : 1};
@@ -1199,21 +1089,6 @@ namespace gxfile {
             FFile->WriteInteger(MinElem[D]);
             FFile->WriteInteger(MaxElem[D]);
         }
-
-#ifdef YAML
-        if(writeAsYAML) {
-            YFile->AddKeyItem("sym_write_header");
-            YFile->IncIndentLevel();
-            YFile->AddKeyValue("symbol_index", CurSyPtr->SSyNr);
-            YFile->AddKeyValue("dim", FCurrentDim);
-            YFile->AddKeyValue("nr_recs", NrRecs);
-            for (int D{}; D < FCurrentDim; D++) {
-                YFile->AddKeyValue("min_elem_" + std::to_string(D), MinElem[D]);
-                YFile->AddKeyValue("max_elem_" + std::to_string(D), MaxElem[D]);
-            }
-            YFile->DecIndentLevel();
-        }
-#endif
     }
 
     // we have to make these mask "constants" vars since we cannot
@@ -1902,11 +1777,6 @@ namespace gxfile {
             ErrNr = ERR_ZLIB_NOT_FOUND;
             return FileNoGood();
         }
-
-#ifdef YAML
-        const std::string FileNameYML = utils::replaceSubstrs(Afn, ".gdx", ".yaml");
-        YFile = std::make_unique<yaml::TYAMLFile>(FileNameYML, writeAsYAML);
-#endif
 
         fComprLev = Compr;
         FileSystemID = FFile->ReadString();
@@ -3243,10 +3113,6 @@ namespace gxfile {
 
     void TGXFileObj::SetTraceLevel(TGXFileObj::TraceLevels tl) {
         TraceLevel = tl;
-    }
-
-    void TGXFileObj::SetWriteAsYAML(bool asYAML) {
-        this->writeAsYAML = asYAML;
     }
 
     // Summary:

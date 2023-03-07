@@ -59,10 +59,6 @@ namespace gdlib::gmsstrm {
 #define strncasecmp _strnicmp
 #endif
 
-namespace yaml {
-    class TYAMLFile;
-}
-
 namespace gxfile {
 
     using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
@@ -356,10 +352,6 @@ namespace gxfile {
     public:
         enum class TraceLevels { trl_none, trl_errors, trl_some, trl_all };
     private:
-#ifdef YAML
-        std::unique_ptr<yaml::TYAMLFile> YFile;
-#endif
-        bool writeAsYAML{};
         std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
         TgxFileMode fmode {f_not_open}, fmode_AftReg {f_not_open};
         enum {stat_notopen, stat_read, stat_write} fstatus {stat_notopen};
@@ -522,7 +514,6 @@ namespace gxfile {
         int gdxDataReadMap(int RecNr, int *KeyInt, double *Values, int &DimFrst);
 
         void SetTraceLevel(TraceLevels tl);
-        void SetWriteAsYAML(bool asYAML);
 
         // region Acronym handling
         [[nodiscard]] int gdxAcronymCount() const;
