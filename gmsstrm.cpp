@@ -83,9 +83,7 @@ namespace gdlib::gmsstrm {
         return h->bad() ? 1 : 0;
     }
 
-    const uint8_t signature_header = 0xFF;
     const std::string signature_gams = "*GAMS*"s;
-    const int verify_offset = 100;
 
     union TDoubleVar {
         //bool realNumOrBytes;

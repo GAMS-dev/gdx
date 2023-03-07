@@ -179,7 +179,7 @@ namespace gxfile {
     ERR_OPEN_TEXTMARKER1     = -100039,
     ERR_OPEN_TEXTMARKER2     = -100040,
     ERR_BADDATAFORMAT        = -100041,
-    ERR_NEXT_ERROR           = -100042,
+//    ERR_NEXT_ERROR           = -100042,
     ERR_OUT_OF_MEMORY        = -100043,
     ERR_ZLIB_NOT_FOUND       = -100044, //check with gmsstrm
     ERR_OPEN_ACROMARKER1     = -100045,
