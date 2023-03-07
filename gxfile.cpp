@@ -2320,7 +2320,7 @@ namespace gxfile {
     //  Total number of errors encountered
     // See Also:
     //   gdxGetLastError
-    int TGXFileObj::gdxErrorCount() {
+    int TGXFileObj::gdxErrorCount() const {
         return ErrCntTotal;
     }
 
@@ -2906,7 +2906,7 @@ namespace gxfile {
     //    is sometimes needed to convert arguments from strings to pchars etc.
     // See Also:
     //
-    int TGXFileObj::gdxCurrentDim() {
+    int TGXFileObj::gdxCurrentDim() const {
         return FCurrentDim; //need to do more checks here
     }
 
@@ -4236,7 +4236,7 @@ namespace gxfile {
         return true;
     }
 
-    int TGXFileObj::gdxStoreDomainSets() {
+    int TGXFileObj::gdxStoreDomainSets() const {
         return StoreDomainSets;
     }
 
@@ -4381,10 +4381,6 @@ namespace gxfile {
         }
         gdxDataReadDone();
         return NrRecs >= 0;
-    }
-
-    std::string TGXFileObj::getImplName() const {
-        return "tgxfileobj"s;
     }
 
     void TGXFileObj::gdxGetDomainElements_DP_FC(int RawIndex, int MappedIndex, void* Uptr) {

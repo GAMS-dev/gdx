@@ -293,7 +293,7 @@ namespace gdlib::strhash {
             return std::strlen(GetString(N));
         }
 
-        int64_t MemoryUsed() const {
+        [[nodiscard]] int64_t MemoryUsed() const {
             int64_t res{};
             for(int N{}; N<Count(); N++)
                 res += std::strlen(Buckets[N]->StrP)+1;
@@ -338,11 +338,11 @@ namespace gdlib::strhash {
             return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]].Obj;
         }
 
-        char *GetString(int N) const {
+        [[nodiscard]] char *GetString(int N) const {
             return Buckets[N-(OneBased ? 1 : 0)]->StrP;
         }
 
-        char *GetName(int N) const {
+        [[nodiscard]] char *GetName(int N) const {
             return GetString(N);
         }
 
@@ -358,20 +358,20 @@ namespace gdlib::strhash {
             utils::assignPCharToBuf(s, slen, bucket->StrP);
         }
 
-        char *GetSortedString(int N) const {
+        [[nodiscard]] char *GetSortedString(int N) const {
             if(!FSorted) Sort();
             return Buckets[(*SortMap)[N-(OneBased ? 1 : 0)]]->StrP;
         }
 
-        int Count() const {
+        [[nodiscard]] int Count() const {
             return FCount;
         }
 
-        int size() const {
+        [[nodiscard]] int size() const {
             return FCount;
         }
 
-        bool empty() const {
+        [[nodiscard]] bool empty() const {
             return !FCount;
         }
 
@@ -602,11 +602,11 @@ namespace gdlib::strhash {
             return res;
         }
 
-        char *GetString(int N) const {
+        [[nodiscard]] char *GetString(int N) const {
             return Buckets.GetItemPtrIndexConst(N-(OneBased ? 1 : 0))->StrP;
         }
 
-        char *GetName(int N) const {
+        [[nodiscard]] char *GetName(int N) const {
             return GetString(N);
         }
 
@@ -637,7 +637,7 @@ namespace gdlib::strhash {
             *strRef = gmsobj::NewString(s, std::strlen(s));
         }
 
-        int64_t MemoryUsed() const {
+        [[nodiscard]] int64_t MemoryUsed() const {
             int64_t res{};
             for(int N{}; N<FCount; N++)
                 res += std::strlen(Buckets.GetItemPtrIndexConst(N)->StrP) + 1;
@@ -647,11 +647,11 @@ namespace gdlib::strhash {
             return res;
         }
 
-        int size() const {
+        [[nodiscard]] int size() const {
             return FCount;
         }
 
-        int Count() const {
+        [[nodiscard]] int Count() const {
             return FCount;
         }
 
@@ -663,7 +663,7 @@ namespace gdlib::strhash {
             // FIXME: Should do something!
         }
 
-        bool empty() const {
+        [[nodiscard]] bool empty() const {
             return !FCount;
         }
 

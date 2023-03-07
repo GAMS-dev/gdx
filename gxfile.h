@@ -488,7 +488,7 @@ namespace gxfile {
         int gdxDataWriteRaw(const int* KeyInt, const double* Values);
         int gdxDataWriteRawStart(const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                  int UserInfo);
-        int gdxErrorCount();
+        int gdxErrorCount() const;
         int gdxGetElemText(int TxtNr, char *Txt, int &Node);
         int gdxGetLastError();
         int gdxGetSpecialValues(double *Avals);
@@ -507,7 +507,7 @@ namespace gxfile {
         int gdxUELRegisterStrStart();
         int gdxUMUelGet(int UelNr, char *Uel, int &UelMap);
         int gdxUMUelInfo(int &UelCnt, int &HighMap);
-        int gdxCurrentDim();
+        int gdxCurrentDim() const;
         int gdxRenameUEL(const char *OldName, const char *NewName);
         int gdxOpenReadEx(const char *FileName, int ReadMode, int &ErrNr);
         int gdxGetUEL(int uelNr, char *Uel);
@@ -561,13 +561,11 @@ namespace gxfile {
         int gdxSymbolGetComment(int SyNr, int N, char *Txt);
         int gdxUELMaxLength();
         int gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap);
-        int gdxStoreDomainSets();
+        int gdxStoreDomainSets() const;
         void gdxStoreDomainSetsSet(int x);
         int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP);
         int gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs);
         int gdxDataReadRawFastEx(int SyNr, TDataStoreExProc_t DP, int &NrRecs, void *Uptr);
-
-        [[nodiscard]] std::string getImplName() const;
     };
 
     extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from
