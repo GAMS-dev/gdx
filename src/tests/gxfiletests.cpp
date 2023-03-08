@@ -28,12 +28,26 @@
 #undef max
 #endif
 
-#include <filesystem>
-#include "doctest.h"
-#include "../gxfile.h"
-#include <cassert>
-#include <numeric>
-#include <random>
+#include <algorithm>                          // for fill_n, find, copy
+#include <array>                              // for array, array<>::value_type
+#include <cassert>                            // for assert
+#include <cstdlib>                            // for system, setenv, unsetenv
+#include <cstring>                            // for strcmp, memcpy
+#include <filesystem>                         // for remove, exists
+#include <functional>                         // for function
+#include <iostream>                           // for char_traits, operator<<
+#include <limits>                             // for numeric_limits
+#include <list>                               // for list, operator!=, _List...
+#include <map>                                // for map, operator!=, _Rb_tr...
+#include <string>                             // for string, operator""s
+#include <tuple>                              // for tuple
+#include <type_traits>                        // for enable_if_t
+#include <utility>                            // for pair
+#include <vector>                             // for vector
+#include "../gmsstrm.h"                       // for fmOpenRead
+#include "../gxfile.h"                        // for TGXFileObj, TgdxValues
+#include "../gclgms.h"                        // for GMS_SSSIZE, GMS_VAL_LEVEL
+#include "doctest.h"                          // for ResultBuilder, Expressi...
 
 using namespace std::literals::string_literals;
 using namespace gdx;

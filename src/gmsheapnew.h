@@ -25,7 +25,11 @@
 
 #pragma once
 
-#include "gmsobj.h"
+#include <cstdint>    // for int64_t, uint16_t
+#include <array>       // for array
+#include <functional>  // for function
+#include <string>      // for string
+#include <vector>      // for vector
 
 namespace gdx::gmsheapnew {
 

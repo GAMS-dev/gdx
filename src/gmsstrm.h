@@ -25,13 +25,16 @@
 
 #pragma once
 
-#include <map>
-#include <fstream>
-#include <memory>
-#include <vector>
-#include <array>
-#include <optional>
-#include <cstring>
+#include <cstdint>     // for uint32_t, uint8_t, int64_t, uint16_t
+#include <array>        // for array
+#include <cstring>      // for strlen
+#include <fstream>      // for fstream, basic_fstream
+#include <map>          // for map
+#include <memory>       // for allocator, unique_ptr
+#include <string>       // for string, basic_string
+#include <string_view>  // for string_view
+#include <tuple>        // for array
+#include <vector>       // for vector
 
 #if defined(NO_ZLIB)
     inline int uncompress(void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen) { return 0; }

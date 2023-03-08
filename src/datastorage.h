@@ -25,17 +25,14 @@
 
 #pragma once
 
-#include <cstring>
-#include <vector>
-#include <list>
-#include <limits>
-#include <algorithm>
-#include <optional>
-#include <array>
-#include <cstdint>
-#include <cassert>
-
-#include "gmsheapnew.h"
+#include <cassert>   // for assert
+#include <cstdint>   // for uint8_t
+#include <cstring>   // for memcpy, memset, size_t
+#include <limits>    // for numeric_limits
+#include <optional>  // for nullopt, optional
+namespace gdx::collections::datastorage {
+    template <typename KeyType, typename ValueType> struct TLinkedDataRec;
+}
 
 // Batch allocations
 // When TLD_DYN_ARRAYS is active: No single item #TotalSize-bytes new allocations

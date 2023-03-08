@@ -23,13 +23,12 @@
  * SOFTWARE.
  */
 
-#include <set>
-#include <fstream>
-#include <filesystem>
-
-#include "../utils.h"
-
-#include "doctest.h"
+#include <cstdint>    // for uint8_t
+#include <array>       // for array
+#include <cstring>     // for strcmp
+#include <string>      // for operator""s, string, basic_string, allocator
+#include "../utils.h"  // for sameTextPChar, in, trim, strCompare, strConvCp...
+#include "doctest.h"   // for ResultBuilder, REQUIRE_EQ, Expression_lhs, Tes...
 
 using namespace std::literals::string_literals;
 

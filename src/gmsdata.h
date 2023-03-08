@@ -25,14 +25,14 @@
 
 #pragma once
 
-#include "gclgms.h"
-
-#include <map>
-#include <string>
-#include <array>
-#include <vector>
-
-#include "gmsobj.h"
+#include <cassert>  // for assert
+#include <array>     // for array
+#include <cstdint>   // for uint8_t, int64_t
+#include <cstdlib>   // for free, malloc, realloc, size_t
+#include <cstring>   // for memcpy, memset
+#include <iterator>  // for pair
+#include <vector>    // for vector
+#include "gmsobj.h"  // for TXList
 
 namespace gdx::collections::gmsdata {
     template<typename T>

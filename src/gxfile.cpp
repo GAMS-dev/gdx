@@ -30,11 +30,19 @@
 #endif
 
 #include "gxfile.h"
-#include "utils.h"
-
-#include <cassert>
-#include <numeric>
-#include <cmath>
+#include <bits/std_abs.h>  // for abs
+#include <cstdint>        // for int64_t, uint8_t
+#include <algorithm>       // for fill_n, max, fill, sort
+#include <cassert>         // for assert
+#include <cmath>           // for round, isinf, isnan, isnormal
+#include <cstdio>          // for sprintf
+#include <cstdlib>         // for system, free, getenv, malloc, realloc, WEX...
+#include <exception>       // for exception
+#include <iostream>        // for operator<<, basic_ostream, cout, ostream
+#include <map>             // for map, operator==, _Rb_tree_const_iterator
+#include <utility>         // for pair
+#include <vector>          // for vector
+#include "utils.h"         // for assignPCharToBuf, in, trimRight, assignStr...
 
 #if defined(_WIN32)
 #include <Windows.h>

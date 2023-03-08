@@ -25,7 +25,11 @@
 
 #pragma once
 
-#include "gxfile.h"
+#include <cassert>   // for assert
+#include <cstring>   // for memcpy
+#include <algorithm>  // for min
+#include <string>     // for string
+#include "gxfile.h"   // for TGXFileObj, DLLLoadPath, TDataStoreProc_t, TDat...
 
 #ifdef __cplusplus
 extern "C" {

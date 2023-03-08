@@ -23,12 +23,12 @@
  * SOFTWARE.
  */
 
-#include <string>
-#include <numeric>
-
-#include "doctest.h"
-
-#include "../gmsheapnew.h"
+#include <cstdint>          // for int64_t, uint8_t
+#include <array>            // for array
+#include <cstring>          // for memcpy
+#include <string>           // for operator""s, string_literals
+#include "../gmsheapnew.h"  // for THeapMgr, gmsheapnew
+#include "doctest.h"        // for ResultBuilder, TestCase, REQUIRE_EQ, TEST...
 
 using namespace std::literals::string_literals;
 using namespace gdx::gmsheapnew;

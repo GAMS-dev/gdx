@@ -23,10 +23,12 @@
  * SOFTWARE.
  */
 
-#include <string>
-#include "doctest.h"
-#include "../strhash.h"
-#include <numeric>
+#include <algorithm>     // for fill_n
+#include <array>         // for array
+#include <numeric>       // for iota
+#include <string>        // for operator+, to_string, basic_string, string_l...
+#include "../strhash.h"  // for TXStrHashListLegacy, TXStrHashList, strhash
+#include "doctest.h"     // for ResultBuilder, REQUIRE_EQ, TestCase, TEST_CASE
 
 using namespace std::literals::string_literals;
 using namespace gdx::collections::strhash;

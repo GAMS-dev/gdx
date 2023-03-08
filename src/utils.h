@@ -25,21 +25,11 @@
 
 #pragma once
 
-#include <algorithm>
-#include <array>
-#include <functional>
-#include <iostream>
-#include <iterator>
-#include <initializer_list>
-#include <unordered_set>
-#include <list>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
-#include <map>
-#include <optional>
-#include <cstring>
+#include <strings.h>    // for strcasecmp
+#include <array>        // for array
+#include <cstring>      // for memcpy, size_t, strcmp, strcpy, strlen
+#include <string>       // for string, char_traits
+#include <string_view>  // for string_view, operator==, basic_string_view
 
 // ==============================================================================================================
 // Interface

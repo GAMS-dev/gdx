@@ -23,16 +23,19 @@
  * SOFTWARE.
  */
 
-#include <sstream>
-#include <cstring>
-#include <string>
-#include <utility>
-#include <cmath>
-#include <filesystem>
-
-#include "gclgms.h"
-#include "utils.h"
 #include "gmsstrm.h"
+#include <bits/std_abs.h>  // for abs
+#include <cstdlib>        // for malloc, free
+#include <algorithm>       // for min
+#include <cmath>           // for round
+#include <cstdint>         // for uint8_t, uint16_t, uint32_t, int64_t
+#include <cstring>         // for memcpy, strerror
+#include <filesystem>      // for exists
+#include <stdexcept>       // for runtime_error
+#include <string>          // for string, operator+, to_string, operator""s
+#include <utility>         // for move
+#include "gclgms.h"        // for GMS_SV_ACR, GMS_SV_UNDEF, GMS_SV_EPS, GMS_...
+#include "utils.h"         // for strConvCppToDelphi
 
 using namespace std::literals::string_literals;
 

@@ -23,9 +23,13 @@
  * SOFTWARE.
  */
 
-#include <numeric>
-#include "doctest.h"
-#include "../gmsdata.h"
+#include <algorithm>                     // for fill
+#include <array>                         // for array
+#include <string>                        // for string_literals
+#include <vector>                        // for vector
+#include "../gmsdata.h"                  // for TTblGamsDataLegacy, TTblGams...
+#include "../gclgms.h"                   // for GLOBAL_MAX_INDEX_DIM
+#include "doctest.h"                     // for ResultBuilder, REQUIRE_EQ
 
 using namespace std::literals::string_literals;
 using namespace gdx::collections::gmsdata;

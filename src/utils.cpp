@@ -24,10 +24,10 @@
  */
 
 #include "utils.h"
-
-#include <algorithm>
-#include <chrono>
-#include <cstring>
+#include <cstdint>   // for uint8_t
+#include <algorithm>  // for transform
+#include <cstring>    // for memcpy, strlen, size_t
+#include <limits>     // for numeric_limits
 
 using namespace std::literals::string_literals;
 

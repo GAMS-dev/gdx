@@ -25,15 +25,18 @@
 
 #pragma once
 
-#include "gmsstrm.h"
-#include "utils.h"
-#include "datastorage.h"
-#include "gmsdata.h"
-
-#include <vector>
-#include <string>
-#include <cassert>
-#include <numeric>
+#include <cstdint>        // for int64_t, uint8_t
+#include <cassert>        // for assert
+#include <cstdlib>        // for free, size_t, malloc
+#include <cstring>        // for strlen, memset, strcmp
+#include <limits>         // for numeric_limits
+#include <memory>         // for unique_ptr, make_unique
+#include <numeric>        // for iota
+#include <utility>        // for swap
+#include <vector>         // for vector
+#include "datastorage.h"  // for BatchAllocator, TLD_BATCH_ALLOCS
+#include "gmsdata.h"      // for TXIntList, TGrowArrayFxd
+#include "utils.h"        // for NewString, sameTextPChar, strCompare, toupper
 
 namespace gdx::collections::strhash {
     template<typename T>

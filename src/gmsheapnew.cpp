@@ -24,46 +24,40 @@
  */
 
 #include "gmsheapnew.h"
-
-#include <utility>
-#include <string>
+#include <cstdio>    // for fclose, fopen, fscanf, FILE
+#include <algorithm>  // for find, max
+#include <cstdint>    // for int64_t, uint16_t, uint8_t
+#include <cstdlib>    // for free, malloc, realloc
+#include <cstring>    // for memset, memcpy
+#include <stdexcept>  // for runtime_error
+#include <string>     // for string, operator""s, operator+, string_literals
+#include <utility>    // for move
 
 //#define BYPASSHEAPMGR
 
 #ifdef _WIN32
-#pragma comment(lib, "iphlpapi.lib")
-//#define _WINSOCK2API_
-#define _WINSOCKAPI_   /* Prevent inclusion of winsock.h in windows.h */
-#include <Windows.h>
-#include <WinSock2.h>
-#include <io.h>
-#include <Psapi.h>  /* enough if we run on Windows 7 or later */
-#include <iphlpapi.h>
-#include <ShlObj.h>
-#include <IPTypes.h>
+    #pragma comment(lib, "iphlpapi.lib")
+    #define _WINSOCKAPI_   /* Prevent inclusion of winsock.h in windows.h */
+    #include <Windows.h>
+    #include <WinSock2.h>
+    #include <io.h>
+    #include <Psapi.h>  /* enough if we run on Windows 7 or later */
+    #include <iphlpapi.h>
+    #include <ShlObj.h>
+    #include <IPTypes.h>
 #else
-# include <sys/socket.h>
-# if (defined(__linux__) || defined(__APPLE__)) /* at least, maybe for others too */
-#  if defined(__linux__)
-#   include <sys/ioctl.h>
-#   include <net/if.h>
-#  elif defined(__APPLE__)
-#   include <sys/ioctl.h>
-#   include <sys/sysctl.h>
-#   include <net/if.h>
-#   include <net/if_dl.h>
-#  endif
-# endif
-# include <netinet/in.h>
-#include <sys/utsname.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <dlfcn.h>
+    #if (defined(__linux__) || defined(__APPLE__)) /* at least, maybe for others too */
+    #if defined(__linux__)
+    #elif defined(__APPLE__)
+            #include <sys/ioctl.h>
+            #include <sys/sysctl.h>
+            #include <net/if.h>
+            #include <net/if_dl.h>
+            #include <sys/proc_info.h>
+            #include <libproc.h>
+    #endif
 #endif
-#if defined(__APPLE__)
-#include <sys/proc_info.h>
-#include <libproc.h>
+#include <unistd.h>
 #endif
 
 using namespace std::literals::string_literals;

@@ -23,11 +23,15 @@
  * SOFTWARE.
  */
 
-#include <string>
-
-#include "doctest.h"
-
-#include "../gmsobj.h"
+#include <cstdint>     // for uint8_t
+#include <algorithm>    // for find
+#include <array>        // for array
+#include <cstring>      // for strcmp
+#include <list>         // for list, operator!=, _List_iterator
+#include <string>       // for operator+, to_string, string, operator""s
+#include <vector>       // for vector, vector<>::reference
+#include "../gmsobj.h"  // for TXStrPool, TBooleanBitArray, TXList, TXCustom...
+#include "doctest.h"    // for ResultBuilder, REQUIRE_EQ, Expression_lhs
 
 using namespace std::literals::string_literals;
 using namespace gdx::collections::gmsobj;

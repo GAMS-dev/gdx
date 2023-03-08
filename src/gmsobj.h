@@ -25,11 +25,14 @@
 
 #pragma once
 
-#include <cstdint>
-#include <string>
-#include <cassert>
-#include <limits>
-#include "utils.h"
+#include <algorithm>  // for min
+#include <array>      // for array
+#include <cassert>    // for assert
+#include <cstdint>    // for uint8_t, uint32_t, int64_t
+#include <cstdlib>    // for malloc, free, size_t, realloc
+#include <cstring>    // for memmove, memcpy, memset, strlen
+#include <limits>     // for numeric_limits
+#include "utils.h"    // for NewString, sameTextPChar, toupper
 
 // ==============================================================================================================
 // Interface

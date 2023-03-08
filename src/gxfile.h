@@ -35,24 +35,25 @@
 #define MIX_COLLECTIONS
 #endif
 
-#include "gclgms.h"
-
-#include "gmsdata.h"
-#include "datastorage.h"
-#include "strhash.h"
-#include "gmsobj.h"
-
-#include "utils.h"
-
-#include <memory>
-#include <map>
-#include <utility>
-#include <vector>
-#include <optional>
-#include <unordered_set>
-#include <unordered_map>
-#include <cstring>
-#include <variant>
+#include <array>             // for array
+#include <cstdint>           // for int64_t, uint8_t
+#include <cstring>           // for size_t
+#include <initializer_list>  // for initializer_list
+#include <limits>            // for numeric_limits
+#include <memory>            // for unique_ptr, allocator
+#include <optional>          // for optional
+#include <string>            // for string
+#include <string_view>       // for string_view
+#include "datastorage.h"     // for TLinkedData
+#include "gclgms.h"          // for GLOBAL_MAX_INDEX_DIM, GMS_MAX_INDEX_DIM
+#include "gmsdata.h"         // for TTblGamsData
+#include "gmsobj.h"          // for TBooleanBitArray, TXList, TXStrings
+#include "strhash.h"         // for TXCSStrHashList, TXStrHashList
+#include "utils.h"           // for IContainsPredicate
+namespace gdx::gmsstrm {
+    class TMiBufferedStreamDelphi;
+    class TXStreamDelphi;
+}
 
 //======================================================================================================================
 // Various switches for container/data structure implementation choices:
@@ -74,10 +75,6 @@
 #endif
 
 //======================================================================================================================
-
-namespace collections::gmsstrm {
-    class TMiBufferedStreamDelphi;
-}
 
 #if defined(_WIN32)
 #define strcasecmp  _stricmp
