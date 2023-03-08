@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <cassert>    // for assert
 #include <strings.h>    // for strcasecmp
 #include <array>        // for array
 #include <cstring>      // for memcpy, size_t, strcmp, strcpy, strlen
@@ -104,8 +105,8 @@ namespace gdx::utils {
 
     int strConvCppToDelphi(std::string_view s, char *delphistr);
 
-    inline void assignStrToBuf(const std::string &s, char *buf, int outBufSize = 256) {
-        if((int)s.length() > outBufSize) return;
+    inline void assignStrToBuf(const std::string &s, char *buf, size_t outBufSize = 256) {
+        if(s.length() > outBufSize) return;
 #if defined(_WIN32)
         std::memcpy(buf, s.c_str(), s.length()+1);
 #else
@@ -131,17 +132,6 @@ namespace gdx::utils {
         buf[s.length()] = '\0';
     }
 
-    inline char *NewString(const char *s, size_t slen) {
-        if(!s) return nullptr;
-        char *buf{new char[slen+1]};
-        utils::assignPCharToBuf(s, slen, buf, slen+1);
-        return buf;
-    }
-
-    inline char *NewString(const char *s) {
-        return !s ? nullptr : NewString(s, std::strlen(s));
-    }
-
     inline std::unique_ptr<char[]> NewStringUniq(const char *s) {
         if(!s) return {};
         const auto slen {std::strlen(s)};
@@ -156,19 +146,17 @@ namespace gdx::utils {
         return buf;
     }
 
-    inline char *NewString(const std::string &s) {
-        return NewString(s.c_str());
+    inline char *NewString(const char *s, size_t slen) {
+        if(!s) return nullptr;
+        assert(s[slen] == '\0');
+        char *buf{new char[slen+1]};
+        utils::assignPCharToBuf(s, slen, buf, slen+1);
+        return buf;
     }
 
     inline char *NewString(const char *s, size_t slen, size_t &memSize) {
-        if(!s) {
-            slen = 0;
-            return nullptr;
-        }
-        const auto l {slen+1};
-        char *buf{new char[l]};
-        utils::assignPCharToBuf(s, slen, buf, l);
-        memSize += l;
+        char *buf {NewString(s, slen)};
+        memSize += slen+1;
         return buf;
     }
 }

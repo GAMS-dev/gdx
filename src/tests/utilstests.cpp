@@ -75,10 +75,13 @@ namespace gdx::tests::utilstests {
         // With pchars (pointer to char -> char *)
         // Case-insensitive
         REQUIRE(utils::sameTextPChar(nullptr, nullptr));
+        REQUIRE_FALSE(utils::sameTextPChar("", nullptr));
+        REQUIRE_FALSE(utils::sameTextPChar(nullptr, ""));
         REQUIRE(utils::sameTextPChar("", ""));
         REQUIRE(utils::sameTextPChar("aBc", "AbC"));
         REQUIRE(utils::sameTextPChar("abc", "abc"));
         // Case-sensitive
+        REQUIRE(utils::sameTextPChar<false>(nullptr, nullptr));
         REQUIRE_FALSE(utils::sameTextPChar<false>("aBc", "AbC "));
         REQUIRE_FALSE(utils::sameTextPChar<false>("aBc", "AbC"));
         REQUIRE(utils::sameTextPChar<false>("abc", "abc"));
@@ -173,10 +176,41 @@ namespace gdx::tests::utilstests {
         REQUIRE_EQ('\0', buf.back());
     }
 
+    TEST_CASE("Test copying contents of a string into a char buffer") {
+        std::array<char, 3> buf{};
+        utils::assignStrToBuf(""s, buf.data(), buf.size());
+        REQUIRE_EQ('\0', buf.front());
+        utils::assignStrToBuf(std::string(100, 'x'), buf.data(), buf.size());
+        std::array<char, 256> buf2{};
+        utils::assignStrToBuf("abc", buf2.data(), buf2.size());
+        REQUIRE(!std::strcmp("abc", buf2.data()));
+    }
+
+    TEST_CASE("Test copying contents of a string view into a char buffer") {
+        std::array<char, 256> buf {};
+        utils::assignViewToBuf(""s, buf.data(), buf.size());
+        REQUIRE_EQ('\0', buf.front());
+        utils::assignViewToBuf("abc"s, buf.data(), buf.size());
+        REQUIRE(!std::strcmp("abc", buf.data()));
+        utils::assignViewToBuf(std::string(300, 'x'), buf.data(), buf.size());
+    }
+
     TEST_CASE("Test constructing a std::array object filled by repeating a single value") {
         std::array<int, 3>  arr {utils::arrayWithValue<int, 3>(23)},
                             expArr {23,23,23};
         REQUIRE_EQ(expArr, arr);
+    }
+
+    TEST_CASE("Test creating a new C-style string on the heap from the contents of another buffer") {
+        size_t memSize{};
+        std::unique_ptr<char[]> s {utils::NewString("abc", 3, memSize)};
+        REQUIRE_FALSE(utils::NewString(nullptr, 23));
+        REQUIRE(!std::strcmp(s.get(), "abc"));
+        REQUIRE_EQ(4, memSize);
+        std::unique_ptr<char[]> s2 {utils::NewStringUniq("abc")};
+        REQUIRE(!std::strcmp(s2.get(), "abc"));
+        std::unique_ptr<char[]> s3 {utils::NewStringUniq("abc"s)};
+        REQUIRE(!std::strcmp(s3.get(), "abc"));
     }
 
     TEST_SUITE_END();
