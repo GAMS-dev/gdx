@@ -34,7 +34,7 @@ using namespace std::literals::string_literals;
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
-namespace utils {
+namespace gdx::utils {
 
     std::string uppercase(const std::string_view s) {
         std::string out{ s };

@@ -75,7 +75,7 @@
 
 //======================================================================================================================
 
-namespace gdlib::gmsstrm {
+namespace collections::gmsstrm {
     class TMiBufferedStreamDelphi;
 }
 
@@ -84,7 +84,7 @@ namespace gdlib::gmsstrm {
 #define strncasecmp _strnicmp
 #endif
 
-namespace gxfile {
+namespace gdx {
 
     using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
     using TgdxValues = std::array<double, GMS_VAL_SCALE+ 1>;
@@ -111,7 +111,7 @@ namespace gxfile {
 
     struct TDFilter {
         int FiltNumber{}, FiltMaxUel{};
-        gdlib::gmsobj::TBooleanBitArray FiltMap{};
+        collections::gmsobj::TBooleanBitArray FiltMap{};
         bool FiltSorted{};
 
         TDFilter(int Nr, int UserHigh) :
@@ -135,7 +135,7 @@ namespace gxfile {
         }
     };
 
-    using TSetBitMap = gdlib::gmsobj::TBooleanBitArray;
+    using TSetBitMap = collections::gmsobj::TBooleanBitArray;
 
     enum class TgdxDAction {
         dm_unmapped,
@@ -151,7 +151,7 @@ namespace gxfile {
 
     using TDomainList = std::array<TDomain, GLOBAL_MAX_INDEX_DIM>;
 
-    using TCommentsList = gdlib::gmsobj::TXStrings;
+    using TCommentsList = collections::gmsobj::TXStrings;
 
     struct TgdxSymbRecord {
         int SSyNr;
@@ -259,16 +259,16 @@ namespace gxfile {
 
     template<typename T>
 #ifdef TSH_LEGACY
-    using TXStrHashListImpl = gdlib::strhash::TXStrHashListLegacy<T>;
+    using TXStrHashListImpl = collections::strhash::TXStrHashListLegacy<T>;
 #else
-    using TXStrHashListImpl = gdlib::strhash::TXStrHashList<T>;
+    using TXStrHashListImpl = collections::strhash::TXStrHashList<T>;
 #endif
 
     template<typename T>
 #ifdef TSH_LEGACY
-    using TXCSStrHashListImpl = gdlib::strhash::TXCSStrHashListLegacy<T>;
+    using TXCSStrHashListImpl = collections::strhash::TXCSStrHashListLegacy<T>;
 #else
-    using TXCSStrHashListImpl = gdlib::strhash::TXCSStrHashList<T>;
+    using TXCSStrHashListImpl = collections::strhash::TXCSStrHashList<T>;
 #endif
 
     class TUELTable : public TXStrHashListImpl<int> {
@@ -291,8 +291,8 @@ namespace gxfile {
         const char *operator[](int index) const;
         void RenameEntry(int N, const char *s);
         [[nodiscard]] int MemoryUsed() const;
-        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S);
-        void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi &S);
+        void SaveToStream(gmsstrm::TXStreamDelphi &S);
+        void LoadFromStream(gmsstrm::TXStreamDelphi &S);
         TUELUserMapStatus GetMapToUserStatus();
         void ResetMapToUserStatus();
     };
@@ -305,15 +305,15 @@ namespace gxfile {
         bool AcrAutoGen{};
 
         TAcronym(std::string Name, const std::string& Text, int Map);
-        explicit TAcronym(gdlib::gmsstrm::TXStreamDelphi &S);
-        void FillFromStream(gdlib::gmsstrm::TXStreamDelphi &S);
+        explicit TAcronym(gmsstrm::TXStreamDelphi &S);
+        void FillFromStream(gmsstrm::TXStreamDelphi &S);
         TAcronym() = default;
         [[nodiscard]] int MemoryUsed() const;
-        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi &S) const;
+        void SaveToStream(gmsstrm::TXStreamDelphi &S) const;
     };
 
     class TAcronymList {
-        gdlib::gmsobj::TXList<TAcronym> FList;
+        collections::gmsobj::TXList<TAcronym> FList;
     public:
         TAcronymList() = default;
         ~TAcronymList();
@@ -321,15 +321,15 @@ namespace gxfile {
         int FindName(const char *Name);
         int AddEntry(const std::string& Name, const std::string& Text, int Map);
         void CheckEntry(int Map);
-        void SaveToStream(gdlib::gmsstrm::TXStreamDelphi& S);
-        void LoadFromStream(gdlib::gmsstrm::TXStreamDelphi& S);
+        void SaveToStream(gmsstrm::TXStreamDelphi& S);
+        void LoadFromStream(gmsstrm::TXStreamDelphi& S);
         int MemoryUsed();
         [[nodiscard]] int size() const;
         TAcronym &operator[](int Index);
     };
 
     class TFilterList {
-        gdlib::gmsobj::TXList<TDFilter> FList;
+        collections::gmsobj::TXList<TDFilter> FList;
     public:
         TFilterList() = default;
         ~TFilterList();
@@ -342,11 +342,11 @@ namespace gxfile {
     using TIntlValueMapDbl = std::array<double, vm_count>;
     using TIntlValueMapI64 = std::array<int64_t, vm_count>;
 
-    using LinkedDataType = gdlib::datastorage::TLinkedData<int, double>;
-    using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, double> *;
+    using LinkedDataType = collections::datastorage::TLinkedData<int, double>;
+    using LinkedDataIteratorType = collections::datastorage::TLinkedDataRec<int, double> *;
 
     #if defined(TXSPOOL_LEGACY)
-        using TSetTextList = gdlib::gmsobj::TXStrPool<uint8_t>;
+        using TSetTextList = collections::gmsobj::TXStrPool<uint8_t>;
     #else
         using TSetTextList = TXCSStrHashListImpl<uint8_t>;
     #endif
@@ -355,10 +355,10 @@ namespace gxfile {
 
 #ifdef TBL_GMSDATA_LEGACY
     template<typename T>
-    using TTblGamsDataImpl = gdlib::gmsdata::TTblGamsDataLegacy<T>;
+    using TTblGamsDataImpl = collections::gmsdata::TTblGamsDataLegacy<T>;
 #else
     template<typename T>
-    using TTblGamsDataImpl = gdlib::gmsdata::TTblGamsData<T>;
+    using TTblGamsDataImpl = collections::gmsdata::TTblGamsData<T>;
 #endif
 
     using TDomainStrList = TXStrHashListImpl<uint8_t>;
@@ -377,7 +377,7 @@ namespace gxfile {
     public:
         enum class TraceLevels { trl_none, trl_errors, trl_some, trl_all };
     private:
-        std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
+        std::unique_ptr<gmsstrm::TMiBufferedStreamDelphi> FFile;
         TgxFileMode fmode {f_not_open}, fmode_AftReg {f_not_open};
         enum {stat_notopen, stat_read, stat_write} fstatus {stat_notopen};
         int fComprLev{};

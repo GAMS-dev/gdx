@@ -24,6 +24,7 @@
  */
 
 #pragma once
+
 #include <algorithm>
 #include <array>
 #include <functional>
@@ -43,7 +44,7 @@
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace utils {
+namespace gdx::utils {
 
     inline char toupper(char c) {
         return c >= 'a' && c <= 'z' ? static_cast<char>(c ^ 32) : c;

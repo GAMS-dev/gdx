@@ -34,7 +34,7 @@
 
 #include "gmsobj.h"
 
-namespace gdlib::gmsdata {
+namespace gdx::collections::gmsdata {
     template<typename T>
     class TTblGamsData {
         int FDim, FDataSize;
@@ -253,7 +253,7 @@ namespace gdlib::gmsdata {
     template<typename T>
     class TTblGamsDataLegacy {
         TGrowArrayFxd<uint8_t> DS;
-        gdlib::gmsobj::TXList<uint8_t> FList {};
+        collections::gmsobj::TXList<uint8_t> FList {};
         int FDim, FIndexSize, FDataSize;
         bool FIsSorted{true};
         int FLastIndex{-1};

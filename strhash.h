@@ -35,7 +35,7 @@
 #include <cassert>
 #include <numeric>
 
-namespace gdlib::strhash {
+namespace gdx::collections::strhash {
     template<typename T>
     struct THashBucket {
         char *StrP {};
@@ -47,9 +47,6 @@ namespace gdlib::strhash {
     template<typename T>
     using PHashBucket = THashBucket<T>*;
 
-    // TODO: This is still deviating significantly from the original P3-Implementation
-    // Consider doing a more verbatim line-by-line port by also porting data structures like
-    // gdlib/gmsdata/TGrowArrayFxd and gmsheapnew
     template<typename T>
     class TXStrHashList {
     protected:
@@ -69,7 +66,8 @@ namespace gdlib::strhash {
         }
 
         void HashTableReset(int ACnt) {
-            const int   HashSize_1 = 997,
+            constexpr int
+                        HashSize_1 = 997,
                         HashSize_2 = 9973,
                         HashSize_3 = 99991,
                         HashSize_4 = 999979,
@@ -467,7 +465,7 @@ namespace gdlib::strhash {
     template<typename T>
     class TXStrHashListLegacy {
         THashBucket<T> **PHashTable{};
-        std::unique_ptr<gdlib::gmsdata::TXIntList> SortMap{};
+        std::unique_ptr<collections::gmsdata::TXIntList> SortMap{};
         int64_t SizeOfHashTable{};
         int ReHashCnt{};
         bool FSorted{};
@@ -481,7 +479,7 @@ namespace gdlib::strhash {
 
     protected:
         int HashTableSize{}, FCount{};
-        gdlib::gmsdata::TGrowArrayFxd<THashBucket<T>> Buckets;
+        collections::gmsdata::TGrowArrayFxd<THashBucket<T>> Buckets;
 
     public:
         bool OneBased{};
@@ -536,7 +534,8 @@ namespace gdlib::strhash {
         }
 
         void HashTableReset(int ACnt) {
-            const int   HashSize_1 = 997,
+            constexpr int
+                    HashSize_1 = 997,
                     HashSize_2 = 9973,
                     HashSize_3 = 99991,
                     HashSize_4 = 999979,

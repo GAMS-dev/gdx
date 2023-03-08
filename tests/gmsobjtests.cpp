@@ -24,15 +24,17 @@
  */
 
 #include <string>
+
 #include "doctest.h"
+
 #include "../gmsobj.h"
 
 using namespace std::literals::string_literals;
-using namespace gdlib::gmsobj;
+using namespace gdx::collections::gmsobj;
 
-namespace tests::gmsobjtests {
+namespace gdx::tests::gmsobjtests {
 
-    TEST_SUITE_BEGIN("gdlib::gmsobj");
+    TEST_SUITE_BEGIN("gdx::collections::gmsobj");
 
     static std::vector<bool> asBoolVec(const TBooleanBitArray &bba) {
         std::vector<bool> res(bba.GetHighIndex()+1);

@@ -29,11 +29,11 @@
 #include <numeric>
 
 using namespace std::literals::string_literals;
-using namespace gdlib::strhash;
+using namespace gdx::collections::strhash;
 
-namespace tests::strhashtests {
+namespace gdx::tests::strhashtests {
 
-    TEST_SUITE_BEGIN("gdlib::strhash");
+    TEST_SUITE_BEGIN("collections::strhash");
 
     template<typename T>
     void runTest(const std::array<int, 10> &nums) {

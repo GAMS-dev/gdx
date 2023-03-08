@@ -68,7 +68,7 @@
 
 using namespace std::literals::string_literals;
 
-namespace gdlib::gmsheapnew {
+namespace gdx::gmsheapnew {
 
     bool getMemoryInfo(int64_t& rss, int64_t& vss);
 

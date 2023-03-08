@@ -25,7 +25,7 @@
 
 #include "gmsobj.h"
 
-namespace gdlib::gmsobj {
+namespace gdx::collections::gmsobj {
 
     void TQuickSortClass::SortN(int n) {
         if(n > 1)

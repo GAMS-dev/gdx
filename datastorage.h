@@ -47,11 +47,11 @@
 #define TLD_REC_TYPE TLinkedDataRec<KeyType, ValueType>
 
 #if defined(P3_COLLECTIONS)
-// Instead of using builtin C++ heap functionality new/delete, use custom GAMS big block heap from gdlib/gmsheapnew
+// Instead of using builtin C++ heap functionality new/delete, use custom GAMS big block heap from gmsheapnew
 #define USE_GMSHEAP
 #endif
 
-namespace gdlib::datastorage {
+namespace gdx::collections::datastorage {
 
 #ifdef TLD_BATCH_ALLOCS
     struct DataBatch {
@@ -128,7 +128,7 @@ namespace gdlib::datastorage {
         RecType *FHead, *FTail;
 
 #if defined(USE_GMSHEAP)
-        gdlib::gmsheapnew::THeapMgr MyHeap {"TLinkedData"};
+        collections::gmsheapnew::THeapMgr MyHeap {"TLinkedData"};
 #elif defined(TLD_BATCH_ALLOCS)
         BatchAllocator<960> batchAllocator;
 #endif

@@ -33,7 +33,7 @@
 
 using namespace std::literals::string_literals;
 
-namespace tests::utilstests {
+namespace gdx::tests::utilstests {
 
     TEST_SUITE_BEGIN("utils");
 

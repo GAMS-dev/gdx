@@ -27,7 +27,7 @@
 
 #include "gmsobj.h"
 
-namespace gdlib::gmsheapnew {
+namespace gdx::gmsheapnew {
 
     using TMemoryReportProc = std::function<void(double)>;
 

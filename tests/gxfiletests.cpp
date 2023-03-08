@@ -36,9 +36,9 @@
 #include <random>
 
 using namespace std::literals::string_literals;
-using namespace gxfile;
+using namespace gdx;
 
-namespace tests::gxfiletests {
+namespace gdx::tests::gxfiletests {
     TEST_SUITE_BEGIN("GDX object tests");
 
 #if !defined(_WIN32)
@@ -87,7 +87,7 @@ namespace tests::gxfiletests {
     std::list<std::function<TGXFileObj*()>> getBuilders() {
         static std::string ErrMsg;
         std::list<std::function<TGXFileObj*()>> builders {
-                [&]() { return new gxfile::TGXFileObj{ErrMsg}; }
+                [&]() { return new gdx::TGXFileObj{ErrMsg}; }
         };
         return builders;
     }
@@ -177,7 +177,7 @@ namespace tests::gxfiletests {
             int ErrNr;
             REQUIRE_FALSE(pgx.gdxOpenRead("doesNotExist", ErrNr));
             checksAfterOpenAttempt(ErrNr);
-            REQUIRE_FALSE(pgx.gdxOpenReadEx("doesNotExist", gdlib::gmsstrm::fmOpenRead, ErrNr));
+            REQUIRE_FALSE(pgx.gdxOpenReadEx("doesNotExist", gmsstrm::fmOpenRead, ErrNr));
             checksAfterOpenAttempt(ErrNr);
         });
     }
@@ -259,11 +259,11 @@ namespace tests::gxfiletests {
     }
 
     void testReads(const std::string &filename, const std::function<void(TGXFileObj&)> &cb) {
-        testReadOp<gxfile::TGXFileObj>(filename, cb);
+        testReadOp<gdx::TGXFileObj>(filename, cb);
     }
 
     void testWrites(const std::string &filename, const std::function<void(TGXFileObj&)> &cb) {
-        testWriteOp<gxfile::TGXFileObj>(filename, cb);
+        testWriteOp<gdx::TGXFileObj>(filename, cb);
     }
 
     TEST_CASE("Test adding uels (raw mode)") {
@@ -573,7 +573,7 @@ namespace tests::gxfiletests {
         std::array<double, GMS_SVIDX_MAX> specialValuesFromPort{};
         std::string ErrMsg;
         {
-            gxfile::TGXFileObj pgx{ErrMsg};
+            gdx::TGXFileObj pgx{ErrMsg};
             REQUIRE(pgx.gdxGetSpecialValues(specialValuesFromPort.data()));
         }
         /*for(int i{}; i<(int)specialValuesFromPort.size(); i++) {
@@ -586,15 +586,15 @@ namespace tests::gxfiletests {
         basicTest([&](TGXFileObj &pgx) {
             std::array<double, GMS_SVIDX_MAX> moddedSpecVals {}, queriedSpecVals {};
             REQUIRE(pgx.gdxGetSpecialValues(moddedSpecVals.data()));
-            moddedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin] = 0.0;
+            moddedSpecVals[gdx::TgdxIntlValTyp::vm_valpin] = 0.0;
             REQUIRE(pgx.gdxSetSpecialValues(moddedSpecVals.data()));
             REQUIRE(pgx.gdxGetSpecialValues(queriedSpecVals.data()));
-            REQUIRE_EQ(0.0, queriedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin]);
+            REQUIRE_EQ(0.0, queriedSpecVals[gdx::TgdxIntlValTyp::vm_valpin]);
             REQUIRE(pgx.gdxResetSpecialValues());
             REQUIRE(pgx.gdxGetSpecialValues(queriedSpecVals.data()));
-            REQUIRE_EQ(GMS_SV_PINF, queriedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin]);
+            REQUIRE_EQ(GMS_SV_PINF, queriedSpecVals[gdx::TgdxIntlValTyp::vm_valpin]);
             std::copy(queriedSpecVals.begin(), queriedSpecVals.end(), moddedSpecVals.begin());
-            moddedSpecVals[gxfile::TgdxIntlValTyp::vm_valpin] = 0.0;
+            moddedSpecVals[gdx::TgdxIntlValTyp::vm_valpin] = 0.0;
             REQUIRE(pgx.gdxSetReadSpecialValues(moddedSpecVals.data()));
             // TODO: Actually check somehow the previous call had an effect!
         });
@@ -1093,7 +1093,7 @@ namespace tests::gxfiletests {
 
             int nrElem{};
             std::list<std::pair<int,int>> callArgs{};
-            REQUIRE(pgx.gdxGetDomainElements(5, 1, gxfile::DOMC_EXPAND, domIndexCallback, nrElem, (void *)&callArgs));
+            REQUIRE(pgx.gdxGetDomainElements(5, 1, gdx::DOMC_EXPAND, domIndexCallback, nrElem, (void *)&callArgs));
             const std::list<std::pair<int,int>> expectedCallArgs {
                 {1,1}, {2,2}
             };
@@ -1102,7 +1102,7 @@ namespace tests::gxfiletests {
 
             callArgs.clear();
             nrElem = 0;
-            REQUIRE(pgx.gdxGetDomainElements(5, 1, gxfile::DOMC_EXPAND, nullptr, nrElem, (void *)&callArgs));
+            REQUIRE(pgx.gdxGetDomainElements(5, 1, gdx::DOMC_EXPAND, nullptr, nrElem, (void *)&callArgs));
             REQUIRE_EQ(2, nrElem);
             REQUIRE(callArgs.empty());
 
@@ -1151,7 +1151,7 @@ namespace tests::gxfiletests {
 
             pgx.gdxClose();
 
-            REQUIRE(pgx.gdxOpenReadEx(fn.c_str(), gdlib::gmsstrm::fmOpenRead, errNr));
+            REQUIRE(pgx.gdxOpenReadEx(fn.c_str(), gmsstrm::fmOpenRead, errNr));
 
             REQUIRE(pgx.gdxSymbolInfoX(0, recCnt, userInfo, explText));
             REQUIRE(pgx.gdxFindSymbol("*", symNr));
@@ -1518,7 +1518,7 @@ namespace tests::gxfiletests {
         testReadModelGDX("trnsport"s, [](TGXFileObj &pgx) {
             int nrRecs, dimFirst;
             // uels: seattle 1, san-diego 2, new-york 3, chicago 4, topeka 5
-            std::array<int, 2> filterAction { gxfile::DOMC_EXPAND, gxfile::DOMC_EXPAND },
+            std::array<int, 2> filterAction { gdx::DOMC_EXPAND, gdx::DOMC_EXPAND },
                                keys { 3, 1 }; // new-york, seattle
             std::array<double, GLOBAL_MAX_INDEX_DIM> values {};
 
@@ -1545,7 +1545,7 @@ namespace tests::gxfiletests {
     TEST_CASE("Test setting trace level") {
         std::string fn {"trace.gdx"s};
         testWrites(fn, [&](TGXFileObj &pgx) {
-            REQUIRE(pgx.gdxSetTraceLevel((int)gxfile::TGXFileObj::TraceLevels::trl_all, "tracestr"));
+            REQUIRE(pgx.gdxSetTraceLevel((int)gdx::TGXFileObj::TraceLevels::trl_all, "tracestr"));
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw("TheOnlyUEL"));
             REQUIRE(pgx.gdxUELRegisterDone());

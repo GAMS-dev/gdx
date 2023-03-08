@@ -39,10 +39,10 @@
 #undef GetObject
 #endif
 
-using namespace gdlib::gmsstrm;
+using namespace gdx::gmsstrm;
 using namespace std::literals::string_literals;
 
-namespace gxfile {
+namespace gdx {
 
     std::string QueryEnvironmentVariable(const std::string &Name);
     std::string QueryEnvironmentVariable(const std::string &Name) {
@@ -4456,13 +4456,13 @@ namespace gxfile {
             AddEntry("", "", Map);
     }
     
-    void TAcronymList::SaveToStream(gdlib::gmsstrm::TXStreamDelphi& S) {
+    void TAcronymList::SaveToStream(gmsstrm::TXStreamDelphi& S) {
         S.WriteInteger(FList.GetCount());
         for (int N{}; N < FList.GetCount(); N++)
             FList[N]->SaveToStream(S);
     }
     
-    void TAcronymList::LoadFromStream(gdlib::gmsstrm::TXStreamDelphi& S) {
+    void TAcronymList::LoadFromStream(gmsstrm::TXStreamDelphi& S) {
         int Cnt{ S.ReadInteger() };
         FList.Clear();
         FList.SetCapacity(Cnt);

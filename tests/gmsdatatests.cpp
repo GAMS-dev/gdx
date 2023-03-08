@@ -28,10 +28,10 @@
 #include "../gmsdata.h"
 
 using namespace std::literals::string_literals;
-using namespace gdlib::gmsdata;
+using namespace gdx::collections::gmsdata;
 
-namespace tests::gmsdatatests {
-    TEST_SUITE_BEGIN("gdlib::gmsdata");
+namespace gdx::tests::gmsdatatests {
+    TEST_SUITE_BEGIN("gdx::collections::gmsdata");
 
     TEST_CASE("Test basic usage of TGrowArrayFxd") {
         TGrowArrayFxd<int> gaf;

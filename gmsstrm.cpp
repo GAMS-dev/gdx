@@ -39,7 +39,7 @@ using namespace std::literals::string_literals;
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
-namespace gdlib::gmsstrm {
+namespace gdx::gmsstrm {
 
     std::string SysErrorMessage(int errorCode) {
 #if defined(_WIN32)
