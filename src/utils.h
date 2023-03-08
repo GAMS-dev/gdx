@@ -30,6 +30,7 @@
 #include <cstring>      // for memcpy, size_t, strcmp, strcpy, strlen
 #include <string>       // for string, char_traits
 #include <string_view>  // for string_view, operator==, basic_string_view
+#include <memory>
 
 // ==============================================================================================================
 // Interface
@@ -124,20 +125,35 @@ namespace gdx::utils {
         buf[i == outBufSize ? i - 1 : i] = '\0'; // truncate when exceeding
     }
 
-    inline void assignViewToBuf(const std::string_view s, char *buf, int outBufSize = 256) {
-        if((int)s.length() + 1 > outBufSize) return;
+    inline void assignViewToBuf(const std::string_view s, char *buf, size_t outBufSize = 256) {
+        if(s.length() + 1 > outBufSize) return;
         std::memcpy(buf, s.data(), s.length());
         buf[s.length()] = '\0';
     }
 
     inline char *NewString(const char *s, size_t slen) {
+        if(!s) return nullptr;
         char *buf{new char[slen+1]};
         utils::assignPCharToBuf(s, slen, buf, slen+1);
         return buf;
     }
 
     inline char *NewString(const char *s) {
-        return NewString(s, std::strlen(s));
+        return !s ? nullptr : NewString(s, std::strlen(s));
+    }
+
+    inline std::unique_ptr<char[]> NewStringUniq(const char *s) {
+        if(!s) return {};
+        const auto slen {std::strlen(s)};
+        std::unique_ptr<char[]> buf {std::make_unique<char[]>(slen + 1)};
+        utils::assignPCharToBuf(s, slen, buf.get(), slen + 1);
+        return buf;
+    }
+
+    inline std::unique_ptr<char[]> NewStringUniq(const std::string_view s) {
+        std::unique_ptr<char[]> buf {std::make_unique<char[]>(s.length() + 1)};
+        utils::assignViewToBuf(s, buf.get(), s.length()+1);
+        return buf;
     }
 
     inline char *NewString(const std::string &s) {
@@ -145,7 +161,11 @@ namespace gdx::utils {
     }
 
     inline char *NewString(const char *s, size_t slen, size_t &memSize) {
-        const auto l = slen+1;
+        if(!s) {
+            slen = 0;
+            return nullptr;
+        }
+        const auto l {slen+1};
         char *buf{new char[l]};
         utils::assignPCharToBuf(s, slen, buf, l);
         memSize += l;

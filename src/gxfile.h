@@ -296,23 +296,29 @@ namespace gdx {
 
     int MakeGoodExplText(char *s);
 
-    struct TAcronym {
-        char *AcrName{}, *AcrText{};
-        int AcrMap{}, AcrReadMap{};
+    class TAcronym {
+        std::unique_ptr<char[]> AcrName{}, AcrText{};
+        int AcrMap{}, AcrReadMap{-1};
         bool AcrAutoGen{};
 
+    public:
         TAcronym(const char *Name, const char *Text, int Map);
         explicit TAcronym(gmsstrm::TXStreamDelphi &S);
-        void FillFromStream(gmsstrm::TXStreamDelphi &S);
         TAcronym() = default;
-
-        ~TAcronym() {
-            delete [] AcrName;
-            delete [] AcrText;
-        }
-
+        virtual ~TAcronym() = default;
         [[nodiscard]] int MemoryUsed() const;
         void SaveToStream(gmsstrm::TXStreamDelphi &S) const;
+
+        // Getters and setters
+        void SetMapAutoGen(int map, bool autogen);
+        [[nodiscard]] int GetReadMap() const;
+        [[nodiscard]] char *GetName() const;
+        [[nodiscard]] char *GetText() const;
+        [[nodiscard]] int GetMap() const;
+        void SetNameAndText(const char *Name, const char *Text);
+        [[nodiscard]] bool GetAutoGen() const;
+        void SetReadMap(int readMap);
+        void SetAutoGen(bool autogen);
     };
 
     class TAcronymList {
