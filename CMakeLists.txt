@@ -20,31 +20,29 @@ if (UNIX)
 endif (UNIX)
 
 # Makefile in devel/products/src/gdxio takes care of acquiring sources for zlib, skip in CMake builds so far
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_ZLIB -DGAMSBUILD")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_ZLIB")
 
 set(common
-		gclgms.h gclgms.c
-		# Only needed for -DGAMSBUILD
-		palmcc.h palmcc.c
-		gmsstrm.h gmsstrm.cpp
-		gmsdata.h
-		datastorage.h
-		strhash.h
-		gmsobj.h gmsobj.cpp
-		gmsheapnew.h gmsheapnew.cpp
-		utils.h utils.cpp
-		gxfile.h gxfile.cpp
-		cwrap.h cwrap.cpp
+		src/gclgms.h src/gclgms.c
+		src/gmsstrm.h src/gmsstrm.cpp
+		src/gmsdata.h
+		src/datastorage.h
+		src/strhash.h
+		src/gmsobj.h src/gmsobj.cpp
+		src/gmsheapnew.h src/gmsheapnew.cpp
+		src/utils.h src/utils.cpp
+		src/gxfile.h src/gxfile.cpp
+		src/cwrap.h src/cwrap.cpp
 )
 
 set(tests
-		tests/doctestmain.cpp
-		tests/gxfiletests.cpp
-		tests/utilstests.cpp
-		tests/gmsobjtests.cpp
-		tests/gmsdatatests.cpp
-		tests/strhashtests.cpp
-		tests/gmsheapnewtests.cpp
+		src/tests/doctestmain.cpp
+		src/tests/gxfiletests.cpp
+		src/tests/utilstests.cpp
+		src/tests/gmsobjtests.cpp
+		src/tests/gmsdatatests.cpp
+		src/tests/strhashtests.cpp
+		src/tests/gmsheapnewtests.cpp
 )
 
 add_library(gdxcclib64 SHARED ${common})

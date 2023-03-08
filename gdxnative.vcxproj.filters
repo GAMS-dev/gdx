@@ -6,57 +6,54 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gxfile.cpp">
+    <ClCompile Include="src\gxfile.cpp">
     </ClCompile>
-    <ClCompile Include="utils.cpp">
+    <ClCompile Include="src\utils.cpp">
     </ClCompile>
-    <ClCompile Include="tests\doctestmain.cpp">
+    <ClCompile Include="src\tests\doctestmain.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="tests\gxfiletests.cpp">
+    <ClCompile Include="src\tests\gxfiletests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="tests\utilstests.cpp">
+    <ClCompile Include="src\tests\utilstests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="gclgms.c">
+    <ClCompile Include="src\gclgms.c">
     </ClCompile>
-    <ClCompile Include="palmcc.c">
+    <ClCompile Include="src\gmsheapnew.cpp">
     </ClCompile>
-    <ClCompile Include="gmsheapnew.cpp">
+    <ClCompile Include="src\gmsobj.cpp">
     </ClCompile>
-    <ClCompile Include="gmsobj.cpp">
+    <ClCompile Include="src\gmsstrm.cpp">
     </ClCompile>
-    <ClCompile Include="gmsstrm.cpp">
-    </ClCompile>
-    <ClCompile Include="tests\strhashtests.cpp">
+    <ClCompile Include="src\tests\strhashtests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="tests\gmsobjtests.cpp">
+    <ClCompile Include="src\tests\gmsobjtests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="tests\gmsheapnewtests.cpp">
+    <ClCompile Include="src\tests\gmsheapnewtests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="tests\gmsdatatests.cpp">
+    <ClCompile Include="src\tests\gmsdatatests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gxfile.h">
+    <ClInclude Include="src\gxfile.h">
     </ClInclude>
-    <ClInclude Include="utils.h">
+    <ClInclude Include="src\utils.h">
     </ClInclude>
-    <ClInclude Include="tests\doctest.h">
+    <ClInclude Include="src\tests\doctest.h">
       <Filter>tests</Filter>
     </ClInclude>
-    <ClInclude Include="gclgms.h" />
-    <ClInclude Include="palmcc.h" />
-    <ClInclude Include="datastorage.h" />
-    <ClInclude Include="gmsdata.h" />
-    <ClInclude Include="gmsheapnew.h" />
-    <ClInclude Include="gmsobj.h" />
-    <ClInclude Include="gmsstrm.h" />
-    <ClInclude Include="strhash.h" />
+    <ClInclude Include="src\gclgms.h" />
+    <ClInclude Include="src\datastorage.h" />
+    <ClInclude Include="src\gmsdata.h" />
+    <ClInclude Include="src\gmsheapnew.h" />
+    <ClInclude Include="src\gmsobj.h" />
+    <ClInclude Include="src\gmsstrm.h" />
+    <ClInclude Include="src\strhash.h" />
   </ItemGroup>
 </Project>

@@ -24,7 +24,10 @@
  */
 
 #include "gmsstrm.h"
-#include "palmcc.h"
+
+#ifdef GAMSBUILD
+#include <palmcc.h>
+#endif
 
 #include "gxfile.h"
 #include "utils.h"

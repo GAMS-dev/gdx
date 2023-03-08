@@ -19,33 +19,31 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="gclgms.c" />
-    <ClCompile Include="palmcc.c" />
-    <ClCompile Include="gmsheapnew.cpp" />
-    <ClCompile Include="gmsobj.cpp" />
-    <ClCompile Include="gmsstrm.cpp" />
-    <ClCompile Include="gxfile.cpp" />
-    <ClCompile Include="tests\doctestmain.cpp" />
-    <ClCompile Include="tests\gmsdatatests.cpp" />
-    <ClCompile Include="tests\gmsheapnewtests.cpp" />
-    <ClCompile Include="tests\gmsobjtests.cpp" />
-    <ClCompile Include="tests\strhashtests.cpp" />
-    <ClCompile Include="tests\gxfiletests.cpp" />
-    <ClCompile Include="tests\utilstests.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="src\gclgms.c" />
+    <ClCompile Include="src\gmsheapnew.cpp" />
+    <ClCompile Include="src\gmsobj.cpp" />
+    <ClCompile Include="src\gmsstrm.cpp" />
+    <ClCompile Include="src\gxfile.cpp" />
+    <ClCompile Include="src\tests\doctestmain.cpp" />
+    <ClCompile Include="src\tests\gmsdatatests.cpp" />
+    <ClCompile Include="src\tests\gmsheapnewtests.cpp" />
+    <ClCompile Include="src\tests\gmsobjtests.cpp" />
+    <ClCompile Include="src\tests\strhashtests.cpp" />
+    <ClCompile Include="src\tests\gxfiletests.cpp" />
+    <ClCompile Include="src\tests\utilstests.cpp" />
+    <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="gclgms.h" />
-    <ClInclude Include="palmcc.h" />
-    <ClInclude Include="datastorage.h" />
-    <ClInclude Include="gmsdata.h" />
-    <ClInclude Include="gmsheapnew.h" />
-    <ClInclude Include="gmsobj.h" />
-    <ClInclude Include="gmsstrm.h" />
-    <ClInclude Include="strhash.h" />
-    <ClInclude Include="gxfile.h" />
-    <ClInclude Include="tests\doctest.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="src\gclgms.h" />
+    <ClInclude Include="src\datastorage.h" />
+    <ClInclude Include="src\gmsdata.h" />
+    <ClInclude Include="src\gmsheapnew.h" />
+    <ClInclude Include="src\gmsobj.h" />
+    <ClInclude Include="src\gmsstrm.h" />
+    <ClInclude Include="src\strhash.h" />
+    <ClInclude Include="src\gxfile.h" />
+    <ClInclude Include="src\tests\doctest.h" />
+    <ClInclude Include="src\utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -137,7 +135,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GC_NO_MUTEX;GAMSBUILD;NO_ZLIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GC_NO_MUTEX;NO_ZLIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -154,7 +152,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GC_NO_MUTEX;GAMSBUILD;NO_ZLIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GC_NO_MUTEX;NO_ZLIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
