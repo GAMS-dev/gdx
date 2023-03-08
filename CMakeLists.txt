@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(gdxnative)
+project(gdx)
 set(CMAKE_CXX_STANDARD 17)
 
 find_program(CCACHE_FOUND ccache)
@@ -48,6 +48,6 @@ set(tests
 add_library(gdxcclib64 SHARED ${common})
 set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-add_library(gdxnativeshared STATIC ${common})
-add_executable(gdxnativetest ${tests})
-target_link_libraries(gdxnativetest gdxnativeshared ${mylibs})
+add_library(gdxshared STATIC ${common})
+add_executable(gdxtest ${tests})
+target_link_libraries(gdxtest gdxshared ${mylibs})

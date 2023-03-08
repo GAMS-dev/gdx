@@ -1,3 +1,3 @@
-# gdxnative
+# GDX
 
-Native C++17 re-implementation/port of the classic expert-level GDX API.
+C++17 port of the classic expert-level GDX API.
