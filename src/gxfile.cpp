@@ -590,7 +590,7 @@ namespace gdx {
                 FFile->WriteInteger(PSy->SDataCount);
                 FFile->WriteInteger(PSy->SErrors);
                 FFile->WriteByte(PSy->SSetText);
-                FFile->WriteString(PSy->SExplTxt);
+                FFile->WriteString<GMS_SSSIZE>(PSy->SExplTxt);
                 FFile->WriteByte(PSy->SIsCompressed);
                 FFile->WriteByte(PSy->SDomSymbols ? 1 : 0);
 
