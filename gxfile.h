@@ -600,7 +600,7 @@ namespace gdx {
         void *p;
     };
 
-    bool IsGoodIdent(std::string_view S);
+    bool IsGoodIdent(const char *S);
 
     int ConvertGDXFile(const std::string &fn, const std::string &MyComp);
 
