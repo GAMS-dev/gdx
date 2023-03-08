@@ -138,7 +138,8 @@ namespace gdx::tests::gmsobjtests {
             std::string s{"i"+std::to_string(i+1)};
             int ix{lst.Add(s.c_str(), s.length())};
             REQUIRE_GT(ix, -1);
-            REQUIRE_EQ(-1, utils::indexOf(knownIndices, ix));
+            auto it {std::find(knownIndices.begin(), knownIndices.end(), ix)};
+            REQUIRE_EQ(knownIndices.end(), it);
             knownIndices.push_back(ix);
         }
         REQUIRE_LE(n, lst.GetCapacity());

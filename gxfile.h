@@ -160,7 +160,7 @@ namespace gdx {
         gdxSyType SDataType;
         int SUserInfo;
         bool SSetText;
-        std::string SExplTxt;
+        std::array<char, GMS_SSSIZE> SExplTxt;
         bool SIsCompressed;
         std::unique_ptr<int[]>  SDomSymbols, // real domain info
                                 SDomStrings; // relaxed domain info
@@ -297,17 +297,23 @@ namespace gdx {
         void ResetMapToUserStatus();
     };
 
-    std::string MakeGoodExplText(std::string_view s);
+    int MakeGoodExplText(char *s);
 
     struct TAcronym {
-        std::string AcrName{}, AcrText{};
+        char *AcrName{}, *AcrText{};
         int AcrMap{}, AcrReadMap{};
         bool AcrAutoGen{};
 
-        TAcronym(std::string Name, const std::string& Text, int Map);
+        TAcronym(const char *Name, const char *Text, int Map);
         explicit TAcronym(gmsstrm::TXStreamDelphi &S);
         void FillFromStream(gmsstrm::TXStreamDelphi &S);
         TAcronym() = default;
+
+        ~TAcronym() {
+            delete [] AcrName;
+            delete [] AcrText;
+        }
+
         [[nodiscard]] int MemoryUsed() const;
         void SaveToStream(gmsstrm::TXStreamDelphi &S) const;
     };
@@ -319,7 +325,7 @@ namespace gdx {
         ~TAcronymList();
         int FindEntry(int Map);
         int FindName(const char *Name);
-        int AddEntry(const std::string& Name, const std::string& Text, int Map);
+        int AddEntry(const char *Name, const char *Text, int Map);
         void CheckEntry(int Map);
         void SaveToStream(gmsstrm::TXStreamDelphi& S);
         void LoadFromStream(gmsstrm::TXStreamDelphi& S);

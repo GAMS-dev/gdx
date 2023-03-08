@@ -270,7 +270,7 @@ namespace gdx::gmsstrm {
         for (int N{}; N < Len; N++) {
             FPwNxt++;
             if (FPwNxt > L) FPwNxt = 1;
-            PW[N] = (char)utils::excl_or(PR[N], FPassWord[FPwNxt]);
+            PW[N] = (char)(PR[N] ^ FPassWord[FPwNxt]);
         }
     }
 

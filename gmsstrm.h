@@ -119,6 +119,11 @@ namespace gdx::gmsstrm {
             WriteString(std::string_view{s, std::strlen(s)});
         }
 
+        template<int count>
+        inline void WriteString(const std::array<char, count> &s) {
+            WriteString(s.data());
+        }
+
         void WriteDouble(double x);
         void WriteInteger(int n);
         void WriteInt64(int64_t N);

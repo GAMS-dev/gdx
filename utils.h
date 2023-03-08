@@ -54,11 +54,6 @@ namespace gdx::utils {
         return c >= 'A' && c <= 'Z' ? static_cast<char>(c ^ 32) : c;
     }
 
-    template<class T>
-    bool in(const T& val, const std::vector<T>& elems) {
-        return std::find(elems.begin(), elems.end(), val) != elems.end();
-    }
-
     template<typename T>
     bool in(const T& val, const T& last) {
         return val == last;
@@ -67,21 +62,6 @@ namespace gdx::utils {
     template<typename T, typename... Args>
     bool in(const T& val, const T& first, Args... rest) {
         return val == first || in(val, rest...);
-    }
-
-    template<typename T>
-    bool in(const T& val, const std::set<T>& elems) {
-        return elems.find(val) != elems.end(); // C++20 starts offering contains method
-    }
-
-    template<typename K, typename V>
-    bool in(const K& val, const std::map<K, V>& m) {
-        return m.find(val) != m.end(); // C++20 starts offering contains method
-    }
-
-    template<typename K, typename V>
-    bool in(const K& val, const std::unordered_set<K, V>& m) {
-        return m.find(val) != m.end(); // C++20 starts offering contains method
     }
 
     template<typename T>
@@ -94,32 +74,6 @@ namespace gdx::utils {
     template<typename T>
     bool in(const T& val, const IContainsPredicate<T>& coll) {
         return coll.contains(val);
-    }
-
-    template<class T>
-    bool any(std::function<bool(const T&)> predicate, const std::initializer_list<T>& elems) {
-        return std::any_of(std::cbegin(elems), std::cend(elems), predicate);
-    }
-
-    template<typename T, const int notFound = -1>
-    int indexOf(const std::list<T> &elems, const T& elem) {
-        int i{};
-        for (const T& other : elems) {
-            if (other == elem)
-                return i;
-            i++;
-        }
-        return notFound;
-    }
-
-    template<typename T, const int notFound = -1>
-    int indexOf(const std::list<T>& elems, std::function<bool(const T&)> predicate) {
-        int i{};
-        for (const T & elem : elems) {
-            if (predicate(elem)) return i;
-            i++;
-        }
-        return notFound;
     }
 
     std::string uppercase(std::string_view s);
@@ -146,17 +100,6 @@ namespace gdx::utils {
     std::string_view trim(std::string_view s);
     const char *trimRight(const char *s, char *storage, int &slen);
 
-    std::vector<size_t> substrPositions(std::string_view s, std::string_view substr);
-	std::string replaceSubstrs(std::string_view s, std::string_view substr, std::string_view replacement);
-
-    bool strContains(std::string_view s, char c);
-
-    bool excl_or(bool a, bool b);
-
-    std::string_view substr(std::string_view s, int offset, int len);
-
-    bool starts_with(std::string_view s, std::string_view prefix);
-
     std::string quoteWhitespace(const std::string &s, char quotechar = '\'');
 
     template<class T, const int size>
@@ -166,7 +109,7 @@ namespace gdx::utils {
         return res;
     }
 
-    int strCompare(std::string_view S1, std::string_view S2, bool caseInsensitive = true);
+    int strCompare(const char *S1, const char *S2, bool caseInsensitive = true);
 
     int strConvCppToDelphi(std::string_view s, char *delphistr);
 
@@ -189,5 +132,33 @@ namespace gdx::utils {
         for(i = 0; i < outBufSize && s[i] != '\0'; i++)
             buf[i] = s[i];
         buf[i == outBufSize ? i - 1 : i] = '\0'; // truncate when exceeding
+    }
+
+    inline void assignViewToBuf(const std::string_view s, char *buf, int outBufSize = 256) {
+        if((int)s.length() + 1 > outBufSize) return;
+        std::memcpy(buf, s.data(), s.length());
+        buf[s.length()] = '\0';
+    }
+
+    inline char *NewString(const char *s, size_t slen) {
+        char *buf{new char[slen+1]};
+        utils::assignPCharToBuf(s, slen, buf, slen+1);
+        return buf;
+    }
+
+    inline char *NewString(const char *s) {
+        return NewString(s, std::strlen(s));
+    }
+
+    inline char *NewString(const std::string &s) {
+        return NewString(s.c_str());
+    }
+
+    inline char *NewString(const char *s, size_t slen, size_t &memSize) {
+        const auto l = slen+1;
+        char *buf{new char[l]};
+        utils::assignPCharToBuf(s, slen, buf, l);
+        memSize += l;
+        return buf;
     }
 }

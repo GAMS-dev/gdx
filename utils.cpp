@@ -77,66 +77,21 @@ namespace gdx::utils {
         return storage;
     }
 
-    std::vector<size_t> substrPositions(const std::string_view s, const std::string_view substr) {
-        std::vector<size_t> positions;
-        for (size_t p{s.find(substr)}; p != std::string::npos; p = s.find(substr, p + substr.size()))
-            positions.push_back(p);
-        return positions;
-    }
-
-    std::string replaceSubstrs(const std::string_view s, const std::string_view substr, const std::string_view replacement) {
-        if (substr == replacement) return std::string{ s };
-        std::string out{};
-        const auto ssl = static_cast<int>(substr.length());
-        const auto positions = substrPositions(s, substr);
-        for (int i = 0; i < (int) s.length(); i++) {
-            if (utils::in<size_t>(i, positions)) {
-                out += replacement;
-                i += ssl - 1;
-                continue;
-            }
-            out += s[i];
-        }
-        return out;
-    }
-
-    bool strContains(const std::string_view s, char c) {
-        return s.find(c) != std::string::npos;
-    }
-
-    bool excl_or(bool a, bool b) {
-        return (a && !b) || (!a && b);
-    }
-
-    // same as std::string::substr but silent when offset > input size
-    std::string_view substr(const std::string_view s, int offset, int len) {
-        return (s.empty() || offset > (int) s.size() - 1) ? std::string_view {} : s.substr(offset, len);
-    }
-
-    bool starts_with(const std::string_view s, const std::string_view prefix) {
-        if (prefix.length() > s.length()) return false;
-        for (int i = 0; i < (int) prefix.length(); i++) {
-            if (s[i] != prefix[i])
-                return false;
-        }
-        return true;
-    }
-
     std::string quoteWhitespace(const std::string &s, char quotechar) {
-        return utils::strContains(s, ' ') ? ""s + quotechar + s + quotechar : s;
+        return s.find(' ') != std::string::npos ? ""s + quotechar + s + quotechar : s;
     }
 
-    int strCompare(const std::string_view S1, const std::string_view S2, bool caseInsensitive) {
-        if (S1.empty() || S2.empty()) return (!S1.empty() ? 1 : 0) - (!S2.empty() ? 1 : 0);
-        auto L = S1.length();
-        if (L > S2.length()) L = S2.length();
-        for (size_t K{}; K < L; K++) {
+    int strCompare(const char *S1, const char *S2, bool caseInsensitive) {
+        if (S1[0] == '\0' || S2[0] == '\0')
+            return (S1[0] != '\0' ? 1 : 0) - (S2[0] != '\0' ? 1 : 0);
+        size_t K;
+        for (K=0; S1[K] != '\0' && S2[K] != '\0'; K++) {
             int c1 = static_cast<unsigned char>(caseInsensitive ? utils::toupper(S1[K]) : S1[K]);
             int c2 = static_cast<unsigned char>(caseInsensitive ? utils::toupper(S2[K]) : S2[K]);
             int d = c1 - c2;
             if (d) return d;
         }
-        return static_cast<int>(S1.length() - S2.length());
+        return static_cast<int>(std::strlen(S1) - std::strlen(S2));
     }
 
     /**

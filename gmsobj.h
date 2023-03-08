@@ -202,27 +202,13 @@ namespace gdx::collections::gmsobj {
         }
     };
 
-    inline char *NewString(const char *s, size_t slen) {
-        char *buf{new char[slen+1]};
-        utils::assignPCharToBuf(s, slen, buf, slen+1);
-        return buf;
-    }
-
-    inline char *NewString(const char *s, size_t slen, size_t &memSize) {
-        const auto l = slen+1;
-        char *buf{new char[l]};
-        utils::assignPCharToBuf(s, slen, buf, l);
-        memSize += l;
-        return buf;
-    }
-
     class TXStrings : public TXList<char> {
     private:
         size_t FStrMemory;
 
         void Put(int Index, const char *Item, size_t itemLen) {
             FreeItem(Index);
-            FList[Index-(OneBased ? 1 : 0)] = NewString(Item, itemLen, FStrMemory);
+            FList[Index-(OneBased ? 1 : 0)] = utils::NewString(Item, itemLen, FStrMemory);
         }
 
         char *Get(int Index) {
@@ -242,7 +228,7 @@ namespace gdx::collections::gmsobj {
         }
 
         int Add(const char *Item, size_t ItemLen) {
-            return TXList<char>::Add(NewString(Item, ItemLen, FStrMemory));
+            return TXList<char>::Add(utils::NewString(Item, ItemLen, FStrMemory));
         }
 
         int IndexOf(const char *Item) {
@@ -355,7 +341,7 @@ namespace gdx::collections::gmsobj {
         void SetName(int Index, const char *v) {
             char **sref = FList[Index-(OneBased?1:0)]->FString;
             delete [] *sref;
-            *sref = NewString(v, std::strlen(v), FStrMemory);
+            *sref = utils::NewString(v, std::strlen(v), FStrMemory);
         }
 
     public:
@@ -412,7 +398,7 @@ namespace gdx::collections::gmsobj {
             if(OneBased) Index--;
             if(Index < FCount) // overlap so use memmove instead of memcpy
                 std::memmove(&FList[Index+1], &FList[Index], (FCount-Index)*sizeof(TStringItem<T>));
-            FList[Index].FString = NewString(S, slen, FStrMemory);
+            FList[Index].FString = utils::NewString(S, slen, FStrMemory);
             FList[Index].FObject = APointer;
             FCount++;
         }
@@ -485,7 +471,7 @@ namespace gdx::collections::gmsobj {
         int Compare(int Index1, int Index2) override {
             char *s1 = FList[Index1-(OneBased?1:0)].FString;
             char *s2 = FList[Index2-(OneBased?1:0)].FString;
-            return utils::sameText(s1, s2);
+            return utils::sameTextPChar(s1, s2);
         }
 
         [[nodiscard]] int Count() const {

@@ -100,7 +100,7 @@ namespace gdx::collections::strhash {
             return utils::sameTextPChar(ps1, ps2);
         }
 
-        virtual int Compare(const std::string_view ps1, const std::string_view ps2) {
+        virtual int Compare(const char *ps1, const char *ps2) {
             return utils::strCompare(ps1, ps2);
         }
 
@@ -454,7 +454,7 @@ namespace gdx::collections::strhash {
             return utils::sameTextPChar<false>(ps1, ps2);
         }
 
-        int Compare(const std::string_view ps1, const std::string_view ps2) override {
+        int Compare(const char * ps1, const char * ps2) override {
             return utils::strCompare(ps1, ps2, false);
         }
     };
@@ -529,7 +529,7 @@ namespace gdx::collections::strhash {
             return utils::sameTextPChar(ps1, ps2);
         }
 
-        virtual int Compare(const std::string_view ps1, const std::string_view ps2) {
+        virtual int Compare(const char *ps1, const char *ps2) {
             return utils::strCompare(ps1, ps2);
         }
 
@@ -600,7 +600,7 @@ namespace gdx::collections::strhash {
                 FSorted = false;
             }
             FCount++; // ugly
-            obj->StrP = gmsobj::NewString(s, slen);
+            obj->StrP = utils::NewString(s, slen);
             obj->Obj = AObj;
             return res;
         }
@@ -621,7 +621,7 @@ namespace gdx::collections::strhash {
                 FSorted = false;
             }
             FCount++; // ugly
-            obj->StrP  = gmsobj::NewString(s, slen);
+            obj->StrP  = utils::NewString(s, slen);
             obj->Obj = AObj;
             return res;
         }
@@ -658,7 +658,7 @@ namespace gdx::collections::strhash {
             }
             char **strRef = &Buckets.GetItemPtrIndex(N)->StrP;
             delete [] *strRef;
-            *strRef = gmsobj::NewString(s, std::strlen(s));
+            *strRef = utils::NewString(s, std::strlen(s));
         }
 
         [[nodiscard]] int64_t MemoryUsed() const {

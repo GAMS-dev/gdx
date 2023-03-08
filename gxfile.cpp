@@ -272,7 +272,7 @@ namespace gdx {
         std::string Conv {utils::trim(utils::uppercase(QueryEnvironmentVariable(strGDXCONVERT)))};
         if(Conv.empty()) Conv = "V7"s;
         std::string Comp = Conv == "V5" ? ""s : (!GetEnvCompressFlag() ? "U" : "C");
-        if(utils::sameText(Conv+Comp, "V7"+MyComp)) return 0;
+        if(utils::sameText(Conv+Comp, "V7"s+MyComp)) return 0;
         int progRC, res {SystemP("gdxcopy -"s + Conv+Comp + " -Replace "s + utils::quoteWhitespace(fn, '\"'), progRC)};
         return progRC ? ERR_GDXCOPY - progRC : res;
     }
@@ -280,17 +280,18 @@ namespace gdx {
     // If both single and double quotes appear in the string, replace
     // each quote by the first quote seen
     // Replace control character with a question mark
-    std::string MakeGoodExplText(const std::string_view s) {
+    int MakeGoodExplText(char *s) {
         char q {'\0'};
-        std::string res;
-        res.reserve(s.length());
-        for(char Ch : s) {
-            if(!utils::in(Ch, '\"', '\'')) {
-                if(Ch < ' ') Ch = '?';
-            } else Ch = q;
-            res += Ch;
+        int i;
+        for(i=0; s[i] != '\0'; i++) {
+            if(!utils::in(s[i], '\"', '\'')) {
+                if(s[i] < ' ') s[i] = '?';
+            } else {
+                if(q == '\0') q = s[i];
+                s[i] = q;
+            }
         }
-        return res;
+        return i;
     }
 
     static inline bool isLetter(char c) {
@@ -301,13 +302,12 @@ namespace gdx {
         return isLetter(c) || (c >= '0' && c <= '9') || (c == '_');
     }
 
-    bool IsGoodIdent(const std::string_view S) {
-        if(S.empty() || (int)S.length() >= GLOBAL_UEL_IDENT_SIZE || !isLetter(S.front()))
-            return false;
-        for(int n{1}; n<(int)S.length(); n++)
-            if(!isLetterDigitOrUnderscore(S[n]))
-                return false;
-        return true;
+    bool IsGoodIdent(const char *S) {
+        if(S[0] == '\0' || !isLetter(S[0])) return false;
+        int i;
+        for(i=1; S[i] != '\0'; i++)
+            if(!isLetterDigitOrUnderscore(S[i])) return false;
+        return i < GLOBAL_UEL_IDENT_SIZE;
     }
 
     static TgdxElemSize GetIntegerSize(int N) {
@@ -769,7 +769,8 @@ namespace gdx {
         obj->SDataType = static_cast<gdxSyType>(AType);
         obj->SUserInfo = AUserInfo;
         obj->SSetText = false;
-        obj->SExplTxt = MakeGoodExplText(AText);
+        utils::assignViewToBuf(AText, obj->SExplTxt.data(), GMS_SSSIZE);
+        MakeGoodExplText(obj->SExplTxt.data());
         obj->SIsCompressed = CompressOut && ADim > 0;
         obj->SCommentsList = std::nullopt;
         obj->SDomSymbols = nullptr;
@@ -819,7 +820,7 @@ namespace gdx {
     bool TGXFileObj::IsGoodNewSymbol(const char *s) {
         return !(ErrorCondition(NameList->IndexOf(s) < 1, ERR_DUPLICATESYMBOL) ||
                  ErrorCondition(AcronymList->FindName(s) < 0, ERR_DUPLICATESYMBOL) ||
-                 ErrorCondition(IsGoodIdent(std::string_view{s, std::strlen(s)}), ERR_BADIDENTFORMAT));
+                 ErrorCondition(IsGoodIdent(s), ERR_BADIDENTFORMAT));
     }
 
     bool TGXFileObj::ErrorCondition(bool cnd, int N) {
@@ -1332,7 +1333,7 @@ namespace gdx {
                 else {
                     newIndx = NextAutoAcronym;
                     NextAutoAcronym++;
-                    N = AcronymList->AddEntry(""s, ""s, orgIndx);
+                    N = AcronymList->AddEntry("", "", orgIndx);
                     (*AcronymList)[N].AcrReadMap = newIndx;
                     (*AcronymList)[N].AcrAutoGen = true;
                 }
@@ -1754,6 +1755,11 @@ namespace gdx {
         return NrRecs >= 0;
     }
 
+    // same as std::string::substr but silent when offset > input size
+    static inline std::string_view substr(const std::string_view s, int offset, int len) {
+        return (s.empty() || offset > (int) s.size() - 1) ? std::string_view {} : s.substr(offset, len);
+    }
+
     int TGXFileObj::gdxOpenReadXX(const char *Afn, int filemode, int ReadMode, int &ErrNr) {
         if(fmode != f_not_open) {
             ErrNr = ERR_FILEALREADYOPEN;
@@ -1849,7 +1855,7 @@ namespace gdx {
             CurSyPtr->SErrors = FFile->ReadInteger();
             B = FFile->ReadByte();
             CurSyPtr->SSetText = B;
-            CurSyPtr->SExplTxt = FFile->ReadString();
+            utils::assignStrToBuf(FFile->ReadString(), CurSyPtr->SExplTxt.data(), GMS_SSSIZE);
             CurSyPtr->SIsCompressed = VersionRead > 5 && FFile->ReadByte();
             CurSyPtr->SDomSymbols = nullptr;
             CurSyPtr->SCommentsList = std::nullopt;
@@ -1885,7 +1891,7 @@ namespace gdx {
 
         NrElem = FFile->ReadInteger();
         //bug for pre 2002
-        if (utils::substr(FileSystemID, 15, 4) == "2001"s) NrElem--;
+        if (substr(FileSystemID, 15, 4) == "2001"s) NrElem--;
 
         while (UELTable->size() < NrElem) {
             auto s{FFile->ReadString()};
@@ -1988,10 +1994,10 @@ namespace gdx {
         SyPtr->SUserInfo = SyNr;
         if(!SyNr) {
             SyPtr->SDim = 1;
-            SyPtr->SExplTxt = "Aliased with *"s;
+            utils::assignStrToBuf("Aliased with *"s, SyPtr->SExplTxt.data());
         } else {
             SyPtr->SDim = (*NameList->GetObject(SyNr))->SDim;
-            SyPtr->SExplTxt = "Aliased with "s + NameList->GetString(SyNr);
+            utils::assignStrToBuf("Aliased with "s + NameList->GetString(SyNr), SyPtr->SExplTxt.data());
         }
         NameList->AddObject(AName, std::strlen(AName), SyPtr);
         return true;
@@ -2013,8 +2019,10 @@ namespace gdx {
     int TGXFileObj::gdxAddSetText(const char *Txt, int &TxtNr) {
         if(!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText")))
             return false;
-        auto s{MakeGoodExplText(std::string_view{Txt,std::strlen(Txt)})};
-        TxtNr = SetTextList->Add(s.c_str(), s.length());
+        static std::array<char, GMS_SSSIZE> s;
+        utils::assignPCharToBuf(Txt, s.data(), GMS_SSSIZE);
+        const int slen {MakeGoodExplText(s.data())};
+        TxtNr = SetTextList->Add(s.data(), slen);
         return true;
     }
 
@@ -2488,7 +2496,7 @@ namespace gdx {
             const auto *obj = (*NameList->GetObject(SyNr));
             RecCnt = !obj->SDim ? 1 : obj->SDataCount; // scalar trick
             UserInfo = obj->SUserInfo;
-            utils::assignStrToBuf(obj->SExplTxt, ExplTxt, GMS_SSSIZE);
+            utils::assignPCharToBuf(obj->SExplTxt.data(), ExplTxt, GMS_SSSIZE);
             return true;
         }
     }
@@ -2610,12 +2618,11 @@ namespace gdx {
                 SyPtr->SDomStrings = std::make_unique<int[]>(SyPtr->SDim);
             for (int D{}; D < SyPtr->SDim; D++) {
                 const char *S { DomainIDs[D] };
-                const std::string_view Sview {S, std::strlen(S)};
-                if (Sview.empty() || Sview == "*" || !IsGoodIdent(S)) SyPtr->SDomStrings[D] = 0;
+                if (S[0] == '\0' || !strcmp(S, "*") || !IsGoodIdent(S)) SyPtr->SDomStrings[D] = 0;
                 else {
                     SyPtr->SDomStrings[D] = DomainStrList->IndexOf(S); // one based
                     if (SyPtr->SDomStrings[D] <= 0) {
-                        DomainStrList->Add(S, Sview.length());
+                        DomainStrList->Add(S, std::strlen(S));
                         SyPtr->SDomStrings[D] = (int) DomainStrList->size();
                     }
                 }
@@ -3169,8 +3176,8 @@ namespace gdx {
             return false;
         }
         const auto &acr = (*AcronymList)[N-1];
-        utils::assignStrToBuf(acr.AcrName, AName, GMS_SSSIZE);
-        utils::assignStrToBuf(acr.AcrText, Txt, GMS_SSSIZE);
+        utils::assignPCharToBuf(acr.AcrName, AName, GMS_SSSIZE);
+        utils::assignPCharToBuf(acr.AcrText, Txt, GMS_SSSIZE);
         AIndx = acr.AcrMap;
         return true;
     }
@@ -3212,11 +3219,12 @@ namespace gdx {
             }
             else if(ErrorCondition(AIndx == obj.AcrMap, ERR_BADACROINDEX)) return false;
 
-            obj.AcrName = AName;
-            obj.AcrText = MakeGoodExplText(Txt);
+            obj.AcrName = utils::NewString(AName);
+            obj.AcrText = utils::NewString(Txt);
+            MakeGoodExplText(obj.AcrText);
 
         } else if(obj.AcrReadMap != AIndx) {
-            if(ErrorCondition(utils::sameText(AName, obj.AcrName), ERR_BADACRONAME) ||
+            if(ErrorCondition(utils::sameTextPChar(AName, obj.AcrName), ERR_BADACRONAME) ||
                 ErrorCondition(MapIsUnique(AIndx), ERR_ACRODUPEMAP)) return false;
             obj.AcrReadMap = AIndx;
         }
@@ -3580,7 +3588,7 @@ namespace gdx {
     int TGXFileObj::gdxAcronymAdd(const char *AName, const char *Txt, int AIndx) {
         for(int N{}; N<(int)AcronymList->size(); N++) {
             const auto &obj = (*AcronymList)[N];
-            if(utils::sameText(obj.AcrName, AName)) {
+            if(utils::sameTextPChar(obj.AcrName, AName)) {
                 if(ErrorCondition(obj.AcrMap == AIndx, ERR_ACROBADADDITION)) return -1;
                 return N;
             }
@@ -3622,7 +3630,8 @@ namespace gdx {
         if(Indx <= 0) AName[0] = '\0';
         else {
             int N {AcronymList->FindEntry(Indx)};
-            utils::assignStrToBuf(N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : (*AcronymList)[N].AcrName, AName, GMS_SSSIZE);
+            if(N < 0) utils::assignStrToBuf("UnknownAcronym"s + std::to_string(Indx), AName, GMS_SSSIZE);
+            else utils::assignPCharToBuf((*AcronymList)[N].AcrName, AName, GMS_SSSIZE);
             return true;
         }
         return false;
@@ -4442,13 +4451,13 @@ namespace gdx {
 
     int TAcronymList::FindName(const char *Name) {
         for (int N{}; N<FList.GetCount(); N++)
-            if (utils::sameTextPChar(FList[N]->AcrName.c_str(), Name))
+            if (utils::sameTextPChar(FList[N]->AcrName, Name))
                 return N;
         return -1;
     }
     
-    int TAcronymList::AddEntry(const std::string& Name, const std::string& Text, int Map) {
-        return FList.Add(new TAcronym{ Name, Text, Map });
+    int TAcronymList::AddEntry(const char *Name, const char *Text, int Map) {
+        return FList.Add(new TAcronym { Name, Text, Map });
     }
     
     void TAcronymList::CheckEntry(int Map) {
@@ -4573,11 +4582,12 @@ namespace gdx {
         return !FCapacity;
     }
 
-    TAcronym::TAcronym(std::string Name, const std::string &Text, int Map) :
-        AcrName { std::move(Name) },
-        AcrText { MakeGoodExplText(Text) },
+    TAcronym::TAcronym(const char *Name, const char *Text, int Map) :
         AcrMap{ Map },
         AcrReadMap{ -1 } {
+        AcrName = utils::NewString(Name);
+        AcrText = utils::NewString(Text);
+        MakeGoodExplText(AcrText);
     }
 
     TAcronym::TAcronym(TXStreamDelphi &S) : TAcronym("", "", 0) {
@@ -4585,17 +4595,17 @@ namespace gdx {
     }
 
     void TAcronym::FillFromStream(TXStreamDelphi &S) {
-        AcrName = S.ReadString();
-        AcrText = S.ReadString();
+        AcrName = utils::NewString(S.ReadString());
+        AcrText = utils::NewString(S.ReadString());
         AcrMap = S.ReadInteger();
     }
 
     int TAcronym::MemoryUsed() const {
-        return 2 + (int)AcrName.length() + (int)AcrText.length();
+        return 2 + (int)std::strlen(AcrName) + (int)std::strlen(AcrText);
     }
 
     void TAcronym::SaveToStream(TXStreamDelphi &S) const {
-        S.WriteString(AcrName.empty() ? "UnknownACRO" + std::to_string(AcrMap) : AcrName);
+        S.WriteString(AcrName[0] == '\0' ? "UnknownACRO" + std::to_string(AcrMap) : AcrName);
         S.WriteString(AcrText);
         S.WriteInteger(AcrMap);
     }

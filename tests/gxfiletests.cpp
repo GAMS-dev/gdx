@@ -113,7 +113,9 @@ namespace gdx::tests::gxfiletests {
         basicTest([](TGXFileObj &pgx) {
             std::array<char, GMS_SSSIZE> versionStr {};
             REQUIRE(pgx.gdxGetDLLVersion(versionStr.data()));
-            REQUIRE(utils::starts_with(versionStr.data(), "GDX Library"s));
+            std::string expectedPrefix {"GDX Library"s};
+            versionStr[expectedPrefix.length()] = '\0';
+            REQUIRE(!std::strcmp(expectedPrefix.c_str(), versionStr.data()));
         });
     }
 
