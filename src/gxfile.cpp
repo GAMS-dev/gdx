@@ -75,11 +75,10 @@ namespace gdx {
 #endif
     }
 
-    bool CanBeQuoted(const char *s);
-    bool GoodUELString(const char *s, size_t slen);
     int64_t dblToI64(double x);
 
     bool CanBeQuoted(const char *s) {
+        if(!s) return false;
         bool saw_single{}, saw_double{};
         for(int i{}; true; i++) {
             char Ch = s[i];
@@ -96,7 +95,7 @@ namespace gdx {
     }
 
     bool GoodUELString(const char *s, size_t slen) {
-        return slen <= GLOBAL_UEL_IDENT_SIZE-1 && CanBeQuoted(s); // also checks Ch < '
+        return slen < GLOBAL_UEL_IDENT_SIZE && CanBeQuoted(s);
     }
 
     const int MaxDimV148 = 10;
@@ -667,9 +666,7 @@ namespace gdx {
             FFile->SetCompression(false);
             FFile->WriteInteger(MARK_BOI);
             // Note that we have room for 10 indices; if we need more, create an overflow link in the 10th position.
-            const std::array<int64_t, 6> offsets = {SymbPos, UELPos, SetTextPos, AcronymPos, NextWritePosition, DomStrPos};
-            const std::array offsetNames = {"symbol_table"s, "uel_table"s, "set_texts"s, "acronyms"s, "next_write"s, "domain_strs"s };
-            for(int64_t offset : offsets)
+            for(int64_t offset : {SymbPos, UELPos, SetTextPos, AcronymPos, NextWritePosition, DomStrPos})
                 FFile->WriteInt64(offset);
         }
 
@@ -744,10 +741,15 @@ namespace gdx {
 
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
             std::cout << "reset special vals, dump of readIntlValueMapDbl\n"s;
-            std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
-            std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
-            for(int i=0; i<(int)svNames.size(); i++)
-                std::cout << svNames[i] << "="s << readIntlValueMapDbl[svIndices[i]] << '\n';
+            std::array<std::pair<std::string, int>, 5> svNameIndexPairs{
+                {{"undef"s, sv_valund},
+                {"na"s, sv_valna},
+                {"posinf"s, sv_valpin},
+                {"min"s, sv_valmin},
+                {"eps"s, sv_valeps}}
+            };
+            for(auto &[svName, svIndex] : svNameIndexPairs)
+                std::cout << svName << "="s << readIntlValueMapDbl[svIndex] << '\n';
         }
 
         copyIntlMapDblToI64(intlValueMapDbl, intlValueMapI64);

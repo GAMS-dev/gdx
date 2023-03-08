@@ -23,6 +23,17 @@
  * SOFTWARE.
  */
 
+// TODO: Add test that does gdxdatareadraw of set with elements that have element texts
+// TODO: Test reading symbol alias
+// TODO: Test scalar with value
+// TODO: Get to SScalarFrst
+// TODO: Test reading set elements that have acronyms assigned
+// TODO: Somehow hit "get default record"
+// TODO: Test GDX file version
+// TODO: Data read string with invalid inputs
+// TODO: Read file with comments list
+// TODO: Read file with set text list duplicates
+
 #if defined(_WIN32)
 #include <Windows.h>
 #undef max
@@ -86,8 +97,7 @@ namespace gdx::tests::gxfiletests {
 #endif
     }
 
-    std::list<std::function<TGXFileObj*()>> getBuilders();
-    void basicTest(const std::function<void(TGXFileObj&)> &cb, int ub = -1);
+    void basicTest(const std::function<void(TGXFileObj&)> &cb);
     void testReads(const std::string &filename, const std::function<void(TGXFileObj&)> &cb);
     void testWrites(const std::string &filename, const std::function<void(TGXFileObj&)> &cb);
     void writeMappedRecordsOutOfOrder(TGXFileObj &pgx);
@@ -98,22 +108,10 @@ namespace gdx::tests::gxfiletests {
     void testReadModelGDX(const std::string &model, const std::function<void(TGXFileObj&)> &func);
     void testWithCompressConvert(bool compress = false, const std::string &convert = ""s);
 
-    std::list<std::function<TGXFileObj*()>> getBuilders() {
+    void basicTest(const std::function<void(TGXFileObj&)> &cb) {
         static std::string ErrMsg;
-        std::list<std::function<TGXFileObj*()>> builders {
-                [&]() { return new gdx::TGXFileObj{ErrMsg}; }
-        };
-        return builders;
-    }
-
-    void basicTest(const std::function<void(TGXFileObj&)> &cb, int ub) {
-        int i {};
-        for(const auto &builder : getBuilders()) {
-            if(ub != -1 && i++ >= ub) break;
-            TGXFileObj *pgx = builder();
-            cb(*pgx);
-            delete pgx;
-        }
+        TGXFileObj pgx {ErrMsg};
+        cb(pgx);
     }
 
     TEST_CASE("Simple setup and teardown of a GDX object") {
@@ -139,7 +137,7 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
 
             int ErrNr;
-            REQUIRE_FALSE(pgx.gdxOpenWrite("", "gdxinterfacetest", ErrNr));
+            REQUIRE_FALSE(pgx.gdxOpenWrite("", "gdxtest", ErrNr));
             REQUIRE_NE(0, ErrNr);
             // TODO: Why is this zero?
             REQUIRE_EQ(0, pgx.gdxErrorCount());
@@ -149,7 +147,7 @@ namespace gdx::tests::gxfiletests {
 
             int fileVer, comprLev;
 
-            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetest", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxtest", ErrNr));
             REQUIRE_FALSE(ErrNr);
             REQUIRE_EQ(0, pgx.gdxErrorCount());
 
@@ -161,11 +159,11 @@ namespace gdx::tests::gxfiletests {
             REQUIRE(std::filesystem::exists(fn));
 
             std::filesystem::remove(fn);
-            REQUIRE(pgx.gdxOpenWriteEx(fn.c_str(), "gdxinterfacetest", 1, ErrNr));
+            REQUIRE(pgx.gdxOpenWriteEx(fn.c_str(), "gdxtest", 1, ErrNr));
             REQUIRE_FALSE(ErrNr);
             REQUIRE_EQ(0, pgx.gdxErrorCount());
 
-            REQUIRE_FALSE(pgx.gdxOpenWriteEx(fn.c_str(), "gdxinterfacetest", 1, ErrNr));
+            REQUIRE_FALSE(pgx.gdxOpenWriteEx(fn.c_str(), "gdxtest", 1, ErrNr));
 
             REQUIRE(pgx.gdxFileInfo(fileVer, comprLev));
             REQUIRE_EQ(7, fileVer);
@@ -178,6 +176,17 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ(0, fileVer);
             REQUIRE_EQ(0, comprLev);
         });
+        std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Creating a file should also work when closing was forgotten") {
+        std::string ErrMsg, fn{"tmp.gdx"s};
+        int ErrNr;
+        {
+            TGXFileObj pgx{ ErrMsg };
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxtest", ErrNr));
+        }
+        REQUIRE(std::filesystem::exists(fn));
         std::filesystem::remove(fn);
     }
 
@@ -202,7 +211,7 @@ namespace gdx::tests::gxfiletests {
         std::string fn{"rename_uel.gdx"};
         basicTest([&](TGXFileObj &pgx) {
             int ErrNr;
-            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetest", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxtest", ErrNr));
 
             REQUIRE(pgx.gdxUELRegisterStrStart());
             int uelNr;
@@ -227,7 +236,7 @@ namespace gdx::tests::gxfiletests {
         std::string fn{"sym_dim.gdx"};
         basicTest([&](TGXFileObj &pgx) {
             int ErrNr;
-            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetest", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxtest", ErrNr));
             REQUIRE(pgx.gdxDataWriteRawStart("mysym", "Some explanatory text.", 2, dt_par, 0));
             REQUIRE_EQ(2, pgx.gdxCurrentDim());
             REQUIRE(pgx.gdxDataWriteDone());
@@ -237,17 +246,19 @@ namespace gdx::tests::gxfiletests {
         std::filesystem::remove(fn);
     }
 
-    template<typename T>
     void testWriteOp(const std::string &fn,
                      const std::function<void(TGXFileObj&)> &cb,
-                     bool cleanup = false) {
+                     bool cleanup = false);
+    void testWriteOp(const std::string &fn,
+                     const std::function<void(TGXFileObj&)> &cb,
+                     bool cleanup) {
         if(fn.empty()) return;
 
         {
             std::string ErrMsg;
-            T pgx{ErrMsg};
+            TGXFileObj pgx{ErrMsg};
             int ErrNr;
-            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxinterfacetest", ErrNr));
+            REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxtest", ErrNr));
             cb(pgx);
             pgx.gdxClose();
         }
@@ -255,15 +266,17 @@ namespace gdx::tests::gxfiletests {
             std::filesystem::remove(fn);
     }
 
-    template<typename T>
     void testReadOp(const std::string &fn,
                     const std::function<void(TGXFileObj&)> &cb,
-                    bool cleanup = false) {
+                    bool cleanup = false);
+    void testReadOp(const std::string &fn,
+                    const std::function<void(TGXFileObj&)> &cb,
+                    bool cleanup) {
         if(fn.empty()) return;
 
         {
             std::string ErrMsg;
-            T pgx{ErrMsg};
+            TGXFileObj pgx{ErrMsg};
             int ErrNr, rc;
             rc = pgx.gdxOpenRead(fn.c_str(), ErrNr);
             REQUIRE(rc);
@@ -275,11 +288,11 @@ namespace gdx::tests::gxfiletests {
     }
 
     void testReads(const std::string &filename, const std::function<void(TGXFileObj&)> &cb) {
-        testReadOp<gdx::TGXFileObj>(filename, cb);
+        testReadOp(filename, cb);
     }
 
     void testWrites(const std::string &filename, const std::function<void(TGXFileObj&)> &cb) {
-        testWriteOp<gdx::TGXFileObj>(filename, cb);
+        testWriteOp(filename, cb);
     }
 
     TEST_CASE("Test adding uels (raw mode)") {
@@ -387,13 +400,16 @@ namespace gdx::tests::gxfiletests {
         std::string fn {"rwrecordraw.gdx"};
         int key;
         TgdxValues values{};
+        const int nMany {800};
         testWrites(fn, [&](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
-            REQUIRE(pgx.gdxUELRegisterRaw("TheFirstUEL"));
-            REQUIRE(pgx.gdxUELRegisterRaw("TheSecondUEL"));
+            for(int i{}; i<nMany; i++) {
+                std::string uel{"i"s + std::to_string(i+1)};
+                REQUIRE(pgx.gdxUELRegisterRaw(uel.c_str()));
+            }
             REQUIRE(pgx.gdxUELRegisterDone());
             // Called out of context with garbage
-            //REQUIRE_FALSE(pgx.gdxDataWriteRaw(nullptr, nullptr));
+            REQUIRE_FALSE(pgx.gdxDataWriteRaw(nullptr, nullptr));
             REQUIRE(pgx.gdxDataWriteRawStart("mysym", "This is my symbol!", 1, dt_par, 0));
 
             key = 1;
@@ -407,16 +423,28 @@ namespace gdx::tests::gxfiletests {
             REQUIRE(pgx.gdxDataWriteDone());
 
             REQUIRE(pgx.gdxDataWriteRawStart("myscalar", "This is a scalar!", 0, dt_par, 0));
+            //REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
             REQUIRE(pgx.gdxDataWriteDone());
+
+
+
+            REQUIRE(pgx.gdxDataWriteRawStart("mysymbig", "This is another symbol!", 1, dt_par, 0));
+            for(int i{}; i<nMany; i++) {
+                key = 1 + i;
+                values[GMS_VAL_LEVEL] = 42.1987 + i;
+                REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
+            }
+            REQUIRE(pgx.gdxDataWriteDone());
+
         });
         testReads(fn, [&](TGXFileObj &pgx) {
             char uel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
-            REQUIRE(!strcmp("TheFirstUEL", uel));
+            REQUIRE(!strcmp("i1", uel));
             REQUIRE_EQ(-1, uelMap);
             REQUIRE(pgx.gdxUMUelGet(2, uel, uelMap));
-            REQUIRE(!strcmp("TheSecondUEL", uel));
+            REQUIRE(!strcmp("i2", uel));
             REQUIRE_EQ(-1, uelMap);
 
             int NrRecs;
@@ -432,6 +460,19 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ(2, key);
             REQUIRE_EQ(42.1987, values[GMS_VAL_LEVEL]);
 
+            REQUIRE(pgx.gdxDataReadDone());
+
+            REQUIRE(pgx.gdxDataReadRawStart(2, NrRecs));
+            REQUIRE_EQ(1, NrRecs);
+            REQUIRE(pgx.gdxDataReadDone());
+
+            REQUIRE(pgx.gdxDataReadRawStart(3, NrRecs));
+            REQUIRE_EQ(nMany, NrRecs);
+            for(int i{}; i<nMany; i++) {
+                REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
+                REQUIRE_EQ(1 + i, key);
+                REQUIRE_EQ(42.1987 + i, values[GMS_VAL_LEVEL]);
+            }
             REQUIRE(pgx.gdxDataReadDone());
 
             auto recordCallback = [](const int *keys, const double *vals) {
@@ -457,7 +498,7 @@ namespace gdx::tests::gxfiletests {
                 REQUIRE_EQ(3.141, vals[0]);
                 return 1;
             };
-            std::string uelFilterName{"TheFirstUEL"s};
+            std::string uelFilterName{"i1"s};
             std::array<const char*, 1> uelFilterNames{ uelFilterName.c_str() };
             REQUIRE(pgx.gdxDataReadRawFastFilt(1, uelFilterNames.data(), recordCallbackFiltered));
 
@@ -592,10 +633,6 @@ namespace gdx::tests::gxfiletests {
             gdx::TGXFileObj pgx{ErrMsg};
             REQUIRE(pgx.gdxGetSpecialValues(specialValuesFromPort.data()));
         }
-        /*for(int i{}; i<(int)specialValuesFromPort.size(); i++) {
-            const double eps = 0.001;
-            REQUIRE(specialValuesFromWrap[i] - specialValuesFromPort[i] < eps);
-        }*/
     }
 
     TEST_CASE("Test setting and resetting special values") {
@@ -1325,6 +1362,8 @@ namespace gdx::tests::gxfiletests {
             int acroIndex;
             pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex);
             REQUIRE(!strcmp("myacr_mod", acroName));
+
+            // TODO: do gdxdatareadraw
         });
         
             std::filesystem::remove(fn);
@@ -1451,7 +1490,7 @@ namespace gdx::tests::gxfiletests {
         auto getfn = [&](int i) {
             return "append_"s + infixes[i] + "_rename.gdx"s;
         };
-        const std::string prod {"gdxinterfacetest"s};
+        const std::string prod {"gdxtest"s};
         int errNr, cnt {};
         basicTest([&](TGXFileObj &pgx) {
             pgx.gdxOpenWrite(getfn(cnt).c_str(), prod.c_str(), errNr);
@@ -1533,6 +1572,9 @@ namespace gdx::tests::gxfiletests {
     TEST_CASE("Test filter") {
         testReadModelGDX("trnsport"s, [](TGXFileObj &pgx) {
             int nrRecs, dimFirst;
+
+            // TODO: Write tests with different filter action
+
             // uels: seattle 1, san-diego 2, new-york 3, chicago 4, topeka 5
             std::array<int, 2> filterAction { gdx::DOMC_EXPAND, gdx::DOMC_EXPAND },
                                keys { 3, 1 }; // new-york, seattle
@@ -1602,7 +1644,7 @@ namespace gdx::tests::gxfiletests {
             int ErrNr;
             const std::string fn {"autoconv.gdx"s};
             REQUIRE(pgx.gdxAutoConvert(0)); // disable auto convert
-            REQUIRE(pgx.gdxOpenWriteEx(fn.c_str(), "gdxinterfacetest", 0, ErrNr));
+            REQUIRE(pgx.gdxOpenWriteEx(fn.c_str(), "gdxtest", 0, ErrNr));
             pgx.gdxClose();
             REQUIRE(pgx.gdxOpenRead(fn.c_str(), ErrNr));
             int fileVer, comprLevel;
@@ -1684,6 +1726,35 @@ namespace gdx::tests::gxfiletests {
                 REQUIRE_EQ(-2, errorKeys[i]);
         });
         std::filesystem::remove(fn);
+    }
+
+    TEST_CASE("Test 'can be quoted' function") {
+        REQUIRE_FALSE(CanBeQuoted(nullptr));
+        REQUIRE(CanBeQuoted("abc"));
+        REQUIRE(CanBeQuoted("a\"bc"));
+        REQUIRE(CanBeQuoted("a'bc"));
+        REQUIRE_FALSE(CanBeQuoted("a'b\"c"));
+    }
+
+    TEST_CASE("Test checking for good UEL string") {
+        REQUIRE_FALSE(GoodUELString(nullptr, 0));
+        REQUIRE(GoodUELString("abc", 3));
+        std::string tooLong(300, 'x');
+        REQUIRE_FALSE(GoodUELString(tooLong.c_str(), tooLong.size()));
+    }
+
+    TEST_CASE("Test making a good explanatory text function") {
+        REQUIRE_FALSE(MakeGoodExplText(nullptr));
+
+        char explTxt1[256] = "'Test 1' and \"Test 2\"\t";
+        std::string expectedExplTxt1 {"'Test 1' and 'Test 2'?"};
+        REQUIRE_EQ(expectedExplTxt1.length(), MakeGoodExplText(explTxt1));
+        REQUIRE(!strcmp(expectedExplTxt1.c_str(), explTxt1));
+
+        char explTxt2[256] = "\"Test 1\"\n and 'Test 2'";
+        std::string expectedExplTxt2 {R"("Test 1"? and "Test 2")"};
+        REQUIRE_EQ(expectedExplTxt2.length(), MakeGoodExplText(explTxt2));
+        REQUIRE(!strcmp(expectedExplTxt2.c_str(), explTxt2));
     }
 
     TEST_SUITE_END();

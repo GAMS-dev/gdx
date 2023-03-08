@@ -155,6 +155,9 @@ namespace gdx::tests::utilstests {
     }
 
     TEST_CASE("Test lexicographical string comparison (optionally case-sensitive)") {
+        REQUIRE_EQ(0, utils::strCompare("", ""));
+        REQUIRE_EQ(1, utils::strCompare("Alpha", ""));
+        REQUIRE_EQ(-1, utils::strCompare("", "Beta"));
         REQUIRE_EQ(-1, utils::strCompare("Alpha", "Beta"));
         REQUIRE_EQ(1, utils::strCompare("Beta", "Alpha"));
         REQUIRE_EQ(0, utils::strCompare("alpha", "Alpha"));

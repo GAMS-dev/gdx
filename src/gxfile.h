@@ -604,6 +604,8 @@ namespace gdx {
     };
 
     bool IsGoodIdent(const char *S);
+    bool CanBeQuoted(const char *s);
+    bool GoodUELString(const char *s, size_t slen);
 
     int ConvertGDXFile(const std::string &fn, const std::string &MyComp);
 
