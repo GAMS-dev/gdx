@@ -907,7 +907,6 @@ namespace gdx {
                 do {
                     SyNr = CurSyPtr->SUserInfo;
                     if (!SyNr) {
-                        // FIXME: Not hit by any test!
                         ReadUniverse = true;
                         break;
                     }
@@ -1778,8 +1777,8 @@ namespace gdx {
     //      DataReadDone(PGX)
     //      end;
     int TGXFileObj::gdxDataReadStrStart(int SyNr, int &NrRecs) {
-        NrRecs = PrepareSymbolRead("DataReadStrStart"s, SyNr,
-                                   utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED).data(), fr_str_data);
+        auto XDomains{ utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED) };
+        NrRecs = PrepareSymbolRead("DataReadStrStart"s, SyNr, XDomains.data(), fr_str_data);
         return NrRecs >= 0;
     }
 
@@ -2021,10 +2020,10 @@ namespace gdx {
         else if(ErrorCondition(utils::in((*NameList->GetObject(SyNr))->SDataType, dt_set, dt_alias), ERR_ALIASSETEXPECTED)) return false;
         if(!IsGoodNewSymbol(AName)) return false;
         auto SyPtr = new TgdxSymbRecord{};
+        // NOTE: SSyNr not set correctly for alias! (was also like this in original P3 implementation of GDX)
         SyPtr->SDataType = dt_alias;
         SyPtr->SUserInfo = SyNr;
         if(!SyNr) {
-            // FIXME: Not hit by any test!
             SyPtr->SDim = 1;
             utils::assignStrToBuf("Aliased with *"s, SyPtr->SExplTxt.data());
         } else {
@@ -2166,8 +2165,8 @@ namespace gdx {
     // See Also:
     //   gdxDataReadRaw, gdxDataReadMapStart, gdxDataReadStrStart, gdxDataReadDone
     int TGXFileObj::gdxDataReadRawStart(int SyNr, int &NrRecs) {
-        NrRecs = PrepareSymbolRead("DataReadRawStart"s, SyNr,
-                                   utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED).data(), fr_raw_data);
+        auto XDomains{ utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED) };
+        NrRecs = PrepareSymbolRead("DataReadRawStart"s, SyNr, XDomains.data(), fr_raw_data);
         return NrRecs >= 0;
     }
 
@@ -4224,10 +4223,9 @@ namespace gdx {
     int TGXFileObj::gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP) {
         gdxDataReadRawFastFilt_DP = DP;
         bool res{};
+        auto XDomains{ utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED) };
         // -- Note: PrepareSymbolRead checks for the correct status
-        int NrRecs { PrepareSymbolRead("gdxDataReadRawFastFilt"s, SyNr,
-                                       utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED).data(),
-                                       fr_raw_data) };
+        int NrRecs { PrepareSymbolRead("gdxDataReadRawFastFilt"s, SyNr, XDomains.data(), fr_raw_data) };
         if(NrRecs >= 0) {
             bool GoodIndx {true};
             int FiltDim {};
@@ -4277,7 +4275,8 @@ namespace gdx {
     //   to read the data is faster because we no longer have to check the context for each
     //   call to read a record.
     int TGXFileObj::gdxDataReadRawFast(int SyNr, TDataStoreProc_t DP, int &NrRecs) {
-        NrRecs = PrepareSymbolRead("gdxDataReadRawFast"s, SyNr, utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED).data(), fr_raw_data);
+        auto XDomains { utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>(DOMC_UNMAPPED) };
+        NrRecs = PrepareSymbolRead("gdxDataReadRawFast"s, SyNr, XDomains.data(), fr_raw_data);
         std::array<double, GMS_VAL_SCALE + 1> AVals {};
         int AFDim;
         while(DoRead(AVals.data(), AFDim))

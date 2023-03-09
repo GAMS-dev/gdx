@@ -24,7 +24,6 @@
  */
 
 // TODO: Add test that does gdxdatareadraw of set with elements that have element texts
-// TODO: Test reading symbol alias
 // TODO: Test scalar with value
 // TODO: Get to SScalarFrst
 // TODO: Test reading set elements that have acronyms assigned
@@ -843,26 +842,27 @@ namespace gdx::tests::gxfiletests {
     }
 
     TEST_CASE("Test adding a set alias") {
-        const std::string fn {"addalias_wrap.gdx"};
-        constexpr int elemCnt {10};
-        StrIndexBuffers sib{};
-        TgdxValues vals{};
+        const std::string fn { "add_alias.gdx"s };
 
-        auto queryAliasSymbolInfo = [](TGXFileObj &pgx) {
+        auto queryAliasSymbolInfo = [](TGXFileObj &pgx, const std::string &aliasName, int aliasSymNr, const std::string &refSymName, int referencedSymNr) {
             int aliasIx;
-            REQUIRE(pgx.gdxFindSymbol("aliasI", aliasIx));
-            REQUIRE_EQ(2, aliasIx);
+            REQUIRE(pgx.gdxFindSymbol(aliasName.c_str(), aliasIx));
+            REQUIRE_EQ(aliasSymNr, aliasIx);
             int numRecords, userInfo, dim, typ;
-            char explText[GMS_SSSIZE], symbolName[GMS_SSSIZE];
-            REQUIRE(pgx.gdxSymbolInfoX(2, numRecords, userInfo, explText));
-            REQUIRE(pgx.gdxSymbolInfo(2, symbolName, dim, typ));
+            std::array<char, GMS_SSSIZE> explText, symbolName;
+            REQUIRE(pgx.gdxSymbolInfoX(aliasSymNr, numRecords, userInfo, explText.data()));
+            REQUIRE(pgx.gdxSymbolInfo(aliasSymNr, symbolName.data(), dim, typ));
             REQUIRE_EQ(0, numRecords);
-            REQUIRE_EQ(1, userInfo); // symbol index of "i"
-            REQUIRE(!strcmp("Aliased with i", explText));
-            REQUIRE(!strcmp("aliasI", symbolName));
+            REQUIRE_EQ(referencedSymNr, userInfo); // symbol index of references symbol
+            REQUIRE_EQ("Aliased with "s + refSymName, explText.data());
+            REQUIRE_EQ(aliasName, symbolName.data());
             REQUIRE_EQ(1, dim);
             REQUIRE_EQ(dt_alias, typ);
         };
+
+        constexpr int elemCnt{ 10 };
+        StrIndexBuffers sib{};
+        TgdxValues vals{};
 
         testWrite(fn, [&](TGXFileObj &pgx) {
             // set i /i1*i10/;
@@ -883,19 +883,36 @@ namespace gdx::tests::gxfiletests {
             REQUIRE(pgx.gdxSystemInfo(numSymbols, numUels));
             REQUIRE_EQ(10, numUels);
             REQUIRE_EQ(symbolCountBefore + 1, numSymbols);
+            // aliasI is symbol nr. 2 referencing symbol i with nr. 1
+            queryAliasSymbolInfo(pgx, "aliasI", 2, "i", 1);
 
-            queryAliasSymbolInfo(pgx);
+            // alias(*, aliasUniverse);
+            REQUIRE(pgx.gdxAddAlias("*", "aliasUniverse"));
+            REQUIRE(pgx.gdxSystemInfo(numSymbols, numUels));
+            REQUIRE_EQ(10, numUels);
+            REQUIRE_EQ(symbolCountBefore + 2, numSymbols);
+            // aliasUniverse is symbol nr. 3 referencing symbol * (universe) with nr. 0
+            queryAliasSymbolInfo(pgx, "aliasUniverse", 3, "*", 0);
         });
 
         testRead(fn, [&](TGXFileObj &pgx) {
-            queryAliasSymbolInfo(pgx);
+            queryAliasSymbolInfo(pgx, "aliasI", 2, "i", 1);
+
             int numRecords;
             REQUIRE(pgx.gdxDataReadRawStart(2, numRecords));
             REQUIRE_EQ(10, numRecords);
             int key, dimFrst;
-            for(int i{}; i<elemCnt; i++) {
+            for(int i{}; i<numRecords; i++) {
                 REQUIRE(pgx.gdxDataReadRaw(&key, vals.data(), dimFrst));
                 REQUIRE_EQ(i+1, key);
+            }
+            REQUIRE(pgx.gdxDataReadDone());
+            
+            REQUIRE(pgx.gdxDataReadRawStart(3, numRecords));
+            REQUIRE_EQ(10, numRecords);
+            for (int i{}; i < numRecords; i++) {
+                REQUIRE(pgx.gdxDataReadRaw(&key, vals.data(), dimFrst));
+                REQUIRE_EQ(i + 1, key);
             }
             REQUIRE(pgx.gdxDataReadDone());
         });
@@ -904,7 +921,7 @@ namespace gdx::tests::gxfiletests {
     }
 
     TEST_CASE("Test creating and querying element text for sets") {
-        const std::string fn{ "elemtxt_wrap.gdx" }, f2{ "elemtxt_port.gdx" };
+        const std::string fn{ "elemtxt.gdx" };
         testWrite(fn, [&](TGXFileObj& pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw("onlyuel"));
@@ -1408,38 +1425,31 @@ namespace gdx::tests::gxfiletests {
     }
 
     TEST_CASE("Test open append to rename a single uel") {
-        const std::array infixes {"wrap"s, "port"s};
-        auto getfn = [&](int i) {
-            return "append_"s + infixes[i] + "_rename.gdx"s;
-        };
-        const std::string prod {"gdxtest"s};
-        int errNr, cnt {};
+        const auto fn{ "append_rename.gdx"s }, prod {"gdxtest"s};
+        int errNr;
         basicTest([&](TGXFileObj &pgx) {
-            pgx.gdxOpenWrite(getfn(cnt).c_str(), prod.c_str(), errNr);
+            pgx.gdxOpenWrite(fn.c_str(), prod.c_str(), errNr);
             pgx.gdxUELRegisterRawStart();
             pgx.gdxUELRegisterRaw("a");
             pgx.gdxUELRegisterDone();
             pgx.gdxClose();
-            pgx.gdxOpenAppend(getfn(cnt).c_str(), prod.c_str(), errNr);
+            pgx.gdxOpenAppend(fn.c_str(), prod.c_str(), errNr);
             pgx.gdxRenameUEL("a", "b");
             pgx.gdxClose();
-            cnt++;
         });
-        cnt = 0;
         basicTest([&](TGXFileObj &pgx) {
-            pgx.gdxOpenRead(getfn(cnt).c_str(), errNr);
+            pgx.gdxOpenRead(fn.c_str(), errNr);
             int uelMap;
             char uelStr[GMS_SSSIZE];
             pgx.gdxUMUelGet(1, uelStr, uelMap);
             REQUIRE_EQ("b"s, uelStr);
             pgx.gdxClose();
-            std::filesystem::remove(getfn(cnt));
-            cnt++;
         });
+        std::filesystem::remove(fn);
     }
 
     void testWithCompressConvert(bool compress, const std::string &convert) {
-        const std::string fn {"conv_compr_wrap.gdx"}, f2 {"conv_compr_port.gdx"};
+        const std::string fn {"conv_compr.gdx"};
         setEnvironmentVar("GDXCOMPRESS", compress ? "1"s : "0"s);
         setEnvironmentVar("GDXCONVERT", convert);
         testWrite(fn, [&](TGXFileObj &pgx) {
