@@ -26,7 +26,9 @@
 #pragma once
 
 #include <cassert>    // for assert
+#ifndef _WIN32
 #include <strings.h>    // for strcasecmp
+#endif
 #include <array>        // for array
 #include <cstring>      // for memcpy, size_t, strcmp, strcpy, strlen
 #include <string>       // for string, char_traits
