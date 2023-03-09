@@ -30,11 +30,10 @@
 #endif
 
 #include "gxfile.h"
-#include <bits/std_abs.h>  // for abs
 #include <cstdint>        // for int64_t, uint8_t
 #include <algorithm>       // for fill_n, max, fill, sort
 #include <cassert>         // for assert
-#include <cmath>           // for round, isinf, isnan, isnormal
+#include <cmath>           // for round, isinf, isnan, isnormal, abs
 #include <cstdio>          // for sprintf
 #include <cstdlib>         // for system, free, getenv, malloc, realloc, WEX...
 #include <exception>       // for exception
