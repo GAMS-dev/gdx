@@ -134,20 +134,6 @@ namespace gdx::utils {
         buf[s.length()] = '\0';
     }
 
-    inline std::unique_ptr<char[]> NewStringUniq(const char *s) {
-        if(!s) return {};
-        const auto slen {std::strlen(s)};
-        std::unique_ptr<char[]> buf {std::make_unique<char[]>(slen + 1)};
-        utils::assignPCharToBuf(s, slen, buf.get(), slen + 1);
-        return buf;
-    }
-
-    inline std::unique_ptr<char[]> NewStringUniq(const std::string_view s) {
-        std::unique_ptr<char[]> buf {std::make_unique<char[]>(s.length() + 1)};
-        utils::assignViewToBuf(s, buf.get(), s.length()+1);
-        return buf;
-    }
-
     inline char *NewString(const char *s, size_t slen) {
         if(!s) return nullptr;
         assert(s[slen] == '\0');

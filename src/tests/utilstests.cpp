@@ -209,10 +209,6 @@ namespace gdx::tests::utilstests {
         REQUIRE_FALSE(utils::NewString(nullptr, 23));
         REQUIRE(!std::strcmp(s.get(), "abc"));
         REQUIRE_EQ(4, memSize);
-        std::unique_ptr<char[]> s2 {utils::NewStringUniq("abc")};
-        REQUIRE(!std::strcmp(s2.get(), "abc"));
-        std::unique_ptr<char[]> s3 {utils::NewStringUniq("abc"s)};
-        REQUIRE(!std::strcmp(s3.get(), "abc"));
     }
 
     TEST_SUITE_END();
