@@ -91,7 +91,7 @@ test-leg:
   needs: [install-gamsdist-leg,build-leg]
   script:
     - GAMS_PATH=$(pwd)/gamsdist
-    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ./gdxtest -tce=*trace* --reporters=junit > doctest_results_linux.xml
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ./gdxtest -tce=*trace* --reporters=junit --out=doctest_results_linux.xml
 #    - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
 #  coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
