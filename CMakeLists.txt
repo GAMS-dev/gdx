@@ -46,12 +46,11 @@ set(tests
 		src/tests/gmsheapnewtests.cpp
 )
 
-add_library(gdxcclib64 SHARED ${common})
-set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
+#add_library(gdxcclib64 SHARED ${common})
+#set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-add_library(gdxshared STATIC ${common})
-add_executable(gdxtest ${tests})
-target_link_libraries(gdxtest gdxshared ${mylibs})
+add_executable(gdxtest ${common} ${tests})
+target_link_libraries(gdxtest ${mylibs})
 
 # Quickly run "include what you use" (https://include-what-you-use.org/) over project
 #find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
