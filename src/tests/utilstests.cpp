@@ -27,6 +27,8 @@
 #include <array>       // for array
 #include <cstring>     // for strcmp
 #include <string>      // for operator""s, string, basic_string, allocator
+#include <string_view> // for string_view
+#include <memory>      // for unique_ptr
 #include "../utils.h"  // for sameTextPChar, in, trim, strCompare, strConvCp...
 #include "doctest.h"   // for ResultBuilder, REQUIRE_EQ, Expression_lhs, Tes...
 
