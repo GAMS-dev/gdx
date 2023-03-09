@@ -3216,8 +3216,8 @@ namespace gdx {
             return false;
         }
         const auto &acr = (*AcronymList)[N-1];
-        utils::assignPCharToBuf(acr.AcrName.get(), AName, GMS_SSSIZE);
-        utils::assignPCharToBuf(acr.AcrText.get(), Txt, GMS_SSSIZE);
+        utils::assignStrToBuf(acr.AcrName, AName, GMS_SSSIZE);
+        utils::assignStrToBuf(acr.AcrText, Txt, GMS_SSSIZE);
         AIndx = acr.AcrMap;
         return true;
     }
@@ -3264,7 +3264,7 @@ namespace gdx {
 
         } else if(obj.AcrReadMap != AIndx) {
             // FIXME: Not hit by any test!
-            if(ErrorCondition(utils::sameTextPChar(AName, obj.AcrName.get()), ERR_BADACRONAME) ||
+            if(ErrorCondition(utils::sameTextPChar(AName, obj.AcrName.c_str()), ERR_BADACRONAME) ||
                 ErrorCondition(MapIsUnique(AIndx), ERR_ACRODUPEMAP)) return false;
             obj.AcrReadMap = AIndx;
         }
@@ -3632,7 +3632,7 @@ namespace gdx {
     int TGXFileObj::gdxAcronymAdd(const char *AName, const char *Txt, int AIndx) {
         for(int N{}; N<(int)AcronymList->size(); N++) {
             const auto &obj = (*AcronymList)[N];
-            if(utils::sameTextPChar(obj.AcrName.get(), AName)) {
+            if(utils::sameTextPChar(obj.AcrName.c_str(), AName)) {
                 if(ErrorCondition(obj.AcrMap == AIndx, ERR_ACROBADADDITION)) return -1;
                 return N;
             }
@@ -3674,8 +3674,8 @@ namespace gdx {
         if(Indx <= 0) AName[0] = '\0';
         else {
             int N {AcronymList->FindEntry(Indx)};
-            if(N < 0) utils::assignStrToBuf("UnknownAcronym"s + std::to_string(Indx), AName, GMS_SSSIZE);
-            else utils::assignPCharToBuf((*AcronymList)[N].AcrName.get(), AName, GMS_SSSIZE);
+            utils::assignStrToBuf(N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : (*AcronymList)[N].AcrName,
+                                  AName, GMS_SSSIZE);
             return true;
         }
         return false;
@@ -4505,7 +4505,7 @@ namespace gdx {
 
     int TAcronymList::FindName(const char *Name) {
         for (int N{}; N<FList.GetCount(); N++)
-            if (utils::sameTextPChar(FList[N]->AcrName.get(), Name))
+            if (utils::sameTextPChar(FList[N]->AcrName.c_str(), Name))
                 return N;
         return -1;
     }
@@ -4639,31 +4639,31 @@ namespace gdx {
     }
 
     TAcronym::TAcronym(const char *Name, const char *Text, int Map) :
-        AcrName{utils::NewStringUniq(Name)},
-        AcrText{utils::NewStringUniq(Text)},
+        AcrName{Name},
+        AcrText{Text},
         AcrMap{ Map } {
-        MakeGoodExplText(AcrText.get());
+        MakeGoodExplText(AcrText.data());
     }
 
     TAcronym::TAcronym(TXStreamDelphi &S) :
-        AcrName{utils::NewStringUniq(S.ReadString())},
-        AcrText{utils::NewStringUniq(S.ReadString())},
+        AcrName{S.ReadString()},
+        AcrText{S.ReadString()},
         AcrMap{S.ReadInteger()} {
     }
 
     int TAcronym::MemoryUsed() const {
-        return 2 + (AcrName && AcrText ? (int)std::strlen(AcrName.get()) + (int)std::strlen(AcrText.get()) : 0);
+        return 2 + (int)AcrName.length() + (int)AcrText.length();
     }
 
     void TAcronym::SaveToStream(TXStreamDelphi &S) const {
-        S.WriteString(AcrName[0] == '\0' ? "UnknownACRO" + std::to_string(AcrMap) : AcrName.get());
-        S.WriteString(AcrText.get());
+        S.WriteString(AcrName.empty() ? "UnknownACRO" + std::to_string(AcrMap) : AcrName);
+        S.WriteString(AcrText);
         S.WriteInteger(AcrMap);
     }
 
     void TAcronym::SetNameAndText(const char *Name, const char *Text) {
-        AcrName = utils::NewStringUniq(Name);
-        AcrText = utils::NewStringUniq(Text);
-        MakeGoodExplText(AcrText.get());
+        AcrName.assign(Name);
+        AcrText.assign(Text);
+        MakeGoodExplText(AcrText.data());
     }
 }

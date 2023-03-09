@@ -291,7 +291,7 @@ namespace gdx {
     int MakeGoodExplText(char *s);
 
     struct TAcronym {
-        std::unique_ptr<char[]> AcrName{}, AcrText{};
+        std::string AcrName, AcrText;
         int AcrMap{}, AcrReadMap{-1};
         bool AcrAutoGen{};
 
