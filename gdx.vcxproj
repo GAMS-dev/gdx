@@ -43,6 +43,7 @@
     <ClInclude Include="src\strhash.h" />
     <ClInclude Include="src\gxfile.h" />
     <ClInclude Include="src\tests\doctest.h" />
+    <ClInclude Include="src\tests\gxfiletests.h" />
     <ClInclude Include="src\utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -24,11 +24,8 @@
  */
 
 // TODO: Add test that does gdxdatareadraw of set with elements that have element texts
-// TODO: Test scalar with value
-// TODO: Get to SScalarFrst
-// TODO: Test reading set elements that have acronyms assigned
+// TODO: Test scalar with value and get to SScalarFrst
 // TODO: Somehow hit "get default record"
-// TODO: Test GDX file version
 // TODO: Data read string with invalid inputs
 // TODO: Read file with comments list
 // TODO: Read file with set text list duplicates
@@ -1263,19 +1260,24 @@ namespace gdx::tests::gxfiletests {
     }
 
     TEST_CASE("Test acronym facilities") {
-        auto fn{ "acronyms.gdx"s };
-        testWrite(fn, [](TGXFileObj &pgx) {
+        const auto fn{ "acronyms.gdx"s };
+        char acroName[GMS_SSSIZE], acroText[GMS_SSSIZE];
+        int acroIndex;
+        TgdxValues vals{};
+        StrIndexBuffers sib;
+
+        testWrite(fn, [&](TGXFileObj &pgx) {
             REQUIRE_EQ(0, pgx.gdxAcronymCount());
 
+            // acronym myacr 'my acronym';
             REQUIRE(pgx.gdxAcronymAdd("myacr", "my acronym", 23));
-            char acroName[GMS_SSSIZE], acroText[GMS_SSSIZE];
-            int acroIndex;
             REQUIRE(pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex));
             REQUIRE_EQ("myacr"s, acroName);
             REQUIRE_EQ("my acronym"s, acroText);
             REQUIRE_EQ(23, acroIndex);
             REQUIRE_EQ(1, pgx.gdxAcronymCount());
 
+            // change item name and explanatory text
             REQUIRE(pgx.gdxAcronymSetInfo(1, "myacr_mod", "my acronym_mod", 23));
             REQUIRE(pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex));
             REQUIRE_EQ("myacr_mod"s, acroName);
@@ -1287,6 +1289,7 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ(acroText[0], '\0');
             REQUIRE_EQ(0, acroIndex);
 
+            // acronym anotherOne 'my second acronym';
             REQUIRE(pgx.gdxAcronymAdd("anotherOne", "my second acronym", 2));
             REQUIRE_EQ(2, pgx.gdxAcronymCount());
 
@@ -1300,6 +1303,7 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ(23, newIx);
             REQUIRE_EQ(23, orgIx);
 
+            // Acronym index is stored in double value field as multiple, e.g. index n>=1 is n * 10^300
             REQUIRE_EQ(0, pgx.gdxAcronymValue(0));
             REQUIRE_EQ(GMS_SV_ACR, pgx.gdxAcronymValue(1));
             REQUIRE_EQ(GMS_SV_ACR * 23, pgx.gdxAcronymValue(23));
@@ -1314,18 +1318,25 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ("UnknownAcronym1"s, acroName);
             REQUIRE(pgx.gdxAcronymName(pgx.gdxAcronymValue(23), acroName));
             REQUIRE_EQ("myacr_mod"s, acroName);
-        });
-        testRead(fn, [](TGXFileObj &pgx) {
-            REQUIRE_EQ(2, pgx.gdxAcronymCount());
-            char acroName[GMS_SSSIZE], acroText[GMS_SSSIZE];
-            int acroIndex;
-            pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex);
-            REQUIRE(!strcmp("myacr_mod", acroName));
 
-            // TODO: do gdxdatareadraw
+            // Create new 1-dim parameter symbol with second acronym "anotherOne" as single record
+            REQUIRE(pgx.gdxDataWriteStrStart("p", "magic parameter", 1, dt_par, 0));
+            sib.front() = "i1"s;
+            vals[GMS_VAL_LEVEL] = pgx.gdxAcronymValue(2);
+            REQUIRE(pgx.gdxDataWriteStr(sib.cptrs(), vals.data()));
+            REQUIRE(pgx.gdxDataWriteDone());
         });
-        
-            std::filesystem::remove(fn);
+        testRead(fn, [&](TGXFileObj &pgx) {
+            REQUIRE_EQ(2, pgx.gdxAcronymCount());
+            pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex);
+            REQUIRE_EQ("myacr_mod"s, acroName);
+            int nrRecs, key, dimFrst;
+            REQUIRE(pgx.gdxDataReadRawStart(1, nrRecs));
+            REQUIRE(pgx.gdxDataReadRaw(&key, vals.data(), dimFrst));
+            REQUIRE_EQ(2, pgx.gdxAcronymIndex(vals[GMS_VAL_LEVEL]));
+            REQUIRE(pgx.gdxDataReadDone());
+        });
+        std::filesystem::remove(fn);
     }
 
     TEST_CASE("Test comments addition and querying") {

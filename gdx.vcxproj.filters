@@ -55,5 +55,8 @@
     <ClInclude Include="src\gmsobj.h" />
     <ClInclude Include="src\gmsstrm.h" />
     <ClInclude Include="src\strhash.h" />
+    <ClInclude Include="src\tests\gxfiletests.h">
+      <Filter>tests</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

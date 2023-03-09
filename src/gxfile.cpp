@@ -1041,7 +1041,6 @@ namespace gdx {
                                         else {
                                             V = UELTable->GetUserMap(EN);
                                             if(V >= 0) {
-                                                // FIXME: Not hit by any test!
                                                 ExpndList.SetMapping(EN, V);
                                                 AElements[D] = V;
                                             } else {
@@ -1344,13 +1343,13 @@ namespace gdx {
         return true;
     }
 
-    // FIXME: Not hit by any test!
     double TGXFileObj::AcronymRemap(double V) {
         auto GetAsAcronym = [&](double v) {
             int orgIndx {static_cast<int>(std::round(v / Zvalacr))},
                 N {AcronymList->FindEntry(orgIndx)},
                 newIndx {};
             if(N < 0) { // not found
+                // FIXME: Not hit by any test
                 if(NextAutoAcronym <= 0) newIndx = orgIndx;
                 else {
                     newIndx = NextAutoAcronym;
@@ -1364,6 +1363,7 @@ namespace gdx {
                 if(newIndx <= 0) {
                     if(NextAutoAcronym <= 0) newIndx = orgIndx;
                     else {
+                        // FIXME: Not hit by any test
                         newIndx = NextAutoAcronym;
                         NextAutoAcronym++;
                         (*AcronymList)[N].AcrReadMap = newIndx;
@@ -1610,7 +1610,6 @@ namespace gdx {
     //   gdxOpenWrite, gdxOpenWriteEx
     // Description:
     //
-    // FIXME: Not hit by any test!
     int TGXFileObj::gdxFileVersion(char *FileStr, char *ProduceStr) const {
         utils::assignStrToBuf(FileSystemID, FileStr, GMS_SSSIZE);
         utils::assignStrToBuf(FProducer, ProduceStr, GMS_SSSIZE);
@@ -2139,7 +2138,6 @@ namespace gdx {
         if((TraceLevel >= TraceLevels::trl_all || fmode != fr_raw_data) && !CheckMode("DataReadRaw"s, fr_raw_data)) return false;
         if(!DoRead(Values, DimFrst)) gdxDataReadDone();
         else {
-            //std::copy(LastElem.begin(), LastElem.begin()+FCurrentDim-1, KeyInt.begin());
             std::memcpy(KeyInt, LastElem.data(), FCurrentDim*sizeof(int));
 
             if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
@@ -3086,7 +3084,6 @@ namespace gdx {
                 int V;
                 switch(obj.DAction) {
                     case TgdxDAction::dm_unmapped:
-                        // FIXME: Not hit by any test!
                         KeyInt[D] = LastElem[D];
                         break;
                     case TgdxDAction::dm_filter:
