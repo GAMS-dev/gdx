@@ -1723,6 +1723,22 @@ namespace gdx::tests::gxfiletests {
         REQUIRE(!strcmp(expectedExplTxt2.c_str(), explTxt2));
     }
 
+    TEST_CASE("Test TIntegerMapping") {
+        TIntegerMapping im;
+        REQUIRE(im.empty());
+        im.SetMapping(3, 5);
+        REQUIRE_GE(im.size(), 3);
+        REQUIRE_FALSE(im.empty());
+        REQUIRE_EQ(3, im.GetHighestIndex());
+        REQUIRE_EQ(5, im.GetMapping(3));
+        im.SetMapping(2048, 8);
+        REQUIRE_GE(im.size(), 2048);
+        REQUIRE_EQ(2048, im.GetHighestIndex());
+        REQUIRE_FALSE(im.empty());
+        REQUIRE_EQ(8, im.GetMapping(2048));
+        REQUIRE_EQ(5, im.GetMapping(3));
+    }
+
     TEST_SUITE_END();
 
 }

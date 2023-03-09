@@ -4596,7 +4596,6 @@ namespace gdx {
         FMapBytes = (int64_t)(FCapacity * sizeof(int));
         if(!PMap) PMap = (int *)std::malloc(FMapBytes);
         else {
-            // FIXME: Not covered by test!
             void* p = std::realloc(PMap, FMapBytes);
             if(p) PMap = (int*)p;
         }
