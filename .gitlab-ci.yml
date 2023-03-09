@@ -2,48 +2,34 @@ stages:
   - build
   - test
 
-variables:
-  MACHINES_CONTAINER_REG:
-    value: registry.gams.com/devel/machines
-    description: "URL to the container registry of the machines repository"
-
 build-leg:
   stage: build
   when: always
   tags: [linux]
   image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    name: registry.gams.com/devel/machines/leg/builder-full:latest
     entrypoint: [""]
   script:
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
-    - cmake --build . 2>&1 | tee build_log.txt
-    - python3 ci/report_for_log.py gcc build_log.txt warnings.xml
+    - cmake --build .
   artifacts:
     name: gdx-leg
     paths: [gdxtest]
     expire_in: 2 hours
-    reports:
-      junit: warnings.xml
 
 test-leg:
   stage: test
   when: on_success
   tags: [linux]
   image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    name: registry.gams.com/devel/machines/leg/builder-full:latest
     entrypoint: [""]
   needs: [build-leg]
   script:
-    - GAMS_PATH=$(pwd)/gamsdist
-    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ./gdxtest -tce=*trace* --reporters=junit --out=doctest_results_linux.xml
-#    - gcovr --xml-pretty --exclude-unreachable-branches --print-summary -o coverage.xml --root ${CI_PROJECT_DIR}
-#  coverage: /^\s*lines:\s*\d+.\d+\%/
+    - ./gdxtest -tce=*trace* --reporters=junit --out=doctest_results_linux.xml
   artifacts:
     name: unittest-results-linux
     paths: [doctest_results_linux.xml]
     expire_in: 2 hours
     reports:
       junit: doctest_results_linux.xml
-#      coverage_report:
-#        coverage_format: cobertura
-#        path: coverage.xml
