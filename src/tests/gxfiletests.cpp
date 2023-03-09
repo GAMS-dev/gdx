@@ -23,12 +23,10 @@
  * SOFTWARE.
  */
 
-// TODO: Add test that does gdxdatareadraw of set with elements that have element texts
-// TODO: Test scalar with value and get to SScalarFrst
-// TODO: Somehow hit "get default record"
 // TODO: Data read string with invalid inputs
 // TODO: Read file with comments list
 // TODO: Read file with set text list duplicates
+// TODO: Add test that does gdxdatareadraw of set with elements that have element texts
 
 #if defined(_WIN32)
 #include <Windows.h>
@@ -376,6 +374,7 @@ namespace gdx::tests::gxfiletests {
         const int nMany {800};
         testWrite(fn, [&](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxUELRegisterRawStart());
+            // register UELs i1*i800
             for(int i{}; i<nMany; i++) {
                 std::string uel{"i"s + std::to_string(i+1)};
                 REQUIRE(pgx.gdxUELRegisterRaw(uel.c_str()));
@@ -383,6 +382,9 @@ namespace gdx::tests::gxfiletests {
             REQUIRE(pgx.gdxUELRegisterDone());
             // Called out of context with garbage
             REQUIRE_FALSE(pgx.gdxDataWriteRaw(nullptr, nullptr));
+
+            // First symbol
+            // parameter mysym(*) 'This is my symbol' / i1 3.141, i2 42.1987, i3 na, i4 inf, i5 -inf, i6 eps /;
             REQUIRE(pgx.gdxDataWriteRawStart("mysym", "This is my symbol!", 1, dt_par, 0));
 
             key = 1;
@@ -392,13 +394,30 @@ namespace gdx::tests::gxfiletests {
             key = 2;
             values[GMS_VAL_LEVEL] = 42.1987;
             REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
+            key = 3;
+            values[GMS_VAL_LEVEL] = std::numeric_limits<double>::quiet_NaN();
+            REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
+
+            key = 4;
+            values[GMS_VAL_LEVEL] = std::numeric_limits<double>::infinity();
+            REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
+
+            key = 5;
+            values[GMS_VAL_LEVEL] = -std::numeric_limits<double>::infinity();
+            REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
 
             REQUIRE(pgx.gdxDataWriteDone());
 
+            // Second symbol
+            // scalar myscalar 'This is a scalar!' /23/;
             REQUIRE(pgx.gdxDataWriteRawStart("myscalar", "This is a scalar!", 0, dt_par, 0));
-            //REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
+            key = 0;
+            values[GMS_VAL_LEVEL] = 23.0;
+            REQUIRE(pgx.gdxDataWriteRaw(&key, values.data()));
             REQUIRE(pgx.gdxDataWriteDone());
 
+            // Third symbol
+            // parameter mysymbig 'This is another symbol' /i1 42.1987, i2 43.1987, i3 44.1987, ... /
             REQUIRE(pgx.gdxDataWriteRawStart("mysymbig", "This is another symbol!", 1, dt_par, 0));
             for(int i{}; i<nMany; i++) {
                 key = 1 + i;
@@ -407,6 +426,10 @@ namespace gdx::tests::gxfiletests {
             }
             REQUIRE(pgx.gdxDataWriteDone());
 
+            // Fourth symbol
+            // scalar emptyscalar 'A scalar without any records';
+            REQUIRE(pgx.gdxDataWriteRawStart("emptyscalar", "A scalar without any records", 0, dt_par, 0));
+            REQUIRE(pgx.gdxDataWriteDone());
         });
         testRead(fn, [&](TGXFileObj &pgx) {
             char uel[GMS_SSSIZE];
@@ -420,7 +443,7 @@ namespace gdx::tests::gxfiletests {
 
             int NrRecs;
             REQUIRE(pgx.gdxDataReadRawStart(1, NrRecs));
-            REQUIRE_EQ(2, NrRecs);
+            REQUIRE_EQ(5, NrRecs);
 
             int dimFrst;
             REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
@@ -431,10 +454,33 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ(2, key);
             REQUIRE_EQ(42.1987, values[GMS_VAL_LEVEL]);
 
+            REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
+            REQUIRE_EQ(3, key);
+            REQUIRE_EQ(GMS_SV_NA, values[GMS_VAL_LEVEL]);
+
+            REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
+            REQUIRE_EQ(4, key);
+            REQUIRE_EQ(GMS_SV_PINF, values[GMS_VAL_LEVEL]);
+
+            REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
+            REQUIRE_EQ(5, key);
+            REQUIRE_EQ(GMS_SV_MINF, values[GMS_VAL_LEVEL]);
+
             REQUIRE(pgx.gdxDataReadDone());
 
+            // Scalar with single record storing its specific value of 23
             REQUIRE(pgx.gdxDataReadRawStart(2, NrRecs));
             REQUIRE_EQ(1, NrRecs);
+            REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
+            REQUIRE_EQ(23, values[GMS_VAL_LEVEL]);
+            REQUIRE(pgx.gdxDataReadDone());
+
+            // Empty scalar defaults to value 0
+            REQUIRE(pgx.gdxDataReadRawStart(4, NrRecs));
+            REQUIRE_EQ(1, NrRecs);
+            REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
+            REQUIRE_EQ(0, values[GMS_VAL_LEVEL]);
+            REQUIRE_EQ(0, dimFrst);
             REQUIRE(pgx.gdxDataReadDone());
 
             REQUIRE(pgx.gdxDataReadRawStart(3, NrRecs));
@@ -445,12 +491,12 @@ namespace gdx::tests::gxfiletests {
                 REQUIRE_EQ(42.1987 + i, values[GMS_VAL_LEVEL]);
             }
             REQUIRE(pgx.gdxDataReadDone());
-
+            
             auto recordCallback = [](const int *keys, const double *vals) {
+                static std::array expVals{ 3.141, 42.1987, GMS_SV_NA, GMS_SV_PINF, GMS_SV_MINF };
                 static int cnt{};
-                REQUIRE_EQ(++cnt, keys[0]);
-                REQUIRE_EQ(keys[0] == 1 ? 3.141 : 42.1987, vals[GMS_VAL_LEVEL]);
-                cnt %= 2;
+                REQUIRE_EQ(cnt+1, keys[0]);
+                REQUIRE_EQ(expVals[cnt++], vals[GMS_VAL_LEVEL]);
             };
             REQUIRE(pgx.gdxDataReadRawFast(1, recordCallback, NrRecs));
 
@@ -459,7 +505,7 @@ namespace gdx::tests::gxfiletests {
             };
             std::list<std::tuple<int, double, int>>
                 collectedRecords{},
-                expectedRecords{{1,3.141,1},{2,42.1987,1}};
+                expectedRecords{ {1,3.141,1},{2,42.1987,1},{3,GMS_SV_NA,1}, {4,GMS_SV_PINF,1}, {5,GMS_SV_MINF,1} };
             REQUIRE(pgx.gdxDataReadRawFastEx(1, recordCallbackEx, NrRecs, static_cast<void *>(&collectedRecords)));
             REQUIRE_EQ(expectedRecords, collectedRecords);
 
@@ -1341,16 +1387,20 @@ namespace gdx::tests::gxfiletests {
 
     TEST_CASE("Test comments addition and querying") {
         auto fn{ "comments.gdx"s };
-        testWrite(fn, [](TGXFileObj &pgx) {
+        char commentStrGot[GMS_SSSIZE];
+        const auto commentStrExp{ "A fancy comment!"s };
+        testWrite(fn, [&](TGXFileObj &pgx) {
             REQUIRE(pgx.gdxDataWriteStrStart("i", "expl text", 1, dt_set, 0));
             REQUIRE(pgx.gdxDataWriteDone());
-            const auto commentStrExp {"A fancy comment!"s};
             REQUIRE(pgx.gdxSymbolAddComment(1, commentStrExp.c_str()));
-            char commentStrGot[GMS_SSSIZE];
             REQUIRE(pgx.gdxSymbolGetComment(1, 1, commentStrGot));
             REQUIRE_EQ(commentStrExp, commentStrGot);
             REQUIRE_FALSE(pgx.gdxSymbolAddComment(-5, "should not work"));
             REQUIRE_FALSE(pgx.gdxSymbolAddComment(std::numeric_limits<int>::max(), "should not work"));
+        });
+        testRead(fn, [&](TGXFileObj& pgx) {
+            REQUIRE(pgx.gdxSymbolGetComment(1, 1, commentStrGot));
+            REQUIRE_EQ(commentStrExp, commentStrGot);
         });
         std::filesystem::remove(fn);
     }
@@ -1542,6 +1592,11 @@ namespace gdx::tests::gxfiletests {
 
             // empty filter
             REQUIRE_FALSE(pgx.gdxFilterExists(2));
+            REQUIRE(pgx.gdxFilterRegisterStart(2));
+            REQUIRE(pgx.gdxFilterRegisterDone());
+            REQUIRE(pgx.gdxFilterExists(2));
+
+            // override empty filter with itself
             REQUIRE(pgx.gdxFilterRegisterStart(2));
             REQUIRE(pgx.gdxFilterRegisterDone());
             REQUIRE(pgx.gdxFilterExists(2));

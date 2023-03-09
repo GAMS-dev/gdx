@@ -1164,7 +1164,6 @@ namespace gdx {
     *  3.  otherwise: finite
     */
     // for double input x, return the bits (in i) and the class of x
-    // FIXME: Not hit by any test!
     TDblClass dblInfo(double x, int64_t &i) {
         TI64Rec i64Rec{};
         i64Rec.x = x;
@@ -1254,7 +1253,6 @@ namespace gdx {
                 for (; xv < vm_normal; xv++)
                     if (i64 == intlValueMapI64[xv]) break;
                 if (xv == vm_normal && dClass != DBL_FINITE) {
-                    // FIXME: Not hit by any test!
                     switch (dClass) {
                     case DBL_NINF: xv = vm_valmin; break;
                     case DBL_PINF: xv = vm_valpin; break;
@@ -1299,7 +1297,6 @@ namespace gdx {
             return res;
         }
         if (CurSyPtr->SScalarFrst) {
-            // FIXME: Not hit by any test!
             CurSyPtr->SScalarFrst = false;
             GetDefaultRecord(AVals);
             AFDim = 0;
@@ -1445,7 +1442,6 @@ namespace gdx {
         return true;
     }
 
-    // FIXME: Not hit by any test!
     void TGXFileObj::GetDefaultRecord(double *Avals) const {
         int ui{};
         switch (CurSyPtr->SDataType) {
@@ -1455,10 +1451,12 @@ namespace gdx {
             Avals[GMS_VAL_LEVEL] = 0.0;
             break;
         case dt_var:
+            // FIXME: Write test!
             ui = CurSyPtr->SUserInfo;
             std::memcpy(Avals, ui >= GMS_VARTYPE_UNKNOWN && ui <= GMS_VARTYPE_SEMIINT ? gmsDefRecVar[ui] : gmsDefRecVar[GMS_VARTYPE_UNKNOWN], sizeof(double)*5);
             break;
         case dt_equ:
+            // FIXME: Write test!
             ui = CurSyPtr->SUserInfo;
             std::memcpy(Avals, ui >= GMS_EQUTYPE_E && ui <= GMS_EQUTYPE_E + (GMS_EQUTYPE_B + 1) ? gmsDefRecEqu[ui] : gmsDefRecEqu[GMS_EQUTYPE_E], sizeof(double)*5);
             break;
@@ -1660,7 +1658,6 @@ namespace gdx {
         if ((TraceLevel >= TraceLevels::trl_all || fmode != fr_str_data) && !CheckMode("DataReadStr"s, fr_str_data))
             return false;
         if (!DoRead(Values, DimFrst)) {
-            // FIXME: Not hit by any test!
             gdxDataReadDone();
             return false;
         }
@@ -1893,12 +1890,10 @@ namespace gdx {
                 }
                 NrElem = FFile->ReadInteger();
                 if(NrElem > 0) {
-                    // FIXME: Not hit by any test!
                     CurSyPtr->SCommentsList = std::make_optional<TCommentsList>();
-                    while(NrElem > 0) {
-                        auto s{FFile->ReadString()};
+                    for(;  NrElem > 0; NrElem--) {
+                        const auto s{FFile->ReadString()};
                         CurSyPtr->SCommentsList->Add(s.c_str(), s.length());
-                        NrElem--;
                     }
                 }
             }
@@ -2139,14 +2134,12 @@ namespace gdx {
         if(!DoRead(Values, DimFrst)) gdxDataReadDone();
         else {
             std::memcpy(KeyInt, LastElem.data(), FCurrentDim*sizeof(int));
-
             if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
                 std::cout << "DataReadRaw index: "s;
                 for(int D{}; D<FCurrentDim; D++)
                     std::cout << std::to_string(KeyInt[D]) << (D+1 < FCurrentDim ? ","s : ""s);
                 std::cout << '\n';
             }
-
             return true;
         }
         return false;
@@ -3344,7 +3337,6 @@ namespace gdx {
     int TGXFileObj::gdxFilterRegisterStart(int FilterNr) {
         if(!MajorCheckMode("FilterRegisterStart"s, fr_init) ||
             ErrorCondition(FilterNr >= 1, ERR_BAD_FILTER_NR)) return false;
-
         CurFilter = new TDFilter{ FilterNr, UELTable->UsrUel2Ent->GetHighestIndex() };
         FilterList->AddFilter(CurFilter);
         fmode = fr_filter;
@@ -4547,7 +4539,6 @@ namespace gdx {
 
     void TFilterList::AddFilter(TDFilter *F) {
         for(int N{}; N<FList.size(); N++) {
-            // FIXME: Not covered by test!
             if(FList[N]->FiltNumber == F->FiltNumber) {
                 DeleteFilter(N);
                 break;
