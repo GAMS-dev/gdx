@@ -1,6 +1,4 @@
 stages:
-  - fetch-scripts
-  - install-gams
   - build
   - test
 
@@ -8,63 +6,10 @@ variables:
   MACHINES_CONTAINER_REG:
     value: registry.gams.com/devel/machines
     description: "URL to the container registry of the machines repository"
-  PF_CUSTOM_BRANCH:
-    value: "master"
-    description: "Name of custom branch or 0 if published distribution with version as specified should be taken"
-  PF_BUILDS_WWW_PATH:
-    value: $BUILDS_WWW_PATH
-    description: "URL path prefix for builds server"
-  PF_BUILDS_SSH_PORT:
-    value: $BUILDS_SSH_PORT
-    description: "Port used for SSH connection to builds server"
-  PF_BUILDS_SSH_SERVER:
-    value: $BUILDS_SSH_SERVER
-    description: "URL of the build server"
-  PF_BUILDS_SSH_USER:
-    value: $BUILDS_SSH_USER
-    description: "Username used for SSH connection to builds server"
-  PF_GAMS_LICENSE:
-    value: $GAMS_LICENSE
-    description: "GAMS license string used for testing"
-
-fetch-ci-scripts:
-  stage: fetch-scripts
-  when: always
-  tags: [linux]
-  dependencies: []
-  image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
-    entrypoint: [ "" ]
-  script:
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
-    - cp -R scripts-repo/ci .
-  artifacts:
-    name: ci-scripts
-    expire_in: 2 hours
-    paths: [ci/*]
-
-install-gamsdist-leg:
-  stage: install-gams
-  when: on_success
-  tags: [linux]
-  needs: [fetch-ci-scripts]
-  image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
-    entrypoint: [""]
-  script:
-    - python3 ci/fetch_gams.py fetch_leg $PF_CUSTOM_BRANCH $SSH_KEY_PORTING
-    - chmod 777 linux_x64_64_sfx.exe
-    - python3 ci/fetch_gams.py install
-    - echo $GAMS_LICENSE > $(pwd)/gamsdist/gamslice.txt
-    - $(pwd)/gamsdist/gams
-  artifacts:
-    name: gamsdist-leg
-    expire_in: 1 hour
-    paths: [ gamsdist/* ]
 
 build-leg:
   stage: build
-  when: on_success
+  when: always
   tags: [linux]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
@@ -73,7 +18,6 @@ build-leg:
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py gcc build_log.txt warnings.xml
-  needs: [fetch-ci-scripts]
   artifacts:
     name: gdx-leg
     paths: [gdxtest]
@@ -88,7 +32,7 @@ test-leg:
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
-  needs: [install-gamsdist-leg,build-leg]
+  needs: [build-leg]
   script:
     - GAMS_PATH=$(pwd)/gamsdist
     - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ./gdxtest -tce=*trace* --reporters=junit --out=doctest_results_linux.xml
@@ -96,7 +40,7 @@ test-leg:
 #  coverage: /^\s*lines:\s*\d+.\d+\%/
   artifacts:
     name: unittest-results-linux
-    paths: [doctest_results_linux.xml,slowdown.txt,class_benchmarks.txt]
+    paths: [doctest_results_linux.xml]
     expire_in: 2 hours
     reports:
       junit: doctest_results_linux.xml
