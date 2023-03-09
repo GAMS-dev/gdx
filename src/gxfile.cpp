@@ -1356,7 +1356,7 @@ namespace gdx {
                     newIndx = NextAutoAcronym;
                     NextAutoAcronym++;
                     N = AcronymList->AddEntry("", "", orgIndx);
-                    (*AcronymList)[N].AcrMap = newIndx;
+                    (*AcronymList)[N].AcrReadMap = newIndx;
                     (*AcronymList)[N].AcrAutoGen = true;
                 }
             } else { // found
@@ -1366,7 +1366,7 @@ namespace gdx {
                     else {
                         newIndx = NextAutoAcronym;
                         NextAutoAcronym++;
-                        (*AcronymList)[N].AcrMap = newIndx;
+                        (*AcronymList)[N].AcrReadMap = newIndx;
                         (*AcronymList)[N].AcrAutoGen = true;
                     }
                 }
