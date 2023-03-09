@@ -209,7 +209,6 @@ namespace gdx {
         uint8_t count{};
     public:
         TgxModeSet(const std::initializer_list<TgxFileMode> &modes);
-        explicit TgxModeSet(TgxFileMode mode);
         ~TgxModeSet() override = default;
         [[nodiscard]] bool contains(const TgxFileMode& mode) const override;
         [[nodiscard]] bool empty() const;
@@ -296,29 +295,18 @@ namespace gdx {
 
     int MakeGoodExplText(char *s);
 
-    class TAcronym {
+    struct TAcronym {
         std::unique_ptr<char[]> AcrName{}, AcrText{};
         int AcrMap{}, AcrReadMap{-1};
         bool AcrAutoGen{};
 
-    public:
         TAcronym(const char *Name, const char *Text, int Map);
         explicit TAcronym(gmsstrm::TXStreamDelphi &S);
         TAcronym() = default;
         virtual ~TAcronym() = default;
         [[nodiscard]] int MemoryUsed() const;
         void SaveToStream(gmsstrm::TXStreamDelphi &S) const;
-
-        // Getters and setters
-        void SetMapAutoGen(int map, bool autogen);
-        [[nodiscard]] int GetReadMap() const;
-        [[nodiscard]] char *GetName() const;
-        [[nodiscard]] char *GetText() const;
-        [[nodiscard]] int GetMap() const;
         void SetNameAndText(const char *Name, const char *Text);
-        [[nodiscard]] bool GetAutoGen() const;
-        void SetReadMap(int readMap);
-        void SetAutoGen(bool autogen);
     };
 
     class TAcronymList {

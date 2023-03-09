@@ -904,6 +904,7 @@ namespace gdx {
             if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return -1;
             CurSyPtr = *NameList->GetObject(SyNr);
             if (CurSyPtr->SDataType == dt_alias) {
+                // FIXME: Not hit by any test!
                 do {
                     SyNr = CurSyPtr->SUserInfo;
                     if (!SyNr) {
@@ -951,6 +952,7 @@ namespace gdx {
                     obj.DFilter = FilterList->FindFilter(ADomainNrs[D]);
                     if(obj.DFilter) obj.DAction = TgdxDAction::dm_filter;
                     else {
+                        // FIXME: Not hit by any test!
                         ReportError(ERR_UNKNOWNFILTER);
                         return -1;
                     }
@@ -1013,9 +1015,11 @@ namespace gdx {
                             }
                             switch(obj.DAction) {
                                 case TgdxDAction::dm_unmapped:
+                                    // FIXME: Not hit by any test!
                                     AElements[D] = LastElem[D];
                                     break;
                                 case TgdxDAction::dm_filter:
+                                    // FIXME: Not hit by any test!
                                     V = UELTable->GetUserMap(LastElem[D]);
                                     if(obj.DFilter->InFilter(V))
                                         AElements[D] = V;
@@ -1039,6 +1043,7 @@ namespace gdx {
                                         else {
                                             V = UELTable->GetUserMap(EN);
                                             if(V >= 0) {
+                                                // FIXME: Not hit by any test!
                                                 ExpndList.SetMapping(EN, V);
                                                 AElements[D] = V;
                                             } else {
@@ -1055,6 +1060,7 @@ namespace gdx {
                             break;
                         }
                         else if(AddError) {
+                            // FIXME: Not hit by any test!
                             // Ensure that dimensions to the right have no bad UELs
                             for(int D2{D+1}; D2 <= FCurrentDim; D2++) {
                                 if(LastElem[D2] < 0) {
@@ -1161,6 +1167,7 @@ namespace gdx {
     *  3.  otherwise: finite
     */
     // for double input x, return the bits (in i) and the class of x
+    // FIXME: Not hit by any test!
     TDblClass dblInfo(double x, int64_t &i) {
         TI64Rec i64Rec{};
         i64Rec.x = x;
@@ -1250,6 +1257,7 @@ namespace gdx {
                 for (; xv < vm_normal; xv++)
                     if (i64 == intlValueMapI64[xv]) break;
                 if (xv == vm_normal && dClass != DBL_FINITE) {
+                    // FIXME: Not hit by any test!
                     switch (dClass) {
                     case DBL_NINF: xv = vm_valmin; break;
                     case DBL_PINF: xv = vm_valpin; break;
@@ -1294,6 +1302,7 @@ namespace gdx {
             return res;
         }
         if (CurSyPtr->SScalarFrst) {
+            // FIXME: Not hit by any test!
             CurSyPtr->SScalarFrst = false;
             GetDefaultRecord(AVals);
             AFDim = 0;
@@ -1325,6 +1334,7 @@ namespace gdx {
                 AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap(FFile->ReadDouble());
             }
             if(MapSetText && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set) { // remap settext number
+                // FIXME: Not hit by any test!
                 double X {AVals[GMS_VAL_LEVEL]};
                 int D {static_cast<int>(std::round(X))};
                 if(std::abs(X-D) < 1e-12 && D >= 0 && D <= SetTextList->GetCapacity())
@@ -1336,6 +1346,7 @@ namespace gdx {
         return true;
     }
 
+    // FIXME: Not hit by any test!
     double TGXFileObj::AcronymRemap(double V) {
         auto GetAsAcronym = [&](double v) {
             int orgIndx {static_cast<int>(std::round(v / Zvalacr))},
@@ -1347,16 +1358,18 @@ namespace gdx {
                     newIndx = NextAutoAcronym;
                     NextAutoAcronym++;
                     N = AcronymList->AddEntry("", "", orgIndx);
-                    (*AcronymList)[N].SetMapAutoGen(newIndx, true);
+                    (*AcronymList)[N].AcrMap = newIndx;
+                    (*AcronymList)[N].AcrAutoGen = true;
                 }
             } else { // found
-                newIndx = (*AcronymList)[N].GetReadMap();
+                newIndx = (*AcronymList)[N].AcrReadMap;
                 if(newIndx <= 0) {
                     if(NextAutoAcronym <= 0) newIndx = orgIndx;
                     else {
                         newIndx = NextAutoAcronym;
                         NextAutoAcronym++;
-                        (*AcronymList)[N].SetMapAutoGen(newIndx, true);
+                        (*AcronymList)[N].AcrMap = newIndx;
+                        (*AcronymList)[N].AcrAutoGen = true;
                     }
                 }
             }
@@ -1386,6 +1399,7 @@ namespace gdx {
             if (EN < 0) {
                 bool Found{};
                 for(int i{}; i<ErrorList->GetCount(); i++) {
+                    // FIXME: Not hit by any test!
                     ErrorList->GetRecord(i, keys.data(), vals.data());
                     if (keys[D] == EN) {
                         Found = true;
@@ -1433,6 +1447,7 @@ namespace gdx {
         return true;
     }
 
+    // FIXME: Not hit by any test!
     void TGXFileObj::GetDefaultRecord(double *Avals) const {
         int ui{};
         switch (CurSyPtr->SDataType) {
@@ -1597,6 +1612,7 @@ namespace gdx {
     //   gdxOpenWrite, gdxOpenWriteEx
     // Description:
     //
+    // FIXME: Not hit by any test!
     int TGXFileObj::gdxFileVersion(char *FileStr, char *ProduceStr) const {
         utils::assignStrToBuf(FileSystemID, FileStr, GMS_SSSIZE);
         utils::assignStrToBuf(FProducer, ProduceStr, GMS_SSSIZE);
@@ -1647,6 +1663,7 @@ namespace gdx {
         if ((TraceLevel >= TraceLevels::trl_all || fmode != fr_str_data) && !CheckMode("DataReadStr"s, fr_str_data))
             return false;
         if (!DoRead(Values, DimFrst)) {
+            // FIXME: Not hit by any test!
             gdxDataReadDone();
             return false;
         }
@@ -1830,6 +1847,7 @@ namespace gdx {
         int64_t AcronymPos{}, DomStrPos{}, SymbPos{}, UELPos{}, SetTextPos{};
 
         if(VersionRead <= 5) {
+            // FIXME: Not hit by any test!
             SymbPos = FFile->ReadInteger();
             UELPos = FFile->ReadInteger();
             SetTextPos = FFile->ReadInteger();
@@ -1878,6 +1896,7 @@ namespace gdx {
                 }
                 NrElem = FFile->ReadInteger();
                 if(NrElem > 0) {
+                    // FIXME: Not hit by any test!
                     CurSyPtr->SCommentsList = std::make_optional<TCommentsList>();
                     while(NrElem > 0) {
                         auto s{FFile->ReadString()};
@@ -1924,6 +1943,7 @@ namespace gdx {
                 auto s{FFile->ReadString()};
                 int TextNum{ SetTextList->Add(s.c_str(), s.length()) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
+                    // FIXME: Not hit by any test!
                     if(!MapSetText) {
                         MapSetText = std::make_unique<int[]>(NrElem);
                         for (int D{}; D < N; D++)
@@ -2004,6 +2024,7 @@ namespace gdx {
         SyPtr->SDataType = dt_alias;
         SyPtr->SUserInfo = SyNr;
         if(!SyNr) {
+            // FIXME: Not hit by any test!
             SyPtr->SDim = 1;
             utils::assignStrToBuf("Aliased with *"s, SyPtr->SExplTxt.data());
         } else {
@@ -2261,6 +2282,7 @@ namespace gdx {
     int TGXFileObj::gdxGetElemText(int TxtNr, char *Txt, int &Node) {
         Node = 0;
         if(!SetTextList) {
+            // FIXME: Not hit by any test!
             Txt[0] = '\0';
             return false;
         }
@@ -2372,6 +2394,7 @@ namespace gdx {
         for (int iv1{ vm_valund }; iv1 <= stopper; iv1++) {
             for (int iv2{ iv1+1 }; iv2 <= stopper; iv2++) {
                 if (tmpI64[iv1] == tmpI64[iv2]) {
+                    // FIXME: Not hit by any test!
                     ReportError(ERR_DUPLICATESPECVAL);
                     return false;
                 }
@@ -2588,6 +2611,7 @@ namespace gdx {
             fmode = fw_raw_data;
             break;
         case fw_dom_map:
+            // FIXME: Not hit by any test!
             fmode = fw_map_data;
             break;
         case fw_dom_str:
@@ -2785,6 +2809,7 @@ namespace gdx {
     // Description:
     int TGXFileObj::gdxUMUelInfo(int &UelCnt, int &HighMap) const {
         if (!FFile) { // AS: Use FFile != nullptr as proxy for checking open has been called before
+            // FIXME: Not hit by any test!
             UelCnt = HighMap = 0;
             return false;
         }
@@ -2882,6 +2907,7 @@ namespace gdx {
     //   gdxUMUelGet
     int TGXFileObj::gdxGetUEL(int uelNr, char *Uel) const {
         if(!UELTable) {
+            // FIXME: Not hit by any test!
             Uel[0] = '\0';
             return false;
         }
@@ -3022,6 +3048,7 @@ namespace gdx {
         static const TgxModeSet AllowedModes{fr_map_data, fr_mapr_data};
         if((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadMap", AllowedModes)) return false;
         if(CurSyPtr && CurSyPtr->SScalarFrst) {
+            // FIXME: Not hit by any test!
             CurSyPtr->SScalarFrst = false;
             GetDefaultRecord(Values);
             DimFrst = 0;
@@ -3054,6 +3081,7 @@ namespace gdx {
             for(int D{DimFrst-1}; D<FCurrentDim && !loopDone; D++) {
                 const auto &obj = DomainList[D];
                 if(LastElem[D] < 0) {
+                    // FIXME: Not hit by any test!
                     ReportError(ERR_BADELEMENTINDEX);
                     BadError = true;
                     break;
@@ -3061,6 +3089,7 @@ namespace gdx {
                 int V;
                 switch(obj.DAction) {
                     case TgdxDAction::dm_unmapped:
+                        // FIXME: Not hit by any test!
                         KeyInt[D] = LastElem[D];
                         break;
                     case TgdxDAction::dm_filter:
@@ -3076,12 +3105,13 @@ namespace gdx {
                         V = UELTable->GetUserMap(LastElem[D]);
                         if(V >= 0) KeyInt[D] = V;
                         else {
-                            AddError = true;
+                            AddError = true;// FIXME: Not hit by any test!
                             FIDim = D+1;
                             loopDone = true;
                         }
                         break;
                     case TgdxDAction::dm_expand: // no filter, allow growth of domain
+                        // FIXME: Not hit by any test!
                         {
                             int EN = LastElem[D];
                             V = UELTable->GetUserMap(EN);
@@ -3102,6 +3132,7 @@ namespace gdx {
         else if(AddError) {
             for(int D{}; D<FCurrentDim; D++) {
                 if(LastElem[D] < 0) {
+                    // FIXME: Not hit by any test!
                     ReportError(ERR_BADELEMENTINDEX);
                     return false;
                 }
@@ -3129,6 +3160,7 @@ namespace gdx {
         }
 
         if(AddNew) {
+            // FIXME: Not hit by any test!
             for(int D{}; D<FCurrentDim; D++) {
                 int EN = KeyInt[D];
                 if(EN < 0) {
@@ -3187,9 +3219,9 @@ namespace gdx {
             return false;
         }
         const auto &acr = (*AcronymList)[N-1];
-        utils::assignPCharToBuf(acr.GetName(), AName, GMS_SSSIZE);
-        utils::assignPCharToBuf(acr.GetText(), Txt, GMS_SSSIZE);
-        AIndx = acr.GetMap();
+        utils::assignPCharToBuf(acr.AcrName.get(), AName, GMS_SSSIZE);
+        utils::assignPCharToBuf(acr.AcrText.get(), Txt, GMS_SSSIZE);
+        AIndx = acr.AcrMap;
         return true;
     }
 
@@ -3211,8 +3243,9 @@ namespace gdx {
     //     is used to provide the acronym index, and the AName parameter must match.
     int TGXFileObj::gdxAcronymSetInfo(int N, const char *AName, const char *Txt, int AIndx) {
         auto MapIsUnique = [this](int Indx) {
+            // FIXME: Not hit by any test!
             for(int i{}; i<(int)AcronymList->size(); i++)
-                if((*AcronymList)[i].GetReadMap() == Indx)
+                if((*AcronymList)[i].AcrReadMap == Indx)
                     return false;
             return true;
         };
@@ -3222,21 +3255,21 @@ namespace gdx {
 
         if(ErrorCondition(N >= 1 || N <= (int)AcronymList->size(), ERR_BADACRONUMBER)) return false;
         auto &obj = (*AcronymList)[N-1];
-        auto autoGen = obj.GetAutoGen();
-        if(utils::in(fmode, AnyWriteMode) || autoGen) {
+        if(utils::in(fmode, AnyWriteMode) || obj.AcrAutoGen) {
             if(ErrorCondition(IsGoodNewSymbol(AName), ERR_BADACRONAME)) return false;
-            if(autoGen) {
+            if(obj.AcrAutoGen) {
                 assert(obj.GetReadMap() == AIndx && "gdxAcronymSetInfo");
-                obj.SetAutoGen(false);
+                obj.AcrAutoGen = false;
             }
-            else if(ErrorCondition(AIndx == obj.GetMap(), ERR_BADACROINDEX)) return false;
+            else if(ErrorCondition(AIndx == obj.AcrMap, ERR_BADACROINDEX)) return false;
 
             obj.SetNameAndText(AName, Txt);
 
-        } else if(obj.GetReadMap() != AIndx) {
-            if(ErrorCondition(utils::sameTextPChar(AName, obj.GetName()), ERR_BADACRONAME) ||
+        } else if(obj.AcrReadMap != AIndx) {
+            // FIXME: Not hit by any test!
+            if(ErrorCondition(utils::sameTextPChar(AName, obj.AcrName.get()), ERR_BADACRONAME) ||
                 ErrorCondition(MapIsUnique(AIndx), ERR_ACRODUPEMAP)) return false;
-            obj.SetReadMap(AIndx);
+            obj.AcrReadMap = AIndx;
         }
         return true;
     }
@@ -3281,9 +3314,9 @@ namespace gdx {
             WriteTrace("AcronymGetMapping: N = "s + std::to_string(N));
         if(ErrorCondition(N >= 1 || N <= (int)AcronymList->size(), ERR_BADACRONUMBER)) return false;
         const auto &obj = (*AcronymList)[N-1];
-        orgIndx = obj.GetMap();
-        newIndx = obj.GetReadMap();
-        autoIndex = obj.GetAutoGen();
+        orgIndx = obj.AcrMap;
+        newIndx = obj.AcrReadMap;
+        autoIndex = obj.AcrAutoGen;
         return true;
     }
 
@@ -3345,6 +3378,7 @@ namespace gdx {
         int EN{UELTable->UsrUel2Ent->GetMapping(UelMap)};
         if (EN >= 1) obj.SetFilter(UelMap, true);
         else {
+            // FIXME: Not hit by any test!
             ReportError(ERR_FILTER_UNMAPPED);
             return false;
         }
@@ -3369,6 +3403,7 @@ namespace gdx {
                 int V{UELTable->GetUserMap(N)};
                 if(!CurFilter->InFilter(V)) continue;
                 if(V <= LV) {
+                    // FIXME: Not hit by any test!
                     CurFilter->FiltSorted = false;
                     break;
                 }
@@ -3497,6 +3532,7 @@ namespace gdx {
         if (!Dim || ErrorCondition(DimPos >= 1 && DimPos <= Dim, ERR_BADDIMENSION)) return false;
         const TDFilter *DFilter = FilterNr == DOMC_EXPAND ? nullptr : FilterList->FindFilter(FilterNr);
         if (FilterNr != DOMC_EXPAND && !DFilter) {
+            // FIXME: Not hit by any test!
             ReportError(ERR_UNKNOWNFILTER);
             return false;
         }
@@ -3515,6 +3551,7 @@ namespace gdx {
             if (DFilter) {
                 int MapNr{ UELTable->GetUserMap(RawNr) };
                 if (!DFilter->InFilter(MapNr)) {
+                    // FIXME: Not hit by any test!
                     //Register this record as a domain error (negative value indicates domain violation)
                     LastElem[DimPos - 1] = -LastElem[DimPos - 1];
                     AddToErrorListDomErrs(LastElem, AVals.data());    //unmapped
@@ -3598,14 +3635,14 @@ namespace gdx {
     int TGXFileObj::gdxAcronymAdd(const char *AName, const char *Txt, int AIndx) {
         for(int N{}; N<(int)AcronymList->size(); N++) {
             const auto &obj = (*AcronymList)[N];
-            if(utils::sameTextPChar(obj.GetName(), AName)) {
-                if(ErrorCondition(obj.GetMap() == AIndx, ERR_ACROBADADDITION)) return -1;
+            if(utils::sameTextPChar(obj.AcrName.get(), AName)) {
+                if(ErrorCondition(obj.AcrMap == AIndx, ERR_ACROBADADDITION)) return -1;
                 return N;
             }
-            if(ErrorCondition(obj.GetMap() != AIndx, ERR_ACROBADADDITION)) return -1;
+            if(ErrorCondition(obj.AcrMap != AIndx, ERR_ACROBADADDITION)) return -1;
         }
         int res{AcronymList->AddEntry(AName, Txt, AIndx)};
-        (*AcronymList)[res].SetReadMap(AIndx);
+        (*AcronymList)[res].AcrReadMap = AIndx;
         res++;  // one based for the user
         return res;
     }
@@ -3641,7 +3678,7 @@ namespace gdx {
         else {
             int N {AcronymList->FindEntry(Indx)};
             if(N < 0) utils::assignStrToBuf("UnknownAcronym"s + std::to_string(Indx), AName, GMS_SSSIZE);
-            else utils::assignPCharToBuf((*AcronymList)[N].GetName(), AName, GMS_SSSIZE);
+            else utils::assignPCharToBuf((*AcronymList)[N].AcrName.get(), AName, GMS_SSSIZE);
             return true;
         }
         return false;
@@ -3799,6 +3836,7 @@ namespace gdx {
                 Dimen++;
             }
             else {
+                // FIXME: Not hit by any test!
                 ElemNrs[D] = UELTable->IndexOf(UelFilterStr[D]);
                 if (ElemNrs[D] < 0) GoodIndx = false;
             }
@@ -3817,7 +3855,7 @@ namespace gdx {
                 if (ElemNrs[D] == -1)
                     HisIndx[HisDim++] = SliceIndxs[D]->GetMapping(LastElem[D]);
                 else if(ElemNrs[D] != LastElem[D])
-                    GoodIndx = false;
+                    GoodIndx = false; // FIXME: Not hit by any test!
             }
             if (GoodIndx) DP(HisIndx.data(), Values.data());
         }
@@ -3841,11 +3879,12 @@ namespace gdx {
         if (!MajorCheckMode("DataSliceUELS"s, fr_slice)) return false;
         int HisDim{};
         for (int D {}; D < FCurrentDim; D++) {
-            if (!SliceElems[D].empty())
+            if (!SliceElems[D].empty()) // FIXME: Not hit by any test!
                 utils::assignStrToBuf(SliceElems[D], KeyStr[D]);
             else {
                 int N = SliceRevMap[D]->GetMapping(SliceKeyInt[HisDim++]);
                 if (N < 0) {
+                    // FIXME: Not hit by any test!
                     KeyStr[D][0] = '?';
                     KeyStr[D][1] = '\0';
                 }
@@ -3941,6 +3980,7 @@ namespace gdx {
         int res{ gdxOpenReadXX(FileName, fmOpenReadWrite, 0, ErrNr) };
         if (!res || ErrNr != 0) return res;
         if (VersionRead < 7) {
+            // FIXME: Not hit by any test!
             ReportError(ERR_FILETOOLDFORAPPEND);
             gdxClose();
             return res;
@@ -3989,10 +4029,15 @@ namespace gdx {
 
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
             std::cout << "gdxSetReadSpecialValues, dump of readIntlValueMapDbl\n";
-            std::array svNames {"undef"s, "na"s, "posinf"s, "min"s, "eps"s};
-            std::array svIndices {sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps};
-            for(int i=0; i<(int)svNames.size(); i++)
-                std::cout << svNames[i] << "="s << readIntlValueMapDbl[svIndices[i]] << '\n';
+            static const std::array<std::pair<std::string, int>, 5> svNameIndexPairs {{
+              {"undef"s, sv_valund},
+              {"na"s, sv_valna },
+              {"posinf"s, sv_valpin},
+              {"min"s, sv_valmin},
+              {"eps"s, sv_valeps}
+            }};
+            for(const auto &[svName, svIndex] : svNameIndexPairs)
+                std::cout << svName << "="s << readIntlValueMapDbl[svIndex] << '\n';
         }
 
         return true;
@@ -4093,6 +4138,7 @@ namespace gdx {
                 return true;
             }
         }
+        // FIXME: Not hit by any test!
         Txt[0] = '\0';
         return false;
     }
@@ -4120,6 +4166,7 @@ namespace gdx {
     int TGXFileObj::gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap) {
         UelMap = -1;
         if (!UELTable) {
+            // FIXME: Not hit by any test!
             UelNr = -1;
             return false;
         }
@@ -4264,6 +4311,7 @@ namespace gdx {
         std::array<double, valscale + 1> AVals {};
         int AFDim;
         if(gdxDataReadRawFastEx_DP_CallByRef) {
+            // FIXME: Not hit by any test!
             TDataStoreExProc_F local_DP {(TDataStoreExProc_F)DP};
             uInt64 local_Uptr {};
             local_Uptr.i = 0;
@@ -4279,6 +4327,7 @@ namespace gdx {
     }
 
     void TGXFileObj::gdxGetDomainElements_DP_FC(int RawIndex, int MappedIndex, void* Uptr) {
+        // FIXME: Not hit by any test!
         if (gdxGetDomainElements_DP_CallByRef) {
             TDomainIndexProc_F local_gdxGetDomainElements_DP{ (TDomainIndexProc_F)gdxGetDomainElements_DP };
             uInt64 local_Uptr;
@@ -4289,6 +4338,7 @@ namespace gdx {
         return gdxGetDomainElements_DP(RawIndex, MappedIndex, Uptr);
     }
 
+    // FIXME: Not hit by any test!
     int TGXFileObj::gdxDataReadRawFastFilt_DP_FC(const int* Indx, const double* Vals, void* Uptr) {
         if (gdxDataReadRawFastFilt_DP_CallByRef) {
             TDataStoreFiltProc_F local_gdxDataReadRawFastFilt_DP{ (TDataStoreFiltProc_F)gdxDataReadRawFastFilt_DP };
@@ -4347,7 +4397,7 @@ namespace gdx {
             *GetObject(EN) = res;
             UsrUel2Ent->SetMapping(res, EN);
         } else if(res != UelNr) {
-            res = -1;
+            res = -1; // FIXME: Not hit by any test!
         }
         ResetMapToUserStatus();
         return res;
@@ -4394,6 +4444,7 @@ namespace gdx {
         TXStrHashListImpl<int>::SaveToStream(S);
     }
 
+    // TODO: Appears to be unused!
     void TUELTable::LoadFromStream(TXStreamDelphi &S) {
         TXStrHashListImpl<int>::LoadFromStream(S);
         if(UsrUel2Ent) UsrUel2Ent = std::make_unique<TIntegerMapping>();
@@ -4443,10 +4494,6 @@ namespace gdx {
         return !count;
     }
 
-    TgxModeSet::TgxModeSet(const TgxFileMode mode) : count{1} {
-        modeActive[mode] = true;
-    }
-
     TAcronymList::~TAcronymList() {
         for (int N{}; N<FList.GetCount(); N++)
             delete FList[N];
@@ -4454,14 +4501,14 @@ namespace gdx {
 
     int TAcronymList::FindEntry(int Map) {
         for (int N{}; N<FList.GetCount(); N++)
-            if (FList[N]->GetMap() == Map)
+            if (FList[N]->AcrMap == Map)
                 return N;
         return -1;
     }
 
     int TAcronymList::FindName(const char *Name) {
         for (int N{}; N<FList.GetCount(); N++)
-            if (utils::sameTextPChar(FList[N]->GetName(), Name))
+            if (utils::sameTextPChar(FList[N]->AcrName.get(), Name))
                 return N;
         return -1;
     }
@@ -4506,6 +4553,7 @@ namespace gdx {
 
     void TFilterList::AddFilter(TDFilter *F) {
         for(int N{}; N<FList.size(); N++) {
+            // FIXME: Not covered by test!
             if(FList[N]->FiltNumber == F->FiltNumber) {
                 DeleteFilter(N);
                 break;
@@ -4554,6 +4602,7 @@ namespace gdx {
         FMapBytes = (int64_t)(FCapacity * sizeof(int));
         if(!PMap) PMap = (int *)std::malloc(FMapBytes);
         else {
+            // FIXME: Not covered by test!
             void* p = std::realloc(PMap, FMapBytes);
             if(p) PMap = (int*)p;
         }
@@ -4615,25 +4664,9 @@ namespace gdx {
         S.WriteInteger(AcrMap);
     }
 
-    void TAcronym::SetMapAutoGen(int map, bool autogen) {
-        AcrMap = map;
-        AcrAutoGen = autogen;
-    }
-
-    int TAcronym::GetReadMap() const {
-        return AcrReadMap;
-    }
-
     void TAcronym::SetNameAndText(const char *Name, const char *Text) {
         AcrName = utils::NewStringUniq(Name);
         AcrText = utils::NewStringUniq(Text);
         MakeGoodExplText(AcrText.get());
     }
-
-    bool TAcronym::GetAutoGen() const { return AcrAutoGen; }
-    void TAcronym::SetReadMap(int readMap) { AcrReadMap = readMap; }
-    void TAcronym::SetAutoGen(bool autogen) { AcrAutoGen = autogen; }
-    char *TAcronym::GetName() const { return AcrName.get(); }
-    char *TAcronym::GetText() const { return AcrText.get(); }
-    int TAcronym::GetMap() const { return AcrMap; }
 }
