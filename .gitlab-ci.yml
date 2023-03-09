@@ -81,6 +81,42 @@ build-leg:
     reports:
       junit: warnings.xml
 
+build-deg:
+  stage: build
+  when: on_success
+  tags: [macos]
+  script:
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
+    - cmake --build . 2>&1 | tee build_log.txt
+    - python3 ci/report_for_log.py clang build_log.txt warnings.xml
+  needs: [fetch-ci-scripts]
+  artifacts:
+    name: gdx-deg
+    paths: [gdxtest]
+    expire_in: 2 hours
+    reports:
+      junit: warnings.xml
+
+build-wei:
+  stage: build
+  when: on_success
+  tags: [windows]
+  image:
+    name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
+  script:
+    - bash -l -c "env | sort"
+    - echo "Compiling the code..."
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
+    - cmake --build  . --config Release -- -m | Tee-Object -FilePath 'build_log.txt'
+    - python ci/report_for_log.py msvc build_log.txt warnings.xml
+  needs: [fetch-ci-scripts]
+  artifacts:
+    name: gdx-wei
+    paths: [Release]
+    expire_in: 2 hours
+    reports:
+      junit: warnings.xml
+
 test-leg:
   stage: test
   when: on_success
