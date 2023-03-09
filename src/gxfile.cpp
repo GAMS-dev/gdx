@@ -3258,7 +3258,7 @@ namespace gdx {
         if(utils::in(fmode, AnyWriteMode) || obj.AcrAutoGen) {
             if(ErrorCondition(IsGoodNewSymbol(AName), ERR_BADACRONAME)) return false;
             if(obj.AcrAutoGen) {
-                assert(obj.GetReadMap() == AIndx && "gdxAcronymSetInfo");
+                assert(obj.AcrReadMap == AIndx && "gdxAcronymSetInfo");
                 obj.AcrAutoGen = false;
             }
             else if(ErrorCondition(AIndx == obj.AcrMap, ERR_BADACROINDEX)) return false;

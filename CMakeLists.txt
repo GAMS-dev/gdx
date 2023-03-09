@@ -38,6 +38,7 @@ set(common
 set(tests
 		src/tests/doctestmain.cpp
 		src/tests/gxfiletests.cpp
+		src/tests/gxfiletests.h
 		src/tests/utilstests.cpp
 		src/tests/gmsobjtests.cpp
 		src/tests/gmsdatatests.cpp
