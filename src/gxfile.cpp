@@ -951,7 +951,6 @@ namespace gdx {
                     obj.DFilter = FilterList->FindFilter(ADomainNrs[D]);
                     if(obj.DFilter) obj.DAction = TgdxDAction::dm_filter;
                     else {
-                        // FIXME: Not hit by any test!
                         ReportError(ERR_UNKNOWNFILTER);
                         return -1;
                     }
@@ -4453,22 +4452,22 @@ namespace gdx {
 
     TUELUserMapStatus TUELTable::GetMapToUserStatus() {
         if(FMapToUserStatus == TUELUserMapStatus::map_unknown) {
-            int LV {-1};
-            bool C {true};
             FMapToUserStatus = TUELUserMapStatus::map_sortgrow;
-            for(int N{1}; N<=size(); N++) {
+            bool C {true};
+            for (int N{ 1 }, LV{ -1 }; N <= size(); N++) {
                 int V = GetUserMap(N);
                 if(V < 0) C = false;
                 else if(V > LV) {
                     LV = V;
-                    if(!C) FMapToUserStatus = TUELUserMapStatus::map_sorted;
+                    // saw some un-init/neg values
+                    if(!C) FMapToUserStatus = TUELUserMapStatus::map_sorted; 
                 } else {
                     FMapToUserStatus = TUELUserMapStatus::map_unsorted;
                     break;
                 }
             }
             if(FMapToUserStatus == TUELUserMapStatus::map_sortgrow && C)
-                FMapToUserStatus = TUELUserMapStatus::map_sortfull;
+                FMapToUserStatus = TUELUserMapStatus::map_sortfull; // fully strictly growing
         }
         return FMapToUserStatus;
     }

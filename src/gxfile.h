@@ -76,11 +76,6 @@ namespace gdx::gmsstrm {
 
 //======================================================================================================================
 
-#if defined(_WIN32)
-#define strcasecmp  _stricmp
-#define strncasecmp _strnicmp
-#endif
-
 namespace gdx {
 
     using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
@@ -97,9 +92,9 @@ namespace gdx {
 
     const std::array<int, GMS_DT_ALIAS+1> DataTypSize {1,1,5,5,0};
 
-    const int   DOMC_UNMAPPED = -2, // indicator for unmapped index pos
-                DOMC_EXPAND = -1, // indicator growing index pos
-                DOMC_STRICT = 0; // indicator mapped index pos
+    constexpr int   DOMC_UNMAPPED = -2, // indicator for unmapped index pos
+                    DOMC_EXPAND = -1,   // indicator growing index pos
+                    DOMC_STRICT = 0;    // indicator mapped index pos
 
     const std::string   BADUEL_PREFIX = "?L__",
                         BADStr_PREFIX = "?Str__",

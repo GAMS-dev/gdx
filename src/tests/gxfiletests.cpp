@@ -1502,20 +1502,26 @@ namespace gdx::tests::gxfiletests {
 
     TEST_CASE("Test filter") {
         testReadModelGDX("trnsport"s, [](TGXFileObj &pgx) {
-            int nrRecs, dimFirst;
-
-            // TODO: Write tests with different filter action
-
             // uels: seattle 1, san-diego 2, new-york 3, chicago 4, topeka 5
-            std::array<int, 2> filterAction { gdx::DOMC_EXPAND, gdx::DOMC_EXPAND },
-                               keys { 3, 1 }; // new-york, seattle
-            std::array<double, GLOBAL_MAX_INDEX_DIM> values {};
+            std::array<int, 2> filterAction{ gdx::DOMC_EXPAND, gdx::DOMC_EXPAND }, keys{};
+            TgdxValues values {};
 
+            int nrRecs, dimFirst;
             REQUIRE(pgx.gdxDataReadFilteredStart(5, filterAction.data(), nrRecs)); // symbol 'd'
             REQUIRE_EQ(6, nrRecs);
             REQUIRE(pgx.gdxDataReadMap(1, keys.data(), values.data(), dimFirst));
+            REQUIRE_EQ(1, keys.front()); // seattle
+            REQUIRE_EQ(2, keys.back()); // san-diego
             REQUIRE(pgx.gdxDataReadDone());
 
+            for (int fa{ -2 }; fa <= 0; fa++) {
+                filterAction = { fa, fa };
+                REQUIRE(pgx.gdxDataReadFilteredStart(5, filterAction.data(), nrRecs)); // symbol 'd'
+                REQUIRE(pgx.gdxDataReadMap(1, keys.data(), values.data(), dimFirst));
+                REQUIRE(pgx.gdxDataReadDone());
+            }
+
+            // filter with just (1,2) = (seattle,new-york)
             REQUIRE_FALSE(pgx.gdxFilterExists(1));
             REQUIRE(pgx.gdxFilterRegisterStart(1));
             REQUIRE(pgx.gdxFilterRegister(1)); // seattle
@@ -1523,11 +1529,29 @@ namespace gdx::tests::gxfiletests {
             REQUIRE(pgx.gdxFilterRegisterDone());
             REQUIRE(pgx.gdxFilterExists(1));
 
-            filterAction[0] = filterAction[1] = 1;
+            // empty filter
+            REQUIRE_FALSE(pgx.gdxFilterExists(2));
+            REQUIRE(pgx.gdxFilterRegisterStart(2));
+            REQUIRE(pgx.gdxFilterRegisterDone());
+            REQUIRE(pgx.gdxFilterExists(2));
+
+            // filter nr. 1
+            filterAction[0] = filterAction[1] = 1; 
             REQUIRE(pgx.gdxDataReadFilteredStart(5, filterAction.data(), nrRecs)); // symbol 'd'
             REQUIRE_EQ(6, nrRecs);
             REQUIRE(pgx.gdxDataReadMap(1, keys.data(), values.data(), dimFirst));
+            REQUIRE_EQ(1, keys.front()); // seattle
+            REQUIRE_EQ(3, keys.back()); // new-york
             REQUIRE(pgx.gdxDataReadDone());
+
+            // filter nr. 2 (empty)
+            filterAction[0] = filterAction[1] = 2;
+            REQUIRE(pgx.gdxDataReadFilteredStart(5, filterAction.data(), nrRecs)); // symbol 'd'
+            REQUIRE(pgx.gdxDataReadDone());
+
+            // invalid filter nr
+            filterAction[0] = filterAction[1] = 23;
+            REQUIRE_FALSE(pgx.gdxDataReadFilteredStart(5, filterAction.data(), nrRecs)); // symbol 'd'
         });
     }
 
