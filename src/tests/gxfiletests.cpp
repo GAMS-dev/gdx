@@ -23,10 +23,7 @@
  * SOFTWARE.
  */
 
-// TODO: Data read string with invalid inputs
-// TODO: Read file with comments list
-// TODO: Read file with set text list duplicates
-// TODO: Add test that does gdxdatareadraw of set with elements that have element texts
+// TODO: Read file with set text list duplicates to use mapsettext field
 
 #if defined(_WIN32)
 #include <Windows.h>
@@ -572,6 +569,9 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ(std::string(63, 'i'), keyNames[0].str());
             REQUIRE_EQ(3.141, values[GMS_VAL_LEVEL]);
 
+            // Nothing left!
+            REQUIRE_FALSE(pgx.gdxDataReadStr(keyNames.ptrs(), values.data(), dimFrst));
+
             REQUIRE(pgx.gdxDataReadDone());
         });
         std::filesystem::remove(fn);
@@ -965,37 +965,56 @@ namespace gdx::tests::gxfiletests {
 
     TEST_CASE("Test creating and querying element text for sets") {
         const std::string fn{ "elemtxt.gdx" };
+        int elemNode;
+        char elemTxt[GMS_SSSIZE];
+        TgdxUELIndex keys;
+        TgdxValues values;
         testWrite(fn, [&](TGXFileObj& pgx) {
+            int txtNr;
+            REQUIRE(pgx.gdxAddSetText("", txtNr));
             REQUIRE(pgx.gdxUELRegisterRawStart());
             REQUIRE(pgx.gdxUELRegisterRaw("onlyuel"));
             REQUIRE(pgx.gdxUELRegisterDone());
+            // set i 'expl' /onlyuel 'set text'/;
             REQUIRE(pgx.gdxDataWriteRawStart("i", "expl", 1, dt_set, 0));
-            TgdxUELIndex keys;
-            TgdxValues values;
             keys[0] = 1;
             values[GMS_VAL_LEVEL] = 1; // this determines first record/elem of set i has set text with textnr=1
             REQUIRE(pgx.gdxDataWriteRaw(keys.data(), values.data()));
             REQUIRE(pgx.gdxDataWriteDone());
-            int txtNr;
             REQUIRE(pgx.gdxAddSetText("set text", txtNr));
             REQUIRE_EQ(1, txtNr);
             // Check adding twice: Should give same text number!
             REQUIRE(pgx.gdxAddSetText("set text", txtNr));
             REQUIRE_EQ(1, txtNr);
-            int elemNode;
-            char elemTxt[GMS_SSSIZE];
             REQUIRE(pgx.gdxGetElemText(txtNr, elemTxt, elemNode));
-            REQUIRE(!strcmp("set text", elemTxt));
+            REQUIRE_EQ("set text"s, elemTxt);
             REQUIRE_EQ(0, elemNode);
             REQUIRE_FALSE(pgx.gdxSetTextNodeNr(200, 42));
             REQUIRE(pgx.gdxSetTextNodeNr(1, 23));
             REQUIRE(pgx.gdxGetElemText(1, elemTxt, elemNode));
-            REQUIRE(!strcmp("set text", elemTxt));
+            REQUIRE_EQ("set text"s, elemTxt);
             REQUIRE_EQ(23, elemNode);
             REQUIRE(pgx.gdxSetHasText(1));
             // Set texts are case-sensitive so adding it with different casing should be a new text!
             REQUIRE(pgx.gdxAddSetText("sEt text", txtNr));
             REQUIRE_EQ(2, txtNr);
+            REQUIRE(pgx.gdxAddSetText("   ", txtNr));
+            REQUIRE_EQ(3, txtNr);
+        });
+        testRead(fn, [&](TGXFileObj& pgx) {
+            REQUIRE(pgx.gdxGetElemText(1, elemTxt, elemNode));
+            REQUIRE_EQ("set text"s, elemTxt);
+            REQUIRE_EQ(0, elemNode);
+            REQUIRE(pgx.gdxSetHasText(1));
+            int nrRecs;
+            REQUIRE(pgx.gdxDataReadRawStart(1, nrRecs));
+            REQUIRE_EQ(1, nrRecs);
+            int dimFrst;
+            REQUIRE(pgx.gdxDataReadRaw(keys.data(), values.data(), dimFrst));
+            REQUIRE(pgx.gdxDataReadDone());
+            pgx.gdxGetElemText(static_cast<int>(values[GMS_VAL_LEVEL]), elemTxt, elemNode);
+            REQUIRE_EQ("set text"s, elemTxt);
+            REQUIRE_EQ(0, elemNode);
         });
         std::filesystem::remove(fn);
     }
@@ -1029,7 +1048,7 @@ namespace gdx::tests::gxfiletests {
             int ec = pgx.gdxGetLastError();
             char errMsg[GMS_SSSIZE];
             REQUIRE(pgx.gdxErrorStr(ec, errMsg));
-            REQUIRE(!strcmp("Data not sorted when writing raw", errMsg));
+            REQUIRE_EQ("Data not sorted when writing raw"s, errMsg);
             pgx.gdxClose();
         });
         std::filesystem::remove(fn);
@@ -1188,7 +1207,7 @@ namespace gdx::tests::gxfiletests {
             char symName[GMS_SSSIZE];
             int dim, typ;
             REQUIRE(pgx.gdxSymbolInfo(0, symName, dim, typ));
-            REQUIRE(!strcmp("*", symName));
+            REQUIRE_EQ("*"s, symName);
             REQUIRE_EQ(1, dim);
             REQUIRE_EQ(dt_set, typ);
 
@@ -1197,7 +1216,7 @@ namespace gdx::tests::gxfiletests {
             REQUIRE(pgx.gdxSymbolInfoX(0, recCnt, userInfo, explText));
             REQUIRE_EQ(0, recCnt);
             REQUIRE_EQ(0, userInfo);
-            REQUIRE(!strcmp("Universe", explText));
+            REQUIRE_EQ("Universe"s, explText);
 
             REQUIRE_FALSE(pgx.gdxSymbolInfoX(999, recCnt, userInfo, explText));
             REQUIRE_EQ(0, recCnt);
@@ -1428,8 +1447,7 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_FALSE(pgx.gdxGetElemText(hi, txt, node));
             REQUIRE_FALSE(pgx.gdxGetElemText(1, txt, node));
         });
-        
-            std::filesystem::remove(fn);
+        std::filesystem::remove(fn);
     }
 
     TEST_CASE("Debug issue with SymbolSetDomain and write raw domain check uncovered by emp_oa_gams_jams test") {

@@ -30,6 +30,7 @@
 #include <cstring>   // for memcpy, memset, size_t
 #include <limits>    // for numeric_limits
 #include <optional>  // for nullopt, optional
+#include "gmsheapnew.h"
 namespace gdx::collections::datastorage {
     template <typename KeyType, typename ValueType> struct TLinkedDataRec;
 }
@@ -125,7 +126,7 @@ namespace gdx::collections::datastorage {
         RecType *FHead, *FTail;
 
 #if defined(USE_GMSHEAP)
-        collections::gmsheapnew::THeapMgr MyHeap {"TLinkedData"};
+        gmsheapnew::THeapMgr MyHeap {"TLinkedData"};
 #elif defined(TLD_BATCH_ALLOCS)
         BatchAllocator<960> batchAllocator;
 #endif

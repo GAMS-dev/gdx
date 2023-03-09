@@ -622,12 +622,9 @@ namespace gdx {
             FFile->SetCompression(CompressOut);
             FFile->WriteString(MARK_SETT);
             FFile->WriteInteger(static_cast<int>(SetTextList ? SetTextList->size() : 0));
-            if(SetTextList) {
-                for (int N{}; N < static_cast<int>(SetTextList->Count()); N++) {
-                    const char *SetText = SetTextList->GetName(N);
-                    FFile->WriteString(SetText);
-                }
-            }
+            if(SetTextList)
+                for (int N{}; N < static_cast<int>(SetTextList->Count()); N++)
+                    FFile->WriteString(SetTextList->GetName(N));
             FFile->WriteString(MARK_SETT);
 
             auto UELPos {static_cast<int64_t>(FFile->GetPosition())};
@@ -1930,8 +1927,7 @@ namespace gdx {
             if(ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1)) return FileErrorNr();
             NrElem = FFile->ReadInteger();
             SetTextList->SetCapacity(NrElem);
-            //SetTextList->reserve(NrElem);
-            for (int N{}; N < NrElem; N++) {
+            for(int N{}; N < NrElem; N++) {
                 auto s{FFile->ReadString()};
                 int TextNum{ SetTextList->Add(s.c_str(), s.length()) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
