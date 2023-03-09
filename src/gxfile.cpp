@@ -904,10 +904,10 @@ namespace gdx {
             if (ErrorCondition(SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX)) return -1;
             CurSyPtr = *NameList->GetObject(SyNr);
             if (CurSyPtr->SDataType == dt_alias) {
-                // FIXME: Not hit by any test!
                 do {
                     SyNr = CurSyPtr->SUserInfo;
                     if (!SyNr) {
+                        // FIXME: Not hit by any test!
                         ReadUniverse = true;
                         break;
                     }
@@ -2570,8 +2570,7 @@ namespace gdx {
             int DomSy;
             if (!std::strcmp(DomainIDs[D], "*")) DomSy = 0;
             else {
-                // Since SSyNr of alias symbol objects is 0
-                // so symbol number of alias is deduced by helper field SSyNrActual
+                // NOTE: SSyNr of alias symbol objects is 0!
                 DomSy = NameList->IndexOf(DomainIDs[D]);
                 if (DomSy <= -1) {
                     ReportError(ERR_UNKNOWNDOMAIN);

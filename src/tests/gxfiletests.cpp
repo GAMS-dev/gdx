@@ -134,6 +134,10 @@ namespace gdx::tests::gxfiletests {
         basicTest([](TGXFileObj &pgx) {
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             REQUIRE_EQ(0, pgx.gdxGetMemoryUsed());
+            int symbolCount, uelCount;
+            REQUIRE(pgx.gdxSystemInfo(symbolCount, uelCount));
+            REQUIRE_EQ(0, symbolCount);
+            REQUIRE_EQ(0, uelCount);
         });
     }
 
@@ -170,6 +174,12 @@ namespace gdx::tests::gxfiletests {
             REQUIRE(pgx.gdxFileInfo(fileVer, comprLev));
             REQUIRE_EQ(7, fileVer);
             REQUIRE_EQ(0, comprLev);
+
+            std::array<char, GMS_SSSIZE> fileStr{}, producerStr{};
+            REQUIRE(pgx.gdxFileVersion(fileStr.data(), producerStr.data()));
+            std::string fs {fileStr.data()}, ps{producerStr.data()}, expFsPrefix {"GDX Library"};
+            REQUIRE_EQ("gdxtest"s, ps);
+            REQUIRE_EQ(expFsPrefix, fs.substr(0, expFsPrefix.length()));
 
             pgx.gdxClose();
             REQUIRE(std::filesystem::exists(fn));
@@ -834,15 +844,11 @@ namespace gdx::tests::gxfiletests {
 
     TEST_CASE("Test adding a set alias") {
         const std::string fn {"addalias_wrap.gdx"};
-        testWrite(fn, [&](TGXFileObj &pgx) {
-            REQUIRE(pgx.gdxDataWriteStrStart("i", "A set", 1, dt_set, 0));
-            REQUIRE(pgx.gdxDataWriteDone());
-            int numSymbols, numUels, symbolCountBefore;
-            REQUIRE(pgx.gdxSystemInfo(symbolCountBefore, numUels));
-            REQUIRE_EQ(1, symbolCountBefore);
-            REQUIRE(pgx.gdxAddAlias("i", "aliasI"));
-            REQUIRE(pgx.gdxSystemInfo(numSymbols, numUels));
-            REQUIRE_EQ(symbolCountBefore + 1, numSymbols);
+        constexpr int elemCnt {10};
+        StrIndexBuffers sib{};
+        TgdxValues vals{};
+
+        auto queryAliasSymbolInfo = [](TGXFileObj &pgx) {
             int aliasIx;
             REQUIRE(pgx.gdxFindSymbol("aliasI", aliasIx));
             REQUIRE_EQ(2, aliasIx);
@@ -856,7 +862,44 @@ namespace gdx::tests::gxfiletests {
             REQUIRE(!strcmp("aliasI", symbolName));
             REQUIRE_EQ(1, dim);
             REQUIRE_EQ(dt_alias, typ);
+        };
+
+        testWrite(fn, [&](TGXFileObj &pgx) {
+            // set i /i1*i10/;
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "A set", 1, dt_set, 0));
+            for(int i{}; i<elemCnt; i++) {
+                sib.front() = "i"s + std::to_string(i+1);
+                REQUIRE(pgx.gdxDataWriteStr(sib.cptrs(), vals.data()));
+            }
+            REQUIRE(pgx.gdxDataWriteDone());
+
+            int numSymbols, numUels, symbolCountBefore;
+            REQUIRE(pgx.gdxSystemInfo(symbolCountBefore, numUels));
+            REQUIRE_EQ(10, numUels);
+            REQUIRE_EQ(1, symbolCountBefore);
+
+            // alias(i,aliasI);
+            REQUIRE(pgx.gdxAddAlias("i", "aliasI"));
+            REQUIRE(pgx.gdxSystemInfo(numSymbols, numUels));
+            REQUIRE_EQ(10, numUels);
+            REQUIRE_EQ(symbolCountBefore + 1, numSymbols);
+
+            queryAliasSymbolInfo(pgx);
         });
+
+        testRead(fn, [&](TGXFileObj &pgx) {
+            queryAliasSymbolInfo(pgx);
+            int numRecords;
+            REQUIRE(pgx.gdxDataReadRawStart(2, numRecords));
+            REQUIRE_EQ(10, numRecords);
+            int key, dimFrst;
+            for(int i{}; i<elemCnt; i++) {
+                REQUIRE(pgx.gdxDataReadRaw(&key, vals.data(), dimFrst));
+                REQUIRE_EQ(i+1, key);
+            }
+            REQUIRE(pgx.gdxDataReadDone());
+        });
+
         std::filesystem::remove(fn);
     }
 
