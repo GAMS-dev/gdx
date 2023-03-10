@@ -428,15 +428,15 @@ namespace gdx::tests::gxfiletests {
 
             // Fifth symbol
             // variable emptyvar 'A variable without any records';
-            REQUIRE(pgx.gdxDataWriteRawStart("emptyvar", "A variable without any records", 0, dt_var, 0));
+            REQUIRE(pgx.gdxDataWriteRawStart("emptyvar", "A variable without any records", 0, dt_var, GMS_VARTYPE_INTEGER));
             REQUIRE(pgx.gdxDataWriteDone());
 
             // Sixth symbol
             // equation emptyequ 'An equation without any records';
-            REQUIRE(pgx.gdxDataWriteRawStart("emptyequ", "An equation without any records", 0, dt_equ, 0));
+            REQUIRE(pgx.gdxDataWriteRawStart("emptyequ", "An equation without any records", 0, dt_equ, GMS_EQUTYPE_L));
             REQUIRE(pgx.gdxDataWriteDone());
         });
-        testRead(fn, [&](TGXFileObj &pgx) {
+        testRead(fn, [&](TGXFileObj& pgx) {
             char uel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, uel, uelMap));
@@ -491,11 +491,13 @@ namespace gdx::tests::gxfiletests {
             // Empty variable
             REQUIRE(pgx.gdxDataReadRawStart(5, NrRecs));
             REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
+            REQUIRE_EQ(std::array{ 0.0, 0.0, 0.0, GMS_SV_PINF, 1.0 }, values);
             REQUIRE(pgx.gdxDataReadDone());
 
             // Empty equation
             REQUIRE(pgx.gdxDataReadRawStart(6, NrRecs));
             REQUIRE(pgx.gdxDataReadRaw(&key, values.data(), dimFrst));
+            REQUIRE_EQ(std::array{ 0.0, 0.0, GMS_SV_MINF, 0.0, 1.0 }, values);
             REQUIRE(pgx.gdxDataReadDone());
 
             REQUIRE(pgx.gdxDataReadRawStart(3, NrRecs));

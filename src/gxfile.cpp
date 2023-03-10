@@ -1443,12 +1443,10 @@ namespace gdx {
             Avals[GMS_VAL_LEVEL] = 0.0;
             break;
         case dt_var:
-            // FIXME: Write test!
             ui = CurSyPtr->SUserInfo;
             std::memcpy(Avals, ui >= GMS_VARTYPE_UNKNOWN && ui <= GMS_VARTYPE_SEMIINT ? gmsDefRecVar[ui] : gmsDefRecVar[GMS_VARTYPE_UNKNOWN], sizeof(double)*5);
             break;
         case dt_equ:
-            // FIXME: Write test!
             ui = CurSyPtr->SUserInfo;
             std::memcpy(Avals, ui >= GMS_EQUTYPE_E && ui <= GMS_EQUTYPE_E + (GMS_EQUTYPE_B + 1) ? gmsDefRecEqu[ui] : gmsDefRecEqu[GMS_EQUTYPE_E], sizeof(double)*5);
             break;
@@ -3027,7 +3025,6 @@ namespace gdx {
         static const TgxModeSet AllowedModes{fr_map_data, fr_mapr_data};
         if((TraceLevel >= TraceLevels::trl_all || !utils::in(fmode, AllowedModes)) && !CheckMode("DataReadMap", AllowedModes)) return false;
         if(CurSyPtr && CurSyPtr->SScalarFrst) {
-            // FIXME: Not hit by any test!
             CurSyPtr->SScalarFrst = false;
             GetDefaultRecord(Values);
             DimFrst = 0;
