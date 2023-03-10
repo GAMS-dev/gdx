@@ -247,8 +247,6 @@ namespace gdx {
     ERR_CANNOT_DELETE        = ERR_GDXCOPY - 12,
     ERR_CANNOT_RENAME        = ERR_GDXCOPY - 13;
 
-    // ...
-
     int GetEnvCompressFlag();
 
     static int SystemP(const std::string &cmd, int &ProgRC) {
@@ -737,7 +735,7 @@ namespace gdx {
 
         if(verboseTrace && TraceLevel >= TraceLevels::trl_all) {
             std::cout << "reset special vals, dump of readIntlValueMapDbl\n"s;
-            std::array<std::pair<std::string, int>, 5> svNameIndexPairs{
+            const std::array<std::pair<std::string, int>, 5> svNameIndexPairs{
                 {{"undef"s, sv_valund},
                 {"na"s, sv_valna},
                 {"posinf"s, sv_valpin},
@@ -1346,8 +1344,7 @@ namespace gdx {
                 // FIXME: Not hit by any test
                 if(NextAutoAcronym <= 0) newIndx = orgIndx;
                 else {
-                    newIndx = NextAutoAcronym;
-                    NextAutoAcronym++;
+                    newIndx = NextAutoAcronym++;
                     N = AcronymList->AddEntry("", "", orgIndx);
                     (*AcronymList)[N].AcrReadMap = newIndx;
                     (*AcronymList)[N].AcrAutoGen = true;
@@ -1357,9 +1354,7 @@ namespace gdx {
                 if(newIndx <= 0) {
                     if(NextAutoAcronym <= 0) newIndx = orgIndx;
                     else {
-                        // FIXME: Not hit by any test
-                        newIndx = NextAutoAcronym;
-                        NextAutoAcronym++;
+                        newIndx = NextAutoAcronym++;
                         (*AcronymList)[N].AcrReadMap = newIndx;
                         (*AcronymList)[N].AcrAutoGen = true;
                     }
@@ -3226,8 +3221,7 @@ namespace gdx {
     //     is used to provide the acronym index, and the AName parameter must match.
     int TGXFileObj::gdxAcronymSetInfo(int N, const char *AName, const char *Txt, int AIndx) {
         auto MapIsUnique = [this](int Indx) {
-            // FIXME: Not hit by any test!
-            for(int i{}; i<(int)AcronymList->size(); i++)
+            for(int i{}; i<AcronymList->size(); i++)
                 if((*AcronymList)[i].AcrReadMap == Indx)
                     return false;
             return true;
@@ -3249,7 +3243,6 @@ namespace gdx {
             obj.SetNameAndText(AName, Txt);
 
         } else if(obj.AcrReadMap != AIndx) {
-            // FIXME: Not hit by any test!
             if(ErrorCondition(utils::sameTextPChar(AName, obj.AcrName.c_str()), ERR_BADACRONAME) ||
                 ErrorCondition(MapIsUnique(AIndx), ERR_ACRODUPEMAP)) return false;
             obj.AcrReadMap = AIndx;
@@ -3659,8 +3652,7 @@ namespace gdx {
         if(Indx <= 0) AName[0] = '\0';
         else {
             int N {AcronymList->FindEntry(Indx)};
-            utils::assignStrToBuf(N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : (*AcronymList)[N].AcrName,
-                                  AName, GMS_SSSIZE);
+            utils::assignStrToBuf(N < 0 ? "UnknownAcronym"s + std::to_string(Indx) : (*AcronymList)[N].AcrName, AName, GMS_SSSIZE);
             return true;
         }
         return false;
@@ -4639,7 +4631,7 @@ namespace gdx {
     }
 
     void TAcronym::SaveToStream(TXStreamDelphi &S) const {
-        S.WriteString(AcrName.empty() ? "UnknownACRO" + std::to_string(AcrMap) : AcrName);
+        S.WriteString(AcrName.empty() ? "UnknownACRO"s + std::to_string(AcrMap) : AcrName);
         S.WriteString(AcrText);
         S.WriteInteger(AcrMap);
     }

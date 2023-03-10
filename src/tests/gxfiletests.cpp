@@ -1334,7 +1334,7 @@ namespace gdx::tests::gxfiletests {
         testWrite(fn, [&](TGXFileObj &pgx) {
             REQUIRE_EQ(0, pgx.gdxAcronymCount());
 
-            // acronym myacr 'my acronym';
+            // first acronym (ix=23): acronym myacr 'my acronym';
             REQUIRE(pgx.gdxAcronymAdd("myacr", "my acronym", 23));
             REQUIRE(pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex));
             REQUIRE_EQ("myacr"s, acroName);
@@ -1342,7 +1342,7 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ(23, acroIndex);
             REQUIRE_EQ(1, pgx.gdxAcronymCount());
 
-            // change item name and explanatory text
+            // modify first acronym: change item name and explanatory text
             REQUIRE(pgx.gdxAcronymSetInfo(1, "myacr_mod", "my acronym_mod", 23));
             REQUIRE(pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex));
             REQUIRE_EQ("myacr_mod"s, acroName);
@@ -1354,14 +1354,11 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ(acroText[0], '\0');
             REQUIRE_EQ(0, acroIndex);
 
-            // acronym anotherOne 'my second acronym';
+            // second acornym (ix=2): acronym anotherOne 'my second acronym';
             REQUIRE(pgx.gdxAcronymAdd("anotherOne", "my second acronym", 2));
             REQUIRE_EQ(2, pgx.gdxAcronymCount());
 
-            int oldNextAutoAcronym = pgx.gdxAcronymNextNr(23);
-            REQUIRE_EQ(0, oldNextAutoAcronym);
-            REQUIRE_EQ(23, pgx.gdxAcronymNextNr(0));
-
+            // get mapping for first acronym (ix=23)
             int orgIx, newIx, autoIx;
             REQUIRE(pgx.gdxAcronymGetMapping(1, orgIx, newIx, autoIx));
             REQUIRE_EQ(0, autoIx);
@@ -1377,30 +1374,109 @@ namespace gdx::tests::gxfiletests {
             REQUIRE_EQ(1, pgx.gdxAcronymIndex(pgx.gdxAcronymValue(1)));
             REQUIRE_EQ(2, pgx.gdxAcronymIndex(pgx.gdxAcronymValue(2)));
 
+            // Acronym index must be >= 1
             REQUIRE_FALSE(pgx.gdxAcronymName(0, acroName));
             REQUIRE_EQ(""s, acroName);
+
+            // Acronym with index=1 does not exist
             REQUIRE(pgx.gdxAcronymName(pgx.gdxAcronymValue(1), acroName));
             REQUIRE_EQ("UnknownAcronym1"s, acroName);
+
+            // Get name of first acronym (ix=23)
             REQUIRE(pgx.gdxAcronymName(pgx.gdxAcronymValue(23), acroName));
             REQUIRE_EQ("myacr_mod"s, acroName);
 
-            // Create new 1-dim parameter symbol with second acronym "anotherOne" as single record
-            REQUIRE(pgx.gdxDataWriteStrStart("p", "magic parameter", 1, dt_par, 0));
-            sib.front() = "i1"s;
-            vals[GMS_VAL_LEVEL] = pgx.gdxAcronymValue(2);
-            REQUIRE(pgx.gdxDataWriteStr(sib.cptrs(), vals.data()));
-            REQUIRE(pgx.gdxDataWriteDone());
-        });
-        testRead(fn, [&](TGXFileObj &pgx) {
+            // Previous operations should not add any new acronym
             REQUIRE_EQ(2, pgx.gdxAcronymCount());
-            pgx.gdxAcronymGetInfo(1, acroName, acroText, acroIndex);
-            REQUIRE_EQ("myacr_mod"s, acroName);
+            
+            // Create new 1-dim parameter symbol with second acronym "anotherOne" as first record
+            // Add acronym mapped to 23 as second record
+            // Add unknown acronym as value of third record
+            REQUIRE(pgx.gdxDataWriteStrStart("p", "magic parameter", 1, dt_par, 0));
+            const std::array<std::pair<std::string, int>, 4> entries{ {
+                {"i1"s, 2 },
+                {"i2"s, 23 },
+                {"i3"s, 8 },
+                {"i4"s, 42 }
+            } };
+            for (const auto& [keyStr, acroVal] : entries) {
+                sib.front() = keyStr;
+                vals[GMS_VAL_LEVEL] = pgx.gdxAcronymValue(acroVal);
+                REQUIRE(pgx.gdxDataWriteStr(sib.cptrs(), vals.data()));
+            }
+            REQUIRE(pgx.gdxDataWriteDone());
+
+            // Added UnknownACRO8 as third acronym with index=8
+            // Added UnknownACRO42 as third acronym with index=42
+            REQUIRE_EQ(4, pgx.gdxAcronymCount());
+
+            // Can rename now but not change index
+            REQUIRE(pgx.gdxAcronymSetInfo(4, "Acro43", "", 42));
+        });
+
+        auto readMagicParameter = [&](TGXFileObj& pgx, int acroNextNr) {
             int nrRecs, key, dimFrst;
             REQUIRE(pgx.gdxDataReadRawStart(1, nrRecs));
-            REQUIRE(pgx.gdxDataReadRaw(&key, vals.data(), dimFrst));
-            REQUIRE_EQ(2, pgx.gdxAcronymIndex(vals[GMS_VAL_LEVEL]));
+            REQUIRE_EQ(4, nrRecs);
+            const std::array<std::tuple<int, std::string, int>, 4> expectedKeyAcros{ {
+                {1, "anotherOne"s, 2},
+                {2, "myacr_mod"s, 23},
+                {3, "UnknownACRO8", 8 },
+                {4, "Acro43", 42 }
+            } };
+            for (const auto& triple : expectedKeyAcros) {
+                int expKey = std::get<0>(triple);
+                std::string expAcroName = std::get<1>(triple);
+                int expAcroValue = std::get<2>(triple);
+                if (acroNextNr) {
+                    expAcroValue = acroNextNr++;
+                    expAcroName = "UnknownAcronym"s + std::to_string(expAcroValue);
+                }
+                REQUIRE(pgx.gdxDataReadRaw(&key, vals.data(), dimFrst));
+                REQUIRE_EQ(expKey, key);
+                REQUIRE_EQ(expAcroValue, pgx.gdxAcronymIndex(vals[GMS_VAL_LEVEL]));
+                REQUIRE(pgx.gdxAcronymName(pgx.gdxAcronymValue(expAcroValue), acroName));
+                REQUIRE_EQ(expAcroName, acroName);
+            }
             REQUIRE(pgx.gdxDataReadDone());
+        };
+
+        testRead(fn, [&](TGXFileObj &pgx) {
+            // set and reset acronym next nr
+            int oldNextAutoAcronym = pgx.gdxAcronymNextNr(23);
+            REQUIRE_EQ(0, oldNextAutoAcronym);
+            REQUIRE_EQ(23, pgx.gdxAcronymNextNr(0));
+            REQUIRE_EQ(4, pgx.gdxAcronymCount());
+            auto checkAcronym = [&](int index, const std::string& expName, const std::string& expText, int expIndex) {
+                REQUIRE(pgx.gdxAcronymGetInfo(index, acroName, acroText, acroIndex));
+                REQUIRE_EQ(expName, acroName);
+                REQUIRE_EQ(expText, acroText);
+                REQUIRE_EQ(expIndex, acroIndex);
+            };
+            checkAcronym(1, "myacr_mod"s, "my acronym_mod"s, 23);
+            checkAcronym(2, "anotherOne"s, "my second acronym"s, 2);
+            checkAcronym(3, "UnknownACRO8"s, ""s, 8);
+            checkAcronym(4, "Acro43"s, ""s, 42);
+
+            // Name not matching!
+            REQUIRE_FALSE(pgx.gdxAcronymSetInfo(2, "YesAnotherOne", "new text", 22));
+            // Index already taken
+            //REQUIRE_FALSE(pgx.gdxAcronymSetInfo(2, "anotherOne", "new text", 23));
+            // ok
+            REQUIRE(pgx.gdxAcronymSetInfo(2, "anotherOne", "new text", 43));
+            checkAcronym(2, "anotherOne"s, "my second acronym"s, 2);
         });
+
+        testRead(fn, [&](TGXFileObj& pgx) {
+            REQUIRE_EQ(0, pgx.gdxAcronymNextNr(0));
+            readMagicParameter(pgx, 0);
+        });
+
+        testRead(fn, [&](TGXFileObj& pgx) {
+            REQUIRE_EQ(0, pgx.gdxAcronymNextNr(82));
+            readMagicParameter(pgx, 82);
+        });
+
         std::filesystem::remove(fn);
     }
 
