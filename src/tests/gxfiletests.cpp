@@ -225,6 +225,8 @@ namespace gdx::tests::gxfiletests {
     TEST_CASE("Test renaming an UEL") {
         std::string fn{"rename_uel.gdx"};
         basicTest([&](TGXFileObj &pgx) {
+            REQUIRE_EQ(-1, pgx.gdxRenameUEL("", ""));
+
             int ErrNr;
             REQUIRE(pgx.gdxOpenWrite(fn.c_str(), "gdxtest", ErrNr));
 
@@ -238,9 +240,20 @@ namespace gdx::tests::gxfiletests {
             REQUIRE(pgx.gdxUMUelGet(1, queriedUel, uelMap));
             REQUIRE(!strcmp("myuel", queriedUel));
 
-            pgx.gdxRenameUEL("myuel", "newname");
+            REQUIRE_FALSE(pgx.gdxRenameUEL("myuel", "newname"));
             REQUIRE(pgx.gdxUMUelGet(1, queriedUel, uelMap));
             REQUIRE(!strcmp("newname", queriedUel));
+
+            std::string tooLong(64, 'x'); // max uel length is 63
+            REQUIRE_EQ(-100017, pgx.gdxRenameUEL("newname", tooLong.c_str())); // ERR_BADUELSTR
+
+            REQUIRE_EQ(2, pgx.gdxRenameUEL("doesNotExist", "anything"));
+            REQUIRE_EQ(3, pgx.gdxRenameUEL("newname", "newname"));
+
+            std::string justOkLength(63, 'x');
+            REQUIRE_EQ(0, pgx.gdxRenameUEL("newname", justOkLength.c_str()));
+            REQUIRE(pgx.gdxUMUelGet(1, queriedUel, uelMap));
+            REQUIRE_EQ(justOkLength, queriedUel);
 
             pgx.gdxClose();
         });
