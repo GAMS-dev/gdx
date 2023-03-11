@@ -238,11 +238,11 @@ namespace gdx::tests::gxfiletests {
             char queriedUel[GMS_SSSIZE];
             int uelMap;
             REQUIRE(pgx.gdxUMUelGet(1, queriedUel, uelMap));
-            REQUIRE(!strcmp("myuel", queriedUel));
+            REQUIRE_EQ("myuel"s, queriedUel);
 
             REQUIRE_FALSE(pgx.gdxRenameUEL("myuel", "newname"));
             REQUIRE(pgx.gdxUMUelGet(1, queriedUel, uelMap));
-            REQUIRE(!strcmp("newname", queriedUel));
+            REQUIRE_EQ("newname"s, queriedUel);
 
             std::string tooLong(64, 'x'); // max uel length is 63
             REQUIRE_EQ(-100017, pgx.gdxRenameUEL("newname", tooLong.c_str())); // ERR_BADUELSTR
@@ -749,6 +749,9 @@ namespace gdx::tests::gxfiletests {
             }
             REQUIRE_EQ(0, pgx.gdxDataErrorCount());
             REQUIRE(pgx.gdxDataReadDone());
+
+            std::string tooLong(64, 'x');
+            REQUIRE_FALSE(pgx.gdxUELRegisterMap(6, tooLong.c_str()));
         });
         std::filesystem::remove(fn);
     }
@@ -1876,6 +1879,18 @@ namespace gdx::tests::gxfiletests {
         std::filesystem::remove(fn);
     }
 
+    TEST_CASE("Test checking if an identifier string is well formed") {
+        REQUIRE_FALSE(IsGoodIdent(""));
+        REQUIRE(IsGoodIdent("x"));
+        REQUIRE(IsGoodIdent("x6"));
+        REQUIRE_FALSE(IsGoodIdent("6x"));
+        REQUIRE_FALSE(IsGoodIdent("_"));
+        REQUIRE(IsGoodIdent("x_"));
+        std::string longestValidUEL(63, 'x'), tooLong(64, 'x');
+        REQUIRE(IsGoodIdent(longestValidUEL.c_str()));
+        REQUIRE_FALSE(IsGoodIdent(tooLong.c_str()));
+    }
+
     TEST_CASE("Test 'can be quoted' function") {
         REQUIRE_FALSE(CanBeQuoted(nullptr));
         REQUIRE(CanBeQuoted("abc"));
@@ -1887,8 +1902,10 @@ namespace gdx::tests::gxfiletests {
     TEST_CASE("Test checking for good UEL string") {
         REQUIRE_FALSE(GoodUELString(nullptr, 0));
         REQUIRE(GoodUELString("abc", 3));
-        std::string tooLong(300, 'x');
+        std::string tooLong(64, 'x');
         REQUIRE_FALSE(GoodUELString(tooLong.c_str(), tooLong.size()));
+        std::string stillOk(63, 'x');
+        REQUIRE(GoodUELString(stillOk.c_str(), stillOk.size()));
     }
 
     TEST_CASE("Test making a good explanatory text function") {
