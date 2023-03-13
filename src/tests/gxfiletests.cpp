@@ -1664,6 +1664,35 @@ namespace gdx::tests::gxfiletests {
         testWithCompressConvert(true,  "v7");
     }
 
+    TEST_CASE("Test simple write/read with compression activated") {
+        const auto fn { "rw_compression.gdx"s };
+        const int cardinality{ 1024 };
+        setEnvironmentVar("GDXCOMPRESS", "1"s);
+        TgdxValues vals{};
+        StrIndexBuffers sib;
+        testWrite(fn, [&](TGXFileObj& pgx) {
+            REQUIRE(pgx.gdxDataWriteStrStart("i", "set", 1, dt_set, 0));
+            for (int i{}; i < cardinality; i++) {
+                sib.front() = "i"s + std::to_string(i + 1);
+                REQUIRE(pgx.gdxDataWriteStr(sib.cptrs(), vals.data()));
+            }
+            REQUIRE(pgx.gdxDataWriteDone());
+        });
+        testRead(fn, [&](TGXFileObj& pgx) {
+            int numRecs;
+            REQUIRE(pgx.gdxDataReadStrStart(1, numRecs));
+            REQUIRE_EQ(cardinality, numRecs);
+            int dimFrst;
+            for (int i{}; i < cardinality; i++) {
+                REQUIRE(pgx.gdxDataReadStr(sib.ptrs(), vals.data(), dimFrst));
+                REQUIRE_EQ("i"s + std::to_string(i + 1), sib.front().str());
+            }
+            REQUIRE(pgx.gdxDataReadDone());
+        });
+        unsetEnvironmentVar("GDXCOMPRESS");
+        std::filesystem::remove(fn);
+    }
+
     TEST_CASE("Test symbol index max UEL length") {
         testReadModelGDX("trnsport"s, [&](TGXFileObj &pgx) {
             std::array<int, GLOBAL_MAX_INDEX_DIM> lengthInfo {};

@@ -19,6 +19,21 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\libs\gmszlib\adler32.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\compress.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\crc32.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\deflate.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\gzclose.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\gzlib.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\gzread.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\gzwrite.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\infback.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\inffast.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\inflate.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\inftrees.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\trees.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\uncompr.c" />
+    <ClCompile Include="..\..\..\..\libs\gmszlib\zutil.c" />
     <ClCompile Include="src\gclgms.c" />
     <ClCompile Include="src\gmsheapnew.cpp" />
     <ClCompile Include="src\gmsobj.cpp" />
@@ -34,6 +49,17 @@
     <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\libs\gmszlib\crc32.h" />
+    <ClInclude Include="..\..\..\..\libs\gmszlib\deflate.h" />
+    <ClInclude Include="..\..\..\..\libs\gmszlib\gzguts.h" />
+    <ClInclude Include="..\..\..\..\libs\gmszlib\inffast.h" />
+    <ClInclude Include="..\..\..\..\libs\gmszlib\inffixed.h" />
+    <ClInclude Include="..\..\..\..\libs\gmszlib\inflate.h" />
+    <ClInclude Include="..\..\..\..\libs\gmszlib\inftrees.h" />
+    <ClInclude Include="..\..\..\..\libs\gmszlib\trees.h" />
+    <ClInclude Include="..\..\..\..\libs\gmszlib\zconf.h" />
+    <ClInclude Include="..\..\..\..\libs\gmszlib\zlib.h" />
+    <ClInclude Include="..\..\..\..\libs\gmszlib\zutil.h" />
     <ClInclude Include="src\gclgms.h" />
     <ClInclude Include="src\datastorage.h" />
     <ClInclude Include="src\gmsdata.h" />
@@ -101,6 +127,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\libs\gmszlib;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\libs\gmszlib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -139,7 +169,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>P3_COLLECTIONS;GC_NO_MUTEX;NO_ZLIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>P3_COLLECTIONS;GC_NO_MUTEX;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -157,7 +187,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>P3_COLLECTIONS;GC_NO_MUTEX;NO_ZLIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>P3_COLLECTIONS;GC_NO_MUTEX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

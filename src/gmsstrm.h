@@ -37,10 +37,17 @@
 #include <vector>       // for vector
 
 #if defined(NO_ZLIB)
-// FIXME: Shouldnt this do a memcpy?
-// TODO: Write test that writes compressed file and reads its again to check if records match
-    inline int uncompress(void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen) { return 0; }
-    inline int compress(void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen) { return 0; }
+    inline int uncompress(void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen) {
+        *destLen = sourceLen;
+        std::memcpy(dest, source, sourceLen);
+        return 0;
+    }
+
+    inline int compress(void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen) {
+        *destLen = sourceLen;
+        std::memcpy(dest, source, sourceLen);
+        return 0;
+    }
 #else
     #include <zlib.h>
 #endif
