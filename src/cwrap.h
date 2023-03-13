@@ -54,9 +54,6 @@ extern "C" {
     typedef long long INT64;
 
     int gdxFree(TGXFileRec_t **pgdx);
-    int gdxGetReady(char *msgBuf, int msgBufLen);
-    int gdxLibraryLoaded();
-    int gdxLibraryUnload();
 
     int gdxCreate(TGXFileRec_t **pgdx, char *errBuf, int bufSize);
     void gdxCreateD(TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen);
@@ -156,7 +153,7 @@ extern "C" {
     int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char *UelFilterStr[], TDataStoreFiltProc_t DP);
     int gdxDataReadRawFastEx(TGXFileRec_t *TGXFile, int SyNr, TDataStoreExProc_t DP, int *NrRecs, void *Uptr);
 
-    void setCallByRef(const char *FuncName, int cbrValue);
+    void setCallByRef(TGXFileRec_t *TGXFile, const char *FuncName, int cbrValue);
 #ifdef __cplusplus
 }
 #endif

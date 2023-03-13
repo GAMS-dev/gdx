@@ -67,9 +67,6 @@ typedef long long INT64;
 void GDX_CALLCONV doSetLoadPath(const char *s);
 void GDX_CALLCONV doGetLoadPath(char *s);
 int gdxFree(TGXFileRec_t **pgdx);
-int gdxGetReady(char *msgBuf, int msgBufLen);
-int gdxLibraryLoaded();
-int gdxLibraryUnload();
 int gdxCreate(TGXFileRec_t **pgdx, char *errBuf, int bufSize);
 void gdxCreateD(TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen);
 void gdxDestroy(TGXFileRec_t **pgx);
@@ -165,7 +162,7 @@ void gdxStoreDomainSetsSet(TGXFileRec_t *pgdx, int x);
 int gdxDataReadRawFast(TGXFileRec_t *TGXFile, int SyNr, TDataStoreProc_t DP, int *NrRecs);
 int gdxDataReadRawFastFilt(TGXFileRec_t *TGXFile, int SyNr, const char *UelFilterStr[], TDataStoreFiltProc_t DP);
 int gdxDataReadRawFastEx(TGXFileRec_t *TGXFile, int SyNr, ::TDataStoreExProc_t DP, int *NrRecs, void *Uptr);
-void setCallByRef(const char *FuncName, int cbrValue);
+void setCallByRef(TGXFileRec_t *TGXFile, const char *FuncName, int cbrValue);
 // PROTOTYPES END
 
 GDX_INLINE void GDX_CALLCONV doSetLoadPath(const char *s) {
@@ -565,24 +562,12 @@ GDX_INLINE int gdxFree(TGXFileRec_t **TGXFile) {
 }
 
 GDX_INLINE int gdxGetReady(char *msgBuf, int msgBufLen) {
-    // FIXME: Is this enough?
     assert(msgBufLen > 0);
     msgBuf[0] = '\0';
     return 1;
 }
 
-GDX_INLINE int gdxLibraryLoaded() {
-    // FIXME: Is this enough?
-    return 1;
-}
-
-GDX_INLINE int gdxLibraryUnload() {
-    // FIXME: Is this enough?
-    return 1;
-}
-
 GDX_INLINE void gdxCreateD(TGXFileRec_t **TGXFile, const char *sysDir, char *msgBuf, int msgBufLen) {
-    // FIXME: Is this correct?
     doSetLoadPath(sysDir);
     gdxCreate(TGXFile, msgBuf, msgBufLen);
 }
@@ -599,9 +584,14 @@ GDX_INLINE int gdxDataReadRawFastEx(TGXFileRec_t *TGXFile, int SyNr, ::TDataStor
     return reinterpret_cast<gdx::TGXFileObj *>(TGXFile)->gdxDataReadRawFastEx(SyNr, (gdx::TDataStoreExProc_t)DP, *NrRecs, Uptr);
 }
 
-void setCallByRef(const char *FuncName, int cbrValue) {
-    // FIXME: Actually do something!
-    // ...
+GDX_INLINE void setCallByRef(TGXFileRec_t *TGXFile, const char *FuncName, int cbrValue) {
+    const auto obj = reinterpret_cast<gdx::TGXFileObj *>(TGXFile);
+    if(!std::strcmp(FuncName, "gdxDataReadRawFastEx_DP"))
+        obj->gdxDataReadRawFastEx_DP_CallByRef = cbrValue;
+    else if(!std::strcmp(FuncName, "gdxDataReadRawFastFilt_DP"))
+        obj->gdxDataReadRawFastFilt_DP_CallByRef = cbrValue;
+    else if(!std::strcmp(FuncName, "gdxGetDomainElements_DP"))
+        obj->gdxGetDomainElements_DP_CallByRef = cbrValue;
 }
 
 #ifdef __cplusplus
