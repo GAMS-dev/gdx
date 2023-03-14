@@ -533,7 +533,7 @@ namespace gdx::collections::gmsobj {
 
         virtual int compareEntry(const char *s, int EN) {
             auto p { this->FList[EN].FString };
-            return !p ? (!(!s || s[0] == '\0') ? 1 : 0) : utils::sameTextPChar<false>(s, p);
+            return !p ? (!(!s || s[0] == '\0') ? 1 : 0) : utils::sameTextPChar<true>(s, p);
         }
 
         void ClearHashList() {
@@ -632,7 +632,17 @@ namespace gdx::collections::gmsobj {
         }
 
         uint32_t hashValue(const char *s, size_t slen) override {
-            return TXHashedStringList<T>::hashValue(s, slen);
+            int64_t r{};
+            int i{}, n{ (int)slen };
+            while (i + 5 < n) {
+                uint32_t t{ (uint32_t)s[i++] };
+                for (int j{}; j < 5; j++)
+                    t = (HASHMULT * t) + (uint32_t)s[i++];
+                r = (HASHMULT_6 * r + t) % this->hashCount;
+            }
+            while (i < n)
+                r = (HASHMULT * r + (uint32_t)s[i++]) % this->hashCount;
+            return (uint32_t)r;
         }
 
     public:

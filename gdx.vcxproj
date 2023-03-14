@@ -39,6 +39,7 @@
     <ClCompile Include="src\gmsobj.cpp" />
     <ClCompile Include="src\gmsstrm.cpp" />
     <ClCompile Include="src\gxfile.cpp" />
+    <ClCompile Include="src\tests\datastoragetests.cpp" />
     <ClCompile Include="src\tests\doctestmain.cpp" />
     <ClCompile Include="src\tests\gmsdatatests.cpp" />
     <ClCompile Include="src\tests\gmsheapnewtests.cpp" />

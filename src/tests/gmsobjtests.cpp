@@ -162,34 +162,34 @@ namespace gdx::tests::gmsobjtests {
         REQUIRE_GT(lst.Add("", 0), -1);
     }
 
-    template<typename T, typename U, typename f>
+    template<typename T, typename f>
     void runStressTest(const std::string_view caption, f getelem) {
         auto t {std::chrono::high_resolution_clock::now()};
         constexpr int card {90000}, ntries { 40 };
-        std::array<U, card> nums;
+        static_assert(card < std::numeric_limits<int>::max());
+        std::array<int, card> nums;
         std::random_device rd;
         for(int k{}; k<ntries; k++) {
             T shlst;
             std::mt19937 g(rd());
             std::iota(nums.begin(), nums.end(), 1);
             std::shuffle(nums.begin(), nums.end(), g);
-            for(U n : nums) {
+            int ctr{};
+            for(int n : nums) {
                 std::string s{"i"s+std::to_string(n)};
-                shlst.Add(s.c_str(), s.length());
+                REQUIRE_EQ(ctr++, shlst.Add(s.c_str(), s.length()));
             }
             int sum{};
-            for(U n : nums) {
-                sum += (int)std::strlen(shlst.GetName(n));
-                sum += *shlst.GetObject(n);
-            }
+            for (int i{}; i < card; i++)
+                sum += (int)std::strlen(shlst.GetName(i));
         }
         auto delta {std::chrono::high_resolution_clock::now() - t};
         std::cout << "Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds(1) << std::endl;
     }
 
     TEST_CASE("TXStrPool vs. TXCSStrHashList") {
-        runStressTest<TXStrPool<uint8_t>, uint8_t>("TXStrPool"s, [](uint8_t &n) { return &n; });
-        runStressTest<collections::strhash::TXCSStrHashList<uint8_t>, uint8_t>("TXCSStrHashList"s, [](uint8_t &n) { return n; });
+        runStressTest<TXStrPool<uint8_t>>("TXStrPool"s, [](uint8_t &n) { return &n; });
+        runStressTest<collections::strhash::TXCSStrHashList<uint8_t>>("TXCSStrHashList"s, [](uint8_t &n) { return n; });
     }
 
     TEST_SUITE_END();

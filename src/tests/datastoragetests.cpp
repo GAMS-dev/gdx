@@ -35,6 +35,7 @@ namespace tests::datastoragetests {
     TEST_CASE("Stress test linked data") {
         auto t {std::chrono::high_resolution_clock::now()};
         constexpr int card {90000}, ntries { 40 }, dim{3}, valdim{5};
+        static_assert(card < std::numeric_limits<int>::max());
         std::random_device rd;
         std::array<int, dim> keys{};
         std::array<double, valdim> values{};

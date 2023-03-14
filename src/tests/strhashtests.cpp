@@ -62,6 +62,7 @@ namespace gdx::tests::strhashtests {
     void runStressTest(const std::string_view caption) {
         auto t {std::chrono::high_resolution_clock::now()};
         constexpr int card {50000}, ntries { 40 };
+        static_assert(card < std::numeric_limits<int>::max());
         std::array<int, card> nums;
         std::random_device rd;
         for(int k{}; k<ntries; k++) {
