@@ -177,9 +177,10 @@ namespace gdx::tests::gmsobjtests {
                 std::string s{"i"s+std::to_string(n)};
                 shlst.Add(s.c_str(), s.length());
             }
+            int sum{};
             for(U n : nums) {
-                auto name {shlst.GetName(n) };
-                auto obj{ shlst.GetObject(n) };
+                sum += std::strlen(shlst.GetName(n));
+                sum += *shlst.GetObject(n);
             }
         }
         auto delta {std::chrono::high_resolution_clock::now() - t};
