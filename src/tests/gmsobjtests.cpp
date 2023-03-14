@@ -179,7 +179,7 @@ namespace gdx::tests::gmsobjtests {
             }
             int sum{};
             for(U n : nums) {
-                sum += std::strlen(shlst.GetName(n));
+                sum += (int)std::strlen(shlst.GetName(n));
                 sum += *shlst.GetObject(n);
             }
         }

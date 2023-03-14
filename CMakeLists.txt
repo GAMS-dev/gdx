@@ -44,6 +44,7 @@ set(tests
 		src/tests/gmsdatatests.cpp
 		src/tests/strhashtests.cpp
 		src/tests/gmsheapnewtests.cpp
+		src/tests/datastoragetests.cpp
 )
 
 #add_library(gdxcclib64 SHARED ${common})
