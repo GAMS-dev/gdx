@@ -62,7 +62,7 @@ namespace gdx::tests::strhashtests {
     void runStressTest() {
         auto t {std::chrono::high_resolution_clock::now()};
         T shlst;
-        constexpr int card {50000}, ntries { 10 };
+        constexpr int card {50000}, ntries { 40 };
         std::array<int, card> nums;
         std::iota(nums.begin(), nums.end(), 1);
         std::random_device rd;
@@ -73,9 +73,10 @@ namespace gdx::tests::strhashtests {
                 std::string s{"i"s+std::to_string(n)};
                 shlst.AddObject(s.c_str(), s.length(), n);
             }
+            int sum{};
             for(int n : nums) {
                 std::string s{"i"s+std::to_string(n)};
-                int r {shlst.IndexOf(s.c_str())};
+                sum += shlst.IndexOf(s.c_str());
             }
         }
         auto delta {std::chrono::high_resolution_clock::now() - t};
@@ -88,6 +89,11 @@ namespace gdx::tests::strhashtests {
 
     TEST_CASE("Stress test for non-legacy variant") {
         runStressTest<TXStrHashList<int>>();
+    }
+
+    TEST_CASE("Run both stress tests") {
+        runStressTest<TXStrHashList<int>>();
+        runStressTest<TXStrHashListLegacy<int>>();
     }
 
     TEST_SUITE_END();

@@ -561,12 +561,6 @@ GDX_INLINE int gdxFree(TGXFileRec_t **TGXFile) {
     return 1;
 }
 
-GDX_INLINE int gdxGetReady(char *msgBuf, int msgBufLen) {
-    assert(msgBufLen > 0);
-    msgBuf[0] = '\0';
-    return 1;
-}
-
 GDX_INLINE void gdxCreateD(TGXFileRec_t **TGXFile, const char *sysDir, char *msgBuf, int msgBufLen) {
     doSetLoadPath(sysDir);
     gdxCreate(TGXFile, msgBuf, msgBufLen);
