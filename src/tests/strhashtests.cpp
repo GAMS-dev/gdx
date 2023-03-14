@@ -59,15 +59,16 @@ namespace gdx::tests::strhashtests {
     }
 
     template<typename T>
-    void runStressTest() {
+    void runStressTest(const std::string_view caption) {
         auto t {std::chrono::high_resolution_clock::now()};
-        T shlst;
         constexpr int card {50000}, ntries { 40 };
         std::array<int, card> nums;
-        std::iota(nums.begin(), nums.end(), 1);
         std::random_device rd;
         for(int k{}; k<ntries; k++) {
+            T shlst;
+            shlst.SetCapacity(card);
             std::mt19937 g(rd());
+            std::iota(nums.begin(), nums.end(), 1);
             std::shuffle(nums.begin(), nums.end(), g);
             for(int n : nums) {
                 std::string s{"i"s+std::to_string(n)};
@@ -80,20 +81,12 @@ namespace gdx::tests::strhashtests {
             }
         }
         auto delta {std::chrono::high_resolution_clock::now() - t};
-        std::cout << "Time in milliseconds: " << delta / std::chrono::milliseconds(1) << std::endl;
+        std::cout << "Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds(1) << std::endl;
     }
 
-    TEST_CASE("Stress test for legacy variant") {
-        runStressTest<TXStrHashListLegacy<int>>();
-    }
-
-    TEST_CASE("Stress test for non-legacy variant") {
-        runStressTest<TXStrHashList<int>>();
-    }
-
-    TEST_CASE("Run both stress tests") {
-        runStressTest<TXStrHashList<int>>();
-        runStressTest<TXStrHashListLegacy<int>>();
+    TEST_CASE("Stress test TXStrHashList vs. TXStrHashListLegacy") {
+        runStressTest<TXStrHashList<int>>("TXStrHashList"s);
+        runStressTest<TXStrHashListLegacy<int>>("TXStrHashListLegacy"s);
     }
 
     TEST_SUITE_END();

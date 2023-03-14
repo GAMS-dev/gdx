@@ -33,6 +33,11 @@
 #include "../gmsobj.h"  // for TXStrPool, TBooleanBitArray, TXList, TXCustom...
 #include "doctest.h"    // for ResultBuilder, REQUIRE_EQ, Expression_lhs
 
+#include <chrono>
+#include <random>
+#include <iostream>
+#include "../strhash.h"
+
 using namespace std::literals::string_literals;
 using namespace gdx::collections::gmsobj;
 
@@ -155,6 +160,35 @@ namespace gdx::tests::gmsobjtests {
         REQUIRE(!std::strcmp("i2", lst.GetName(0)));
         REQUIRE_GT(lst.MemoryUsed(), 0);
         REQUIRE_GT(lst.Add("", 0), -1);
+    }
+
+    template<typename T, typename U, typename f>
+    void runStressTest(const std::string_view caption, f getelem) {
+        auto t {std::chrono::high_resolution_clock::now()};
+        constexpr int card {90000}, ntries { 40 };
+        std::array<U, card> nums;
+        std::random_device rd;
+        for(int k{}; k<ntries; k++) {
+            T shlst;
+            std::mt19937 g(rd());
+            std::iota(nums.begin(), nums.end(), 1);
+            std::shuffle(nums.begin(), nums.end(), g);
+            for(U n : nums) {
+                std::string s{"i"s+std::to_string(n)};
+                shlst.Add(s.c_str(), s.length());
+            }
+            for(U n : nums) {
+                auto name {shlst.GetName(n) };
+                auto obj{ shlst.GetObject(n) };
+            }
+        }
+        auto delta {std::chrono::high_resolution_clock::now() - t};
+        std::cout << "Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds(1) << std::endl;
+    }
+
+    TEST_CASE("TXStrPool vs. TXCSStrHashList") {
+        runStressTest<TXStrPool<uint8_t>, uint8_t>("TXStrPool"s, [](uint8_t &n) { return &n; });
+        runStressTest<collections::strhash::TXCSStrHashList<uint8_t>, uint8_t>("TXCSStrHashList"s, [](uint8_t &n) { return n; });
     }
 
     TEST_SUITE_END();
