@@ -27,6 +27,9 @@
 #include <array>         // for array
 #include <numeric>       // for iota
 #include <string>        // for operator+, to_string, basic_string, string_l...
+#include <random>
+#include <chrono>
+#include <iostream>
 #include "../strhash.h"  // for TXStrHashListLegacy, TXStrHashList, strhash
 #include "doctest.h"     // for ResultBuilder, REQUIRE_EQ, TestCase, TEST_CASE
 
@@ -53,6 +56,38 @@ namespace gdx::tests::strhashtests {
         std::iota(nums.begin(), nums.end(), 1);
         runTest<TXStrHashList<int>>(nums);
         runTest<TXStrHashListLegacy<int>>(nums);
+    }
+
+    template<typename T>
+    void runStressTest() {
+        auto t {std::chrono::high_resolution_clock::now()};
+        T shlst;
+        constexpr int card {50000}, ntries { 10 };
+        std::array<int, card> nums;
+        std::iota(nums.begin(), nums.end(), 1);
+        std::random_device rd;
+        for(int k{}; k<ntries; k++) {
+            std::mt19937 g(rd());
+            std::shuffle(nums.begin(), nums.end(), g);
+            for(int n : nums) {
+                std::string s{"i"s+std::to_string(n)};
+                shlst.AddObject(s.c_str(), s.length(), n);
+            }
+            for(int n : nums) {
+                std::string s{"i"s+std::to_string(n)};
+                int r {shlst.IndexOf(s.c_str())};
+            }
+        }
+        auto delta {std::chrono::high_resolution_clock::now() - t};
+        std::cout << "Time in milliseconds: " << delta / std::chrono::milliseconds(1) << std::endl;
+    }
+
+    TEST_CASE("Stress test for legacy variant") {
+        runStressTest<TXStrHashListLegacy<int>>();
+    }
+
+    TEST_CASE("Stress test for non-legacy variant") {
+        runStressTest<TXStrHashList<int>>();
     }
 
     TEST_SUITE_END();
