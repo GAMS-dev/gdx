@@ -148,7 +148,6 @@ namespace gdx::tests::gxfiletests {
             int ErrNr;
             REQUIRE_FALSE(pgx.gdxOpenWrite("", "gdxtest", ErrNr));
             REQUIRE_NE(0, ErrNr);
-            // TODO: Why is this zero?
             REQUIRE_EQ(0, pgx.gdxErrorCount());
             char msg[GMS_SSSIZE];
             REQUIRE(pgx.gdxErrorStr(pgx.gdxGetLastError(), msg));
@@ -633,7 +632,6 @@ namespace gdx::tests::gxfiletests {
             std::copy(queriedSpecVals.begin(), queriedSpecVals.end(), moddedSpecVals.begin());
             moddedSpecVals[gdx::TgdxIntlValTyp::vm_valpin] = 0.0;
             REQUIRE(pgx.gdxSetReadSpecialValues(moddedSpecVals.data()));
-            // TODO: Actually check somehow the previous call had an effect!
         });
     }
 

@@ -331,8 +331,6 @@ namespace gdx::collections::gmsobj {
         T *FObject;
     };
 
-    // This seems very much redundant to TXStrings
-    // TODO: Should be refactored. Work out the differences to TXStrings and try merging code
     template<typename T>
     class TXCustomStringList : public TQuickSortClass {
     protected:
@@ -369,7 +367,7 @@ namespace gdx::collections::gmsobj {
             if(NewCapacity < FCount) NewCapacity = FCount;
             FListMemory = sizeof(TStringItem<T>) * NewCapacity;
             if(!FList) FList = (TStringItem<T> *)std::malloc(FListMemory);
-            else if(!FListMemory) { // TODO: Isn't std::realloc(FList, 0) doing the same?
+            else if(!FListMemory) {
                 std::free(FList);
                 FList = nullptr;
             }
@@ -634,7 +632,6 @@ namespace gdx::collections::gmsobj {
         }
 
         uint32_t hashValue(const char *s, size_t slen) override {
-            // TODO: How does this method differ from the base class implementation?
             return TXHashedStringList<T>::hashValue(s, slen);
         }
 

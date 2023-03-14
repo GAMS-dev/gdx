@@ -1008,11 +1008,11 @@ namespace gdx {
                             }
                             switch(obj.DAction) {
                                 case TgdxDAction::dm_unmapped:
-                                    // FIXME: Not hit by any test!
+                                    // NOTE: Not covered by unit tests yet.
                                     AElements[D] = LastElem[D];
                                     break;
                                 case TgdxDAction::dm_filter:
-                                    // FIXME: Not hit by any test!
+                                    // NOTE: Not covered by unit tests yet.
                                     V = UELTable->GetUserMap(LastElem[D]);
                                     if(obj.DFilter->InFilter(V))
                                         AElements[D] = V;
@@ -1052,7 +1052,7 @@ namespace gdx {
                             break;
                         }
                         else if(AddError) {
-                            // FIXME: Not hit by any test!
+                            // NOTE: Not covered by unit tests yet.
                             // Ensure that dimensions to the right have no bad UELs
                             for(int D2{D+1}; D2 <= FCurrentDim; D2++) {
                                 if(LastElem[D2] < 0) {
@@ -1323,7 +1323,7 @@ namespace gdx {
                 AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap(FFile->ReadDouble());
             }
             if(MapSetText && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set) { // remap settext number
-                // FIXME: Not hit by any test!
+                // NOTE: Not covered by unit tests yet.
                 double X {AVals[GMS_VAL_LEVEL]};
                 int D {static_cast<int>(std::round(X))};
                 if(std::abs(X-D) < 1e-12 && D >= 0 && D <= SetTextList->GetCapacity())
@@ -1341,7 +1341,7 @@ namespace gdx {
                 N {AcronymList->FindEntry(orgIndx)},
                 newIndx {};
             if(N < 0) { // not found
-                // FIXME: Not hit by any test
+                // NOTE: Not covered by unit tests yet.
                 if(NextAutoAcronym <= 0) newIndx = orgIndx;
                 else {
                     newIndx = NextAutoAcronym++;
@@ -1386,7 +1386,7 @@ namespace gdx {
             if (EN < 0) {
                 bool Found{};
                 for(int i{}; i<ErrorList->GetCount(); i++) {
-                    // FIXME: Not hit by any test!
+                    // NOTE: Not covered by unit tests yet.
                     ErrorList->GetRecord(i, keys.data(), vals.data());
                     if (keys[D] == EN) {
                         Found = true;
@@ -1831,7 +1831,7 @@ namespace gdx {
         int64_t AcronymPos{}, DomStrPos{}, SymbPos{}, UELPos{}, SetTextPos{};
 
         if(VersionRead <= 5) {
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             SymbPos = FFile->ReadInteger();
             UELPos = FFile->ReadInteger();
             SetTextPos = FFile->ReadInteger();
@@ -1924,7 +1924,7 @@ namespace gdx {
                 auto s{FFile->ReadString()};
                 int TextNum{ SetTextList->Add(s.c_str(), s.length()) };
                 if (TextNum != N) { // duplicates stored in GDX file, e.g. empty string
-                    // FIXME: Not hit by any test!
+                    // NOTE: Not covered by unit tests yet.
                     if(!MapSetText) {
                         MapSetText = std::make_unique<int[]>(NrElem);
                         for (int D{}; D < N; D++)
@@ -2260,7 +2260,7 @@ namespace gdx {
     int TGXFileObj::gdxGetElemText(int TxtNr, char *Txt, int &Node) {
         Node = 0;
         if(!SetTextList) {
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             Txt[0] = '\0';
             return false;
         }
@@ -2372,7 +2372,7 @@ namespace gdx {
         for (int iv1{ vm_valund }; iv1 <= stopper; iv1++) {
             for (int iv2{ iv1+1 }; iv2 <= stopper; iv2++) {
                 if (tmpI64[iv1] == tmpI64[iv2]) {
-                    // FIXME: Not hit by any test!
+                    // NOTE: Not covered by unit tests yet.
                     ReportError(ERR_DUPLICATESPECVAL);
                     return false;
                 }
@@ -2588,7 +2588,7 @@ namespace gdx {
             fmode = fw_raw_data;
             break;
         case fw_dom_map:
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             fmode = fw_map_data;
             break;
         case fw_dom_str:
@@ -2786,7 +2786,7 @@ namespace gdx {
     // Description:
     int TGXFileObj::gdxUMUelInfo(int &UelCnt, int &HighMap) const {
         if (!FFile) { // AS: Use FFile != nullptr as proxy for checking open has been called before
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             UelCnt = HighMap = 0;
             return false;
         }
@@ -2884,7 +2884,7 @@ namespace gdx {
     //   gdxUMUelGet
     int TGXFileObj::gdxGetUEL(int uelNr, char *Uel) const {
         if(!UELTable) {
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             Uel[0] = '\0';
             return false;
         }
@@ -3057,7 +3057,7 @@ namespace gdx {
             for(int D{DimFrst-1}; D<FCurrentDim && !loopDone; D++) {
                 const auto &obj = DomainList[D];
                 if(LastElem[D] < 0) {
-                    // FIXME: Not hit by any test!
+                    // NOTE: Not covered by unit tests yet.
                     ReportError(ERR_BADELEMENTINDEX);
                     BadError = true;
                     break;
@@ -3080,13 +3080,13 @@ namespace gdx {
                         V = UELTable->GetUserMap(LastElem[D]);
                         if(V >= 0) KeyInt[D] = V;
                         else {
-                            AddError = true;// FIXME: Not hit by any test!
+                            AddError = true;// NOTE: Not covered by unit tests yet.
                             FIDim = D+1;
                             loopDone = true;
                         }
                         break;
                     case TgdxDAction::dm_expand: // no filter, allow growth of domain
-                        // FIXME: Not hit by any test!
+                        // NOTE: Not covered by unit tests yet.
                         {
                             int EN = LastElem[D];
                             V = UELTable->GetUserMap(EN);
@@ -3107,7 +3107,7 @@ namespace gdx {
         else if(AddError) {
             for(int D{}; D<FCurrentDim; D++) {
                 if(LastElem[D] < 0) {
-                    // FIXME: Not hit by any test!
+                    // NOTE: Not covered by unit tests yet.
                     ReportError(ERR_BADELEMENTINDEX);
                     return false;
                 }
@@ -3135,7 +3135,7 @@ namespace gdx {
         }
 
         if(AddNew) {
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             for(int D{}; D<FCurrentDim; D++) {
                 int EN = KeyInt[D];
                 if(EN < 0) {
@@ -3350,7 +3350,7 @@ namespace gdx {
         int EN{UELTable->UsrUel2Ent->GetMapping(UelMap)};
         if (EN >= 1) obj.SetFilter(UelMap, true);
         else {
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             ReportError(ERR_FILTER_UNMAPPED);
             return false;
         }
@@ -3375,7 +3375,7 @@ namespace gdx {
                 int V{UELTable->GetUserMap(N)};
                 if(!CurFilter->InFilter(V)) continue;
                 if(V <= LV) {
-                    // FIXME: Not hit by any test!
+                    // NOTE: Not covered by unit tests yet.
                     CurFilter->FiltSorted = false;
                     break;
                 }
@@ -3504,7 +3504,7 @@ namespace gdx {
         if (!Dim || ErrorCondition(DimPos >= 1 && DimPos <= Dim, ERR_BADDIMENSION)) return false;
         const TDFilter *DFilter = FilterNr == DOMC_EXPAND ? nullptr : FilterList->FindFilter(FilterNr);
         if (FilterNr != DOMC_EXPAND && !DFilter) {
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             ReportError(ERR_UNKNOWNFILTER);
             return false;
         }
@@ -3523,7 +3523,7 @@ namespace gdx {
             if (DFilter) {
                 int MapNr{ UELTable->GetUserMap(RawNr) };
                 if (!DFilter->InFilter(MapNr)) {
-                    // FIXME: Not hit by any test!
+                    // NOTE: Not covered by unit tests yet.
                     //Register this record as a domain error (negative value indicates domain violation)
                     LastElem[DimPos - 1] = -LastElem[DimPos - 1];
                     AddToErrorListDomErrs(LastElem, AVals.data());    //unmapped
@@ -3807,7 +3807,7 @@ namespace gdx {
                 Dimen++;
             }
             else {
-                // FIXME: Not hit by any test!
+                // NOTE: Not covered by unit tests yet.
                 ElemNrs[D] = UELTable->IndexOf(UelFilterStr[D]);
                 if (ElemNrs[D] < 0) GoodIndx = false;
             }
@@ -3826,7 +3826,7 @@ namespace gdx {
                 if (ElemNrs[D] == -1)
                     HisIndx[HisDim++] = SliceIndxs[D]->GetMapping(LastElem[D]);
                 else if(ElemNrs[D] != LastElem[D])
-                    GoodIndx = false; // FIXME: Not hit by any test!
+                    GoodIndx = false; // NOTE: Not covered by unit tests yet.
             }
             if (GoodIndx) DP(HisIndx.data(), Values.data());
         }
@@ -3850,12 +3850,12 @@ namespace gdx {
         if (!MajorCheckMode("DataSliceUELS"s, fr_slice)) return false;
         int HisDim{};
         for (int D {}; D < FCurrentDim; D++) {
-            if (!SliceElems[D].empty()) // FIXME: Not hit by any test!
+            if (!SliceElems[D].empty()) // NOTE: Not covered by unit tests yet.
                 utils::assignStrToBuf(SliceElems[D], KeyStr[D]);
             else {
                 int N = SliceRevMap[D]->GetMapping(SliceKeyInt[HisDim++]);
                 if (N < 0) {
-                    // FIXME: Not hit by any test!
+                    // NOTE: Not covered by unit tests yet.
                     KeyStr[D][0] = '?';
                     KeyStr[D][1] = '\0';
                 }
@@ -3951,7 +3951,7 @@ namespace gdx {
         int res{ gdxOpenReadXX(FileName, fmOpenReadWrite, 0, ErrNr) };
         if (!res || ErrNr != 0) return res;
         if (VersionRead < 7) {
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             ReportError(ERR_FILETOOLDFORAPPEND);
             gdxClose();
             return res;
@@ -4109,7 +4109,7 @@ namespace gdx {
                 return true;
             }
         }
-        // FIXME: Not hit by any test!
+        // NOTE: Not covered by unit tests yet.
         Txt[0] = '\0';
         return false;
     }
@@ -4137,7 +4137,7 @@ namespace gdx {
     int TGXFileObj::gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap) {
         UelMap = -1;
         if (!UELTable) {
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             UelNr = -1;
             return false;
         }
@@ -4282,7 +4282,7 @@ namespace gdx {
         std::array<double, valscale + 1> AVals {};
         int AFDim;
         if(gdxDataReadRawFastEx_DP_CallByRef) {
-            // FIXME: Not hit by any test!
+            // NOTE: Not covered by unit tests yet.
             TDataStoreExProc_F local_DP {(TDataStoreExProc_F)DP};
             uInt64 local_Uptr {};
             local_Uptr.i = 0;
@@ -4298,7 +4298,7 @@ namespace gdx {
     }
 
     void TGXFileObj::gdxGetDomainElements_DP_FC(int RawIndex, int MappedIndex, void* Uptr) {
-        // FIXME: Not hit by any test!
+        // NOTE: Not covered by unit tests yet.
         if (gdxGetDomainElements_DP_CallByRef) {
             TDomainIndexProc_F local_gdxGetDomainElements_DP{ (TDomainIndexProc_F)gdxGetDomainElements_DP };
             uInt64 local_Uptr;
@@ -4309,7 +4309,7 @@ namespace gdx {
         return gdxGetDomainElements_DP(RawIndex, MappedIndex, Uptr);
     }
 
-    // FIXME: Not hit by any test!
+    // NOTE: Not covered by unit tests yet.
     int TGXFileObj::gdxDataReadRawFastFilt_DP_FC(const int* Indx, const double* Vals, void* Uptr) {
         if (gdxDataReadRawFastFilt_DP_CallByRef) {
             TDataStoreFiltProc_F local_gdxDataReadRawFastFilt_DP{ (TDataStoreFiltProc_F)gdxDataReadRawFastFilt_DP };
@@ -4368,7 +4368,7 @@ namespace gdx {
             *GetObject(EN) = res;
             UsrUel2Ent->SetMapping(res, EN);
         } else if(res != UelNr) {
-            res = -1; // FIXME: Not hit by any test!
+            res = -1; // NOTE: Not covered by unit tests yet.
         }
         ResetMapToUserStatus();
         return res;
@@ -4415,7 +4415,6 @@ namespace gdx {
         TXStrHashListImpl<int>::SaveToStream(S);
     }
 
-    // TODO: Appears to be unused!
     void TUELTable::LoadFromStream(TXStreamDelphi &S) {
         TXStrHashListImpl<int>::LoadFromStream(S);
         if(UsrUel2Ent) UsrUel2Ent = std::make_unique<TIntegerMapping>();

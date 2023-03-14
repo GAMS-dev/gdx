@@ -63,7 +63,7 @@ namespace gdx::collections::gmsdata {
         }
 
         void AddRecord(const int* AElements, const T* AVals) {
-            // TODO: Maybe use batch allocator vs. single new allocs here for performance?
+            // NOTE: Maybe use batch allocator vs. single new allocs here for performance?
             auto vals {new T[(size_t)FDataSize/sizeof(T)]};
             std::memcpy(vals, AVals, FDataSize);
             auto keys{new int[FDim]};

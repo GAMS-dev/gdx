@@ -686,8 +686,8 @@ namespace gdx::collections::strhash {
             return (int)Buckets.size();
         }
 
+        // Only called when using this for SetTextList
         void SetCapacity(size_t cap) {
-            // FIXME: Should do something!
         }
 
         [[nodiscard]] bool empty() const {
