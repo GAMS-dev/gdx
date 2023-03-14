@@ -2030,8 +2030,10 @@ namespace gdx {
     //  The integer value can be used to set the associated text of a set element.
     //  The string must follow the GAMS syntax rules for explanatory text.
     int TGXFileObj::gdxAddSetText(const char *Txt, int &TxtNr) {
-        if(!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText")))
+        if(!SetTextList || (TraceLevel >= TraceLevels::trl_all && !CheckMode("AddSetText"))) {
+            TxtNr = 0;
             return false;
+        }
         static std::array<char, GMS_SSSIZE> s;
         utils::assignPCharToBuf(Txt, s.data(), GMS_SSSIZE);
         const int slen {MakeGoodExplText(s.data())};
@@ -2260,7 +2262,6 @@ namespace gdx {
     int TGXFileObj::gdxGetElemText(int TxtNr, char *Txt, int &Node) {
         Node = 0;
         if(!SetTextList) {
-            // NOTE: Not covered by unit tests yet.
             Txt[0] = '\0';
             return false;
         }
@@ -2786,7 +2787,6 @@ namespace gdx {
     // Description:
     int TGXFileObj::gdxUMUelInfo(int &UelCnt, int &HighMap) const {
         if (!FFile) { // AS: Use FFile != nullptr as proxy for checking open has been called before
-            // NOTE: Not covered by unit tests yet.
             UelCnt = HighMap = 0;
             return false;
         }
@@ -2884,7 +2884,6 @@ namespace gdx {
     //   gdxUMUelGet
     int TGXFileObj::gdxGetUEL(int uelNr, char *Uel) const {
         if(!UELTable) {
-            // NOTE: Not covered by unit tests yet.
             Uel[0] = '\0';
             return false;
         }
@@ -4109,7 +4108,6 @@ namespace gdx {
                 return true;
             }
         }
-        // NOTE: Not covered by unit tests yet.
         Txt[0] = '\0';
         return false;
     }
@@ -4137,7 +4135,6 @@ namespace gdx {
     int TGXFileObj::gdxUMFindUEL(const char *Uel, int& UelNr, int& UelMap) {
         UelMap = -1;
         if (!UELTable) {
-            // NOTE: Not covered by unit tests yet.
             UelNr = -1;
             return false;
         }

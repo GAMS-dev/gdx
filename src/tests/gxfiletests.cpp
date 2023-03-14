@@ -1965,6 +1965,46 @@ namespace gdx::tests::gxfiletests {
         REQUIRE_EQ(5, im.GetMapping(3));
     }
 
+    TEST_CASE("Test fallback behavior when trying GDX operations when no file is open") {
+        std::string msg;
+        TGXFileObj pgx {msg};
+
+        char text[GMS_SSSIZE];
+        int nodeNr;
+        REQUIRE_FALSE(pgx.gdxGetElemText(1, text, nodeNr));
+        REQUIRE_EQ(0, nodeNr);
+        REQUIRE_EQ(""s, text);
+
+        int uelCnt, highMap;
+        REQUIRE_FALSE(pgx.gdxUMUelInfo(uelCnt, highMap));
+        REQUIRE_EQ(0, uelCnt);
+        REQUIRE_EQ(0, highMap);
+
+        char uel[GMS_SSSIZE];
+        REQUIRE_FALSE(pgx.gdxGetUEL(1, uel));
+        REQUIRE_EQ(""s, uel);
+
+        int uelNr, uelMap;
+        REQUIRE_FALSE(pgx.gdxUMFindUEL("i1", uelNr, uelMap));
+        REQUIRE_EQ(-1, uelNr);
+        REQUIRE_EQ(-1, uelMap);
+
+        REQUIRE_EQ(-1, pgx.gdxRenameUEL("i1", "i2"));
+
+        int txtNr;
+        REQUIRE_FALSE(pgx.gdxAddSetText("test", txtNr));
+        REQUIRE_EQ(0, txtNr);
+
+        REQUIRE_FALSE(pgx.gdxGetElemText(3, text, nodeNr));
+        REQUIRE_EQ(""s, text);
+        REQUIRE_EQ(0, nodeNr);
+
+        REQUIRE_FALSE(pgx.gdxSetTextNodeNr(23, 42));
+
+        REQUIRE_FALSE(pgx.gdxSymbolGetComment(23, 2, text));
+        REQUIRE_EQ(""s, text);
+    }
+
     TEST_SUITE_END();
 
 }
