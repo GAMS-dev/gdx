@@ -31,29 +31,30 @@
 // Quick settings:
 // P3_COLLECTIONS: Use paul objects as much as possible and gmsheapnew for TLinkedData, most verbatim port
 // MIXED_COLLECTIONS (default): Mix-and-match custom and builtin data structures for best performance
-#if !defined(P3_COLLECTIONS) && !defined(MIX_COLLECTIONS)
+#if !defined( P3_COLLECTIONS ) && !defined( MIX_COLLECTIONS )
 #define MIX_COLLECTIONS
 #endif
 
-#include <array>             // for array
-#include <cstdint>           // for int64_t, uint8_t
-#include <cstring>           // for size_t
-#include <initializer_list>  // for initializer_list
-#include <limits>            // for numeric_limits
-#include <memory>            // for unique_ptr, allocator
-#include <optional>          // for optional
-#include <string>            // for string
-#include <string_view>       // for string_view
-#include "datastorage.h"     // for TLinkedData
-#include "gclgms.h"          // for GLOBAL_MAX_INDEX_DIM, GMS_MAX_INDEX_DIM
-#include "gmsdata.h"         // for TTblGamsData
-#include "gmsobj.h"          // for TBooleanBitArray, TXList, TXStrings
-#include "strhash.h"         // for TXCSStrHashList, TXStrHashList
-#include "utils.h"           // for IContainsPredicate
-namespace gdx::gmsstrm {
-    class TMiBufferedStreamDelphi;
-    class TXStreamDelphi;
-}
+#include "datastorage.h"   // for TLinkedData
+#include "gclgms.h"        // for GLOBAL_MAX_INDEX_DIM, GMS_MAX_INDEX_DIM
+#include "gmsdata.h"       // for TTblGamsData
+#include "gmsobj.h"        // for TBooleanBitArray, TXList, TXStrings
+#include "strhash.h"       // for TXCSStrHashList, TXStrHashList
+#include "utils.h"         // for IContainsPredicate
+#include <array>           // for array
+#include <cstdint>         // for int64_t, uint8_t
+#include <cstring>         // for size_t
+#include <initializer_list>// for initializer_list
+#include <limits>          // for numeric_limits
+#include <memory>          // for unique_ptr, allocator
+#include <optional>        // for optional
+#include <string>          // for string
+#include <string_view>     // for string_view
+namespace gdx::gmsstrm
+{
+class TMiBufferedStreamDelphi;
+class TXStreamDelphi;
+}// namespace gdx::gmsstrm
 
 //======================================================================================================================
 // Various switches for container/data structure implementation choices:
@@ -68,312 +69,332 @@ namespace gdx::gmsstrm {
 // Use verbatim port for TTblGamsData
 #define TBL_GMSDATA_LEGACY
 
-#if defined(MIX_COLLECTIONS)
-    #undef TSH_LEGACY
-    #undef TXSPOOL_LEGACY
-    #undef TBL_GMSDATA_LEGACY
+#if defined( MIX_COLLECTIONS )
+#undef TSH_LEGACY
+#undef TXSPOOL_LEGACY
+#undef TBL_GMSDATA_LEGACY
 #endif
 
 //======================================================================================================================
 
-namespace gdx {
+namespace gdx
+{
 
-    using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
-    using TgdxValues = std::array<double, GMS_VAL_SCALE+ 1>;
+using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
+using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
 
-    using TDomainIndexProc_t = void(*)(int RawIndex, int MappedIndex, void* Uptr);
-    using TDataStoreProc_t = void(*)(const int* Indx, const double* Vals);
-    using TDataStoreFiltProc_t = int(*)(const int *Indx, const double *Vals, void *Uptr);
-    using TDataStoreExProc_t = void (*)(const int *Indx, const double *Vals, const int afdim, void *Uptr);
+using TDomainIndexProc_t = void ( * )( int RawIndex, int MappedIndex, void *Uptr );
+using TDataStoreProc_t = void ( * )( const int *Indx, const double *Vals );
+using TDataStoreFiltProc_t = int ( * )( const int *Indx, const double *Vals, void *Uptr );
+using TDataStoreExProc_t = void ( * )( const int *Indx, const double *Vals, const int afdim, void *Uptr );
 
-    using TDataStoreExProc_F = void (*)(const int *Indx, const double *Vals, const int afdim, int64_t Uptr);
-    using TDataStoreFiltProc_F = int(*)(const int *Indx, const double *Vals, int64_t Uptr);
-    using TDomainIndexProc_F = void(*)(int RawIndex, int MappedIndex, int64_t Uptr);
+using TDataStoreExProc_F = void ( * )( const int *Indx, const double *Vals, const int afdim, int64_t Uptr );
+using TDataStoreFiltProc_F = int ( * )( const int *Indx, const double *Vals, int64_t Uptr );
+using TDomainIndexProc_F = void ( * )( int RawIndex, int MappedIndex, int64_t Uptr );
 
-    const std::array<int, GMS_DT_ALIAS+1> DataTypSize {1,1,5,5,0};
+const std::array<int, GMS_DT_ALIAS + 1> DataTypSize{ 1, 1, 5, 5, 0 };
 
-    constexpr int   DOMC_UNMAPPED = -2, // indicator for unmapped index pos
-                    DOMC_EXPAND = -1,   // indicator growing index pos
-                    DOMC_STRICT = 0;    // indicator mapped index pos
+constexpr int DOMC_UNMAPPED = -2,// indicator for unmapped index pos
+        DOMC_EXPAND = -1,        // indicator growing index pos
+        DOMC_STRICT = 0;         // indicator mapped index pos
 
-    const std::string   BADUEL_PREFIX = "?L__",
-                        BADStr_PREFIX = "?Str__",
-                        strGDXCOMPRESS = "GDXCOMPRESS",
-                        strGDXCONVERT = "GDXCONVERT";
+const std::string BADUEL_PREFIX = "?L__",
+                  BADStr_PREFIX = "?Str__",
+                  strGDXCOMPRESS = "GDXCOMPRESS",
+                  strGDXCONVERT = "GDXCONVERT";
 
-    struct TDFilter {
-        int FiltNumber{}, FiltMaxUel{};
-        collections::gmsobj::TBooleanBitArray FiltMap{};
-        bool FiltSorted{};
+struct TDFilter {
+   int FiltNumber{}, FiltMaxUel{};
+   collections::gmsobj::TBooleanBitArray FiltMap{};
+   bool FiltSorted{};
 
-        TDFilter(int Nr, int UserHigh) :
-            FiltNumber{Nr},
-            FiltMaxUel{UserHigh}
-        {
-        }
+   TDFilter( int Nr, int UserHigh ) : FiltNumber{ Nr },
+                                      FiltMaxUel{ UserHigh }
+   {
+   }
 
-        ~TDFilter() = default;
+   ~TDFilter() = default;
 
-        [[nodiscard]] int MemoryUsed() const {
-            return FiltMap.MemoryUsed();
-        }
+   [[nodiscard]] int MemoryUsed() const
+   {
+      return FiltMap.MemoryUsed();
+   }
 
-        [[nodiscard]] bool InFilter(int V) const {
-            return V >= 0 && V <= FiltMaxUel && FiltMap.GetBit(V);
-        }
+   [[nodiscard]] bool InFilter( int V ) const
+   {
+      return V >= 0 && V <= FiltMaxUel && FiltMap.GetBit( V );
+   }
 
-        void SetFilter(int ix, bool v) {
-            FiltMap.SetBit(ix, v);
-        }
-    };
+   void SetFilter( int ix, bool v )
+   {
+      FiltMap.SetBit( ix, v );
+   }
+};
 
-    using TSetBitMap = collections::gmsobj::TBooleanBitArray;
+using TSetBitMap = collections::gmsobj::TBooleanBitArray;
 
-    enum class TgdxDAction {
-        dm_unmapped,
-        dm_strict,
-        dm_filter,
-        dm_expand
-    };
+enum class TgdxDAction
+{
+   dm_unmapped,
+   dm_strict,
+   dm_filter,
+   dm_expand
+};
 
-    struct TDomain {
-        TDFilter *DFilter;
-        TgdxDAction DAction;
-    };
+struct TDomain {
+   TDFilter *DFilter;
+   TgdxDAction DAction;
+};
 
-    using TDomainList = std::array<TDomain, GLOBAL_MAX_INDEX_DIM>;
+using TDomainList = std::array<TDomain, GLOBAL_MAX_INDEX_DIM>;
 
-    using TCommentsList = collections::gmsobj::TXStrings;
+using TCommentsList = collections::gmsobj::TXStrings;
 
-    struct TgdxSymbRecord {
-        int SSyNr;
-        int64_t SPosition;
-        int SDim, SDataCount, SErrors;
-        gdxSyType SDataType;
-        int SUserInfo;
-        bool SSetText;
-        std::array<char, GMS_SSSIZE> SExplTxt;
-        bool SIsCompressed;
-        std::unique_ptr<int[]>  SDomSymbols, // real domain info
-                                SDomStrings; // relaxed domain info
-        std::optional<TCommentsList> SCommentsList;
-        bool SScalarFrst; // not stored
-        std::unique_ptr<TSetBitMap> SSetBitMap; // for 1-dim sets only
-    };
-    using PgdxSymbRecord = TgdxSymbRecord*;
+struct TgdxSymbRecord {
+   int SSyNr;
+   int64_t SPosition;
+   int SDim, SDataCount, SErrors;
+   gdxSyType SDataType;
+   int SUserInfo;
+   bool SSetText;
+   std::array<char, GMS_SSSIZE> SExplTxt;
+   bool SIsCompressed;
+   std::unique_ptr<int[]> SDomSymbols,// real domain info
+           SDomStrings;               // relaxed domain info
+   std::optional<TCommentsList> SCommentsList;
+   bool SScalarFrst;                      // not stored
+   std::unique_ptr<TSetBitMap> SSetBitMap;// for 1-dim sets only
+};
+using PgdxSymbRecord = TgdxSymbRecord *;
 
-    enum TgdxIntlValTyp { // values stored internally via the indicator byte
-        vm_valund,
-        vm_valna,
-        vm_valpin,
-        vm_valmin,
-        vm_valeps,
-        vm_zero,
-        vm_one,
-        vm_mone,
-        vm_half,
-        vm_two,
-        vm_normal,
-        vm_count
-    };
+enum TgdxIntlValTyp
+{// values stored internally via the indicator byte
+   vm_valund,
+   vm_valna,
+   vm_valpin,
+   vm_valmin,
+   vm_valeps,
+   vm_zero,
+   vm_one,
+   vm_mone,
+   vm_half,
+   vm_two,
+   vm_normal,
+   vm_count
+};
 
-    enum TgxFileMode {
-        f_not_open,
-        fr_init,
-        fw_init,
-        fw_dom_raw,
-        fw_dom_map,
-        fw_dom_str,
-        fw_raw_data,
-        fw_map_data,
-        fw_str_data,
-        f_raw_elem,
-        f_map_elem,
-        f_str_elem,
-        fr_raw_data,
-        fr_map_data,
-        fr_mapr_data,
-        fr_str_data,
-        fr_filter,
-        fr_slice,
-        tgxfilemode_count
-    };
+enum TgxFileMode
+{
+   f_not_open,
+   fr_init,
+   fw_init,
+   fw_dom_raw,
+   fw_dom_map,
+   fw_dom_str,
+   fw_raw_data,
+   fw_map_data,
+   fw_str_data,
+   f_raw_elem,
+   f_map_elem,
+   f_str_elem,
+   fr_raw_data,
+   fr_map_data,
+   fr_mapr_data,
+   fr_str_data,
+   fr_filter,
+   fr_slice,
+   tgxfilemode_count
+};
 
-    class TgxModeSet : public utils::IContainsPredicate<TgxFileMode> {
-        std::array<bool, tgxfilemode_count> modeActive{};
-        uint8_t count{};
-    public:
-        TgxModeSet(const std::initializer_list<TgxFileMode> &modes);
-        ~TgxModeSet() override = default;
-        [[nodiscard]] bool contains(const TgxFileMode& mode) const override;
-        [[nodiscard]] bool empty() const;
-    };
+class TgxModeSet : public utils::IContainsPredicate<TgxFileMode>
+{
+   std::array<bool, tgxfilemode_count> modeActive{};
+   uint8_t count{};
 
-    const TgxModeSet    AnyWriteMode {fw_init,fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data,fw_map_data,fw_str_data},
-                        AnyReadMode {fr_init,fr_raw_data,fr_map_data,fr_mapr_data,fr_str_data};
+public:
+   TgxModeSet( const std::initializer_list<TgxFileMode> &modes );
+   ~TgxModeSet() override = default;
+   [[nodiscard]] bool contains( const TgxFileMode &mode ) const override;
+   [[nodiscard]] bool empty() const;
+};
 
-    enum class TgdxElemSize {
-        sz_byte,
-        sz_word,
-        sz_integer
-    };
+const TgxModeSet AnyWriteMode{ fw_init, fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data, fw_map_data, fw_str_data },
+        AnyReadMode{ fr_init, fr_raw_data, fr_map_data, fr_mapr_data, fr_str_data };
 
-    // N.B.: we store integers in [0..high(integer)] in TIntegerMapping, so
-    // FMAXCAPACITY = high(integer) + 1 is all we will ever need, and we will
-    // never get a request to grow any larger.  The checks and code
-    // in growMapping reflect this
-    class TIntegerMapping {
-        int64_t FCapacity {}, FMapBytes {};
-        int64_t FMAXCAPACITY {std::numeric_limits<int>::max() + static_cast<int64_t>(1)};
-        int FHighestIndex{};
-        int *PMap {};
+enum class TgdxElemSize
+{
+   sz_byte,
+   sz_word,
+   sz_integer
+};
 
-        void growMapping(int F);
-    public:
-        TIntegerMapping() {}
-        ~TIntegerMapping();
-        [[nodiscard]] int MemoryUsed() const;
-        [[nodiscard]] int GetHighestIndex() const;
-        [[nodiscard]] int GetMapping(int F) const;
-        void SetMapping(int F, int T);
-        [[nodiscard]] int size() const;
-        [[nodiscard]] bool empty() const;
-    };
+// N.B.: we store integers in [0..high(integer)] in TIntegerMapping, so
+// FMAXCAPACITY = high(integer) + 1 is all we will ever need, and we will
+// never get a request to grow any larger.  The checks and code
+// in growMapping reflect this
+class TIntegerMapping
+{
+   int64_t FCapacity{}, FMapBytes{};
+   int64_t FMAXCAPACITY{ std::numeric_limits<int>::max() + static_cast<int64_t>( 1 ) };
+   int FHighestIndex{};
+   int *PMap{};
 
-    enum class TUELUserMapStatus {
-        map_unknown,
-        map_unsorted,
-        map_sorted,
-        map_sortgrow,
-        map_sortfull
-    };
+   void growMapping( int F );
 
-    template<typename T>
+public:
+   TIntegerMapping() {}
+   ~TIntegerMapping();
+   [[nodiscard]] int MemoryUsed() const;
+   [[nodiscard]] int GetHighestIndex() const;
+   [[nodiscard]] int GetMapping( int F ) const;
+   void SetMapping( int F, int T );
+   [[nodiscard]] int size() const;
+   [[nodiscard]] bool empty() const;
+};
+
+enum class TUELUserMapStatus
+{
+   map_unknown,
+   map_unsorted,
+   map_sorted,
+   map_sortgrow,
+   map_sortfull
+};
+
+template<typename T>
 #ifdef TSH_LEGACY
-    using TXStrHashListImpl = collections::strhash::TXStrHashListLegacy<T>;
+using TXStrHashListImpl = collections::strhash::TXStrHashListLegacy<T>;
 #else
-    using TXStrHashListImpl = collections::strhash::TXStrHashList<T>;
+using TXStrHashListImpl = collections::strhash::TXStrHashList<T>;
 #endif
 
-    template<typename T>
+template<typename T>
 #ifdef TSH_LEGACY
-    using TXCSStrHashListImpl = collections::strhash::TXCSStrHashListLegacy<T>;
+using TXCSStrHashListImpl = collections::strhash::TXCSStrHashListLegacy<T>;
 #else
-    using TXCSStrHashListImpl = collections::strhash::TXCSStrHashList<T>;
+using TXCSStrHashListImpl = collections::strhash::TXCSStrHashList<T>;
 #endif
 
-    class TUELTable : public TXStrHashListImpl<int> {
-        TUELUserMapStatus FMapToUserStatus {TUELUserMapStatus::map_unknown};
-    public:
-        std::unique_ptr<TIntegerMapping> UsrUel2Ent {}; // from user uelnr to table entry
-        TUELTable();
-        ~TUELTable() override = default;
-        [[nodiscard]] int size() const;
-        [[nodiscard]] bool empty() const;
-        int GetUserMap(int i);
-        void SetUserMap(int EN, int N);
-        int NewUsrUel(int EN);
-        int AddUsrNew(const char *s, size_t slen);
-        int AddUsrIndxNew(const char *s, size_t slen, int UelNr);
-        [[nodiscard]] int GetMaxUELLength() const;
-        int IndexOf(const char *s);
-        int AddObject(const char *id, size_t idlen, int mapping);
-        int StoreObject(const char *id, size_t idlen, int mapping);
-        const char *operator[](int index) const;
-        void RenameEntry(int N, const char *s);
-        [[nodiscard]] int MemoryUsed() const;
-        void SaveToStream(gmsstrm::TXStreamDelphi &S);
-        void LoadFromStream(gmsstrm::TXStreamDelphi &S);
-        TUELUserMapStatus GetMapToUserStatus();
-        void ResetMapToUserStatus();
-    };
+class TUELTable : public TXStrHashListImpl<int>
+{
+   TUELUserMapStatus FMapToUserStatus{ TUELUserMapStatus::map_unknown };
 
-    int MakeGoodExplText(char *s);
+public:
+   std::unique_ptr<TIntegerMapping> UsrUel2Ent{};// from user uelnr to table entry
+   TUELTable();
+   ~TUELTable() override = default;
+   [[nodiscard]] int size() const;
+   [[nodiscard]] bool empty() const;
+   int GetUserMap( int i );
+   void SetUserMap( int EN, int N );
+   int NewUsrUel( int EN );
+   int AddUsrNew( const char *s, size_t slen );
+   int AddUsrIndxNew( const char *s, size_t slen, int UelNr );
+   [[nodiscard]] int GetMaxUELLength() const;
+   int IndexOf( const char *s );
+   int AddObject( const char *id, size_t idlen, int mapping );
+   int StoreObject( const char *id, size_t idlen, int mapping );
+   const char *operator[]( int index ) const;
+   void RenameEntry( int N, const char *s );
+   [[nodiscard]] int MemoryUsed() const;
+   void SaveToStream( gmsstrm::TXStreamDelphi &S );
+   void LoadFromStream( gmsstrm::TXStreamDelphi &S );
+   TUELUserMapStatus GetMapToUserStatus();
+   void ResetMapToUserStatus();
+};
 
-    struct TAcronym {
-        std::string AcrName, AcrText;
-        int AcrMap{}, AcrReadMap{-1};
-        bool AcrAutoGen{};
+int MakeGoodExplText( char *s );
 
-        TAcronym(const char *Name, const char *Text, int Map);
-        explicit TAcronym(gmsstrm::TXStreamDelphi &S);
-        TAcronym() = default;
-        virtual ~TAcronym() = default;
-        [[nodiscard]] int MemoryUsed() const;
-        void SaveToStream(gmsstrm::TXStreamDelphi &S) const;
-        void SetNameAndText(const char *Name, const char *Text);
-    };
+struct TAcronym {
+   std::string AcrName, AcrText;
+   int AcrMap{}, AcrReadMap{ -1 };
+   bool AcrAutoGen{};
 
-    class TAcronymList {
-        collections::gmsobj::TXList<TAcronym> FList;
-    public:
-        TAcronymList() = default;
-        ~TAcronymList();
-        int FindEntry(int Map);
-        int FindName(const char *Name);
-        int AddEntry(const char *Name, const char *Text, int Map);
-        void CheckEntry(int Map);
-        void SaveToStream(gmsstrm::TXStreamDelphi& S);
-        void LoadFromStream(gmsstrm::TXStreamDelphi& S);
-        int MemoryUsed();
-        [[nodiscard]] int size() const;
-        TAcronym &operator[](int Index);
-    };
+   TAcronym( const char *Name, const char *Text, int Map );
+   explicit TAcronym( gmsstrm::TXStreamDelphi &S );
+   TAcronym() = default;
+   virtual ~TAcronym() = default;
+   [[nodiscard]] int MemoryUsed() const;
+   void SaveToStream( gmsstrm::TXStreamDelphi &S ) const;
+   void SetNameAndText( const char *Name, const char *Text );
+};
 
-    class TFilterList {
-        collections::gmsobj::TXList<TDFilter> FList;
-    public:
-        TFilterList() = default;
-        ~TFilterList();
-        void AddFilter(TDFilter *F);
-        void DeleteFilter(int ix);
-        TDFilter *FindFilter(int Nr);
-        [[nodiscard]] size_t MemoryUsed() const;
-    };
+class TAcronymList
+{
+   collections::gmsobj::TXList<TAcronym> FList;
 
-    using TIntlValueMapDbl = std::array<double, vm_count>;
-    using TIntlValueMapI64 = std::array<int64_t, vm_count>;
+public:
+   TAcronymList() = default;
+   ~TAcronymList();
+   int FindEntry( int Map );
+   int FindName( const char *Name );
+   int AddEntry( const char *Name, const char *Text, int Map );
+   void CheckEntry( int Map );
+   void SaveToStream( gmsstrm::TXStreamDelphi &S );
+   void LoadFromStream( gmsstrm::TXStreamDelphi &S );
+   int MemoryUsed();
+   [[nodiscard]] int size() const;
+   TAcronym &operator[]( int Index );
+};
 
-    using LinkedDataType = collections::datastorage::TLinkedData<int, double>;
-    using LinkedDataIteratorType = collections::datastorage::TLinkedDataRec<int, double> *;
+class TFilterList
+{
+   collections::gmsobj::TXList<TDFilter> FList;
 
-    #if defined(TXSPOOL_LEGACY)
-        using TSetTextList = collections::gmsobj::TXStrPool<uint8_t>;
-    #else
-        using TSetTextList = TXCSStrHashListImpl<uint8_t>;
-    #endif
+public:
+   TFilterList() = default;
+   ~TFilterList();
+   void AddFilter( TDFilter *F );
+   void DeleteFilter( int ix );
+   TDFilter *FindFilter( int Nr );
+   [[nodiscard]] size_t MemoryUsed() const;
+};
 
-    using TNameList = TXStrHashListImpl<PgdxSymbRecord>;
+using TIntlValueMapDbl = std::array<double, vm_count>;
+using TIntlValueMapI64 = std::array<int64_t, vm_count>;
+
+using LinkedDataType = collections::datastorage::TLinkedData<int, double>;
+using LinkedDataIteratorType = collections::datastorage::TLinkedDataRec<int, double> *;
+
+#if defined( TXSPOOL_LEGACY )
+using TSetTextList = collections::gmsobj::TXStrPool<uint8_t>;
+#else
+using TSetTextList = TXCSStrHashListImpl<uint8_t>;
+#endif
+
+using TNameList = TXStrHashListImpl<PgdxSymbRecord>;
 
 #ifdef TBL_GMSDATA_LEGACY
-    template<typename T>
-    using TTblGamsDataImpl = collections::gmsdata::TTblGamsDataLegacy<T>;
+template<typename T>
+using TTblGamsDataImpl = collections::gmsdata::TTblGamsDataLegacy<T>;
 #else
-    template<typename T>
-    using TTblGamsDataImpl = collections::gmsdata::TTblGamsData<T>;
+template<typename T>
+using TTblGamsDataImpl = collections::gmsdata::TTblGamsData<T>;
 #endif
 
-    using TDomainStrList = TXStrHashListImpl<uint8_t>;
+using TDomainStrList = TXStrHashListImpl<uint8_t>;
 
-    enum tvarvaltype {
-        vallevel, // 1
-        valmarginal, // 2
-        vallower, // 3
-        valupper, // 4
-        valscale // 5
-    };
+enum tvarvaltype
+{
+   vallevel,   // 1
+   valmarginal,// 2
+   vallower,   // 3
+   valupper,   // 4
+   valscale    // 5
+};
 
-    extern std::string DLLLoadPath; // can be set by loader, so the "dll" knows where it is loaded from
+extern std::string DLLLoadPath;// can be set by loader, so the "dll" knows where it is loaded from
 
-    union uInt64 {
-        int64_t i;
-        void *p;
-    };
+union uInt64
+{
+   int64_t i;
+   void *p;
+};
 
-    bool IsGoodIdent(const char *S);
-    bool CanBeQuoted(const char *s);
-    bool GoodUELString(const char *s, size_t slen);
+bool IsGoodIdent( const char *S );
+bool CanBeQuoted( const char *s );
+bool GoodUELString( const char *s, size_t slen );
 
-    int ConvertGDXFile(const std::string &fn, const std::string &MyComp);
+int ConvertGDXFile( const std::string &fn, const std::string &MyComp );
 
-}
+}// namespace gdx

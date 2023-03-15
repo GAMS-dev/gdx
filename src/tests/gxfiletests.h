@@ -1,85 +1,101 @@
 #pragma once
 
-namespace gdx::tests::gxfiletests {
+namespace gdx::tests::gxfiletests
+{
 
-    bool setEnvironmentVar(const std::string& name, const std::string &val);
-    void unsetEnvironmentVar(const std::string& name);
+bool setEnvironmentVar( const std::string &name, const std::string &val );
+void unsetEnvironmentVar( const std::string &name );
 
-    void basicTest(const std::function<void(TGXFileObj&)> &cb);
-    void testRead(const std::string &filename, const std::function<void(TGXFileObj&)> &cb);
-    void testWrite(const std::string &filename, const std::function<void(TGXFileObj&)> &cb);
+void basicTest( const std::function<void( TGXFileObj & )> &cb );
+void testRead( const std::string &filename, const std::function<void( TGXFileObj & )> &cb );
+void testWrite( const std::string &filename, const std::function<void( TGXFileObj & )> &cb );
 
-    void writeMappedRecordsOutOfOrder(TGXFileObj &pgx);
-    void domainSetGetTestSetupPrefix(TGXFileObj &pgx);
-    std::string acquireGDXforModel(const std::string &model);
-    void commonSetGetDomainTests(const std::vector<std::string> &domainNames, const std::vector<int> &domainIndices);
-    void testReadModelGDX(const std::string &model, const std::function<void(TGXFileObj&)> &func);
-    void testWithCompressConvert(bool compress, const std::string &convert);
+void writeMappedRecordsOutOfOrder( TGXFileObj &pgx );
+void domainSetGetTestSetupPrefix( TGXFileObj &pgx );
+std::string acquireGDXforModel( const std::string &model );
+void commonSetGetDomainTests( const std::vector<std::string> &domainNames, const std::vector<int> &domainIndices );
+void testReadModelGDX( const std::string &model, const std::function<void( TGXFileObj & )> &func );
+void testWithCompressConvert( bool compress, const std::string &convert );
 
-    class StrRef {
-        char *s;
-    public:
-        explicit StrRef(char *_s) : s(_s) {}
+class StrRef
+{
+   char *s;
 
-        StrRef &operator=(const std::string &other) {
-            std::memcpy(s, other.c_str(), sizeof(char)*(other.length()+1));
-            return *this;
-        }
+public:
+   explicit StrRef( char *_s ) : s( _s ) {}
 
-        const char *c_str() {
-            return s;
-        }
+   StrRef &operator=( const std::string &other )
+   {
+      std::memcpy( s, other.c_str(), sizeof( char ) * ( other.length() + 1 ) );
+      return *this;
+   }
 
-        [[nodiscard]] bool empty() const {
-            return s[0] == '\0';
-        }
+   const char *c_str()
+   {
+      return s;
+   }
 
-        explicit operator std::string() const {
-            std::string res;
-            res.assign(s);
-            return res;
-        }
+   [[nodiscard]] bool empty() const
+   {
+      return s[0] == '\0';
+   }
 
-        [[nodiscard]] std::string str() const {
-            std::string res;
-            res.assign(s);
-            return res;
-        }
+   explicit operator std::string() const
+   {
+      std::string res;
+      res.assign( s );
+      return res;
+   }
 
-        bool operator==(const std::string &other) {
-            return !std::strcmp(other.c_str(), s);
-        }
-    };
+   [[nodiscard]] std::string str() const
+   {
+      std::string res;
+      res.assign( s );
+      return res;
+   }
 
-    using TgdxStrIndex = std::array<std::string, GMS_MAX_INDEX_DIM>;
+   bool operator==( const std::string &other )
+   {
+      return !std::strcmp( other.c_str(), s );
+   }
+};
 
-    class StrIndexBuffers {
-        std::array<std::array<char, GMS_SSSIZE>, GMS_MAX_INDEX_DIM> bufContents{};
-        std::array<char*, GMS_MAX_INDEX_DIM> bufPtrs{};
-    public:
-        explicit StrIndexBuffers(const TgdxStrIndex *strIndex = nullptr) {
-            for (int i{}; i < (int)bufPtrs.size(); i++) {
-                bufPtrs[i] = bufContents[i].data();
-                if (strIndex)
-                    std::memcpy(bufPtrs[i], (*strIndex)[i].c_str(),(*strIndex)[i].length()+1);
-            }
-        }
+using TgdxStrIndex = std::array<std::string, GMS_MAX_INDEX_DIM>;
 
-        StrRef operator[](int index) {
-            return StrRef{bufPtrs[index]};
-        }
+class StrIndexBuffers
+{
+   std::array<std::array<char, GMS_SSSIZE>, GMS_MAX_INDEX_DIM> bufContents{};
+   std::array<char *, GMS_MAX_INDEX_DIM> bufPtrs{};
 
-        char **ptrs() { return bufPtrs.data(); }
-        const char** cptrs() { return (const char **)bufPtrs.data(); }
+public:
+   explicit StrIndexBuffers( const TgdxStrIndex *strIndex = nullptr )
+   {
+      for( int i{}; i < (int) bufPtrs.size(); i++ )
+      {
+         bufPtrs[i] = bufContents[i].data();
+         if( strIndex )
+            std::memcpy( bufPtrs[i], ( *strIndex )[i].c_str(), ( *strIndex )[i].length() + 1 );
+      }
+   }
 
-        void clear() {
-            for (int i{}; i < (int)bufContents.size(); i++)
-                bufContents[i].fill(0);
-        }
+   StrRef operator[]( int index )
+   {
+      return StrRef{ bufPtrs[index] };
+   }
 
-        StrRef front() {
-            return StrRef{bufPtrs[0]};
-        }
-    };
+   char **ptrs() { return bufPtrs.data(); }
+   const char **cptrs() { return (const char **) bufPtrs.data(); }
 
-}
+   void clear()
+   {
+      for( int i{}; i < (int) bufContents.size(); i++ )
+         bufContents[i].fill( 0 );
+   }
+
+   StrRef front()
+   {
+      return StrRef{ bufPtrs[0] };
+   }
+};
+
+}// namespace gdx::tests::gxfiletests

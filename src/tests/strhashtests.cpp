@@ -23,73 +23,82 @@
  * SOFTWARE.
  */
 
-#include <algorithm>     // for fill_n
-#include <array>         // for array
-#include <numeric>       // for iota
-#include <string>        // for operator+, to_string, basic_string, string_l...
-#include <random>
+#include "../strhash.h"// for TXStrHashListLegacy, TXStrHashList, strhash
+#include "doctest.h"   // for ResultBuilder, REQUIRE_EQ, TestCase, TEST_CASE
+#include <algorithm>   // for fill_n
+#include <array>       // for array
 #include <chrono>
 #include <iostream>
-#include "../strhash.h"  // for TXStrHashListLegacy, TXStrHashList, strhash
-#include "doctest.h"     // for ResultBuilder, REQUIRE_EQ, TestCase, TEST_CASE
+#include <numeric>// for iota
+#include <random>
+#include <string>// for operator+, to_string, basic_string, string_l...
 
 using namespace std::literals::string_literals;
 using namespace gdx::collections::strhash;
 
-namespace gdx::tests::strhashtests {
+namespace gdx::tests::strhashtests
+{
 
-    TEST_SUITE_BEGIN("collections::strhash");
+TEST_SUITE_BEGIN( "collections::strhash" );
 
-    template<typename T>
-    void runTest(const std::array<int, 10> &nums) {
-        T shlst;
-        // 0-based
-        for(const int &n : nums) {
-            auto s {"i" + std::to_string(n)};
-            REQUIRE_EQ(n-1, shlst.AddObject(s.c_str(), s.length(), n));
-        }
-        REQUIRE_EQ(2, shlst.IndexOf("i3"));
-    };
+template<typename T>
+void runTest( const std::array<int, 10> &nums )
+{
+   T shlst;
+   // 0-based
+   for( const int &n: nums )
+   {
+      auto s{ "i" + std::to_string( n ) };
+      REQUIRE_EQ( n - 1, shlst.AddObject( s.c_str(), s.length(), n ) );
+   }
+   REQUIRE_EQ( 2, shlst.IndexOf( "i3" ) );
+};
 
-    TEST_CASE("Adding some set element names that are mapped to numbers") {
-        std::array<int, 10> nums {};
-        std::iota(nums.begin(), nums.end(), 1);
-        runTest<TXStrHashList<int>>(nums);
-        runTest<TXStrHashListLegacy<int>>(nums);
-    }
-
-    template<typename T>
-    void runStressTest(const std::string_view caption) {
-        auto t {std::chrono::high_resolution_clock::now()};
-        constexpr int card {50000}, ntries { 40 };
-        static_assert(card < std::numeric_limits<int>::max());
-        std::array<int, card> nums;
-        std::random_device rd;
-        for(int k{}; k<ntries; k++) {
-            T shlst;
-            shlst.SetCapacity(card);
-            std::mt19937 g(rd());
-            std::iota(nums.begin(), nums.end(), 1);
-            std::shuffle(nums.begin(), nums.end(), g);
-            for(int n : nums) {
-                std::string s{"i"s+std::to_string(n)};
-                shlst.AddObject(s.c_str(), s.length(), n);
-            }
-            int sum{};
-            for(int n : nums) {
-                std::string s{"i"s+std::to_string(n)};
-                sum += shlst.IndexOf(s.c_str());
-            }
-        }
-        auto delta {std::chrono::high_resolution_clock::now() - t};
-        std::cout << "Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds(1) << std::endl;
-    }
-
-    TEST_CASE("Stress test TXStrHashList vs. TXStrHashListLegacy") {
-        runStressTest<TXStrHashList<int>>("TXStrHashList"s);
-        runStressTest<TXStrHashListLegacy<int>>("TXStrHashListLegacy"s);
-    }
-
-    TEST_SUITE_END();
-
+TEST_CASE( "Adding some set element names that are mapped to numbers" )
+{
+   std::array<int, 10> nums{};
+   std::iota( nums.begin(), nums.end(), 1 );
+   runTest<TXStrHashList<int>>( nums );
+   runTest<TXStrHashListLegacy<int>>( nums );
 }
+
+template<typename T>
+void runStressTest( const std::string_view caption )
+{
+   auto t{ std::chrono::high_resolution_clock::now() };
+   constexpr int card{ 50000 }, ntries{ 40 };
+   static_assert( card < std::numeric_limits<int>::max() );
+   std::array<int, card> nums;
+   std::random_device rd;
+   for( int k{}; k < ntries; k++ )
+   {
+      T shlst;
+      shlst.SetCapacity( card );
+      std::mt19937 g( rd() );
+      std::iota( nums.begin(), nums.end(), 1 );
+      std::shuffle( nums.begin(), nums.end(), g );
+      for( int n: nums )
+      {
+         std::string s{ "i"s + std::to_string( n ) };
+         shlst.AddObject( s.c_str(), s.length(), n );
+      }
+      int sum{};
+      for( int n: nums )
+      {
+         std::string s{ "i"s + std::to_string( n ) };
+         sum += shlst.IndexOf( s.c_str() );
+      }
+   }
+   auto delta{ std::chrono::high_resolution_clock::now() - t };
+   std::cout << "Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds( 1 ) << std::endl;
+}
+
+TEST_CASE( "Stress test TXStrHashList vs. TXStrHashListLegacy" )
+{
+   runStressTest<TXStrHashList<int>>( "TXStrHashList"s );
+   runStressTest<TXStrHashListLegacy<int>>( "TXStrHashListLegacy"s );
+}
+
+TEST_SUITE_END();
+
+}// namespace gdx::tests::strhashtests

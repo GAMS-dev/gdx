@@ -23,42 +23,46 @@
  * SOFTWARE.
  */
 
-#include <cstdint>          // for int64_t, uint8_t
-#include <array>            // for array
-#include <cstring>          // for memcpy
-#include <string>           // for operator""s, string_literals
-#include "../gmsheapnew.h"  // for THeapMgr, gmsheapnew
-#include "doctest.h"        // for ResultBuilder, TestCase, REQUIRE_EQ, TEST...
+#include "../gmsheapnew.h"// for THeapMgr, gmsheapnew
+#include "doctest.h"      // for ResultBuilder, TestCase, REQUIRE_EQ, TEST...
+#include <array>          // for array
+#include <cstdint>        // for int64_t, uint8_t
+#include <cstring>        // for memcpy
+#include <string>         // for operator""s, string_literals
 
 using namespace std::literals::string_literals;
 using namespace gdx::gmsheapnew;
 
-namespace gdx::tests::gmsheapnew {
+namespace gdx::tests::gmsheapnew
+{
 
-    TEST_SUITE_BEGIN("collections::gmsheapnew");
+TEST_SUITE_BEGIN( "collections::gmsheapnew" );
 
-    TEST_CASE("Test simple usage of the custom heap") {
-        THeapMgr thm {"heapmgr-test"s};
-        const char *data {"hej"};
-        const int l {4};
-        void *buf = thm.XGetMem(l);
-        std::memcpy(buf, data, l);
-        thm.XFreeMem(buf, l);
-        const int n {10000};
-        std::array<void *, n> ptrs {};
-        std::array<uint8_t, 20> buf2{};
-        auto ref {reinterpret_cast<int64_t*>(buf2.data())};
-        for(int i{}; i<n; i++) {
-            ptrs[i] = thm.XGetMem((int)buf2.size());
-            *ref = (int64_t)i;
-            std::memcpy(ptrs[i], buf2.data(), buf2.size());
-        }
-        for(int i{}; i<n; i++) {
-            REQUIRE_EQ(*(reinterpret_cast<int64_t*>(ptrs[i])), (int64_t)i);
-            thm.XFreeMem(ptrs[i], (int)buf2.size());
-        }
-    }
-
-    TEST_SUITE_END();
-
+TEST_CASE( "Test simple usage of the custom heap" )
+{
+   THeapMgr thm{ "heapmgr-test"s };
+   const char *data{ "hej" };
+   const int l{ 4 };
+   void *buf = thm.XGetMem( l );
+   std::memcpy( buf, data, l );
+   thm.XFreeMem( buf, l );
+   const int n{ 10000 };
+   std::array<void *, n> ptrs{};
+   std::array<uint8_t, 20> buf2{};
+   auto ref{ reinterpret_cast<int64_t *>( buf2.data() ) };
+   for( int i{}; i < n; i++ )
+   {
+      ptrs[i] = thm.XGetMem( (int) buf2.size() );
+      *ref = (int64_t) i;
+      std::memcpy( ptrs[i], buf2.data(), buf2.size() );
+   }
+   for( int i{}; i < n; i++ )
+   {
+      REQUIRE_EQ( *( reinterpret_cast<int64_t *>( ptrs[i] ) ), (int64_t) i );
+      thm.XFreeMem( ptrs[i], (int) buf2.size() );
+   }
 }
+
+TEST_SUITE_END();
+
+}// namespace gdx::tests::gmsheapnew
