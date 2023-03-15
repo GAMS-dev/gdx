@@ -29,7 +29,7 @@
 #include <palmcc.h>
 #endif
 
-#include "gxfile.h"
+#include "gdx.h"
 #include <cstdint>        // for int64_t, uint8_t
 #include <algorithm>       // for fill_n, max, fill, sort
 #include <cassert>         // for assert

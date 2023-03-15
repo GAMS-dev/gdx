@@ -32,6 +32,7 @@ set(common
 		src/gmsheapnew.h src/gmsheapnew.cpp
 		src/utils.h src/utils.cpp
 		src/gxfile.h src/gxfile.cpp
+		src/gdx.h
 )
 
 set(tests

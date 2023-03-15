@@ -45,7 +45,7 @@
 #include <utility>                            // for pair
 #include <vector>                             // for vector
 #include "../gmsstrm.h"                       // for fmOpenRead
-#include "../gxfile.h"                        // for TGXFileObj, TgdxValues
+#include "../gdx.h"                             // for TGXFileObj, TgdxValues
 #include "../gclgms.h"                        // for GMS_SSSIZE, GMS_VAL_LEVEL
 #include "doctest.h"                          // for ResultBuilder, Expressi...
 #include "gxfiletests.h"
