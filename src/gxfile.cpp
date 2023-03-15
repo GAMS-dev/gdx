@@ -91,11 +91,13 @@ bool CanBeQuoted( const char *s )
       {
          if( saw_double ) return false;
          saw_single = true;
-      } else if( Ch == '\"' )
+      }
+      else if( Ch == '\"' )
       {
          if( saw_single ) return false;
          saw_double = true;
-      } else if( static_cast<unsigned char>( Ch ) < ' ' )
+      }
+      else if( static_cast<unsigned char>( Ch ) < ' ' )
          return false;
    }
    return true;
@@ -278,11 +280,13 @@ static int SystemP( const std::string &cmd, int &ProgRC )
          ProgRC = 0;
          return 126;
       }
-   } else if( WIFSIGNALED( res ) )
+   }
+   else if( WIFSIGNALED( res ) )
    {
       ProgRC = WTERMSIG( res );
       return 1;
-   } else
+   }
+   else
    {
       ProgRC = 0;
       return 2;
@@ -314,7 +318,8 @@ int MakeGoodExplText( char *s )
       if( !utils::in( s[i], '\"', '\'' ) )
       {
          if( s[i] < ' ' ) s[i] = '?';
-      } else
+      }
+      else
       {
          if( q == '\0' ) q = s[i];
          s[i] = q;
@@ -1005,7 +1010,8 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
       NrRecs = UelCntOrig;
       UniverseNr = 0;
       CurSyPtr = nullptr;
-   } else
+   }
+   else
    {
       FCurrentDim = CurSyPtr->SDim;
       FFile->SetCompression( CurSyPtr->SIsCompressed );
@@ -1086,7 +1092,8 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
          //WriteLn('Changing mapped read to raw read');
          res = NrRecs;// ignores filtering etc
          newmode = fr_mapr_data;
-      } else
+      }
+      else
       {
          //WriteLn('Cannot do mapped read fast');
          try
@@ -1137,7 +1144,8 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
                            FIDim = D;
                         }
                         break;
-                     case TgdxDAction::dm_expand: {
+                     case TgdxDAction::dm_expand:
+                     {
                         int EN = LastElem[D];
                         V = ExpndList.GetMapping( EN );
                         if( V >= 0 ) AElements[D] = V;
@@ -1148,7 +1156,8 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
                            {
                               ExpndList.SetMapping( EN, V );
                               AElements[D] = V;
-                           } else
+                           }
+                           else
                            {
                               AElements[D] = -EN;// so we recognize and assign the same nr
                               AddNew = true;
@@ -1162,7 +1171,8 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
                {
                   AllocOk = false;// That is used as a signal below for something bad happend, i.e., an exception was thrown
                   break;
-               } else if( AddError )
+               }
+               else if( AddError )
                {
                   // NOTE: Not covered by unit tests yet.
                   // Ensure that dimensions to the right have no bad UELs
@@ -1179,7 +1189,8 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
                   AddToErrorListDomErrs( LastElem, Avals.data() );// unmapped
                   LastElem[FIDim] = -LastElem[FIDim];
                   AddError = false;
-               } else
+               }
+               else
                {
                   if( AddNew )
                   {
@@ -1206,7 +1217,8 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
             }
             ReadPtr = SortList->StartRead( nullptr );
             res = static_cast<int>( SortList->Count() );
-         } catch( std::exception &e )
+         }
+         catch( std::exception &e )
          {
             std::cout << "Exception: " << e.what() << "\n";
             AllocOk = false;
@@ -1219,7 +1231,8 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
       std::fill_n( LastElem.begin(), FCurrentDim, -1 );
       fmode = newmode;
       return res;
-   } else
+   }
+   else
    {
       SetError( ERR_OUT_OF_MEMORY );
       SortList = nullptr;
@@ -1351,7 +1364,8 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
          return false;
       }
       FFile->WriteByte( 1 );// keeps logic working for scalars
-   } else
+   }
+   else
    {
       if( delta < 0 )
       {
@@ -1363,7 +1377,8 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
       {// small change in last dimension
          FFile->WriteByte( FCurrentDim + delta );
          LastElem[FCurrentDim - 1] = AElements[FCurrentDim - 1];
-      } else
+      }
+      else
       {// general change
          FFile->WriteByte( FDim );
          for( int D{ FDim - 1 }; D < FCurrentDim; D++ )
@@ -1469,7 +1484,8 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
       if( B == 255 ) return false;
       AFDim = FCurrentDim;
       if( FCurrentDim > 0 ) LastElem[FCurrentDim - 1] += B - DeltaForRead;
-   } else
+   }
+   else
    {
       AFDim = B;
       for( int D{ AFDim - 1 }; D < FCurrentDim; D++ )
@@ -1529,7 +1545,8 @@ double TGXFileObj::AcronymRemap( double V )
             ( *AcronymList )[N].AcrReadMap = newIndx;
             ( *AcronymList )[N].AcrAutoGen = true;
          }
-      } else
+      }
+      else
       {// found
          newIndx = ( *AcronymList )[N].AcrReadMap;
          if( newIndx <= 0 )
@@ -1616,7 +1633,8 @@ bool TGXFileObj::ResultWillBeSorted( const int *ADomainNrs )
                if( UELTable->GetMapToUserStatus() >= TUELUserMapStatus::map_sortgrow ) continue;
                else
                   return false;
-            } else if( UELTable->GetMapToUserStatus() == TUELUserMapStatus::map_sortfull )
+            }
+            else if( UELTable->GetMapToUserStatus() == TUELUserMapStatus::map_sortfull )
                continue;
             else
                return false;
@@ -1860,7 +1878,8 @@ int TGXFileObj::gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst )
    {
       gdxDataReadDone();
       return false;
-   } else
+   }
+   else
    {
       for( int D{}; D < FCurrentDim; D++ )
       {
@@ -1872,7 +1891,8 @@ int TGXFileObj::gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst )
 #else
             std::strcpy( KeyStr[D], ( *UELTable )[LED] );
 #endif
-         } else
+         }
+         else
             std::sprintf( KeyStr[D], "%s%d", BADUEL_PREFIX.c_str(), LED );
       }
       return true;
@@ -2066,7 +2086,8 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
       UELPos = FFile->ReadInteger();
       SetTextPos = FFile->ReadInteger();
       NextWritePosition = FFile->ReadInteger();
-   } else
+   }
+   else
    {
       SymbPos = FFile->ReadInt64();
       UELPos = FFile->ReadInt64();
@@ -2241,7 +2262,8 @@ int TGXFileObj::gdxAddAlias( const char *Id1, const char *Id2 )
    {
       SyNr = SyNr1;
       AName = Id2;
-   } else
+   }
+   else
    {
       SyNr = SyNr2;
       AName = Id1;
@@ -2258,7 +2280,8 @@ int TGXFileObj::gdxAddAlias( const char *Id1, const char *Id2 )
    {
       SyPtr->SDim = 1;
       utils::assignStrToBuf( "Aliased with *"s, SyPtr->SExplTxt.data() );
-   } else
+   }
+   else
    {
       SyPtr->SDim = ( *NameList->GetObject( SyNr ) )->SDim;
       utils::assignStrToBuf( "Aliased with "s + NameList->GetString( SyNr ), SyPtr->SExplTxt.data() );
@@ -2358,7 +2381,8 @@ int TGXFileObj::gdxDataErrorRecordX( int RecNr, int *KeyInt, double *Values )
       if( RecNr < 1 || RecNr > ErrorList->GetCount() )
       {
          ReportError( ERR_BADERRORRECORD );
-      } else
+      }
+      else
       {
          ErrorList->GetRecord( RecNr - 1, KeyInt, Values );
          return true;
@@ -2538,7 +2562,8 @@ int TGXFileObj::gdxGetElemText( int TxtNr, char *Txt, int &Node )
    {
       utils::assignStrToBuf( BADStr_PREFIX + std::to_string( TxtNr ), Txt, GMS_SSSIZE );
       return false;
-   } else
+   }
+   else
    {
       utils::assignPCharToBuf( SetTextList->GetName( TxtNr ), Txt, GMS_SSSIZE );
       auto obj = SetTextList->GetObject( TxtNr );
@@ -2569,7 +2594,8 @@ int TGXFileObj::gdxGetLastError()
       int le{ LastError };
       LastError = ERR_NOERROR;
       return le;
-   } else
+   }
+   else
    {
       int res{ FFile->GetLastIOResult() };
       if( res == ERR_NOERROR )
@@ -2729,7 +2755,8 @@ int TGXFileObj::gdxSymbolGetDomainX( int SyNr, char **DomainIDs )
          if( SyPtr->SDomStrings[D] )
             utils::assignPCharToBuf( DomainStrList->GetString( SyPtr->SDomStrings[D] ), DomainIDs[D], GMS_SSSIZE );
       res = 2;
-   } else if( !SyPtr->SDomSymbols )
+   }
+   else if( !SyPtr->SDomSymbols )
       res = 1;
    else
    {
@@ -2789,12 +2816,14 @@ int TGXFileObj::gdxSymbolInfoX( int SyNr, int &RecCnt, int &UserInfo, char *Expl
       UserInfo = 0;
       utils::assignPCharToBuf( "Universe", ExplTxt, GMS_SSSIZE );
       return true;
-   } else if( !NameList || NameList->empty() || SyNr < 1 || SyNr > NameList->size() )
+   }
+   else if( !NameList || NameList->empty() || SyNr < 1 || SyNr > NameList->size() )
    {
       RecCnt = UserInfo = 0;
       ExplTxt[0] = '\0';
       return false;
-   } else
+   }
+   else
    {
       const auto *obj = ( *NameList->GetObject( SyNr ) );
       RecCnt = !obj->SDim ? 1 : obj->SDataCount;// scalar trick
@@ -3081,7 +3110,8 @@ int TGXFileObj::gdxUMUelGet( int UelNr, char *Uel, int &UelMap )
       utils::assignPCharToBuf( ( *UELTable )[UelNr], Uel );
       UelMap = UELTable->GetUserMap( UelNr );
       return true;
-   } else
+   }
+   else
    {
       utils::assignStrToBuf( BADUEL_PREFIX + std::to_string( UelNr ), Uel );
       UelMap = -1;
@@ -3105,7 +3135,8 @@ int TGXFileObj::gdxUMUelInfo( int &UelCnt, int &HighMap ) const
    {// AS: Use FFile != nullptr as proxy for checking open has been called before
       UelCnt = HighMap = 0;
       return false;
-   } else
+   }
+   else
    {
       UelCnt = UELTable ? UELTable->size() : 0;
       HighMap = UELTable->UsrUel2Ent->GetHighestIndex();// highest index
@@ -3593,12 +3624,13 @@ int TGXFileObj::gdxAcronymSetInfo( int N, const char *AName, const char *Txt, in
       {
          assert( obj.AcrReadMap == AIndx && "gdxAcronymSetInfo" );
          obj.AcrAutoGen = false;
-      } else if( ErrorCondition( AIndx == obj.AcrMap, ERR_BADACROINDEX ) )
+      }
+      else if( ErrorCondition( AIndx == obj.AcrMap, ERR_BADACROINDEX ) )
          return false;
 
       obj.SetNameAndText( AName, Txt );
-
-   } else if( obj.AcrReadMap != AIndx )
+   }
+   else if( obj.AcrReadMap != AIndx )
    {
       if( ErrorCondition( utils::sameTextPChar( AName, obj.AcrName.c_str() ), ERR_BADACRONAME ) ||
           ErrorCondition( MapIsUnique( AIndx ), ERR_ACRODUPEMAP ) ) return false;
@@ -3919,7 +3951,8 @@ int TGXFileObj::gdxGetDomainElements( int SyNr, int DimPos, int FilterNr, TDomai
       for( int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++ )
          if( DomainIndxs.GetMapping( N ) == 1 )
             NrElem++;
-   } else
+   }
+   else
    {//should we have an option to return indices in Raw order or in Mapped order?
       TTblGamsDataImpl<int> SortL{ 1, sizeof( int ) };
       for( int N{ 1 }; N <= DomainIndxs.GetHighestIndex(); N++ )
@@ -4214,7 +4247,8 @@ int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataSt
       {
          ElemNrs[D] = -1;
          Dimen++;
-      } else
+      }
+      else
       {
          // NOTE: Not covered by unit tests yet.
          ElemNrs[D] = UELTable->IndexOf( UelFilterStr[D] );
@@ -4273,7 +4307,8 @@ int TGXFileObj::gdxDataSliceUELS( const int *SliceKeyInt, char **KeyStr )
             // NOTE: Not covered by unit tests yet.
             KeyStr[D][0] = '?';
             KeyStr[D][1] = '\0';
-         } else
+         }
+         else
             utils::assignPCharToBuf( ( *UELTable )[N], KeyStr[D] );
       }
    }
@@ -4737,7 +4772,8 @@ int TGXFileObj::gdxDataReadRawFastEx( int SyNr, TDataStoreExProc_t DP, int &NrRe
       local_Uptr.p = Uptr;
       while( DoRead( AVals.data(), AFDim ) )
          local_DP( LastElem.data(), AVals.data(), AFDim, local_Uptr.i );
-   } else
+   }
+   else
    {
       while( DoRead( AVals.data(), AFDim ) )
          DP( LastElem.data(), AVals.data(), AFDim, Uptr );
@@ -4830,7 +4866,8 @@ int TUELTable::AddUsrIndxNew( const char *s, size_t slen, int UelNr )
       res = UelNr;
       *GetObject( EN ) = res;
       UsrUel2Ent->SetMapping( res, EN );
-   } else if( res != UelNr )
+   }
+   else if( res != UelNr )
    {
       res = -1;// NOTE: Not covered by unit tests yet.
    }
@@ -4912,7 +4949,8 @@ TUELUserMapStatus TUELTable::GetMapToUserStatus()
             LV = V;
             // saw some un-init/neg values
             if( !C ) FMapToUserStatus = TUELUserMapStatus::map_sorted;
-         } else
+         }
+         else
          {
             FMapToUserStatus = TUELUserMapStatus::map_unsorted;
             break;

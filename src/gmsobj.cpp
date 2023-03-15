@@ -51,7 +51,8 @@ void TQuickSortClass::QuickSort( int L, int R )
                p = i;
             i++;
             j--;
-         } else if( i == j )
+         }
+         else if( i == j )
          {
             i++;
             j--;
@@ -64,7 +65,8 @@ void TQuickSortClass::QuickSort( int L, int R )
          if( i < R ) QuickSort( i, R );// sort the right part if necessary
          i = L;                        // move to the left part
          R = j;
-      } else
+      }
+      else
       {                                // right part is bigger, look left first
          if( L < j ) QuickSort( L, j );// sort the right part if necessary
          L = i;

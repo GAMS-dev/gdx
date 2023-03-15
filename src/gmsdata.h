@@ -325,7 +325,8 @@ class TTblGamsDataLegacy
             if( i < R ) QuickSort( i, R );
             i = L;
             R = j;
-         } else
+         }
+         else
          {
             if( L < j ) QuickSort( L, j );
             L = i;

@@ -271,7 +271,8 @@ class TMiBufferedStreamDelphi : public TBufferedFileStreamDelphi
       {
          order_type = PAT_BAD_SIZE;
          SetPosition( GetPosition() + size_type );
-      } else
+      }
+      else
       {
          Read( &v1, sizeof( T ) );
          order_type = 0;

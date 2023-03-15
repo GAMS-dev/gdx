@@ -331,7 +331,8 @@ uint32_t TXFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
    if( FPassWord.empty() )
    {
       FS->write( static_cast<const char *>( Buffer ), Count );
-   } else
+   }
+   else
    {
       auto PR = static_cast<const char *>( Buffer );
       std::vector<char> PW( Count );
@@ -361,7 +362,8 @@ bool TBufferedFileStreamDelphi::FillBuffer()
    {
       NrLoaded = 0;
       FLastIOResult = -100044;// check with gxdefs.pas
-   } else
+   }
+   else
    {
       uint16_t RLen = TXFileStreamDelphi::Read( &CBufPtr->cxHeader, sizeof( TCompressHeader ) );
       if( RLen < sizeof( TCompressHeader ) ) NrLoaded = 0;
@@ -439,7 +441,8 @@ bool TBufferedFileStreamDelphi::FlushBuffer()
    {
       ActWritten = TXFileStreamDelphi::Write( BufPtr.data(), NrWritten );
       res = NrWritten == ActWritten;
-   } else
+   }
+   else
    {
       unsigned long Len = CBufSize - sizeof( TCompressHeader );
       compress( &CBufPtr->cxData, &Len, BufPtr.data(), NrWritten );
@@ -451,7 +454,8 @@ bool TBufferedFileStreamDelphi::FlushBuffer()
          Len += sizeof( TCompressHeader );
          ActWritten = TXFileStreamDelphi::Write( &CBufPtr->cxHeader.cxTyp, Len );
          res = Len == ActWritten;
-      } else
+      }
+      else
       {
          CBufPtr->cxHeader.cxTyp = 0;// indicates no compression
          CBufPtr->cxHeader.cxB1 = NrWritten >> 8;
@@ -473,7 +477,8 @@ uint32_t TBufferedFileStreamDelphi::Read( void *Buffer, uint32_t Count )
       std::memcpy( Buffer, &BufPtr[NrRead], Count );
       NrRead += Count;
       return Count;
-   } else
+   }
+   else
    {
       char *UsrPtr = static_cast<char *>( Buffer );
       uint32_t UsrReadCnt = 0;
@@ -510,7 +515,8 @@ uint32_t TBufferedFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
       std::memcpy( &BufPtr[NrWritten], Buffer, Count );
       NrWritten += Count;
       return Count;
-   } else
+   }
+   else
    {
       auto UsrPtr = static_cast<const char *>( Buffer );
       int UsrWriteCnt{};// total number of bytes written
@@ -705,7 +711,8 @@ void TMiBufferedStreamDelphi::WriteGmsDouble( double D )
       B = 128 | C;
       Write( &B, 1 );
       Write( &Z.VA[C + 1], (uint32_t) Z.VA.size() - C );
-   } else
+   }
+   else
    {
       for( int i{ (int) Z.VA.size() - 1 }; i >= 0; i-- )
       {
@@ -758,7 +765,8 @@ double TMiBufferedStreamDelphi::ReadGmsDouble()
             C--;
          }
       }
-   } else
+   }
+   else
    {
       for( int i{ (int) Z.VA.size() - 1 }; i >= 0; i-- )
       {

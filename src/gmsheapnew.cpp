@@ -115,7 +115,8 @@ void *TBigBlockMgr::GetBigBlock()
    {
       FreeList.pop_back();
       return res;
-   } else
+   }
+   else
    {
       IncreaseMemorySize( BIGBLOCKSIZE );
       return std::malloc( BIGBLOCKSIZE );
@@ -530,10 +531,12 @@ void THeapMgr::XReAllocMem( void **P, int OldSize, int NewSize )
    {
       if( OldSize > 0 && P && *P ) std::free( *P );
       *P = nullptr;
-   } else if( !P || !*P || OldSize <= 0 )
+   }
+   else if( !P || !*P || OldSize <= 0 )
    {
       *P = std::malloc( NewSize );
-   } else
+   }
+   else
       *P = std::realloc( *P, NewSize );
 #else
    void *PNew;
@@ -544,13 +547,16 @@ void THeapMgr::XReAllocMem( void **P, int OldSize, int NewSize )
    {
       if( OldSize > 0 && P ) prvXFreeMem( P, OldSize );
       PNew = nullptr;
-   } else if( !P || OldSize <= 0 )
+   }
+   else if( !P || OldSize <= 0 )
    {
       PNew = prvXGetMem( NewSize );
-   } else if( OldSize == NewSize )
+   }
+   else if( OldSize == NewSize )
    {
       PNew = P;
-   } else if( OldSize > LastSlot * HEAPGRANULARITY && NewSize > LastSlot * HEAPGRANULARITY )
+   }
+   else if( OldSize > LastSlot * HEAPGRANULARITY && NewSize > LastSlot * HEAPGRANULARITY )
    {
       PNew = P;
       Active.erase( std::find( Active.begin(), Active.end(), P ) );
@@ -559,7 +565,8 @@ void THeapMgr::XReAllocMem( void **P, int OldSize, int NewSize )
       if( NewSize > OldSize ) IncreaseMemorySize( NewSize - OldSize );
       else
          ReduceMemorySize( OldSize - NewSize );
-   } else
+   }
+   else
    {
       PNew = prvXGetMem( NewSize );
       std::memcpy( PNew, P, OldSize <= NewSize ? OldSize : NewSize );
@@ -576,7 +583,8 @@ void THeapMgr::XReAllocMemNC( void **P, int OldSize, int NewSize )
    {
       if( OldSize > 0 && P && *P ) std::free( *P );
       *P = nullptr;
-   } else if( !P || OldSize <= 0 )
+   }
+   else if( !P || OldSize <= 0 )
       *P = std::malloc( NewSize );
    else
       *P = std::realloc( *P, NewSize );
@@ -596,7 +604,8 @@ void THeapMgr::XReAllocMem64( void **P, int64_t OldSize, int64_t NewSize )
    {
       if( OldSize > 0 && P ) std::free( P );
       P = nullptr;
-   } else if( !P || OldSize <= 0 )
+   }
+   else if( !P || OldSize <= 0 )
       PNew = std::malloc( NewSize );
    else
    {
@@ -612,10 +621,12 @@ void THeapMgr::XReAllocMem64( void **P, int64_t OldSize, int64_t NewSize )
    {
       if( OldSize > 0 && P ) prvXFreeMem64( P, OldSize );
       PNew = nullptr;
-   } else if( !P || OldSize <= 0 )
+   }
+   else if( !P || OldSize <= 0 )
    {
       PNew = prvXGetMem64( NewSize );
-   } else if( OldSize == NewSize )
+   }
+   else if( OldSize == NewSize )
       PNew = P;
    else if( OldSize > LastSlot * HEAPGRANULARITY && NewSize > LastSlot * HEAPGRANULARITY )
    {
@@ -626,7 +637,8 @@ void THeapMgr::XReAllocMem64( void **P, int64_t OldSize, int64_t NewSize )
       if( NewSize > OldSize ) IncreaseMemorySize( NewSize - OldSize );
       else
          ReduceMemorySize( OldSize - NewSize );
-   } else
+   }
+   else
    {
       PNew = prvXGetMem64( NewSize );
       std::memcpy( PNew, P, OldSize <= NewSize ? OldSize : NewSize );
@@ -657,7 +669,8 @@ void THeapMgr::GetOtherStats( bool do64, int64_t &cntGet, int64_t &cntFree, int6
       cntFree = OtherFree64;
       cntReAlloc = ReAllocCnt64;
       sizeRUsed = ReAllocUsed64;
-   } else
+   }
+   else
    {
       cntGet = OtherGet;
       cntFree = OtherFree;

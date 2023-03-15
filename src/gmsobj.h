@@ -196,7 +196,8 @@ public:
       {
          std::free( FList );
          FList = nullptr;
-      } else
+      }
+      else
          FList = static_cast<T **>( std::realloc( FList, FListMemory ) );
       FCapacity = NewCapacity;
    }
@@ -436,7 +437,8 @@ public:
       {
          std::free( FList );
          FList = nullptr;
-      } else
+      }
+      else
          FList = (TStringItem<T> *) std::realloc( FList, FListMemory );
       FCapacity = NewCapacity;
    }

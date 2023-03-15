@@ -90,23 +90,28 @@ protected:
       {
          HashTableSize = HashSize_6;
          ReHashCnt = Next_6;
-      } else if( ACnt >= Next_4 )
+      }
+      else if( ACnt >= Next_4 )
       {
          HashTableSize = HashSize_5;
          ReHashCnt = Next_5;
-      } else if( ACnt >= Next_3 )
+      }
+      else if( ACnt >= Next_3 )
       {
          HashTableSize = HashSize_4;
          ReHashCnt = Next_4;
-      } else if( ACnt >= Next_2 )
+      }
+      else if( ACnt >= Next_2 )
       {
          HashTableSize = HashSize_3;
          ReHashCnt = Next_3;
-      } else if( ACnt >= Next_1 )
+      }
+      else if( ACnt >= Next_1 )
       {
          HashTableSize = HashSize_2;
          ReHashCnt = Next_2;
-      } else
+      }
+      else
       {
          HashTableSize = HashSize_1;
          ReHashCnt = Next_1;
@@ -178,7 +183,8 @@ protected:
                std::swap( ( *SortMap )[i], ( *SortMap )[j] );
                i++;
                j--;
-            } else if( i == j )
+            }
+            else if( i == j )
             {
                i++;
                j--;
@@ -191,7 +197,8 @@ protected:
             if( i < R ) QuickSort( i, R );// if necessary, sort the right part
             i = L;                        // and move to the left part
             R = j;
-         } else
+         }
+         else
          {                                // right part is bigger, look left first
             if( L < j ) QuickSort( L, j );// if necessary, sort the right part
             L = i;
@@ -657,23 +664,28 @@ public:
       {
          HashTableSize = HashSize_6;
          ReHashCnt = Next_6;
-      } else if( ACnt >= Next_4 )
+      }
+      else if( ACnt >= Next_4 )
       {
          HashTableSize = HashSize_5;
          ReHashCnt = Next_5;
-      } else if( ACnt >= Next_3 )
+      }
+      else if( ACnt >= Next_3 )
       {
          HashTableSize = HashSize_4;
          ReHashCnt = Next_4;
-      } else if( ACnt >= Next_2 )
+      }
+      else if( ACnt >= Next_2 )
       {
          HashTableSize = HashSize_3;
          ReHashCnt = Next_3;
-      } else if( ACnt >= Next_1 )
+      }
+      else if( ACnt >= Next_1 )
       {
          HashTableSize = HashSize_2;
          ReHashCnt = Next_2;
-      } else
+      }
+      else
       {
          HashTableSize = HashSize_1;
          ReHashCnt = Next_1;

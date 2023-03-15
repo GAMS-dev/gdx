@@ -98,7 +98,8 @@ public:
       {
          head = tail = new DataBatch{ batchSize };
          offsetInTail = 0;
-      } else if( batchSize - offsetInTail < count )
+      }
+      else if( batchSize - offsetInTail < count )
       {
          tail->next = new DataBatch{ batchSize };
          tail = tail->next;
