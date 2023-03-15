@@ -38,13 +38,13 @@
 #ifdef _WIN32
 #pragma comment( lib, "iphlpapi.lib" )
 #define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
-#include <IPTypes.h>
+#include <Windows.h>
+#include <WinSock2.h>
+#include <io.h>
 #include <Psapi.h> /* enough if we run on Windows 7 or later */
 #include <ShlObj.h>
-#include <WinSock2.h>
-#include <Windows.h>
-#include <io.h>
 #include <iphlpapi.h>
+#include <IPTypes.h>
 #else
 #if( defined( __linux__ ) || defined( __APPLE__ ) ) /* at least, maybe for others too */
 #if defined( __linux__ )
