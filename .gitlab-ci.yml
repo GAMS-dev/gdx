@@ -23,9 +23,6 @@ variables:
   PF_BUILDS_SSH_USER:
     value: $BUILDS_SSH_USER
     description: "Username used for SSH connection to builds server"
-  PF_GAMS_LICENSE:
-    value: $GAMS_LICENSE
-    description: "GAMS license string used for testing"
 
 fetch-ci-scripts:
   stage: fetch-scripts
@@ -42,25 +39,6 @@ fetch-ci-scripts:
     name: ci-scripts
     expire_in: 2 hours
     paths: [ci/*]
-
-install-gamsdist-leg:
-  stage: install-gams
-  when: on_success
-  tags: [linux]
-  needs: [fetch-ci-scripts]
-  image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
-    entrypoint: [""]
-  script:
-    - python3 ci/fetch_gams.py fetch_leg $PF_CUSTOM_BRANCH $SSH_KEY_PORTING
-    - chmod 777 linux_x64_64_sfx.exe
-    - python3 ci/fetch_gams.py install
-    - echo $GAMS_LICENSE > $(pwd)/gamsdist/gamslice.txt
-    - $(pwd)/gamsdist/gams
-  artifacts:
-    name: gamsdist-leg
-    expire_in: 1 hour
-    paths: [ gamsdist/* ]
 
 build-leg:
   stage: build
@@ -104,8 +82,6 @@ build-wei:
   image:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
   script:
-    - bash -l -c "env | sort"
-    - echo "Compiling the code..."
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build  . --config Release -- -m | Tee-Object -FilePath 'build_log.txt'
     - python ci/report_for_log.py msvc build_log.txt warnings.xml
@@ -124,10 +100,9 @@ test-leg:
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
-  needs: [install-gamsdist-leg,build-leg]
+  needs: [build-leg]
   script:
-    - GAMS_PATH=$(pwd)/gamsdist
-    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ./gdxtest -tce=*trace* --reporters=junit --out=doctest_results_linux.xml
+    - ./gdxtest -tce=*trace* --reporters=junit --out=doctest_results_linux.xml
   artifacts:
     name: unittest-results-linux
     paths: [doctest_results_linux.xml]
