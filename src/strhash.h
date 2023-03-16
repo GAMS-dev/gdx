@@ -117,7 +117,8 @@ protected:
          ReHashCnt = Next_1;
       }
       PHashTable = std::make_unique<std::vector<PHashBucket<T>>>( HashTableSize );
-      std::fill_n( PHashTable->begin(), HashTableSize, nullptr );
+      // should be redundant due to std::vector being zero/value-initialized
+      //std::fill_n( PHashTable->begin(), HashTableSize, nullptr );
    }
 
    virtual int Hash( const char *s )
@@ -210,6 +211,7 @@ protected:
    {
       if( !SortMap )
       {
+         // TODO: SortMap gets first value/zero-init and then overwritten. Avoid first init somehow!
          SortMap = std::make_unique<std::vector<int>>( FCount );
          std::iota( SortMap->begin(), SortMap->end(), 0 );
          FSorted = false;

@@ -63,6 +63,7 @@ std::string QueryEnvironmentVariable( const std::string &Name )
    if( !len ) return ""s;
    else
    {
+      // TODO: Performance hit due to zero/value-init here!
       std::vector<char> buf( len );
       GetEnvironmentVariableA( Name.c_str(), buf.data(), len );
       std::string val( buf.begin(), buf.end() - 1 );// no terminating zero
@@ -2136,7 +2137,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
       {
          if( FFile->ReadByte() )
          {
-            CurSyPtr->SDomSymbols = std::make_unique<int[]>( CurSyPtr->SDim );
+            CurSyPtr->SDomSymbols = std::unique_ptr<int[]>{ new int [CurSyPtr->SDim] };
             for( int D{}; D < CurSyPtr->SDim; D++ )
                CurSyPtr->SDomSymbols[D] = FFile->ReadInteger();
          }
@@ -2195,7 +2196,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
             // NOTE: Not covered by unit tests yet.
             if( !MapSetText )
             {
-               MapSetText = std::make_unique<int[]>( NrElem );
+               MapSetText = std::unique_ptr<int[]>{ new int[NrElem] };
                for( int D{}; D < N; D++ )
                   MapSetText[D] = D;
             }
@@ -2227,7 +2228,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
          int SyNr = FFile->ReadInteger();
          if( SyNr <= 0 ) break;
          const auto sym = *NameList->GetObject( SyNr );
-         sym->SDomStrings = std::make_unique<int[]>( sym->SDim );
+         sym->SDomStrings = std::unique_ptr<int[]>{ new int[sym->SDim] };
          for( int D{}; D < sym->SDim; D++ )
             sym->SDomStrings[D] = FFile->ReadInteger();
       }
@@ -2870,7 +2871,7 @@ int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
 
    int res{ true };
    assert( !CurSyPtr->SDomSymbols && "SymbolSetDomain" );
-   CurSyPtr->SDomSymbols = std::make_unique<int[]>( CurSyPtr->SDim );
+   CurSyPtr->SDomSymbols = std::unique_ptr<int[]>{ new int[CurSyPtr->SDim] };
    for( int D{}; D < CurSyPtr->SDim; D++ )
    {
       bool domap{ true };
@@ -2966,7 +2967,7 @@ int TGXFileObj::gdxSymbolSetDomainX( int SyNr, const char **DomainIDs )
    if( SyPtr->SDim > 0 )
    {
       if( !SyPtr->SDomStrings )
-         SyPtr->SDomStrings = std::make_unique<int[]>( SyPtr->SDim );
+         SyPtr->SDomStrings = std::unique_ptr<int[]>{ new int[SyPtr->SDim] };
       for( int D{}; D < SyPtr->SDim; D++ )
       {
          const char *S{ DomainIDs[D] };
