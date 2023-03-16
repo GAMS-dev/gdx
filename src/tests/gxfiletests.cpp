@@ -1149,6 +1149,10 @@ std::string acquireGDXforModel( const std::string &model )
 
 void testReadModelGDX( const std::string &model, const std::function<void( TGXFileObj & )> &func )
 {
+#ifdef NO_GAMSDIST
+   // relies on gamslib tool
+   return;
+#endif
    const std::string gdxfn = acquireGDXforModel( model );
    testRead( gdxfn, func );
    std::filesystem::remove( gdxfn );
@@ -1156,6 +1160,10 @@ void testReadModelGDX( const std::string &model, const std::function<void( TGXFi
 
 TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
 {
+#ifdef NO_GAMSDIST
+   // relies on gamslib tool
+   return;
+#endif
    const std::array expectedSymbolNames{
            "a"s, "b"s, "c"s,
            "cost"s, "d"s, "demand"s,
