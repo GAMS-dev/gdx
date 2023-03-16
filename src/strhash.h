@@ -160,13 +160,13 @@ protected:
    void SetSortedObject( int N, T &AObj )
    {
       if( !FSorted ) Sort();
-      Buckets[( *SortMap )[N - ( OneBased ? 1 : 0 )]]->Obj = &AObj;
+      Buckets[SortMap[N - ( OneBased ? 1 : 0 )]]->Obj = &AObj;
    }
 
    char *GetSortedString( int N )
    {
       if( FSorted ) Sort();
-      return Buckets[( *SortMap )[N - ( OneBased ? 1 : 0 )]]->StrP;
+      return Buckets[SortMap[N - ( OneBased ? 1 : 0 )]]->StrP;
    }
 
    void QuickSort( int L, int R )
@@ -175,13 +175,13 @@ protected:
       while( i < R )
       {
          int j{ R }, p{ ( L + R ) >> 1 };
-         char *pPivotStr = Buckets[( *SortMap )[p]]->StrP;
+         char *pPivotStr = Buckets[SortMap[p]]->StrP;
          do {
-            while( Compare( Buckets[( *SortMap )[i]]->StrP, pPivotStr ) < 0 ) i++;
-            while( Compare( Buckets[( *SortMap )[j]]->StrP, pPivotStr ) > 0 ) j--;
+            while( Compare( Buckets[SortMap[i]]->StrP, pPivotStr ) < 0 ) i++;
+            while( Compare( Buckets[SortMap[j]]->StrP, pPivotStr ) > 0 ) j--;
             if( i < j )
             {
-               std::swap( ( *SortMap )[i], ( *SortMap )[j] );
+               std::swap( SortMap[i], SortMap[j] );
                i++;
                j--;
             }
@@ -442,7 +442,7 @@ public:
    T *GetSortedObject( int N )
    {
       if( !FSorted ) Sort();
-      return Buckets[( *SortMap )[N - ( OneBased ? 1 : 0 )]].Obj;
+      return Buckets[SortMap[N - ( OneBased ? 1 : 0 )]].Obj;
    }
 
    [[nodiscard]] char *GetString( int N ) const
@@ -471,7 +471,7 @@ public:
    [[nodiscard]] char *GetSortedString( int N ) const
    {
       if( !FSorted ) Sort();
-      return Buckets[( *SortMap )[N - ( OneBased ? 1 : 0 )]]->StrP;
+      return Buckets[SortMap[N - ( OneBased ? 1 : 0 )]]->StrP;
    }
 
    [[nodiscard]] int Count() const
