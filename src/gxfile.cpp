@@ -261,6 +261,7 @@ const int
 
 int GetEnvCompressFlag();
 
+#ifndef NO_GAMSDIST
 static int SystemP( const std::string &cmd, int &ProgRC )
 {
    int res{ std::system( cmd.c_str() ) };
@@ -294,6 +295,7 @@ static int SystemP( const std::string &cmd, int &ProgRC )
 #endif
    return res;
 }
+#endif
 
 int ConvertGDXFile( const std::string &fn, const std::string &MyComp )
 {
@@ -1897,7 +1899,7 @@ int TGXFileObj::gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst )
 #endif
          }
          else
-            std::sprintf( KeyStr[D], "%s%d", BADUEL_PREFIX.c_str(), LED );
+            std::snprintf( KeyStr[D], GMS_UEL_IDENT_SIZE, "%s%d", BADUEL_PREFIX.c_str(), LED );
       }
       return true;
    }

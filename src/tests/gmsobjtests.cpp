@@ -194,6 +194,7 @@ void runStressTest( const std::string_view caption, f getelem )
       int sum{};
       for( int i{}; i < card; i++ )
          sum += (int) std::strlen( shlst.GetName( i ) );
+      std::cout << sum << std::endl;
    }
    auto delta{ std::chrono::high_resolution_clock::now() - t };
    std::cout << "Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds( 1 ) << std::endl;
