@@ -75,6 +75,22 @@ build-deg:
     reports:
       junit: warnings.xml
 
+build-dac:
+  stage: build
+  when: on_success
+  tags: [macos-arm64]
+  script:
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
+    - cmake --build . 2>&1 | tee build_log.txt
+    - python3 ci/report_for_log.py clang build_log.txt warnings.xml
+  needs: [fetch-ci-scripts]
+  artifacts:
+    name: gdx-dac
+    paths: [gdxtest]
+    expire_in: 2 hours
+    reports:
+      junit: warnings.xml
+
 build-wei:
   stage: build
   when: on_success
