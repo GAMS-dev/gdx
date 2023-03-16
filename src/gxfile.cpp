@@ -63,7 +63,7 @@ std::string QueryEnvironmentVariable( const std::string &Name )
    if( !len ) return ""s;
    else
    {
-      auto buf { std::unique_ptr<char>{ new char[len] } };
+      auto buf { std::unique_ptr<char[]>{ new char[len] } };
       GetEnvironmentVariableA( Name.c_str(), buf.get(), len );
       std::string val(buf.get(), len-1); // no terminating zero
       if( val.length() > 255 ) val = val.substr( 0, 255 );
