@@ -61,7 +61,7 @@ protected:
 #endif
    std::vector<PHashBucket<T>> Buckets{};                    // sorted by order of insertion, no gaps
    std::unique_ptr<std::vector<PHashBucket<T>>> PHashTable{};// sorted by hash value, with gaps
-   std::unique_ptr<std::vector<int>> SortMap{};
+   std::unique_ptr<int[]> SortMap{};
    int HashTableSize{}, ReHashCnt{}, FCount{};
    bool FSorted{};
 
@@ -211,9 +211,9 @@ protected:
    {
       if( !SortMap )
       {
-         // TODO: SortMap gets first value/zero-init and then overwritten. Avoid first init somehow!
-         SortMap = std::make_unique<std::vector<int>>( FCount );
-         std::iota( SortMap->begin(), SortMap->end(), 0 );
+         SortMap = std::unique_ptr<int[]>{ new int[FCount] };
+         for(int N{}; N<FCount; N++)
+            SortMap[N] = N;
          FSorted = false;
       }
       if( !FSorted )
@@ -293,7 +293,7 @@ public:
       int res{ FCount + ( OneBased ? 1 : 0 ) };
       if( SortMap )
       {
-         ( *SortMap )[FCount] = FCount;
+         SortMap[FCount] = FCount;
          FSorted = false;
       }
       FCount++;// ugly
@@ -331,7 +331,7 @@ public:
       int res{ FCount + ( OneBased ? 1 : 0 ) };
       if( SortMap )
       {
-         ( *SortMap )[FCount] = FCount;
+         SortMap[FCount] = FCount;
          FSorted = false;
       }
       FCount++;// ugly
@@ -398,7 +398,7 @@ public:
          res += std::strlen( Buckets[N]->StrP ) + 1;
       res += (int) ( Buckets.size() * sizeof( THashBucket<T> ) );
       if( PHashTable ) res += (int) ( PHashTable->size() * sizeof( THashBucket<T> ) );
-      if( SortMap ) res += (int) ( SortMap->size() * sizeof( int ) );
+      if( SortMap ) res += (int) ( FCount * sizeof( int ) );
       return res;
    }
 

@@ -318,10 +318,9 @@ uint32_t TXFileStreamDelphi::Read( void *Buffer, uint32_t Count )
    else
    {
       auto PW = static_cast<char *>( Buffer );
-      // TODO: Performance hit due to zero/value-init here!
-      std::vector<char> PR( Count );
-      SetLastIOResult( customFileRead( FS.get(), PR.data(), Count, res ) );
-      ApplyPassWord( PR.data(), PW, (int) Count, PhysPosition );
+      auto PR = std::unique_ptr<char> {new char[Count]};
+      SetLastIOResult( customFileRead( FS.get(), PR.get(), Count, res ) );
+      ApplyPassWord( PR.get(), PW, (int) Count, PhysPosition );
    }
    PhysPosition += res;
    return res;
@@ -336,9 +335,8 @@ uint32_t TXFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
    else
    {
       auto PR = static_cast<const char *>( Buffer );
-      // TODO: Performance hit due to zero/value-init here!
-      std::vector<char> PW( Count );
-      ApplyPassWord( PR, PW.data(), (int) Count, PhysPosition );
+      auto PW = std::unique_ptr<char> { new char[Count] };
+      ApplyPassWord( PR, PW.get(), (int) Count, PhysPosition );
    }
    SetLastIOResult( FS->bad() ? 1 : 0 );
    PhysPosition += Count;

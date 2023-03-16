@@ -177,8 +177,9 @@ void runStressTest( const std::string_view caption, f getelem )
    auto t{ std::chrono::high_resolution_clock::now() };
    constexpr int card{ 90000 }, ntries{ 40 };
    static_assert( card < std::numeric_limits<int>::max() );
-   std::array<int, card> nums;
+   std::array<int, card> nums {};
    std::random_device rd;
+   int sum{};
    for( int k{}; k < ntries; k++ )
    {
       T shlst;
@@ -191,13 +192,11 @@ void runStressTest( const std::string_view caption, f getelem )
          std::string s{ "i"s + std::to_string( n ) };
          REQUIRE_EQ( ctr++, shlst.Add( s.c_str(), s.length() ) );
       }
-      int sum{};
       for( int i{}; i < card; i++ )
          sum += (int) std::strlen( shlst.GetName( i ) );
-      std::cout << sum << std::endl;
    }
    auto delta{ std::chrono::high_resolution_clock::now() - t };
-   std::cout << "Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds( 1 ) << std::endl;
+   std::cout << "(" << sum << ") Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds( 1 ) << std::endl;
 }
 
 TEST_CASE( "TXStrPool vs. TXCSStrHashList" )

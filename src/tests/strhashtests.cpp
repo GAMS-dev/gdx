@@ -68,8 +68,9 @@ void runStressTest( const std::string_view caption )
    auto t{ std::chrono::high_resolution_clock::now() };
    constexpr int card{ 50000 }, ntries{ 40 };
    static_assert( card < std::numeric_limits<int>::max() );
-   std::array<int, card> nums;
+   std::array<int, card> nums{};
    std::random_device rd;
+   int sum{};
    for( int k{}; k < ntries; k++ )
    {
       T shlst;
@@ -82,7 +83,6 @@ void runStressTest( const std::string_view caption )
          std::string s{ "i"s + std::to_string( n ) };
          shlst.AddObject( s.c_str(), s.length(), n );
       }
-      int sum{};
       for( int n: nums )
       {
          std::string s{ "i"s + std::to_string( n ) };
@@ -90,7 +90,7 @@ void runStressTest( const std::string_view caption )
       }
    }
    auto delta{ std::chrono::high_resolution_clock::now() - t };
-   std::cout << "Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds( 1 ) << std::endl;
+   std::cout << "(" << sum << ") Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds( 1 ) << std::endl;
 }
 
 TEST_CASE( "Stress test TXStrHashList vs. TXStrHashListLegacy" )
