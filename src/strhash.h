@@ -123,7 +123,7 @@ protected:
 
    virtual int Hash( const char *s )
    {
-      int res{};
+      /*unsigned */int res{};
       for( int i{}; s[i] != '\0'; i++ )
          res = 211 * res + utils::toupper( s[i] );
       return ( res & 0x7FFFFFFF ) % HashTableSize;
@@ -300,7 +300,7 @@ public:
 #ifdef TLD_BATCH_ALLOCS
       PBuck->StrP = reinterpret_cast<char *>( batchStrAllocator.GetBytes( slen + 1 ) );
 #else
-      PBuck->StrP = new char[s.length() + 1];
+      PBuck->StrP = new char[slen + 1];
 #endif
       utils::assignPCharToBuf( s, (int) slen, PBuck->StrP, (int) slen + 1 );
       PBuck->Obj = std::move( AObj );
@@ -545,7 +545,7 @@ class TXCSStrHashList : public TXStrHashList<T>
 protected:
    int Hash( const char *s ) override
    {
-      int res{};
+      /*unsigned */int res{};
       for( int i{}; s[i] != '\0'; i++ )
          res = 211 * res + s[i];
       return ( res & 0x7FFFFFFF ) % this->HashTableSize;
@@ -631,7 +631,7 @@ public:
 
    virtual int Hash( const char *s )
    {
-      int res{};
+      /*unsigned */int res{};
       for( int i{}; s[i] != '\0'; i++ )
          res = 211 * res + utils::toupper( s[i] );
       return ( res & 0x7FFFFFFF ) % HashTableSize;
@@ -916,7 +916,7 @@ class TXCSStrHashListLegacy : public TXStrHashListLegacy<T>
 protected:
    int Hash( const char *s ) override
    {
-      int res{};
+      /*unsigned */int res{};
       for( int i{}; s[i] != '\0'; i++ )
          res = 211 * res + s[i];
       return ( res & 0x7FFFFFFF ) % this->HashTableSize;

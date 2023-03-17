@@ -353,7 +353,7 @@ bool IsGoodIdent( const char *S )
    return i < GLOBAL_UEL_IDENT_SIZE;
 }
 
-static TgdxElemSize GetIntegerSize( int N )
+static TgdxElemSize GetIntegerSize( unsigned int N )
 {
    if( N <= 0 ) return TgdxElemSize::sz_integer;
    else if( N <= 255 )
@@ -1082,7 +1082,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
       {
          MinElem[D] = FFile->ReadInteger();
          MaxElem[D] = FFile->ReadInteger();
-         ElemType[D] = GetIntegerSize( MaxElem[D] - MinElem[D] + 1 );
+         ElemType[D] = GetIntegerSize( (unsigned int)MaxElem[D] - (unsigned int)MinElem[D] + 1 );
       }
    }
    bool AllocOk{ true };
@@ -1266,7 +1266,7 @@ void TGXFileObj::InitDoWrite( int NrRecs )
    for( int D{}; D < FCurrentDim; D++ )
    {
       LastElem[D] = INDEX_INITIAL;
-      ElemType[D] = GetIntegerSize( MaxElem[D] - MinElem[D] + 1 );
+      ElemType[D] = GetIntegerSize( (unsigned int)MaxElem[D] - (unsigned int)MinElem[D] + 1 );
       FFile->WriteInteger( MinElem[D] );
       FFile->WriteInteger( MaxElem[D] );
    }
