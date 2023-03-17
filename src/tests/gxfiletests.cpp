@@ -580,8 +580,19 @@ TEST_CASE( "Test write and read record in string mode" )
    std::string fn{ "rwrecordstr.gdx" };
    StrIndexBuffers keyNames;
    TgdxValues values{};
+   std::string stillOk(255, 'b');
+   stillOk.front() = 'a';
+   stillOk.back() = 'c';
    testWrite( fn, [&]( TGXFileObj &pgx ) {
-      REQUIRE( pgx.gdxDataWriteStrStart( "mysym", "This is my symbol!", 1, dt_par, 0 ) );
+      std::string tooLong(256, 'b');
+      tooLong.front() = 'a';
+      tooLong.back() = 'c';
+      REQUIRE_FALSE( pgx.gdxDataWriteStrStart( tooLong.c_str(), "ok", 1, dt_par, 0 ) );
+
+      // NOTE: This does not return false right now but explanatory text ist truncated to 255 characters when it is longer
+      //REQUIRE_FALSE( pgx.gdxDataWriteStrStart( "ok", tooLong.c_str(), 1, dt_par, 0 ) );
+
+      REQUIRE( pgx.gdxDataWriteStrStart( "mysym", stillOk.c_str(), 1, dt_par, 0 ) );
       values[GMS_VAL_LEVEL] = 3.141;
 
       char empty = '\0';
@@ -605,7 +616,12 @@ TEST_CASE( "Test write and read record in string mode" )
       REQUIRE( pgx.gdxDataWriteDone() );
    } );
    testRead( fn, [&]( TGXFileObj &pgx ) {
-      int NrRecs;
+      int NrRecs, UserInfo;
+      char ExplTxt[GMS_SSSIZE];
+      REQUIRE( pgx.gdxSymbolInfoX(1, NrRecs, UserInfo, ExplTxt) );
+      REQUIRE_EQ( 3, NrRecs );
+      REQUIRE_EQ(stillOk, ExplTxt);
+
       REQUIRE( pgx.gdxDataReadStrStart( 1, NrRecs ) );
       REQUIRE_EQ( 3, NrRecs );
 
@@ -624,7 +640,6 @@ TEST_CASE( "Test write and read record in string mode" )
 
       // Nothing left!
       REQUIRE_FALSE( pgx.gdxDataReadStr( keyNames.ptrs(), values.data(), dimFrst ) );
-
       REQUIRE( pgx.gdxDataReadDone() );
    } );
    std::filesystem::remove( fn );
