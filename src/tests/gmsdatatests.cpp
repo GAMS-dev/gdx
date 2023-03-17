@@ -82,7 +82,7 @@ TEST_CASE( "Test basic usage of TXIntList" )
 template<typename T>
 void commonTTblGamsDataTests( T &gdl )
 {
-   REQUIRE_EQ( 2, gdl.GetDimension() );
+   REQUIRE_EQ( 1, gdl.GetDimension() );
    REQUIRE_EQ( 0, gdl.GetCount() );
 
    std::array<int, GLOBAL_MAX_INDEX_DIM> keys{};
@@ -127,6 +127,7 @@ void commonTTblGamsDataTests( T &gdl )
       gdl.AddRecord( keys.data(), vals.data() );
    }
    gdl.Sort();
+   REQUIRE_EQ(10, gdl.GetCount());
    for( int i{}; i < 10; i++ )
    {
       gdl.GetRecord( i, keys.data(), vals.data() );
@@ -138,11 +139,11 @@ void commonTTblGamsDataTests( T &gdl )
 TEST_CASE( "Test basic usage of TTblGamsDataLegacy" )
 {
    {
-      TTblGamsData<double> gdl{ 2, sizeof( double ) * 2 };
+      TTblGamsData<double> gdl{ 1, sizeof( double ) * 2 };
       commonTTblGamsDataTests<TTblGamsData<double>>( gdl );
    }
    {
-      TTblGamsDataLegacy<double> gdl{ 2, sizeof( double ) * 2 };
+      TTblGamsDataLegacy<double> gdl{ 1, sizeof( double ) * 2 };
       commonTTblGamsDataTests<TTblGamsDataLegacy<double>>( gdl );
    }
 }
