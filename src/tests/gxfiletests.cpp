@@ -584,13 +584,10 @@ TEST_CASE( "Test write and read record in string mode" )
    stillOk.front() = 'a';
    stillOk.back() = 'c';
    testWrite( fn, [&]( TGXFileObj &pgx ) {
-      std::string tooLong(256, 'b');
-      tooLong.front() = 'a';
-      tooLong.back() = 'c';
-      REQUIRE_FALSE( pgx.gdxDataWriteStrStart( tooLong.c_str(), "ok", 1, dt_par, 0 ) );
-
-      // NOTE: This does not return false right now but explanatory text ist truncated to 255 characters when it is longer
-      //REQUIRE_FALSE( pgx.gdxDataWriteStrStart( "ok", tooLong.c_str(), 1, dt_par, 0 ) );
+      std::string tooLongForSymName(GLOBAL_UEL_IDENT_SIZE, 'b');
+      tooLongForSymName.front() = 'a';
+      tooLongForSymName.back() = 'c';
+      REQUIRE_FALSE( pgx.gdxDataWriteStrStart(tooLongForSymName.c_str(), "ok", 1, dt_par, 0 ) );
 
       REQUIRE( pgx.gdxDataWriteStrStart( "mysym", stillOk.c_str(), 1, dt_par, 0 ) );
       values[GMS_VAL_LEVEL] = 3.141;
@@ -613,6 +610,12 @@ TEST_CASE( "Test write and read record in string mode" )
       keyptrs[0] = keyNames[0].c_str();
       REQUIRE_FALSE( pgx.gdxDataWriteStr( keyptrs, values.data() ) );
 
+      REQUIRE( pgx.gdxDataWriteDone() );
+
+      std::string tooLongForExplTxt( GMS_SSSIZE, 'b' );
+      tooLongForExplTxt.front() = 'a';
+      tooLongForExplTxt.back() = 'c';
+      REQUIRE( pgx.gdxDataWriteStrStart( "mysym2", tooLongForExplTxt.c_str(), 1, dt_par, 0 ) );
       REQUIRE( pgx.gdxDataWriteDone() );
    } );
    testRead( fn, [&]( TGXFileObj &pgx ) {
@@ -641,6 +644,11 @@ TEST_CASE( "Test write and read record in string mode" )
       // Nothing left!
       REQUIRE_FALSE( pgx.gdxDataReadStr( keyNames.ptrs(), values.data(), dimFrst ) );
       REQUIRE( pgx.gdxDataReadDone() );
+
+      REQUIRE( pgx.gdxSymbolInfoX(2, NrRecs, UserInfo, ExplTxt) );
+      REQUIRE_EQ( 0, NrRecs );
+      REQUIRE_EQ( 255, std::strlen(ExplTxt) );
+      REQUIRE_EQ( "String overflow: a"s + std::string(255-"String overflow: a..."s.length(), 'b') + "..."s, ExplTxt );
    } );
    std::filesystem::remove( fn );
 }
