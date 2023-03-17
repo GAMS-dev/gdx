@@ -97,11 +97,11 @@ TEST_CASE( "Comparing strings the Delphi way" )
 
 TEST_CASE( "Trim blanks from beginning and end of strings but not in between" )
 {
-   REQUIRE_EQ( "", utils::trim( "" ) );
-   REQUIRE_EQ( "", utils::trim( "                  \t \n           " ) );
-   REQUIRE_EQ( "abc def", utils::trim( "   abc def " ) );
-   REQUIRE_EQ( "abc", utils::trim( "     abc" ) );
-   REQUIRE_EQ( "abc", utils::trim( "abc     " ) );
+   REQUIRE_EQ( ""s, utils::trim( ""s ) );
+   REQUIRE_EQ( ""s, utils::trim( "                  \t \n           "s ) );
+   REQUIRE_EQ( "abc def"s, utils::trim( "   abc def "s ) );
+   REQUIRE_EQ( "abc"s, utils::trim( "     abc"s ) );
+   REQUIRE_EQ( "abc"s, utils::trim( "abc     "s ) );
 }
 
 TEST_CASE( "Uppercase all characters in a string" )

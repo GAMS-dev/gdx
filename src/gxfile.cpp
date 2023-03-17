@@ -827,7 +827,7 @@ int TGXFileObj::gdxResetSpecialValues()
 
 bool TGXFileObj::PrepareSymbolWrite( const std::string_view Caller,
                                      const char *AName,
-                                     const std::string_view AText,
+                                     const char *AText,
                                      int ADim,
                                      int AType,
                                      int AUserInfo )
@@ -852,7 +852,7 @@ bool TGXFileObj::PrepareSymbolWrite( const std::string_view Caller,
    obj->SDataType = static_cast<gdxSyType>( AType );
    obj->SUserInfo = AUserInfo;
    obj->SSetText = false;
-   utils::assignViewToBuf( AText, obj->SExplTxt.data(), GMS_SSSIZE );
+   utils::assignPCharToBuf( AText, obj->SExplTxt.data(), GMS_SSSIZE );
    MakeGoodExplText( obj->SExplTxt.data() );
    obj->SIsCompressed = CompressOut && ADim > 0;
    obj->SCommentsList = std::nullopt;
@@ -2311,7 +2311,7 @@ int TGXFileObj::gdxAddAlias( const char *Id1, const char *Id2 )
 //  The string must follow the GAMS syntax rules for explanatory text.
 int TGXFileObj::gdxAddSetText( const char *Txt, int &TxtNr )
 {
-   if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "AddSetText" ) ) )
+   if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "AddSetText"s ) ) )
    {
       TxtNr = 0;
       return false;
@@ -2379,7 +2379,7 @@ int TGXFileObj::gdxDataErrorRecord( int RecNr, int *KeyInt, double *Values )
 int TGXFileObj::gdxDataErrorRecordX( int RecNr, int *KeyInt, double *Values )
 {
    static const TgxModeSet AllowedModes{ fr_init, fw_init, fr_map_data, fr_mapr_data, fw_raw_data, fw_map_data, fw_str_data };
-   if( ( TraceLevel >= TraceLevels::trl_all || !utils::in( fmode, AllowedModes ) ) && !CheckMode( "DataErrorRecord", AllowedModes ) )
+   if( ( TraceLevel >= TraceLevels::trl_all || !utils::in( fmode, AllowedModes ) ) && !CheckMode( "DataErrorRecord"s, AllowedModes ) )
       return false;
 
    if( ErrorList )
@@ -2562,7 +2562,7 @@ int TGXFileObj::gdxGetElemText( int TxtNr, char *Txt, int &Node )
       Txt[0] = '\0';
       return false;
    }
-   if( TraceLevel >= TraceLevels::trl_all && !CheckMode( "GetElemText" ) )
+   if( TraceLevel >= TraceLevels::trl_all && !CheckMode( "GetElemText"s ) )
       return false;
    if( TxtNr < 0 || TxtNr >= SetTextList->size() )
    {
@@ -3392,7 +3392,7 @@ int TGXFileObj::gdxDataReadMapStart( int SyNr, int &NrRecs )
 int TGXFileObj::gdxDataReadMap( [[maybe_unused]] int RecNr, int *KeyInt, double *Values, int &DimFrst )
 {
    static const TgxModeSet AllowedModes{ fr_map_data, fr_mapr_data };
-   if( ( TraceLevel >= TraceLevels::trl_all || !utils::in( fmode, AllowedModes ) ) && !CheckMode( "DataReadMap", AllowedModes ) ) return false;
+   if( ( TraceLevel >= TraceLevels::trl_all || !utils::in( fmode, AllowedModes ) ) && !CheckMode( "DataReadMap"s, AllowedModes ) ) return false;
    if( CurSyPtr && CurSyPtr->SScalarFrst )
    {
       CurSyPtr->SScalarFrst = false;
@@ -3847,7 +3847,7 @@ int TGXFileObj::gdxDataReadFilteredStart( int SyNr, const int *FilterAction, int
 //  integer which is stored without further restrictions.
 int TGXFileObj::gdxSetTextNodeNr( int TxtNr, int Node )
 {
-   if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "SetTextNodeNr" ) ) ) return false;
+   if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "SetTextNodeNr"s ) ) ) return false;
    auto &obj = *SetTextList;
    if( TxtNr >= 0 && TxtNr < obj.size() )
    {

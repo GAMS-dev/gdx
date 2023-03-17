@@ -217,7 +217,7 @@ private:
    TDataStoreFiltProc_t gdxDataReadRawFastFilt_DP{};
    TDomainIndexProc_t gdxGetDomainElements_DP{};
 
-   bool PrepareSymbolWrite( std::string_view Caller, const char *AName, std::string_view AText, int ADim, int AType, int AUserInfo );
+   bool PrepareSymbolWrite( std::string_view Caller, const char *AName, const char *AText, int ADim, int AType, int AUserInfo );
    int PrepareSymbolRead( std::string_view Caller, int SyNr, const int *ADomainNrs, TgxFileMode newmode );
 
    void InitErrors();
