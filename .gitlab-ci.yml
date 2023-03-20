@@ -40,7 +40,7 @@ fetch-ci-scripts:
   artifacts:
     name: ci-scripts
     expire_in: 2 hours
-    paths: [ci/*]
+    paths: [ci/*,zlib/*]
 
 build-leg:
   stage: build
