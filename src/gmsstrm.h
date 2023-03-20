@@ -33,7 +33,6 @@
 #include <memory>     // for allocator, unique_ptr
 #include <string>     // for string, basic_string
 #include <string_view>// for string_view
-#include <tuple>      // for array
 #include <vector>     // for vector
 
 #if defined( NO_ZLIB )

@@ -33,7 +33,6 @@
 
 #include <array>  // for array
 #include <cstring>// for memcpy, size_t, strcmp, strcpy, strlen
-#include <memory>
 #include <string>     // for string, char_traits
 #include <string_view>// for string_view, operator==, basic_string_view
 
