@@ -24,16 +24,10 @@
  */
 
 #include "../gclgms.h" // for GLOBAL_MAX_INDEX_DIM
-#include "../gmsdata.h"// for TTblGamsDataLegacy, TTblGams...
+#include "../gmsdata.h"// for TTblGamsData, TTblGams...
 #include "doctest.h"   // for ResultBuilder, REQUIRE_EQ
 #include <algorithm>   // for fill
 #include <array>       // for array
-#include <string>      // for string_literals
-#include <vector>      // for vector
-#include <random>
-#include <iostream>
-#include <chrono>
-#include <numeric>// for iota
 
 using namespace std::literals::string_literals;
 using namespace gdx::collections::gmsdata;
@@ -83,9 +77,9 @@ TEST_CASE( "Test basic usage of TXIntList" )
    REQUIRE_EQ( 24, lst[0] );
 }
 
-template<typename T>
-void commonTTblGamsDataTests( T &gdl )
+TEST_CASE( "Test basic usage of TTblGamsData" )
 {
+   TTblGamsData<double> gdl{ 1, sizeof( double ) * 2 };
    REQUIRE_EQ( 1, gdl.GetDimension() );
    REQUIRE_EQ( 0, gdl.GetCount() );
 
@@ -138,52 +132,6 @@ void commonTTblGamsDataTests( T &gdl )
       REQUIRE_EQ( i + 1, keys.front() );
       REQUIRE_EQ( 23.0, vals.front() );
    }
-}
-
-TEST_CASE( "Test basic usage of TTblGamsDataLegacy" )
-{
-   {
-      TTblGamsData<double> gdl{ 1, sizeof( double ) * 2 };
-      commonTTblGamsDataTests<TTblGamsData<double>>( gdl );
-   }
-   {
-      TTblGamsDataLegacy<double> gdl{ 1, sizeof( double ) * 2 };
-      commonTTblGamsDataTests<TTblGamsDataLegacy<double>>( gdl );
-   }
-}
-
-template<typename T>
-void runStressTest( const std::string_view caption )
-{
-   std::array<int, GLOBAL_MAX_INDEX_DIM> keys{};
-   std::array<double, 2> vals{};
-   auto t{ std::chrono::high_resolution_clock::now() };
-   constexpr int card{ 50000 }, ntries{ 40 };
-   static_assert( card < std::numeric_limits<int>::max() );
-   std::array<int, card> nums{};
-   std::random_device rd;
-   for( int k{}; k < ntries; k++ )
-   {
-      T shlst { 1, sizeof( double ) * 2 };
-      std::mt19937 g( rd() );
-      std::iota( nums.begin(), nums.end(), 1 );
-      std::shuffle( nums.begin(), nums.end(), g );
-      for( int n: nums )
-      {
-         keys.front() = n;
-         shlst.AddRecord( keys.data(), vals.data() );
-      }
-      for(int i{}; i<shlst.GetCount(); i++)
-         shlst.GetRecord( i, keys.data(), vals.data() );
-   }
-   auto delta{ std::chrono::high_resolution_clock::now() - t };
-   std::cout << "Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds( 1 ) << std::endl;
-}
-
-TEST_CASE( "Stress test TTblGamsData vs. TTblGamsDataLegacy" )
-{
-   runStressTest<TTblGamsData<double>>( "TTblGamsData"s );
-   runStressTest<TTblGamsDataLegacy<double>>( "TTblGamsDataLegacy"s );
 }
 
 TEST_SUITE_END();

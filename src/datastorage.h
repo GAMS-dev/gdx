@@ -25,7 +25,6 @@
 
 #pragma once
 
-#include "gmsheapnew.h"
 #include <cassert> // for assert
 #include <cstdint> // for uint8_t
 #include <cstring> // for memcpy, memset, size_t
@@ -45,11 +44,6 @@ struct TLinkedDataRec;
 
 #define TLD_TEMPLATE_HEADER template<typename KeyType, typename ValueType>
 #define TLD_REC_TYPE TLinkedDataRec<KeyType, ValueType>
-
-#if defined( P3_COLLECTIONS )
-// Instead of using builtin C++ heap functionality new/delete, use custom GAMS big block heap from gmsheapnew
-#define USE_GMSHEAP
-#endif
 
 namespace gdx::collections::datastorage
 {
@@ -138,9 +132,7 @@ class TLinkedData
    using RecType = TLD_REC_TYPE;
    RecType *FHead, *FTail;
 
-#if defined( USE_GMSHEAP )
-   gmsheapnew::THeapMgr MyHeap{ "TLinkedData" };
-#elif defined( TLD_BATCH_ALLOCS )
+#if defined( TLD_BATCH_ALLOCS )
    BatchAllocator<960> batchAllocator;
 #endif
 
@@ -187,18 +179,14 @@ public:
 
    void Clear()
    {
-#if defined( TLD_BATCH_ALLOCS ) && !defined( USE_GMSHEAP )
+#if defined( TLD_BATCH_ALLOCS )
       batchAllocator.clear();
 #else
       RecType *P{ FHead };
       while( P )
       {
          auto Pn = P->RecNext;
-#ifdef USE_GMSHEAP
-         MyHeap.XFreeMem( P, FTotalSize );
-#else
          delete[] P;
-#endif
          P = Pn;
       }
 #endif
@@ -214,9 +202,7 @@ public:
 
    RecType *AddItem( const KeyType *AKey, const ValueType *AData )
    {
-#if defined( USE_GMSHEAP )
-      auto *node = reinterpret_cast<RecType *>( MyHeap.XGetMem( FTotalSize ) );
-#elif defined( TLD_BATCH_ALLOCS )
+#if defined( TLD_BATCH_ALLOCS )
       auto *node = reinterpret_cast<RecType *>( batchAllocator.GetBytes( FTotalSize ) );
 #else
       auto *node = reinterpret_cast<RecType *>( new uint8_t[FTotalSize] );
@@ -243,13 +229,7 @@ public:
       if( !FHead || IsSorted() ) return;
       const int AllocCount = FMaxKey - FMinKey + 1;
       const int KeyBase{ FMinKey };
-#if !defined( USE_GMSHEAP )
       auto Head{ new RecType *[AllocCount] }, Tail{ new RecType *[AllocCount] };
-#else
-      const int64_t AllocSize{ static_cast<int64_t>( AllocCount * sizeof( RecType * ) ) };
-      auto Head{ reinterpret_cast<RecType **>( MyHeap.XGetMem64( AllocSize ) ) };
-      auto Tail{ reinterpret_cast<RecType **>( MyHeap.XGetMem64( AllocSize ) ) };
-#endif
       std::memset( Head, 0, sizeof( RecType * ) * AllocCount );
       // Perform radix sort
       for( int D{ FDimension - 1 }; D >= 0; D-- )
@@ -277,13 +257,8 @@ public:
          FHead = R;
       }
       FTail = nullptr;// what is the tail???
-#if !defined( USE_GMSHEAP )
       delete[] Head;
       delete[] Tail;
-#else
-      MyHeap.XFreeMem64( Head, AllocSize );
-      MyHeap.XFreeMem64( Tail, AllocSize );
-#endif
    }
 
    std::optional<RecType *> StartRead( const int *AMap = nullptr )

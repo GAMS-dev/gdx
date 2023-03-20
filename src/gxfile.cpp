@@ -2587,11 +2587,7 @@ int TGXFileObj::gdxGetElemText( int TxtNr, char *Txt, int &Node )
    {
       utils::assignPCharToBuf( SetTextList->GetName( TxtNr ), Txt, GMS_SSSIZE );
       auto obj = SetTextList->GetObject( TxtNr );
-#ifdef TXSPOOL_LEGACY
-      Node = obj ? (int) reinterpret_cast<long long>( obj ) : 0;
-#else
       Node = obj ? (int) *obj : 0;
-#endif
       return true;
    }
 }
@@ -3863,21 +3859,10 @@ int TGXFileObj::gdxSetTextNodeNr( int TxtNr, int Node )
 {
    if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "SetTextNodeNr"s ) ) ) return false;
    auto &obj = *SetTextList;
-   if( TxtNr >= 0 && TxtNr < obj.size() )
+   if( TxtNr >= 0 && TxtNr < obj.size() && !*obj.GetObject( TxtNr ) )
    {
-#ifdef TXSPOOL_LEGACY
-      if( !obj.GetObject( TxtNr ) )
-      {
-         obj.PutObject( TxtNr, reinterpret_cast<uint8_t *>( (long long) Node ) );
-         return true;
-      }
-#else
-      if( !*obj.GetObject( TxtNr ) )
-      {
-         *obj.GetObject( TxtNr ) = static_cast<uint8_t>( Node );
-         return true;
-      }
-#endif
+      *obj.GetObject( TxtNr ) = static_cast<uint8_t>( Node );
+      return true;
    }
    return false;
 }

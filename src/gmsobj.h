@@ -51,24 +51,6 @@ class TXList
       return FList[Index - ( OneBased ? 1 : 0 )];
    }
 
-   void Put( int Index, T *Item )
-   {
-      FreeItem( Index );
-      FList[Index - ( OneBased ? 1 : 0 )] = Item;
-   }
-
-   void SetCount( int NewCount )
-   {
-      if( NewCount != FCount )
-      {
-         if( NewCount > FCapacity ) SetCapacity( NewCount );
-         if( NewCount > FCount ) std::memset( &FList[FCount], 0, ( NewCount - FCount ) * sizeof( T * ) );
-         else
-            for( int i{ FCount - 1 }; i >= NewCount; i-- ) FreeItem( i );
-         FCount = NewCount;
-      }
-   }
-
 protected:
    int FCount;
    T **FList;
@@ -243,17 +225,6 @@ class TXStrings : public TXList<char>
 private:
    size_t FStrMemory;
 
-   void Put( int Index, const char *Item, size_t itemLen )
-   {
-      FreeItem( Index );
-      FList[Index - ( OneBased ? 1 : 0 )] = utils::NewString( Item, itemLen, FStrMemory );
-   }
-
-   char *Get( int Index )
-   {
-      return FList[Index - ( OneBased ? 1 : 0 )];
-   }
-
 protected:
    void FreeItem( int Index ) override
    {
@@ -381,7 +352,6 @@ public:
    bool OneBased{};
    virtual void Exchange( int Index1, int Index2 ) = 0;
    virtual int Compare( int Index1, int Index2 ) = 0;
-   void SortN( int n );
 };
 
 template<typename T>
@@ -480,15 +450,6 @@ public:
    ~TXCustomStringList() override
    {
       Clear();
-   }
-
-   void Delete( int Index )
-   {
-      FreeItem( Index );
-      if( OneBased ) Index--;
-      FCount--;
-      if( Index < FCount )// overlap so use memmove instead of memcpy
-         std::memmove( &FList[Index], &FList[Index + 1], ( FCount - Index ) * sizeof( TStringItem<T> ) );
    }
 
    void FreeItem( int Index )
@@ -726,42 +687,6 @@ public:
    int Add( const char *S, size_t slen ) override
    {
       return AddObject( S, slen, nullptr );
-   }
-};
-
-template<typename T>
-class TXStrPool : public TXHashedStringList<T>
-{
-   int compareEntry( const char *s, int EN ) override
-   {
-      auto p{ this->FList[EN].FString };
-      return !p ? ( !( !s || s[0] == '\0' ) ? 1 : 0 ) : utils::sameTextPChar<false>( s, p );
-   }
-
-   uint32_t hashValue( const char *s, size_t slen ) override
-   {
-      int64_t r{};
-      int i{}, n{ (int) slen };
-      while( i + 5 < n )
-      {
-         uint32_t t{ (uint32_t) s[i++] };
-         for( int j{}; j < 5; j++ )
-            t = ( HASHMULT * t ) + (uint32_t) s[i++];
-         r = ( HASHMULT_6 * r + t ) % this->hashCount;
-      }
-      while( i < n )
-         r = ( HASHMULT * r + (uint32_t) s[i++] ) % this->hashCount;
-      return (uint32_t) r;
-   }
-
-public:
-   virtual ~TXStrPool() = default;
-
-   int Compare( int Index1, int Index2 ) override
-   {
-      char *s1{ this->FList[Index1 - ( this->OneBased ? 1 : 0 )].FString },
-              *s2{ this->FList[Index2 - ( this->OneBased ? 1 : 0 )].FString };
-      return utils::sameTextPChar<false>( s1, s2 );
    }
 };
 

@@ -1,10 +1,7 @@
 #include "../datastorage.h"
 #include "doctest.h"
-#include <chrono>
-#include <iostream>
-#include <numeric>
 #include <random>
-#include <string>
+#include <array>
 
 using namespace std::literals::string_literals;
 using namespace gdx::collections::datastorage;
@@ -34,33 +31,6 @@ TEST_CASE( "Simple use of linked data" )
       REQUIRE( ( i == 3 || res ) );
       REQUIRE_EQ( i + 1, keys.front() );
    }
-}
-
-TEST_CASE( "Stress test linked data" )
-{
-   auto t{ std::chrono::high_resolution_clock::now() };
-   constexpr int card{ 90000 }, ntries{ 40 }, dim{ 3 }, valdim{ 5 };
-   static_assert( card < std::numeric_limits<int>::max() );
-   std::random_device rd;
-   std::array<int, dim> keys{};
-   std::array<double, valdim> values{};
-   for( int k{}; k < ntries; k++ )
-   {
-      TLinkedData<int, double> lst{ dim, sizeof( double ) * valdim };
-      std::mt19937 rng( rd() );
-      std::uniform_int_distribution<int> gen( 1, 100 );
-      for( int j{}; j < card; j++ )
-      {
-         for( int l{}; l < dim; l++ )
-            keys[l] = gen( rng );
-         for( int l{}; l < valdim; l++ )
-            values[l] = gen( rng );
-         lst.AddItem( keys.data(), values.data() );
-      }
-      lst.Sort();
-   }
-   auto delta{ std::chrono::high_resolution_clock::now() - t };
-   std::cout << "Time in milliseconds for TLinkedData: "s << delta / std::chrono::milliseconds( 1 ) << std::endl;
 }
 
 TEST_SUITE_END();

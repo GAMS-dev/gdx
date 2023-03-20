@@ -36,95 +36,6 @@
 
 namespace gdx::collections::gmsdata
 {
-template<typename T>
-class TTblGamsData
-{
-   int FDim, FDataSize;
-   std::vector<std::pair<int *, T *>> keyValues{};
-
-public:
-   TTblGamsData( int ADim, int ADataSize ) : FDim{ ADim }, FDataSize{ ADataSize } {}
-
-   virtual ~TTblGamsData()
-   {
-      Clear();
-   }
-
-   void GetRecord( int N, int *Inx, T *Vals )
-   {
-      std::memcpy( Inx, keyValues[N].first, FDim * sizeof( int ) );
-      std::memcpy( Vals, keyValues[N].second, FDataSize );
-   }
-
-   void GetKeys( int N, int *Inx )
-   {
-      std::memcpy( Inx, keyValues[N].first, FDim * sizeof( int ) );
-   }
-
-   void GetData( int N, T *Vals )
-   {
-      std::memcpy( Vals, keyValues[N].second, FDataSize );
-   }
-   double *GetDataPtr( int N )
-   {
-      return keyValues[N].second;
-   }
-
-   void AddRecord( const int *AElements, const T *AVals )
-   {
-      // NOTE: Maybe use batch allocator vs. single new allocs here for performance?
-      auto vals{ new T[(size_t) FDataSize / sizeof( T )] };
-      std::memcpy( vals, AVals, FDataSize );
-      auto keys{ new int[FDim] };
-      std::memcpy( keys, AElements, FDim * sizeof( int ) );
-      keyValues.emplace_back( keys, vals );
-   }
-
-   void Clear()
-   {
-      for( auto [k, v]: keyValues )
-      {
-         delete[] k;
-         delete[] v;
-      }
-      keyValues.clear();
-   }
-
-   [[nodiscard]] int size() const
-   {
-      return (int) keyValues.size();
-   }
-
-   [[nodiscard]] int GetCount() const
-   {
-      return size();
-   }
-
-   [[nodiscard]] bool empty() const
-   {
-      return keyValues.empty();
-   }
-
-   void Sort()
-   {
-      std::sort( keyValues.begin(), keyValues.end(), [this]( const auto &pair1, const auto &pair2 ) {
-         for( int i = 0; i < FDim; i++ )
-            if( pair1.first[i] >= pair2.first[i] ) return false;
-         return true;
-      } );
-   }
-
-   [[nodiscard]] int MemoryUsed() const
-   {
-      return static_cast<int>( keyValues.size() * ( FDim * sizeof( int ) + FDataSize * sizeof( T ) ) + keyValues.capacity() );
-   }
-
-   [[nodiscard]] int GetDimension() const
-   {
-      return FDim;
-   }
-};
-
 const int BufSize = 1024 * 16;
 
 struct TGADataBuffer {
@@ -293,7 +204,7 @@ public:
 };
 
 template<typename T>
-class TTblGamsDataLegacy
+class TTblGamsData
 {
    TGrowArrayFxd<uint8_t> DS;
    collections::gmsobj::TXList<uint8_t> FList{};
@@ -385,14 +296,14 @@ class TTblGamsDataLegacy
    }
 
 public:
-   TTblGamsDataLegacy( int ADim, int ADataSize ) : DS{ static_cast<int>( ADim * sizeof( int ) + ADataSize ) },
+   TTblGamsData( int ADim, int ADataSize ) : DS{ static_cast<int>( ADim * sizeof( int ) + ADataSize ) },
                                                    FDim{ ADim },
                                                    FIndexSize{ static_cast<int>( FDim * sizeof( int ) ) },
                                                    FDataSize{ ADataSize }
    {
    }
 
-   virtual ~TTblGamsDataLegacy() = default;
+   virtual ~TTblGamsData() = default;
 
    inline void AddRecord( const int *Inx, const T *Buffer )
    {
@@ -504,16 +415,6 @@ public:
    [[nodiscard]] int GetCount() const
    {
       return FList.size();
-   }
-
-   [[nodiscard]] int GetCapacity() const
-   {
-      return FList.GetCapacity();
-   }
-
-   void SetCapacity( int N )
-   {
-      FList.SetCapacity( N );
    }
 
    [[nodiscard]] int GetDimension() const

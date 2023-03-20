@@ -28,13 +28,6 @@
 // Description:
 //  This unit defines the GDX Object as a C++ object.
 
-// Quick settings:
-// P3_COLLECTIONS: Use paul objects as much as possible and gmsheapnew for TLinkedData, most verbatim port
-// MIXED_COLLECTIONS (default): Mix-and-match custom and builtin data structures for best performance
-#if !defined( P3_COLLECTIONS ) && !defined( MIX_COLLECTIONS )
-#define MIX_COLLECTIONS
-#endif
-
 #include "datastorage.h"   // for TLinkedData
 #include "gclgms.h"        // for GLOBAL_MAX_INDEX_DIM, GMS_MAX_INDEX_DIM
 #include "gmsdata.h"       // for TTblGamsData
@@ -50,30 +43,12 @@
 #include <optional>        // for optional
 #include <string>          // for string
 #include <string_view>     // for string_view
+
 namespace gdx::gmsstrm
 {
 class TMiBufferedStreamDelphi;
 class TXStreamDelphi;
 }// namespace gdx::gmsstrm
-
-//======================================================================================================================
-// Various switches for container/data structure implementation choices:
-//======================================================================================================================
-
-// Only if no other C++-hashmap is chosen, switch to TXStrHash implementation as close as possible to original P3 one
-#define TSH_LEGACY
-
-// Use TXStrPool port for SetTextList
-#define TXSPOOL_LEGACY
-
-// Use verbatim port for TTblGamsData
-#define TBL_GMSDATA_LEGACY
-
-#if defined( MIX_COLLECTIONS )
-#undef TSH_LEGACY
-#undef TXSPOOL_LEGACY
-#undef TBL_GMSDATA_LEGACY
-#endif
 
 //======================================================================================================================
 
@@ -262,18 +237,10 @@ enum class TUELUserMapStatus
 };
 
 template<typename T>
-#ifdef TSH_LEGACY
-using TXStrHashListImpl = collections::strhash::TXStrHashListLegacy<T>;
-#else
 using TXStrHashListImpl = collections::strhash::TXStrHashList<T>;
-#endif
 
 template<typename T>
-#ifdef TSH_LEGACY
-using TXCSStrHashListImpl = collections::strhash::TXCSStrHashListLegacy<T>;
-#else
 using TXCSStrHashListImpl = collections::strhash::TXCSStrHashList<T>;
-#endif
 
 class TUELTable : public TXStrHashListImpl<int>
 {
@@ -356,21 +323,12 @@ using TIntlValueMapI64 = std::array<int64_t, vm_count>;
 using LinkedDataType = collections::datastorage::TLinkedData<int, double>;
 using LinkedDataIteratorType = collections::datastorage::TLinkedDataRec<int, double> *;
 
-#if defined( TXSPOOL_LEGACY )
-using TSetTextList = collections::gmsobj::TXStrPool<uint8_t>;
-#else
 using TSetTextList = TXCSStrHashListImpl<uint8_t>;
-#endif
 
 using TNameList = TXStrHashListImpl<PgdxSymbRecord>;
 
-#ifdef TBL_GMSDATA_LEGACY
-template<typename T>
-using TTblGamsDataImpl = collections::gmsdata::TTblGamsDataLegacy<T>;
-#else
 template<typename T>
 using TTblGamsDataImpl = collections::gmsdata::TTblGamsData<T>;
-#endif
 
 using TDomainStrList = TXStrHashListImpl<uint8_t>;
 

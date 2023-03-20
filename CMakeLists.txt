@@ -20,7 +20,7 @@ if (UNIX)
 endif (UNIX)
 
 # Makefile in devel/products/src/gdxio takes care of acquiring sources for zlib, skip in CMake builds so far
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVERBOSE_TRACE -DNO_GAMSDIST")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_GAMSDIST")
 
 set(common
 		src/gclgms.h src/gclgms.c
@@ -29,7 +29,6 @@ set(common
 		src/datastorage.h
 		src/strhash.h
 		src/gmsobj.h src/gmsobj.cpp
-		src/gmsheapnew.h src/gmsheapnew.cpp
 		src/utils.h src/utils.cpp
 		src/gxfile.h src/gxfile.cpp
 		src/gdx.h
@@ -46,7 +45,6 @@ set(tests
 		src/tests/gmsobjtests.cpp
 		src/tests/gmsdatatests.cpp
 		src/tests/strhashtests.cpp
-		src/tests/gmsheapnewtests.cpp
 		src/tests/datastoragetests.cpp
 )
 
