@@ -127,7 +127,7 @@ void commonTTblGamsDataTests( T &gdl )
       gdl.AddRecord( keys.data(), vals.data() );
    }
    gdl.Sort();
-   REQUIRE_EQ(10, gdl.GetCount());
+   REQUIRE_EQ( 10, gdl.GetCount() );
    for( int i{}; i < 10; i++ )
    {
       gdl.GetRecord( i, keys.data(), vals.data() );

@@ -452,7 +452,7 @@ bool TBufferedFileStreamDelphi::FlushBuffer()
          CBufPtr->cxHeader.cxB1 = (uint8_t) ( Len >> 8 );
          CBufPtr->cxHeader.cxB2 = Len & 0xFF;
          Len += sizeof( TCompressHeader );
-         ActWritten = TXFileStreamDelphi::Write( &CBufPtr->cxHeader.cxTyp, static_cast<uint32_t>(Len) );
+         ActWritten = TXFileStreamDelphi::Write( &CBufPtr->cxHeader.cxTyp, static_cast<uint32_t>( Len ) );
          res = Len == ActWritten;
       }
       else
@@ -492,8 +492,8 @@ uint32_t TBufferedFileStreamDelphi::Read( void *Buffer, uint32_t Count )
          Count -= NrBytes;
       }
       // Out param buffer should not contain garbage after call
-      if(!UsrReadCnt && Count > 0)
-         std::memset(UsrPtr, 0, Count);
+      if( !UsrReadCnt && Count > 0 )
+         std::memset( UsrPtr, 0, Count );
       return UsrReadCnt;
    }
 }

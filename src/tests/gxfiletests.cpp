@@ -580,14 +580,14 @@ TEST_CASE( "Test write and read record in string mode" )
    std::string fn{ "rwrecordstr.gdx" };
    StrIndexBuffers keyNames;
    TgdxValues values{};
-   std::string stillOk(255, 'b');
+   std::string stillOk( 255, 'b' );
    stillOk.front() = 'a';
    stillOk.back() = 'c';
    testWrite( fn, [&]( TGXFileObj &pgx ) {
-      std::string tooLongForSymName(GLOBAL_UEL_IDENT_SIZE, 'b');
+      std::string tooLongForSymName( GLOBAL_UEL_IDENT_SIZE, 'b' );
       tooLongForSymName.front() = 'a';
       tooLongForSymName.back() = 'c';
-      REQUIRE_FALSE( pgx.gdxDataWriteStrStart(tooLongForSymName.c_str(), "ok", 1, dt_par, 0 ) );
+      REQUIRE_FALSE( pgx.gdxDataWriteStrStart( tooLongForSymName.c_str(), "ok", 1, dt_par, 0 ) );
 
       REQUIRE( pgx.gdxDataWriteStrStart( "mysym", stillOk.c_str(), 1, dt_par, 0 ) );
       values[GMS_VAL_LEVEL] = 3.141;
@@ -621,9 +621,9 @@ TEST_CASE( "Test write and read record in string mode" )
    testRead( fn, [&]( TGXFileObj &pgx ) {
       int NrRecs, UserInfo;
       char ExplTxt[GMS_SSSIZE];
-      REQUIRE( pgx.gdxSymbolInfoX(1, NrRecs, UserInfo, ExplTxt) );
+      REQUIRE( pgx.gdxSymbolInfoX( 1, NrRecs, UserInfo, ExplTxt ) );
       REQUIRE_EQ( 3, NrRecs );
-      REQUIRE_EQ(stillOk, ExplTxt);
+      REQUIRE_EQ( stillOk, ExplTxt );
 
       REQUIRE( pgx.gdxDataReadStrStart( 1, NrRecs ) );
       REQUIRE_EQ( 3, NrRecs );
@@ -645,10 +645,10 @@ TEST_CASE( "Test write and read record in string mode" )
       REQUIRE_FALSE( pgx.gdxDataReadStr( keyNames.ptrs(), values.data(), dimFrst ) );
       REQUIRE( pgx.gdxDataReadDone() );
 
-      REQUIRE( pgx.gdxSymbolInfoX(2, NrRecs, UserInfo, ExplTxt) );
+      REQUIRE( pgx.gdxSymbolInfoX( 2, NrRecs, UserInfo, ExplTxt ) );
       REQUIRE_EQ( 0, NrRecs );
-      REQUIRE_EQ( 255, std::strlen(ExplTxt) );
-      REQUIRE_EQ( "String overflow: a"s + std::string(255-"String overflow: a..."s.length(), 'b') + "..."s, ExplTxt );
+      REQUIRE_EQ( 255, std::strlen( ExplTxt ) );
+      REQUIRE_EQ( "String overflow: a"s + std::string( 255 - "String overflow: a..."s.length(), 'b' ) + "..."s, ExplTxt );
    } );
    std::filesystem::remove( fn );
 }

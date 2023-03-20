@@ -572,7 +572,7 @@ void THeapMgr::XReAllocMem( void **P, int OldSize, int NewSize )
       std::memcpy( PNew, P, OldSize <= NewSize ? OldSize : NewSize );
       prvXFreeMem( P, OldSize );
    }
-   if(P)
+   if( P )
       *P = PNew;
 #endif
 }
@@ -620,7 +620,8 @@ void THeapMgr::XReAllocMem64( void **P, int64_t OldSize, int64_t NewSize )
    ReAllocUsed64 += NewSize;
    if( NewSize <= 0 )
    {
-      if( OldSize > 0 && P ) {
+      if( OldSize > 0 && P )
+      {
          prvXFreeMem64( P, OldSize );
          P = nullptr;
       }
@@ -639,7 +640,8 @@ void THeapMgr::XReAllocMem64( void **P, int64_t OldSize, int64_t NewSize )
       PNew = std::realloc( PNew, NewSize );
       Active.push_back( PNew );
       if( NewSize > OldSize ) IncreaseMemorySize( NewSize - OldSize );
-      else ReduceMemorySize( OldSize - NewSize );
+      else
+         ReduceMemorySize( OldSize - NewSize );
    }
    else
    {
@@ -648,7 +650,7 @@ void THeapMgr::XReAllocMem64( void **P, int64_t OldSize, int64_t NewSize )
       prvXFreeMem64( P, OldSize );
    }
 #endif
-   if(P)
+   if( P )
       *P = PNew;
 }
 

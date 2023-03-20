@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "gdx.h" // for TGXFileObj, DLLLoadPath, TDataStoreProc_t, TDat...
+#include "gdx.h"    // for TGXFileObj, DLLLoadPath, TDataStoreProc_t, TDat...
 #include <algorithm>// for min
 #include <cassert>  // for assert
 #include <cstring>  // for memcpy
