@@ -8,7 +8,7 @@ if(CCACHE_FOUND)
 	set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
-set(mylibs dl pthread)
+set(mylibs dl pthread z)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGC_NO_MUTEX")
 if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /W3 /EHs /D_CRT_SECURE_NO_WARNINGS")
@@ -20,7 +20,7 @@ if (UNIX)
 endif (UNIX)
 
 # Makefile in devel/products/src/gdxio takes care of acquiring sources for zlib, skip in CMake builds so far
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_ZLIB -DVERBOSE_TRACE -DNO_GAMSDIST")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVERBOSE_TRACE -DNO_GAMSDIST")
 
 set(common
 		src/gclgms.h src/gclgms.c
