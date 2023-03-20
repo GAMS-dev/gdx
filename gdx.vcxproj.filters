@@ -24,8 +24,6 @@
     </ClCompile>
     <ClCompile Include="src\gclgms.c">
     </ClCompile>
-    <ClCompile Include="src\gmsheapnew.cpp">
-    </ClCompile>
     <ClCompile Include="src\gmsobj.cpp">
     </ClCompile>
     <ClCompile Include="src\gmsstrm.cpp">
@@ -34,9 +32,6 @@
       <Filter>tests</Filter>
     </ClCompile>
     <ClCompile Include="src\tests\gmsobjtests.cpp">
-      <Filter>tests</Filter>
-    </ClCompile>
-    <ClCompile Include="src\tests\gmsheapnewtests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
     <ClCompile Include="src\tests\gmsdatatests.cpp">
@@ -102,7 +97,6 @@
     <ClInclude Include="src\gclgms.h" />
     <ClInclude Include="src\datastorage.h" />
     <ClInclude Include="src\gmsdata.h" />
-    <ClInclude Include="src\gmsheapnew.h" />
     <ClInclude Include="src\gmsobj.h" />
     <ClInclude Include="src\gmsstrm.h" />
     <ClInclude Include="src\strhash.h" />

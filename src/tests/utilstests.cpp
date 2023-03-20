@@ -30,6 +30,7 @@
 #include <cstring>   // for strcmp
 #include <memory>    // for unique_ptr
 #include <string>// for operator""s, string, basic_string, allocator
+#include <ostream>
 
 using namespace std::literals::string_literals;
 

@@ -35,14 +35,12 @@
     <ClCompile Include="..\..\..\..\libs\gmszlib\uncompr.c" />
     <ClCompile Include="..\..\..\..\libs\gmszlib\zutil.c" />
     <ClCompile Include="src\gclgms.c" />
-    <ClCompile Include="src\gmsheapnew.cpp" />
     <ClCompile Include="src\gmsobj.cpp" />
     <ClCompile Include="src\gmsstrm.cpp" />
     <ClCompile Include="src\gxfile.cpp" />
     <ClCompile Include="src\tests\datastoragetests.cpp" />
     <ClCompile Include="src\tests\doctestmain.cpp" />
     <ClCompile Include="src\tests\gmsdatatests.cpp" />
-    <ClCompile Include="src\tests\gmsheapnewtests.cpp" />
     <ClCompile Include="src\tests\gmsobjtests.cpp" />
     <ClCompile Include="src\tests\strhashtests.cpp" />
     <ClCompile Include="src\tests\gxfiletests.cpp" />
@@ -64,7 +62,6 @@
     <ClInclude Include="src\gclgms.h" />
     <ClInclude Include="src\datastorage.h" />
     <ClInclude Include="src\gmsdata.h" />
-    <ClInclude Include="src\gmsheapnew.h" />
     <ClInclude Include="src\gmsobj.h" />
     <ClInclude Include="src\gmsstrm.h" />
     <ClInclude Include="src\strhash.h" />
