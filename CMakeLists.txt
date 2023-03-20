@@ -8,7 +8,7 @@ if(CCACHE_FOUND)
 	set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif(CCACHE_FOUND)
 
-set(mylibs dl pthread z)
+set(mylibs dl pthread)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGC_NO_MUTEX")
 if (MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /W3 /EHs /D_CRT_SECURE_NO_WARNINGS")
@@ -54,6 +54,7 @@ set(tests
 #set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_executable(gdxtest ${common} ${tests})
+target_include_directories(gdxtest PRIVATE zlib)
 target_link_libraries(gdxtest ${mylibs})
 
 # Quickly run "include what you use" (https://include-what-you-use.org/) over project
