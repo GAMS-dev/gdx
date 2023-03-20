@@ -33,6 +33,7 @@
 #include <random>
 #include <iostream>
 #include <chrono>
+#include <numeric>// for iota
 
 using namespace std::literals::string_literals;
 using namespace gdx::collections::gmsdata;
