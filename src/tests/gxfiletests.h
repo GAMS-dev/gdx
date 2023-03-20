@@ -1,5 +1,11 @@
 #pragma once
 
+#include <functional> // for function
+#include <string>     // for string, operator""s
+#include <vector>     // for vector
+#include <array>      // for array, array<>::value_type
+#include <cassert>    // for assert
+
 namespace gdx::tests::gxfiletests
 {
 
