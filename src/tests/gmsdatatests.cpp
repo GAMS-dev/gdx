@@ -30,6 +30,8 @@
 #include <array>       // for array
 #include <string>      // for string_literals
 #include <vector>      // for vector
+#include <random>
+#include <iostream>
 
 using namespace std::literals::string_literals;
 using namespace gdx::collections::gmsdata;
@@ -146,6 +148,40 @@ TEST_CASE( "Test basic usage of TTblGamsDataLegacy" )
       TTblGamsDataLegacy<double> gdl{ 1, sizeof( double ) * 2 };
       commonTTblGamsDataTests<TTblGamsDataLegacy<double>>( gdl );
    }
+}
+
+template<typename T>
+void runStressTest( const std::string_view caption )
+{
+   std::array<int, GLOBAL_MAX_INDEX_DIM> keys{};
+   std::array<double, 2> vals{};
+   auto t{ std::chrono::high_resolution_clock::now() };
+   constexpr int card{ 50000 }, ntries{ 40 };
+   static_assert( card < std::numeric_limits<int>::max() );
+   std::array<int, card> nums{};
+   std::random_device rd;
+   for( int k{}; k < ntries; k++ )
+   {
+      T shlst { 1, sizeof( double ) * 2 };
+      std::mt19937 g( rd() );
+      std::iota( nums.begin(), nums.end(), 1 );
+      std::shuffle( nums.begin(), nums.end(), g );
+      for( int n: nums )
+      {
+         keys.front() = n;
+         shlst.AddRecord( keys.data(), vals.data() );
+      }
+      for(int i{}; i<shlst.GetCount(); i++)
+         shlst.GetRecord( i, keys.data(), vals.data() );
+   }
+   auto delta{ std::chrono::high_resolution_clock::now() - t };
+   std::cout << "Time in milliseconds for "s << caption << ": "s << delta / std::chrono::milliseconds( 1 ) << std::endl;
+}
+
+TEST_CASE( "Stress test TTblGamsData vs. TTblGamsDataLegacy" )
+{
+   runStressTest<TTblGamsData<double>>( "TTblGamsData"s );
+   runStressTest<TTblGamsDataLegacy<double>>( "TTblGamsDataLegacy"s );
 }
 
 TEST_SUITE_END();
