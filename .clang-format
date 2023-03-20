@@ -65,4 +65,4 @@ SpacesInSquareBrackets: false
 TabWidth: 3
 UseTab: Never
 SortIncludes: Never
-InsertNewlineAtEOF: true
+#InsertNewlineAtEOF: true

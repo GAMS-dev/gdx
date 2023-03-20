@@ -45,6 +45,8 @@ template<typename T>
 void runTest( const std::array<int, 10> &nums )
 {
    T shlst;
+   shlst.Clear();
+   REQUIRE_EQ( -1, shlst.IndexOf( "xyz" ) );
    // 0-based
    for( const int &n: nums )
    {

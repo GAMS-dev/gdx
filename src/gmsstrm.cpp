@@ -376,7 +376,7 @@ bool TBufferedFileStreamDelphi::FillBuffer()
             TXFileStreamDelphi::Read( &CBufPtr->cxData, WLen );
             unsigned long XLen = BufSize;// we need a var parameter
             uncompress( BufPtr.data(), &XLen, &CBufPtr->cxData, WLen );
-            NrLoaded = XLen;
+            NrLoaded = static_cast<uint32_t>( XLen );
          }
       }
    }
@@ -452,7 +452,7 @@ bool TBufferedFileStreamDelphi::FlushBuffer()
          CBufPtr->cxHeader.cxB1 = (uint8_t) ( Len >> 8 );
          CBufPtr->cxHeader.cxB2 = Len & 0xFF;
          Len += sizeof( TCompressHeader );
-         ActWritten = TXFileStreamDelphi::Write( &CBufPtr->cxHeader.cxTyp, Len );
+         ActWritten = TXFileStreamDelphi::Write( &CBufPtr->cxHeader.cxTyp, static_cast<uint32_t>(Len) );
          res = Len == ActWritten;
       }
       else
@@ -491,6 +491,9 @@ uint32_t TBufferedFileStreamDelphi::Read( void *Buffer, uint32_t Count )
          UsrReadCnt += NrBytes;
          Count -= NrBytes;
       }
+      // Out param buffer should not contain garbage after call
+      if(!UsrReadCnt && Count > 0)
+         std::memset(UsrPtr, 0, Count);
       return UsrReadCnt;
    }
 }
@@ -729,7 +732,7 @@ void TMiBufferedStreamDelphi::WriteGmsDouble( double D )
 
 int TMiBufferedStreamDelphi::ReadGmsInteger()
 {
-   uint8_t B;
+   uint8_t B{};
    Read( &B, 1 );
    std::array<uint8_t, 5> W{};
    W[0] = B & 15;
