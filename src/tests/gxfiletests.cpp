@@ -617,7 +617,10 @@ TEST_CASE( "Test write and read record in string mode" )
       tooLongForExplTxt.back() = 'c';
       REQUIRE( pgx.gdxDataWriteStrStart( "mysym2", tooLongForExplTxt.c_str(), 1, dt_par, 0 ) );
       REQUIRE( pgx.gdxDataWriteDone() );
-   } );
+
+      REQUIRE( pgx.gdxDataWriteStrStart( almostTooLongButStillOk.c_str(), stillOk.c_str(), 0, dt_par, 0 ) );
+      REQUIRE( pgx.gdxDataWriteDone() );
+   });
    testRead( fn, [&]( TGXFileObj &pgx ) {
       int NrRecs, UserInfo;
       char ExplTxt[GMS_SSSIZE];
@@ -752,7 +755,22 @@ TEST_CASE( "Test write and read record mapped - out of order" )
          REQUIRE( pgx.gdxDataWriteMap( &i, values.data() ) );
       REQUIRE( pgx.gdxDataWriteDone() );
 
+      constexpr char c {'i'};
+      std::string notTooLongSymID(GLOBAL_UEL_IDENT_SIZE-1, c),
+                  notTooLongExpl(GMS_SSSIZE-1, c),
+                  tooLongSymID(GLOBAL_UEL_IDENT_SIZE, c),
+                  tooLongExpl(GMS_SSSIZE, c);
+
+      REQUIRE( pgx.gdxDataWriteMapStart( notTooLongSymID.c_str(), notTooLongExpl.c_str(), 0, dt_par, 0 ));
+      REQUIRE( pgx.gdxDataWriteDone() );
+
       REQUIRE_EQ( 0, pgx.gdxErrorCount() );
+      REQUIRE_EQ( 0, pgx.gdxDataErrorCount() );
+
+      REQUIRE_FALSE( pgx.gdxDataWriteMapStart( tooLongSymID.c_str(), notTooLongExpl.c_str(), 0, dt_par, 0 ));
+      REQUIRE_FALSE( pgx.gdxDataWriteMapStart( notTooLongSymID.c_str(), tooLongExpl.c_str(), 0, dt_par, 0 ));
+
+      REQUIRE_EQ( 2, pgx.gdxErrorCount() );
       REQUIRE_EQ( 0, pgx.gdxDataErrorCount() );
    } );
    testRead( fn, [&]( TGXFileObj &pgx ) {
