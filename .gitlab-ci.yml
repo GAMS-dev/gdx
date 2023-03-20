@@ -24,7 +24,7 @@ variables:
     value: $BUILDS_SSH_USER
     description: "Username used for SSH connection to builds server"
 
-fetch-ci-scripts:
+fetch-ci-scripts-and-zlib:
   stage: fetch-scripts
   when: always
   tags: [linux]
@@ -35,6 +35,7 @@ fetch-ci-scripts:
   script:
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
     - cp -R scripts-repo/ci .
+    - git clone  https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/gmszlib.git zlib
   artifacts:
     name: ci-scripts
     expire_in: 2 hours

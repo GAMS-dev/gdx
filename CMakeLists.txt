@@ -33,6 +33,9 @@ set(common
 		src/utils.h src/utils.cpp
 		src/gxfile.h src/gxfile.cpp
 		src/gdx.h
+		# ZLIB modules
+		# missing? run in project root: git clone git@git.gams.com:devel/gmszlib.git zlib
+		zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c zlib/zutil.c
 )
 
 set(tests
