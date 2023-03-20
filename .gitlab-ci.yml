@@ -24,7 +24,8 @@ variables:
     value: $BUILDS_SSH_USER
     description: "Username used for SSH connection to builds server"
 
-fetch-ci-scripts-and-zlib:
+# also fetches zlib since CMake-build of doesn't automatigically gets its like the devel/products Makefile
+fetch-ci-scripts:
   stage: fetch-scripts
   when: always
   tags: [linux]
