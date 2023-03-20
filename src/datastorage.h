@@ -197,7 +197,7 @@ public:
 #ifdef USE_GMSHEAP
          MyHeap.XFreeMem( P, FTotalSize );
 #else
-         delete [] P;
+         delete[] P;
 #endif
          P = Pn;
       }

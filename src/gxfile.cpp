@@ -63,9 +63,9 @@ std::string QueryEnvironmentVariable( const std::string &Name )
    if( !len ) return ""s;
    else
    {
-      auto buf { std::unique_ptr<char[]>{ new char[len] } };
+      auto buf{ std::unique_ptr<char[]>{ new char[len] } };
       GetEnvironmentVariableA( Name.c_str(), buf.get(), len );
-      std::string val(buf.get(), len-1); // no terminating zero
+      std::string val( buf.get(), len - 1 );// no terminating zero
       if( val.length() > 255 ) val = val.substr( 0, 255 );
       return val;
    }
@@ -304,9 +304,9 @@ int ConvertGDXFile( const std::string &fn, const std::string &MyComp )
    std::string Comp = Conv == "V5" ? ""s : ( !GetEnvCompressFlag() ? "U" : "C" );
    if( utils::sameText( Conv + Comp, "V7"s + MyComp ) ) return 0;
 #ifdef NO_GAMSDIST
-   int progRC {}, res {};
+   int progRC{}, res{};
 #else
-   int progRC, res { SystemP( "gdxcopy -"s + Conv + Comp + " -Replace "s + utils::quoteWhitespace( fn, '\"' ), progRC ) };
+   int progRC, res{ SystemP( "gdxcopy -"s + Conv + Comp + " -Replace "s + utils::quoteWhitespace( fn, '\"' ), progRC ) };
 #endif
    return progRC ? ERR_GDXCOPY - progRC : res;
 }
@@ -826,15 +826,17 @@ int TGXFileObj::gdxResetSpecialValues()
 }
 
 // This makes the expected case (<=255 chars) fast but the exceptional case (>=256 chars) slow
-static void assignExplanatoryText( const char *userText, char *buf ) {
-    int i;
-    for(i=0; i<GMS_SSSIZE && userText[i] != '\0'; i++)
-        buf[i] = userText[i];
-    if(i < GMS_SSSIZE) {
-        buf[i] = '\0';
-        return;
-    }
-    std::snprintf(buf, GMS_SSSIZE, "String overflow: %.*s...", GMS_SSSIZE-21, userText);
+static void assignExplanatoryText( const char *userText, char *buf )
+{
+   int i;
+   for( i = 0; i < GMS_SSSIZE && userText[i] != '\0'; i++ )
+      buf[i] = userText[i];
+   if( i < GMS_SSSIZE )
+   {
+      buf[i] = '\0';
+      return;
+   }
+   std::snprintf( buf, GMS_SSSIZE, "String overflow: %.*s...", GMS_SSSIZE - 21, userText );
 }
 
 bool TGXFileObj::PrepareSymbolWrite( const std::string_view Caller,
@@ -864,7 +866,7 @@ bool TGXFileObj::PrepareSymbolWrite( const std::string_view Caller,
    obj->SDataType = static_cast<gdxSyType>( AType );
    obj->SUserInfo = AUserInfo;
    obj->SSetText = false;
-   assignExplanatoryText(AText, obj->SExplTxt.data());
+   assignExplanatoryText( AText, obj->SExplTxt.data() );
    MakeGoodExplText( obj->SExplTxt.data() );
    obj->SIsCompressed = CompressOut && ADim > 0;
    obj->SCommentsList = std::nullopt;
@@ -1094,7 +1096,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
       {
          MinElem[D] = FFile->ReadInteger();
          MaxElem[D] = FFile->ReadInteger();
-         ElemType[D] = GetIntegerSize( (unsigned int)MaxElem[D] - (unsigned int)MinElem[D] + 1 );
+         ElemType[D] = GetIntegerSize( (unsigned int) MaxElem[D] - (unsigned int) MinElem[D] + 1 );
       }
    }
    bool AllocOk{ true };
@@ -1278,7 +1280,7 @@ void TGXFileObj::InitDoWrite( int NrRecs )
    for( int D{}; D < FCurrentDim; D++ )
    {
       LastElem[D] = INDEX_INITIAL;
-      ElemType[D] = GetIntegerSize( (unsigned int)MaxElem[D] - (unsigned int)MinElem[D] + 1 );
+      ElemType[D] = GetIntegerSize( (unsigned int) MaxElem[D] - (unsigned int) MinElem[D] + 1 );
       FFile->WriteInteger( MinElem[D] );
       FFile->WriteInteger( MaxElem[D] );
    }
@@ -2148,7 +2150,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
       {
          if( FFile->ReadByte() )
          {
-            CurSyPtr->SDomSymbols = std::unique_ptr<int[]>{ new int [CurSyPtr->SDim] };
+            CurSyPtr->SDomSymbols = std::unique_ptr<int[]>{ new int[CurSyPtr->SDim] };
             for( int D{}; D < CurSyPtr->SDim; D++ )
                CurSyPtr->SDomSymbols[D] = FFile->ReadInteger();
          }
