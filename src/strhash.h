@@ -190,35 +190,6 @@ protected:
       }
    }
 
-   void Sort()
-   {
-      if( !SortMap )
-      {
-         SortMap = std::unique_ptr<int[]>{ new int[FCount] };
-         for( int N{}; N < FCount; N++ )
-            SortMap[N] = N;
-         FSorted = false;
-      }
-      if( !FSorted )
-      {
-         if( FCount >= 2 )
-         {
-            char *PSN = Buckets[0]->StrP;
-            for( int N{}; N < FCount - 1; N++ )
-            {
-               char *PSN1 = Buckets[N + 1]->StrP;
-               if( Compare( PSN, PSN1 ) > 0 )
-               {
-                  QuickSort( 0, FCount - 1 );
-                  break;
-               }
-               PSN = PSN1;
-            }
-         }
-         FSorted = true;
-      }
-   }
-
 public:
    bool OneBased{};// When false (default) indices are in the range 0..Count-1
    // when true, indices are in the range 1..Count

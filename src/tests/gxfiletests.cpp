@@ -42,7 +42,6 @@
 #include <list>       // for list, operator!=, _List...
 #include <map>        // for map, operator!=, _Rb_tr...
 #include <tuple>      // for tuple
-#include <type_traits>// for enable_if_t
 #include <utility>    // for pair
 
 #include "gxfiletests.h"
@@ -999,7 +998,7 @@ TEST_CASE( "Test adding a set alias" )
       REQUIRE( pgx.gdxFindSymbol( aliasName.c_str(), aliasIx ) );
       REQUIRE_EQ( aliasSymNr, aliasIx );
       int numRecords, userInfo, dim, typ;
-      std::array<char, GMS_SSSIZE> explText, symbolName;
+      std::array<char, GMS_SSSIZE> explText{}, symbolName{};
       REQUIRE( pgx.gdxSymbolInfoX( aliasSymNr, numRecords, userInfo, explText.data() ) );
       REQUIRE( pgx.gdxSymbolInfo( aliasSymNr, symbolName.data(), dim, typ ) );
       REQUIRE_EQ( 0, numRecords );
@@ -1450,7 +1449,7 @@ TEST_CASE( "Test writing a duplicate uel in string mode" )
       REQUIRE( pgx.gdxDataWriteDone() );
       REQUIRE_EQ( 1, pgx.gdxErrorCount() );
       char msg[GMS_SSSIZE];
-      pgx.gdxErrorStr( pgx.gdxGetLastError(), msg );
+      TGXFileObj::gdxErrorStr( pgx.gdxGetLastError(), msg );
       REQUIRE( !strcmp( "Duplicate keys", msg ) );
       pgx.gdxClose();
       std::filesystem::remove( fn );

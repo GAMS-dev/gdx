@@ -204,7 +204,6 @@ class TTblGamsData
    collections::gmsobj::TXList<uint8_t> FList{};
    int FDim, FIndexSize, FDataSize;
    bool FIsSorted{ true };
-   int FLastIndex{ -1 };
 
    void QuickSort( int L, int R )
    {
@@ -246,17 +245,6 @@ class TTblGamsData
       for( int D{}; D < FDim; D++ )
       {
          int diff{ P1[D] - P2[D] };
-         if( diff ) return diff;
-      }
-      return 0;
-   }
-
-   int CompareWithRecord( const int *Inx, int N )
-   {
-      auto P1{ reinterpret_cast<const int *>( FList[N] ) };
-      for( int D{}; D < FDim; D++ )
-      {
-         int diff{ Inx[D] - P1[D] };
          if( diff ) return diff;
       }
       return 0;
@@ -342,49 +330,6 @@ public:
    T *GetDataPtr( int N )
    {
       return reinterpret_cast<T *>( &FList[N][FIndexSize] );
-   }
-
-   bool SearchRecord( const int *Inx, int &RecNr )
-   {
-      int H{ FList.size() - 1 };
-      if( H < 0 )
-      {
-         RecNr = 0;
-         FLastIndex = 0;
-         return false;
-      }
-      int L{};
-      FLastIndex++;
-      if( FLastIndex >= 0 && FLastIndex <= H )
-      {
-         int C{ CompareWithRecord( Inx, FLastIndex ) };
-         if( !C )
-         {
-            RecNr = FLastIndex;
-            return true;
-         }
-         if( C < 0 ) H = FLastIndex - 1;
-         else
-            L = FLastIndex + 1;
-      }
-      // binary search
-      bool res{};
-      while( L <= H )
-      {
-         int I{ ( L + H ) >> 1 };
-         int C{ CompareWithRecord( Inx, I ) };
-         if( C > 0 ) L = I + 1;
-         else if( C )
-            H = I - 1;
-         else
-         {
-            res = true;
-            L = I;
-            break;
-         }
-      }
-      RecNr = FLastIndex = L;
-      return res;
    }
 
    void Clear()

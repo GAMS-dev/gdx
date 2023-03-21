@@ -120,14 +120,6 @@ public:
       }
    }
 
-   int IndexOf( const T *Item ) const
-   {
-      for( int N{}; N < FCount; N++ )
-         if( FList[N] == Item )
-            return N + ( OneBased ? 1 : 0 );
-      return -1;
-   }
-
    void Insert( int Index, T *Item )
    {
       if( FCount == FCapacity ) Grow();

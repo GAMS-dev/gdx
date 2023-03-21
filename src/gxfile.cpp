@@ -41,7 +41,6 @@
 #include <iostream> // for operator<<, basic_ostream, cout, ostream
 #include <map>      // for map, operator==, _Rb_tree_const_iterator
 #include <utility>  // for pair
-#include <vector>   // for vector
 
 #if defined( _WIN32 )
 #include <Windows.h>
@@ -937,7 +936,7 @@ void TGXFileObj::ReportError( int N )
       if( !MajContext.empty() )
          std::cout << "Error after call to " << MajContext << '\n';
       std::array<char, GMS_SSSIZE> s{};
-      this->gdxErrorStr( N, s.data() );
+      gdxErrorStr( N, s.data() );
       std::cout << "Error = " << N << " : " << s.data() << "\n";
    }
    SetError( N );
@@ -1302,13 +1301,6 @@ enum TDblClass
 };
 
 TDblClass dblInfo( double x, int64_t &i );
-
-const std::array DblClassText {
-        "NaN"s
-        "negative infinity"s,
-        "positive infinity"s,
-        "finite"s
-};
 
 /* Assume the IEEE double looks like
             * s eeeeeeeeeee mmm....mmm
