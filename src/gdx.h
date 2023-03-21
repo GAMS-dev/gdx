@@ -47,8 +47,7 @@ public:
    int gdxUELRegisterMap( int UMap, const char *Uel );
    int gdxClose();
    int gdxResetSpecialValues();
-   int gdxErrorStr( int ErrNr, char *ErrMsg ) const;
-   static int gdxErrorStrStatic( int ErrNr, char *ErrMsg );
+   static int gdxErrorStr( int ErrNr, char *ErrMsg );
    int gdxOpenRead( const char *FileName, int &ErrNr );
    int gdxFileVersion( char *FileStr, char *ProduceStr ) const;
    int gdxFindSymbol( const char *SyId, int &SyNr );
@@ -126,7 +125,7 @@ public:
    int gdxAcronymName( double V, char *AName );
    [[nodiscard]] double gdxAcronymValue( int AIndx ) const;
    int gdxAutoConvert( int nv );
-   int gdxGetDLLVersion( char *V ) const;
+   static int gdxGetDLLVersion( char *V ) ;
    int gdxFileInfo( int &FileVer, int &ComprLev ) const;
    int gdxDataReadSliceStart( int SyNr, int *ElemCounts );
    int gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataStoreProc_t DP );

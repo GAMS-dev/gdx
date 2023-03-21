@@ -385,14 +385,7 @@ GDX_INLINE int gdxDataWriteStr( TGXFileRec_t *TGXFile, const char *KeyStr[], con
 
 GDX_INLINE int gdxGetDLLVersion( TGXFileRec_t *TGXFile, char *V )
 {
-   // CMEX calls get DLL version with nil/nullptr for some reason.
-   // Weirdly this is no problem when the function is not virtual but segfaults when it is (vtable lookup)
-   if( !TGXFile )
-   {
-      V[0] = '\0';
-      return 0;
-   }
-   return reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxGetDLLVersion( V );
+   return gdx::TGXFileObj::gdxGetDLLVersion( V );
 }
 
 GDX_INLINE int gdxErrorCount( TGXFileRec_t *TGXFile )
@@ -402,7 +395,7 @@ GDX_INLINE int gdxErrorCount( TGXFileRec_t *TGXFile )
 
 GDX_INLINE int gdxErrorStr( TGXFileRec_t *TGXFile, int ErrNr, char *ErrMsg )
 {
-   return TGXFile ? reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxErrorStr( ErrNr, ErrMsg ) : gdx::TGXFileObj::gdxErrorStrStatic( ErrNr, ErrMsg );
+   return gdx::TGXFileObj::gdxErrorStr( ErrNr, ErrMsg );
 }
 
 GDX_INLINE int gdxFileInfo( TGXFileRec_t *TGXFile, int *FileVer, int *ComprLev )

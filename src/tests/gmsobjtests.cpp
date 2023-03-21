@@ -25,16 +25,11 @@
 
 #include "../gmsobj.h"// for TXStrPool, TBooleanBitArray, TXList, TXCustom...
 #include "doctest.h"  // for ResultBuilder, REQUIRE_EQ, Expression_lhs
-#include <algorithm>  // for find
 #include <array>      // for array
-#include <cstdint>    // for uint8_t
-#include <cstring>    // for strcmp
 #include <list>       // for list, operator!=, _List_iterator
 #include <string>     // for operator+, to_string, string, operator""s
 #include <vector>     // for vector, vector<>::reference
 
-#include "../strhash.h"
-#include <chrono>
 #include <iostream>
 #include <random>
 
@@ -123,16 +118,6 @@ TEST_CASE( "Simple use of TXList" )
 TEST_CASE( "Simple use of TXStrings" )
 {
    TXStrings lst;
-   lst.Add( "First", 5 );
-   lst.Add( "Second", 6 );
-   lst.Add( "Third", 5 );
-   REQUIRE_EQ( 1, lst.IndexOf( "Second" ) );
-   REQUIRE_EQ( "First"s, lst[0] );
-}
-
-TEST_CASE( "Simple use TXCustomStringList" )
-{
-   TXCustomStringList<uint8_t> lst;
    lst.Add( "First", 5 );
    lst.Add( "Second", 6 );
    lst.Add( "Third", 5 );

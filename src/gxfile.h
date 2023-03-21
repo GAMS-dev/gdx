@@ -217,7 +217,7 @@ class TIntegerMapping
    void growMapping( int F );
 
 public:
-   TIntegerMapping() {}
+   TIntegerMapping() = default;
    ~TIntegerMapping();
    [[nodiscard]] int MemoryUsed() const;
    [[nodiscard]] int GetHighestIndex() const;

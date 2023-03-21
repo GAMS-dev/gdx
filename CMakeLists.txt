@@ -28,8 +28,8 @@ set(common
 		src/gmsdata.h
 		src/datastorage.h
 		src/strhash.h
-		src/gmsobj.h src/gmsobj.cpp
-		src/utils.h src/utils.cpp
+		src/gmsobj.h
+        src/utils.h src/utils.cpp
 		src/gxfile.h src/gxfile.cpp
 		src/gdx.h
 		# ZLIB modules

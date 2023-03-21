@@ -152,23 +152,6 @@ protected:
       }
    }
 
-   void SetObject( int N, T AObj )
-   {
-      Buckets[N - ( OneBased ? 1 : 0 )]->Obj = AObj;
-   }
-
-   void SetSortedObject( int N, T &AObj )
-   {
-      if( !FSorted ) Sort();
-      Buckets[SortMap[N - ( OneBased ? 1 : 0 )]]->Obj = &AObj;
-   }
-
-   char *GetSortedString( int N )
-   {
-      if( FSorted ) Sort();
-      return Buckets[SortMap[N - ( OneBased ? 1 : 0 )]]->StrP;
-   }
-
    void QuickSort( int L, int R )
    {
       int i{ L };
@@ -386,11 +369,6 @@ public:
          s.WriteString( GetString( N ) );
    }
 
-   int GetStringLength( int N )
-   {
-      return std::strlen( GetString( N ) );
-   }
-
    [[nodiscard]] int64_t MemoryUsed() const
    {
       int64_t res{};
@@ -439,12 +417,6 @@ public:
       return *GetObject( IndexOf( key ) );
    }
 
-   T *GetSortedObject( int N )
-   {
-      if( !FSorted ) Sort();
-      return Buckets[SortMap[N - ( OneBased ? 1 : 0 )]].Obj;
-   }
-
    [[nodiscard]] char *GetString( int N ) const
    {
       return Buckets[N - ( OneBased ? 1 : 0 )]->StrP;
@@ -466,12 +438,6 @@ public:
       bucket->StrP = new char[slen + 1];
 #endif
       utils::assignPCharToBuf( s, slen, bucket->StrP );
-   }
-
-   [[nodiscard]] char *GetSortedString( int N ) const
-   {
-      if( !FSorted ) Sort();
-      return Buckets[SortMap[N - ( OneBased ? 1 : 0 )]]->StrP;
    }
 
    [[nodiscard]] int Count() const

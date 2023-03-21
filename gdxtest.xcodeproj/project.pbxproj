@@ -11,7 +11,6 @@
 		4299369A29C5C12A00227BD2 /* gmsheapnew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4299368829C5C12A00227BD2 /* gmsheapnew.cpp */; };
 		4299369B29C5C12A00227BD2 /* gxfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4299368A29C5C12A00227BD2 /* gxfile.cpp */; };
 		4299369C29C5C12A00227BD2 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4299368B29C5C12A00227BD2 /* utils.cpp */; };
-		4299369D29C5C12A00227BD2 /* gmsobj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4299368F29C5C12A00227BD2 /* gmsobj.cpp */; };
 		4299369E29C5C12A00227BD2 /* gmsstrm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4299369829C5C12A00227BD2 /* gmsstrm.cpp */; };
 		429936BB29C5C32700227BD2 /* gmsobjtests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 429936B329C5C32700227BD2 /* gmsobjtests.cpp */; };
 		429936BC29C5C32700227BD2 /* doctestmain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 429936B429C5C32700227BD2 /* doctestmain.cpp */; };
@@ -44,7 +43,6 @@
 		4299368C29C5C12A00227BD2 /* strhash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = strhash.h; path = src/strhash.h; sourceTree = "<group>"; };
 		4299368D29C5C12A00227BD2 /* gmsheapnew.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gmsheapnew.h; path = src/gmsheapnew.h; sourceTree = "<group>"; };
 		4299368E29C5C12A00227BD2 /* gxfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gxfile.h; path = src/gxfile.h; sourceTree = "<group>"; };
-		4299368F29C5C12A00227BD2 /* gmsobj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gmsobj.cpp; path = src/gmsobj.cpp; sourceTree = "<group>"; };
 		4299369029C5C12A00227BD2 /* gmsobj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gmsobj.h; path = src/gmsobj.h; sourceTree = "<group>"; };
 		4299369129C5C12A00227BD2 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = src/utils.h; sourceTree = "<group>"; };
 		4299369229C5C12A00227BD2 /* datastorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = datastorage.h; path = src/datastorage.h; sourceTree = "<group>"; };
@@ -184,7 +182,6 @@
 				429936C229C5C32700227BD2 /* utilstests.cpp in Sources */,
 				4299369A29C5C12A00227BD2 /* gmsheapnew.cpp in Sources */,
 				4299369E29C5C12A00227BD2 /* gmsstrm.cpp in Sources */,
-				4299369D29C5C12A00227BD2 /* gmsobj.cpp in Sources */,
 				4299369929C5C12A00227BD2 /* gclgms.c in Sources */,
 				4299369B29C5C12A00227BD2 /* gxfile.cpp in Sources */,
 				4299369C29C5C12A00227BD2 /* utils.cpp in Sources */,

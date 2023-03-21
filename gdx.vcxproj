@@ -35,7 +35,6 @@
     <ClCompile Include="..\..\..\..\libs\gmszlib\uncompr.c" />
     <ClCompile Include="..\..\..\..\libs\gmszlib\zutil.c" />
     <ClCompile Include="src\gclgms.c" />
-    <ClCompile Include="src\gmsobj.cpp" />
     <ClCompile Include="src\gmsstrm.cpp" />
     <ClCompile Include="src\gxfile.cpp" />
     <ClCompile Include="src\tests\datastoragetests.cpp" />

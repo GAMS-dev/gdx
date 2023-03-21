@@ -59,7 +59,7 @@ std::string QueryEnvironmentVariable( const std::string &Name );
 std::string QueryEnvironmentVariable( const std::string &Name )
 {
 #if defined( _WIN32 )
-   int len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 );
+   auto len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 );
    if( !len ) return ""s;
    else
    {
@@ -1303,8 +1303,12 @@ enum TDblClass
 
 TDblClass dblInfo( double x, int64_t &i );
 
-const std::array DblClassText{
-        "NaN"s, "negative infinity"s, "positive infinity"s, "finite"s };
+const std::array DblClassText {
+        "NaN"s
+        "negative infinity"s,
+        "positive infinity"s,
+        "finite"s
+};
 
 /* Assume the IEEE double looks like
             * s eeeeeeeeeee mmm....mmm
@@ -1785,12 +1789,7 @@ const std::map<int, std::string> errorCodeToStr{
 //
 // See Also:
 //   gdxGetLastError
-int TGXFileObj::gdxErrorStr( int ErrNr, char *ErrMsg ) const
-{
-   return gdxErrorStrStatic( ErrNr, ErrMsg );
-}
-
-int TGXFileObj::gdxErrorStrStatic( int ErrNr, char *ErrMsg )
+int TGXFileObj::gdxErrorStr( int ErrNr, char *ErrMsg )
 {
    const auto it = errorCodeToStr.find( ErrNr );
    utils::assignStrToBuf( it == errorCodeToStr.end() ? SysErrorMessage( ErrNr ) : it->second, ErrMsg, GMS_SSSIZE );
@@ -4130,7 +4129,7 @@ int TGXFileObj::gdxAutoConvert( int nv )
 // Description:
 //
 // See Also:
-int TGXFileObj::gdxGetDLLVersion( char *V ) const
+int TGXFileObj::gdxGetDLLVersion( char *V )
 {
    utils::assignStrToBuf( auditLine, V, GMS_SSSIZE );
    return true;

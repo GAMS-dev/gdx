@@ -24,8 +24,6 @@
     </ClCompile>
     <ClCompile Include="src\gclgms.c">
     </ClCompile>
-    <ClCompile Include="src\gmsobj.cpp">
-    </ClCompile>
     <ClCompile Include="src\gmsstrm.cpp">
     </ClCompile>
     <ClCompile Include="src\tests\strhashtests.cpp">

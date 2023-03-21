@@ -121,13 +121,13 @@ class TXStreamDelphi
 {
 protected:
    template<typename T>
-   void WriteValue( RWType rwt, T &v )
+   void WriteValue( T &v )
    {
       Write( &v, sizeof( T ) );
    }
 
    template<typename T>
-   T ReadValue( RWType rwt )
+   T ReadValue()
    {
       T res;
       Read( &res, sizeof( T ) );
@@ -248,7 +248,7 @@ class TMiBufferedStreamDelphi : public TBufferedFileStreamDelphi
    bool NormalOrder{};
 
    template<typename T>
-   T ReadValueOrdered( RWType rwt, bool order_type )
+   T ReadValueOrdered( bool order_type )
    {
       T res;
       if( !order_type ) Read( &res, sizeof( T ) );

@@ -166,12 +166,6 @@ class TXIntList : public TGrowArrayFxd<int>
       return *GetItemPtrIndexConst( Index );
    }
 
-   void SetItems( int Index, int V )
-   {
-      while( Index >= FCount ) ReserveAndClear();
-      *GetItemPtrIndex( Index ) = V;
-   }
-
 public:
    TXIntList() = default;
    ~TXIntList() override = default;
@@ -308,14 +302,6 @@ public:
    inline void AddRecord( const int *Inx, const T *Buffer )
    {
       InsertRecord( FList.size(), Inx, Buffer );
-   }
-
-   bool AddUniqueRecord( const int *Inx, T *Buffer )
-   {
-      int N;
-      bool res{ !SearchRecord( Inx, N ) };
-      if( res ) InsertRecord( N, Inx, Buffer );
-      return res;
    }
 
    void GetRecord( int N, int *Inx, T *Buffer )
