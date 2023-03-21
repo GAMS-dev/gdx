@@ -59,7 +59,12 @@ TEST_SUITE_BEGIN( "GDX object tests" );
 
 static bool hasGAMSinstalled()
 {
-   return !std::system( "gams" );
+   int rc {std::system( "gamslib trnsport" )};
+   if(std::filesystem::exists("trnsport.gms")) {
+      std::filesystem::remove("trnsport.gms");
+      return true;
+   }
+   return false;
 }
 
 #if !defined( _WIN32 )
