@@ -58,7 +58,7 @@ target_link_libraries(gdxtest ${mylibs})
 
 add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp src/tests/dummy/gdxcc.c)
 target_link_libraries(gdxwraptest ${mylibs})
-target_compile_options(gdxwraptest PRIVATE -DGXFILE_DUMMY)
+target_compile_options(gdxwraptest PRIVATE -DGXFILE_DUMMY -DGC_NO_MUTEX)
 
 # Quickly run "include what you use" (https://include-what-you-use.org/) over project
 #find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
