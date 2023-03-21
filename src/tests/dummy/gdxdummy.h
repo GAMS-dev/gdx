@@ -59,9 +59,9 @@ public:
    {
       char buf[GMS_SSSIZE];
       if( !::gdxLibraryLoaded() && !::gdxGetReady( buf, GMS_SSSIZE ) )
-         throw std::runtime_error("Loading DLL failed!");
+         throw std::runtime_error(buf);
       if( !::gdxCreate( &pgx, buf, GMS_SSSIZE ) )
-         throw std::runtime_error("Unable to create GDX object");
+         throw std::runtime_error(buf);
       ErrMsg.assign( buf );
    }
 
