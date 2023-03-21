@@ -120,10 +120,51 @@ test-leg:
     entrypoint: [""]
   needs: [build-leg]
   script:
-    - ./gdxtest -tce=*trace* --reporters=junit --out=doctest_results_linux.xml
+    - ./gdxtest --reporters=junit --out=doctest_results_linux.xml
   artifacts:
     name: unittest-results-linux
     paths: [doctest_results_linux.xml]
     expire_in: 2 hours
     reports:
       junit: doctest_results_linux.xml
+
+test-deg:
+  stage: test
+  when: on_success
+  tags: [macos]
+  needs: [build-deg]
+  script:
+    - ./CPPMEXTest --reporters=junit --out=doctest_results_deg.xml
+  artifacts:
+    name: unittest-results-deg
+    paths: [doctest_results_deg.xml]
+    reports:
+      junit: doctest_results_deg.xml
+
+test-dac:
+  stage: test
+  when: on_success
+  tags: [macos-arm64]
+  needs: [build-dac]
+  script:
+    - ./CPPMEXTest --reporters=junit --out=doctest_results_dac.xml
+  artifacts:
+    name: unittest-results-dac
+    paths: [doctest_results_dac.xml]
+    reports:
+      junit: doctest_results_dac.xml
+
+test-wei:
+  stage: test
+  when: on_success
+  tags: [windows]
+  image:
+    name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
+  needs: [build-wei]
+  script:
+    - ./Release/CPPMEXTest --reporters=junit --out=doctest_results_windows.xml
+  artifacts:
+    name: unittest-results-windows
+    paths: [doctest_results_windows.xml]
+    reports:
+      junit: doctest_results_windows.xml
