@@ -1173,14 +1173,13 @@ TEST_CASE( "Test invalid raw writing error processing" )
 std::string acquireGDXforModel( const std::string &model )
 {
    const std::string model_fn = model + ".gms"s,
-                     log_fn = model + "Log.txt"s,
-                     fnpf = "model_data"s;
-   std::string gdxfn = fnpf + ".gdx"s;// non-const so we get automatic move
+                     log_fn = model + "Log.txt"s;
+   std::string gdxfn = model + ".gdx"s;// non-const so we get automatic move
    int rc = std::system( ( "gamslib "s + model + " > gamslibLog.txt"s ).c_str() );
    REQUIRE_FALSE( rc );
    std::filesystem::remove( "gamslibLog.txt" );
    REQUIRE( std::filesystem::exists( model_fn ) );
-   rc = std::system( ( "gams " + model_fn + " gdx="s + fnpf + " lo=0 o=lf > " + log_fn ).c_str() );
+   rc = std::system( ( "gams " + model_fn + " gdx=default lo=0 o=lf > " + log_fn ).c_str() );
    REQUIRE_FALSE( rc );
    std::filesystem::remove( log_fn );
    std::filesystem::remove( model_fn );
@@ -2161,24 +2160,28 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
    }
    const auto modelName{ "trnsport"s };
    acquireGDXforModel( modelName );
-   for( auto versSuff: { "V5"s, "V6U"s, "V6C"s } )
+   for( const auto &versSuff: { "V5"s, "V6U"s, "V6C"s } )
    {
-      const auto outDir{ "out"s + versSuff };
-      std::system( ( "gdxcopy -V"s + versSuff + " "s + modelName + ".gdx "s + outDir ).c_str() );
-      const auto convertedGDXfn{ modelName + "_"s + versSuff + ".gdx"s };
-      std::filesystem::rename( outDir + "/"s + modelName + ".gdx"s, convertedGDXfn );
-      std::filesystem::remove( outDir );
-      std::string ErrMsg;
-      TGXFileObj pgx{ ErrMsg };
-      int ErrNr;
-      REQUIRE( pgx.gdxOpenRead( convertedGDXfn.c_str(), ErrNr ) );
-      int syCnt, uelCnt;
-      REQUIRE( pgx.gdxSystemInfo( syCnt, uelCnt ) );
-      REQUIRE_GT( syCnt, 0 );
-      REQUIRE_GT( uelCnt, 0 );
-      pgx.gdxClose();
-      std::filesystem::remove( convertedGDXfn );
+      const auto outDir{ "out"s + versSuff }, cmd{"gdxcopy -"s + versSuff + " "s + modelName + ".gdx "s + outDir};
+      int rc{ std::system( cmd.c_str() ) };
+      if(!rc)
+      {
+         const auto convertedGDXfn{ modelName + "_"s + versSuff + ".gdx"s };
+         std::filesystem::rename( outDir + "/"s + modelName + ".gdx"s, convertedGDXfn );
+         std::filesystem::remove( outDir );
+         std::string ErrMsg;
+         TGXFileObj pgx{ ErrMsg };
+         int ErrNr;
+         REQUIRE( pgx.gdxOpenRead( convertedGDXfn.c_str(), ErrNr ) );
+         int syCnt, uelCnt;
+         REQUIRE( pgx.gdxSystemInfo( syCnt, uelCnt ) );
+         REQUIRE_GT( syCnt, 0 );
+         REQUIRE_GT( uelCnt, 0 );
+         pgx.gdxClose();
+         std::filesystem::remove( convertedGDXfn );
+      }
    }
+   std::filesystem::remove( "trnsport.gdx" );
 }
 
 TEST_SUITE_END();
