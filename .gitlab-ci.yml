@@ -134,7 +134,7 @@ test-deg:
   tags: [macos]
   needs: [build-deg]
   script:
-    - ./CPPMEXTest --reporters=junit --out=doctest_results_deg.xml
+    - ./gdxtest --reporters=junit --out=doctest_results_deg.xml
   artifacts:
     name: unittest-results-deg
     paths: [doctest_results_deg.xml]
@@ -147,7 +147,7 @@ test-dac:
   tags: [macos-arm64]
   needs: [build-dac]
   script:
-    - ./CPPMEXTest --reporters=junit --out=doctest_results_dac.xml
+    - ./gdxtest --reporters=junit --out=doctest_results_dac.xml
   artifacts:
     name: unittest-results-dac
     paths: [doctest_results_dac.xml]
@@ -162,7 +162,7 @@ test-wei:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
   needs: [build-wei]
   script:
-    - ./Release/CPPMEXTest --reporters=junit --out=doctest_results_windows.xml
+    - ./Release/gdxtest --reporters=junit --out=doctest_results_windows.xml
   artifacts:
     name: unittest-results-windows
     paths: [doctest_results_windows.xml]
