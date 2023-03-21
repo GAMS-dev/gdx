@@ -6,7 +6,7 @@
 #include <array>     // for array, array<>::value_type
 #include <cassert>   // for assert
 
-namespace gdx::tests::gxfiletests
+namespace gdx::tests::gdxtests
 {
 
 bool setEnvironmentVar( const std::string &name, const std::string &val );

@@ -83,6 +83,9 @@
     <ClCompile Include="src\tests\datastoragetests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="src\tests\gdxtests.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\gxfile.h">
@@ -98,9 +101,6 @@
     <ClInclude Include="src\gmsobj.h" />
     <ClInclude Include="src\gmsstrm.h" />
     <ClInclude Include="src\strhash.h" />
-    <ClInclude Include="src\tests\gxfiletests.h">
-      <Filter>tests</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\libs\gmszlib\crc32.h">
       <Filter>zlib</Filter>
     </ClInclude>
@@ -133,6 +133,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\libs\gmszlib\zutil.h">
       <Filter>zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\gdxtests.h">
+      <Filter>tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

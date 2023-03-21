@@ -20,7 +20,7 @@ if (UNIX)
 endif (UNIX)
 
 # Makefile in devel/products/src/gdxio takes care of acquiring sources for zlib, skip in CMake builds so far
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(common
 		src/gclgms.h src/gclgms.c
@@ -39,8 +39,9 @@ set(common
 
 set(tests
 		src/tests/doctestmain.cpp
+		src/tests/gdxtests.cpp
 		src/tests/gxfiletests.cpp
-		src/tests/gxfiletests.h
+        src/tests/gdxtests.h
 		src/tests/utilstests.cpp
 		src/tests/gmsobjtests.cpp
 		src/tests/gmsdatatests.cpp
@@ -54,6 +55,10 @@ set(tests
 add_executable(gdxtest ${common} ${tests})
 target_include_directories(gdxtest PRIVATE zlib)
 target_link_libraries(gdxtest ${mylibs})
+
+add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp src/tests/dummy/gdxcc.c)
+target_link_libraries(gdxwraptest ${mylibs})
+target_compile_options(gdxwraptest PRIVATE -DGXFILE_DUMMY)
 
 # Quickly run "include what you use" (https://include-what-you-use.org/) over project
 #find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)

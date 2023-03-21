@@ -39,6 +39,7 @@
     <ClCompile Include="src\gxfile.cpp" />
     <ClCompile Include="src\tests\datastoragetests.cpp" />
     <ClCompile Include="src\tests\doctestmain.cpp" />
+    <ClCompile Include="src\tests\gdxtests.cpp" />
     <ClCompile Include="src\tests\gmsdatatests.cpp" />
     <ClCompile Include="src\tests\gmsobjtests.cpp" />
     <ClCompile Include="src\tests\strhashtests.cpp" />
@@ -66,7 +67,7 @@
     <ClInclude Include="src\strhash.h" />
     <ClInclude Include="src\gxfile.h" />
     <ClInclude Include="src\tests\doctest.h" />
-    <ClInclude Include="src\tests\gxfiletests.h" />
+    <ClInclude Include="src\tests\gdxtests.h" />
     <ClInclude Include="src\utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -166,7 +167,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>P3_COLLECTIONS;GC_NO_MUTEX;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GC_NO_MUTEX;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -184,7 +185,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>P3_COLLECTIONS;GC_NO_MUTEX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GC_NO_MUTEX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
