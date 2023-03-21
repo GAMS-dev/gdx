@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		4299369929C5C12A00227BD2 /* gclgms.c in Sources */ = {isa = PBXBuildFile; fileRef = 4299368729C5C12A00227BD2 /* gclgms.c */; };
-		4299369A29C5C12A00227BD2 /* gmsheapnew.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4299368829C5C12A00227BD2 /* gmsheapnew.cpp */; };
 		4299369B29C5C12A00227BD2 /* gxfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4299368A29C5C12A00227BD2 /* gxfile.cpp */; };
 		4299369C29C5C12A00227BD2 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4299368B29C5C12A00227BD2 /* utils.cpp */; };
 		4299369E29C5C12A00227BD2 /* gmsstrm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4299369829C5C12A00227BD2 /* gmsstrm.cpp */; };
@@ -18,8 +17,22 @@
 		429936BE29C5C32700227BD2 /* gxfiletests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 429936B629C5C32700227BD2 /* gxfiletests.cpp */; };
 		429936BF29C5C32700227BD2 /* gmsdatatests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 429936B729C5C32700227BD2 /* gmsdatatests.cpp */; };
 		429936C029C5C32700227BD2 /* strhashtests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 429936B829C5C32700227BD2 /* strhashtests.cpp */; };
-		429936C129C5C32700227BD2 /* gmsheapnewtests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 429936B929C5C32700227BD2 /* gmsheapnewtests.cpp */; };
 		429936C229C5C32700227BD2 /* utilstests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 429936BA29C5C32700227BD2 /* utilstests.cpp */; };
+		42D0995D29C99FA300285505 /* inflate.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0994429C99FA300285505 /* inflate.c */; };
+		42D0995E29C99FA300285505 /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0994629C99FA300285505 /* compress.c */; };
+		42D0995F29C99FA300285505 /* deflate.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0994729C99FA300285505 /* deflate.c */; };
+		42D0996029C99FA300285505 /* gzread.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0994929C99FA300285505 /* gzread.c */; };
+		42D0996129C99FA300285505 /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0994C29C99FA300285505 /* crc32.c */; };
+		42D0996229C99FA300285505 /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0994D29C99FA300285505 /* infback.c */; };
+		42D0996329C99FA300285505 /* zutil.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0994E29C99FA300285505 /* zutil.c */; };
+		42D0996429C99FA300285505 /* gzlib.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0995229C99FA300285505 /* gzlib.c */; };
+		42D0996529C99FA300285505 /* inftrees.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0995429C99FA300285505 /* inftrees.c */; };
+		42D0996629C99FA300285505 /* uncompr.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0995529C99FA300285505 /* uncompr.c */; };
+		42D0996729C99FA300285505 /* gzwrite.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0995629C99FA300285505 /* gzwrite.c */; };
+		42D0996829C99FA300285505 /* trees.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0995729C99FA300285505 /* trees.c */; };
+		42D0996929C99FA300285505 /* gzclose.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0995829C99FA300285505 /* gzclose.c */; };
+		42D0996A29C99FA300285505 /* inffast.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0995A29C99FA300285505 /* inffast.c */; };
+		42D0996B29C99FA300285505 /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = 42D0995B29C99FA300285505 /* adler32.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,12 +49,10 @@
 
 /* Begin PBXFileReference section */
 		4299368729C5C12A00227BD2 /* gclgms.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = gclgms.c; path = src/gclgms.c; sourceTree = "<group>"; };
-		4299368829C5C12A00227BD2 /* gmsheapnew.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gmsheapnew.cpp; path = src/gmsheapnew.cpp; sourceTree = "<group>"; };
 		4299368929C5C12A00227BD2 /* tests */ = {isa = PBXFileReference; lastKnownFileType = folder; name = tests; path = src/tests; sourceTree = "<group>"; };
 		4299368A29C5C12A00227BD2 /* gxfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gxfile.cpp; path = src/gxfile.cpp; sourceTree = "<group>"; };
 		4299368B29C5C12A00227BD2 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = utils.cpp; path = src/utils.cpp; sourceTree = "<group>"; };
 		4299368C29C5C12A00227BD2 /* strhash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = strhash.h; path = src/strhash.h; sourceTree = "<group>"; };
-		4299368D29C5C12A00227BD2 /* gmsheapnew.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gmsheapnew.h; path = src/gmsheapnew.h; sourceTree = "<group>"; };
 		4299368E29C5C12A00227BD2 /* gxfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gxfile.h; path = src/gxfile.h; sourceTree = "<group>"; };
 		4299369029C5C12A00227BD2 /* gmsobj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gmsobj.h; path = src/gmsobj.h; sourceTree = "<group>"; };
 		4299369129C5C12A00227BD2 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = src/utils.h; sourceTree = "<group>"; };
@@ -58,9 +69,35 @@
 		429936B629C5C32700227BD2 /* gxfiletests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = gxfiletests.cpp; path = src/tests/gxfiletests.cpp; sourceTree = "<group>"; };
 		429936B729C5C32700227BD2 /* gmsdatatests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = gmsdatatests.cpp; path = src/tests/gmsdatatests.cpp; sourceTree = "<group>"; };
 		429936B829C5C32700227BD2 /* strhashtests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = strhashtests.cpp; path = src/tests/strhashtests.cpp; sourceTree = "<group>"; };
-		429936B929C5C32700227BD2 /* gmsheapnewtests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = gmsheapnewtests.cpp; path = src/tests/gmsheapnewtests.cpp; sourceTree = "<group>"; };
 		429936BA29C5C32700227BD2 /* utilstests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = utilstests.cpp; path = src/tests/utilstests.cpp; sourceTree = "<group>"; };
 		42C53F4B29C5C0B60027E3E6 /* gdxtest */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = gdxtest; sourceTree = BUILT_PRODUCTS_DIR; };
+		42D0994229C99FA300285505 /* zutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zutil.h; sourceTree = "<group>"; };
+		42D0994329C99FA300285505 /* inftrees.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inftrees.h; sourceTree = "<group>"; };
+		42D0994429C99FA300285505 /* inflate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inflate.c; sourceTree = "<group>"; };
+		42D0994529C99FA300285505 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		42D0994629C99FA300285505 /* compress.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = compress.c; sourceTree = "<group>"; };
+		42D0994729C99FA300285505 /* deflate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = deflate.c; sourceTree = "<group>"; };
+		42D0994829C99FA300285505 /* inffixed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inffixed.h; sourceTree = "<group>"; };
+		42D0994929C99FA300285505 /* gzread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gzread.c; sourceTree = "<group>"; };
+		42D0994A29C99FA300285505 /* trees.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trees.h; sourceTree = "<group>"; };
+		42D0994B29C99FA300285505 /* inffast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inffast.h; sourceTree = "<group>"; };
+		42D0994C29C99FA300285505 /* crc32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crc32.c; sourceTree = "<group>"; };
+		42D0994D29C99FA300285505 /* infback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = infback.c; sourceTree = "<group>"; };
+		42D0994E29C99FA300285505 /* zutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zutil.c; sourceTree = "<group>"; };
+		42D0994F29C99FA300285505 /* deflate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = deflate.h; sourceTree = "<group>"; };
+		42D0995029C99FA300285505 /* gzguts.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gzguts.h; sourceTree = "<group>"; };
+		42D0995129C99FA300285505 /* zlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zlib.h; sourceTree = "<group>"; };
+		42D0995229C99FA300285505 /* gzlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gzlib.c; sourceTree = "<group>"; };
+		42D0995329C99FA300285505 /* inflate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inflate.h; sourceTree = "<group>"; };
+		42D0995429C99FA300285505 /* inftrees.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inftrees.c; sourceTree = "<group>"; };
+		42D0995529C99FA300285505 /* uncompr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = uncompr.c; sourceTree = "<group>"; };
+		42D0995629C99FA300285505 /* gzwrite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gzwrite.c; sourceTree = "<group>"; };
+		42D0995729C99FA300285505 /* trees.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = trees.c; sourceTree = "<group>"; };
+		42D0995829C99FA300285505 /* gzclose.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = gzclose.c; sourceTree = "<group>"; };
+		42D0995929C99FA300285505 /* crc32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crc32.h; sourceTree = "<group>"; };
+		42D0995A29C99FA300285505 /* inffast.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inffast.c; sourceTree = "<group>"; };
+		42D0995B29C99FA300285505 /* adler32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = adler32.c; sourceTree = "<group>"; };
+		42D0995C29C99FA300285505 /* zconf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zconf.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,10 +114,10 @@
 		42C53F4229C5C0B60027E3E6 = {
 			isa = PBXGroup;
 			children = (
+				42D0994129C99FA300285505 /* zlib */,
 				429936B529C5C32700227BD2 /* datastoragetests.cpp */,
 				429936B429C5C32700227BD2 /* doctestmain.cpp */,
 				429936B729C5C32700227BD2 /* gmsdatatests.cpp */,
-				429936B929C5C32700227BD2 /* gmsheapnewtests.cpp */,
 				429936B329C5C32700227BD2 /* gmsobjtests.cpp */,
 				429936B629C5C32700227BD2 /* gxfiletests.cpp */,
 				429936B829C5C32700227BD2 /* strhashtests.cpp */,
@@ -92,9 +129,6 @@
 				4299369529C5C12A00227BD2 /* gclgms.h */,
 				4299369729C5C12A00227BD2 /* gdx.h */,
 				4299369629C5C12A00227BD2 /* gmsdata.h */,
-				4299368829C5C12A00227BD2 /* gmsheapnew.cpp */,
-				4299368D29C5C12A00227BD2 /* gmsheapnew.h */,
-				4299368F29C5C12A00227BD2 /* gmsobj.cpp */,
 				4299369029C5C12A00227BD2 /* gmsobj.h */,
 				4299369829C5C12A00227BD2 /* gmsstrm.cpp */,
 				4299369329C5C12A00227BD2 /* gmsstrm.h */,
@@ -113,6 +147,40 @@
 				42C53F4B29C5C0B60027E3E6 /* gdxtest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		42D0994129C99FA300285505 /* zlib */ = {
+			isa = PBXGroup;
+			children = (
+				42D0994229C99FA300285505 /* zutil.h */,
+				42D0994329C99FA300285505 /* inftrees.h */,
+				42D0994429C99FA300285505 /* inflate.c */,
+				42D0994529C99FA300285505 /* LICENSE */,
+				42D0994629C99FA300285505 /* compress.c */,
+				42D0994729C99FA300285505 /* deflate.c */,
+				42D0994829C99FA300285505 /* inffixed.h */,
+				42D0994929C99FA300285505 /* gzread.c */,
+				42D0994A29C99FA300285505 /* trees.h */,
+				42D0994B29C99FA300285505 /* inffast.h */,
+				42D0994C29C99FA300285505 /* crc32.c */,
+				42D0994D29C99FA300285505 /* infback.c */,
+				42D0994E29C99FA300285505 /* zutil.c */,
+				42D0994F29C99FA300285505 /* deflate.h */,
+				42D0995029C99FA300285505 /* gzguts.h */,
+				42D0995129C99FA300285505 /* zlib.h */,
+				42D0995229C99FA300285505 /* gzlib.c */,
+				42D0995329C99FA300285505 /* inflate.h */,
+				42D0995429C99FA300285505 /* inftrees.c */,
+				42D0995529C99FA300285505 /* uncompr.c */,
+				42D0995629C99FA300285505 /* gzwrite.c */,
+				42D0995729C99FA300285505 /* trees.c */,
+				42D0995829C99FA300285505 /* gzclose.c */,
+				42D0995929C99FA300285505 /* crc32.h */,
+				42D0995A29C99FA300285505 /* inffast.c */,
+				42D0995B29C99FA300285505 /* adler32.c */,
+				42D0995C29C99FA300285505 /* zconf.h */,
+			);
+			path = zlib;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -172,19 +240,32 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				42D0996329C99FA300285505 /* zutil.c in Sources */,
 				429936BB29C5C32700227BD2 /* gmsobjtests.cpp in Sources */,
 				429936BC29C5C32700227BD2 /* doctestmain.cpp in Sources */,
+				42D0996629C99FA300285505 /* uncompr.c in Sources */,
+				42D0996029C99FA300285505 /* gzread.c in Sources */,
 				429936BD29C5C32700227BD2 /* datastoragetests.cpp in Sources */,
+				42D0995E29C99FA300285505 /* compress.c in Sources */,
+				42D0996129C99FA300285505 /* crc32.c in Sources */,
 				429936BE29C5C32700227BD2 /* gxfiletests.cpp in Sources */,
+				42D0996929C99FA300285505 /* gzclose.c in Sources */,
 				429936BF29C5C32700227BD2 /* gmsdatatests.cpp in Sources */,
+				42D0995D29C99FA300285505 /* inflate.c in Sources */,
 				429936C029C5C32700227BD2 /* strhashtests.cpp in Sources */,
-				429936C129C5C32700227BD2 /* gmsheapnewtests.cpp in Sources */,
 				429936C229C5C32700227BD2 /* utilstests.cpp in Sources */,
-				4299369A29C5C12A00227BD2 /* gmsheapnew.cpp in Sources */,
+				42D0995F29C99FA300285505 /* deflate.c in Sources */,
 				4299369E29C5C12A00227BD2 /* gmsstrm.cpp in Sources */,
 				4299369929C5C12A00227BD2 /* gclgms.c in Sources */,
+				42D0996B29C99FA300285505 /* adler32.c in Sources */,
+				42D0996529C99FA300285505 /* inftrees.c in Sources */,
 				4299369B29C5C12A00227BD2 /* gxfile.cpp in Sources */,
+				42D0996229C99FA300285505 /* infback.c in Sources */,
+				42D0996A29C99FA300285505 /* inffast.c in Sources */,
+				42D0996429C99FA300285505 /* gzlib.c in Sources */,
+				42D0996729C99FA300285505 /* gzwrite.c in Sources */,
 				4299369C29C5C12A00227BD2 /* utils.cpp in Sources */,
+				42D0996829C99FA300285505 /* trees.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -234,8 +315,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
-					NO_ZLIB,
-					NO_GAMSDIST,
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -289,10 +368,7 @@
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					NO_ZLIB,
-					NO_GAMSDIST,
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -313,6 +389,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = P2B8CY36F4;
 				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -324,6 +404,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = P2B8CY36F4;
 				ENABLE_HARDENED_RUNTIME = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
