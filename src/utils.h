@@ -31,8 +31,8 @@
 #include <strings.h>// for strcasecmp
 #endif
 
-#include <array>  // for array
-#include <cstring>// for memcpy, size_t, strcmp, strcpy, strlen
+#include <array>      // for array
+#include <cstring>    // for memcpy, size_t, strcmp, strcpy, strlen
 #include <string>     // for string, char_traits
 #include <string_view>// for string_view, operator==, basic_string_view
 

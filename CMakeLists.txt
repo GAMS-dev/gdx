@@ -20,7 +20,7 @@ if (UNIX)
 endif (UNIX)
 
 # Makefile in devel/products/src/gdxio takes care of acquiring sources for zlib, skip in CMake builds so far
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNO_GAMSDIST")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(common
 		src/gclgms.h src/gclgms.c

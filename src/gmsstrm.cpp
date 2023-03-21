@@ -138,7 +138,7 @@ void TXStreamDelphi::WriteInt64( int64_t N )
 
 void TXStreamDelphi::WriteByte( uint8_t b )
 {
-   WriteValue(  b );
+   WriteValue( b );
 }
 
 void TXStreamDelphi::WriteWord( uint16_t W )
@@ -159,27 +159,27 @@ std::string TXStreamDelphi::ReadString()
 
 double TXStreamDelphi::ReadDouble()
 {
-   return ReadValue<double>(  );
+   return ReadValue<double>();
 }
 
 int TXStreamDelphi::ReadInteger()
 {
-   return ReadValue<int>(  );
+   return ReadValue<int>();
 }
 
 uint8_t TXStreamDelphi::ReadByte()
 {
-   return ReadValue<uint8_t>(  );
+   return ReadValue<uint8_t>();
 }
 
 uint16_t TXStreamDelphi::ReadWord()
 {
-   return ReadValue<uint16_t>(  );
+   return ReadValue<uint16_t>();
 }
 
 int64_t TXStreamDelphi::ReadInt64()
 {
-   return ReadValue<int64_t>( );
+   return ReadValue<int64_t>();
 }
 
 void TXFileStreamDelphi::SetLastIOResult( int V )
@@ -519,7 +519,7 @@ int TMiBufferedStreamDelphi::GoodByteOrder() const
 
 double TMiBufferedStreamDelphi::ReadDouble()
 {
-   return ReadValueOrdered<double>(  order_double );
+   return ReadValueOrdered<double>( order_double );
 }
 
 int TMiBufferedStreamDelphi::ReadInteger()
@@ -529,7 +529,7 @@ int TMiBufferedStreamDelphi::ReadInteger()
 
 uint16_t TMiBufferedStreamDelphi::ReadWord()
 {
-   return ReadValueOrdered<uint16_t>(  order_word );
+   return ReadValueOrdered<uint16_t>( order_word );
 }
 
 int64_t TMiBufferedStreamDelphi::ReadInt64()

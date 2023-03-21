@@ -125,7 +125,7 @@ public:
    int gdxAcronymName( double V, char *AName );
    [[nodiscard]] double gdxAcronymValue( int AIndx ) const;
    int gdxAutoConvert( int nv );
-   static int gdxGetDLLVersion( char *V ) ;
+   static int gdxGetDLLVersion( char *V );
    int gdxFileInfo( int &FileVer, int &ComprLev ) const;
    int gdxDataReadSliceStart( int SyNr, int *ElemCounts );
    int gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataStoreProc_t DP );

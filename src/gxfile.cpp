@@ -260,7 +260,6 @@ const int
 
 int GetEnvCompressFlag();
 
-#ifndef NO_GAMSDIST
 static int SystemP( const std::string &cmd, int &ProgRC )
 {
    int res{ std::system( cmd.c_str() ) };
@@ -294,7 +293,6 @@ static int SystemP( const std::string &cmd, int &ProgRC )
 #endif
    return res;
 }
-#endif
 
 int ConvertGDXFile( const std::string &fn, const std::string &MyComp )
 {
@@ -302,11 +300,7 @@ int ConvertGDXFile( const std::string &fn, const std::string &MyComp )
    if( Conv.empty() ) Conv = "V7"s;
    std::string Comp = Conv == "V5" ? ""s : ( !GetEnvCompressFlag() ? "U" : "C" );
    if( utils::sameText( Conv + Comp, "V7"s + MyComp ) ) return 0;
-#ifdef NO_GAMSDIST
-   int progRC{}, res{};
-#else
    int progRC, res{ SystemP( "gdxcopy -"s + Conv + Comp + " -Replace "s + utils::quoteWhitespace( fn, '\"' ), progRC ) };
-#endif
    return progRC ? ERR_GDXCOPY - progRC : res;
 }
 

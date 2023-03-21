@@ -33,16 +33,16 @@
 #include "../gmsstrm.h"// for fmOpenRead
 #include "doctest.h"   // for ResultBuilder, Expressi...
 
-#include <algorithm>  // for fill_n, find, copy
-#include <cstdlib>    // for system, setenv, unsetenv
-#include <cstring>    // for strcmp, memcpy
-#include <filesystem> // for remove, exists
-#include <iostream>   // for char_traits, operator<<
-#include <limits>     // for numeric_limits
-#include <list>       // for list, operator!=, _List...
-#include <map>        // for map, operator!=, _Rb_tr...
-#include <tuple>      // for tuple
-#include <utility>    // for pair
+#include <algorithm> // for fill_n, find, copy
+#include <cstdlib>   // for system, setenv, unsetenv
+#include <cstring>   // for strcmp, memcpy
+#include <filesystem>// for remove, exists
+#include <iostream>  // for char_traits, operator<<
+#include <limits>    // for numeric_limits
+#include <list>      // for list, operator!=, _List...
+#include <map>       // for map, operator!=, _Rb_tr...
+#include <tuple>     // for tuple
+#include <utility>   // for pair
 
 #include "gxfiletests.h"
 
@@ -52,6 +52,11 @@ using namespace gdx;
 namespace gdx::tests::gxfiletests
 {
 TEST_SUITE_BEGIN( "GDX object tests" );
+
+static bool hasGAMSinstalled()
+{
+   return !std::system( "gams" );
+}
 
 #if !defined( _WIN32 )
 static bool setEnvironmentVariableUnix( const std::string &name, const std::string &value = ""s )
@@ -616,7 +621,7 @@ TEST_CASE( "Test write and read record in string mode" )
 
       REQUIRE( pgx.gdxDataWriteStrStart( almostTooLongButStillOk.c_str(), stillOk.c_str(), 0, dt_par, 0 ) );
       REQUIRE( pgx.gdxDataWriteDone() );
-   });
+   } );
    testRead( fn, [&]( TGXFileObj &pgx ) {
       int NrRecs, UserInfo;
       char ExplTxt[GMS_SSSIZE];
@@ -751,20 +756,20 @@ TEST_CASE( "Test write and read record mapped - out of order" )
          REQUIRE( pgx.gdxDataWriteMap( &i, values.data() ) );
       REQUIRE( pgx.gdxDataWriteDone() );
 
-      constexpr char c {'i'};
-      std::string notTooLongSymID(GLOBAL_UEL_IDENT_SIZE-1, c),
-                  notTooLongExpl(GMS_SSSIZE-1, c),
-                  tooLongSymID(GLOBAL_UEL_IDENT_SIZE, c),
-                  tooLongExpl(GMS_SSSIZE, c);
+      constexpr char c{ 'i' };
+      std::string notTooLongSymID( GLOBAL_UEL_IDENT_SIZE - 1, c ),
+              notTooLongExpl( GMS_SSSIZE - 1, c ),
+              tooLongSymID( GLOBAL_UEL_IDENT_SIZE, c ),
+              tooLongExpl( GMS_SSSIZE, c );
 
-      REQUIRE( pgx.gdxDataWriteMapStart( notTooLongSymID.c_str(), notTooLongExpl.c_str(), 0, dt_par, 0 ));
+      REQUIRE( pgx.gdxDataWriteMapStart( notTooLongSymID.c_str(), notTooLongExpl.c_str(), 0, dt_par, 0 ) );
       REQUIRE( pgx.gdxDataWriteDone() );
 
       REQUIRE_EQ( 0, pgx.gdxErrorCount() );
       REQUIRE_EQ( 0, pgx.gdxDataErrorCount() );
 
-      REQUIRE_FALSE( pgx.gdxDataWriteMapStart( tooLongSymID.c_str(), notTooLongExpl.c_str(), 0, dt_par, 0 ));
-      REQUIRE_FALSE( pgx.gdxDataWriteMapStart( notTooLongSymID.c_str(), tooLongExpl.c_str(), 0, dt_par, 0 ));
+      REQUIRE_FALSE( pgx.gdxDataWriteMapStart( tooLongSymID.c_str(), notTooLongExpl.c_str(), 0, dt_par, 0 ) );
+      REQUIRE_FALSE( pgx.gdxDataWriteMapStart( notTooLongSymID.c_str(), tooLongExpl.c_str(), 0, dt_par, 0 ) );
 
       REQUIRE_EQ( 2, pgx.gdxErrorCount() );
       REQUIRE_EQ( 0, pgx.gdxDataErrorCount() );
@@ -1186,10 +1191,11 @@ std::string acquireGDXforModel( const std::string &model )
 
 void testReadModelGDX( const std::string &model, const std::function<void( TGXFileObj & )> &func )
 {
-#ifdef NO_GAMSDIST
-   // relies on gamslib tool
-   return;
-#endif
+   if( !hasGAMSinstalled() )
+   {
+      std::cout << "Warning: No GAMS system found. Unable to acquire model \"" << model << "\" skipping test!" << std::endl;
+      return;
+   }
    const std::string gdxfn = acquireGDXforModel( model );
    testRead( gdxfn, func );
    std::filesystem::remove( gdxfn );
@@ -1197,10 +1203,11 @@ void testReadModelGDX( const std::string &model, const std::function<void( TGXFi
 
 TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
 {
-#ifdef NO_GAMSDIST
-   // relies on gamslib tool
-   return;
-#endif
+   if( !hasGAMSinstalled() )
+   {
+      std::cout << "Skipping test since GAMS system is not found!" << std::endl;
+      return;
+   }
    const std::array expectedSymbolNames{
            "a"s, "b"s, "c"s,
            "cost"s, "d"s, "demand"s,
@@ -1742,6 +1749,11 @@ TEST_CASE( "Test open append to rename a single uel" )
 
 void testWithCompressConvert( bool compress, const std::string &convert )
 {
+   if( !hasGAMSinstalled() )
+   {
+      std::cout << "Skipping conversion test due to missing GAMS system" << std::endl;
+      return;
+   }
    const std::string fn{ "conv_compr.gdx" };
    setEnvironmentVar( "GDXCOMPRESS", compress ? "1"s : "0"s );
    setEnvironmentVar( "GDXCONVERT", convert );
@@ -1758,6 +1770,11 @@ void testWithCompressConvert( bool compress, const std::string &convert )
 
 TEST_CASE( "Test convert and compress" )
 {
+   if( !hasGAMSinstalled() )
+   {
+      std::cout << "Skipping conversion test due to missing GAMS system" << std::endl;
+      return;
+   }
    testWithCompressConvert( false, "" );
 #ifndef __APPLE__
    testWithCompressConvert( false, "v5" );
@@ -1926,6 +1943,11 @@ TEST_CASE( "Test classifying a map value as potential specval" )
 
 TEST_CASE( "Test setting/getting auto convert flag" )
 {
+   if( !hasGAMSinstalled() )
+   {
+      std::cout << "Skipping conversion test due to missing GAMS system" << std::endl;
+      return;
+   }
    basicTest( []( TGXFileObj &pgx ) {
       // default is AutoConvert=1/true
       REQUIRE( pgx.gdxAutoConvert( 0 ) );
@@ -2128,6 +2150,35 @@ TEST_CASE( "Test fallback behavior when trying GDX operations when no file is op
 
    REQUIRE_FALSE( pgx.gdxSymbolGetComment( 23, 2, text ) );
    REQUIRE_EQ( ""s, text );
+}
+
+TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
+{
+   if( !hasGAMSinstalled() )
+   {
+      std::cout << "Skipping legacy version GDX file read test due to missing GAMS system!" << std::endl;
+      return;
+   }
+   const auto modelName{ "trnsport"s };
+   acquireGDXforModel( modelName );
+   for( auto versSuff: { "V5"s, "V6U"s, "V6C"s } )
+   {
+      const auto outDir{ "out"s + versSuff };
+      std::system( ( "gdxcopy -V"s + versSuff + " "s + modelName + ".gdx "s + outDir ).c_str() );
+      const auto convertedGDXfn{ modelName + "_"s + versSuff + ".gdx"s };
+      std::filesystem::rename( outDir + "/"s + modelName + ".gdx"s, convertedGDXfn );
+      std::filesystem::remove( outDir );
+      std::string ErrMsg;
+      TGXFileObj pgx{ ErrMsg };
+      int ErrNr;
+      REQUIRE( pgx.gdxOpenRead( convertedGDXfn.c_str(), ErrNr ) );
+      int syCnt, uelCnt;
+      REQUIRE( pgx.gdxSystemInfo( syCnt, uelCnt ) );
+      REQUIRE_GT( syCnt, 0 );
+      REQUIRE_GT( uelCnt, 0 );
+      pgx.gdxClose();
+      std::filesystem::remove( convertedGDXfn );
+   }
 }
 
 TEST_SUITE_END();

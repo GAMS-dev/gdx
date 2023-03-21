@@ -26,8 +26,8 @@
 #include "../strhash.h"// for TXStrHashList, strhash
 #include "doctest.h"   // for ResultBuilder, REQUIRE_EQ, TestCase, TEST_CASE
 #include <array>       // for array
-#include <numeric>// for iota
-#include <string>// for operator+, to_string, basic_string, string_l...
+#include <numeric>     // for iota
+#include <string>      // for operator+, to_string, basic_string, string_l...
 
 using namespace std::literals::string_literals;
 using namespace gdx::collections::strhash;

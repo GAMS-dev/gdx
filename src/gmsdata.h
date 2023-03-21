@@ -279,9 +279,9 @@ class TTblGamsData
 
 public:
    TTblGamsData( int ADim, int ADataSize ) : DS{ static_cast<int>( ADim * sizeof( int ) + ADataSize ) },
-                                                   FDim{ ADim },
-                                                   FIndexSize{ static_cast<int>( FDim * sizeof( int ) ) },
-                                                   FDataSize{ ADataSize }
+                                             FDim{ ADim },
+                                             FIndexSize{ static_cast<int>( FDim * sizeof( int ) ) },
+                                             FDataSize{ ADataSize }
    {
    }
 
