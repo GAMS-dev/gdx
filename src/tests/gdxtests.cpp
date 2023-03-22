@@ -57,10 +57,28 @@ namespace gdx::tests::gdxtests
 {
 TEST_SUITE_BEGIN( "GDX object tests" );
 
+static std::string gamsToolCall(const std::string &toolName)
+{
+   std::string pf, sf;
+   // when running in "gms test" directory (in nightly build) the executable is located inside the system directory
+#if defined(_WIN32)
+   if(std::filesystem::exists(toolName + ".exe"s)) {
+      pf = ".\\"s;
+      sf = ".exe"s;
+   }
+#else
+   if(std::filesystem::exists(toolName))
+      pf = "./"s;
+#endif
+   return pf + toolName + sf;
+}
+
 static bool hasGAMSinstalled()
 {
-   int rc {std::system( "gamslib trnsport" )};
-   if(std::filesystem::exists("trnsport.gms")) {
+   int rc {std::system( (gamsToolCall("gamslib"s) + " trnsport"s).c_str() )};
+   std::cout << "gamslib RC="s << rc << std::endl;
+   if(std::filesystem::exists("trnsport.gms"))
+   {
       std::filesystem::remove("trnsport.gms");
       return true;
    }
@@ -1184,11 +1202,11 @@ std::string acquireGDXforModel( const std::string &model )
    const std::string model_fn = model + ".gms"s,
                      log_fn = model + "Log.txt"s;
    std::string gdxfn = model + ".gdx"s;// non-const so we get automatic move
-   int rc = std::system( ( "gamslib "s + model + " > gamslibLog.txt"s ).c_str() );
+   int rc = std::system( ( gamsToolCall("gamslib"s) + " "s + model + " > gamslibLog.txt"s ).c_str() );
    REQUIRE_FALSE( rc );
    std::filesystem::remove( "gamslibLog.txt" );
    REQUIRE( std::filesystem::exists( model_fn ) );
-   rc = std::system( ( "gams " + model_fn + " gdx=default lo=0 o=lf > " + log_fn ).c_str() );
+   rc = std::system( ( gamsToolCall("gams"s) + " "s + model_fn + " gdx=default lo=0 o=lf > " + log_fn ).c_str() );
    REQUIRE_FALSE( rc );
    std::filesystem::remove( log_fn );
    std::filesystem::remove( model_fn );
@@ -2108,7 +2126,7 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
    acquireGDXforModel( modelName );
    for( const auto &versSuff: { "V5"s, "V6U"s, "V6C"s } )
    {
-      const auto outDir{ "out"s + versSuff }, cmd{ "gdxcopy -"s + versSuff + " "s + modelName + ".gdx "s + outDir };
+      const auto outDir{ "out"s + versSuff }, cmd{ gamsToolCall("gdxcopy"s) + " -"s + versSuff + " "s + modelName + ".gdx "s + outDir };
       int rc{ std::system( cmd.c_str() ) };
       if( !rc )
       {
