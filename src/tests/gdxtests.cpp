@@ -1805,6 +1805,8 @@ TEST_CASE( "Test convert and compress" )
 #ifndef __APPLE__
    testWithCompressConvert( false, "v5" );
    testWithCompressConvert( true, "v5" );
+   testWithCompressConvert( false, "v6" );
+   testWithCompressConvert( true, "v6" );
 #endif
    testWithCompressConvert( false, "v7" );
    testWithCompressConvert( true, "v7" );
@@ -2122,10 +2124,16 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
       std::cout << "Skipping legacy version GDX file read test due to missing GAMS system!" << std::endl;
       return;
    }
+   // See: https://www.gams.com/latest/docs/T_GDXCOPY.html
+#ifdef __APPLE__
+   std::cout << "Skipping legacy version GDX file read test on macOS since gdxcopy does not support V5 and V6 there." << std::endl;
+   return;
+#endif
    const auto modelName{ "trnsport"s };
    acquireGDXforModel( modelName );
    for( const auto &versSuff: { "V5"s, "V6U"s, "V6C"s } )
    {
+
       const auto outDir{ "out"s + versSuff }, cmd{ gamsToolCall("gdxcopy"s) + " -"s + versSuff + " "s + modelName + ".gdx "s + outDir };
       int rc{ std::system( cmd.c_str() ) };
       if( !rc )
