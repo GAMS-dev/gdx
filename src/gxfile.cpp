@@ -25,10 +25,6 @@
 
 #include "gmsstrm.h"
 
-#ifdef GAMSBUILD
-#include <palmcc.h>
-#endif
-
 #include "gdx.h"
 #include "utils.h"  // for assignPCharToBuf, in, trimRight, assignStr...
 #include <algorithm>// for fill_n, max, fill, sort
@@ -110,22 +106,25 @@ bool GoodUELString( const char *s, size_t slen )
 const int MaxDimV148 = 10;
 using TIndex = std::array<int, GLOBAL_MAX_INDEX_DIM>;
 
-#ifdef GAMSBUILD
-static std::string gdlSetSystemName()
-{
-   palHandle_t pal;
-   std::array<char, 256> msg{};
-   if( !palCreate( &pal, msg.data(), static_cast<int>( msg.size() ) ) )
-      printf( "error" );
-   palSetSystemName( pal, "GDX Library" );
-   palGetAuditLine( pal, msg.data() );
-   palFree( &pal );
-   return msg.data();
-}
-static const std::string auditLine{ gdlSetSystemName() };
+#if defined(__x86_64__) || defined(_M_X64)
+static const auto archStr {"x86_64"s};
+#elif defined(__aarch64__) || defined(_M_ARM)
+static const auto archStr {"arm64"s};
 #else
-static const std::string auditLine{ "GDX Library      00.0.0 ffffffff May  4, 1970  (AUDIT) XYZ arch xybit/myOS" };
+static const auto archStr {"UnknownInstructionSet"s};
 #endif
+
+#if defined(_WIN32)
+static const auto opSysStr {"Windows"s};
+#elif defined(__APPLE__)
+static const auto opSysStr {"macOS"s};
+#elif defined(__linux__)
+static const auto opSysStr {"Linux"s};
+else
+static const auto opSysStr {"UnknownOS"s};
+#endif
+
+static const auto auditLine { "GDX Library C++ V7 (AUDIT) "s + __TIMESTAMP__ + " "s + archStr + " "s + opSysStr };
 
 using UELTableImplChoice = TUELTable;
 
