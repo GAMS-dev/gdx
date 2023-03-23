@@ -106,25 +106,25 @@ bool GoodUELString( const char *s, size_t slen )
 const int MaxDimV148 = 10;
 using TIndex = std::array<int, GLOBAL_MAX_INDEX_DIM>;
 
-#if defined(__x86_64__) || defined(_M_X64)
-static const auto archStr {"x86_64"s};
-#elif defined(__aarch64__) || defined(_M_ARM)
-static const auto archStr {"arm64"s};
+#if defined( __x86_64__ ) || defined( _M_X64 )
+static const auto archStr{ "x86_64"s };
+#elif defined( __aarch64__ ) || defined( _M_ARM )
+static const auto archStr{ "arm64"s };
 #else
-static const auto archStr {"UnknownInstructionSet"s};
+static const auto archStr{ "UnknownInstructionSet"s };
 #endif
 
-#if defined(_WIN32)
-static const auto opSysStr {"Windows"s};
-#elif defined(__APPLE__)
-static const auto opSysStr {"macOS"s};
-#elif defined(__linux__)
-static const auto opSysStr {"Linux"s};
+#if defined( _WIN32 )
+static const auto opSysStr{ "Windows"s };
+#elif defined( __APPLE__ )
+static const auto opSysStr{ "macOS"s };
+#elif defined( __linux__ )
+static const auto opSysStr{ "Linux"s };
 #else
-static const auto opSysStr {"UnknownOS"s};
+static const auto opSysStr{ "UnknownOS"s };
 #endif
 
-static const auto auditLine { "GDX Library C++ V7 (AUDIT) "s + __TIMESTAMP__ + " "s + archStr + " "s + opSysStr };
+static const auto auditLine{ "GDX Library C++ V7 (AUDIT) "s + __TIMESTAMP__ + " "s + archStr + " "s + opSysStr };
 
 using UELTableImplChoice = TUELTable;
 
@@ -387,59 +387,11 @@ int GetEnvCompressFlag()
    return c == 'N' || c == '0' ? 0 : 1;
 }
 
-// Brief:
-//   Open a new gdx file for output; uses the environment variable GDXCOMPRESS to set compression argument for gdxOpenWriteEx
-// Arguments:
-//   FileName:  File name of the gdx file to be created
-//   Producer:  Name of program that creates the gdx file
-//   ErrNr: Returns an error code or zero if there is no error
-// Returns:
-//   Returns non-zero if the file can be opened; zero otherwise
-// Description:
-//   See gdxOpenWriteEx
-// See Also:
-//   gdxOpenRead, gdxOpenWriteEx, Destroy
 int TGXFileObj::gdxOpenWrite( const char *FileName, const char *Producer, int &ErrNr )
 {
    return gdxOpenWriteEx( FileName, Producer, GetEnvCompressFlag(), ErrNr );
 }
 
-// Brief:
-//   Create a gdx file for writing
-// Arguments:
-//   FileName:  File name of the gdx file to be created
-//   Producer:  Name of program that creates the gdx file
-//   Compr: Zero for no compression; non-zero uses compression if available
-//          Important! when writing compressed, set the AutoConvert flag to zero
-//          so the file is not uncompressed after the Close; see gdxAutoConvert
-//   ErrNr: Returns an error code or zero if there is no error
-// Returns:
-//   Returns non-zero if the file can be opened; zero otherwise
-// Description:
-//   Open a new gdx file for output. If a file extension is not
-//   supplied, the extension '.gdx' will be used. The return code is
-//   a system dependent I/O error.
-// See Also:
-//   gdxOpenRead, gdxOpenWrite, gdxAutoConvert, Destroy
-// Example:
-// <CODE>
-//   var
-//      ErrNr: integer;
-//      PGX  : PGXFile;
-//      Msg  : ShortString;
-//   begin
-//   if not gdxGetReady(Msg)
-//   then
-//      begin
-//      WriteLn('Cannot load GDX library, msg: ', Msg);
-//      exit;
-//      end;
-//   gdxOpenWriteEx(PGX,'c:\\mydata\\file1.gdx','Examples', 1, ErrCode);
-//   gdxAutoConvert(PGX, 0);
-//   if ErrCode <> 0
-//   then
-//      [ ... ]
-// </CODE>
 int TGXFileObj::gdxOpenWriteEx( const char *FileName, const char *Producer, int Compr, int &ErrNr )
 {
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
@@ -504,19 +456,6 @@ int TGXFileObj::gdxOpenWriteEx( const char *FileName, const char *Producer, int 
    return true;
 }
 
-// Brief:
-//   Start writing a new symbol in string mode
-// Arguments:
-//   SyId: Name of the symbol
-//   ExplTxt: Explanatory text for the symbol
-//   Dimen: Dimension of the symbol
-//   Typ: Type of the symbol
-//   UserInfo: See gdxDataWriteRawStart for more information
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Description:
-// See Also:
-//   gdxDataWriteStr, gdxDataWriteDone
 int TGXFileObj::gdxDataWriteStrStart( const char *SyId, const char *ExplTxt, int Dim, int Typ, int UserInfo )
 {
    if( !PrepareSymbolWrite( "DataWriteStrStart"s, SyId, ExplTxt, Dim, Typ, UserInfo ) ) return false;
@@ -527,21 +466,6 @@ int TGXFileObj::gdxDataWriteStrStart( const char *SyId, const char *ExplTxt, int
    return true;
 }
 
-// Brief:
-//   Write a data element in string mode
-// Arguments:
-//   KeyStr: The index for this element using strings for the unique elements
-//   Values: The values for this element
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxDataWriteMapStart, gdxDataWriteDone
-// Description:
-//   When writing data using string elements, each string element is added
-//   to the internal unique element table and assigned an index.
-//   Writing using strings does not add the unique elements to the
-//   user mapped space.
-//   Each element string must follow the GAMS rules for unique elements.
 int TGXFileObj::gdxDataWriteStr( const char **KeyStr, const double *Values )
 {
    if( fmode == fw_dom_str ) fmode = fw_str_data;
@@ -577,13 +501,6 @@ int TGXFileObj::gdxDataWriteStr( const char **KeyStr, const double *Values )
    return true;
 }
 
-// Brief:
-//   Finish a write operation
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//  gdxDataErrorCount, gdxDataWriteRawStart, gdxDataWriteMapStart, gdxDataWriteStrStart,
-// Description:
 int TGXFileObj::gdxDataWriteDone()
 {
    static const TgxModeSet AllowedModes{ fw_raw_data, fw_map_data, fw_str_data, fw_dom_raw, fw_dom_map, fw_dom_str };
@@ -609,16 +526,6 @@ int TGXFileObj::gdxDataWriteDone()
    return true;
 }
 
-// Brief:
-//   Close a gdx file
-// Description
-//   Close a gdx file that was previously opened for reading or writing.
-//   Before the file is closed, any pending write operations will be
-//   finished. To free the gdx object, call gdxFree.
-// Returns:
-//   Returns the value of gdxGetLastError
-// See Also:
-//   gdxOpenRead, gdxOpenWrite
 int TGXFileObj::gdxClose()
 {
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
@@ -777,14 +684,6 @@ TGXFileObj::~TGXFileObj()
    }
 }
 
-// Brief:
-//   Reset the internal values for special values
-// Returns:
-//   Always non-zero
-// See Also:
-//   gdxSetSpecialValues, gdxGetSpecialValues
-// Description:
-//
 int TGXFileObj::gdxResetSpecialValues()
 {
    intlValueMapDbl[vm_valund] = GMS_SV_UNDEF;
@@ -1101,13 +1000,11 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
       assert( newmode == fr_map_data && "Expect to read mapped data" );
       if( ResultWillBeSorted( ADomainNrs ) )
       {
-         //WriteLn('Changing mapped read to raw read');
          res = NrRecs;// ignores filtering etc
          newmode = fr_mapr_data;
       }
       else
       {
-         //WriteLn('Cannot do mapped read fast');
          try
          {
             SortList = std::make_unique<LinkedDataType>( FCurrentDim, static_cast<int>( DataSize * sizeof( double ) ) );
@@ -1763,17 +1660,6 @@ const std::map<int, std::string> errorCodeToStr{
         { ERR_CANNOT_DELETE, "GDXCOPY: Cannot delete file"s },
         { ERR_CANNOT_RENAME, "GDXCOPY: Cannot rename file"s } };
 
-// Summary:
-//   Returns the text for a given error number
-// Arguments:
-//    N: Error number
-//    S: Contains error text after return
-// Return Value:
-//   Always returns non-zero
-// Description:
-//
-// See Also:
-//   gdxGetLastError
 int TGXFileObj::gdxErrorStr( int ErrNr, char *ErrMsg )
 {
    const auto it = errorCodeToStr.find( ErrNr );
@@ -1781,49 +1667,11 @@ int TGXFileObj::gdxErrorStr( int ErrNr, char *ErrMsg )
    return true;
 }
 
-// Brief:
-//   Open a gdx file for reading
-// Arguments:
-//   FileName: file name of the gdx file to be opened
-//   ErrNr: Returns an error code or zero if there is no error
-// Returns:
-//   Returns non-zero if the file can be opened; zero otherwise
-// See Also:
-//   gdxOpenWrite, Destroy, gdxGetLastError
-// Description:
-//   Open an existing gdx file for input. If a file extension is not
-//   supplied, the extension '.gdx' will be used. The return code is
-//   a system dependent I/O error. If the file was found, but is not
-//   a valid gdx file, the function GetLastError can be used to handle
-//   these type of errors.
-// Example:
-// <CODE>
-//   var
-//      ErrNr: integer;
-//      PGX  : PGXFile;
-//   begin
-//   gdxOpenRead(PGX,'c:\\mydata\\file1.gdx', ErrNr);
-//   if ErrNr <> 0
-//   then
-//      begin
-//      [...]
-// </CODE>
 int TGXFileObj::gdxOpenRead( const char *FileName, int &ErrNr )
 {
    return gdxOpenReadXX( FileName, fmOpenRead, 0, ErrNr );
 }
 
-// Brief:
-//   Return strings for file version and file producer
-// Arguments:
-//   FileStr: Version string
-//   ProduceStr: Producer string
-// Returns:
-//   Always non-zero
-// See Also:
-//   gdxOpenWrite, gdxOpenWriteEx
-// Description:
-//
 int TGXFileObj::gdxFileVersion( char *FileStr, char *ProduceStr ) const
 {
    utils::assignStrToBuf( FileSystemID, FileStr, GMS_SSSIZE );
@@ -1831,20 +1679,6 @@ int TGXFileObj::gdxFileVersion( char *FileStr, char *ProduceStr ) const
    return true;
 }
 
-// Brief:
-//   Find symbol by name
-// Arguments:
-//   SyId: Name of the symbol
-//   SyNr: Symbol number
-// Returns:
-//   Non-zero if the symbol is found, zero otherwise.
-// Description:
-//   Search for a symbol by name; the search is not case sensitive.
-//   When the symbol is found, SyNr contains the symbol number and the
-//   function returns a non-zero integer. When the symbol is not found, the function
-//   returns zero.
-// See Also:
-//   gdxSymbolInfo, gdxSymbolInfoX
 int TGXFileObj::gdxFindSymbol( const char *SyId, int &SyNr )
 {
    if( SyId == "*"s )
@@ -1860,20 +1694,6 @@ int TGXFileObj::gdxFindSymbol( const char *SyId, int &SyNr )
    return false;
 }
 
-// Brief:
-//   Read the next record in string mode
-// Arguments:
-//   KeyStr: The index of the record as strings for the unique elements
-//   Values: The data of the record
-//   DimFrst: The first index position in KeyStr that changed
-// Returns:
-//   Non-zero if the operation is possible; return zero if the operation is not
-//   possible or if there is no more data
-// See Also:
-//   gdxDataReadStrStart, gdxDataReadDone
-// Description:
-//   Read the next record using strings for the unique elements. The
-//   reading should be initialized by calling DataReadStrStart
 int TGXFileObj::gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst )
 {
    if( ( TraceLevel >= TraceLevels::trl_all || fmode != fr_str_data ) && !CheckMode( "DataReadStr"s, fr_str_data ) )
@@ -1903,13 +1723,6 @@ int TGXFileObj::gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst )
    }
 }
 
-// Brief:
-//   Finish reading of a symbol in any mode(raw, mapped, string)
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxDataReadRawStart, gdxDataReadMapStart, gdxDataReadStrStart
-// Description:
 int TGXFileObj::gdxDataReadDone()
 {
    static const TgxModeSet AllowedMode{ fr_init, fr_raw_data, fr_map_data, fr_mapr_data, fr_str_data, fr_slice };
@@ -1947,17 +1760,6 @@ int TGXFileObj::gdxDataReadDone()
    return true;
 }
 
-// Brief:
-//  Returns information about a symbol
-// Arguments:
-//   SyNr: The symbol number (range 0..NrSymbols); return universe info when SyNr = 0
-//   SyId: Name of the symbol
-//   Dimen: Dimension of the symbol
-//   Typ: Symbol type
-// Returns:
-//   Zero if the symbol number is not in the correct range, non-zero otherwise
-// See Also:
-//   gdxSystemInfo, gdxSymbolInfoX, gdxSymbolDim, gdxFindSymbol
 int TGXFileObj::gdxSymbolInfo( int SyNr, char *SyId, int &Dim, int &Typ )
 {
    if( !SyNr )
@@ -1984,28 +1786,6 @@ int TGXFileObj::gdxSymbolInfo( int SyNr, char *SyId, int &Dim, int &Typ )
    return false;
 }
 
-// Brief:
-//   Initialize the reading of a symbol in string mode
-// Arguments:
-//   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
-//   NrRecs: The number of records available for reading
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxDataReadStr, gdxDataReadRawStart, gdxDataReadMapStart, gdxDataReadDone
-// Description:
-//   Reading data using strings is the simplest way to read data.
-//   Every record read using DataReadStr will return the strings
-//   for the unique elements. Internal mapping is not affected by
-//   this function.
-// Example:
-//   if DataReadStrStart(PGX,1,NrRecs)
-//   then
-//      begin
-//      while DataReadStr(PGX,Uels,Vals)
-//      do [...]
-//      DataReadDone(PGX)
-//      end;
 int TGXFileObj::gdxDataReadStrStart( int SyNr, int &NrRecs )
 {
    auto XDomains{ utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED ) };
@@ -2240,20 +2020,6 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
    return true;
 }
 
-// Summary:
-//   Add an alias for a set to the symbol table
-// Arguments:
-//    AName1: set identifier
-//    AName2: set identifier
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Description:
-//    One of the two identifiers has to be a known set, an alias or * (universe);
-//    the other identifier is used as the new alias for the given set.
-//    The function gdxSymbolInfoX can be used to retrieve the set or alias
-//       associated with the identifier; it is returned as the UserInfo parameter.
-// See Also:
-//   gdxSymbolSetDomain
 int TGXFileObj::gdxAddAlias( const char *Id1, const char *Id2 )
 {
    if( !MajorCheckMode( "AddAlias"s, AnyWriteMode ) ) return false;
@@ -2294,19 +2060,6 @@ int TGXFileObj::gdxAddAlias( const char *Id1, const char *Id2 )
    return true;
 }
 
-// Brief:
-//   Register a string in the string table
-// Arguments:
-//   Txt: The string to be registered
-//   TxtNr: The index number assigned to this string
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//  gdxGetElemText, gdxSetTextNodeNr
-// Description:
-//  Register a string in the string table and return the integer number assigned to this string.
-//  The integer value can be used to set the associated text of a set element.
-//  The string must follow the GAMS syntax rules for explanatory text.
 int TGXFileObj::gdxAddSetText( const char *Txt, int &TxtNr )
 {
    if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "AddSetText"s ) ) )
@@ -2321,36 +2074,11 @@ int TGXFileObj::gdxAddSetText( const char *Txt, int &TxtNr )
    return true;
 }
 
-// Brief:
-//   The number of error records
-// Returns:
-//   The number of error records available.
-// See Also:
-//   gdxDataErrorRecord
-// Description:
-//   After a write operation is finished (gdxDataWriteDone), the data
-//   is sorted and written to the gdx file. If there are duplicate records,
-//   the first record is written to the file and the duplicates are
-//   added to the error list.
-//   <P>
-//   When reading data using a filtered read operation, data records that were
-//   filtered out because an index is not in the user index space or not in a
-//   filter are added the error list.
 int TGXFileObj::gdxDataErrorCount() const
 {
    return !ErrorList ? 0 : ErrorList->GetCount();
 }
 
-// Brief:
-//   Retrieve an error record
-// Arguments:
-//   RecNr: The number of the record to be retrieved, range = 1..NrErrorRecords
-//   KeyInt: Index for the record
-//   Values: Values for the record
-// Returns:
-//   Non-zero if the record number is valid, zero otherwise
-// See Also:
-//   gdxDataErrorCount
 int TGXFileObj::gdxDataErrorRecord( int RecNr, int *KeyInt, double *Values )
 {
    int res{ gdxDataErrorRecordX( RecNr, KeyInt, Values ) };
@@ -2364,16 +2092,6 @@ int TGXFileObj::gdxDataErrorRecord( int RecNr, int *KeyInt, double *Values )
    return res;
 }
 
-// Brief:
-//   Retrieve an error record
-// Arguments:
-//   RecNr: The number of the record to be retrieved, range = 1..NrErrorRecords
-//   KeyInt: Index for the record, negative uel indicates domain violation for filtered/strict read
-//   Values: Values for the record
-// Returns:
-//   Non-zero if the record number is valid, zero otherwise
-// See Also:
-//   gdxDataErrorCount
 int TGXFileObj::gdxDataErrorRecordX( int RecNr, int *KeyInt, double *Values )
 {
    static const TgxModeSet AllowedModes{ fr_init, fw_init, fr_map_data, fr_mapr_data, fw_raw_data, fw_map_data, fw_str_data };
@@ -2396,17 +2114,6 @@ int TGXFileObj::gdxDataErrorRecordX( int RecNr, int *KeyInt, double *Values )
    return false;
 }
 
-// Brief:
-//   Read the next record in raw mode
-// Arguments:
-//   KeyInt: The index of the record
-//   Values: The data of the record
-//   DimFrst: The first index position in KeyInt that changed
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxDataReadRawStart, gdxDataReadDone
-// Description:
 int TGXFileObj::gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst )
 {
    if( ( TraceLevel >= TraceLevels::trl_all || fmode != fr_raw_data ) && !CheckMode( "DataReadRaw"s, fr_raw_data ) ) return false;
@@ -2426,15 +2133,6 @@ int TGXFileObj::gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst )
    return false;
 }
 
-// Brief:
-//   Initialize the reading of a symbol in raw mode
-// Arguments:
-//   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
-//   NrRecs: The number of records available for reading
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxDataReadRaw, gdxDataReadMapStart, gdxDataReadStrStart, gdxDataReadDone
 int TGXFileObj::gdxDataReadRawStart( int SyNr, int &NrRecs )
 {
    auto XDomains{ utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED ) };
@@ -2442,24 +2140,6 @@ int TGXFileObj::gdxDataReadRawStart( int SyNr, int &NrRecs )
    return NrRecs >= 0;
 }
 
-// Brief:
-//   Write a data element in raw mode
-// Arguments:
-//   KeyInt: The index for this element
-//   Values: The values for this element
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Description:
-//   When writing data in raw mode, the index space used is based on the
-//   internal index space. The indices used are in the range 1..NrUels but this is not enforced.
-//   Before we can write in raw mode, the unique elements (strings) should
-//   be registered first.
-//   <P>
-//   When writing raw, it assumed that the records are written in sorted order and
-//   that there are no duplicate records. Records that are not in sorted order or are
-//   duplicates will be added to the error list (see DataErrorCount and DataErrorRecord)
-// See Also:
-//   gdxDataWriteRawStart, gdxDataWriteDone
 int TGXFileObj::gdxDataWriteRaw( const int *KeyInt, const double *Values )
 {
    if( fmode == fw_dom_raw ) fmode = fw_raw_data;
@@ -2468,33 +2148,6 @@ int TGXFileObj::gdxDataWriteRaw( const int *KeyInt, const double *Values )
    return false;
 }
 
-// Brief:
-//   Start writing a new symbol in raw mode
-// Arguments:
-//   SyId: Name of the symbol
-//   ExplTxt: Explanatory text for the symbol
-//   Dimen: Dimension of the symbol
-//   Typ: Type of the symbol
-//   UserInfo: GAMS follows the following conventions:
-//<TABLE>
-//Type           Value(s)
-//-------------  -------------------------------------------------------
-// Aliased Set   The symbol number of the aliased set, or zero for
-//                 the universe
-// Set           Zero
-// Parameter     Zero
-// Variable      The variable type: binary=1, integer=2, positive=3,
-//                 negative=4, free=5, sos1=6, sos2=7, semicontinous=8,
-//                 semiinteger=9
-// Equation      The equation type: eque=53, equg=54, equl=55, equn=56,
-//                 equx=57, equc=58, equb=59
-//</TABLE>
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Description:
-//
-// See Also:
-//   gdxDataWriteRaw, gdxDataWriteDone
 int TGXFileObj::gdxDataWriteRawStart( const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                       int UserInfo )
 {
@@ -2507,51 +2160,11 @@ int TGXFileObj::gdxDataWriteRawStart( const char *SyId, const char *ExplTxt, int
    return true;
 }
 
-// Brief:
-//  Returns the number of errors
-// Returns:
-//  Total number of errors encountered
-// See Also:
-//   gdxGetLastError
 int TGXFileObj::gdxErrorCount() const
 {
    return ErrCntTotal;
 }
 
-// Brief:
-//   Retrieve the string and node number for an entry in the string table
-// Arguments:
-//   TxtNr: String table index
-//   Txt: Text found for the entry
-//   Node: Node number found for the entry
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxAddSetText, gdxSetTextNodeNr
-// Description:
-//   Retrieve a string based on the string table index. When writing to a gdx file,
-//   this index is the value returned by calling gdxAddSetText. When reading a gdx file,
-//   the index is returned as the level value when reading a set.
-//   The Node number can be used as an index in a string table in the user space;
-//   the value is set by calling SetTextNodeNr. If the Node number was never assigned,
-//   it will be returned as zero.
-//   Example:
-// <CODE>
-// [assumes we are reading using strings ...]
-// while gdxDataReadStr(PGX, Uels, Vals) <> 0
-// do begin
-//    for D := 1 to Dim
-//    do Write(Uels[D], '  ');
-//    indx := Round(Vals[GMS_VAL_LEVEL]);
-//    if indx > 0
-//    then
-//       begin
-//       gdxGetElemText(indx, S, N);
-//       Write('txt = ', S, ' Node = ', N);
-//       end;
-//    WriteLn;
-//    end
-// </CODE>
 int TGXFileObj::gdxGetElemText( int TxtNr, char *Txt, int &Node )
 {
    Node = 0;
@@ -2576,17 +2189,6 @@ int TGXFileObj::gdxGetElemText( int TxtNr, char *Txt, int &Node )
    }
 }
 
-// Brief:
-//  Return the last error
-// Returns:
-//  The error number, or zero if there was no error
-// Description:
-//  When an error is encountered, an error code is stored which can
-//  be retrieved with this function. If subsequent errors occur before
-//  this function is called, the first error code will be maintained.
-//  Calling this function will clear the last error stored.
-// See Also:
-//  gdxErrorCount
 int TGXFileObj::gdxGetLastError()
 {
    if( !FFile )
@@ -2607,16 +2209,6 @@ int TGXFileObj::gdxGetLastError()
    }
 }
 
-// Brief:
-//   Retrieve the internal values for special values
-// Arguments:
-//   AVals: array of special values used for Eps, +Inf, -Inf, NA and Undef
-// Returns:
-//   Always non-zero
-// See Also:
-//  gdxResetSpecialValues, gdxSetSpecialValues
-// Description:
-//
 int TGXFileObj::gdxGetSpecialValues( double *AVals )
 {
    AVals[sv_valund] = intlValueMapDbl[vm_valund];
@@ -2637,19 +2229,6 @@ int TGXFileObj::gdxGetSpecialValues( double *AVals )
    return true;
 }
 
-// Brief:
-//   Set the internal values for special values
-// Arguments:
-//   AVals: array of special values to be used for Eps, +Inf, -Inf, NA and Undef
-//          Note that the values have to be unique
-// Returns:
-//   Non-zero if all values specified are unique, zero otherwise
-// Note: Before calling this function, initialize the array of special values
-//   by calling gdxGetSpecialValues first
-// See Also:
-//   gdxSetReadSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
-// Description:
-//
 int TGXFileObj::gdxSetSpecialValues( const double *AVals )
 {
    TIntlValueMapDbl tmpDbl{ intlValueMapDbl };
@@ -2702,17 +2281,6 @@ int TGXFileObj::gdxSetSpecialValues( const double *AVals )
    return true;
 }
 
-// Summary:
-//   Retrieve the domain of a symbol
-// Arguments:
-//   SyNr: The index number of the symbol, range 1..NrSymbols
-//   DomainSyNrs: array returning the set identifiers or *;
-//   DomainSyNrs[D] will contain the index number of the one dimensional
-//   set or alias used as the domain for index position D. A value of zero represents the universe ( * )
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxSymbolSetDomain, gdxSymbolGetDomainX
 int TGXFileObj::gdxSymbolGetDomain( int SyNr, int *DomainSyNrs )
 {
    if( ErrorCondition( SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX ) ) return false;
@@ -2722,20 +2290,6 @@ int TGXFileObj::gdxSymbolGetDomain( int SyNr, int *DomainSyNrs )
    return true;
 }
 
-// Summary:
-//   Retrieve the domain of a symbol (using relaxed or domain information)
-// Arguments:
-//   SyNr: The index number of the symbol, range 1..NrSymbols
-//   DomainIDs[D] will contain the strings as they were stored with the call
-//   gdxSymbolSetDomainX. If gdxSymbolSetDomainX was never called, but gdxSymbolSetDomain
-//   was called, that information will be used instead.
-// Returns:
-//   0: If operation was not possible (Bad SyNr)
-//   1: No domain information was available
-//   2: Data used was defined using gdxSymbolSetDomainX
-//   3: Data used was defined using gdxSymbolSetDomain
-// See Also:
-//   gdxSymbolSetDomainX, gdxSymbolSetDomain
 int TGXFileObj::gdxSymbolGetDomainX( int SyNr, char **DomainIDs )
 {
    if( ErrorCondition( !NameList->empty() && SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX ) ) return 0;
@@ -2782,32 +2336,12 @@ int TGXFileObj::gdxSymbolGetDomainX( int SyNr, char **DomainIDs )
    return res;
 }
 
-// Brief:
-//  Returns Dimension of a symbol
-// Arguments:
-//   SyNr: The symbol number (range 0..NrSymbols); return universe info when SyNr = 0
-// Returns:
-//   -1 if the symbol number is not in the correct range, the symbol dimension otherwise
-// See Also:
-//   gdxSymbolInfo, gdxSymbolInfoX, gdxFindSymbol
 int TGXFileObj::gdxSymbolDim( int SyNr )
 {
    if( !SyNr ) return 1;
    return !NameList || NameList->empty() || SyNr < 1 || SyNr > NameList->size() ? -1 : ( *NameList->GetObject( SyNr ) )->SDim;
 }
 
-// Brief:
-//  Returns additional information about a symbol
-// Arguments:
-//   SyNr: The symbol number (range 0..NrSymbols); return universe info when SyNr = 0
-//   RecCnt: Total number of records stored (unmapped); for the universe (SyNr = 0) this is the
-//      number of entries when the gdx file was openened for reading.
-//   UserInfo: User field value; see gdxDataWriteRawStart for more information
-//   ExplTxt: Explanatory text for the symbol
-// Returns:
-//   Zero if the symbol number is not in the correct range, non-zero otherwise
-// See Also:
-//   gdxSystemInfo, gdxSymbolInfo, gdxFindSymbol
 int TGXFileObj::gdxSymbolInfoX( int SyNr, int &RecCnt, int &UserInfo, char *ExplTxt )
 {
    if( !SyNr )
@@ -2833,23 +2367,6 @@ int TGXFileObj::gdxSymbolInfoX( int SyNr, int &RecCnt, int &UserInfo, char *Expl
    }
 }
 
-// Summary:
-//   Define the domain of a symbol
-// Arguments:
-//   DomainIDs: array of identifiers or *
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Description:
-//   This function defines the domain for the symbol for which a write
-//     data operation just started using DataWriteRawStart, DataWriteMapStart or
-//     DataWriteStrStart. At this point the symbol and dimension is known,
-//     but no data has been written yet.
-//   Each identifier will be checked to be a one dimensional set or an alias.
-//   When a domain is specified, write operations will be domain checked; records
-//   violating the domain will be added to the internal error list (see DataErrorCount
-//   and DataErrorRecord.)
-// See Also:
-//   gdxSymbolGetDomain
 int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
 {
    static const TgxModeSet AllowedModes{ fw_dom_raw, fw_dom_map, fw_dom_str };
@@ -2930,20 +2447,6 @@ int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
    return res;
 }
 
-// Summary:
-//   Define the domain of a symbol (relaxed version)
-// Arguments:
-//   DomainIDs: array of identifers or *
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Description:
-//   This function defines the relaxed domain information for the symbol SyNr.
-//   The identifiers will NOT be checked to be known one-dimensional sets, and
-//   no domain checking will be performed. This function can be called during or after
-//   the write operation.
-//   If domain checking is needed, use gdxSymbolSetDomain
-// See Also:
-//   gdxSymbolSetDomain, gdxSymbolGetDomainX
 int TGXFileObj::gdxSymbolSetDomainX( int SyNr, const char **DomainIDs )
 {
    // check for write or append only
@@ -2979,13 +2482,6 @@ int TGXFileObj::gdxSymbolSetDomainX( int SyNr, const char **DomainIDs )
    return true;
 }
 
-// Brief:
-//   Returns the number of symbols and unique elements
-// Arguments:
-//   SyCnt: Number of symbols available in the gdx file
-//   UelCnt: Number of unique elements stored in the gdx file
-// Returns:
-//   Returns a non-zero value
 int TGXFileObj::gdxSystemInfo( int &SyCnt, int &UelCnt ) const
 {
    UelCnt = UELTable ? (int) UELTable->size() : 0;
@@ -2993,12 +2489,6 @@ int TGXFileObj::gdxSystemInfo( int &SyCnt, int &UelCnt ) const
    return true;
 }
 
-// Brief:
-//   Finish registration of unique elements
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxUELRegisterRawStart, gdxUELRegisterMapStart, gdxUELRegisterStrStart
 int TGXFileObj::gdxUELRegisterDone()
 {
    static const TgxModeSet AllowedModes{ f_raw_elem, f_map_elem, f_str_elem };
@@ -3007,18 +2497,6 @@ int TGXFileObj::gdxUELRegisterDone()
    return true;
 }
 
-// Brief:
-//   Register an unique elements in raw mode
-// Arguments:
-//   Uel: String for unique element
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxUELRegisterMap, gdxUELRegisterDone
-// Description:
-//  The unique element is registered in raw mode, i.e. the internally
-//  assigned integer index is determined by the system
-//  Can only be used while writing to a gdx file
 int TGXFileObj::gdxUELRegisterRaw( const char *Uel )
 {
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
@@ -3035,12 +2513,6 @@ int TGXFileObj::gdxUELRegisterRaw( const char *Uel )
    return true;
 }
 
-// Brief:
-//   Start registering unique elements in raw mode
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxUELRegisterRaw, gdxUELRegisterDone
 int TGXFileObj::gdxUELRegisterRawStart()
 {
    if( !MajorCheckMode( "UELRegisterRawStart"s, fw_init ) ) return false;
@@ -3049,20 +2521,6 @@ int TGXFileObj::gdxUELRegisterRawStart()
    return true;
 }
 
-// Brief:
-//   Register a unique element in string mode
-// Arguments:
-//   Uel: String for unique element
-//   UelNr: Index number assigned to this unique element in user space
-// Returns:
-//   Non-zero if the element was registered, zero otherwise.
-// Description:
-//  The unique element is registered in user mapped space. The returned
-//  index is the next higher value. Registering an element a second time
-//  is not considered an error and the same index position will be returned.
-//   A unique element must follow the GAMS rules when it contains quote characters.
-// See Also:
-//   gdxUELRegisterStrStart, gdxUELRegisterDone
 int TGXFileObj::gdxUELRegisterStr( const char *Uel, int &UelNr )
 {
    if( ( TraceLevel >= TraceLevels::trl_all || fmode != f_str_elem ) && !CheckMode( "UELRegisterStr"s, f_str_elem ) )
@@ -3075,13 +2533,6 @@ int TGXFileObj::gdxUELRegisterStr( const char *Uel, int &UelNr )
    return true;
 }
 
-// Brief:
-//   Start registering unique elements in string mode
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxUELRegisterStr, gdxUELRegisterDone
-// Description:
 int TGXFileObj::gdxUELRegisterStrStart()
 {
    static const TgxModeSet AllowedModes{ fr_init, fw_init };
@@ -3091,18 +2542,6 @@ int TGXFileObj::gdxUELRegisterStrStart()
    return true;
 }
 
-// Brief:
-//   Get a unique element using an unmapped index
-// Arguments:
-//   UelNr: Element number (unmapped) in the range 1..NrElem
-//   Uel: String for unique element
-//   UelMap: User mapping for this element or -1 if element was never mapped
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxUMUelInfo, gdxGetUEL
-// Description:
-//
 int TGXFileObj::gdxUMUelGet( int UelNr, char *Uel, int &UelMap )
 {
    if( UELTable && UelNr >= 1 && UelNr <= UELTable->size() )
@@ -3119,16 +2558,6 @@ int TGXFileObj::gdxUMUelGet( int UelNr, char *Uel, int &UelMap )
    }
 }
 
-// Brief:
-//   Return information about the unique elements
-// Arguments:
-//   UelCnt: Total number of unique elements (uels in gdx file + new registered uels)
-//   HighMap: Highest user mapping index used
-// Returns:
-//   Always returns non-zero
-// See Also:
-//  gdxUMUelGet
-// Description:
 int TGXFileObj::gdxUMUelInfo( int &UelCnt, int &HighMap ) const
 {
    if( !FFile )
@@ -3144,28 +2573,11 @@ int TGXFileObj::gdxUMUelInfo( int &UelCnt, int &HighMap ) const
    }
 }
 
-// Summary:
-//   Returns the dimension of the current active symbol
-// Arguments:
-// Return Value:
-//   Dimension of current active symbol
-// Description:
-//    When reading or writing data, the dimension of the current active symbol
-//    is sometimes needed to convert arguments from strings to pchars etc.
-// See Also:
-//
 int TGXFileObj::gdxCurrentDim() const
 {
    return FCurrentDim;//need to do more checks here
 }
 
-// Brief:
-//   Rename UEL OldName to NewName
-// Arguments:
-//   OldName: Name of an existing UEL
-//   NewName: New name for the UEL
-// Returns:
-//   Zero if the renaming was possible; non-zero is an error indicator
 int TGXFileObj::gdxRenameUEL( const char *OldName, const char *NewName )
 {
    if( !UELTable ) return -1;
@@ -3188,50 +2600,11 @@ int TGXFileObj::gdxRenameUEL( const char *OldName, const char *NewName )
    return 0;
 }
 
-// Brief:
-//   Open a gdx file for reading
-// Arguments:
-//   FileName: file name of the gdx file to be opened
-//   ReadMode: bitmap skip reading sections: 0-bit: string (1 skip reading string)
-//   ErrNr: Returns an error code or zero if there is no error
-// Returns:
-//   Returns non-zero if the file can be opened; zero otherwise
-// See Also:
-//   gdxOpenWrite, Destroy, gdxGetLastError
-// Description:
-//   Open an existing gdx file for input. If a file extension is not
-//   supplied, the extension '.gdx' will be used. The return code is
-//   a system dependent I/O error. If the file was found, but is not
-//   a valid gdx file, the function GetLastError can be used to handle
-//   these type of errors.
-// Example:
-// <CODE>
-//   var
-//      ErrNr: integer;
-//      PGX  : PGXFile;
-//   begin
-//   gdxOpenRead(PGX,'c:\\mydata\\file1.gdx', ErrNr);
-//   if ErrNr <> 0
-//   then
-//      begin
-//      [...]
-// </CODE>
 int TGXFileObj::gdxOpenReadEx( const char *FileName, int ReadMode, int &ErrNr )
 {
    return gdxOpenReadXX( FileName, FileAccessMode::fmOpenRead, ReadMode, ErrNr );
 }
 
-// Brief:
-//  Get the string for a unique element using a mapped index
-// Arguments:
-//   UelNr: Index number in user space (1..NrUserElem)
-//   Uel: String for the unique element
-// Returns:
-//  Return non-zero if the index is in a valid range, zero otherwise
-// Description:
-//  Retrieve the string for a unique element based on a mapped index number.
-// See Also:
-//   gdxUMUelGet
 int TGXFileObj::gdxGetUEL( int uelNr, char *Uel ) const
 {
    if( !UELTable )
@@ -3246,19 +2619,6 @@ int TGXFileObj::gdxGetUEL( int uelNr, char *Uel ) const
    return EN >= 1;
 }
 
-// Brief:
-//   Start writing a new symbol in mapped mode
-// Arguments:
-//   SyId: Name of the symbol
-//   ExplTxt: Explanatory text for the symbol
-//   Dimen: Dimension of the symbol
-//   Type: Type of the symbol
-//   UserInfo: See gdxDataWriteRawStart for more information
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Description:
-// See Also:
-//   gdxDataWriteMap, gdxDataWriteDone
 int TGXFileObj::gdxDataWriteMapStart( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo )
 {
    if( !PrepareSymbolWrite( "DataWriteMapStart"s, SyId, ExplTxt, Dimen, Typ, UserInfo ) ) return false;
@@ -3267,16 +2627,6 @@ int TGXFileObj::gdxDataWriteMapStart( const char *SyId, const char *ExplTxt, int
    return true;
 }
 
-// Brief:
-//   Write a data element in mapped mode
-// Arguments:
-//   KeyInt: The index for this element using mapped values
-//   Values: The values for this element
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxDataWriteMapStart, gdxDataWriteDone
-// Description:
 int TGXFileObj::gdxDataWriteMap( const int *KeyInt, const double *Values )
 {
    TIndex Keys;
@@ -3308,13 +2658,6 @@ int TGXFileObj::gdxDataWriteMap( const int *KeyInt, const double *Values )
    return true;
 }
 
-// Brief:
-//   Start registering unique elements in mapped mode
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxUELRegisterMap, gdxUELRegisterDone
-// Description:
 int TGXFileObj::gdxUELRegisterMapStart()
 {
    static const TgxModeSet AllowedModes{ fr_init, fw_init };
@@ -3324,22 +2667,6 @@ int TGXFileObj::gdxUELRegisterMapStart()
    return true;
 }
 
-// Brief:
-//   Register an unique elements in mapped mode
-// Arguments:
-//   UMap: User index number to be assigned to the unique element
-//   Uel: String for unique element
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxUELRegisterMapStart, gdxUELRegisterDone
-// Description:
-//  Register a unique element in mapped space; UMap is the user assigned
-//  index for the element. Registering an element a second time is not considered
-//  an error as long as the same UMap is used. Assigning different elements
-//  with the same UMap value is an error.
-//   A unique element
-//   must follow the GAMS rules when it contains quote characters.
 int TGXFileObj::gdxUELRegisterMap( int UMap, const char *Uel )
 {
    int svLen;
@@ -3355,15 +2682,6 @@ int TGXFileObj::gdxUELRegisterMap( int UMap, const char *Uel )
    return true;
 }
 
-// Brief:
-//   Initialize the reading of a symbol in mapped mode
-// Arguments:
-//   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
-//   NrRecs: The number of records available for reading
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxDataReadMap, gdxDataReadRawStart, gdxDataReadStrStart, gdxDataReadDone
 int TGXFileObj::gdxDataReadMapStart( int SyNr, int &NrRecs )
 {
    auto XDomains = utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_STRICT );
@@ -3371,18 +2689,6 @@ int TGXFileObj::gdxDataReadMapStart( int SyNr, int &NrRecs )
    return NrRecs >= 0;
 }
 
-// Brief:
-//   Read the next record in mapped mode
-// Arguments:
-//   RecNr: Ignored (left in for backward compatibility)
-//   KeyInt: The index of the record
-//   Values: The data of the record
-//   DimFrst: The first index position in KeyInt that changed
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxDataReadMapStart, gdxDataReadFilteredStart, gdxDataReadDone
-// Description:
 int TGXFileObj::gdxDataReadMap( [[maybe_unused]] int RecNr, int *KeyInt, double *Values, int &DimFrst )
 {
    static const TgxModeSet AllowedModes{ fr_map_data, fr_mapr_data };
@@ -3549,29 +2855,11 @@ void TGXFileObj::SetTraceLevel( TGXFileObj::TraceLevels tl )
    TraceLevel = tl;
 }
 
-// Summary:
-//   Number of entries in the acronym table
-// Arguments:
-// Returns:
-//   The number of entries in the acronym table
-// See Also:
-//    gdxAcronymSetInfo, gdxAcronymSetInfo
 int TGXFileObj::gdxAcronymCount() const
 {
    return !AcronymList ? 0 : static_cast<int>( AcronymList->size() );
 }
 
-// Summary:
-//   Retrieve acronym information from the acronym table
-// Arguments:
-//   N: Index into acronym table; range from 1 to AcronymCount
-//   AName: Name of the acronym
-//   Txt: Explanatory text of the acronym
-//   AIndx:  Index value of the acronym
-// Returns:
-//   Non-zero if the index into the acronym table is valid; false otherwise
-// See Also:
-//    gdxAcronymSetInfo, gdxAcronymCount
 int TGXFileObj::gdxAcronymGetInfo( int N, char *AName, char *Txt, int &AIndx ) const
 {
    if( N < 1 || N > (int) AcronymList->size() )
@@ -3587,22 +2875,6 @@ int TGXFileObj::gdxAcronymGetInfo( int N, char *AName, char *Txt, int &AIndx ) c
    return true;
 }
 
-// Summary:
-//   Modify acronym information in the acronym table
-// Arguments:
-//   N: Index into acronym table; range from 1 to AcronymCount
-//   AName: Name of the acronym
-//   Txt: Explanatory text of the acronym
-//   AIndx:  Index value of the acronym
-// Return Value:
-//   Non-zero if the index into the acronym table is valid; false otherwise
-// See Also:
-//   gdxAcronymGetInfo, gdxAcronymCount
-// Description:
-//   When writing a gdx file, this function is used to provide the name of an acronym;
-//     in this case the Indx parameter must match.
-//   When reading a gdx file, this function
-//     is used to provide the acronym index, and the AName parameter must match.
 int TGXFileObj::gdxAcronymSetInfo( int N, const char *AName, const char *Txt, int AIndx )
 {
    auto MapIsUnique = [this]( int Indx ) {
@@ -3639,18 +2911,6 @@ int TGXFileObj::gdxAcronymSetInfo( int N, const char *AName, const char *Txt, in
    return true;
 }
 
-// Summary:
-//   Returns the value of the NextAutoAcronym variable and sets the variable to nv
-// Arguments:
-//    nv: New value for NextAutoAcronym; a value of less than zero is ignored
-// Return Value:
-//    Previous value of NextAutoAcronym
-// Description:
-//    When we read from a gdx file and encounter an acronym that was not defined, we need to assign
-//    a new index for that acronym. The variable NextAutoAcronym is used for this purpose and is
-//    incremented for each new undefined acronym.
-//    When NextAutoAcronym has a value of zero, the default, the value is ignored and the original
-//    index as stored in the gdx file is used for the index.
 int TGXFileObj::gdxAcronymNextNr( int nv )
 {
    int res{ NextAutoAcronym };
@@ -3658,23 +2918,6 @@ int TGXFileObj::gdxAcronymNextNr( int nv )
    return res;
 }
 
-// Summary:
-//   Get information how acronym values are remapped
-// Arguments:
-//   N: Index into acronym table; range from 1 to AcronymCount
-//   orgIndx: The Index used in the gdx file
-//   newIndx: The Index returned when reading gdx data
-//   autoIndex: non-zero if the newIndx was generated using the value of NextAutoAcronym
-// Return Value:
-//   Non-zero if the index into the acronym table is valid; false otherwise
-// See Also:
-//   gdxAcronymGetInfo, gdxAcronymCount, gdxAcronymNextNr
-// Description:
-//   When reading gdx data, we need to map indices for acronyms used in the gdx file to
-//   indices used by the reading program. There is a problen when not all acronyms have been
-//   registered before reading the gdx data. We need to map an udefined index we read to a new value.
-//   The value of NextAutoAcronym is used for that.
-//
 int TGXFileObj::gdxAcronymGetMapping( int N, int &orgIndx, int &newIndx, int &autoIndex )
 {
    if( TraceLevel >= TraceLevels::trl_some )
@@ -3687,34 +2930,12 @@ int TGXFileObj::gdxAcronymGetMapping( int N, int &orgIndx, int &newIndx, int &au
    return true;
 }
 
-// Brief:
-//   Check if there is a filter defined based on its number
-// Arguments:
-//   FilterNr: Filter number as used in FilterRegisterStart
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//  gdxFilterRegisterStart
-// Description:
-//
 int TGXFileObj::gdxFilterExists( int FilterNr )
 {
    if( !MajorCheckMode( "FilterExists"s, AnyReadMode ) ) return false;
    return FilterList->FindFilter( FilterNr ) != nullptr;
 }
 
-// Brief:
-//   Define a unique element filter
-// Arguments:
-//   FilterNr: Filter number to be assigned
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//  gdxFilterRegister, gdxFilterRegisterDone, gdxDataReadFilteredStart
-// Description:
-//   Start the registration of a filter. A filter is used to map a number
-//   of elements to a single integer; the filter number. A filter number
-//   can later be used to specify a filter for an index position when reading data.
 int TGXFileObj::gdxFilterRegisterStart( int FilterNr )
 {
    if( !MajorCheckMode( "FilterRegisterStart"s, fr_init ) ||
@@ -3725,19 +2946,6 @@ int TGXFileObj::gdxFilterRegisterStart( int FilterNr )
    return true;
 }
 
-// Brief:
-//   Add a unique element to the current filter definition
-// Arguments:
-//   UelMap: Unique element number in the user index space
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//  gdxFilterRegisterStart, gdxFilterRegisterDone
-// Description:
-//  Register a unique element as part of the current filter. The
-//  function returns false if the index number is out of range of
-//  valid user indices or the index was never mapped into the
-//  user index space.
 int TGXFileObj::gdxFilterRegister( int UelMap )
 {
    if( ( TraceLevel >= TraceLevels::trl_all || fmode != fr_filter ) &&
@@ -3755,14 +2963,6 @@ int TGXFileObj::gdxFilterRegister( int UelMap )
    return true;
 }
 
-// Brief:
-//   Finish registration of unique elements for a filter
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//  gdxFilterRegisterStart, gdxFilterRegister
-// Description:
-//
 int TGXFileObj::gdxFilterRegisterDone()
 {
    if( !MajorCheckMode( "FilterRegisterDone"s, fr_filter ) ) return false;
@@ -3788,57 +2988,12 @@ int TGXFileObj::gdxFilterRegisterDone()
    return true;
 }
 
-// Brief:
-//   Initialize the reading of a symbol in filtered mode
-// Arguments:
-//   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
-//   FilterAction: Array of filter actions for each index position
-//   NrRecs: The maximum number of records available for reading. The actual number of records may be
-//      less when a filter is applied to the records read.
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxFilterRegisterStart, gdxDataReadMap, gdxDataReadRawStart, gdxDataReadStrStart, gdxDataReadDone
-// Description:
-//   Start reading data for a symbol in filtered mode. Each filter action
-//   (1..Dimension) describes how each index should be treated when reading
-//   a data record. When new unique elements are returned, they are added
-//   to the user index space automatically. The actual reading of records
-//   is done with DataReadMap.
-//   <P>The action codes are as follows:
-//   <TABLE>
-//   Action code         Result
-//   -----------         ------
-//   DOMC_UNMAPPED       The index is not mapped into user space
-//   DOMC_EXPAND         New unique elements encountered will be
-//                         be mapped into the user space
-//   DOMC_STRICT         If the unique element in this position does not map into
-//                         user space, the record will not be available and
-//                         is added to the error list instead
-//   FilterNumber        If the unique element in this position does not map
-//                         into user space or is not enabled in this filter,
-//                         the record will not be available and is added to
-//                         the error list instead
-//   </TABLE>
 int TGXFileObj::gdxDataReadFilteredStart( int SyNr, const int *FilterAction, int &NrRecs )
 {
    NrRecs = PrepareSymbolRead( "DataReadStartFiltered"s, SyNr, FilterAction, fr_map_data );
    return NrRecs >= 0;
 }
 
-// Brief:
-//   Set the Node number for an entry in the string table
-// Arguments:
-//   TxtNr: Index number of the entry to be modified
-//   Node: The new Node value for the entry
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//  gdxAddSetText, gdxGetElemText
-// Description:
-//  After registering a string with AddSetText, we can assign
-//  a node number for later retrieval. The node number is any
-//  integer which is stored without further restrictions.
 int TGXFileObj::gdxSetTextNodeNr( int TxtNr, int Node )
 {
    if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "SetTextNodeNr"s ) ) ) return false;
@@ -3851,45 +3006,6 @@ int TGXFileObj::gdxSetTextNodeNr( int TxtNr, int Node )
    return false;
 }
 
-// Brief:
-//   Get the unique elements for a given dimension of a given symbol
-// Arguments:
-//   SyNr: The index number of the symbol, range 1..NrSymbols
-//   DimPos:  The dimension to use, range 1..dim
-//   FilterNr: Number of a previously registered filter or the value DOMC_EXPAND if no filter is wanted
-//   DP: Callback procedure which will be called once for each available element (can be nil)
-//   NrElem: Number of unique elements found
-//   UPtr: User pointer; will be passed to the callback procedure
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Description:
-//   Using the data of a symbol, get the unique elements for a given index position. To achieve this,
-//   the symbols data is read and a tally is kept for the elements in the given index position. When a filter
-//   is specified, records that have elements in the specified index position that are outside the filter will
-//   be added to the list of DataErrorRecords. See gdxDataErrorRecord
-// See Also:
-//   gdxDataErrorCount gdxDataErrorRecord
-// Example:
-// <CODE>
-//   var
-//      T0 : Cardinal;
-//      Cnt: integer;
-//
-//   procedure DataDomainCB(RawNr, MappedNr: integer; UPtr: pointer); stdcall;
-//   begin
-//   Write(RawNr, ' (', MappedNr, ')');
-//   end;
-//
-//   T0 := GetTickCount();
-//   gdxGetDomainElements(PGX, 1, 1, DOMC_EXPAND, nil, cnt);
-//   WriteLn('Domain count only = ',cnt ,' ', GetTickCount - T0, ' ms');
-//   T0 := GetTickCount();
-//   gdxGetDomainElements(PGX, 1, 1, DOMC_EXPAND, DataDomainCB, cnt);
-//   WriteLn('Get domain count = ',cnt ,' ', GetTickCount - T0, ' ms');
-//   T0 := GetTickCount();
-//   gdxGetDomainElements(PGX, 1, 1, 7, DataDomainCB, cnt);
-//   WriteLn('Using filter 7; number of records in error list = ', gdxDataErrorCount(PGX) );
-// </CODE>
 int TGXFileObj::gdxGetDomainElements( int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int &NrElem, void *UPtr )
 {
    gdxGetDomainElements_DP = DP;
@@ -3964,15 +3080,6 @@ int TGXFileObj::gdxGetDomainElements( int SyNr, int DimPos, int FilterNr, TDomai
    return NrElem >= 0;
 }
 
-// Brief:
-//   Set the amount of trace (debug) information generated
-// Arguments:
-//   N: Tracing level  N <= 0 no tracing  N >= 3 maximum tracing
-//   S: A string to be included in the trace output
-// Returns:
-//   Always non-zero
-// Description:
-//
 int TGXFileObj::gdxSetTraceLevel( int N, const char *s )
 {
    if( N <= 0 ) TraceLevel = TraceLevels::trl_none;
@@ -4001,22 +3108,6 @@ int TGXFileObj::gdxSetTraceLevel( int N, const char *s )
    return true;
 }
 
-// Summary:
-//   Add a new acronym entry
-// Arguments:
-//   AName: Name of the acronym
-//   Txt: Explanatory text of the acronym
-//   AIndx:  Index value of the acronym
-// Return Value:
-//    0 If the entry is not added because of a duplicate name using the same value fo the indx
-//   -1 If the entry is not added because of a duplicate name using a different value for the indx
-//   Otherwise the index into the acronym table (1..gdxAcronymCount)
-// See Also:
-//   gdxAcronymGetInfo, gdxAcronymCount
-// Description:
-//   This function can be used to add entries before data is written. When entries
-//   are added implicitly use gdxAcronymSetInfo to update the table.
-//
 int TGXFileObj::gdxAcronymAdd( const char *AName, const char *Txt, int AIndx )
 {
    for( int N{}; N < (int) AcronymList->size(); N++ )
@@ -4035,31 +3126,11 @@ int TGXFileObj::gdxAcronymAdd( const char *AName, const char *Txt, int AIndx )
    return res;
 }
 
-// Summary:
-//   Get index value of an acronym
-// Arguments:
-//   V: Input value possibly representing an acronym
-// Returns:
-//   Index of acronym value V; zero if V does not represent an acronym
-// See Also:
-//    gdxAcronymValue
 int TGXFileObj::gdxAcronymIndex( double V ) const
 {
    return V < Zvalacr ? 0 : static_cast<int>( std::round( V / Zvalacr ) );
 }
 
-// Summary:
-//   Find the name of an acronym value
-// Arguments:
-//   V: Input value possibly containing an acronym
-//   AName: Name of acronym value or the empty string
-// Returns:
-//   Return non-zero if a name for the acronym is defined. Return
-//   zero if V does not represent an acronym value or a name
-//   is not defined. An unnamed acronym value will return a string
-//   of the form UnknownAcronymNNN; were NNN is the index of the acronym.
-// See Also:
-//    gdxAcronymIndex
 int TGXFileObj::gdxAcronymName( double V, char *AName )
 {
    int Indx{ gdxAcronymIndex( V ) };
@@ -4074,30 +3145,11 @@ int TGXFileObj::gdxAcronymName( double V, char *AName )
    return false;
 }
 
-// Summary:
-//   Create an acronym value based on the index
-// Arguments:
-//   AIndx: Index value; should be greater than zero
-// Returns:
-//   The calculated acronym value; zero if Indx is not positive
-// See Also:
-//    gdxAcronymIndex
 double TGXFileObj::gdxAcronymValue( int AIndx ) const
 {
    return AIndx <= 0 ? 0.0 : Zvalacr * AIndx;
 }
 
-// Summary:
-//   Returns the value of the AutoConvert variable and sets the variable to nv
-// Arguments:
-//    nv: New value for AutoConvert
-// Return Value:
-//    Previous value of AutoConvert
-// Description:
-//    When we close a new gdx file, we look at the value of AutoConvert; if AutoConvert
-//    is non-zero, we look at the GDXCOMPRESS and GDXCONVERT environment variables to determine if
-//    conversion to an older file format is desired. We needed this logic so gdxcopy.exe
-//    can disable automatic file conversion.
 int TGXFileObj::gdxAutoConvert( int nv )
 {
    int res{ AutoConvert };
@@ -4105,31 +3157,12 @@ int TGXFileObj::gdxAutoConvert( int nv )
    return res;
 }
 
-// Summary:
-//   Returns a version descriptor of the library
-// Arguments:
-//    V: Contains version string after return
-// Returns:
-//   Always returns non-zero
-// Description:
-//
-// See Also:
 int TGXFileObj::gdxGetDLLVersion( char *V )
 {
    utils::assignStrToBuf( auditLine, V, GMS_SSSIZE );
    return true;
 }
 
-// Summary:
-//   Returns file format number and compression level used
-// Arguments:
-//    FileVer: File format number or zero if the file is not open
-//    ComprLev: Compression used; 0= no compression, 1=zlib
-// Returns:
-//   Always returns non-zero
-// Description:
-//
-// See Also:
 int TGXFileObj::gdxFileInfo( int &FileVer, int &ComprLev ) const
 {
    switch( fstatus )
@@ -4149,19 +3182,6 @@ int TGXFileObj::gdxFileInfo( int &FileVer, int &ComprLev ) const
    return true;
 }
 
-// Brief:
-//   Prepare for the reading of a slice of data from a data set
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Arguments:
-//   SyNr: Symbol number to read, range 1..NrSymbols
-//   ElemCounts: Array of integers, each position indicating the number of
-//             unique indices in that position
-// See Also:
-//   gdxDataReadSlice, gdxDataReadDone
-// Description:
-//   Prepare for the reading of a slice of data. The actual read of the data
-//   is done by calling gdxDataReadSlice. When finished reading, call gdxDataReadDone.
 int TGXFileObj::gdxDataReadSliceStart( int SyNr, int *ElemCounts )
 {
    //-- Note: PrepareSymbolRead checks for the correct status
@@ -4203,25 +3223,6 @@ int TGXFileObj::gdxDataReadSliceStart( int SyNr, int *ElemCounts )
    return true;
 }
 
-// Brief:
-//   Read a slice of data from a data set
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Arguments:
-//   UelFilterStr: Each index can be fixed by setting the string for the unique
-//                  element. Set an index position to the empty string in order
-//                  not to fix that position.
-//   Dimen: The dimension of the index space; this is the number of index positions
-//         that is not fixed.
-//   DP: Callback procedure which will be called for each available data item
-// See Also:
-//   gdxDataReadSliceStart, gdxDataSliceUELS, gdxDataReadDone
-// Description:
-//   Read a slice of data, by fixing zero or more index positions in the data.
-//   When a data element is available, the callback procedure DP is called with the
-//   current index and the values. The indices used in the index vary from zero to
-//   the highest value minus one for that index position. This function can be called
-//   multiple times.
 int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataStoreProc_t DP )
 {
    if( !MajorCheckMode( "DataReadSlice"s, fr_slice ) )
@@ -4267,19 +3268,6 @@ int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataSt
    return true;
 }
 
-// Brief:
-//   Map a slice index in to the corresponding unique elements
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Arguments:
-//   SliceKeyInt: The slice index to be mapped to strings.
-//   KeyStr: Array of strings containg the unique elements
-// See Also:
-//   gdxDataReadSliceStart, gdxDataReadDone
-// Description:
-//   After calling DataReadSliceStart, each index position is mapped from 0 to N(d)-1.
-//   This function maps this index space back in to unique elements represented as
-//   strings.
 int TGXFileObj::gdxDataSliceUELS( const int *SliceKeyInt, char **KeyStr )
 {
    if( !MajorCheckMode( "DataSliceUELS"s, fr_slice ) ) return false;
@@ -4304,12 +3292,6 @@ int TGXFileObj::gdxDataSliceUELS( const int *SliceKeyInt, char **KeyStr )
    return true;
 }
 
-// Brief:
-//   Return the number of bytes used by the data objects
-// Arguments:
-//   None
-// Returns:
-//   The number of bytes used by the data objects
 int64_t TGXFileObj::gdxGetMemoryUsed()
 {
    int64_t res{};
@@ -4323,17 +3305,6 @@ int64_t TGXFileObj::gdxGetMemoryUsed()
    return res;
 }
 
-// Brief:
-//   Classify a value as a potential special value
-// Arguments:
-//   D: Value to classify
-//   sv: Classification
-// Returns:
-//   Returns non-zero if D is a special value, zero otherwise
-// See Also:
-//  gdxGetSpecialValues, gdxSetSpecialValues
-// Description:
-//
 int TGXFileObj::gdxMapValue( double D, int &sv )
 {
    int64_t i64 = dblToI64( D );
@@ -4354,42 +3325,6 @@ int TGXFileObj::gdxMapValue( double D, int &sv )
    return true;
 }
 
-// Brief:
-//   Open an existing gdx file for output
-// Arguments:
-//   FileName:  File name of the gdx file to be created
-//   Producer:  Name of program that appends to the gdx file
-//   ErrNr: Returns an error code or zero if there is no error
-// Returns:
-//   Returns non-zero if the file can be opened; zero otherwise
-// See Also:
-//   gdxOpenRead, gdxOpenWrite, gdxOpenWriteEx
-// Description:
-//   Open an existing gdx file for output. If a file extension is not
-//   supplied, the extension '.gdx' will be used. The return code is
-//   a system dependent I/O error.
-//   When appending to a gdx file, the symbol table, uel table etc will be read
-//   and the whole setup will be treated as if all symbols were just written to
-//   the gdx file. Replacing a symbol is not allowed; it will generate a duplicate
-//   symbol error.
-// Example:
-// <CODE>
-//   var
-//      ErrNr: integer;
-//      PGX  : PGXFile;
-//      Msg  : ShortString;
-//   begin
-//   if not gdxGetReady(Msg)
-//   then
-//      begin
-//      WriteLn('Cannot load GDX library, msg: ', Msg);
-//      exit;
-//      end;
-//   gdxOpenAppend(PGX,'c:\\mydata\\file1.gdx','Examples', ErrCode);
-//   if ErrCode <> 0
-//   then
-//      [ ... ]
-// </CODE>
 int TGXFileObj::gdxOpenAppend( const char *FileName, const char *Producer, int &ErrNr )
 {
    FProducer2 = Producer;
@@ -4410,35 +3345,11 @@ int TGXFileObj::gdxOpenAppend( const char *FileName, const char *Producer, int &
    return res;
 }
 
-// Brief:
-//   Test if any of the elements of the set has an associated text
-// Arguments:
-//   SyNr: Set Symbol number (1..NrSymbols)
-// Returns:
-//   Non-zero if the Set contains at least one element that has associated text,
-//     zero otherwise
-// See Also:
-//   gdxSystemInfo, gdxSymbolInfo
-// Description:
-//
 int TGXFileObj::gdxSetHasText( int SyNr )
 {
    return NameList && !NameList->empty() && SyNr >= 1 && SyNr <= NameList->size() && ( *NameList->GetObject( SyNr ) )->SSetText;
 }
 
-// Brief:
-//   Set the internal values for special values when reading a gdx file
-// Arguments:
-//   AVals: array of special values to be used for Eps, +Inf, -Inf, NA and Undef
-//          Note that the values do not have to be unique
-// Returns:
-//   Always non-zero
-// Note: Before calling this function, initialize the array of special values
-//   by calling gdxGetSpecialValues first
-// See Also:
-//  gdxSetSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
-// Description:
-//
 int TGXFileObj::gdxSetReadSpecialValues( const double *AVals )
 {
    readIntlValueMapDbl[vm_valund] = AVals[sv_valund];
@@ -4462,15 +3373,6 @@ int TGXFileObj::gdxSetReadSpecialValues( const double *AVals )
    return true;
 }
 
-// Summary:
-//   Returns the length of the longest UEL used for every index position for a given symbol
-// Arguments:
-//   SyNr: Symbol number
-//   LengthInfo: The longest length for each index position
-// Returns:
-//   The length of the longest UEL found in the data
-// See also:
-//   gdxUELMaxLength
 int TGXFileObj::gdxSymbIndxMaxLength( int SyNr, int *LengthInfo )
 {
    memset( LengthInfo, 0, GLOBAL_MAX_INDEX_DIM * sizeof( int ) );
@@ -4505,11 +3407,6 @@ int TGXFileObj::gdxSymbIndxMaxLength( int SyNr, int *LengthInfo )
    return res;
 }
 
-// Summary:
-//   Returns the length of the longest symbol name
-// Arguments:
-// Returns:
-//   The length of the longest symbol name
 int TGXFileObj::gdxSymbMaxLength() const
 {
    int acc{};
@@ -4518,15 +3415,6 @@ int TGXFileObj::gdxSymbMaxLength() const
    return acc;
 }
 
-// Summary:
-//   Add a line of comment text for a symbol
-// Arguments:
-//   SyNr: The symbol number (range 1..NrSymbols); if SyNr <= 0 the current symbol being written
-//   Txt: String to add
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxSymbolGetComment
 int TGXFileObj::gdxSymbolAddComment( int SyNr, const char *Txt )
 {
    if( !MajorCheckMode( "SymbolAddComment"s, AnyWriteMode ) ) return false;
@@ -4545,16 +3433,6 @@ int TGXFileObj::gdxSymbolAddComment( int SyNr, const char *Txt )
    return true;
 }
 
-// Summary:
-//   Retrieve a line of comment text for a symbol
-// Arguments:
-//   SyNr: The symbol number (range 1..NrSymbols)
-//   N: Line number (1..Count)
-//   Txt: String containing the line requested
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxSymbolAddComment
 int TGXFileObj::gdxSymbolGetComment( int SyNr, int N, char *Txt )
 {
    if( NameList && !NameList->empty() && SyNr >= 1 && SyNr <= NameList->size() )
@@ -4570,27 +3448,11 @@ int TGXFileObj::gdxSymbolGetComment( int SyNr, int N, char *Txt )
    return false;
 }
 
-// Summary:
-//   Returns the length of the longest UEL name
-// Arguments:
-// Returns:
-//   The length of the longest UEL name
-// See also:
-//   gdxSymbIndxMaxLength
 int TGXFileObj::gdxUELMaxLength() const
 {
    return UELTable->GetMaxUELLength();
 }
 
-// Brief:
-//   Search for unique element by its string
-// Arguments:
-//   Uel: String to be searched
-//   UelNr: Internal unique element number or -1 if not found
-//   UelMap: User mapping for the element or -1 if not found or
-//         the element was never mapped
-// Returns:
-//   Non-zero if the element was found, zero otherwise
 int TGXFileObj::gdxUMFindUEL( const char *Uel, int &UelNr, int &UelMap )
 {
    UelMap = -1;
@@ -4617,42 +3479,6 @@ void TGXFileObj::gdxStoreDomainSetsSet( int x )
    StoreDomainSets = x;
 }
 
-// Brief:
-//   Read a symbol in Raw mode while applying a filter using a callback procedure
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// Arguments:
-//   UelFilterStr: Each index can be fixed by setting the string for the unique
-//                  element. Set an index position to the empty string in order
-//                  not to fix that position.
-//   DP: Callback procedure which will be called for each available data item
-// See Also:
-//   gdxDataReadRawFast, gdxDataReadSliceStart, gdxDataSliceUELS, gdxDataReadDone,
-// Description:
-//   Read a slice of data, by fixing zero or more index positions in the data.
-//   When a data element is available, the callback procedure DP is called with the
-//   current index (as raw numbers) and the values.
-// Example:
-// <CODE>
-// function DPCallBack(const Indx: TgdxUELIndex; const Vals: TgdxValues; Uptr: Pointer): integer; stdcall;
-// var
-//    s: ShortString;
-//    UelMap: integer;
-// begin
-// Result := 1;
-// gdxUMUelGet(Uptr, Indx[2], s, UelMap);
-// WriteLn(s, ' ', Vals[GMS_VAL_LEVEL]);
-// end;
-//
-// var
-//    pgx  : PGXFile;
-//    Msg  : ShortString;
-//    ErrNr: integer;
-//    IndxS: TgdxStrIndex;
-//
-// IndxS[1] := 'i200'; IndxS[2] := '';
-// gdxDataReadRawFastFilt(pgx, 1, IndxS, DPCallBack);
-// </CODE>
 int TGXFileObj::gdxDataReadRawFastFilt( int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP )
 {
    gdxDataReadRawFastFilt_DP = DP;
@@ -4702,20 +3528,6 @@ int TGXFileObj::gdxDataReadRawFastFilt( int SyNr, const char **UelFilterStr, TDa
    return res;
 }
 
-// Brief:
-//   Read a symbol in Raw mode using a callback procedure
-// Arguments:
-//   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
-//   DP: Procedure that will be called for each data record
-//   NrRecs: The number of records available for reading
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxDataReadRaw, gdxDataReadMapStart, gdxDataReadStrStart, gdxDataReadDone, gdxDataReadRawFastFilt
-// Description:
-//   Use a callback function to read a symbol in raw mode. Using a callback procedure
-//   to read the data is faster because we no longer have to check the context for each
-//   call to read a record.
 int TGXFileObj::gdxDataReadRawFast( int SyNr, TDataStoreProc_t DP, int &NrRecs )
 {
    auto XDomains{ utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED ) };
@@ -4728,21 +3540,6 @@ int TGXFileObj::gdxDataReadRawFast( int SyNr, TDataStoreProc_t DP, int &NrRecs )
    return NrRecs >= 0;
 }
 
-// Brief:
-//   Read a symbol in Raw mode using a callback procedure
-// Arguments:
-//   SyNr: The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
-//   DP: Procedure that will be called for each data record
-//   NrRecs: The number of records available for reading
-//   Uptr: pointer to user memory that will be passed back with the callback
-// Returns:
-//   Non-zero if the operation is possible, zero otherwise
-// See Also:
-//   gdxDataReadRawFast
-// Description:
-//   Use a callback function to read a symbol in raw mode. Using a callback procedure
-//   to read the data is faster because we no longer have to check the context for each
-//   call to read a record.
 int TGXFileObj::gdxDataReadRawFastEx( int SyNr, TDataStoreExProc_t DP, int &NrRecs, void *Uptr )
 {
    //-- Note: PrepareSymbolRead checks for the correct status
