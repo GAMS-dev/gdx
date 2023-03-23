@@ -89,7 +89,7 @@ then
 @brief  Start writing a new symbol in string mode
 @param SyId Name of the symbol
 @param ExplTxt Explanatory text for the symbol
-@param Dimen Dimension of the symbol
+@param Dim Dimension of the symbol
 @param Typ Type of the symbol
 @param UserInfo See gdxDataWriteRawStart for more information
 @returns  Non-zero if the operation is possible, zero otherwise
@@ -485,12 +485,10 @@ do begin
 
    /**
 @brief  Retrieve the internal values for special values
-@param
-  AVals array of special values used for Eps, +Inf, -Inf, NA and Undef
+@param Avals array of special values used for Eps, +Inf, -Inf, NA and Undef
 @return
   Always non-zero
 @see gdxResetSpecialValues, gdxSetSpecialValues
-@details
 */
    int gdxGetSpecialValues( double *Avals );
 
@@ -505,7 +503,6 @@ do begin
 @note Before calling this function, initialize the array of special values
   by calling gdxGetSpecialValues first
 @see  gdxSetReadSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
-@details
 */
    int gdxSetSpecialValues( const double *AVals );
 
@@ -514,8 +511,8 @@ do begin
 @brief
   Retrieve the domain of a symbol
 
-@param  SyNr: The index number of the symbol, range 1..NrSymbols
-@param  DomainSyNrs: array returning the set identifiers or *;
+@param SyNr The index number of the symbol, range 1..NrSymbols
+@param DomainSyNrs array returning the set identifiers or *;
   DomainSyNrs[D] will contain the index number of the one dimensional
   set or alias used as the domain for index position D. A value of zero represents the universe ( * )
 @return
@@ -673,7 +670,6 @@ do begin
 @return
   Non-zero if the operation is possible, zero otherwise
 @see  gdxUELRegisterStr, gdxUELRegisterDone
-@details
 */
    int gdxUELRegisterStrStart();
 
@@ -687,7 +683,6 @@ do begin
 @return
   Non-zero if the operation is possible, zero otherwise
 @see  gdxUMUelInfo, gdxGetUEL
-@details
 */
    int gdxUMUelGet( int UelNr, char *Uel, int &UelMap );
 
@@ -700,7 +695,6 @@ do begin
 @return
   Always returns non-zero
 @see gdxUMUelGet
-@details
 */
    int gdxUMUelInfo( int &UelCnt, int &HighMap ) const;
 
@@ -711,21 +705,17 @@ do begin
 @details
    When reading or writing data, the dimension of the current active symbol
    is sometimes needed to convert arguments from strings to pchars etc.
-@param
 @return
   Dimension of current active symbol
-
-@see*/
+    */
    [[nodiscard]] int gdxCurrentDim() const;
 
 
    /**
 @brief  Rename UEL OldName to NewName
-
 @param  OldName Name of an existing UEL
 @param  NewName New name for the UEL
-@return
-  Zero if the renaming was possible; non-zero is an error indicator
+@return Zero if the renaming was possible; non-zero is an error indicator
 */
    int gdxRenameUEL( const char *OldName, const char *NewName );
 
@@ -765,7 +755,7 @@ do begin
 @brief Get the string for a unique element using a mapped index
 @details
  Retrieve the string for an unique element based on a mapped index number.
-@param  UelNr Index number in user space (1..NrUserElem)
+@param  uelNr Index number in user space (1..NrUserElem)
 @param  Uel String for the unique element
 @return
  Return non-zero if the index is in a valid range, zero otherwise
@@ -780,11 +770,9 @@ do begin
 @param  SyId Name of the symbol
 @param  ExplTxt Explanatory text for the symbol
 @param  Dimen Dimension of the symbol
-@param  Type Type of the symbol
+@param  Typ Type of the symbol
 @param  UserInfo See gdxDataWriteRawStart for more information
-@return
-  Non-zero if the operation is possible, zero otherwise
-@details
+@return Non-zero if the operation is possible, zero otherwise
 @see  gdxDataWriteMap, gdxDataWriteDone
 */
    int gdxDataWriteMapStart( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
@@ -797,7 +785,6 @@ do begin
 @return
   Non-zero if the operation is possible, zero otherwise
 @see  gdxDataWriteMapStart, gdxDataWriteDone
-@details
 */
    int gdxDataWriteMap( const int *KeyInt, const double *Values );
 
@@ -822,7 +809,6 @@ do begin
 @return
   Non-zero if the operation is possible, zero otherwise
 @see  gdxDataReadMapStart, gdxDataReadFilteredStart, gdxDataReadDone
-@details
 */
    int gdxDataReadMap( int RecNr, int *KeyInt, double *Values, int &DimFrst );
 
@@ -839,7 +825,6 @@ do begin
    /**
 @brief
   Number of entries in the acronym table
-@param
 @return
   The number of entries in the acronym table
 @see   gdxAcronymSetInfo, gdxAcronymSetInfo
@@ -933,7 +918,6 @@ do begin
 @return
   Non-zero if the operation is possible, zero otherwise
 @see gdxFilterRegisterStart
-@details
 */
    int gdxFilterExists( int FilterNr );
 
@@ -972,7 +956,6 @@ do begin
 @return
   Non-zero if the operation is possible, zero otherwise
 @see gdxFilterRegisterStart, gdxFilterRegister
-@details
 */
    int gdxFilterRegisterDone();
    /**
@@ -1066,10 +1049,9 @@ do begin
 @brief   Set the amount of trace (debug) information generated
  
 @param   N Tracing level  N <= 0 no tracing  N >= 3 maximum tracing
-@param   S A string to be included in the trace output
+@param   s A string to be included in the trace output
 @return
   Always non-zero
-@details
 */
    int gdxSetTraceLevel( int N, const char *s );
 
@@ -1152,10 +1134,7 @@ do begin
  @param
     V Contains version string after return
  @return
-   Always returns non-zero
- @details
-
- @see*/
+   Always returns non-zero*/
    static int gdxGetDLLVersion( char *V );
 
 
@@ -1167,9 +1146,7 @@ do begin
 @param  ComprLev Compression used; 0= no compression, 1=zlib
 @return
   Always returns non-zero
-@details
-
-@see*/
+ */
    int gdxFileInfo( int &FileVer, int &ComprLev ) const;
 
 
@@ -1235,8 +1212,6 @@ do begin
 
    /**
 @brief   Return the number of bytes used by the data objects
-@param
-
 @return
   The number of bytes used by the data objects
 */
@@ -1251,7 +1226,6 @@ do begin
 @return
   Returns non-zero if D is a special value, zero otherwise
 @see  gdxGetSpecialValues, gdxSetSpecialValues
-@details
 */
    int gdxMapValue( double D, int &sv );
 
@@ -1303,7 +1277,6 @@ do begin
   Non-zero if the Set contains at least one element that has associated text,
     zero otherwise
 @see   gdxSystemInfo, gdxSymbolInfo
-@details
 */
    int gdxSetHasText( int SyNr );
 
@@ -1318,7 +1291,6 @@ do begin
 @note Before calling this function, initialize the array of special values
   by calling gdxGetSpecialValues first
 @see  gdxSetSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
-@details
 */
    int gdxSetReadSpecialValues( const double *AVals );
 
@@ -1339,7 +1311,6 @@ do begin
    /**
 @brief
   Returns the length of the longest symbol name
-@param
 @return
   The length of the longest symbol name
 */
@@ -1370,7 +1341,6 @@ do begin
    /**
 @brief
   Returns the length of the longest UEL name
-@param
 @return
   The length of the longest UEL name
 @see   gdxSymbIndxMaxLength
