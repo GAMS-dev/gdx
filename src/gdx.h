@@ -61,23 +61,19 @@ a system dependent I/O error.
 @attention when writing compressed, set the AutoConvert flag to zero so the file is not uncompressed after the Close; see gdxAutoConvert
 @return Returns non-zero if the file can be opened; zero otherwise
 
-@code{.pas}
-var
-ErrNr: integer;
-PGX : PGXFile;
-Msg : ShortString;
-begin
-if not gdxGetReady(Msg)
-then
-begin
-WriteLn('Cannot load GDX library, msg: ', Msg);
-exit;
-end;
-gdxOpenWriteEx(PGX,'c:\mydata\file1.gdx','Examples', 1, ErrCode);
-gdxAutoConvert(PGX, 0);
-if ErrCode <> 0
-then
+@code
+std::string errMsg;
+TGXFileObj pgx{errMsg};
+if(!errMsg.empty()) {
+    std::cout << "Failure with GDX: " << errMsg << std::endl;
+    return;
+}
+int ErrCode;
+pgx.gdxOpenWriteEx("file1.gdx", "Examples", 1, ErrCode);
+pgx.gdxAutoConvert(0);
+if(ErrCode) {
 [ ... ]
+}
 @endcode
 
 @see gdxOpenRead(), gdxOpenWrite(), gdxAutoConvert(), Destroy()
@@ -182,15 +178,12 @@ then
 @see  gdxOpenWrite, Destroy, gdxGetLastError
 
 @code
-  var
-     ErrNr: integer;
-     PGX  : PGXFile;
-  begin
-  gdxOpenRead(PGX,'c:\\mydata\\file1.gdx', ErrNr);
-  if ErrNr <> 0
-  then
-     begin
-     [...]
+std::string errMsg;
+TGXFileObj pgx{errMsg};
+pgx.gdxOpenRead("file1.gdx", ErrNr);
+if(ErrNr) {
+  [...]
+}
 @endcode
 */
    int gdxOpenRead( const char *FileName, int &ErrNr );
@@ -271,13 +264,12 @@ then
 @see  gdxDataReadStr, gdxDataReadRawStart, gdxDataReadMapStart, gdxDataReadDone
 
 @code
-  if gdxDataReadStrStart(PGX,1,NrRecs)
-  then
-     begin
-     while gdxDataReadStr(PGX,Uels,Vals)
-     do [...]
-     gdxDataReadDone(PGX)
-     end;
+if(pgx.gdxDataReadStrStart(1,NrRecs)) {
+  while(pgx.gdxDataReadStr(Uels,Vals)) {
+    ...
+  }
+  pgx.gdxDataReadDone();
+}
 @endcode
 */
    int gdxDataReadStrStart( int SyNr, int &NrRecs );
@@ -1380,24 +1372,17 @@ do begin
 
 
 @code
-function DPCallBack(const Indx: TgdxUELIndex; const Vals: TgdxValues; Uptr: Pointer): integer; stdcall;
-var
-  s: ShortString;
-  UelMap: integer;
-begin
-Result := 1;
-gdxUMUelGet(Uptr, Indx[2], s, UelMap);
-WriteLn(s, ' ', Vals[vallevel]);
-end;
-
-var
-  pgx  : PGXFile;
-  Msg  : ShortString;
-  ErrNr: integer;
-  IndxS: TgdxStrIndex;
-
-IndxS[1] := 'i200'; IndxS[2] := '';
-gdxDataReadRawFastFilt(pgx, 1, IndxS, DPCallBack);
+int DPCallBack(const TgdxUELIndex Indx, const TgdxValues Vals, void *Uptr)
+{
+  std::string s;
+  int UelMap;
+  ((TGXFileObj*)Uptr).gdxUMUelGet(Indx[1], s, UelMap);
+  std::cout << s << ' ' << Vals[vallevel] << std::endl;
+  return 1;
+}
+TgdxStrIndex IndxS;
+IndxS[0] = "i200"; IndxS[1] = "";
+pgx.gdxDataReadRawFastFilt(1, IndxS, DPCallBack);
 @endcode
 */
    int gdxDataReadRawFastFilt( int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP );
