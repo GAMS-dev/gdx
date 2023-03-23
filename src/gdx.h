@@ -45,7 +45,7 @@ public:
     * Destructor
     * @brief Dispose GDX object
     * @details Tears down a GDX object and potentially closes (and flushes) a file opened for writing.
-     */
+    */
    ~TGXFileObj();
 
    /**
@@ -60,7 +60,7 @@ public:
     * @param ErrNr Returns an error code or zero if there is no error.
     * @return Returns non-zero if the file can be opened; zero otherwise.
     * @see gdxOpenRead, gdxOpenWriteEx, ~TGXFileObj
-     */
+    */
    int gdxOpenWrite( const char *FileName, const char *Producer, int &ErrNr );
 
    /**
@@ -187,11 +187,11 @@ public:
    /**
     * @brief Open a gdx file for reading
     * @details
-        Open an existing gdx file for input. If a file extension is not
-        supplied, the extension '.gdx' will be used. The return code is
-        a system dependent I/O error. If the file was found, but is not
-        a valid gdx file, the function GetLastError can be used to handle
-        these type of errors.
+    *    Open an existing gdx file for input. If a file extension is not
+    *    supplied, the extension '.gdx' will be used. The return code is
+    *    a system dependent I/O error. If the file was found, but is not
+    *    a valid gdx file, the function GetLastError can be used to handle
+    *    these type of errors.
     * @param FileName file name of the gdx file to be opened.
     * @param ErrNr Returns an error code or zero if there is no error.
     * @return Returns non-zero if the file can be opened; zero otherwise.
@@ -212,6 +212,7 @@ public:
     * @param FileStr Version string (out argument). Known versions are V5, V6U, V6C and V7.
     * @param ProduceStr Producer string (out argument). The producer is the application that wrote the GDX file.
     * @return Always non-zero.
+    * @attention Supplied buffers for FileStr and ProduceStr should be 256 bytes long to prevent overflow.
     * @see gdxOpenWrite, gdxOpenWriteEx
     */
    int gdxFileVersion( char *FileStr, char *ProduceStr ) const;
@@ -219,10 +220,10 @@ public:
    /**
     * @brief Find symbol by name
     * @details
-        Search for a symbol by name; the search is not case-sensitive.
-        When the symbol is found, SyNr contains the symbol number and the
-        function returns a non-zero integer. When the symbol is not found, the function
-        returns zero and SyNr is set to -1.
+    *    Search for a symbol by name; the search is not case-sensitive.
+    *    When the symbol is found, SyNr contains the symbol number and the
+    *    function returns a non-zero integer. When the symbol is not found, the function
+    *    returns zero and SyNr is set to -1.
     * @param SyId Name of the symbol (must not exceed 63 characters).
     * @param SyNr Symbol number (>=1 if exists, 0 for universe and -1 if not found).
     * @return Non-zero if the symbol is found, zero otherwise.
@@ -233,14 +234,17 @@ public:
    /**
     * @brief Read the next record in string mode
     * @details
-        Read the next record using strings for the unique elements. The
-        reading should be initialized by calling DataReadStrStart beforehand.
+    *    Read the next record using strings for the unique elements. The
+    *    reading should be initialized by calling DataReadStrStart beforehand.
     * @param KeyStr The index of the record as strings for the unique elements. Array of strings with one string for each dimension.
     * @param Values The data of the record (level, marginal, lower-, upper-bound, scale).
     * @param DimFrst The first index position in KeyStr that changed.
     * @return
-        Non-zero if the operation is possible; return zero if the operation is not
-        possible or if there is no more data.
+    *    Non-zero if the operation is possible; return zero if the operation is not
+    *    possible or if there is no more data.
+    * @attention
+    *   KeyStr must point to one string for each symbol dimension where each string buffer must have size of 64 bytes.
+    *   Values must have length >=5.
     * @see gdxDataReadStrStart, gdxDataReadDone
     */
    int gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst );
@@ -259,6 +263,7 @@ public:
     * @param Dim Dimension of the symbol (range 0..20).
     * @param Typ Symbol type (set=0, parameter=1, variable=2, equation=3, alias=4).
     * @return Zero if the symbol number is not in the correct range, non-zero otherwise.
+    * @attention SyId must be 64 characters long.
     * @see gdxSystemInfo, gdxSymbolInfoX, gdxSymbolDim, gdxFindSymbol
     */
    int gdxSymbolInfo( int SyNr, char *SyId, int &Dim, int &Typ );
@@ -304,28 +309,30 @@ public:
    /**
     * @brief Register a string in the string table
     * @details
-       Register a string in the string table and return the integer number assigned to this string.
-       The integer value can be used to set the associated text of a set element.
-       The string must follow the GAMS syntax rules for explanatory text.
-    * @param Txt The string to be registered
-    * @param TxtNr The index number assigned to this string
-    * @return Non-zero if the operation is possible, zero otherwise
+    *   Register a string in the string table and return the integer number assigned to this string.
+    *   The integer value can be used to set the associated text of a set element.
+    *   The string must follow the GAMS syntax rules for explanatory text
+    *   e.g. not longer than 255 characters.
+    * @attention Mixing of single- and double-quotes in the explanatory text will be resolved by replacing
+    *   all quote character occurrences with the first one in the text.
+    * @param Txt The string to be registered (must not exceed 255 characters).
+    * @param TxtNr The index number assigned to this string (output argument).
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxGetElemText, gdxSetTextNodeNr
     */
    int gdxAddSetText( const char *Txt, int &TxtNr );
 
 
    /**
-    * @brief The number of error records
+    * @brief Query the number of error records
     * @details
-    *   After a write operation is finished (gdxDataWriteDone), the data
-    *   is sorted and written to the gdx file. If there are duplicate records,
-    *   the first record is written to the file and the duplicates are
-    *   added to the error list.
-    *   <P>
-    *   When reading data using a filtered read operation, data records that were
+    *   <p>After a write operation is finished (with gdxDataWriteDone), the data
+    *   is sorted and written to the gdx file (for map- and string-mode).
+    *   If there are duplicate records, the first record is written to the file and
+    *   the duplicates are added to the error list.</p>
+    *   <p>When reading data using a filtered read operation, data records that were
     *   filtered out because an index is not in the user index space or not in a
-    *   filter are added the error list.
+    *   filter are added the error list.</p>
     * @return The number of error records available.
     * @see gdxDataErrorRecord
     */
@@ -333,35 +340,46 @@ public:
 
    /**
     * @brief Retrieve an error record
-    * @param RecNr The number of the record to be retrieved, range = 1..NrErrorRecords
-    * @param KeyInt Index for the record
-    * @param Values Values for the record
-    * @return Non-zero if the record number is valid, zero otherwise
+    * @details Does not indicate domain violation for filtered/strict read with negative indices.
+    * @param RecNr The number of the record to be retrieved (range = 1..NrErrorRecords).
+    * @param KeyInt Index for the record (array of UEL numbers for each dimension).
+    * @param Values Values for the record (level, marginal, lower-, upper-bound, scale).
+    * @return Non-zero if the record number is valid, zero otherwise.
+    * @attention
+    *   Same as gdxDataErrorRecordX but negative UEL index numbers (for domain violations) are inverted,
+    *   so the index is always >=0.
+    *   KeyInt must be big enough to hold one UEL index for each dimension!
+    *   Values must have length >=5.
     * @see gdxDataErrorCount
     */
    int gdxDataErrorRecord( int RecNr, int *KeyInt, double *Values );
 
    /**
     * @brief Retrieve an error record
-    * @param RecNr The number of the record to be retrieved, range = 1..NrErrorRecords
-    * @param KeyInt Index for the record, negative uel indicates domain violation for filtered/strict read
-    * @param Values Values for the record
-    * @return Non-zero if the record number is valid, zero otherwise
+    * @details Also indicate domain violations for filtered/strict read with negative UEL index values.
+    * @param RecNr The number of the record to be retrieved, (range 1..NrErrorRecords).
+    * @param KeyInt Index for the record, negative uel indicates domain violation for filtered/strict read.
+    * @param Values Values for the record (level, marginal, lower-, upper-bound, scale).
+    * @return Non-zero if the record number is valid, zero otherwise.
+    * @attention
+    *   KeyInt must be big enough to hold one UEL index for each dimension!
+    *   Values must have length >=5.
     * @see gdxDataErrorCount
     */
    int gdxDataErrorRecordX( int RecNr, int *KeyInt, double *Values );
 
-
    /**
     * @brief Read the next record in raw mode
-    * @param KeyInt The index of the record
-    * @param Values The data of the record
-    * @param DimFrst The first index position in KeyInt that changed
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @param KeyInt The index of the record in UEL numbers for each dimension.
+    * @param Values The data of the record (level, marginal, lower-, upper-bound, scale).
+    * @param DimFrst The first index position in KeyInt that changed.
+    * @return Non-zero if the operation is possible, zero otherwise (e.g. no records left).
+    * @attention
+    *   KeyInt must be big enough to hold one UEL index for each dimension!
+    *   Values must have length >=5.
     * @see gdxDataReadRawStart, gdxDataReadDone
     */
    int gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst );
-
 
    /**
     * @brief Initialize the reading of a symbol in raw mode
@@ -371,7 +389,6 @@ public:
     * @see gdxDataReadRaw, gdxDataReadMapStart, gdxDataReadStrStart, gdxDataReadDone
     */
    int gdxDataReadRawStart( int SyNr, int &NrRecs );
-
 
    /**
     * @brief Write a data element in raw mode
@@ -390,13 +407,18 @@ public:
     */
    int gdxDataWriteRaw( const int *KeyInt, const double *Values );
 
-
    /**
     * @brief Start writing a new symbol in raw mode
-    * @param SyId Name of the symbol
-    * @param ExplTxt Explanatory text for the symbol
-    * @param Dimen Dimension of the symbol
-    * @param Typ Type of the symbol
+    * @details
+    *   Raw mode flushes new records immediately to the GDX file (unlike mapped or string mode).
+    *   The key indices for the record are provided as unique element numbers.
+    * @param SyId Name of the symbol (up to 63 characters).
+    *   The first character of a symbol must be a letter.
+    *   Following symbol characters may be letters, digits, and underscores.
+    *   Symbol names must be new and unique.
+    * @param ExplTxt Explanatory text for the symbol (up to 255 characters).
+    * @param Dimen Dimension of the symbol (up to 20)
+    * @param Typ Type of the symbol (set=0, parameter=1, variable=2, equation=3, alias=4).
     * @param UserInfo GAMS follows the following conventions:
       | Type         | Value(s)                                                             |
       | ------------ | -------------------------------------------------------------------- |
@@ -405,11 +427,10 @@ public:
       | Parameter    | Zero                                                                 |
       | Variable     | The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9      |
       | Equation     | The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59      |
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxDataWriteRaw, gdxDataWriteDone
     */
    int gdxDataWriteRawStart( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
-
 
    /**
     * @brief Returns the number of errors
