@@ -661,15 +661,11 @@ public:
     *   Returns non-zero if the file can be opened; zero otherwise
     * @see gdxOpenWrite, Destroy, gdxGetLastError
     * @code
-        var
-           ErrNr: integer;
-           PGX  : PGXFile;
-        begin
-        gdxOpenRead(PGX,'c:\\mydata\\file1.gdx', ErrNr);
-        if ErrNr <> 0
-        then
-           begin
+        int ErrNr;
+        pgx.gdxOpenRead("file1.gdx", fmOpenRead, ErrNr);
+        if(ErrNr) {
            [...]
+        }
     * @endcode
     */
    int gdxOpenReadEx( const char *FileName, int ReadMode, int &ErrNr );
@@ -909,24 +905,16 @@ public:
     * @param UPtr User pointer; will be passed to the callback procedure
     * @return Non-zero if the operation is possible, zero otherwise
     * @code
-        var
-           T0 : Cardinal;
-           Cnt: integer;
-
-        procedure DataDomainCB(RawNr, MappedNr: integer; UPtr: pointer); stdcall;
-        begin
-        Write(RawNr, ' (', MappedNr, ')');
-        end;
-
-        T0 := GetTickCount();
-        gdxGetDomainElements(PGX, 1, 1, DOMC_EXPAND, nil, cnt);
-        WriteLn('Domain count only = ',cnt ,' ', GetTickCount - T0, ' ms');
-        T0 := GetTickCount();
-        gdxGetDomainElements(PGX, 1, 1, DOMC_EXPAND, DataDomainCB, cnt);
-        WriteLn('Get domain count = ',cnt ,' ', GetTickCount - T0, ' ms');
-        T0 := GetTickCount();
-        gdxGetDomainElements(PGX, 1, 1, 7, DataDomainCB, cnt);
-        WriteLn('Using filter 7; number of records in error list = ', gdxDataErrorCount(PGX) );
+        int Cnt;
+        auto DataDomainCB = [](int RawNr, int MappedNr, void *UPtr) {
+            std::cout << RawNr << " (" << MappedNr << ")" << std::endl;
+        };
+        pgx.gdxGetDomainElements(1, 1, DOMC_EXPAND, nullptr, cnt);
+        std::cout << "Domain count only = " << cnt << std::endl;
+        pgx.gdxGetDomainElements(1, 1, DOMC_EXPAND, DataDomainCB, cnt);
+        std::cout << "Get domain count = " << cnt << std::endl;
+        pgx.gdxGetDomainElements(1, 1, 7, DataDomainCB, cnt);
+        std::cout << "Using filter 7; number of records in error list = " << gdxDataErrorCount(PGX) << std::endl;
     * @endcode
     */
    int gdxGetDomainElements( int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int &NrElem, void *UPtr );
@@ -1090,21 +1078,13 @@ public:
     * @return Returns non-zero if the file can be opened; zero otherwise
     * @see gdxOpenRead, gdxOpenWrite, gdxOpenWriteEx
     * @code
-        var
-          ErrNr: integer;
-          PGX  : PGXFile;
-          Msg  : ShortString;
-        begin
-        if not gdxGetReady(Msg)
-        then
-          begin
-          WriteLn('Cannot load GDX library, msg: ', Msg);
-          exit;
-          end;
-        gdxOpenAppend(PGX,'c:\\mydata\\file1.gdx','Examples', ErrCode);
-        if ErrCode <> 0
-        then
+        std::string Msg;
+        TGXFileObj pgx {Msg}
+        int ErrCode;
+        pgx.gdxOpenAppend("file1.gdx","Examples", ErrCode);
+        if(ErrCode) {
           [ ... ]
+        }
     * @endcode
     */
    int gdxOpenAppend( const char *FileName, const char *Producer, int &ErrNr );
@@ -1198,14 +1178,14 @@ public:
     * @return Non-zero if the operation is possible, zero otherwise
     * @see gdxDataReadRawFast, gdxDataReadSliceStart, gdxDataSliceUELS, gdxDataReadDone,
     * @code
-      int DPCallBack(const TgdxUELIndex Indx, const TgdxValues Vals, void *Uptr)
+      auto DPCallBack = [](const TgdxUELIndex Indx, const TgdxValues Vals, void *Uptr)
       {
         std::string s;
         int UelMap;
         ((TGXFileObj*)Uptr).gdxUMUelGet(Indx[1], s, UelMap);
         std::cout << s << ' ' << Vals[vallevel] << std::endl;
         return 1;
-      }
+      };
       TgdxStrIndex IndxS;
       IndxS[0] = "i200"; IndxS[1] = "";
       pgx.gdxDataReadRawFastFilt(1, IndxS, DPCallBack);
