@@ -120,7 +120,7 @@ static const auto opSysStr {"Windows"s};
 static const auto opSysStr {"macOS"s};
 #elif defined(__linux__)
 static const auto opSysStr {"Linux"s};
-else
+#else
 static const auto opSysStr {"UnknownOS"s};
 #endif
 
