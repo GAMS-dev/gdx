@@ -42,13 +42,13 @@ TEST_CASE( "Test basic usage of TGrowArrayFxd" )
    REQUIRE_EQ( 0, gaf.GetCount() );
    REQUIRE_EQ( 0, gaf.MemoryUsed() );
    // make sure we need at least three fixed size buffers as storage
-   const int ub{ BufSize / sizeof( int ) * 3 + 1 };
-   for( int n{}; n < ub; n++ )
+   const int ub { BufSize / sizeof( int ) * 3 + 1 };
+   for( int n {}; n < ub; n++ )
       gaf.AddItem( &n );// add item actually copies contents
    REQUIRE_EQ( ub, gaf.GetCount() );
    REQUIRE( gaf.MemoryUsed() > 0 );
    int k;
-   for( int i{}; i < ub; i++ )
+   for( int i {}; i < ub; i++ )
    {
       gaf.GetItem( i, (int **) &k );
       REQUIRE_EQ( i, k );
@@ -64,11 +64,11 @@ TEST_CASE( "Test basic usage of TXIntList" )
    TXIntList lst;
    REQUIRE_EQ( 0, lst.GetCount() );
    REQUIRE_EQ( 0, lst.MemoryUsed() );
-   for( int i{}; i < 100; i++ )
+   for( int i {}; i < 100; i++ )
       lst.Add( i );
    REQUIRE_EQ( 100, lst.GetCount() );
    REQUIRE( lst.MemoryUsed() > 0 );
-   for( int i{}; i < 100; i++ )
+   for( int i {}; i < 100; i++ )
       REQUIRE_EQ( i, lst[i] );
    lst.Exchange( 0, 1 );
    REQUIRE_EQ( 1, lst[0] );
@@ -79,15 +79,15 @@ TEST_CASE( "Test basic usage of TXIntList" )
 
 TEST_CASE( "Test basic usage of TTblGamsData" )
 {
-   TTblGamsData<double> gdl{ 1, sizeof( double ) * 2 };
+   TTblGamsData<double> gdl { 1, sizeof( double ) * 2 };
    REQUIRE_EQ( 1, gdl.GetDimension() );
    REQUIRE_EQ( 0, gdl.GetCount() );
 
-   std::array<int, GLOBAL_MAX_INDEX_DIM> keys{};
-   std::array<double, 2> vals{};
+   std::array<int, GLOBAL_MAX_INDEX_DIM> keys {};
+   std::array<double, 2> vals {};
 
    vals.front() = 23.0;
-   for( int i{}; i < 10; i++ )
+   for( int i {}; i < 10; i++ )
    {
       keys.front() = i + 1;
       gdl.AddRecord( keys.data(), vals.data() );
@@ -98,7 +98,7 @@ TEST_CASE( "Test basic usage of TTblGamsData" )
    std::fill( keys.begin(), keys.end(), 0 );
    std::fill( vals.begin(), vals.end(), 0 );
 
-   for( int i{}; i < 10; i++ )
+   for( int i {}; i < 10; i++ )
    {
       gdl.GetRecord( i, keys.data(), vals.data() );
       REQUIRE_EQ( i + 1, keys.front() );
@@ -119,14 +119,14 @@ TEST_CASE( "Test basic usage of TTblGamsData" )
    std::fill( vals.begin(), vals.end(), 0 );
    vals.front() = 23.0;
 
-   for( int i{ 9 }; i >= 0; i-- )
+   for( int i { 9 }; i >= 0; i-- )
    {
       keys.front() = i + 1;
       gdl.AddRecord( keys.data(), vals.data() );
    }
    gdl.Sort();
    REQUIRE_EQ( 10, gdl.GetCount() );
-   for( int i{}; i < 10; i++ )
+   for( int i {}; i < 10; i++ )
    {
       gdl.GetRecord( i, keys.data(), vals.data() );
       REQUIRE_EQ( i + 1, keys.front() );

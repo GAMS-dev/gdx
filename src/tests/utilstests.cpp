@@ -111,11 +111,11 @@ TEST_CASE( "Uppercase all characters in a string" )
 
 TEST_CASE( "Test trimming blanks from the tail of a string" )
 {
-   const std::string expectedStr{ "  surrounded by blanks"s };
-   std::string s{ "  surrounded by blanks  "s };
+   const std::string expectedStr { "  surrounded by blanks"s };
+   std::string s { "  surrounded by blanks  "s };
 
    int len;
-   std::array<char, 256> buf{};
+   std::array<char, 256> buf {};
    const char *out = utils::trimRight( s.c_str(), buf.data(), len );
    REQUIRE_EQ( expectedStr.length(), len );
    REQUIRE( !strcmp( expectedStr.c_str(), out ) );
@@ -139,7 +139,7 @@ TEST_CASE( "Test trimming blanks from the tail of a string" )
 
 TEST_CASE( "Test conversion of string view into Delphi-format ShortString" )
 {
-   std::array<char, 256> buf{};
+   std::array<char, 256> buf {};
 
    REQUIRE_FALSE( utils::strConvCppToDelphi( "abc"s, buf.data() ) );
    REQUIRE_EQ( 3, buf.front() );
@@ -152,7 +152,7 @@ TEST_CASE( "Test conversion of string view into Delphi-format ShortString" )
 
    REQUIRE_FALSE( utils::strConvCppToDelphi( std::string( 255, 'x' ), buf.data() ) );
    REQUIRE_EQ( 255, (uint8_t) buf.front() );
-   for( int i{}; i < 255; i++ )
+   for( int i {}; i < 255; i++ )
       REQUIRE_EQ( 'x', buf[i + 1] );
 
    REQUIRE( utils::strConvCppToDelphi( std::string( 256, 'x' ), buf.data() ) );
@@ -183,7 +183,7 @@ TEST_CASE( "Test lexicographical string comparison (optionally case-sensitive)" 
 
 TEST_CASE( "Test copying the contents of a pchar into a char buffer" )
 {
-   std::array<char, 256> buf{};
+   std::array<char, 256> buf {};
    utils::assignPCharToBuf( "abc", buf.data(), buf.size() );
    REQUIRE( !std::strcmp( "abc", buf.data() ) );
    std::string tooLong( 256, 'x' );
@@ -193,18 +193,18 @@ TEST_CASE( "Test copying the contents of a pchar into a char buffer" )
 
 TEST_CASE( "Test copying contents of a string into a char buffer" )
 {
-   std::array<char, 3> buf{};
+   std::array<char, 3> buf {};
    utils::assignStrToBuf( ""s, buf.data(), buf.size() );
    REQUIRE_EQ( '\0', buf.front() );
    utils::assignStrToBuf( std::string( 100, 'x' ), buf.data(), buf.size() );
-   std::array<char, 256> buf2{};
+   std::array<char, 256> buf2 {};
    utils::assignStrToBuf( "abc", buf2.data(), buf2.size() );
    REQUIRE( !std::strcmp( "abc", buf2.data() ) );
 }
 
 TEST_CASE( "Test copying contents of a string view into a char buffer" )
 {
-   std::array<char, 256> buf{};
+   std::array<char, 256> buf {};
    utils::assignViewToBuf( ""s, buf.data(), buf.size() );
    REQUIRE_EQ( '\0', buf.front() );
    utils::assignViewToBuf( "abc"s, buf.data(), buf.size() );
@@ -214,15 +214,15 @@ TEST_CASE( "Test copying contents of a string view into a char buffer" )
 
 TEST_CASE( "Test constructing a std::array object filled by repeating a single value" )
 {
-   std::array<int, 3> arr{ utils::arrayWithValue<int, 3>( 23 ) },
-           expArr{ 23, 23, 23 };
+   std::array<int, 3> arr { utils::arrayWithValue<int, 3>( 23 ) },
+           expArr { 23, 23, 23 };
    REQUIRE_EQ( expArr, arr );
 }
 
 TEST_CASE( "Test creating a new C-style string on the heap from the contents of another buffer" )
 {
-   size_t memSize{};
-   std::unique_ptr<char[]> s{ utils::NewString( "abc", 3, memSize ) };
+   size_t memSize {};
+   std::unique_ptr<char[]> s { utils::NewString( "abc", 3, memSize ) };
    REQUIRE_FALSE( utils::NewString( nullptr, 23 ) );
    REQUIRE( !std::strcmp( s.get(), "abc" ) );
    REQUIRE_EQ( 4, memSize );

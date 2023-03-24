@@ -13,10 +13,10 @@ TEST_SUITE_BEGIN( "gdlib::datastorage" );
 
 TEST_CASE( "Simple use of linked data" )
 {
-   TLinkedData<int, double> ld{ 1, 1 * (int) sizeof( double ) };
+   TLinkedData<int, double> ld { 1, 1 * (int) sizeof( double ) };
    std::vector<int> keys( 1 );
-   std::array<double, 1> vals{ 23.0 };
-   for( int i{}; i < 4; i++ )
+   std::array<double, 1> vals { 23.0 };
+   for( int i {}; i < 4; i++ )
    {
       keys.front() = 4 - i;// insert in reverse order
       auto node = ld.AddItem( keys.data(), vals.data() );
@@ -25,7 +25,7 @@ TEST_CASE( "Simple use of linked data" )
    }
    REQUIRE_EQ( 4, ld.Count() );
    auto it = ld.StartRead();// this calls sort!
-   for( int i{}; i < 4; i++ )
+   for( int i {}; i < 4; i++ )
    {
       bool res = ld.GetNextRecord( &it.value(), keys.data(), vals.data() );
       REQUIRE( ( i == 3 || res ) );

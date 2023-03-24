@@ -67,7 +67,7 @@ using TDataStoreExProc_F = void ( * )( const int *Indx, const double *Vals, cons
 using TDataStoreFiltProc_F = int ( * )( const int *Indx, const double *Vals, int64_t Uptr );
 using TDomainIndexProc_F = void ( * )( int RawIndex, int MappedIndex, int64_t Uptr );
 
-const std::array<int, GMS_DT_ALIAS + 1> DataTypSize{ 1, 1, 5, 5, 0 };
+const std::array<int, GMS_DT_ALIAS + 1> DataTypSize { 1, 1, 5, 5, 0 };
 
 constexpr int DOMC_UNMAPPED = -2,// indicator for unmapped index pos
         DOMC_EXPAND = -1,        // indicator growing index pos
@@ -79,12 +79,12 @@ const std::string BADUEL_PREFIX = "?L__",
                   strGDXCONVERT = "GDXCONVERT";
 
 struct TDFilter {
-   int FiltNumber{}, FiltMaxUel{};
-   collections::gmsobj::TBooleanBitArray FiltMap{};
-   bool FiltSorted{};
+   int FiltNumber {}, FiltMaxUel {};
+   collections::gmsobj::TBooleanBitArray FiltMap {};
+   bool FiltSorted {};
 
-   TDFilter( int Nr, int UserHigh ) : FiltNumber{ Nr },
-                                      FiltMaxUel{ UserHigh }
+   TDFilter( int Nr, int UserHigh ) : FiltNumber { Nr },
+                                      FiltMaxUel { UserHigh }
    {
    }
 
@@ -183,8 +183,8 @@ enum TgxFileMode
 
 class TgxModeSet : public utils::IContainsPredicate<TgxFileMode>
 {
-   std::array<bool, tgxfilemode_count> modeActive{};
-   uint8_t count{};
+   std::array<bool, tgxfilemode_count> modeActive {};
+   uint8_t count {};
 
 public:
    TgxModeSet( const std::initializer_list<TgxFileMode> &modes );
@@ -193,8 +193,8 @@ public:
    [[nodiscard]] bool empty() const;
 };
 
-const TgxModeSet AnyWriteMode{ fw_init, fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data, fw_map_data, fw_str_data },
-        AnyReadMode{ fr_init, fr_raw_data, fr_map_data, fr_mapr_data, fr_str_data };
+const TgxModeSet AnyWriteMode { fw_init, fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data, fw_map_data, fw_str_data },
+        AnyReadMode { fr_init, fr_raw_data, fr_map_data, fr_mapr_data, fr_str_data };
 
 enum class TgdxElemSize
 {
@@ -209,10 +209,10 @@ enum class TgdxElemSize
 // in growMapping reflect this
 class TIntegerMapping
 {
-   int64_t FCapacity{}, FMapBytes{};
-   int64_t FMAXCAPACITY{ std::numeric_limits<int>::max() + static_cast<int64_t>( 1 ) };
-   int FHighestIndex{};
-   int *PMap{};
+   int64_t FCapacity {}, FMapBytes {};
+   int64_t FMAXCAPACITY { std::numeric_limits<int>::max() + static_cast<int64_t>( 1 ) };
+   int FHighestIndex {};
+   int *PMap {};
 
    void growMapping( int F );
 
@@ -244,10 +244,10 @@ using TXCSStrHashListImpl = collections::strhash::TXCSStrHashList<T>;
 
 class TUELTable : public TXStrHashListImpl<int>
 {
-   TUELUserMapStatus FMapToUserStatus{ TUELUserMapStatus::map_unknown };
+   TUELUserMapStatus FMapToUserStatus { TUELUserMapStatus::map_unknown };
 
 public:
-   std::unique_ptr<TIntegerMapping> UsrUel2Ent{};// from user uelnr to table entry
+   std::unique_ptr<TIntegerMapping> UsrUel2Ent {};// from user uelnr to table entry
    TUELTable();
    ~TUELTable() override = default;
    [[nodiscard]] int size() const;
@@ -274,8 +274,8 @@ int MakeGoodExplText( char *s );
 
 struct TAcronym {
    std::string AcrName, AcrText;
-   int AcrMap{}, AcrReadMap{ -1 };
-   bool AcrAutoGen{};
+   int AcrMap {}, AcrReadMap { -1 };
+   bool AcrAutoGen {};
 
    TAcronym( const char *Name, const char *Text, int Map );
    explicit TAcronym( gmsstrm::TXStreamDelphi &S );

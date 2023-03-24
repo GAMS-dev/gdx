@@ -39,7 +39,7 @@ namespace gdx::utils
 
 std::string uppercase( const std::string_view s )
 {
-   std::string out{ s };
+   std::string out { s };
    std::transform( s.begin(), s.end(), out.begin(), utils::toupper );
    return out;
 }
@@ -49,7 +49,7 @@ bool sameTextInvariant( const std::string_view a,
 {
    const auto l = a.length();
    if( b.length() != a.length() ) return false;
-   for( size_t i{}; i < l; i++ )
+   for( size_t i {}; i < l; i++ )
    {
       if( utils::tolower( a[i] ) != utils::tolower( b[i] ) )
          return false;
@@ -60,8 +60,8 @@ bool sameTextInvariant( const std::string_view a,
 std::string_view trim( const std::string_view s )
 {
    if( s.empty() ) return {};
-   int firstNonBlank{ -1 }, lastNonBlank{};
-   for( int i{}; i < static_cast<int>( s.length() ); i++ )
+   int firstNonBlank { -1 }, lastNonBlank {};
+   for( int i {}; i < static_cast<int>( s.length() ); i++ )
    {
       if( (unsigned char) s[i] > 32 )
       {
@@ -124,7 +124,7 @@ int strConvCppToDelphi( const std::string_view s,
 {
    if( s.length() > std::numeric_limits<uint8_t>::max() )
    {
-      const std::string errorMessage{ "Error: Maximum short string length is 255 characters!"s };
+      const std::string errorMessage { "Error: Maximum short string length is 255 characters!"s };
       strConvCppToDelphi( errorMessage, delphistr );
       return static_cast<int>( errorMessage.length() );
    }

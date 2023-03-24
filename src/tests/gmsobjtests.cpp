@@ -41,7 +41,7 @@ TEST_SUITE_BEGIN( "gdx::collections::gmsobj" );
 static std::vector<bool> asBoolVec( const TBooleanBitArray &bba )
 {
    std::vector<bool> res( bba.GetHighIndex() + 1 );
-   for( int i{}; i < static_cast<int>( res.size() ); i++ )
+   for( int i {}; i < static_cast<int>( res.size() ); i++ )
       res[i] = bba.GetBit( i );
    return res;
 }
@@ -49,16 +49,16 @@ static std::vector<bool> asBoolVec( const TBooleanBitArray &bba )
 TEST_CASE( "Simple use TBooleanBitArray" )
 {
    TBooleanBitArray bba;
-   for( int i{ -2 }; i < 4; i++ )
+   for( int i { -2 }; i < 4; i++ )
       REQUIRE_FALSE( bba.GetBit( i ) );
    REQUIRE_EQ( 0, bba.MemoryUsed() );
    bba.SetBit( 3, true );
    REQUIRE( bba.MemoryUsed() > 0 );
    REQUIRE( bba.GetBit( 3 ) );
    REQUIRE_EQ( 3, bba.GetHighIndex() );
-   for( int i{ -2 }; i < 3; i++ )
+   for( int i { -2 }; i < 3; i++ )
       REQUIRE_FALSE( bba.GetBit( i ) );
-   for( int i{ 4 }; i < 6; i++ )
+   for( int i { 4 }; i < 6; i++ )
       REQUIRE_FALSE( bba.GetBit( i ) );
    bba.SetHighIndex( 4 );
    REQUIRE_FALSE( bba.GetBit( 4 ) );
@@ -67,8 +67,8 @@ TEST_CASE( "Simple use TBooleanBitArray" )
    REQUIRE_EQ( bba.MemoryUsed(), oldMem );
    auto vec = asBoolVec( bba );
    REQUIRE_EQ( 5, vec.size() );
-   std::vector<bool> expectedVec{ false, false, false, true, true };
-   for( int i{}; i < 5; i++ )
+   std::vector<bool> expectedVec { false, false, false, true, true };
+   for( int i {}; i < 5; i++ )
       REQUIRE_EQ( expectedVec[i], vec[i] );
    // Make sure we need a second alloc
    oldMem = bba.MemoryUsed();
@@ -83,7 +83,7 @@ TEST_CASE( "Simple use TBooleanBitArray" )
 TEST_CASE( "Simple use of TXList" )
 {
    TXList<int> lst;
-   std::array<int, 23> nums{};
+   std::array<int, 23> nums {};
    for( int i = 0; i < (int) nums.size(); i++ )
    {
       nums[i] = i + 1;

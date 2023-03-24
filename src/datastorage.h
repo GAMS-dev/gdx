@@ -52,7 +52,7 @@ namespace gdx::collections::datastorage
 struct DataBatch {
    DataBatch *next;
    uint8_t *ptr;
-   explicit DataBatch( size_t count ) : next{}, ptr{ new uint8_t[count] } {}
+   explicit DataBatch( size_t count ) : next {}, ptr { new uint8_t[count] } {}
    ~DataBatch()
    {
       delete[] ptr;
@@ -66,7 +66,7 @@ class BatchAllocator
    size_t offsetInTail;
 
 public:
-   BatchAllocator() : head{}, tail{}, offsetInTail{} {}
+   BatchAllocator() : head {}, tail {}, offsetInTail {} {}
 
    ~BatchAllocator()
    {
@@ -90,16 +90,16 @@ public:
       assert( count <= batchSize );
       if( !head )
       {
-         head = tail = new DataBatch{ batchSize };
+         head = tail = new DataBatch { batchSize };
          offsetInTail = 0;
       }
       else if( batchSize - offsetInTail < count )
       {
-         tail->next = new DataBatch{ batchSize };
+         tail->next = new DataBatch { batchSize };
          tail = tail->next;
          offsetInTail = 0;
       }
-      auto res{ tail->ptr + offsetInTail };
+      auto res { tail->ptr + offsetInTail };
       offsetInTail += count;
       return res;
    }
@@ -108,7 +108,7 @@ public:
 
 TLD_TEMPLATE_HEADER
 struct TLinkedDataRec {
-   TLinkedDataRec *RecNext{};
+   TLinkedDataRec *RecNext {};
    // when RecData is used, first dim * sizeof(int) bytes are keys and then datasize * sizeof(double) bytes for values
    // hence data bytes start at offset FKeySize
    // when RecKeys is used corresponds directly to key entries (as integers)
@@ -138,13 +138,13 @@ class TLinkedData
 
    bool IsSorted()
    {
-      RecType *R{ FHead };
-      auto *PrevKey{ R->RecKeys };
+      RecType *R { FHead };
+      auto *PrevKey { R->RecKeys };
       R = R->RecNext;
-      int KD{};
+      int KD {};
       while( R )
       {
-         for( int D{}; D < FDimension; D++ )
+         for( int D {}; D < FDimension; D++ )
          {
             KD = R->RecKeys[D] - PrevKey[D];
             if( KD ) break;
@@ -157,15 +157,15 @@ class TLinkedData
    }
 
 public:
-   TLinkedData( int ADimension, int ADataSize ) : FMinKey{ std::numeric_limits<int>::max() },
-                                                  FMaxKey{},
-                                                  FDimension{ ADimension },
-                                                  FKeySize{ ADimension * (int) sizeof( KeyType ) },
-                                                  FDataSize{ ADataSize },
-                                                  FTotalSize{ 1 * (int) sizeof( void * ) + FKeySize + FDataSize },
-                                                  FCount{},
-                                                  FHead{},
-                                                  FTail{} {};
+   TLinkedData( int ADimension, int ADataSize ) : FMinKey { std::numeric_limits<int>::max() },
+                                                  FMaxKey {},
+                                                  FDimension { ADimension },
+                                                  FKeySize { ADimension * (int) sizeof( KeyType ) },
+                                                  FDataSize { ADataSize },
+                                                  FTotalSize { 1 * (int) sizeof( void * ) + FKeySize + FDataSize },
+                                                  FCount {},
+                                                  FHead {},
+                                                  FTail {} {};
 
    ~TLinkedData()
    {
@@ -182,7 +182,7 @@ public:
 #if defined( TLD_BATCH_ALLOCS )
       batchAllocator.clear();
 #else
-      RecType *P{ FHead };
+      RecType *P { FHead };
       while( P )
       {
          auto Pn = P->RecNext;
@@ -215,9 +215,9 @@ public:
       std::memcpy( node->RecData, AKey, FKeySize );             // first FKeySize bytes for keys (integers)
       std::memcpy( &node->RecData[FKeySize], AData, FDataSize );// rest for actual data (doubles)
       FCount++;
-      for( int D{}; D < FDimension; D++ )
+      for( int D {}; D < FDimension; D++ )
       {
-         int Key{ AKey[D] };
+         int Key { AKey[D] };
          if( Key > FMaxKey ) FMaxKey = Key;
          if( Key < FMinKey ) FMinKey = Key;
       }
@@ -228,16 +228,16 @@ public:
    {
       if( !FHead || IsSorted() ) return;
       const int AllocCount = FMaxKey - FMinKey + 1;
-      const int KeyBase{ FMinKey };
-      auto Head{ new RecType *[AllocCount] }, Tail{ new RecType *[AllocCount] };
+      const int KeyBase { FMinKey };
+      auto Head { new RecType *[AllocCount] }, Tail { new RecType *[AllocCount] };
       std::memset( Head, 0, sizeof( RecType * ) * AllocCount );
       // Perform radix sort
-      for( int D{ FDimension - 1 }; D >= 0; D-- )
+      for( int D { FDimension - 1 }; D >= 0; D-- )
       {
          RecType *R = FHead;
          while( R )
          {
-            int Key{ R->RecKeys[AMap ? AMap[D] : D] - KeyBase };
+            int Key { R->RecKeys[AMap ? AMap[D] : D] - KeyBase };
             if( !Head[Key] ) Head[Key] = R;
             else
                Tail[Key]->RecNext = R;
@@ -245,7 +245,7 @@ public:
             R = R->RecNext;
          }
          R = nullptr;
-         for( int Key{ FMaxKey - KeyBase }; Key >= 0; Key-- )
+         for( int Key { FMaxKey - KeyBase }; Key >= 0; Key-- )
          {
             if( Head[Key] )
             {

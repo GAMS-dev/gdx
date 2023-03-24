@@ -42,10 +42,10 @@ namespace gdx::collections::strhash
 {
 template<typename T>
 struct THashBucket {
-   char *StrP{};
-   THashBucket *NextBucket{};
-   int StrNr{};
-   T Obj{};
+   char *StrP {};
+   THashBucket *NextBucket {};
+   int StrNr {};
+   T Obj {};
 };
 
 template<typename T>
@@ -59,11 +59,11 @@ protected:
    datastorage::BatchAllocator<960> batchAllocator;
    datastorage::BatchAllocator<1024> batchStrAllocator;
 #endif
-   std::vector<PHashBucket<T>> Buckets{};                    // sorted by order of insertion, no gaps
-   std::unique_ptr<std::vector<PHashBucket<T>>> PHashTable{};// sorted by hash value, with gaps
-   std::unique_ptr<int[]> SortMap{};
-   int HashTableSize{}, ReHashCnt{}, FCount{};
-   bool FSorted{};
+   std::vector<PHashBucket<T>> Buckets {};                    // sorted by order of insertion, no gaps
+   std::unique_ptr<std::vector<PHashBucket<T>>> PHashTable {};// sorted by hash value, with gaps
+   std::unique_ptr<int[]> SortMap {};
+   int HashTableSize {}, ReHashCnt {}, FCount {};
+   bool FSorted {};
 
    void ClearHashTable()
    {
@@ -123,8 +123,8 @@ protected:
 
    virtual int Hash( const char *s )
    {
-      /*unsigned */ int res{};
-      for( int i{}; s[i] != '\0'; i++ )
+      /*unsigned */ int res {};
+      for( int i {}; s[i] != '\0'; i++ )
          res = 211 * res + utils::toupper( s[i] );
       return ( res & 0x7FFFFFFF ) % HashTableSize;
    }
@@ -143,7 +143,7 @@ protected:
    {
       if( PHashTable ) PHashTable->clear();
       HashTableReset( FCount );
-      for( int N{}; N < FCount; N++ )
+      for( int N {}; N < FCount; N++ )
       {
          auto &PBuck = Buckets[N];
          int HV = Hash( PBuck->StrP );
@@ -154,10 +154,10 @@ protected:
 
    void QuickSort( int L, int R )
    {
-      int i{ L };
+      int i { L };
       while( i < R )
       {
-         int j{ R }, p{ ( L + R ) >> 1 };
+         int j { R }, p { ( L + R ) >> 1 };
          char *pPivotStr = Buckets[SortMap[p]]->StrP;
          do {
             while( Compare( Buckets[SortMap[i]]->StrP, pPivotStr ) < 0 ) i++;
@@ -191,7 +191,7 @@ protected:
    }
 
 public:
-   bool OneBased{};// When false (default) indices are in the range 0..Count-1
+   bool OneBased {};// When false (default) indices are in the range 0..Count-1
    // when true, indices are in the range 1..Count
 
    TXStrHashList()
@@ -239,12 +239,12 @@ public:
 #ifdef TLD_BATCH_ALLOCS
       auto PBuck = reinterpret_cast<PHashBucket<T>>( batchAllocator.GetBytes( sizeof( THashBucket<T> ) ) );
 #else
-      PHashBucket<T> PBuck = new THashBucket<T>{};
+      PHashBucket<T> PBuck = new THashBucket<T> {};
 #endif
       Buckets.push_back( PBuck );
       PBuck->NextBucket = nullptr;
       PBuck->StrNr = FCount;// before it was added!
-      int res{ FCount + ( OneBased ? 1 : 0 ) };
+      int res { FCount + ( OneBased ? 1 : 0 ) };
       if( SortMap )
       {
          SortMap[FCount] = FCount;
@@ -265,7 +265,7 @@ public:
    {
       assert( FCount < std::numeric_limits<int>::max() );
       if( FCount >= ReHashCnt ) HashAll();
-      int HV{ Hash( s ) };
+      int HV { Hash( s ) };
       PHashBucket<T> PBuck = GetBucketByHash( HV );
       while( PBuck )
       {
@@ -276,13 +276,13 @@ public:
 #ifdef TLD_BATCH_ALLOCS
       PBuck = reinterpret_cast<PHashBucket<T>>( batchAllocator.GetBytes( sizeof( THashBucket<T> ) ) );
 #else
-      PBuck = new THashBucket<T>{};
+      PBuck = new THashBucket<T> {};
 #endif
       Buckets.push_back( PBuck );
       PBuck->NextBucket = GetBucketByHash( HV );
       ( *PHashTable )[HV] = PBuck;
       PBuck->StrNr = FCount;// before it was added! zero based
-      int res{ FCount + ( OneBased ? 1 : 0 ) };
+      int res { FCount + ( OneBased ? 1 : 0 ) };
       if( SortMap )
       {
          SortMap[FCount] = FCount;
@@ -312,7 +312,7 @@ public:
    int IndexOf( const char *s )
    {
       if( !PHashTable ) HashAll();
-      int HV{ Hash( s ) };
+      int HV { Hash( s ) };
       PHashBucket<T> PBuck = GetBucketByHash( HV );
       while( PBuck )
       {
@@ -327,8 +327,8 @@ public:
    void LoadFromStream( T2 &s )
    {
       Clear();
-      int Cnt{ s.ReadInteger() };
-      for( int N{}; N < Cnt; N++ )
+      int Cnt { s.ReadInteger() };
+      for( int N {}; N < Cnt; N++ )
          StoreObject( s.ReadString(), nullptr );
    }
 
@@ -336,14 +336,14 @@ public:
    void SaveToStream( T2 &s )
    {
       s.WriteInteger( FCount );
-      for( int N{ OneBased ? 1 : 0 }; N < FCount + ( OneBased ? 1 : 0 ); N++ )
+      for( int N { OneBased ? 1 : 0 }; N < FCount + ( OneBased ? 1 : 0 ); N++ )
          s.WriteString( GetString( N ) );
    }
 
    [[nodiscard]] int64_t MemoryUsed() const
    {
-      int64_t res{};
-      for( int N{}; N < Count(); N++ )
+      int64_t res {};
+      for( int N {}; N < Count(); N++ )
          res += std::strlen( Buckets[N]->StrP ) + 1;
       res += (int) ( Buckets.size() * sizeof( THashBucket<T> ) );
       if( PHashTable ) res += (int) ( PHashTable->size() * sizeof( THashBucket<T> ) );
@@ -361,10 +361,10 @@ public:
       }
       if( PHashTable )
       {
-         int HV0{ Hash( GetString( N + 1 ) ) }, HV1{ Hash( s ) };
+         int HV0 { Hash( GetString( N + 1 ) ) }, HV1 { Hash( s ) };
          if( HV0 != HV1 )
          {
-            PHashBucket<T> PrevBuck{}, PBuck;
+            PHashBucket<T> PrevBuck {}, PBuck;
             for( PBuck = GetBucketByHash( HV0 );
                  PBuck->StrNr != N; PBuck = PBuck->NextBucket )
                PrevBuck = PBuck;
@@ -455,10 +455,10 @@ template<typename T2>
 inline void TXStrHashList<uint8_t>::LoadFromStream( T2 &s )
 {
    Clear();
-   int Cnt{ s.ReadInteger() };
-   for( int N{}; N < Cnt; N++ )
+   int Cnt { s.ReadInteger() };
+   for( int N {}; N < Cnt; N++ )
    {
-      auto str{ s.ReadString() };
+      auto str { s.ReadString() };
       StoreObject( str.c_str(), str.length(), 0 );
    }
 }
@@ -468,10 +468,10 @@ template<typename T2>
 inline void TXStrHashList<int>::LoadFromStream( T2 &s )
 {
    Clear();
-   int Cnt{ s.ReadInteger() };
-   for( int N{}; N < Cnt; N++ )
+   int Cnt { s.ReadInteger() };
+   for( int N {}; N < Cnt; N++ )
    {
-      auto str{ s.ReadString() };
+      auto str { s.ReadString() };
       StoreObject( str.c_str(), str.length(), 0 );
    }
 }
@@ -482,8 +482,8 @@ class TXCSStrHashList : public TXStrHashList<T>
 protected:
    int Hash( const char *s ) override
    {
-      /*unsigned */ int res{};
-      for( int i{}; s[i] != '\0'; i++ )
+      /*unsigned */ int res {};
+      for( int i {}; s[i] != '\0'; i++ )
          res = 211 * res + s[i];
       return ( res & 0x7FFFFFFF ) % this->HashTableSize;
    }

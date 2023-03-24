@@ -57,7 +57,7 @@ protected:
 
    virtual void Grow()
    {
-      int delta{ FCapacity >= 1024 * 1024 ? FCapacity / 4 : ( !FCapacity ? 16 : 7 * FCapacity ) };
+      int delta { FCapacity >= 1024 * 1024 ? FCapacity / 4 : ( !FCapacity ? 16 : 7 * FCapacity ) };
       int64_t i64 = FCapacity;
       i64 += delta;
       if( i64 <= std::numeric_limits<int>::max() ) SetCapacity( (int) i64 );
@@ -78,11 +78,11 @@ protected:
    bool OneBased;
 
 public:
-   TXList() : FCapacity{},
-              FListMemory{},
-              FCount{},
-              FList{},
-              OneBased{}
+   TXList() : FCapacity {},
+              FListMemory {},
+              FCount {},
+              FList {},
+              OneBased {}
    {
    }
 
@@ -93,7 +93,7 @@ public:
 
    int Add( T *Item )
    {
-      int res{ FCount };
+      int res { FCount };
       if( res == FCapacity ) Grow();
       FList[res] = Item;
       FCount++;
@@ -103,7 +103,7 @@ public:
 
    void Clear()
    {
-      for( int N{ FCount - 1 + ( OneBased ? 1 : 0 ) }; N >= ( OneBased ? 1 : 0 ); N-- ) FreeItem( N );
+      for( int N { FCount - 1 + ( OneBased ? 1 : 0 ) }; N >= ( OneBased ? 1 : 0 ); N-- ) FreeItem( N );
       FCount = 0;
       SetCapacity( 0 );
    }
@@ -132,7 +132,7 @@ public:
 
    int Remove( const T *Item )
    {
-      int res{ FCount - 1 };
+      int res { FCount - 1 };
       while( res >= 0 && FList[res] != Item ) res--;
       if( res >= ( OneBased ? 1 : 0 ) ) Delete( res );
       return res;
@@ -203,7 +203,7 @@ protected:
    }
 
 public:
-   TXStrings() : FStrMemory{} {}
+   TXStrings() : FStrMemory {} {}
 
    ~TXStrings() override
    {
@@ -217,7 +217,7 @@ public:
 
    int IndexOf( const char *Item )
    {
-      for( int N{}; N < FCount; N++ )
+      for( int N {}; N < FCount; N++ )
          if( utils::sameTextPChar( FList[N], Item ) )
             return N + ( OneBased ? 1 : 0 );
       return -1;
@@ -236,7 +236,7 @@ class TBooleanBitArray
    }
 
 public:
-   TBooleanBitArray() : PData{}, FAllocated{}, FHighIndex{ -1 }
+   TBooleanBitArray() : PData {}, FAllocated {}, FHighIndex { -1 }
    {
    }
 
@@ -259,10 +259,10 @@ public:
    {
       if( V > FHighIndex )
       {
-         int NewMemSize{ ( V + 8 ) / 8 };
+         int NewMemSize { ( V + 8 ) / 8 };
          if( NewMemSize > FAllocated )
          {
-            int Delta{};
+            int Delta {};
             do {
                if( !FAllocated ) Delta += 256;
                else if( FAllocated < 32 * 256 )

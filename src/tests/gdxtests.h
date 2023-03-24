@@ -70,13 +70,13 @@ using TgdxStrIndex = std::array<std::string, GMS_MAX_INDEX_DIM>;
 
 class StrIndexBuffers
 {
-   std::array<std::array<char, GMS_SSSIZE>, GMS_MAX_INDEX_DIM> bufContents{};
-   std::array<char *, GMS_MAX_INDEX_DIM> bufPtrs{};
+   std::array<std::array<char, GMS_SSSIZE>, GMS_MAX_INDEX_DIM> bufContents {};
+   std::array<char *, GMS_MAX_INDEX_DIM> bufPtrs {};
 
 public:
    explicit StrIndexBuffers( const TgdxStrIndex *strIndex = nullptr )
    {
-      for( int i{}; i < (int) bufPtrs.size(); i++ )
+      for( int i {}; i < (int) bufPtrs.size(); i++ )
       {
          bufPtrs[i] = bufContents[i].data();
          if( strIndex )
@@ -86,7 +86,7 @@ public:
 
    StrRef operator[]( int index )
    {
-      return StrRef{ bufPtrs[index] };
+      return StrRef { bufPtrs[index] };
    }
 
    char **ptrs() { return bufPtrs.data(); }
@@ -94,14 +94,14 @@ public:
 
    void clear()
    {
-      for( int i{}; i < (int) bufContents.size(); i++ )
+      for( int i {}; i < (int) bufContents.size(); i++ )
          bufContents[i].fill( 0 );
    }
 
    StrRef front()
    {
-      return StrRef{ bufPtrs[0] };
+      return StrRef { bufPtrs[0] };
    }
 };
 
-}// namespace gdx::tests::gxfiletests
+}// namespace gdx::tests::gdxtests

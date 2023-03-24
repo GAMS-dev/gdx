@@ -112,7 +112,7 @@ public:
 
    inline void WriteString( const char *s )
    {
-      WriteString( std::string_view{ s, std::strlen( s ) } );
+      WriteString( std::string_view { s, std::strlen( s ) } );
    }
 
    template<int count>
@@ -137,13 +137,13 @@ public:
 
 class TXFileStreamDelphi : public TXStreamDelphi
 {
-   std::unique_ptr<std::fstream> FS{};
-   bool FileIsOpen{};
-   std::string FFileName{}, FPassWord{};
+   std::unique_ptr<std::fstream> FS {};
+   bool FileIsOpen {};
+   std::string FFileName {}, FPassWord {};
 
 protected:
-   int FLastIOResult{};
-   int64_t PhysPosition{};
+   int FLastIOResult {};
+   int64_t PhysPosition {};
 
    int64_t GetPosition() override;
    void SetPosition( int64_t P ) override;
@@ -196,8 +196,8 @@ void reverseBytesMax8( void *psrc, void *pdest, int sz );
 
 class TMiBufferedStreamDelphi : public TBufferedFileStreamDelphi
 {
-   uint8_t order_word{}, order_integer{}, order_double{}, size_word{}, size_integer{}, size_double{};
-   bool NormalOrder{};
+   uint8_t order_word {}, order_integer {}, order_double {}, size_word {}, size_integer {}, size_double {};
+   bool NormalOrder {};
 
    template<typename T>
    T ReadValueOrdered( bool order_type )

@@ -28,14 +28,14 @@
 #undef max
 #endif
 
-#if defined(GXFILE_DUMMY)
+#if defined( GXFILE_DUMMY )
 #include "dummy/gdxdummy.h"
 #else
-#include "../gclgms.h" // for GMS_SSSIZE, GMS_VAL_LEVEL
-#include "../gdx.h"    // for TGXFileObj, TgdxValues
+#include "../gclgms.h"// for GMS_SSSIZE, GMS_VAL_LEVEL
+#include "../gdx.h"   // for TGXFileObj, TgdxValues
 #endif
 
-#include "doctest.h"   // for ResultBuilder, Expressi...
+#include "doctest.h"// for ResultBuilder, Expressi...
 
 #include <algorithm> // for fill_n, find, copy
 #include <cstdlib>   // for system, setenv, unsetenv
@@ -57,17 +57,18 @@ namespace gdx::tests::gdxtests
 {
 TEST_SUITE_BEGIN( "GDX object tests" );
 
-static std::string gamsToolCall(const std::string &toolName)
+static std::string gamsToolCall( const std::string &toolName )
 {
    std::string pf, sf;
    // when running in "gms test" directory (in nightly build) the executable is located inside the system directory
-#if defined(_WIN32)
-   if(std::filesystem::exists(toolName + ".exe"s)) {
+#if defined( _WIN32 )
+   if( std::filesystem::exists( toolName + ".exe"s ) )
+   {
       pf = ".\\"s;
       sf = ".exe"s;
    }
 #else
-   if(std::filesystem::exists(toolName))
+   if( std::filesystem::exists( toolName ) )
       pf = "./"s;
 #endif
    return pf + toolName + sf;
@@ -75,11 +76,11 @@ static std::string gamsToolCall(const std::string &toolName)
 
 static bool hasGAMSinstalled()
 {
-   int rc {std::system( (gamsToolCall("gamslib"s) + " trnsport"s).c_str() )};
+   int rc { std::system( ( gamsToolCall( "gamslib"s ) + " trnsport"s ).c_str() ) };
    std::cout << "gamslib RC="s << rc << std::endl;
-   if(std::filesystem::exists("trnsport.gms"))
+   if( std::filesystem::exists( "trnsport.gms" ) )
    {
-      std::filesystem::remove("trnsport.gms");
+      std::filesystem::remove( "trnsport.gms" );
       return true;
    }
    return false;
@@ -120,7 +121,7 @@ void unsetEnvironmentVar( const std::string &name )
 void basicTest( const std::function<void( TGXFileObj & )> &cb )
 {
    static std::string ErrMsg;
-   TGXFileObj pgx{ ErrMsg };
+   TGXFileObj pgx { ErrMsg };
    cb( pgx );
 }
 
@@ -130,7 +131,7 @@ void testRead( const std::string &filename, const std::function<void( TGXFileObj
 
    {
       std::string ErrMsg;
-      TGXFileObj pgx{ ErrMsg };
+      TGXFileObj pgx { ErrMsg };
       int ErrNr, rc;
       rc = pgx.gdxOpenRead( filename.c_str(), ErrNr );
       REQUIRE( rc );
@@ -145,7 +146,7 @@ void testWrite( const std::string &filename, const std::function<void( TGXFileOb
 
    {
       std::string ErrMsg;
-      TGXFileObj pgx{ ErrMsg };
+      TGXFileObj pgx { ErrMsg };
       int ErrNr;
       REQUIRE( pgx.gdxOpenWrite( filename.c_str(), "gdxtest", ErrNr ) );
       cb( pgx );
@@ -168,9 +169,9 @@ TEST_CASE( "Simple setup and teardown of a GDX object" )
 TEST_CASE( "Check DLL version" )
 {
    basicTest( []( TGXFileObj &pgx ) {
-      std::array<char, GMS_SSSIZE> versionStr{};
+      std::array<char, GMS_SSSIZE> versionStr {};
       REQUIRE( pgx.gdxGetDLLVersion( versionStr.data() ) );
-      std::string expectedPrefix{ "GDX Library"s };
+      std::string expectedPrefix { "GDX Library"s };
       versionStr[expectedPrefix.length()] = '\0';
       REQUIRE( !std::strcmp( expectedPrefix.c_str(), versionStr.data() ) );
    } );
@@ -178,7 +179,7 @@ TEST_CASE( "Check DLL version" )
 
 TEST_CASE( "Just create a file" )
 {
-   const std::string fn{ "create.gdx" };
+   const std::string fn { "create.gdx" };
    basicTest( [&]( TGXFileObj &pgx ) {
       REQUIRE_EQ( 0, pgx.gdxErrorCount() );
 
@@ -200,9 +201,9 @@ TEST_CASE( "Just create a file" )
       REQUIRE_EQ( 7, fileVer );
       REQUIRE_EQ( 0, comprLev );
 
-      std::array<char, GMS_SSSIZE> fileStr{}, producerStr{};
+      std::array<char, GMS_SSSIZE> fileStr {}, producerStr {};
       REQUIRE( pgx.gdxFileVersion( fileStr.data(), producerStr.data() ) );
-      std::string fs{ fileStr.data() }, ps{ producerStr.data() }, expFsPrefix{ "GDX Library" };
+      std::string fs { fileStr.data() }, ps { producerStr.data() }, expFsPrefix { "GDX Library" };
       REQUIRE_EQ( "gdxtest"s, ps );
       REQUIRE_EQ( expFsPrefix, fs.substr( 0, expFsPrefix.length() ) );
 
@@ -232,10 +233,10 @@ TEST_CASE( "Just create a file" )
 
 TEST_CASE( "Creating a file should also work when closing was forgotten" )
 {
-   std::string ErrMsg, fn{ "tmp.gdx"s };
+   std::string ErrMsg, fn { "tmp.gdx"s };
    int ErrNr;
    {
-      TGXFileObj pgx{ ErrMsg };
+      TGXFileObj pgx { ErrMsg };
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxtest", ErrNr ) );
    }
    REQUIRE( std::filesystem::exists( fn ) );
@@ -262,7 +263,7 @@ TEST_CASE( "Test trying to open a file for reading that does not exist" )
 
 TEST_CASE( "Test renaming an UEL" )
 {
-   std::string fn{ "rename_uel.gdx" };
+   std::string fn { "rename_uel.gdx" };
    basicTest( [&]( TGXFileObj &pgx ) {
       REQUIRE_EQ( -1, pgx.gdxRenameUEL( "", "" ) );
 
@@ -301,7 +302,7 @@ TEST_CASE( "Test renaming an UEL" )
 
 TEST_CASE( "Test get current active symbol dimension" )
 {
-   std::string fn{ "sym_dim.gdx" };
+   std::string fn { "sym_dim.gdx" };
    basicTest( [&]( TGXFileObj &pgx ) {
       int ErrNr;
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxtest", ErrNr ) );
@@ -316,7 +317,7 @@ TEST_CASE( "Test get current active symbol dimension" )
 
 TEST_CASE( "Test adding uels (raw mode)" )
 {
-   std::string filename{ "uel.gdx"s };
+   std::string filename { "uel.gdx"s };
    testWrite( filename, []( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxUELRegisterRawStart() );
       REQUIRE( pgx.gdxUELRegisterRaw( "" ) );
@@ -353,7 +354,7 @@ TEST_CASE( "Test adding uels (raw mode)" )
 
 TEST_CASE( "Test adding uels (string mode)" )
 {
-   auto filename{ "uel.gdx"s };
+   auto filename { "uel.gdx"s };
    testWrite( filename, []( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxUELRegisterStrStart() );
       int uelNr;
@@ -381,7 +382,7 @@ TEST_CASE( "Test adding uels (string mode)" )
 
 TEST_CASE( "Test adding uels (mapped mode)" )
 {
-   auto filename{ "uel_mapped.gdx"s };
+   auto filename { "uel_mapped.gdx"s };
    testWrite( filename, []( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxUELRegisterMapStart() );
       REQUIRE_FALSE( pgx.gdxUELRegisterMap( 3, std::string( 64, 'i' ).c_str() ) );
@@ -420,16 +421,16 @@ TEST_CASE( "Test adding uels (mapped mode)" )
 
 TEST_CASE( "Test write and read record raw" )
 {
-   std::string fn{ "rwrecordraw.gdx" };
+   std::string fn { "rwrecordraw.gdx" };
    int key;
-   TgdxValues values{};
-   const int nMany{ 800 };
+   TgdxValues values {};
+   const int nMany { 800 };
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxUELRegisterRawStart() );
       // register UELs i1*i800
-      for( int i{}; i < nMany; i++ )
+      for( int i {}; i < nMany; i++ )
       {
-         std::string uel{ "i"s + std::to_string( i + 1 ) };
+         std::string uel { "i"s + std::to_string( i + 1 ) };
          REQUIRE( pgx.gdxUELRegisterRaw( uel.c_str() ) );
       }
       REQUIRE( pgx.gdxUELRegisterDone() );
@@ -472,7 +473,7 @@ TEST_CASE( "Test write and read record raw" )
       // Third symbol
       // parameter mysymbig 'This is another symbol' /i1 42.1987, i2 43.1987, i3 44.1987, ... /
       REQUIRE( pgx.gdxDataWriteRawStart( "mysymbig", "This is another symbol!", 1, dt_par, 0 ) );
-      for( int i{}; i < nMany; i++ )
+      for( int i {}; i < nMany; i++ )
       {
          key = 1 + i;
          values[GMS_VAL_LEVEL] = 42.1987 + i;
@@ -550,18 +551,18 @@ TEST_CASE( "Test write and read record raw" )
       // Empty variable
       REQUIRE( pgx.gdxDataReadRawStart( 5, NrRecs ) );
       REQUIRE( pgx.gdxDataReadRaw( &key, values.data(), dimFrst ) );
-      REQUIRE_EQ( std::array{ 0.0, 0.0, 0.0, GMS_SV_PINF, 1.0 }, values );
+      REQUIRE_EQ( std::array { 0.0, 0.0, 0.0, GMS_SV_PINF, 1.0 }, values );
       REQUIRE( pgx.gdxDataReadDone() );
 
       // Empty equation
       REQUIRE( pgx.gdxDataReadRawStart( 6, NrRecs ) );
       REQUIRE( pgx.gdxDataReadRaw( &key, values.data(), dimFrst ) );
-      REQUIRE_EQ( std::array{ 0.0, 0.0, GMS_SV_MINF, 0.0, 1.0 }, values );
+      REQUIRE_EQ( std::array { 0.0, 0.0, GMS_SV_MINF, 0.0, 1.0 }, values );
       REQUIRE( pgx.gdxDataReadDone() );
 
       REQUIRE( pgx.gdxDataReadRawStart( 3, NrRecs ) );
       REQUIRE_EQ( nMany, NrRecs );
-      for( int i{}; i < nMany; i++ )
+      for( int i {}; i < nMany; i++ )
       {
          REQUIRE( pgx.gdxDataReadRaw( &key, values.data(), dimFrst ) );
          REQUIRE_EQ( 1 + i, key );
@@ -570,8 +571,8 @@ TEST_CASE( "Test write and read record raw" )
       REQUIRE( pgx.gdxDataReadDone() );
 
       auto recordCallback = []( const int *keys, const double *vals ) {
-         static std::array expVals{ 3.141, 42.1987, GMS_SV_NA, GMS_SV_PINF, GMS_SV_MINF };
-         static int cnt{};
+         static std::array expVals { 3.141, 42.1987, GMS_SV_NA, GMS_SV_PINF, GMS_SV_MINF };
+         static int cnt {};
          REQUIRE_EQ( cnt + 1, keys[0] );
          REQUIRE_EQ( expVals[cnt++], vals[GMS_VAL_LEVEL] );
       };
@@ -581,8 +582,8 @@ TEST_CASE( "Test write and read record raw" )
          static_cast<std::list<std::tuple<int, double, int>> *>( uptr )->emplace_back( keys[0], vals[0], afdim );
       };
       std::list<std::tuple<int, double, int>>
-              collectedRecords{},
-              expectedRecords{ { 1, 3.141, 1 }, { 2, 42.1987, 1 }, { 3, GMS_SV_NA, 1 }, { 4, GMS_SV_PINF, 1 }, { 5, GMS_SV_MINF, 1 } };
+              collectedRecords {},
+              expectedRecords { { 1, 3.141, 1 }, { 2, 42.1987, 1 }, { 3, GMS_SV_NA, 1 }, { 4, GMS_SV_PINF, 1 }, { 5, GMS_SV_MINF, 1 } };
       REQUIRE( pgx.gdxDataReadRawFastEx( 1, recordCallbackEx, NrRecs, static_cast<void *>( &collectedRecords ) ) );
       REQUIRE_EQ( expectedRecords, collectedRecords );
 
@@ -592,8 +593,8 @@ TEST_CASE( "Test write and read record raw" )
          REQUIRE_EQ( 3.141, vals[0] );
          return 1;
       };
-      std::string uelFilterName{ "i1"s };
-      std::array<const char *, 1> uelFilterNames{ uelFilterName.c_str() };
+      std::string uelFilterName { "i1"s };
+      std::array<const char *, 1> uelFilterNames { uelFilterName.c_str() };
       REQUIRE( pgx.gdxDataReadRawFastFilt( 1, uelFilterNames.data(), recordCallbackFiltered ) );
 
       REQUIRE( pgx.gdxDataReadRawStart( 2, NrRecs ) );
@@ -605,9 +606,9 @@ TEST_CASE( "Test write and read record raw" )
 
 TEST_CASE( "Test write and read record in string mode" )
 {
-   std::string fn{ "rwrecordstr.gdx" };
+   std::string fn { "rwrecordstr.gdx" };
    StrIndexBuffers keyNames;
-   TgdxValues values{};
+   TgdxValues values {};
    std::string stillOk( 255, 'b' );
    stillOk.front() = 'a';
    stillOk.back() = 'c';
@@ -686,10 +687,10 @@ TEST_CASE( "Test write and read record in string mode" )
 
 TEST_CASE( "Test getting special values" )
 {
-   std::array<double, GMS_SVIDX_MAX> specialValuesFromPort{};
+   std::array<double, GMS_SVIDX_MAX> specialValuesFromPort {};
    std::string ErrMsg;
    {
-      gdx::TGXFileObj pgx{ ErrMsg };
+      gdx::TGXFileObj pgx { ErrMsg };
       REQUIRE( pgx.gdxGetSpecialValues( specialValuesFromPort.data() ) );
    }
 }
@@ -697,7 +698,7 @@ TEST_CASE( "Test getting special values" )
 TEST_CASE( "Test setting and resetting special values" )
 {
    basicTest( [&]( TGXFileObj &pgx ) {
-      std::array<double, GMS_SVIDX_MAX> moddedSpecVals{}, queriedSpecVals{};
+      std::array<double, GMS_SVIDX_MAX> moddedSpecVals {}, queriedSpecVals {};
       REQUIRE( pgx.gdxGetSpecialValues( moddedSpecVals.data() ) );
       moddedSpecVals[gdx::TgdxIntlValTyp::vm_valpin] = 0.0;
       REQUIRE( pgx.gdxSetSpecialValues( moddedSpecVals.data() ) );
@@ -715,13 +716,13 @@ TEST_CASE( "Test setting and resetting special values" )
 void writeMappedRecordsOutOfOrder( TGXFileObj &pgx )
 {
    // very irregular user uel nr -> uel name mapping
-   const std::map<int, std::string> userUelMapping{
+   const std::map<int, std::string> userUelMapping {
            { 3, "z" },
            { 8, "a" },
            { 1, "y" },
            { 10, "b" } };
    // also weird record write ordering
-   const std::array<int, 4> randomOrder{ 8, 10, 1, 3 };
+   const std::array<int, 4> randomOrder { 8, 10, 1, 3 };
 
    REQUIRE( pgx.gdxUELRegisterMapStart() );
    for( const auto &pair: userUelMapping )
@@ -732,7 +733,7 @@ void writeMappedRecordsOutOfOrder( TGXFileObj &pgx )
 
    REQUIRE( pgx.gdxDataWriteMapStart( "irregularSym", "So out of order!", 1, dt_par, 0 ) );
    int key;
-   TgdxValues values{};
+   TgdxValues values {};
    for( const auto ix: randomOrder )
    {
       key = ix;
@@ -746,16 +747,16 @@ void writeMappedRecordsOutOfOrder( TGXFileObj &pgx )
 
 TEST_CASE( "Test writing mapped records out of order" )
 {
-   std::string fn{ "mapped_outoforder.gdx" };
+   std::string fn { "mapped_outoforder.gdx" };
    testWrite( fn, writeMappedRecordsOutOfOrder );
    std::filesystem::remove( fn );
 }
 
 TEST_CASE( "Test write and read record mapped - out of order" )
 {
-   std::string fn{ "rwrecordmapped_ooo.gdx" };
+   std::string fn { "rwrecordmapped_ooo.gdx" };
    int key;
-   TgdxValues values{};
+   TgdxValues values {};
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       int uelCnt, highMap;
       REQUIRE( pgx.gdxUMUelInfo( uelCnt, highMap ) );
@@ -778,12 +779,12 @@ TEST_CASE( "Test write and read record mapped - out of order" )
 
       // User UEL indices non-increasing
       REQUIRE( pgx.gdxDataWriteMapStart( "mysym2", "Four records", 1, dt_par, 0 ) );
-      std::array<int, 4> expKey{ 3, 4, 5, 2 };
+      std::array<int, 4> expKey { 3, 4, 5, 2 };
       for( int i: expKey )
          REQUIRE( pgx.gdxDataWriteMap( &i, values.data() ) );
       REQUIRE( pgx.gdxDataWriteDone() );
 
-      constexpr char c{ 'i' };
+      constexpr char c { 'i' };
       std::string notTooLongSymID( GLOBAL_UEL_IDENT_SIZE - 1, c ),
               notTooLongExpl( GMS_SSSIZE - 1, c ),
               tooLongSymID( GLOBAL_UEL_IDENT_SIZE, c ),
@@ -836,8 +837,8 @@ TEST_CASE( "Test write and read record mapped - out of order" )
       REQUIRE( pgx.gdxDataReadMapStart( 2, NrRecs ) );
       REQUIRE_EQ( 4, NrRecs );
       // unordered mapped write comes out ordered
-      std::array<int, 4> expKey{ 2, 3, 4, 5 };
-      for( int i{ 1 }; i <= (int) expKey.size(); i++ )
+      std::array<int, 4> expKey { 2, 3, 4, 5 };
+      for( int i { 1 }; i <= (int) expKey.size(); i++ )
       {
          REQUIRE( pgx.gdxDataReadMap( i, &key, values.data(), dimFrst ) );
          REQUIRE_EQ( expKey[i - 1], key );
@@ -853,9 +854,9 @@ TEST_CASE( "Test write and read record mapped - out of order" )
 
 TEST_CASE( "Test write and read record mapped - in order" )
 {
-   std::string fn{ "rwrecordmapped_io.gdx" };
+   std::string fn { "rwrecordmapped_io.gdx" };
    int key;
-   TgdxValues values{};
+   TgdxValues values {};
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       int uelCnt, highMap;
       REQUIRE( pgx.gdxUMUelInfo( uelCnt, highMap ) );
@@ -873,7 +874,7 @@ TEST_CASE( "Test write and read record mapped - in order" )
 
       // User UEL indices increasing
       REQUIRE( pgx.gdxDataWriteMapStart( "mysym", "Four records", 1, dt_par, 0 ) );
-      std::array<int, 4> expKey{ 5, 6, 7, 8 };
+      std::array<int, 4> expKey { 5, 6, 7, 8 };
       for( int i: expKey )
          REQUIRE( pgx.gdxDataWriteMap( &i, values.data() ) );
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -906,8 +907,8 @@ TEST_CASE( "Test write and read record mapped - in order" )
       REQUIRE( pgx.gdxDataReadMapStart( 1, NrRecs ) );
       REQUIRE_EQ( 4, NrRecs );
       // should still be ordered
-      std::array<int, 4> expKey{ 5, 6, 7, 8 };
-      for( int i{ 1 }; i <= (int) expKey.size(); i++ )
+      std::array<int, 4> expKey { 5, 6, 7, 8 };
+      for( int i { 1 }; i <= (int) expKey.size(); i++ )
       {
          int dimFrst;
          REQUIRE( pgx.gdxDataReadMap( i, &key, values.data(), dimFrst ) );
@@ -949,14 +950,14 @@ void commonSetGetDomainTests( const std::vector<std::string> &domainNames,
    assert( domainNames.size() == 2 );
    assert( domainIndices.size() == 2 );
 
-   const std::array<std::string, 2> fns{
+   const std::array<std::string, 2> fns {
            "setgetdomainx.gdx"s,
            "setgetdomain.gdx"s,
    };
 
-   TgdxStrIndex newSymDomainNames{};
-   std::array<int, 2> newSymDomainIndices{};
-   for( int i{}; i < (int) domainNames.size(); i++ )
+   TgdxStrIndex newSymDomainNames {};
+   std::array<int, 2> newSymDomainIndices {};
+   for( int i {}; i < (int) domainNames.size(); i++ )
    {
       newSymDomainNames[i] = domainNames[i];
       newSymDomainIndices[i] = domainIndices[i];
@@ -974,9 +975,9 @@ void commonSetGetDomainTests( const std::vector<std::string> &domainNames,
    };
 
    auto testSetGetDomainX = [&]( TGXFileObj &pgx ) {
-      StrIndexBuffers sib{ &newSymDomainNames };
+      StrIndexBuffers sib { &newSymDomainNames };
       REQUIRE( pgx.gdxSymbolSetDomainX( 4, sib.cptrs() ) );
-      StrIndexBuffers domainIds{};
+      StrIndexBuffers domainIds {};
       REQUIRE( pgx.gdxSymbolGetDomainX( 4, domainIds.ptrs() ) );
       REQUIRE_EQ( newSymDomainNames.front(), domainIds[0].str() );
       REQUIRE_EQ( newSymDomainNames[1], domainIds[1].str() );
@@ -984,10 +985,10 @@ void commonSetGetDomainTests( const std::vector<std::string> &domainNames,
 
    auto testSetGetDomain = [&]( TGXFileObj &pgx ) {
       domainSetGetTestSetupPrefix( pgx );
-      StrIndexBuffers sib{ &newSymDomainNames };
+      StrIndexBuffers sib { &newSymDomainNames };
       REQUIRE( pgx.gdxSymbolSetDomain( sib.cptrs() ) );
       domainSetGetTestSetupSuffix( pgx );
-      std::array<int, 2> domainSyNrs{};
+      std::array<int, 2> domainSyNrs {};
       REQUIRE( pgx.gdxSymbolGetDomain( 4, domainSyNrs.data() ) );
       REQUIRE_EQ( newSymDomainIndices[0], domainSyNrs[0] );
       REQUIRE_EQ( newSymDomainIndices[1], domainSyNrs[1] );
@@ -1000,7 +1001,7 @@ void commonSetGetDomainTests( const std::vector<std::string> &domainNames,
    } );
 
    testRead( fns[0], [&]( TGXFileObj &pgx ) {
-      StrIndexBuffers domainIds{};
+      StrIndexBuffers domainIds {};
       REQUIRE( pgx.gdxSymbolGetDomainX( 4, domainIds.ptrs() ) );
       REQUIRE_EQ( newSymDomainNames[0], domainIds[0].str() );
       REQUIRE_EQ( newSymDomainNames[1], domainIds[1].str() );
@@ -1023,14 +1024,14 @@ TEST_CASE( "Test writing with set/get domain normal and variant" )
 
 TEST_CASE( "Test adding a set alias" )
 {
-   const std::string fn{ "add_alias.gdx"s };
+   const std::string fn { "add_alias.gdx"s };
 
    auto queryAliasSymbolInfo = []( TGXFileObj &pgx, const std::string &aliasName, int aliasSymNr, const std::string &refSymName, int referencedSymNr ) {
       int aliasIx;
       REQUIRE( pgx.gdxFindSymbol( aliasName.c_str(), aliasIx ) );
       REQUIRE_EQ( aliasSymNr, aliasIx );
       int numRecords, userInfo, dim, typ;
-      std::array<char, GMS_SSSIZE> explText{}, symbolName{};
+      std::array<char, GMS_SSSIZE> explText {}, symbolName {};
       REQUIRE( pgx.gdxSymbolInfoX( aliasSymNr, numRecords, userInfo, explText.data() ) );
       REQUIRE( pgx.gdxSymbolInfo( aliasSymNr, symbolName.data(), dim, typ ) );
       REQUIRE_EQ( 0, numRecords );
@@ -1041,14 +1042,14 @@ TEST_CASE( "Test adding a set alias" )
       REQUIRE_EQ( dt_alias, typ );
    };
 
-   constexpr int elemCnt{ 10 };
-   StrIndexBuffers sib{};
-   TgdxValues vals{};
+   constexpr int elemCnt { 10 };
+   StrIndexBuffers sib {};
+   TgdxValues vals {};
 
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       // set i /i1*i10/;
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "A set", 1, dt_set, 0 ) );
-      for( int i{}; i < elemCnt; i++ )
+      for( int i {}; i < elemCnt; i++ )
       {
          sib.front() = "i"s + std::to_string( i + 1 );
          REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), vals.data() ) );
@@ -1084,7 +1085,7 @@ TEST_CASE( "Test adding a set alias" )
       REQUIRE( pgx.gdxDataReadRawStart( 2, numRecords ) );
       REQUIRE_EQ( 10, numRecords );
       int key, dimFrst;
-      for( int i{}; i < numRecords; i++ )
+      for( int i {}; i < numRecords; i++ )
       {
          REQUIRE( pgx.gdxDataReadRaw( &key, vals.data(), dimFrst ) );
          REQUIRE_EQ( i + 1, key );
@@ -1093,7 +1094,7 @@ TEST_CASE( "Test adding a set alias" )
 
       REQUIRE( pgx.gdxDataReadRawStart( 3, numRecords ) );
       REQUIRE_EQ( 10, numRecords );
-      for( int i{}; i < numRecords; i++ )
+      for( int i {}; i < numRecords; i++ )
       {
          REQUIRE( pgx.gdxDataReadRaw( &key, vals.data(), dimFrst ) );
          REQUIRE_EQ( i + 1, key );
@@ -1106,7 +1107,7 @@ TEST_CASE( "Test adding a set alias" )
 
 TEST_CASE( "Test creating and querying element text for sets" )
 {
-   const std::string fn{ "elemtxt.gdx" };
+   const std::string fn { "elemtxt.gdx" };
    int elemNode;
    char elemTxt[GMS_SSSIZE];
    TgdxUELIndex keys;
@@ -1163,9 +1164,9 @@ TEST_CASE( "Test creating and querying element text for sets" )
 
 TEST_CASE( "Test invalid raw writing error processing" )
 {
-   const std::string fn{ "tmpfile.gdx"s };
+   const std::string fn { "tmpfile.gdx"s };
    int key;
-   TgdxValues values{};
+   TgdxValues values {};
    basicTest( [&]( TGXFileObj &pgx ) {
       if( std::filesystem::exists( fn ) )
          std::filesystem::remove( fn );
@@ -1202,11 +1203,11 @@ std::string acquireGDXforModel( const std::string &model )
    const std::string model_fn = model + ".gms"s,
                      log_fn = model + "Log.txt"s;
    std::string gdxfn = model + ".gdx"s;// non-const so we get automatic move
-   int rc = std::system( ( gamsToolCall("gamslib"s) + " "s + model + " > gamslibLog.txt"s ).c_str() );
+   int rc = std::system( ( gamsToolCall( "gamslib"s ) + " "s + model + " > gamslibLog.txt"s ).c_str() );
    REQUIRE_FALSE( rc );
    std::filesystem::remove( "gamslibLog.txt" );
    REQUIRE( std::filesystem::exists( model_fn ) );
-   rc = std::system( ( gamsToolCall("gams"s) + " "s + model_fn + " gdx=default lo=0 o=lf > " + log_fn ).c_str() );
+   rc = std::system( ( gamsToolCall( "gams"s ) + " "s + model_fn + " gdx=default lo=0 o=lf > " + log_fn ).c_str() );
    REQUIRE_FALSE( rc );
    std::filesystem::remove( log_fn );
    std::filesystem::remove( model_fn );
@@ -1234,20 +1235,20 @@ TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
       std::cout << "Skipping test since GAMS system is not found!" << std::endl;
       return;
    }
-   const std::array expectedSymbolNames{
+   const std::array expectedSymbolNames {
            "a"s, "b"s, "c"s,
            "cost"s, "d"s, "demand"s,
            "f"s, "i"s, "j"s, "supply"s,
            "x"s, "z"s };
-   const std::array expectedUels{
+   const std::array expectedUels {
            "seattle"s, "san-diego"s, "new-york"s, "chicago"s, "topeka"s };
    const std::string gdxfn = acquireGDXforModel( "trnsport"s );
    testRead( gdxfn, [&]( TGXFileObj &pgx ) {
       REQUIRE_GT( pgx.gdxGetMemoryUsed(), 0 );
       int numSymbols, numUels;
       pgx.gdxSystemInfo( numSymbols, numUels );
-      std::list<std::string> uelsSeen{}, symbolsSeen{};
-      for( int i{ 1 }; i <= numUels; i++ )
+      std::list<std::string> uelsSeen {}, symbolsSeen {};
+      for( int i { 1 }; i <= numUels; i++ )
       {
          char uel[GMS_SSSIZE];
          int uelMap;
@@ -1259,7 +1260,7 @@ TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
       for( const auto &uel: expectedUels )
          REQUIRE_NE( std::find( uelsSeen.begin(), uelsSeen.end(), uel ), uelsSeen.end() );
 
-      for( int i{ 1 }; i <= numSymbols; i++ )
+      for( int i { 1 }; i <= numSymbols; i++ )
       {
          char name[GMS_SSSIZE];
          int dim, typ;
@@ -1280,11 +1281,11 @@ TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
             StrIndexBuffers keyNames;
             TgdxValues values;
             int dimFirst;
-            for( int j{}; j < numRecords; j++ )
+            for( int j {}; j < numRecords; j++ )
             {
                REQUIRE( pgx.gdxDataReadStr( keyNames.ptrs(), values.data(), dimFirst ) );
                REQUIRE_GE( dimFirst, 0 );
-               for( int d{}; d < dim; d++ )
+               for( int d {}; d < dim; d++ )
                   REQUIRE( !keyNames[d].empty() );
             }
             REQUIRE( pgx.gdxDataReadDone() );
@@ -1305,7 +1306,7 @@ TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
       // d(i,j) is symbol 5
       REQUIRE( pgx.gdxFindSymbol( "d", symNr ) );
       REQUIRE_EQ( 5, symNr );
-      std::array<int, 2> domainSyNrs{};
+      std::array<int, 2> domainSyNrs {};
       REQUIRE( pgx.gdxSymbolGetDomain( 5, domainSyNrs.data() ) );
       REQUIRE_EQ( 2, pgx.gdxSymbolDim( 5 ) );
       // first domain of d(i,j) is i (symbol 1)
@@ -1322,10 +1323,10 @@ TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
          ( (std::list<std::pair<int, int>> *) uptr )->emplace_back( rawIndex, mappedIndex );
       };
 
-      int nrElem{};
-      std::list<std::pair<int, int>> callArgs{};
+      int nrElem {};
+      std::list<std::pair<int, int>> callArgs {};
       REQUIRE( pgx.gdxGetDomainElements( 5, 1, gdx::DOMC_EXPAND, domIndexCallback, nrElem, (void *) &callArgs ) );
-      const std::list<std::pair<int, int>> expectedCallArgs{
+      const std::list<std::pair<int, int>> expectedCallArgs {
               { 1, 1 },
               { 2, 2 } };
       REQUIRE_EQ( 2, nrElem );
@@ -1349,8 +1350,8 @@ TEST_CASE( "Tests related to universe" )
       auto fn = "universe_tests.gdx"s;
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxinterfacetests", errNr ) );
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "A set", 1, dt_set, 0 ) );
-      StrIndexBuffers keys{};
-      TgdxValues vals{};
+      StrIndexBuffers keys {};
+      TgdxValues vals {};
       for( int i = 1; i <= 8; i++ )
       {
          keys[0] = "uel_" + std::to_string( i );
@@ -1408,14 +1409,14 @@ TEST_CASE( "Tests related to universe" )
 
 TEST_CASE( "Test domain checking for subset" )
 {
-   const std::string fn{ "xyz.gdx" };
+   const std::string fn { "xyz.gdx" };
    basicTest( [&]( TGXFileObj &pgx ) {
       int errnr;
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxinterfacetests", errnr ) );
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "expl", 1, dt_set, 0 ) );
       std::string key;
-      TgdxValues vals{};
-      for( int i{}; i < 6; i++ )
+      TgdxValues vals {};
+      for( int i {}; i < 6; i++ )
       {
          key = "i"s + std::to_string( i + 1 );
          const char *keyptrs[] = { key.c_str() };
@@ -1450,8 +1451,8 @@ TEST_CASE( "Test domain checking for subset" )
 
       // check if error uels was correctly set (more specific domain violation details)
       REQUIRE_EQ( 1, pgx.gdxDataErrorCount() );
-      std::array<int, 20> errRecKeys{};
-      std::array<double, 5> errRecVals{};
+      std::array<int, 20> errRecKeys {};
+      std::array<double, 5> errRecVals {};
       REQUIRE( pgx.gdxDataErrorRecord( 1, errRecKeys.data(), errRecVals.data() ) );
       char uelNotInSuperset[GMS_SSSIZE];
       int uelMap;
@@ -1469,8 +1470,8 @@ TEST_CASE( "Test writing a duplicate uel in string mode" )
       auto fn = "dup.gdx"s;
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxinterfacetests", errNr ) );
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "A set", 1, dt_set, 0 ) );
-      TgdxStrIndex keys{};
-      TgdxValues vals{};
+      TgdxStrIndex keys {};
+      TgdxValues vals {};
       for( int i = 1; i <= 8; i++ )
       {
          keys[0] = "uel_" + std::to_string( i );
@@ -1491,10 +1492,10 @@ TEST_CASE( "Test writing a duplicate uel in string mode" )
 
 TEST_CASE( "Test acronym facilities" )
 {
-   const auto fn{ "acronyms.gdx"s };
+   const auto fn { "acronyms.gdx"s };
    char acroName[GMS_SSSIZE], acroText[GMS_SSSIZE];
    int acroIndex;
-   TgdxValues vals{};
+   TgdxValues vals {};
    StrIndexBuffers sib;
 
    testWrite( fn, [&]( TGXFileObj &pgx ) {
@@ -1559,10 +1560,10 @@ TEST_CASE( "Test acronym facilities" )
       // Add acronym mapped to 23 as second record
       // Add unknown acronym as value of third record
       REQUIRE( pgx.gdxDataWriteStrStart( "p", "magic parameter", 1, dt_par, 0 ) );
-      const std::array<std::pair<std::string, int>, 4> entries{ { { "i1"s, 2 },
-                                                                  { "i2"s, 23 },
-                                                                  { "i3"s, 8 },
-                                                                  { "i4"s, 42 } } };
+      const std::array<std::pair<std::string, int>, 4> entries { { { "i1"s, 2 },
+                                                                   { "i2"s, 23 },
+                                                                   { "i3"s, 8 },
+                                                                   { "i4"s, 42 } } };
       for( const auto &[keyStr, acroVal]: entries )
       {
          sib.front() = keyStr;
@@ -1583,10 +1584,10 @@ TEST_CASE( "Test acronym facilities" )
       int nrRecs, key, dimFrst;
       REQUIRE( pgx.gdxDataReadRawStart( 1, nrRecs ) );
       REQUIRE_EQ( 4, nrRecs );
-      const std::array<std::tuple<int, std::string, int>, 4> expectedKeyAcros{ { { 1, "anotherOne"s, 2 },
-                                                                                 { 2, "myacr_mod"s, 23 },
-                                                                                 { 3, "UnknownACRO8", 8 },
-                                                                                 { 4, "Acro43", 42 } } };
+      const std::array<std::tuple<int, std::string, int>, 4> expectedKeyAcros { { { 1, "anotherOne"s, 2 },
+                                                                                  { 2, "myacr_mod"s, 23 },
+                                                                                  { 3, "UnknownACRO8", 8 },
+                                                                                  { 4, "Acro43", 42 } } };
       for( const auto &triple: expectedKeyAcros )
       {
          int expKey = std::get<0>( triple );
@@ -1647,9 +1648,9 @@ TEST_CASE( "Test acronym facilities" )
 
 TEST_CASE( "Test comments addition and querying" )
 {
-   auto fn{ "comments.gdx"s };
+   auto fn { "comments.gdx"s };
    char commentStrGot[GMS_SSSIZE];
-   const auto commentStrExp{ "A fancy comment!"s };
+   const auto commentStrExp { "A fancy comment!"s };
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "expl text", 1, dt_set, 0 ) );
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -1668,7 +1669,7 @@ TEST_CASE( "Test comments addition and querying" )
 
 TEST_CASE( "Test writing and reading set element texts more exhaustively" )
 {
-   std::string fn{ "setelemtxt_wr.gdx" };
+   std::string fn { "setelemtxt_wr.gdx" };
    // no set text
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxUELRegisterRawStart() );
@@ -1676,9 +1677,9 @@ TEST_CASE( "Test writing and reading set element texts more exhaustively" )
       REQUIRE( pgx.gdxUELRegisterDone() );
 
       pgx.gdxDataWriteRawStart( "i", "cities", 1, dt_set, 0 );
-      TgdxValues vals{};
+      TgdxValues vals {};
       vals[GMS_VAL_LEVEL] = 3.141;
-      int key{ 1 };
+      int key { 1 };
       pgx.gdxDataWriteRaw( &key, vals.data() );
       pgx.gdxDataWriteDone();
    } );
@@ -1686,7 +1687,7 @@ TEST_CASE( "Test writing and reading set element texts more exhaustively" )
       char txt[GMS_SSSIZE];
       int node;
       REQUIRE( pgx.gdxGetElemText( 0, txt, node ) );
-      int hi{ std::numeric_limits<int>::max() };
+      int hi { std::numeric_limits<int>::max() };
       REQUIRE_FALSE( pgx.gdxGetElemText( hi, txt, node ) );
       REQUIRE_FALSE( pgx.gdxGetElemText( 1, txt, node ) );
    } );
@@ -1695,7 +1696,7 @@ TEST_CASE( "Test writing and reading set element texts more exhaustively" )
 
 TEST_CASE( "Debug issue with SymbolSetDomain and write raw domain check uncovered by emp_oa_gams_jams test" )
 {
-   std::string fn{ "domaincheck.gdx" };
+   std::string fn { "domaincheck.gdx" };
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxStoreDomainSets() );
       pgx.gdxStoreDomainSetsSet( false );
@@ -1706,16 +1707,16 @@ TEST_CASE( "Debug issue with SymbolSetDomain and write raw domain check uncovere
       pgx.gdxUELRegisterDone();
 
       pgx.gdxDataWriteRawStart( "j", "", 1, dt_set, 0 );
-      TgdxValues vals{};
+      TgdxValues vals {};
       vals[GMS_VAL_LEVEL] = 3.141;
       int key;
       for( key = 17; key <= 32; key++ )
          pgx.gdxDataWriteRaw( &key, vals.data() );
       REQUIRE( pgx.gdxDataWriteDone() );
       REQUIRE( pgx.gdxDataWriteRawStart( "jb", "", 1, dt_set, 0 ) );
-      TgdxStrIndex domainNames{};
+      TgdxStrIndex domainNames {};
       domainNames.front() = "j";
-      StrIndexBuffers domainIds{ &domainNames };
+      StrIndexBuffers domainIds { &domainNames };
       REQUIRE( pgx.gdxSymbolSetDomain( domainIds.cptrs() ) );
       key = 17;
       REQUIRE( pgx.gdxDataWriteRaw( &key, vals.data() ) );
@@ -1726,9 +1727,9 @@ TEST_CASE( "Debug issue with SymbolSetDomain and write raw domain check uncovere
 
 TEST_CASE( "Test writing and reading some special value scalars" )
 {
-   std::string fn{ "sv_scalars.gdx" };
+   std::string fn { "sv_scalars.gdx" };
    testWrite( fn, [&]( TGXFileObj &pgx ) {
-      TgdxValues vals{};
+      TgdxValues vals {};
       vals[GMS_VAL_LEVEL] = 1e+300;
       REQUIRE( pgx.gdxDataWriteRawStart( "undef", "", 0, dt_par, 0 ) );
       REQUIRE( pgx.gdxDataWriteRaw( nullptr, vals.data() ) );
@@ -1738,7 +1739,7 @@ TEST_CASE( "Test writing and reading some special value scalars" )
       int recCnt;
       REQUIRE( pgx.gdxDataReadRawStart( 1, recCnt ) );
       int dimFirst;
-      TgdxValues vals{};
+      TgdxValues vals {};
       pgx.gdxDataReadRaw( nullptr, vals.data(), dimFirst );
       REQUIRE( pgx.gdxDataReadDone() );
       double undef = vals[GMS_VAL_LEVEL];
@@ -1750,7 +1751,7 @@ TEST_CASE( "Test writing and reading some special value scalars" )
 
 TEST_CASE( "Test open append to rename a single uel" )
 {
-   const auto fn{ "append_rename.gdx"s }, prod{ "gdxtest"s };
+   const auto fn { "append_rename.gdx"s }, prod { "gdxtest"s };
    int errNr;
    basicTest( [&]( TGXFileObj &pgx ) {
       pgx.gdxOpenWrite( fn.c_str(), prod.c_str(), errNr );
@@ -1780,11 +1781,11 @@ void testWithCompressConvert( bool compress, const std::string &convert )
       std::cout << "Skipping conversion test due to missing GAMS system" << std::endl;
       return;
    }
-   const std::string fn{ "conv_compr.gdx" };
+   const std::string fn { "conv_compr.gdx" };
    setEnvironmentVar( "GDXCOMPRESS", compress ? "1"s : "0"s );
    setEnvironmentVar( "GDXCONVERT", convert );
    testWrite( fn, [&]( TGXFileObj &pgx ) {
-      TgdxValues vals{};
+      TgdxValues vals {};
       REQUIRE( pgx.gdxDataWriteRawStart( "undef", "", 0, dt_par, 0 ) );
       REQUIRE( pgx.gdxDataWriteRaw( nullptr, vals.data() ) );
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -1814,14 +1815,14 @@ TEST_CASE( "Test convert and compress" )
 
 TEST_CASE( "Test simple write/read with compression activated" )
 {
-   const auto fn{ "rw_compression.gdx"s };
-   const int cardinality{ 1024 };
+   const auto fn { "rw_compression.gdx"s };
+   const int cardinality { 1024 };
    setEnvironmentVar( "GDXCOMPRESS", "1"s );
-   TgdxValues vals{};
+   TgdxValues vals {};
    StrIndexBuffers sib;
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "set", 1, dt_set, 0 ) );
-      for( int i{}; i < cardinality; i++ )
+      for( int i {}; i < cardinality; i++ )
       {
          sib.front() = "i"s + std::to_string( i + 1 );
          REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), vals.data() ) );
@@ -1833,7 +1834,7 @@ TEST_CASE( "Test simple write/read with compression activated" )
       REQUIRE( pgx.gdxDataReadStrStart( 1, numRecs ) );
       REQUIRE_EQ( cardinality, numRecs );
       int dimFrst;
-      for( int i{}; i < cardinality; i++ )
+      for( int i {}; i < cardinality; i++ )
       {
          REQUIRE( pgx.gdxDataReadStr( sib.ptrs(), vals.data(), dimFrst ) );
          REQUIRE_EQ( "i"s + std::to_string( i + 1 ), sib.front().str() );
@@ -1847,7 +1848,7 @@ TEST_CASE( "Test simple write/read with compression activated" )
 TEST_CASE( "Test symbol index max UEL length" )
 {
    testReadModelGDX( "trnsport"s, [&]( TGXFileObj &pgx ) {
-      std::array<int, GLOBAL_MAX_INDEX_DIM> lengthInfo{};
+      std::array<int, GLOBAL_MAX_INDEX_DIM> lengthInfo {};
       int maxUelLen = pgx.gdxSymbIndxMaxLength( 7, lengthInfo.data() );// c
       REQUIRE_EQ( 9, maxUelLen );                                      // len(san-diego)=9
       REQUIRE_EQ( 9, lengthInfo[0] );                                  // san-diego
@@ -1878,8 +1879,8 @@ TEST_CASE( "Test filter" )
 {
    testReadModelGDX( "trnsport"s, []( TGXFileObj &pgx ) {
       // uels: seattle 1, san-diego 2, new-york 3, chicago 4, topeka 5
-      std::array<int, 2> filterAction{ gdx::DOMC_EXPAND, gdx::DOMC_EXPAND }, keys{};
-      TgdxValues values{};
+      std::array<int, 2> filterAction { gdx::DOMC_EXPAND, gdx::DOMC_EXPAND }, keys {};
+      TgdxValues values {};
 
       int nrRecs, dimFirst;
       REQUIRE( pgx.gdxDataReadFilteredStart( 5, filterAction.data(), nrRecs ) );// symbol 'd'
@@ -1889,7 +1890,7 @@ TEST_CASE( "Test filter" )
       REQUIRE_EQ( 2, keys.back() ); // san-diego
       REQUIRE( pgx.gdxDataReadDone() );
 
-      for( int fa{ -2 }; fa <= 0; fa++ )
+      for( int fa { -2 }; fa <= 0; fa++ )
       {
          filterAction = { fa, fa };
          REQUIRE( pgx.gdxDataReadFilteredStart( 5, filterAction.data(), nrRecs ) );// symbol 'd'
@@ -1938,15 +1939,15 @@ TEST_CASE( "Test filter" )
 
 TEST_CASE( "Test setting trace level" )
 {
-   std::string fn{ "trace.gdx"s };
+   std::string fn { "trace.gdx"s };
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxSetTraceLevel( (int) gdx::TGXFileObj::TraceLevels::trl_all, "tracestr" ) );
       REQUIRE( pgx.gdxUELRegisterRawStart() );
       REQUIRE( pgx.gdxUELRegisterRaw( "TheOnlyUEL" ) );
       REQUIRE( pgx.gdxUELRegisterDone() );
       REQUIRE( pgx.gdxDataWriteRawStart( "mysym", "This is my symbol!", 1, dt_par, 0 ) );
-      int key{ 1 };
-      TgdxValues values{};
+      int key { 1 };
+      TgdxValues values {};
       values[GMS_VAL_LEVEL] = 3.141;
       REQUIRE( pgx.gdxDataWriteRaw( &key, values.data() ) );
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -1986,7 +1987,7 @@ TEST_CASE( "Test setting/getting auto convert flag" )
       setEnvironmentVar( "GDXCOMPRESS", "1"s );
       setEnvironmentVar( "GDXCONVERT", "v5" );
       int ErrNr;
-      const std::string fn{ "autoconv.gdx"s };
+      const std::string fn { "autoconv.gdx"s };
       REQUIRE( pgx.gdxAutoConvert( 0 ) );// disable auto convert
       REQUIRE( pgx.gdxOpenWriteEx( fn.c_str(), "gdxtest", 0, ErrNr ) );
       pgx.gdxClose();
@@ -2004,12 +2005,12 @@ TEST_CASE( "Test setting/getting auto convert flag" )
 
 TEST_CASE( "Test reading methods with slices" )
 {
-   std::string fn{ "slice.gdx"s }, f2{ "slice_port.gdx"s };
+   std::string fn { "slice.gdx"s }, f2 { "slice_port.gdx"s };
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       StrIndexBuffers keys;
-      TgdxValues values{};
+      TgdxValues values {};
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "three element set", 1, dt_set, 0 ) );
-      for( int i{}; i < 3; i++ )
+      for( int i {}; i < 3; i++ )
       {
          keys.front() = "i"s + std::to_string( i + 1 );
          REQUIRE( pgx.gdxDataWriteStr( keys.cptrs(), values.data() ) );
@@ -2017,7 +2018,7 @@ TEST_CASE( "Test reading methods with slices" )
       REQUIRE( pgx.gdxDataWriteDone() );
    } );
    testRead( fn, [&]( TGXFileObj &pgx ) {
-      TgdxUELIndex elemCountsPerDim{}, expectedCounts{};
+      TgdxUELIndex elemCountsPerDim {}, expectedCounts {};
       expectedCounts.front() = 3;
       REQUIRE( pgx.gdxDataReadSliceStart( 1, elemCountsPerDim.data() ) );
       REQUIRE_EQ( expectedCounts, elemCountsPerDim );
@@ -2025,14 +2026,14 @@ TEST_CASE( "Test reading methods with slices" )
       StrIndexBuffers uelFilterStrs;
       uelFilterStrs.front() = ""s;
       auto recordCallback = []( const int *keyIndices, const double *vals ) {
-         static int expKey{};
+         static int expKey {};
          REQUIRE_EQ( expKey, keyIndices[0] );
          expKey++;
          expKey %= 3;
       };
       REQUIRE( pgx.gdxDataReadSlice( uelFilterStrs.cptrs(), dim, recordCallback ) );
 
-      TgdxUELIndex keyIndices{};
+      TgdxUELIndex keyIndices {};
       keyIndices.front() = 1;
       StrIndexBuffers uelNames;
       REQUIRE( pgx.gdxDataSliceUELS( keyIndices.data(), uelNames.ptrs() ) );
@@ -2045,31 +2046,31 @@ TEST_CASE( "Test reading methods with slices" )
 
 TEST_CASE( "Test domain violations more extensively" )
 {
-   std::string fn{ "domviol.gdx"s };
+   std::string fn { "domviol.gdx"s };
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "a set", 1, dt_set, 0 ) );
-      std::string elem{ "i"s };
-      const char *key{ elem.c_str() };
-      std::array<double, GMS_VAL_MAX> vals{};
+      std::string elem { "i"s };
+      const char *key { elem.c_str() };
+      std::array<double, GMS_VAL_MAX> vals {};
       REQUIRE( pgx.gdxDataWriteStr( &key, vals.data() ) );
       REQUIRE( pgx.gdxDataWriteDone() );
 
-      const int paramDim{ 3 };
+      const int paramDim { 3 };
       REQUIRE( pgx.gdxDataWriteStrStart( "p", "parameter", paramDim, dt_par, 0 ) );
-      std::array<const char *, paramDim> domainIds{}, keys{};
+      std::array<const char *, paramDim> domainIds {}, keys {};
       std::fill_n( domainIds.begin(), paramDim, key );
-      int rc{ pgx.gdxSymbolSetDomain( domainIds.data() ) };
+      int rc { pgx.gdxSymbolSetDomain( domainIds.data() ) };
       REQUIRE( rc );
-      std::string nf{ "notfound"s };
+      std::string nf { "notfound"s };
       std::fill_n( keys.begin(), paramDim, nf.c_str() );
       rc = pgx.gdxDataWriteStr( keys.data(), vals.data() );
       REQUIRE( rc );
       REQUIRE( pgx.gdxDataWriteDone() );
       REQUIRE_EQ( 1, pgx.gdxDataErrorCount() );
 
-      std::array<int, GMS_MAX_INDEX_DIM> errorKeys{};
+      std::array<int, GMS_MAX_INDEX_DIM> errorKeys {};
       REQUIRE( pgx.gdxDataErrorRecordX( 1, errorKeys.data(), vals.data() ) );
-      for( int i{}; i < paramDim; i++ )
+      for( int i {}; i < paramDim; i++ )
          REQUIRE_EQ( -2, errorKeys[i] );
    } );
    std::filesystem::remove( fn );
@@ -2079,7 +2080,7 @@ TEST_CASE( "Test domain violations more extensively" )
 TEST_CASE( "Test fallback behavior when trying GDX operations when no file is open" )
 {
    std::string msg;
-   TGXFileObj pgx{ msg };
+   TGXFileObj pgx { msg };
 
    char text[GMS_SSSIZE];
    int nodeNr;
@@ -2129,20 +2130,20 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
    std::cout << "Skipping legacy version GDX file read test on macOS since gdxcopy does not support V5 and V6 there." << std::endl;
    return;
 #endif
-   const auto modelName{ "trnsport"s };
+   const auto modelName { "trnsport"s };
    acquireGDXforModel( modelName );
    for( const auto &versSuff: { "V5"s, "V6U"s, "V6C"s } )
    {
 
-      const auto outDir{ "out"s + versSuff }, cmd{ gamsToolCall("gdxcopy"s) + " -"s + versSuff + " "s + modelName + ".gdx "s + outDir };
-      int rc{ std::system( cmd.c_str() ) };
+      const auto outDir { "out"s + versSuff }, cmd { gamsToolCall( "gdxcopy"s ) + " -"s + versSuff + " "s + modelName + ".gdx "s + outDir };
+      int rc { std::system( cmd.c_str() ) };
       if( !rc )
       {
-         const auto convertedGDXfn{ modelName + "_"s + versSuff + ".gdx"s };
+         const auto convertedGDXfn { modelName + "_"s + versSuff + ".gdx"s };
          std::filesystem::rename( outDir + "/"s + modelName + ".gdx"s, convertedGDXfn );
          std::filesystem::remove( outDir );
          std::string ErrMsg;
-         TGXFileObj pgx{ ErrMsg };
+         TGXFileObj pgx { ErrMsg };
          int ErrNr;
          REQUIRE( pgx.gdxOpenRead( convertedGDXfn.c_str(), ErrNr ) );
          int syCnt, uelCnt;
@@ -2156,4 +2157,4 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
    std::filesystem::remove( "trnsport.gdx" );
 }
 
-}
+}// namespace gdx::tests::gdxtests

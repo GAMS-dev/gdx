@@ -1323,72 +1323,72 @@ public:
 
 private:
    std::unique_ptr<gmsstrm::TMiBufferedStreamDelphi> FFile;
-   TgxFileMode fmode{ f_not_open }, fmode_AftReg{ f_not_open };
+   TgxFileMode fmode { f_not_open }, fmode_AftReg { f_not_open };
    enum
    {
       stat_notopen,
       stat_read,
       stat_write
-   } fstatus{ stat_notopen };
-   int fComprLev{};
+   } fstatus { stat_notopen };
+   int fComprLev {};
    std::unique_ptr<TUELTable> UELTable;
-   std::unique_ptr<TSetTextList> SetTextList{};
-   std::unique_ptr<int[]> MapSetText{};
-   int FCurrentDim{};
-   std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem{}, PrevElem{}, MinElem{}, MaxElem{};
-   std::array<std::array<char, GLOBAL_UEL_IDENT_SIZE>, GLOBAL_MAX_INDEX_DIM> LastStrElem{};
-   int DataSize{};
-   tvarvaltype LastDataField{};
+   std::unique_ptr<TSetTextList> SetTextList {};
+   std::unique_ptr<int[]> MapSetText {};
+   int FCurrentDim {};
+   std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem {}, PrevElem {}, MinElem {}, MaxElem {};
+   std::array<std::array<char, GLOBAL_UEL_IDENT_SIZE>, GLOBAL_MAX_INDEX_DIM> LastStrElem {};
+   int DataSize {};
+   tvarvaltype LastDataField {};
    std::unique_ptr<TNameList> NameList;
    std::unique_ptr<TDomainStrList> DomainStrList;
    std::unique_ptr<LinkedDataType> SortList;
    std::optional<LinkedDataIteratorType> ReadPtr;
    std::unique_ptr<TTblGamsDataImpl<double>> ErrorList;
-   PgdxSymbRecord CurSyPtr{};
-   int ErrCnt{}, ErrCntTotal{};
-   int LastError{}, LastRepError{};
+   PgdxSymbRecord CurSyPtr {};
+   int ErrCnt {}, ErrCntTotal {};
+   int LastError {}, LastRepError {};
    std::unique_ptr<TFilterList> FilterList;
-   TDFilter *CurFilter{};
-   TDomainList DomainList{};
-   bool StoreDomainSets{ true };
-   TIntlValueMapDbl intlValueMapDbl{}, readIntlValueMapDbl{};
-   TIntlValueMapI64 intlValueMapI64{};
-   TraceLevels TraceLevel{ TraceLevels::trl_all };
+   TDFilter *CurFilter {};
+   TDomainList DomainList {};
+   bool StoreDomainSets { true };
+   TIntlValueMapDbl intlValueMapDbl {}, readIntlValueMapDbl {};
+   TIntlValueMapI64 intlValueMapI64 {};
+   TraceLevels TraceLevel { TraceLevels::trl_all };
    std::string TraceStr;
-   int VersionRead{};
+   int VersionRead {};
    std::string FProducer, FProducer2, FileSystemID;
-   int64_t MajorIndexPosition{};
-   int64_t NextWritePosition{};
-   int DataCount{}, NrMappedAdded{};
-   std::array<TgdxElemSize, GLOBAL_MAX_INDEX_DIM> ElemType{};
+   int64_t MajorIndexPosition {};
+   int64_t NextWritePosition {};
+   int DataCount {}, NrMappedAdded {};
+   std::array<TgdxElemSize, GLOBAL_MAX_INDEX_DIM> ElemType {};
    std::string MajContext;
    std::array<std::optional<TIntegerMapping>, GLOBAL_MAX_INDEX_DIM> SliceIndxs, SliceRevMap;
-   int SliceSyNr{};
+   int SliceSyNr {};
    std::array<std::string, GMS_MAX_INDEX_DIM> SliceElems;
-   bool DoUncompress{},  // when reading
-           CompressOut{};// when writing
-   int DeltaForWrite{};  // delta for last dimension or first changed dimension
-   int DeltaForRead{};   // first position indicating change
-   double Zvalacr{};     // tricky
+   bool DoUncompress {},  // when reading
+           CompressOut {};// when writing
+   int DeltaForWrite {};  // delta for last dimension or first changed dimension
+   int DeltaForRead {};   // first position indicating change
+   double Zvalacr {};     // tricky
    std::unique_ptr<TAcronymList> AcronymList;
-   std::array<TSetBitMap *, GLOBAL_MAX_INDEX_DIM> WrBitMaps{};
-   bool ReadUniverse{};
-   int UniverseNr{}, UelCntOrig{};// original uel count when we open the file
-   int AutoConvert{ 1 };
-   int NextAutoAcronym{};
-   bool AppendActive{};
+   std::array<TSetBitMap *, GLOBAL_MAX_INDEX_DIM> WrBitMaps {};
+   bool ReadUniverse {};
+   int UniverseNr {}, UelCntOrig {};// original uel count when we open the file
+   int AutoConvert { 1 };
+   int NextAutoAcronym {};
+   bool AppendActive {};
 
 #ifndef VERBOSE_TRACE
-   const TraceLevels defaultTraceLevel{ TraceLevels::trl_none };
-   const bool verboseTrace{};
+   const TraceLevels defaultTraceLevel { TraceLevels::trl_none };
+   const bool verboseTrace {};
 #else
-   const TraceLevels defaultTraceLevel{ TraceLevels::trl_all };
-   const bool verboseTrace{ true };
+   const TraceLevels defaultTraceLevel { TraceLevels::trl_all };
+   const bool verboseTrace { true };
 #endif
 
    //api wrapper magic for Fortran
-   TDataStoreFiltProc_t gdxDataReadRawFastFilt_DP{};
-   TDomainIndexProc_t gdxGetDomainElements_DP{};
+   TDataStoreFiltProc_t gdxDataReadRawFastFilt_DP {};
+   TDomainIndexProc_t gdxGetDomainElements_DP {};
 
    bool PrepareSymbolWrite( std::string_view Caller, const char *AName, const char *AText, int ADim, int AType, int AUserInfo );
    int PrepareSymbolRead( std::string_view Caller, int SyNr, const int *ADomainNrs, TgxFileMode newmode );
@@ -1423,9 +1423,9 @@ private:
    int gdxDataReadRawFastFilt_DP_FC( const int *Indx, const double *Vals, void *Uptr );
 
 public:
-   bool gdxGetDomainElements_DP_CallByRef{},
-           gdxDataReadRawFastFilt_DP_CallByRef{},
-           gdxDataReadRawFastEx_DP_CallByRef{};
+   bool gdxGetDomainElements_DP_CallByRef {},
+           gdxDataReadRawFastFilt_DP_CallByRef {},
+           gdxDataReadRawFastEx_DP_CallByRef {};
 };
 
 }// namespace gdx

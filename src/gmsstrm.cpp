@@ -68,7 +68,7 @@ int customFileRead( std::fstream *h, char *buffer, uint32_t buflen, uint32_t &nu
 
 int customFileOpen( const std::string &fName, CustomOpenAction mode, std::fstream *h )
 {
-   std::ios::openmode itsMode{ std::ios::binary };
+   std::ios::openmode itsMode { std::ios::binary };
    switch( mode )
    {
       case custOpenRead:
@@ -106,17 +106,17 @@ union TDoubleVar
 // sz should be at most 8, but we do not promise to check this!
 void reverseBytesMax8( void *psrc, void *pdest, int sz )
 {
-   std::array<uint8_t, 8> orig{}, flip{};
-   int n{ std::min( sz - 1, 7 ) };
+   std::array<uint8_t, 8> orig {}, flip {};
+   int n { std::min( sz - 1, 7 ) };
    std::memcpy( orig.data(), static_cast<const char *>( psrc ), n + 1 );
-   for( int k{}; k <= n; k++ )
+   for( int k {}; k <= n; k++ )
       flip[k] = orig[n - k];
    std::memcpy( static_cast<char *>( pdest ), flip.data(), n + 1 );
 }
 
 void TXStreamDelphi::WriteString( const std::string_view s )
 {
-   static std::array<char, 256> buf{};
+   static std::array<char, 256> buf {};
    utils::strConvCppToDelphi( s, buf.data() );
    Write( buf.data(), (uint32_t) s.length() + 1 );
 }
@@ -200,9 +200,9 @@ void TXFileStreamDelphi::SetPosition( int64_t P )
 }
 
 TXFileStreamDelphi::TXFileStreamDelphi( std::string AFileName, const FileAccessMode AMode )
-    : FS{}, FFileName{ std::move( AFileName ) }, FPassWord{}, FLastIOResult{}, PhysPosition{}
+    : FS {}, FFileName { std::move( AFileName ) }, FPassWord {}, FLastIOResult {}, PhysPosition {}
 {
-   CustomOpenAction FMode{ custOpenRead };
+   CustomOpenAction FMode { custOpenRead };
    switch( AMode )
    {
       case FileAccessMode::fmCreate:
@@ -236,7 +236,7 @@ void TXFileStreamDelphi::ApplyPassWord( const char *PR, char *PW, int Len, int64
 {
    const int L = (int) FPassWord.length();
    int FPwNxt = (int) Offs % L;
-   for( int N{}; N < Len; N++ )
+   for( int N {}; N < Len; N++ )
    {
       FPwNxt++;
       if( FPwNxt > L ) FPwNxt = 1;
@@ -252,7 +252,7 @@ uint32_t TXFileStreamDelphi::Read( void *Buffer, uint32_t Count )
    else
    {
       auto PW = static_cast<char *>( Buffer );
-      auto PR = std::unique_ptr<char[]>{ new char[Count] };
+      auto PR = std::unique_ptr<char[]> { new char[Count] };
       SetLastIOResult( customFileRead( FS.get(), PR.get(), Count, res ) );
       ApplyPassWord( PR.get(), PW, (int) Count, PhysPosition );
    }
@@ -269,7 +269,7 @@ uint32_t TXFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
    else
    {
       auto PR = static_cast<const char *>( Buffer );
-      auto PW = std::unique_ptr<char[]>{ new char[Count] };
+      auto PW = std::unique_ptr<char[]> { new char[Count] };
       ApplyPassWord( PR, PW.get(), (int) Count, PhysPosition );
    }
    SetLastIOResult( FS->bad() ? 1 : 0 );
@@ -279,7 +279,7 @@ uint32_t TXFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
 
 int TXFileStreamDelphi::GetLastIOResult()
 {
-   int res{ FLastIOResult };
+   int res { FLastIOResult };
    FLastIOResult = 0;
    return res;
 }
@@ -334,7 +334,7 @@ void TBufferedFileStreamDelphi::SetPosition( int64_t p )
    }
    if( NrLoaded > 0 && !FCompress )
    {
-      int64_t StartOfBuf{ PhysPosition - NrLoaded };
+      int64_t StartOfBuf { PhysPosition - NrLoaded };
       if( p >= StartOfBuf && p < PhysPosition )
       {
          NrRead = (uint32_t) ( p - StartOfBuf );
@@ -346,16 +346,16 @@ void TBufferedFileStreamDelphi::SetPosition( int64_t p )
 }
 
 TBufferedFileStreamDelphi::TBufferedFileStreamDelphi( const std::string &FileName, uint16_t Mode )
-    : TXFileStreamDelphi{ FileName, (FileAccessMode) Mode },
-      NrLoaded{},
-      NrRead{},
-      NrWritten{},
-      BufSize{ BufferSize },
-      CBufSize{ (uint32_t) std::round( (double) BufferSize * 12.0 / 10.0 ) + 20 },
+    : TXFileStreamDelphi { FileName, (FileAccessMode) Mode },
+      NrLoaded {},
+      NrRead {},
+      NrWritten {},
+      BufSize { BufferSize },
+      CBufSize { (uint32_t) std::round( (double) BufferSize * 12.0 / 10.0 ) + 20 },
       BufPtr( BufferSize ),
-      CBufPtr{ (PCompressBuffer) malloc( sizeof( TCompressHeader ) + CBufSize ) },
-      FCompress{},
-      FCanCompress{ true }// no longer a fatal error
+      CBufPtr { (PCompressBuffer) malloc( sizeof( TCompressHeader ) + CBufSize ) },
+      FCompress {},
+      FCanCompress { true }// no longer a fatal error
 {
 }
 
@@ -368,7 +368,7 @@ TBufferedFileStreamDelphi::~TBufferedFileStreamDelphi()
 
 bool TBufferedFileStreamDelphi::FlushBuffer()
 {
-   bool res{ true };
+   bool res { true };
    uint32_t ActWritten;
    if( !NrWritten ) return res;
    if( !FCompress || !FCanCompress )
@@ -448,7 +448,7 @@ uint32_t TBufferedFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
    else
    {
       auto UsrPtr = static_cast<const char *>( Buffer );
-      int UsrWriteCnt{};// total number of bytes written
+      int UsrWriteCnt {};// total number of bytes written
       while( Count > 0 )
       {
          auto NrBytes = std::min( Count, BufSize - NrWritten );
@@ -481,7 +481,7 @@ void TMiBufferedStreamDelphi::DetermineByteOrder()
    initOrderCommon<double>( order_double, size_double, PAT_DOUBLE );
 }
 
-TMiBufferedStreamDelphi::TMiBufferedStreamDelphi( const std::string &FileName, uint16_t Mode ) : TBufferedFileStreamDelphi{ FileName, Mode }
+TMiBufferedStreamDelphi::TMiBufferedStreamDelphi( const std::string &FileName, uint16_t Mode ) : TBufferedFileStreamDelphi { FileName, Mode }
 {
    if( FLastIOResult ) return;
    if( Mode != FileAccessMode::fmCreate ) DetermineByteOrder();// we cannot update a mixed environment file!
@@ -500,14 +500,14 @@ TMiBufferedStreamDelphi::TMiBufferedStreamDelphi( const std::string &FileName, u
       double D = PAT_DOUBLE;
       Write( &D, sizeof( double ) );
    }
-   TDoubleVar X{};
+   TDoubleVar X {};
    X.V = 1.0;
    NormalOrder = !X.VA.front();
 }
 
 int TMiBufferedStreamDelphi::GoodByteOrder() const
 {
-   int res{};
+   int res {};
    if( order_word == PAT_BAD_SIZE ) res += 1;
    if( order_word == PAT_BAD_ORDER ) res += 2;
    if( order_integer == PAT_BAD_SIZE ) res += 4;

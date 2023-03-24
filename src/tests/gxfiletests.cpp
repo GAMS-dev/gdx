@@ -1,4 +1,4 @@
-#include "doctest.h"   // for ResultBuilder, Expressi...
+#include "doctest.h"// for ResultBuilder, Expressi...
 #include "../gxfile.h"
 
 using namespace gdx;
@@ -44,12 +44,12 @@ TEST_CASE( "Test making a good explanatory text function" )
    REQUIRE_FALSE( MakeGoodExplText( nullptr ) );
 
    char explTxt1[256] = "'Test 1' and \"Test 2\"\t";
-   std::string expectedExplTxt1{ "'Test 1' and 'Test 2'?" };
+   std::string expectedExplTxt1 { "'Test 1' and 'Test 2'?" };
    REQUIRE_EQ( expectedExplTxt1.length(), MakeGoodExplText( explTxt1 ) );
    REQUIRE( !strcmp( expectedExplTxt1.c_str(), explTxt1 ) );
 
    char explTxt2[256] = "\"Test 1\"\n and 'Test 2'";
-   std::string expectedExplTxt2{ R"("Test 1"? and "Test 2")" };
+   std::string expectedExplTxt2 { R"("Test 1"? and "Test 2")" };
    REQUIRE_EQ( expectedExplTxt2.length(), MakeGoodExplText( explTxt2 ) );
    REQUIRE( !strcmp( expectedExplTxt2.c_str(), explTxt2 ) );
 }

@@ -40,26 +40,26 @@ const int BufSize = 1024 * 16;
 
 struct TGADataBuffer {
    // filler is needed, so a buffer can start on 8 byte boundary
-   int BytesUsed{}, filler{};
-   std::array<uint8_t, BufSize> Buffer{};
+   int BytesUsed {}, filler {};
+   std::array<uint8_t, BufSize> Buffer {};
 };
 
 template<typename T>
 class TGrowArrayFxd
 {
-   TGADataBuffer **PBase{};// dynamic heap array of pointers
-   TGADataBuffer *PCurrentBuf{};
-   int BaseAllocated{}, BaseUsed{ -1 }, FSize, FStoreFact;
+   TGADataBuffer **PBase {};// dynamic heap array of pointers
+   TGADataBuffer *PCurrentBuf {};
+   int BaseAllocated {}, BaseUsed { -1 }, FSize, FStoreFact;
 
 protected:
-   int64_t FCount{};
+   int64_t FCount {};
 
 public:
-   explicit TGrowArrayFxd() : FSize{ sizeof( T ) },
-                              FStoreFact{ BufSize / FSize }
+   explicit TGrowArrayFxd() : FSize { sizeof( T ) },
+                              FStoreFact { BufSize / FSize }
    {}
 
-   explicit TGrowArrayFxd( int ASize ) : FSize{ ASize }, FStoreFact{ BufSize / FSize }
+   explicit TGrowArrayFxd( int ASize ) : FSize { ASize }, FStoreFact { BufSize / FSize }
    {}
 
    virtual ~TGrowArrayFxd()
@@ -91,7 +91,7 @@ public:
             if( !BaseAllocated ) BaseAllocated = 32;
             else
                BaseAllocated *= 2;
-            size_t newByteCount{ BaseAllocated * sizeof( uint8_t * ) };
+            size_t newByteCount { BaseAllocated * sizeof( uint8_t * ) };
             if( !PBase ) PBase = static_cast<TGADataBuffer **>( std::malloc( newByteCount ) );
             else
                PBase = static_cast<TGADataBuffer **>( std::realloc( PBase, newByteCount ) );
@@ -172,15 +172,15 @@ public:
 
    int Add( int Item )
    {
-      int res{ (int) FCount };
+      int res { (int) FCount };
       AddItem( &Item );
       return res;
    }
 
    void Exchange( int Index1, int Index2 )
    {
-      int *p1{ GetItemPtrIndex( Index1 ) }, *p2{ GetItemPtrIndex( Index2 ) };
-      int t{ *p1 };
+      int *p1 { GetItemPtrIndex( Index1 ) }, *p2 { GetItemPtrIndex( Index2 ) };
+      int t { *p1 };
       *p1 = *p2;
       *p2 = t;
    }
@@ -201,18 +201,18 @@ template<typename T>
 class TTblGamsData
 {
    TGrowArrayFxd<uint8_t> DS;
-   collections::gmsobj::TXList<uint8_t> FList{};
+   collections::gmsobj::TXList<uint8_t> FList {};
    int FDim, FIndexSize, FDataSize;
-   bool FIsSorted{ true };
+   bool FIsSorted { true };
 
    void QuickSort( int L, int R )
    {
-      int i{ L };
+      int i { L };
       while( i < R )
       {
-         int j{ R };
-         int p{ ( L + R ) >> 1 };
-         auto pivot{ reinterpret_cast<int *>( FList[p] ) };
+         int j { R };
+         int p { ( L + R ) >> 1 };
+         auto pivot { reinterpret_cast<int *>( FList[p] ) };
          do {
             while( CompareWithRecPtr( i, pivot ) < 0 ) i++;
             while( CompareWithRecPtr( j, pivot ) > 0 ) j--;
@@ -240,11 +240,11 @@ class TTblGamsData
 
    int Compare( int Index1, int Index2 )
    {
-      const int *P1{ reinterpret_cast<const int *>( FList[Index1] ) },
-              *P2{ reinterpret_cast<const int *>( FList[Index2] ) };
-      for( int D{}; D < FDim; D++ )
+      const int *P1 { reinterpret_cast<const int *>( FList[Index1] ) },
+              *P2 { reinterpret_cast<const int *>( FList[Index2] ) };
+      for( int D {}; D < FDim; D++ )
       {
-         int diff{ P1[D] - P2[D] };
+         int diff { P1[D] - P2[D] };
          if( diff ) return diff;
       }
       return 0;
@@ -252,10 +252,10 @@ class TTblGamsData
 
    int CompareWithRecPtr( int i1, const int *p2 )
    {
-      auto P1{ reinterpret_cast<const int *>( FList[i1] ) };
-      for( int k{}; k < FDim; k++ )
+      auto P1 { reinterpret_cast<const int *>( FList[i1] ) };
+      for( int k {}; k < FDim; k++ )
       {
-         int diff{ P1[k] - p2[k] };
+         int diff { P1[k] - p2[k] };
          if( diff ) return diff;
       }
       return 0;
@@ -263,14 +263,14 @@ class TTblGamsData
 
    void Exchange( int Index1, int Index2 )
    {
-      auto P{ *FList[Index1] };
+      auto P { *FList[Index1] };
       *FList[Index1] = *FList[Index2];
       *FList[Index2] = P;
    }
 
    void InsertRecord( int N, const int *Inx, const T *Buffer )
    {
-      auto P{ DS.ReserveMem() };
+      auto P { DS.ReserveMem() };
       std::memcpy( P, Inx, FIndexSize );
       std::memcpy( &P[FIndexSize], Buffer, FDataSize );
       FList.Insert( N, P );
@@ -278,10 +278,10 @@ class TTblGamsData
    }
 
 public:
-   TTblGamsData( int ADim, int ADataSize ) : DS{ static_cast<int>( ADim * sizeof( int ) + ADataSize ) },
-                                             FDim{ ADim },
-                                             FIndexSize{ static_cast<int>( FDim * sizeof( int ) ) },
-                                             FDataSize{ ADataSize }
+   TTblGamsData( int ADim, int ADataSize ) : DS { static_cast<int>( ADim * sizeof( int ) + ADataSize ) },
+                                             FDim { ADim },
+                                             FIndexSize { static_cast<int>( FDim * sizeof( int ) ) },
+                                             FDataSize { ADataSize }
    {
    }
 
@@ -294,7 +294,7 @@ public:
 
    void GetRecord( int N, int *Inx, T *Buffer )
    {
-      auto P{ FList[N] };
+      auto P { FList[N] };
       std::memcpy( Inx, P, FIndexSize );
       std::memcpy( Buffer, &P[FIndexSize], FDataSize );
    }
@@ -303,8 +303,8 @@ public:
    {
       if( !FIsSorted )
       {
-         bool SortNeeded{};
-         for( int N{}; N < FList.size() - 1; N++ )
+         bool SortNeeded {};
+         for( int N {}; N < FList.size() - 1; N++ )
          {
             if( Compare( N, N + 1 ) > 0 )
             {

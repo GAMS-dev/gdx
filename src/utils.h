@@ -178,7 +178,7 @@ inline char *NewString( const char *s,
 {
    if( !s ) return nullptr;
    assert( s[slen] == '\0' );
-   char *buf{ new char[slen + 1] };
+   char *buf { new char[slen + 1] };
    utils::assignPCharToBuf( s, slen, buf, slen + 1 );
    return buf;
 }
@@ -187,7 +187,7 @@ inline char *NewString( const char *s,
                         size_t slen,
                         size_t &memSize )
 {
-   char *buf{ NewString( s, slen ) };
+   char *buf { NewString( s, slen ) };
    memSize += slen + 1;
    return buf;
 }
