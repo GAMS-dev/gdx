@@ -55,8 +55,8 @@ public:
     *   Potentially overwrites existing file with same name.
     *   If a file extension is not supplied, the extension '.gdx' will be used. The return code is
     *   a system dependent I/O error.
-    * @param FileName File name of the GDX file to be created.
-    * @param Producer Name of program that creates the GDX file.
+    * @param FileName File name of the GDX file to be created with arbitrary length.
+    * @param Producer Name of program that creates the GDX file (should not exceed 255 characters).
     * @param ErrNr Returns an error code or zero if there is no error.
     * @return Returns non-zero if the file can be opened; zero otherwise.
     * @see gdxOpenRead, gdxOpenWriteEx, ~TGXFileObj
@@ -68,8 +68,8 @@ public:
     * @details Open a new gdx file for output. If a file extension is not
     * supplied, the extension '.gdx' will be used. The return code is
     * a system dependent I/O error.
-    * @param FileName File name of the gdx file to be created.
-    * @param Producer Name of program that creates the gdx file.
+    * @param FileName File name of the gdx file to be created with arbitrary length.
+    * @param Producer Name of program that creates the gdx file (should not exceed 255 characters).
     * @param Compr Zero for no compression; non-zero uses compression (if available).
     * @param ErrNr Returns an error code or zero if there is no error.
     * @attention When writing compressed, set the AutoConvert flag to zero so the file is not uncompressed after the gdxClose; see gdxAutoConvert.
@@ -96,7 +96,10 @@ public:
     * @brief Start writing a new symbol in string mode
     * @details Adds a new symbol and supplies the UEL keys of the records for each dimension as strings.
     * @param SyId Name of the symbol (limited to 63 characters).
-    * @param ExplTxt Explanatory text for the symbol (limited to 255 characters).
+    *   The first character of a symbol must be a letter.
+    *   Following symbol characters may be letters, digits, and underscores.
+    *   Symbol names must be new and unique.
+    * @param ExplTxt Explanatory text for the symbol (limited to 255 characters). Mixed quote characters will be unified to first occurring one.
     * @param Dim Dimension of the symbol (limited to 20).
     * @param Typ Type of the symbol (set=0, parameter=1, variable=2, equation=3, alias=4).
     * @param UserInfo Supply additional data. See gdxDataWriteRawStart for more information.
@@ -118,9 +121,15 @@ public:
     * @attention
     *   This write operation affects the in-memory GDX object.
     *   Actual flushing of the records to the GDX file happens in gdxDataWriteDone.
-    * @param KeyStr The index for this element using strings for the unique elements
+    *   KeyStr should point to one string for each symbol dimension.
+    *   Each key string should not be longer than 63 characters.
+    *   Values should be big enough to store 5 double values.
+    * @param KeyStr The index for this element using strings for the unique elements. One entry for each symbol dimension.
     * @param Values The values for this element (level, marginal, lower-, upper-bound, scale)
     * @returns Non-zero if the operation is possible, zero otherwise
+    * @attention
+    *   Make sure there is a key string for each symbol dimension and each key string does not exceed 63 characters.
+    *   Make sure values does not contain more than 5 entries
     * @see gdxDataWriteMapStart, gdxDataWriteDone
     */
    int gdxDataWriteStr( const char **KeyStr, const double *Values );
@@ -180,6 +189,7 @@ public:
     * @param ErrNr Error number.
     * @param ErrMsg Error message (output argument). Contains error text after return.
     * @return Always returns non-zero.
+    * @attention Supplied buffer for error message ErrMsg should be at least 256 bytes long.
     * @see gdxGetLastError
     */
    static int gdxErrorStr( int ErrNr, char *ErrMsg );
@@ -192,7 +202,7 @@ public:
     *    a system dependent I/O error. If the file was found, but is not
     *    a valid gdx file, the function GetLastError can be used to handle
     *    these type of errors.
-    * @param FileName file name of the gdx file to be opened.
+    * @param FileName file name of the gdx file to be opened (arbitrary length).
     * @param ErrNr Returns an error code or zero if there is no error.
     * @return Returns non-zero if the file can be opened; zero otherwise.
     * @see gdxOpenWrite, ~TGXFileObj, gdxGetLastError
@@ -220,7 +230,7 @@ public:
    /**
     * @brief Find symbol by name
     * @details
-    *    Search for a symbol by name; the search is not case-sensitive.
+    *    Search for a symbol by name in the symbol table; the search is not case-sensitive.
     *    When the symbol is found, SyNr contains the symbol number and the
     *    function returns a non-zero integer. When the symbol is not found, the function
     *    returns zero and SyNr is set to -1.
@@ -244,7 +254,7 @@ public:
     *    possible or if there is no more data.
     * @attention
     *   KeyStr must point to one string for each symbol dimension where each string buffer must have size of 64 bytes.
-    *   Values must have length >=5.
+    *   Values must have length >=5 double entries.
     * @see gdxDataReadStrStart, gdxDataReadDone
     */
    int gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst );
@@ -257,7 +267,7 @@ public:
    int gdxDataReadDone();
 
    /**
-    * @brief Returns information (name, dimension count, type) about a symbol
+    * @brief Returns information (name, dimension count, type) about a symbol from the symbol table
     * @param SyNr The symbol number (range 0..NrSymbols); return universe info (*) when SyNr = 0.
     * @param SyId Name of the symbol (buffer should be 64 bytes long). Magic name "*" for universe.
     * @param Dim Dimension of the symbol (range 0..20).
@@ -575,8 +585,9 @@ public:
     *   When a domain is specified, write operations will be domain checked; records
     *   violating the domain will be added the the internal error list (see DataErrorCount
     *   and DataErrorRecord.)</p>
-    * @param DomainIDs Array of identifers (domain names) or "*" (universe).
+    * @param DomainIDs Array of identifers (domain names) or "*" (universe). One domain name for each symbol dimension.
     * @return Non-zero if the operation is possible, zero otherwise.
+    * @attention Make sure there is one buffer with size 64 bytes for each symbol dimension.
     * @see gdxSymbolGetDomain
     */
    int gdxSymbolSetDomain( const char **DomainIDs );
@@ -589,7 +600,7 @@ public:
     *   no domain checking will be performed. This function can be called during or after
     *   the write operation.
     *   If domain checking is needed, use gdxSymbolSetDomain
-    * @param DomainIDs Array of identifers (domain names) or "*" (universe).
+    * @param DomainIDs Array of identifiers (domain names) or "*" (universe). One domain name per symbol dimension with not more than 63 characters.
     * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxSymbolSetDomain, gdxSymbolGetDomainX
     */
@@ -660,6 +671,7 @@ public:
     * @param Uel String for unique element. Buffer should be 64 bytes long (to store maximum of 63 characters).
     * @param UelMap User mapping for this element or -1 if element was never mapped.
     * @return Non-zero if the operation is possible, zero otherwise.
+    * @attention Make sure buffer for Uel is at least 64 bytes long to prevent potential overflow.
     * @see gdxUMUelInfo, gdxGetUEL
     */
    int gdxUMUelGet( int UelNr, char *Uel, int &UelMap );
@@ -722,16 +734,20 @@ public:
     * @brief Get the string for a unique element using a mapped index
     * @details Retrieve the string for an unique element based on a mapped index number.
     * @param uelNr Index number in user space (range 1..NrUserElem).
-    * @param Uel String for the unique element.
+    * @param Uel String for the unique element which may be up to 63 characters.
     * @return Return non-zero if the index is in a valid range, zero otherwise.
+    * @attention Supplied buffer for storing the Uel name should be 64 bytes long to prevent overflow!
     * @see gdxUMUelGet
     */
    int gdxGetUEL( int uelNr, char *Uel ) const;
 
    /**
     * @brief Start writing a new symbol in mapped mode
-    * @param SyId Name of the symbol
-    * @param ExplTxt Explanatory text for the symbol
+    * @param SyId Name of the symbol (up to 63 characters)
+    *   The first character of a symbol must be a letter.
+    *   Following symbol characters may be letters, digits, and underscores.
+    *   Symbol names must be new and unique.
+    * @param ExplTxt Explanatory text for the symbol (up to 255 characters)
     * @param Dimen Dimension of the symbol
     * @param Typ Type of the symbol
     * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
@@ -799,11 +815,12 @@ public:
 
    /**
     * @brief Retrieve acronym information from the acronym table
-    * @param N Index into acronym table; range from 1 to AcronymCount
-    * @param AName Name of the acronym
-    * @param Txt Explanatory text of the acronym
-    * @param AIndx  Index value of the acronym
-    * @return Non-zero if the index into the acronym table is valid; false otherwise
+    * @param N Index into acronym table (range 1..AcronymCount).
+    * @param AName Name of the acronym (up to 63 characters).
+    * @param Txt Explanatory text of the acronym (up to 255 characters, mixed quote chars will be unified to first occurring quote).
+    * @param AIndx Index value of the acronym.
+    * @return Non-zero if the index into the acronym table is valid; false otherwise.
+    * @attention Make sure AName is 64 bytes and Txt 256 bytes wide to prevent overflow!
     * @see gdxAcronymSetInfo, gdxAcronymCount
     */
    int gdxAcronymGetInfo( int N, char *AName, char *Txt, int &AIndx ) const;
@@ -816,11 +833,14 @@ public:
     *     in this case the Indx parameter must match.
     *   When reading a gdx file, this function
     *     is used to provide the acronym index, and the AName parameter must match.
-    * @param N Index into acronym table; range from 1 to AcronymCount
-    * @param AName Name of the acronym
-    * @param Txt Explanatory text of the acronym
-    * @param AIndx  Index value of the acronym
-    * @return Non-zero if the index into the acronym table is valid; false otherwise
+    * @param N Index into acronym table (range 1..AcronymCount).
+    * @param AName Name of the acronym (up to 63 characters).
+    *   The first character of a symbol must be a letter.
+    *   Following symbol characters may be letters, digits, and underscores.
+    *   Symbol names must be new and unique.
+    * @param Txt Explanatory text of the acronym (up to 255 characters, mixed quote chars will be unified to first occurring quote)
+    * @param AIndx Index value of the acronym.
+    * @return Non-zero if the index into the acronym table is valid; false otherwise.
     * @see gdxAcronymGetInfo, gdxAcronymCount
     */
    int gdxAcronymSetInfo( int N, const char *AName, const char *Txt, int AIndx );
@@ -844,8 +864,8 @@ public:
     * @brief Get information how acronym values are remapped
     * @details
     *   When reading gdx data, we need to map indices for acronyms used in the gdx file to
-    *   indices used by the reading program. There is a problen when not all acronyms have been
-    *   registered before reading the gdx data. We need to map an udefined index we read to a new value.
+    *   indices used by the reading program. There is a problem when not all acronyms have been
+    *   registered before reading the gdx data. We need to map an undefined index we read to a new value.
     *   The value of NextAutoAcronym is used for that.
     * @param N Index into acronym table; range from 1 to AcronymCount
     * @param orgIndx The Index used in the gdx file
@@ -855,8 +875,8 @@ public:
     * @see gdxAcronymGetInfo, gdxAcronymCount, gdxAcronymNextNr
     * @details
     *   When reading gdx data, we need to map indices for acronyms used in the gdx file to
-    *   indices used by the reading program. There is a problen when not all acronyms have been
-    *   registered before reading the gdx data. We need to map an udefined index we read to a new value.
+    *   indices used by the reading program. There is a problem when not all acronyms have been
+    *   registered before reading the gdx data. We need to map an undefined index we read to a new value.
     *   The value of NextAutoAcronym is used for that.
     */
    int gdxAcronymGetMapping( int N, int &orgIndx, int &newIndx, int &autoIndex );
@@ -974,9 +994,9 @@ public:
 
    /**
     * @brief Set the amount of trace (debug) information generated
-    * @param N Tracing level  N <= 0 no tracing  N >= 3 maximum tracing
-    * @param s A string to be included in the trace output
-    * @return Always non-zero
+    * @param N Tracing level  N <= 0 no tracing  N >= 3 maximum tracing.
+    * @param s A string to be included in the trace output (arbitrary length).
+    * @return Always non-zero.
     */
    int gdxSetTraceLevel( int N, const char *s );
 
@@ -986,9 +1006,12 @@ public:
     * @details
     *   This function can be used to add entries before data is written. When entries
     *   are added implicitly use gdxAcronymSetInfo to update the table.
-    * @param AName Name of the acronym
-    * @param Txt Explanatory text of the acronym
-    * @param AIndx  Index value of the acronym
+    * @param AName Name of the acronym (up to 63 characters)
+    *   The first character of a symbol must be a letter.
+    *   Following symbol characters may be letters, digits, and underscores.
+    *   Symbol names must be new and unique.
+    * @param Txt Explanatory text of the acronym (up to 255 characters, mixed quotes will be unified to first occurring quote character).
+    * @param AIndx Index value of the acronym.
     * @return
     *   0 If the entry is not added because of a duplicate name using the same value fo the indx
     *   -1 If the entry is not added because of a duplicate name using a different value for the indx
@@ -1008,12 +1031,13 @@ public:
    /**
     * @brief Find the name of an acronym value
     * @param V Input value possibly containing an acronym
-    * @param AName Name of acronym value or the empty string
+    * @param AName Name of acronym value or the empty string (can be up to 63 characters)
     * @return
     *   Return non-zero if a name for the acronym is defined. Return
     *   zero if V does not represent an acronym value or a name
     *   is not defined. An unnamed acronym value will return a string
     *   of the form UnknownAcronymNNN; were NNN is the index of the acronym.
+    * @attention Supplied buffer for AName should be 64 bytes long to prevent overflow!
     * @see gdxAcronymIndex
     */
    int gdxAcronymName( double V, char *AName );
@@ -1042,6 +1066,7 @@ public:
     * @brief Returns a version descriptor of the library
     * @param V Contains version string after return
     * @return Always returns non-zero
+    * @attention Output argument buffer V should be 256 bytes long.
     */
    static int gdxGetDLLVersion( char *V );
 
@@ -1081,7 +1106,11 @@ public:
     * @param Dimen The dimension of the index space; this is the number of index positions
     *          that is not fixed.
     * @param DP Callback procedure which will be called for each available data item
+    *   Signature is
+    *       UEL index number keys for each symbol dimension (const int *)
+    *       5 double values (const double *)
     * @return Non-zero if the operation is possible, zero otherwise
+    * @attention Supply one UEL filter str for each symbol dimension (up to 63 characters per str).
     * @see gdxDataReadSliceStart, gdxDataSliceUELS, gdxDataReadDone
     */
    int gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataStoreProc_t DP );
@@ -1092,9 +1121,11 @@ public:
     *   After calling DataReadSliceStart, each index position is mapped from 0 to N(d)-1.
     *   This function maps this index space back in to unique elements represented as
     *   strings.
-    * @param SliceKeyInt The slice index to be mapped to strings.
+    * @param SliceKeyInt The slice index to be mapped to strings with one entry for each symbol dimension.
     * @param KeyStr Array of strings containing the unique elements.
     * @return Non-zero if the operation is possible, zero otherwise.
+    * @attention both SliceKeyInt and KeyStr should match the symbol dimension with their length
+    *   The string buffers pointed to by KeyStr should each be at least 64 bytes long to store up to 63 character UEL names.
     * @see gdxDataReadSliceStart, gdxDataReadDone
     */
    int gdxDataSliceUELS( const int *SliceKeyInt, char **KeyStr );

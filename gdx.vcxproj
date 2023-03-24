@@ -61,6 +61,7 @@
     <ClInclude Include="..\..\..\..\libs\gmszlib\zutil.h" />
     <ClInclude Include="src\gclgms.h" />
     <ClInclude Include="src\datastorage.h" />
+    <ClInclude Include="src\gdx.h" />
     <ClInclude Include="src\gmsdata.h" />
     <ClInclude Include="src\gmsobj.h" />
     <ClInclude Include="src\gmsstrm.h" />

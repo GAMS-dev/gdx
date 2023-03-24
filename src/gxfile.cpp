@@ -2869,7 +2869,7 @@ int TGXFileObj::gdxAcronymGetInfo( int N, char *AName, char *Txt, int &AIndx ) c
       return false;
    }
    const auto &acr = ( *AcronymList )[N - 1];
-   utils::assignStrToBuf( acr.AcrName, AName, GMS_SSSIZE );
+   utils::assignStrToBuf( acr.AcrName, AName, GLOBAL_UEL_IDENT_SIZE );
    utils::assignStrToBuf( acr.AcrText, Txt, GMS_SSSIZE );
    AIndx = acr.AcrMap;
    return true;

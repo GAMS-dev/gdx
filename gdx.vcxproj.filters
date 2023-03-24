@@ -137,5 +137,6 @@
     <ClInclude Include="src\tests\gdxtests.h">
       <Filter>tests</Filter>
     </ClInclude>
+    <ClInclude Include="src\gdx.h" />
   </ItemGroup>
 </Project>
