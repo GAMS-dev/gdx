@@ -3429,7 +3429,8 @@ int TGXFileObj::gdxSymbolAddComment( int SyNr, const char *Txt )
    }
    if( !SyPtr->SCommentsList )
       SyPtr->SCommentsList = std::make_optional<TCommentsList>();
-   SyPtr->SCommentsList->Add( Txt, std::strlen( Txt ) );
+   // AS: Limit to 255 characters since this will be stored as ShortString when saving comments list to GDX file on gdxClose
+   SyPtr->SCommentsList->Add( Txt, std::min<int>(255, (int)std::strlen( Txt )) );
    return true;
 }
 

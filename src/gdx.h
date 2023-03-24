@@ -417,9 +417,9 @@ public:
     *   Following symbol characters may be letters, digits, and underscores.
     *   Symbol names must be new and unique.
     * @param ExplTxt Explanatory text for the symbol (up to 255 characters).
-    * @param Dimen Dimension of the symbol (up to 20)
+    * @param Dimen Dimension of the symbol (up to 20).
     * @param Typ Type of the symbol (set=0, parameter=1, variable=2, equation=3, alias=4).
-    * @param UserInfo GAMS follows the following conventions:
+    * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
       | Type         | Value(s)                                                             |
       | ------------ | -------------------------------------------------------------------- |
       | Aliased Set  | The symbol number of the aliased set, or zero for the universe       |
@@ -449,17 +449,18 @@ public:
     *   The Node number can be used as an index in a string table in the user space;
     *   the value is set by calling SetTextNodeNr. If the Node number was never assigned,
     *   it will be returned as zero.
-    * @param TxtNr String table index
-    * @param Txt Text found for the entry
-    * @param Node Node number found for the entry
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @param TxtNr String table index.
+    * @param Txt Text found for the entry. Buffer should be 256 bytes wide.
+    * @param Node Node number (user space) found for the entry.
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxAddSetText, gdxSetTextNodeNr
+    * @attention Buffer supplied in out argument string Txt should be 256 bytes wide to prevent overflow!
     * @code
-      // assumes we are reading using strings ...
+      // assumes we are reading using strings
       while(pgx.gdxDataReadStr(Uels, Vals)) {
          for(int D{}; D<Dim; D++)
             std::cout << Uels[D] << " ";
-         indx = std::round(Vals[vallevel]);
+         int indx = std::round(Vals[vallevel]);
          if(indx > 0) {
             pgx.gdxGetElemText(indx, S, N);
             std::cout << "txt = " << S << "Node = " << N;
@@ -477,7 +478,7 @@ public:
        be retrieved with this function. If subsequent errors occur before
        this function is called, the first error code will be maintained.
        Calling this function will clear the last error stored.
-    * @return The error number, or zero if there was no error
+    * @return The error number, or zero if there was no error.
     * @see gdxErrorCount
     */
    int gdxGetLastError();
@@ -485,8 +486,9 @@ public:
 
    /**
     * @brief Retrieve the internal values for special values
-    * @param Avals array of special values used for Eps, +Inf, -Inf, NA and Undef
-    * @return Always non-zero
+    * @param Avals 7-element array of special values used for Eps, +Inf, -Inf, NA and Undef.
+    * @return Always non-zero.
+    * @attention output argument array Avals should have size for 7 elements.
     * @see gdxResetSpecialValues, gdxSetSpecialValues
     */
    int gdxGetSpecialValues( double *Avals );
@@ -494,56 +496,70 @@ public:
 
    /**
     * @brief Set the internal values for special values
-    * @param
-    *   AVals array of special values to be used for Eps, +Inf, -Inf, NA and Undef
-    *          Note that the values have to be unique
-    * @return Non-zero if all values specified are unique, zero otherwise
+    * @param AVals array of special values to be used for Eps, +Inf, -Inf, NA and Undef.
+    *   Note that the values have to be unique and AVals should have length 7.
+    * @return Non-zero if all values specified are unique, zero otherwise.
     * @note Before calling this function, initialize the array of special values
-    *   by calling gdxGetSpecialValues first
+    *   by calling gdxGetSpecialValues first.
+    * @attention size of AVals should be 7.
     * @see gdxSetReadSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
     */
    int gdxSetSpecialValues( const double *AVals );
 
    /**
     * @brief Retrieve the domain of a symbol
-    * @param SyNr The index number of the symbol, range 1..NrSymbols
-    * @param DomainSyNrs array returning the set identifiers or *;
+    * @param SyNr The index number of the symbol (range 1..NrSymbols).
+    * @param DomainSyNrs array (length=symbol dim) returning the set identifiers or "*";
     *   DomainSyNrs[D] will contain the index number of the one dimensional
-    *   set or alias used as the domain for index position D. A value of zero represents the universe ( * )
-    * @return Non-zero if the operation is possible, zero otherwise
+    *   set or alias used as the domain for index position D. A value of zero represents the universe "*".
+    * @return Non-zero if the operation is possible, zero otherwise.
+    * @attention integer array DomainSyNrs should be able to store one entry for each symbol dimension.
     * @see gdxSymbolSetDomain, gdxSymbolGetDomainX
     */
    int gdxSymbolGetDomain( int SyNr, int *DomainSyNrs );
 
    /**
     * @brief Retrieve the domain of a symbol (using relaxed or domain information)
-    * @param SyNr The index number of the symbol, range 1..NrSymbols DomainIDs[D] will contain the strings as they were stored with the call gdxSymbolSetDomainX. If gdxSymbolSetDomainX was never called, but gdxSymbolSetDomain was called, that information will be used instead.
+    * @param SyNr The index number of the symbol (range 1..NrSymbols)
+    * @param DomainIDs DomainIDs[D] will contain the strings as they were stored with the call gdxSymbolSetDomainX.
+    *   If gdxSymbolSetDomainX was never called, but gdxSymbolSetDomain was called, that information will be used instead.
+    *   Length of this array should by dimensionality of the symbol.
     * @return
     *   - 0: If operation was not possible (Bad SyNr)
     *   - 1: No domain information was available
     *   - 2: Data used was defined using gdxSymbolSetDomainX
     *   - 3: Data used was defined using gdxSymbolSetDomain
+    * @attention
+    *   Make sure DomainIDs is able to store a domain name for each symbol dimension.
+    *   Each domain name requires a 256 byte wide buffer to store its maximum of 255 characters.
     * @see gdxSymbolSetDomainX, gdxSymbolSetDomain
     */
    int gdxSymbolGetDomainX( int SyNr, char **DomainIDs );
 
-
    /**
     * @brief Returns Dimension of a symbol
-    * @param SyNr The symbol number (range 0..NrSymbols); return universe info when SyNr = 0
-    * @return -1 if the symbol number is not in the correct range, the symbol dimension otherwise
+    * @param SyNr The symbol number (range 0..NrSymbols); return universe info when SyNr = 0..
+    * @return -1 if the symbol number is not in the correct range, the symbol dimension otherwise.
     * @see gdxSymbolInfo, gdxSymbolInfoX, gdxFindSymbol
     */
    int gdxSymbolDim( int SyNr );
 
    /**
     * @brief Returns additional information about a symbol
-    * @param SyNr The symbol number (range 0..NrSymbols); return universe info when SyNr = 0
+    * @param SyNr The symbol number (range 0..NrSymbols); return universe info when SyNr = 0.
     * @param RecCnt Total number of records stored (unmapped); for the universe (SyNr = 0) this is the
-    *      number of entries when the gdx file was openened for reading.
-    * @param UserInfo User field value; see gdxDataWriteRawStart for more information
-    * @param ExplTxt Explanatory text for the symbol
-    * @return Zero if the symbol number is not in the correct range, non-zero otherwise
+    *      number of entries when the gdx file was opened for reading.
+    * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
+    * | Type         | Value(s)                                                             |
+    * | ------------ | -------------------------------------------------------------------- |
+    * | Aliased Set  | The symbol number of the aliased set, or zero for the universe       |
+    * | Set          | Zero                                                                 |
+    * | Parameter    | Zero                                                                 |
+    * | Variable     | The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9      |
+    * | Equation     | The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59      |
+    * @param ExplTxt Explanatory text for the symbol. Buffer for this output argument should be 256 bytes long.
+    * @return Zero if the symbol number is not in the correct range, non-zero otherwise.
+    * @attention Make sure the output argument string buffer for ExplTxt has size of 256 bytes.
     * @see gdxSystemInfo, gdxSymbolInfo, gdxFindSymbol
     */
    int gdxSymbolInfoX( int SyNr, int &RecCnt, int &UserInfo, char *ExplTxt );
@@ -559,8 +575,8 @@ public:
     *   When a domain is specified, write operations will be domain checked; records
     *   violating the domain will be added the the internal error list (see DataErrorCount
     *   and DataErrorRecord.)</p>
-    * @param DomainIDs array of identifers or *
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @param DomainIDs Array of identifers (domain names) or "*" (universe).
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxSymbolGetDomain
     */
    int gdxSymbolSetDomain( const char **DomainIDs );
@@ -573,60 +589,58 @@ public:
     *   no domain checking will be performed. This function can be called during or after
     *   the write operation.
     *   If domain checking is needed, use gdxSymbolSetDomain
-    * @param DomainIDs array of identifers or *
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @param DomainIDs Array of identifers (domain names) or "*" (universe).
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxSymbolSetDomain, gdxSymbolGetDomainX
     */
    int gdxSymbolSetDomainX( int SyNr, const char **DomainIDs );
 
-
    /**
     * @brief Returns the number of symbols and unique elements
-    * @param SyCnt Number of symbols available in the gdx file
-    * @param UelCnt Number of unique elements stored in the gdx file
+    * @param SyCnt Number of symbols (sets, parameters, ...) available in the gdx file.
+    * @param UelCnt Number of unique elements (UELs) stored in the gdx file.
     * @return Returns a non-zero value
     */
    int gdxSystemInfo( int &SyCnt, int &UelCnt ) const;
 
-
    /**
     * @brief Finish registration of unique elements
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxUELRegisterRawStart, gdxUELRegisterMapStart, gdxUELRegisterStrStart
     */
    int gdxUELRegisterDone();
 
-
    /**
     * @brief Register an unique elements in raw mode
     * @details
-       The unique element is registered in raw mode, i.e. the internally
-       assigned integer index is determined by the system
-       Can only be used while writing to a gdx file
-    * @param Uel String for unique element
-    * @return Non-zero if the operation is possible, zero otherwise
+       The unique element (UEL) is registered in raw mode, i.e. the internally
+       assigned integer index is determined by the system.
+       Can only be used while writing to a gdx file and gdxUELRegisterRawStart was called beforehand.
+    * @param Uel String for unique element (UEL) which may not exceed 63 characters in length.
+    *   Furthermore a UEL string must not mix single- and double-quotes.
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxUELRegisterMap, gdxUELRegisterDone
     */
    int gdxUELRegisterRaw( const char *Uel );
 
-
    /**
     * @brief Start registering unique elements in raw mode
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxUELRegisterRaw, gdxUELRegisterDone
     */
    int gdxUELRegisterRawStart();
 
-
    /**
     * @brief Register a unique element in string mode
     * @details
-       The unique element is registered in user mapped space. The returned
-       index is the next higher value. Registering an element a second time
-       is not considered an error and the same index position will be returned.
+    *   The unique element is registered in user mapped space. The returned
+    *   index is the next higher value. Registering an element a second time
+    *   is not considered an error and the same index position will be returned.
     *   A unique element must follow the GAMS rules when it contains quote characters.
-    * @param Uel String for unique element
-    * @param UelNr Index number assigned to this unique element in user space
+    *   Can only be used while writing to a gdx file and gdxUELRegisterStrStart was called beforehand.
+    * @param Uel String for unique element (UEL) which may not exceed a length of 63 characters.
+    *   Furthermore a UEL string must not mix single- and double-quotes.
+    * @param UelNr Index number assigned to this unique element in user space.
     * @return Non-zero if the element was registered, zero otherwise.
     * @see gdxUELRegisterStrStart, gdxUELRegisterDone
     */
@@ -635,48 +649,49 @@ public:
 
    /**
     * @brief Start registering unique elements in string mode
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxUELRegisterStr, gdxUELRegisterDone
     */
    int gdxUELRegisterStrStart();
 
-
    /**
     * @brief Get a unique element using an unmapped index
-    * @param UelNr Element number (unmapped) in the range 1..NrElem
-    * @param Uel String for unique element
-    * @param UelMap User mapping for this element or -1 if element was never mapped
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @param UelNr Element number (unmapped) (range 1..NrElem)
+    * @param Uel String for unique element. Buffer should be 64 bytes long (to store maximum of 63 characters).
+    * @param UelMap User mapping for this element or -1 if element was never mapped.
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxUMUelInfo, gdxGetUEL
     */
    int gdxUMUelGet( int UelNr, char *Uel, int &UelMap );
 
-
    /**
-    * @brief Return information about the unique elements
-    * @param UelCnt Total number of unique elements (uels in gdx file + new registered uels)
-    * @param HighMap Highest user mapping index used
-    * @return Always returns non-zero
+    * @brief Return information about the unique elements (UELs)
+    * @param UelCnt Total number of unique elements (UELs in gdx file plus new registered UELs).
+    * @param HighMap Highest user mapping index used.
+    * @return Always returns non-zero.
     * @see gdxUMUelGet
     */
    int gdxUMUelInfo( int &UelCnt, int &HighMap ) const;
 
-
    /**
-    * @brief Returns the dimension of the current active symbol
+    * @brief Returns the dimension of the currently active symbol
     * @details
     *    When reading or writing data, the dimension of the current active symbol
-    *    is sometimes needed to convert arguments from strings to pchars etc.
-    * @return Dimension of current active symbol
+    *    is sometimes needed to convert arguments from strings to pchars (char *) etc.
+    *    The currently active symbol is selected e.g. by starting a write- or read-operation
+    *    and choosing its symbol number (SyNr).
+    * @return Dimension of current active symbol.
+    * @see gdxDataReadRawStart, gdxDataWriteRawStart
     */
    [[nodiscard]] int gdxCurrentDim() const;
 
-
    /**
-    * @brief Rename UEL OldName to NewName
-    * @param OldName Name of an existing UEL
-    * @param NewName New name for the UEL
-    * @return Zero if the renaming was possible; non-zero is an error indicator
+    * @brief Rename unique element OldName to NewName
+    * @param OldName Name of an existing unique element (UEL).
+    * @param NewName New name for the UEL. Must not exist in UEL table yet.
+    * @attention String for unique element (UEL) which may not exceed a length of 63 characters.
+    *   Furthermore a UEL string must not mix single- and double-quotes.
+    * @return Zero if the renaming was possible; non-zero is an error indicator.
     */
    int gdxRenameUEL( const char *OldName, const char *NewName );
 
@@ -688,15 +703,14 @@ public:
     *   a system dependent I/O error. If the file was found, but is not
     *   a valid gdx file, the function GetLastError can be used to handle
     *   these type of errors.
-    * @param FileName file name of the gdx file to be opened
-    * @param ReadMode bitmap skip reading sections: 0-bit: string (1 skip reading string)
-    * @param ErrNr Returns an error code or zero if there is no error
-    * @return
-    *   Returns non-zero if the file can be opened; zero otherwise
+    * @param FileName File name of the gdx file to be opened (arbitrary length).
+    * @param ReadMode Bitmap skip reading sections: 0-bit: string (1 skip reading string).
+    * @param ErrNr Returns an error code or zero if there is no error.
+    * @return Returns non-zero if the file can be opened; zero otherwise.
     * @see gdxOpenWrite, ~TGXFileObj, gdxGetLastError
     * @code
         int ErrNr;
-        pgx.gdxOpenRead("file1.gdx", fmOpenRead, ErrNr);
+        pgx.gdxOpenReadEx("file1.gdx", fmOpenRead, ErrNr);
         if(ErrNr) {
            [...]
         }
@@ -704,17 +718,15 @@ public:
     */
    int gdxOpenReadEx( const char *FileName, int ReadMode, int &ErrNr );
 
-
    /**
     * @brief Get the string for a unique element using a mapped index
     * @details Retrieve the string for an unique element based on a mapped index number.
-    * @param uelNr Index number in user space (1..NrUserElem)
-    * @param Uel String for the unique element
-    * @return Return non-zero if the index is in a valid range, zero otherwise
+    * @param uelNr Index number in user space (range 1..NrUserElem).
+    * @param Uel String for the unique element.
+    * @return Return non-zero if the index is in a valid range, zero otherwise.
     * @see gdxUMUelGet
     */
    int gdxGetUEL( int uelNr, char *Uel ) const;
-
 
    /**
     * @brief Start writing a new symbol in mapped mode
@@ -722,7 +734,14 @@ public:
     * @param ExplTxt Explanatory text for the symbol
     * @param Dimen Dimension of the symbol
     * @param Typ Type of the symbol
-    * @param UserInfo See gdxDataWriteRawStart for more information
+    * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
+   * | Type         | Value(s)                                                             |
+   * | ------------ | -------------------------------------------------------------------- |
+   * | Aliased Set  | The symbol number of the aliased set, or zero for the universe       |
+   * | Set          | Zero                                                                 |
+   * | Parameter    | Zero                                                                 |
+   * | Variable     | The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9      |
+   * | Equation     | The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59      |
     * @return Non-zero if the operation is possible, zero otherwise
     * @see gdxDataWriteMap, gdxDataWriteDone
     */
@@ -1074,27 +1093,26 @@ public:
     *   This function maps this index space back in to unique elements represented as
     *   strings.
     * @param SliceKeyInt The slice index to be mapped to strings.
-    * @param KeyStr Array of strings containg the unique elements
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @param KeyStr Array of strings containing the unique elements.
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxDataReadSliceStart, gdxDataReadDone
     */
    int gdxDataSliceUELS( const int *SliceKeyInt, char **KeyStr );
 
    /**
     * @brief Return the number of bytes used by the data objects
-    * @return The number of bytes used by the data objects
+    * @return The number of bytes used by the data objects.
     */
    int64_t gdxGetMemoryUsed();
 
    /**
     * @brief Classify a value as a potential special value
-    * @param D Value to classify
-    * @param sv Classification
-    * @return Returns non-zero if D is a special value, zero otherwise
+    * @param D Value to classify.
+    * @param sv Classification.
+    * @return Returns non-zero if D is a special value, zero otherwise.
     * @see gdxGetSpecialValues, gdxSetSpecialValues
     */
    int gdxMapValue( double D, int &sv );
-
 
    /**
     * @brief Open an existing gdx file for output
@@ -1106,10 +1124,10 @@ public:
     *   and the whole setup will be treated as if all symbols were just written to
     *   the gdx file. Replacing a symbol is not allowed; it will generate a duplicate
     *   symbol error.
-    * @param FileName File name of the gdx file to be created
-    * @param Producer Name of program that appends to the gdx file
-    * @param ErrNr Returns an error code or zero if there is no error
-    * @return Returns non-zero if the file can be opened; zero otherwise
+    * @param FileName File name of the gdx file to be created (arbitrary length).
+    * @param Producer Name of program that appends to the gdx file (should not exceed 255 characters).
+    * @param ErrNr Returns an error code or zero if there is no error.
+    * @return Returns non-zero if the file can be opened; zero otherwise.
     * @see gdxOpenRead, gdxOpenWrite, gdxOpenWriteEx
     * @code
         std::string Msg;
@@ -1123,75 +1141,78 @@ public:
     */
    int gdxOpenAppend( const char *FileName, const char *Producer, int &ErrNr );
 
-
    /**
     * @brief Test if any of the elements of the set has an associated text
-    * @param SyNr Set Symbol number (1..NrSymbols)
-    * @return Non-zero if the Set contains at least one element that has associated text,
-    *     zero otherwise
+    * @param SyNr Set symbol number (range 1..NrSymbols).
+    * @return Non-zero if the set contains at least one element that has associated text,
+    *     zero otherwise.
     * @see gdxSystemInfo, gdxSymbolInfo
     */
    int gdxSetHasText( int SyNr );
 
-
    /**
     * @brief Set the internal values for special values when reading a gdx file
-    * @param AVals array of special values to be used for Eps, +Inf, -Inf, NA and Undef
-    *     Note that the values do not have to be unique
-    * @return Always non-zero
+    * @param AVals 7-element array of special values to be used for Eps, +Inf, -Inf, NA and Undef
+    *     Note that the values do not have to be unique.
+    * @return Always non-zero.
     * @note Before calling this function, initialize the array of special values
     *     by calling gdxGetSpecialValues first
+    * @attention AVals must have length of at least 7 double values.
     * @see gdxSetSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
     */
    int gdxSetReadSpecialValues( const double *AVals );
 
    /**
     * @brief Returns the length of the longest UEL used for every index position for a given symbol
-    * @param SyNr Symbol number
-    * @param LengthInfo The longest length for each index position
-    * @return The length of the longest UEL found in the data
+    * @param SyNr Symbol number (range 1..NrSymbols).
+    * @param LengthInfo The longest length for each index position.
+    *   This output argument should be able to store one integer for each symbol dimension.
+    * @return The length of the longest UEL found in the data (over all dimensions).
+    * @attention Make sure LengthInfo can store one integer for each symbol dimension.
     * @see gdxUELMaxLength
     */
    int gdxSymbIndxMaxLength( int SyNr, int *LengthInfo );
 
    /**
     * @brief Returns the length of the longest symbol name
-    * @return The number of characters in the longest symbol name
+    * @return The number of characters in the longest symbol name.
     */
    [[nodiscard]] int gdxSymbMaxLength() const;
 
    /**
     * @brief Add a line of comment text for a symbol
-    * @param SyNr The symbol number (range 1..NrSymbols); if SyNr <= 0 the current symbol being written
-    * @param Txt String to add
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @param SyNr The symbol number (range 1..NrSymbols); if SyNr <= 0 the current symbol being written.
+    * @param Txt String to add which should not exceed a length of 255 characters.
+    * @return Non-zero if the operation is possible, zero otherwise.
+    * @attention A line of comment text can not contain more than 255 characters but there are no other restrictions on it.
     * @see gdxSymbolGetComment
     */
    int gdxSymbolAddComment( int SyNr, const char *Txt );
 
    /**
     * @brief Retrieve a line of comment text for a symbol
-    * @param SyNr The symbol number (range 1..NrSymbols)
-    * @param N Line number (1..Count)
-    * @param Txt String containing the line requested
-    * @return
-    *   Non-zero if the operation is possible, zero otherwise
+    * @param SyNr The symbol number (range 1..NrSymbols).
+    * @param N Line number in the comment block (1..Count).
+    * @param Txt String containing the line requested (empty on error). Buffer should be able to hold 255 characters.
+    *   Potential causes for empty strings are symbol- (SyNr) or line-number (N) out of range.
+    * @return Non-zero if the operation is possible, zero otherwise.
+    * @attention Output argument string buffer must have size of 256 bytes.
     * @see gdxSymbolAddComment
     */
    int gdxSymbolGetComment( int SyNr, int N, char *Txt );
 
    /**
-    * @brief Returns the length of the longest UEL name
-    * @return The length of the longest UEL name
+    * @brief Returns the length of the longest unique element (UEL) name
+    * @return The length of the longest UEL name in the UEL table.
     * @see gdxSymbIndxMaxLength
     */
    [[nodiscard]] int gdxUELMaxLength() const;
 
    /**
     * @brief Search for unique element by its string
-    * @param Uel String to be searched
-    * @param UelNr Internal unique element number or -1 if not found
-    * @param UelMap User mapping for the element or -1 if not found or the element was never mapped
+    * @param Uel String to be searched (not longer than 63 characters, don't mix single- and double-quotes).
+    * @param UelNr Internal unique element number or -1 if not found.
+    * @param UelMap User mapping for the element or -1 if not found or the element was never mapped.
     * @return Non-zero if the element was found, zero otherwise
     */
    int gdxUMFindUEL( const char *Uel, int &UelNr, int &UelMap );
@@ -1207,12 +1228,17 @@ public:
     *   current index (as raw numbers) and the values.
     * @param UelFilterStr Each index can be fixed by setting the string for the unique
     *                 element. Set an index position to the empty string in order
-    *                 not to fix that position.
+    *                 not to fix that position. If the string is not-empty it should match
+    *                 an UEL name from the UEL table.
     * @param DP Callback procedure which will be called for each available data item
-    * @return Non-zero if the operation is possible, zero otherwise
+    *   This procedure (return type=void) should have the following signature:
+    *       UEL index number keys (const int *),
+    *       values (level, marginal, lower-, upper-bound, scale) (const double *),
+    *       pointer to custom data (void *).
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxDataReadRawFast, gdxDataReadSliceStart, gdxDataSliceUELS, gdxDataReadDone,
     * @code
-      auto DPCallBack = [](const TgdxUELIndex Indx, const TgdxValues Vals, void *Uptr)
+      auto DPCallBack = [](const int *Indx, const double *Vals, void *Uptr)
       {
         std::string s;
         int UelMap;
@@ -1233,8 +1259,11 @@ public:
     *   Use a callback function to read a symbol in raw mode. Using a callback procedure
     *   to read the data is faster because we no longer have to check the context for each
     *   call to read a record.
-    * @param SyNr The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
+    * @param SyNr The index number of the symbol (range 0..NrSymbols); SyNr = 0 reads universe.
     * @param DP Procedure that will be called for each data record
+    *   This procedure (return type=void) should have the following signature:
+    *       UEL index number keys (const int *),
+    *       values (level, marginal, lower-, upper-bound, scale) (const double *)
     * @param NrRecs The number of records available for reading
     * @return Non-zero if the operation is possible, zero otherwise
     * @see gdxDataReadRaw, gdxDataReadMapStart, gdxDataReadStrStart, gdxDataReadDone, gdxDataReadRawFastFilt
@@ -1242,15 +1271,21 @@ public:
    int gdxDataReadRawFast( int SyNr, TDataStoreProc_t DP, int &NrRecs );
 
    /**
-    * @brief Read a symbol in Raw mode using a callback procedure@details
+    * @brief Read a symbol in Raw mode using a callback procedure
+    * @details
     *   Use a callback function to read a symbol in raw mode. Using a callback procedure
     *   to read the data is faster because we no longer have to check the context for each
     *   call to read a record.
-    * @param SyNr The index number of the symbol, range 0..NrSymbols; SyNr = 0 reads universe
-    * @param DP Procedure that will be called for each data record
-    * @param NrRecs The number of records available for reading
-    * @param Uptr pointer to user memory that will be passed back with the callback
-    * @return Non-zero if the operation is possible, zero otherwise
+    * @param SyNr The index number of the symbol (range 0..NrSymbols); SyNr = 0 reads universe.
+    * @param DP Procedure that will be called for each data record.
+    *   This procedure (return type=void) should have the following signature:
+    *       UEL index number keys (const int *),
+    *       values (level, marginal, lower-, upper-bound, scale) (const double *),
+    *       dimension of first change (int),
+    *       pointer to custom data (void *)
+    * @param NrRecs The number of records available for reading.
+    * @param Uptr pointer to user memory that will be passed back with the callback.
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxDataReadRawFast
     */
    int gdxDataReadRawFastEx( int SyNr, TDataStoreExProc_t DP, int &NrRecs, void *Uptr );
