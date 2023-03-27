@@ -430,13 +430,38 @@ public:
     * @param Dimen Dimension of the symbol (up to 20).
     * @param Typ Type of the symbol (set=0, parameter=1, variable=2, equation=3, alias=4).
     * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
-      | Type         | Value(s)                                                             |
-      | ------------ | -------------------------------------------------------------------- |
-      | Aliased Set  | The symbol number of the aliased set, or zero for the universe       |
-      | Set          | Zero                                                                 |
-      | Parameter    | Zero                                                                 |
-      | Variable     | The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9      |
-      | Equation     | The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59      |
+    *  <table>
+    *  <thead>
+    *  <tr>
+    *    <th>Type</th>
+    *    <th>Value(s)</th>
+    *  </tr>
+    *  </thead>
+    *  <tbody>
+    *  <tr>
+    *    <td>Aliased Set</td>
+    *    <td>The symbol number of the aliased set, or zero for the universe</td>
+    *  </tr>
+    *  <tr>
+    *    <td>Set</td>
+    *    <td>Zero</td>
+    *  </tr>
+    *  <tr>
+    *    <td>Parameter</td>
+    *    <td>Zero</td>
+    *  </tr>
+    *  <tr>
+    *    <td>Variable</td>
+    *    <td>The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8,
+    *        semiinteger=9
+    *    </td>
+    *  </tr>
+    *  <tr>
+    *    <td>Equation</td>
+    *    <td>The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59</td>
+    *  </tr>
+    *  </tbody>
+    *  </table>
     * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxDataWriteRaw, gdxDataWriteDone
     */
@@ -560,13 +585,38 @@ public:
     * @param RecCnt Total number of records stored (unmapped); for the universe (SyNr = 0) this is the
     *      number of entries when the gdx file was opened for reading.
     * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
-    * | Type         | Value(s)                                                             |
-    * | ------------ | -------------------------------------------------------------------- |
-    * | Aliased Set  | The symbol number of the aliased set, or zero for the universe       |
-    * | Set          | Zero                                                                 |
-    * | Parameter    | Zero                                                                 |
-    * | Variable     | The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9      |
-    * | Equation     | The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59      |
+    * <table>
+    *  <thead>
+    *  <tr>
+    *      <th>Type</th>
+    *      <th>Value(s)</th>
+    *  </tr>
+    *  </thead>
+    *  <tbody>
+    *  <tr>
+    *      <td>Aliased Set</td>
+    *      <td>The symbol number of the aliased set, or zero for the universe</td>
+    *  </tr>
+    *  <tr>
+    *      <td>Set</td>
+    *      <td>Zero</td>
+    *  </tr>
+    *  <tr>
+    *      <td>Parameter</td>
+    *      <td>Zero</td>
+    *  </tr>
+    *  <tr>
+    *      <td>Variable</td>
+    *      <td>The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8,
+    *          semiinteger=9
+    *      </td>
+    *  </tr>
+    *  <tr>
+    *      <td>Equation</td>
+    *      <td>The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59</td>
+    *  </tr>
+    *  </tbody>
+    *  </table>
     * @param ExplTxt Explanatory text for the symbol. Buffer for this output argument should be 256 bytes long.
     * @return Zero if the symbol number is not in the correct range, non-zero otherwise.
     * @attention Make sure the output argument string buffer for ExplTxt has size of 256 bytes.
@@ -752,13 +802,38 @@ public:
     * @param Dimen Dimension of the symbol
     * @param Typ Type of the symbol
     * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
-   * | Type         | Value(s)                                                             |
-   * | ------------ | -------------------------------------------------------------------- |
-   * | Aliased Set  | The symbol number of the aliased set, or zero for the universe       |
-   * | Set          | Zero                                                                 |
-   * | Parameter    | Zero                                                                 |
-   * | Variable     | The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9      |
-   * | Equation     | The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59      |
+    * <table>
+    *   <thead>
+    *   <tr>
+    *       <th>Type</th>
+    *       <th>Value(s)</th>
+    *   </tr>
+    *   </thead>
+    *   <tbody>
+    *   <tr>
+    *       <td>Aliased Set</td>
+    *       <td>The symbol number of the aliased set, or zero for the universe</td>
+    *   </tr>
+    *   <tr>
+    *       <td>Set</td>
+    *       <td>Zero</td>
+    *   </tr>
+    *   <tr>
+    *       <td>Parameter</td>
+    *       <td>Zero</td>
+    *   </tr>
+    *   <tr>
+    *       <td>Variable</td>
+    *       <td>The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8,
+    *           semiinteger=9
+    *       </td>
+    *   </tr>
+    *   <tr>
+    *       <td>Equation</td>
+    *       <td>The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59</td>
+    *   </tr>
+    *   </tbody>
+    * </table>
     * @return Non-zero if the operation is possible, zero otherwise
     * @see gdxDataWriteMap, gdxDataWriteDone
     */
@@ -939,12 +1014,36 @@ public:
     *   to the user index space automatically. The actual reading of records
     *   is done with DataReadMap.</p>
     *   <p>The action codes are as follows:
-      | Action code   | Result                                                         |
-      | ------------- | -------------------------------------------------------------- |
-      | DOMC_UNMAPPED | The index is not mapped into user space                         |
-      | DOMC_EXPAND   | New unique elements encountered will be mapped into the user space |
-      | DOMC_STRICT   | If the unique element in this position does not map into user space, the record will not be available and is added to the error list instead |
-      | FilterNumber  | If the unique element in this position does not map into user space or is not enabled in this filter, the record will not be available and is added to the error list instead |
+    *     <table>
+    *     <thead>
+    *     <tr>
+    *       <th>Action code</th>
+    *       <th>Result</th>
+    *     </tr>
+    *     </thead>
+    *     <tbody>
+    *     <tr>
+    *       <td>DOMC_UNMAPPED</td>
+    *       <td>The index is not mapped into user space</td>
+    *     </tr>
+    *     <tr>
+    *       <td>DOMC_EXPAND</td>
+    *       <td>New unique elements encountered will be mapped into the user space</td>
+    *     </tr>
+    *     <tr>
+    *       <td>DOMC_STRICT</td>
+    *       <td>If the unique element in this position does not map into user space, the record will not be available and is
+    *           added to the error list instead
+    *       </td>
+    *     </tr>
+    *     <tr>
+    *       <td>FilterNumber</td>
+    *       <td>If the unique element in this position does not map into user space or is not enabled in this filter, the
+    *           record will not be available and is added to the error list instead
+    *       </td>
+    *     </tr>
+    *     </tbody>
+    *     </table>
     *   </p>
 */
    int gdxDataReadFilteredStart( int SyNr, const int *FilterAction, int &NrRecs );
