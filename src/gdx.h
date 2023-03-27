@@ -100,13 +100,13 @@ public:
     *   Following symbol characters may be letters, digits, and underscores.
     *   Symbol names must be new and unique.
     * @param ExplTxt Explanatory text for the symbol (limited to 255 characters). Mixed quote characters will be unified to first occurring one.
-    * @param Dim Dimension of the symbol (limited to 20).
+    * @param Dimen Dimension of the symbol (limited to 20).
     * @param Typ Type of the symbol (set=0, parameter=1, variable=2, equation=3, alias=4).
     * @param UserInfo Supply additional data. See gdxDataWriteRawStart for more information.
     * @returns Non-zero if the operation is possible, zero otherwise.
     * @see gdxDataWriteStr, gdxDataWriteDone
     */
-   int gdxDataWriteStrStart( const char *SyId, const char *ExplTxt, int Dim, int Typ, int UserInfo );
+   int gdxDataWriteStrStart( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
 
    /**
     * @brief Write a data element in string mode
@@ -270,13 +270,13 @@ public:
     * @brief Returns information (name, dimension count, type) about a symbol from the symbol table
     * @param SyNr The symbol number (range 0..NrSymbols); return universe info (*) when SyNr = 0.
     * @param SyId Name of the symbol (buffer should be 64 bytes long). Magic name "*" for universe.
-    * @param Dim Dimension of the symbol (range 0..20).
+    * @param Dimen Dimension of the symbol (range 0..20).
     * @param Typ Symbol type (set=0, parameter=1, variable=2, equation=3, alias=4).
     * @return Zero if the symbol number is not in the correct range, non-zero otherwise.
     * @attention SyId must be 64 characters long.
     * @see gdxSystemInfo, gdxSymbolInfoX, gdxSymbolDim, gdxFindSymbol
     */
-   int gdxSymbolInfo( int SyNr, char *SyId, int &Dim, int &Typ );
+   int gdxSymbolInfo( int SyNr, char *SyId, int &Dimen, int &Typ );
 
    /**
     * @brief Initialize the reading of a symbol in string mode
@@ -496,12 +496,12 @@ public:
 
    /**
     * @brief Retrieve the internal values for special values
-    * @param Avals 7-element array of special values used for Eps, +Inf, -Inf, NA and Undef.
+    * @param AVals 7-element array of special values used for Eps, +Inf, -Inf, NA and Undef.
     * @return Always non-zero.
     * @attention output argument array Avals should have size for 7 elements.
     * @see gdxResetSpecialValues, gdxSetSpecialValues
     */
-   int gdxGetSpecialValues( double *Avals );
+   int gdxGetSpecialValues( double *AVals );
 
 
    /**
@@ -600,6 +600,7 @@ public:
     *   no domain checking will be performed. This function can be called during or after
     *   the write operation.
     *   If domain checking is needed, use gdxSymbolSetDomain
+    * @param SyNr The index number of the symbol, range from 0 to NrSymbols; SyNr = 0 reads universe.
     * @param DomainIDs Array of identifiers (domain names) or "*" (universe). One domain name per symbol dimension with not more than 63 characters.
     * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxSymbolSetDomain, gdxSymbolGetDomainX
@@ -733,13 +734,13 @@ public:
    /**
     * @brief Get the string for a unique element using a mapped index
     * @details Retrieve the string for an unique element based on a mapped index number.
-    * @param uelNr Index number in user space (range 1..NrUserElem).
+    * @param UelNr Index number in user space (range 1..NrUserElem).
     * @param Uel String for the unique element which may be up to 63 characters.
     * @return Return non-zero if the index is in a valid range, zero otherwise.
     * @attention Supplied buffer for storing the Uel name should be 64 bytes long to prevent overflow!
     * @see gdxUMUelGet
     */
-   int gdxGetUEL( int uelNr, char *Uel ) const;
+   int gdxGetUEL( int UelNr, char *Uel ) const;
 
    /**
     * @brief Start writing a new symbol in mapped mode
@@ -854,10 +855,10 @@ public:
     *    incremented for each new undefined acronym.
     *    When NextAutoAcronym has a value of zero, the default, the value is ignored and the original
     *    index as stored in the gdx file is used for the index.
-    * @param nv New value for NextAutoAcronym; a value of less than zero is ignored
+    * @param NV New value for NextAutoAcronym; a value of less than zero is ignored
     * @return Previous value of NextAutoAcronym
     */
-   int gdxAcronymNextNr( int nv );
+   int gdxAcronymNextNr( int NV );
 
 
    /**
@@ -975,7 +976,7 @@ public:
     * @param FilterNr Number of a previously registered filter or the value DOMC_EXPAND if no filter is wanted
     * @param DP Callback procedure which will be called once for each available element (can be nil)
     * @param NrElem Number of unique elements found
-    * @param UPtr User pointer; will be passed to the callback procedure
+    * @param Uptr User pointer; will be passed to the callback procedure
     * @return Non-zero if the operation is possible, zero otherwise
     * @code
         int Cnt;
@@ -990,7 +991,7 @@ public:
         std::cout << "Using filter 7; number of records in error list = " << gdxDataErrorCount(PGX) << std::endl;
     * @endcode
     */
-   int gdxGetDomainElements( int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int &NrElem, void *UPtr );
+   int gdxGetDomainElements( int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int &NrElem, void *Uptr );
 
    /**
     * @brief Set the amount of trace (debug) information generated
@@ -1057,10 +1058,10 @@ public:
     *   is non-zero, we look at the GDXCOMPRESS and GDXCONVERT environment variables to determine if
     *   conversion to an older file format is desired. We needed this logic so gdxcopy.exe
     *   can disable automatic file conversion.
-    * @param nv New value for AutoConvert
+    * @param NV New value for AutoConvert
     * @return Previous value of AutoConvert
     */
-   int gdxAutoConvert( int nv );
+   int gdxAutoConvert( int NV );
 
    /**
     * @brief Returns a version descriptor of the library
@@ -1257,6 +1258,7 @@ public:
     *   Read a slice of data, by fixing zero or more index positions in the data.
     *   When a data element is available, the callback procedure DP is called with the
     *   current index (as raw numbers) and the values.
+    * @param SyNr The index number of the symbol, range from 0 to NrSymbols; SyNr = 0 reads universe.
     * @param UelFilterStr Each index can be fixed by setting the string for the unique
     *                 element. Set an index position to the empty string in order
     *                 not to fix that position. If the string is not-empty it should match
