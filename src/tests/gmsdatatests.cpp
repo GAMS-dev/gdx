@@ -79,7 +79,7 @@ TEST_CASE( "Test basic usage of TXIntList" )
 
 TEST_CASE( "Test basic usage of TTblGamsData" )
 {
-   TTblGamsData<double> gdl { 1, sizeof( double ) * 2 };
+   TTblGamsDataCxx<double> gdl { 1, sizeof( double ) * 2 };
    REQUIRE_EQ( 1, gdl.GetDimension() );
    REQUIRE_EQ( 0, gdl.GetCount() );
 

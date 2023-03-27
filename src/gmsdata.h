@@ -353,4 +353,94 @@ public:
       return FDim;
    }
 };
+
+template<typename T>
+class TTblGamsDataCxx
+{
+   int FDim, FDataSize;
+   std::vector<std::pair<int *, T *>> keyValues {};
+
+public:
+   TTblGamsDataCxx( int ADim, int ADataSize ) : FDim { ADim }, FDataSize { ADataSize } {}
+
+   virtual ~TTblGamsDataCxx()
+   {
+      Clear();
+   }
+
+   void GetRecord( int N, int *Inx, T *Vals )
+   {
+      std::memcpy( Inx, keyValues[N].first, FDim * sizeof( int ) );
+      std::memcpy( Vals, keyValues[N].second, FDataSize );
+   }
+
+   void GetKeys( int N, int *Inx )
+   {
+      std::memcpy( Inx, keyValues[N].first, FDim * sizeof( int ) );
+   }
+
+   void GetData( int N, T *Vals )
+   {
+      std::memcpy( Vals, keyValues[N].second, FDataSize );
+   }
+   double *GetDataPtr( int N )
+   {
+      return keyValues[N].second;
+   }
+
+   void AddRecord( const int *AElements, const T *AVals )
+   {
+      // NOTE: Maybe use batch allocator vs. single new allocs here for performance?
+      auto vals { new T[(size_t) FDataSize / sizeof( T )] };
+      std::memcpy( vals, AVals, FDataSize );
+      auto keys { new int[FDim] };
+      std::memcpy( keys, AElements, FDim * sizeof( int ) );
+      keyValues.emplace_back( keys, vals );
+   }
+
+   void Clear()
+   {
+      for( auto [k, v]: keyValues )
+      {
+         delete[] k;
+         delete[] v;
+      }
+      keyValues.clear();
+   }
+
+   [[nodiscard]] int size() const
+   {
+      return (int) keyValues.size();
+   }
+
+   [[nodiscard]] int GetCount() const
+   {
+      return size();
+   }
+
+   [[nodiscard]] bool empty() const
+   {
+      return keyValues.empty();
+   }
+
+   void Sort()
+   {
+      std::sort( keyValues.begin(), keyValues.end(), [this]( const auto &pair1, const auto &pair2 ) {
+         for( int i = 0; i < FDim; i++ )
+            if( pair1.first[i] >= pair2.first[i] ) return false;
+         return true;
+      } );
+   }
+
+   [[nodiscard]] int MemoryUsed() const
+   {
+      return static_cast<int>( keyValues.size() * ( FDim * sizeof( int ) + FDataSize * sizeof( T ) ) + keyValues.capacity() );
+   }
+
+   [[nodiscard]] int GetDimension() const
+   {
+      return FDim;
+   }
+};
+
 }// namespace gdx::collections::gmsdata
