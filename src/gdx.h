@@ -103,7 +103,7 @@ public:
     * @param Dimen Dimension of the symbol (limited to 20).
     * @param Typ Type of the symbol (set=0, parameter=1, variable=2, equation=3, alias=4).
     * @param UserInfo Supply additional data. See gdxDataWriteRawStart for more information.
-    * @returns Non-zero if the operation is possible, zero otherwise.
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxDataWriteStr, gdxDataWriteDone
     */
    int gdxDataWriteStrStart( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
@@ -126,7 +126,7 @@ public:
     *   Values should be big enough to store 5 double values.
     * @param KeyStr The index for this element using strings for the unique elements. One entry for each symbol dimension.
     * @param Values The values for this element (level, marginal, lower-, upper-bound, scale)
-    * @returns Non-zero if the operation is possible, zero otherwise
+    * @return Non-zero if the operation is possible, zero otherwise
     * @attention
     *   Make sure there is a key string for each symbol dimension and each key string does not exceed 63 characters.
     *   Make sure values does not contain more than 5 entries
@@ -137,14 +137,14 @@ public:
    /**
     * @brief Finish a write operation
     * @details For mapped- and string-mode the actual writing of the records to the GDX file happens here.
-    * @returns Non-zero if the operation is possible, zero otherwise.
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxDataErrorCount, gdxDataWriteRawStart, gdxDataWriteMapStart, gdxDataWriteStrStart
     */
    int gdxDataWriteDone();
 
    /**
     * @brief Start registering unique elements in mapped mode
-    * @returns Non-zero if the operation is possible, zero otherwise.
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxUELRegisterMap, gdxUELRegisterDone
     */
    int gdxUELRegisterMapStart();
@@ -160,7 +160,7 @@ public:
     *  and not exceed 63 characters length.
     * @param UMap User index number to be assigned to the unique element.
     * @param Uel String for unique element (max. 63 chars and no single-/double-quote mixing).
-    * @returns Non-zero if the operation is possible, zero otherwise.
+    * @return Non-zero if the operation is possible, zero otherwise.
     * @see gdxUELRegisterMapStart, gdxUELRegisterDone
     */
    int gdxUELRegisterMap( int UMap, const char *Uel );
@@ -172,7 +172,7 @@ public:
     *   finished. This does not free the GDX in-memory object.
     *   This method will automatically be called when the GDX object
     *   lifetime ends (e.g. being out of scope).
-    * @returns Returns the value of gdxGetLastError.
+    * @return Returns the value of gdxGetLastError.
     * @see gdxOpenRead, gdxOpenWrite
     */
    int gdxClose();
