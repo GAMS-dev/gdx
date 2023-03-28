@@ -124,12 +124,11 @@ public:
     *   KeyStr should point to one string for each symbol dimension.
     *   Each key string should not be longer than 63 characters.
     *   Values should be big enough to store 5 double values.
+    *   Make sure there is a key string for each symbol dimension and each key string does not exceed 63 characters.
+    *   Make sure values does not contain more than 5 entries
     * @param KeyStr The index for this element using strings for the unique elements. One entry for each symbol dimension.
     * @param Values The values for this element (level, marginal, lower-, upper-bound, scale)
     * @return Non-zero if the operation is possible, zero otherwise
-    * @attention
-    *   Make sure there is a key string for each symbol dimension and each key string does not exceed 63 characters.
-    *   Make sure values does not contain more than 5 entries
     * @see gdxDataWriteMapStart, gdxDataWriteDone
     */
    int gdxDataWriteStr( const char **KeyStr, const double *Values );
