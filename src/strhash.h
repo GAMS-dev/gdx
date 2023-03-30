@@ -61,7 +61,7 @@ protected:
 #endif
    std::vector<PHashBucket<T>> Buckets {};                    // sorted by order of insertion, no gaps
    std::unique_ptr<std::vector<PHashBucket<T>>> PHashTable {};// sorted by hash value, with gaps
-   std::unique_ptr<int[]> SortMap {};
+   std::unique_ptr<std::vector<int>> SortMap {};
    int HashTableSize {}, ReHashCnt {}, FCount {};
    bool FSorted {};
 
@@ -118,7 +118,7 @@ protected:
       }
       PHashTable = std::make_unique<std::vector<PHashBucket<T>>>( HashTableSize );
       // should be redundant due to std::vector being zero/value-initialized
-      //std::fill_n( PHashTable->begin(), HashTableSize, nullptr );
+      std::fill_n( PHashTable->begin(), HashTableSize, nullptr );
    }
 
    virtual int Hash( const char *s )
@@ -158,13 +158,13 @@ protected:
       while( i < R )
       {
          int j { R }, p { ( L + R ) >> 1 };
-         char *pPivotStr = Buckets[SortMap[p]]->StrP;
+         char *pPivotStr = Buckets[( *SortMap )[p]]->StrP;
          do {
-            while( Compare( Buckets[SortMap[i]]->StrP, pPivotStr ) < 0 ) i++;
-            while( Compare( Buckets[SortMap[j]]->StrP, pPivotStr ) > 0 ) j--;
+            while( Compare( Buckets[( *SortMap )[i]]->StrP, pPivotStr ) < 0 ) i++;
+            while( Compare( Buckets[( *SortMap )[j]]->StrP, pPivotStr ) > 0 ) j--;
             if( i < j )
             {
-               std::swap( SortMap[i], SortMap[j] );
+               std::swap( ( *SortMap )[i], ( *SortMap )[j] );
                i++;
                j--;
             }
@@ -247,7 +247,7 @@ public:
       int res { FCount + ( OneBased ? 1 : 0 ) };
       if( SortMap )
       {
-         SortMap[FCount] = FCount;
+         ( *SortMap )[FCount] = FCount;
          FSorted = false;
       }
       FCount++;// ugly
@@ -285,7 +285,7 @@ public:
       int res { FCount + ( OneBased ? 1 : 0 ) };
       if( SortMap )
       {
-         SortMap[FCount] = FCount;
+         ( *SortMap )[FCount] = FCount;
          FSorted = false;
       }
       FCount++;// ugly
@@ -347,7 +347,7 @@ public:
          res += std::strlen( Buckets[N]->StrP ) + 1;
       res += (int) ( Buckets.size() * sizeof( THashBucket<T> ) );
       if( PHashTable ) res += (int) ( PHashTable->size() * sizeof( THashBucket<T> ) );
-      if( SortMap ) res += (int) ( FCount * sizeof( int ) );
+      if( SortMap ) res += (int) ( SortMap->size() * sizeof( int ) );
       return res;
    }
 

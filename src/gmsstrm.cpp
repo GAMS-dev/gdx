@@ -34,6 +34,7 @@
 #include <stdexcept> // for runtime_error
 #include <string>    // for string, operator+, to_string, operator""s
 #include <utility>   // for move
+#include "gclgms.h"  // for GMS_SV_ACR, GMS_SV_UNDEF, GMS_SV_EPS, GMS_...
 
 using namespace std::literals::string_literals;
 
@@ -89,7 +90,7 @@ int customFileOpen( const std::string &fName, CustomOpenAction mode, std::fstrea
 int customFileRead( std::fstream *h, char *buffer, uint32_t buflen, uint32_t &numRead )
 {
    auto savedPos = h->tellg();
-   h->seekg( 0, std::fstream::end );
+   h->seekg( 0, h->end );
    numRead = std::min<uint32_t>( static_cast<uint32_t>( h->tellg() - savedPos ), buflen );
    h->seekg( savedPos );
    h->read( buffer, numRead );
@@ -123,27 +124,43 @@ void TXStreamDelphi::WriteString( const std::string_view s )
 
 void TXStreamDelphi::WriteDouble( double x )
 {
-   WriteValue( x );
+   WriteValue( RWType::rw_double, x );
 }
 
 void TXStreamDelphi::WriteInteger( int n )
 {
-   WriteValue( n );
+   WriteValue( RWType::rw_integer, n );
 }
 
 void TXStreamDelphi::WriteInt64( int64_t N )
 {
-   WriteValue( N );
+   WriteValue( RWType::rw_int64, N );
 }
 
 void TXStreamDelphi::WriteByte( uint8_t b )
 {
-   WriteValue( b );
+   WriteValue( RWType::rw_byte, b );
 }
 
 void TXStreamDelphi::WriteWord( uint16_t W )
 {
-   WriteValue( W );
+   WriteValue( RWType::rw_word, W );
+}
+
+void TXStreamDelphi::WriteBool( bool B )
+{
+   WriteValue( RWType::rw_bool, B );
+}
+
+void TXStreamDelphi::WriteChar( char C )
+{
+   WriteValue( RWType::rw_char, C );
+}
+
+void TXStreamDelphi::WritePChar( const char *s, int L )
+{
+   WriteInteger( L );
+   if( L > 0 ) Write( s, L );
 }
 
 std::string TXStreamDelphi::ReadString()
@@ -159,32 +176,81 @@ std::string TXStreamDelphi::ReadString()
 
 double TXStreamDelphi::ReadDouble()
 {
-   return ReadValue<double>();
+   return ReadValue<double>( RWType::rw_double );
 }
 
 int TXStreamDelphi::ReadInteger()
 {
-   return ReadValue<int>();
+   return ReadValue<int>( RWType::rw_integer );
 }
 
 uint8_t TXStreamDelphi::ReadByte()
 {
-   return ReadValue<uint8_t>();
+   return ReadValue<uint8_t>( RWType::rw_byte );
 }
 
 uint16_t TXStreamDelphi::ReadWord()
 {
-   return ReadValue<uint16_t>();
+   return ReadValue<uint16_t>( RWType::rw_word );
 }
 
 int64_t TXStreamDelphi::ReadInt64()
 {
-   return ReadValue<int64_t>();
+   return ReadValue<int64_t>( RWType::rw_int64 );
 }
+
+bool TXStreamDelphi::ReadBool()
+{
+   return ReadValue<bool>( RWType::rw_bool );
+}
+
+char TXStreamDelphi::ReadChar()
+{
+   return ReadValue<char>( RWType::rw_char );
+}
+
+void TXStreamDelphi::ReadPChar( char *P, int &L )
+{
+   L = ReadInteger();
+   if( L <= 0 ) P = nullptr;
+   else
+   {
+      P = new char[L];
+      Read( P, L );
+   }
+}
+
+void TXStreamDelphi::ActiveWriteOpTextDumping( const std::string &dumpFilename ) {}
 
 void TXFileStreamDelphi::SetLastIOResult( int V )
 {
    if( !FLastIOResult ) FLastIOResult = V;
+}
+
+void TXFileStreamDelphi::SetPassWord( const std::string &s )
+{
+   FPassWord.clear();
+   if( s.empty() ) return;
+   bool BB {};
+   for( int K {}; K < (int) s.length(); K++ )
+   {
+      if( s[K] != ' ' ) BB = false;
+      else
+      {
+         if( BB ) continue;
+         BB = true;
+      }
+      char B = s[K];
+      if( !( B & 1 ) ) B >>= 1;
+      else
+         B = (unsigned char) ( 0x80 + ( (unsigned char) B >> 1 ) );
+      FPassWord += B;
+   }
+}
+
+bool TXFileStreamDelphi::GetUsesPassWord()
+{
+   return !FPassWord.empty();
 }
 
 int64_t TXFileStreamDelphi::GetPosition()
@@ -252,9 +318,9 @@ uint32_t TXFileStreamDelphi::Read( void *Buffer, uint32_t Count )
    else
    {
       auto PW = static_cast<char *>( Buffer );
-      auto PR = std::unique_ptr<char[]> { new char[Count] };
-      SetLastIOResult( customFileRead( FS.get(), PR.get(), Count, res ) );
-      ApplyPassWord( PR.get(), PW, (int) Count, PhysPosition );
+      std::vector<char> PR( Count );
+      SetLastIOResult( customFileRead( FS.get(), PR.data(), Count, res ) );
+      ApplyPassWord( PR.data(), PW, (int) Count, PhysPosition );
    }
    PhysPosition += res;
    return res;
@@ -269,8 +335,8 @@ uint32_t TXFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
    else
    {
       auto PR = static_cast<const char *>( Buffer );
-      auto PW = std::unique_ptr<char[]> { new char[Count] };
-      ApplyPassWord( PR, PW.get(), (int) Count, PhysPosition );
+      std::vector<char> PW( Count );
+      ApplyPassWord( PR, PW.data(), (int) Count, PhysPosition );
    }
    SetLastIOResult( FS->bad() ? 1 : 0 );
    PhysPosition += Count;
@@ -310,7 +376,7 @@ bool TBufferedFileStreamDelphi::FillBuffer()
             TXFileStreamDelphi::Read( &CBufPtr->cxData, WLen );
             unsigned long XLen = BufSize;// we need a var parameter
             uncompress( BufPtr.data(), &XLen, &CBufPtr->cxData, WLen );
-            NrLoaded = static_cast<uint32_t>( XLen );
+            NrLoaded = XLen;
          }
       }
    }
@@ -386,7 +452,7 @@ bool TBufferedFileStreamDelphi::FlushBuffer()
          CBufPtr->cxHeader.cxB1 = (uint8_t) ( Len >> 8 );
          CBufPtr->cxHeader.cxB2 = Len & 0xFF;
          Len += sizeof( TCompressHeader );
-         ActWritten = TXFileStreamDelphi::Write( &CBufPtr->cxHeader.cxTyp, static_cast<uint32_t>( Len ) );
+         ActWritten = TXFileStreamDelphi::Write( &CBufPtr->cxHeader.cxTyp, Len );
          res = Len == ActWritten;
       }
       else
@@ -425,11 +491,16 @@ uint32_t TBufferedFileStreamDelphi::Read( void *Buffer, uint32_t Count )
          UsrReadCnt += NrBytes;
          Count -= NrBytes;
       }
-      // Out param buffer should not contain garbage after call
-      if( !UsrReadCnt && Count > 0 )
-         std::memset( UsrPtr, 0, Count );
       return UsrReadCnt;
    }
+}
+
+char TBufferedFileStreamDelphi::ReadCharacter()
+{
+   const char substChar = 0x1A;// 26
+   if( NrWritten > 0 ) FlushBuffer();
+   if( NrRead >= NrLoaded && !FillBuffer() ) return substChar;
+   return (char) BufPtr[NrRead++];
 }
 
 uint32_t TBufferedFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
@@ -471,6 +542,8 @@ void TBufferedFileStreamDelphi::SetCompression( bool V )
    FCompress = V;
 }
 
+bool TBufferedFileStreamDelphi::GetCompression() const { return FCompress; }
+
 bool TBufferedFileStreamDelphi::GetCanCompress() const { return FCanCompress; }
 
 
@@ -505,6 +578,20 @@ TMiBufferedStreamDelphi::TMiBufferedStreamDelphi( const std::string &FileName, u
    NormalOrder = !X.VA.front();
 }
 
+//note: this only works when src and dest point to different areas
+void TMiBufferedStreamDelphi::ReverseBytes( void *psrc, void *pdest, int sz )
+{
+   auto pdestc = static_cast<char *>( pdest );
+   auto psrcc = static_cast<char *>( psrc );
+   pdestc += sz - 1;
+   for( int k { 0 }; k < sz; k++ )
+   {
+      *pdestc = *psrcc;
+      psrcc++;
+      pdestc--;
+   }
+}
+
 int TMiBufferedStreamDelphi::GoodByteOrder() const
 {
    int res {};
@@ -519,22 +606,178 @@ int TMiBufferedStreamDelphi::GoodByteOrder() const
 
 double TMiBufferedStreamDelphi::ReadDouble()
 {
-   return ReadValueOrdered<double>( order_double );
+   return ReadValueOrdered<double>( RWType::rw_double, order_double );
 }
 
 int TMiBufferedStreamDelphi::ReadInteger()
 {
-   return ReadValueOrdered<int>( order_integer );
+   return ReadValueOrdered<int>( RWType::rw_integer, order_integer );
 }
 
 uint16_t TMiBufferedStreamDelphi::ReadWord()
 {
-   return ReadValueOrdered<uint16_t>( order_word );
+   return ReadValueOrdered<uint16_t>( RWType::rw_word, order_word );
 }
 
 int64_t TMiBufferedStreamDelphi::ReadInt64()
 {
-   return ReadValueOrdered<int64_t>( order_integer );
+   return ReadValueOrdered<int64_t>( RWType::rw_int64, order_integer );
 }
 
+bool TMiBufferedStreamDelphi::WordsNeedFlip() const
+{
+   return order_word;
+}
+
+bool TMiBufferedStreamDelphi::IntsNeedFlip() const
+{
+   return order_integer;
+}
+
+void TMiBufferedStreamDelphi::WriteGmsInteger( int N )
+{
+   uint8_t B;
+   if( N >= 0 ) B = 0;
+   else
+   {
+      B = 128;
+      N *= -1;
+   }
+   B |= ( N & 15 );
+   N >>= 4;
+   int C {};
+   std::array<uint8_t, 5> W {};
+   while( N )
+   {
+      W[++C] = N & 255;
+      N >>= 8;
+   }
+   W[0] = B | ( C << 4 );
+   Write( W.data(), C + 1 );
+}
+
+enum tgmsvalue
+{
+   xvreal,
+   xvund,
+   xvna,
+   xvpin,
+   xvmin,
+   xveps,
+   xvacr
+};
+static tgmsvalue mapval( double x )
+{
+   if( x < GMS_SV_UNDEF ) return xvreal;
+   if( x >= GMS_SV_ACR ) return xvacr;
+   x /= GMS_SV_UNDEF;
+   int k = static_cast<int>( std::round( x ) );
+   if( std::abs( k - x ) > 1.0e-5 )
+      return xvund;
+   constexpr std::array<tgmsvalue, 5> kToRetMapping = {
+           xvund, xvna, xvpin, xvmin, xveps };
+   return k >= 1 && k <= (int) kToRetMapping.size() ? kToRetMapping[k - 1] : xvacr;
+}
+
+void TMiBufferedStreamDelphi::WriteGmsDouble( double D )
+{
+   tgmsvalue gv = mapval( D );
+   uint8_t B = gv;
+   if( gv == xvreal )
+   {
+      if( D == 0.0 ) B = 7;
+      else if( D == 1.0 )
+         B = 8;
+      else if( D == -1.0 )
+         B = 9;
+   }
+   if( B )
+   {
+      Write( &B, 1 );
+      if( gv == xvacr ) WriteGmsInteger( (int) std::round( D / GMS_SV_ACR ) );
+      return;
+   }
+   int C {};
+   TDoubleVar Z {};
+   Z.V = D;
+   if( NormalOrder )
+   {
+      for( const auto &cell: Z.VA )
+      {
+         if( !cell ) C++;
+         else
+            break;
+      }
+      B = 128 | C;
+      Write( &B, 1 );
+      Write( &Z.VA[C + 1], (uint32_t) Z.VA.size() - C );
+   }
+   else
+   {
+      for( int i { (int) Z.VA.size() - 1 }; i >= 0; i-- )
+      {
+         if( !Z.VA[i] ) C++;
+         else
+            break;
+      }
+      B = 128 | C;
+      Write( &B, 1 );
+      for( int i = 8 - C - 1; i >= 0; i-- )
+         Write( &Z.VA[i], 1 );
+   }
+}
+
+int TMiBufferedStreamDelphi::ReadGmsInteger()
+{
+   uint8_t B;
+   Read( &B, 1 );
+   std::array<uint8_t, 5> W {};
+   W[0] = B & 15;
+   bool Neg = B >= 128;
+   int C { ( B >> 4 ) & 7 };
+   if( C > 0 ) Read( &W[1], C );
+   int res {};
+   while( C >= 1 )
+   {
+      res = ( res << 8 ) | W[C];
+      C--;
+   }
+   res = ( res << 4 ) | W[0];
+   if( Neg ) res *= -1;
+   return res;
+}
+
+double TMiBufferedStreamDelphi::ReadGmsDouble()
+{
+   const static std::array<double, 9> bToRes { GMS_SV_UNDEF, GMS_SV_NA, GMS_SV_PINF, GMS_SV_MINF, GMS_SV_EPS, GMS_SV_ACR, 0.0, 1.0, -1.0 };
+   auto B { ReadByte() };
+   if( !( B & 128 ) ) return B >= 1 && B <= 9 ? ( B == 6 ? ReadGmsInteger() : 1.0 ) * bToRes[B] : 0.0;
+   TDoubleVar Z {};
+   auto C = B & 127;
+   if( NormalOrder )
+   {
+      for( auto &cell: Z.VA )
+      {
+         if( !C ) cell = ReadByte();
+         else
+         {
+            cell = 0;
+            C--;
+         }
+      }
+   }
+   else
+   {
+      for( int i { (int) Z.VA.size() - 1 }; i >= 0; i-- )
+      {
+         if( !C ) Z.VA[i] = ReadByte();
+         else
+         {
+            Z.VA[i] = 0;
+            C--;
+         }
+      }
+   }
+   return Z.V;
+}
 }// namespace gdx::gmsstrm

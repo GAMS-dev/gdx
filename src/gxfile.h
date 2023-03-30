@@ -328,7 +328,7 @@ using TSetTextList = TXCSStrHashListImpl<uint8_t>;
 using TNameList = TXStrHashListImpl<PgdxSymbRecord>;
 
 template<typename T>
-using TTblGamsDataImpl = collections::gmsdata::TTblGamsDataCxx<T>;
+using TTblGamsDataImpl = collections::gmsdata::TTblGamsData<T>;
 
 using TDomainStrList = TXStrHashListImpl<uint8_t>;
 
