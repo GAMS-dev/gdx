@@ -61,8 +61,20 @@ namespace gdx::gmsstrm
 std::string SysErrorMessage( int errorCore );
 
 const int
+        // TXStream seek origins
+        soFromBeginning = 0,
+        soFromCurrent = 1,
+        soFromEnd = 2,
+
         BufferSize = 32 * 1024,//internal maximum for compression
-        strmErrorZLib = 5;
+
+        strmErrorNoError = 0,
+        strmErrorIOResult = 1,
+        strmErrorGAMSHeader = 2,
+        strmErrorNoPassWord = 3,
+        strmErrorIntegrity = 4,
+        strmErrorZLib = 5,
+        strmErrorEncoding = 6;
 
 const uint16_t PAT_WORD = 0x1234u;
 const /*uint32_t*/ int PAT_INTEGER = 0x12345678 /*u*/;
@@ -79,6 +91,29 @@ enum FileAccessMode
    fmOpenReadWrite = 0x002
 };
 
+// File Mode creation constants
+const std::map<FileAccessMode, std::string> modeStrs = {
+        { FileAccessMode::fmCreate, "w" },
+        { FileAccessMode::fmOpenRead, "r" },
+        { FileAccessMode::fmOpenWrite, "w" },
+        { FileAccessMode::fmOpenReadWrite, "w+" } };
+
+enum class RWType
+{
+   rw_byte,
+   rw_bool,
+   rw_char,
+   rw_word,
+   rw_integer,
+   rw_int64,
+   rw_double,
+   rw_string,
+   rw_pchar,
+   rw_pstring,
+   rw_count
+};
+const std::array<std::string, 10> RWTypeText = { "Byte", "Bool", "Char", "Word", "Integer", "Int64", "Double", "String", "PChar", "PString" };
+
 /**
      * Defines the base class for a stream. Only to be used for defining derived objects.
      */
@@ -86,13 +121,13 @@ class TXStreamDelphi
 {
 protected:
    template<typename T>
-   void WriteValue( T &v )
+   void WriteValue( RWType rwt, T &v )
    {
       Write( &v, sizeof( T ) );
    }
 
    template<typename T>
-   T ReadValue()
+   T ReadValue( RWType rwt )
    {
       T res;
       Read( &res, sizeof( T ) );
@@ -126,6 +161,9 @@ public:
    void WriteInt64( int64_t N );
    void WriteByte( uint8_t b );
    void WriteWord( uint16_t W );
+   void WriteBool( bool B );
+   void WriteChar( char C );
+   void WritePChar( const char *s, int L );
 
    std::string ReadString();
    virtual double ReadDouble();
@@ -133,6 +171,11 @@ public:
    uint8_t ReadByte();
    virtual uint16_t ReadWord();
    virtual int64_t ReadInt64();
+   bool ReadBool();
+   char ReadChar();
+   void ReadPChar( char *P, int &L );
+
+   void ActiveWriteOpTextDumping( const std::string &dumpFilename );
 };
 
 class TXFileStreamDelphi : public TXStreamDelphi
@@ -156,6 +199,8 @@ public:
    uint32_t Write( const void *Buffer, uint32_t Count ) override;
    void SetLastIOResult( int V );
    int GetLastIOResult();
+   void SetPassWord( const std::string &s );
+   bool GetUsesPassWord();
    [[nodiscard]] std::string GetFileName() const;
 };
 
@@ -185,7 +230,9 @@ public:
    ~TBufferedFileStreamDelphi() override;
    bool FlushBuffer();
    uint32_t Read( void *Buffer, uint32_t Count ) override;
+   char ReadCharacter();
    uint32_t Write( const void *Buffer, uint32_t Count ) override;
+   [[nodiscard]] bool GetCompression() const;
    void SetCompression( bool V );
    [[nodiscard]] bool GetCanCompress() const;
    int64_t GetPosition() override;
@@ -200,7 +247,7 @@ class TMiBufferedStreamDelphi : public TBufferedFileStreamDelphi
    bool NormalOrder {};
 
    template<typename T>
-   T ReadValueOrdered( bool order_type )
+   T ReadValueOrdered( RWType rwt, bool order_type )
    {
       T res;
       if( !order_type ) Read( &res, sizeof( T ) );
@@ -240,10 +287,17 @@ class TMiBufferedStreamDelphi : public TBufferedFileStreamDelphi
 
 public:
    TMiBufferedStreamDelphi( const std::string &FileName, uint16_t Mode );
+   static void ReverseBytes( void *psrc, void *pdest, int sz );
    [[nodiscard]] int GoodByteOrder() const;
    double ReadDouble() override;
    int ReadInteger() override;
    uint16_t ReadWord() override;
    int64_t ReadInt64() override;
+   [[nodiscard]] bool WordsNeedFlip() const;
+   [[nodiscard]] bool IntsNeedFlip() const;
+   void WriteGmsInteger( int N );
+   void WriteGmsDouble( double D );
+   int ReadGmsInteger();
+   double ReadGmsDouble();
 };
 }// namespace gdx::gmsstrm

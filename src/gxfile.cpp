@@ -54,13 +54,13 @@ std::string QueryEnvironmentVariable( const std::string &Name );
 std::string QueryEnvironmentVariable( const std::string &Name )
 {
 #if defined( _WIN32 )
-   auto len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 );
+   int len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 );
    if( !len ) return ""s;
    else
    {
-      auto buf { std::unique_ptr<char[]> { new char[len] } };
-      GetEnvironmentVariableA( Name.c_str(), buf.get(), len );
-      std::string val( buf.get(), len - 1 );// no terminating zero
+      std::vector<char> buf( len );
+      GetEnvironmentVariableA( Name.c_str(), buf.data(), len );
+      std::string val( buf.begin(), buf.end() - 1 );// no terminating zero
       if( val.length() > 255 ) val = val.substr( 0, 255 );
       return val;
    }
@@ -345,7 +345,7 @@ bool IsGoodIdent( const char *S )
    return i < GLOBAL_UEL_IDENT_SIZE;
 }
 
-static TgdxElemSize GetIntegerSize( unsigned int N )
+static TgdxElemSize GetIntegerSize( int N )
 {
    if( N <= 0 ) return TgdxElemSize::sz_integer;
    else if( N <= 255 )
@@ -758,6 +758,7 @@ bool TGXFileObj::PrepareSymbolWrite( const std::string_view Caller,
    obj->SUserInfo = AUserInfo;
    obj->SSetText = false;
    assignExplanatoryText( AText, obj->SExplTxt.data() );
+   //utils::assignViewToBuf( AText, obj->SExplTxt.data(), GMS_SSSIZE );
    MakeGoodExplText( obj->SExplTxt.data() );
    obj->SIsCompressed = CompressOut && ADim > 0;
    obj->SCommentsList = std::nullopt;
@@ -987,7 +988,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
       {
          MinElem[D] = FFile->ReadInteger();
          MaxElem[D] = FFile->ReadInteger();
-         ElemType[D] = GetIntegerSize( (unsigned int) MaxElem[D] - (unsigned int) MinElem[D] + 1 );
+         ElemType[D] = GetIntegerSize( MaxElem[D] - MinElem[D] + 1 );
       }
    }
    bool AllocOk { true };
@@ -1169,7 +1170,7 @@ void TGXFileObj::InitDoWrite( int NrRecs )
    for( int D {}; D < FCurrentDim; D++ )
    {
       LastElem[D] = INDEX_INITIAL;
-      ElemType[D] = GetIntegerSize( (unsigned int) MaxElem[D] - (unsigned int) MinElem[D] + 1 );
+      ElemType[D] = GetIntegerSize( MaxElem[D] - MinElem[D] + 1 );
       FFile->WriteInteger( MinElem[D] );
       FFile->WriteInteger( MaxElem[D] );
    }
@@ -1914,7 +1915,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
       {
          if( FFile->ReadByte() )
          {
-            CurSyPtr->SDomSymbols = std::unique_ptr<int[]> { new int[CurSyPtr->SDim] };
+            CurSyPtr->SDomSymbols = std::make_unique<int[]>( CurSyPtr->SDim );
             for( int D {}; D < CurSyPtr->SDim; D++ )
                CurSyPtr->SDomSymbols[D] = FFile->ReadInteger();
          }
@@ -1973,7 +1974,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
             // NOTE: Not covered by unit tests yet.
             if( !MapSetText )
             {
-               MapSetText = std::unique_ptr<int[]> { new int[NrElem] };
+               MapSetText = std::make_unique<int[]>( NrElem );
                for( int D {}; D < N; D++ )
                   MapSetText[D] = D;
             }
@@ -2005,7 +2006,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
          int SyNr = FFile->ReadInteger();
          if( SyNr <= 0 ) break;
          const auto sym = *NameList->GetObject( SyNr );
-         sym->SDomStrings = std::unique_ptr<int[]> { new int[sym->SDim] };
+         sym->SDomStrings = std::make_unique<int[]>( sym->SDim );
          for( int D {}; D < sym->SDim; D++ )
             sym->SDomStrings[D] = FFile->ReadInteger();
       }
@@ -2095,7 +2096,7 @@ int TGXFileObj::gdxDataErrorRecord( int RecNr, int *KeyInt, double *Values )
 int TGXFileObj::gdxDataErrorRecordX( int RecNr, int *KeyInt, double *Values )
 {
    static const TgxModeSet AllowedModes { fr_init, fw_init, fr_map_data, fr_mapr_data, fw_raw_data, fw_map_data, fw_str_data };
-   if( ( TraceLevel >= TraceLevels::trl_all || !utils::in( fmode, AllowedModes ) ) && !CheckMode( "DataErrorRecord"s, AllowedModes ) )
+   if( ( TraceLevel >= TraceLevels::trl_all || !utils::in( fmode, AllowedModes ) ) && !CheckMode( "DataErrorRecord", AllowedModes ) )
       return false;
 
    if( ErrorList )
@@ -2173,7 +2174,7 @@ int TGXFileObj::gdxGetElemText( int TxtNr, char *Txt, int &Node )
       Txt[0] = '\0';
       return false;
    }
-   if( TraceLevel >= TraceLevels::trl_all && !CheckMode( "GetElemText"s ) )
+   if( TraceLevel >= TraceLevels::trl_all && !CheckMode( "GetElemText" ) )
       return false;
    if( TxtNr < 0 || TxtNr >= SetTextList->size() )
    {
@@ -2381,7 +2382,7 @@ int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
 
    int res { true };
    assert( !CurSyPtr->SDomSymbols && "SymbolSetDomain" );
-   CurSyPtr->SDomSymbols = std::unique_ptr<int[]> { new int[CurSyPtr->SDim] };
+   CurSyPtr->SDomSymbols = std::make_unique<int[]>( CurSyPtr->SDim );
    for( int D {}; D < CurSyPtr->SDim; D++ )
    {
       bool domap { true };
@@ -2463,7 +2464,7 @@ int TGXFileObj::gdxSymbolSetDomainX( int SyNr, const char **DomainIDs )
    if( SyPtr->SDim > 0 )
    {
       if( !SyPtr->SDomStrings )
-         SyPtr->SDomStrings = std::unique_ptr<int[]> { new int[SyPtr->SDim] };
+         SyPtr->SDomStrings = std::make_unique<int[]>( SyPtr->SDim );
       for( int D {}; D < SyPtr->SDim; D++ )
       {
          const char *S { DomainIDs[D] };
@@ -2692,7 +2693,7 @@ int TGXFileObj::gdxDataReadMapStart( int SyNr, int &NrRecs )
 int TGXFileObj::gdxDataReadMap( [[maybe_unused]] int RecNr, int *KeyInt, double *Values, int &DimFrst )
 {
    static const TgxModeSet AllowedModes { fr_map_data, fr_mapr_data };
-   if( ( TraceLevel >= TraceLevels::trl_all || !utils::in( fmode, AllowedModes ) ) && !CheckMode( "DataReadMap"s, AllowedModes ) ) return false;
+   if( ( TraceLevel >= TraceLevels::trl_all || !utils::in( fmode, AllowedModes ) ) && !CheckMode( "DataReadMap", AllowedModes ) ) return false;
    if( CurSyPtr && CurSyPtr->SScalarFrst )
    {
       CurSyPtr->SScalarFrst = false;
@@ -2996,7 +2997,7 @@ int TGXFileObj::gdxDataReadFilteredStart( int SyNr, const int *FilterAction, int
 
 int TGXFileObj::gdxSetTextNodeNr( int TxtNr, int Node )
 {
-   if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "SetTextNodeNr"s ) ) ) return false;
+   if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "SetTextNodeNr" ) ) ) return false;
    auto &obj = *SetTextList;
    if( TxtNr >= 0 && TxtNr < obj.size() && !*obj.GetObject( TxtNr ) )
    {
