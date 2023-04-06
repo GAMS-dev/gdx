@@ -2157,4 +2157,38 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
    std::filesystem::remove( "trnsport.gdx" );
 }
 
+// This makes the expected case (<=255 chars) fast but the exceptional case (>=256 chars) slow
+static void assignExplanatoryText( const char *userText, char *buf )
+{
+   int i;
+   for( i = 0; i < GMS_SSSIZE && userText[i] != '\0'; i++ )
+      buf[i] = userText[i];
+   if( i < GMS_SSSIZE )
+   {
+      buf[i] = '\0';
+      return;
+   }
+   std::snprintf( buf, GMS_SSSIZE, "String overflow: %.*s...", GMS_SSSIZE - 21, userText );
+}
+
+TEST_CASE("Profile explanatory text assignment old vs. new") {
+   std::chrono::time_point<std::chrono::steady_clock> start, stop;
+   std::chrono::duration<double, std::milli> elapsed{};
+   char srcBuf[GMS_SSSIZE], destBuf[GMS_SSSIZE];
+   srcBuf[255] ='\0';
+   for(int i{}; i<255;i++) srcBuf[i] ='x';
+   start = std::chrono::steady_clock::now();
+   for(int i{}; i<1000; i++)
+      utils::assignViewToBuf( srcBuf, destBuf, GMS_SSSIZE );
+   stop = std::chrono::steady_clock::now();
+   elapsed = stop - start;
+   std::cout << "old=" << elapsed.count() << std::endl;
+   start = std::chrono::steady_clock::now();
+   for(int i{}; i<1000; i++)
+      assignExplanatoryText(srcBuf, destBuf);
+   stop = std::chrono::steady_clock::now();
+   elapsed = stop - start;
+   std::cout << "new=" << elapsed.count() << std::endl;
+}
+
 }// namespace gdx::tests::gdxtests
