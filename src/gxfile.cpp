@@ -716,18 +716,10 @@ int TGXFileObj::gdxResetSpecialValues()
    return true;
 }
 
-// This makes the expected case (<=255 chars) fast but the exceptional case (>=256 chars) slow
-static void assignExplanatoryText( const char *userText, char *buf )
+static inline void assignExplanatoryText( std::string_view userText, char *buf )
 {
-   int i;
-   for( i = 0; i < GMS_SSSIZE && userText[i] != '\0'; i++ )
-      buf[i] = userText[i];
-   if( i < GMS_SSSIZE )
-   {
-      buf[i] = '\0';
-      return;
-   }
-   std::snprintf( buf, GMS_SSSIZE, "String overflow: %.*s...", GMS_SSSIZE - 21, userText );
+   if(userText.length() < GMS_SSSIZE) utils::assignViewToBuf( userText, buf, GMS_SSSIZE );
+   else std::snprintf( buf, GMS_SSSIZE, "String overflow: %.*s...", GMS_SSSIZE - 21, userText.data() );
 }
 
 bool TGXFileObj::PrepareSymbolWrite( const std::string_view Caller,
