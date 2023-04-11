@@ -1011,6 +1011,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
                if( FIDim < AFDim ) AFDim = FIDim;
                FIDim = FCurrentDim;
                int D;
+               BadError = false;
                for( D = AFDim - 1; D < FCurrentDim && !AddError; D++ )
                {
                   const auto &obj = DomainList[D];
@@ -1078,7 +1079,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
                {
                   // NOTE: Not covered by unit tests yet.
                   // Ensure that dimensions to the right have no bad UELs
-                  for( int D2 { D + 1 }; D2 <= FCurrentDim; D2++ )
+                  for( int D2 { D + 1 }; D2 < FCurrentDim; D2++ )
                   {
                      if( LastElem[D2] < 0 )
                      {
