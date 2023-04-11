@@ -1004,16 +1004,17 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
             int FIDim = FCurrentDim;// First invalid dimension
             TgdxValues Avals;
             TIndex AElements {};
+            // AFDim, FIDim are 1-based (1,..,FCurrentDim)
             int AFDim, V;
             bool AddNew {}, AddError {}, BadError {};
             while( DoRead( Avals.data(), AFDim ) )
             {
                if( FIDim < AFDim ) AFDim = FIDim;
                FIDim = FCurrentDim;
-               int D;
-               BadError = false;
+               int D; // 0-based (0,..,FCurrentDim-1)
                for( D = AFDim - 1; D < FCurrentDim && !AddError; D++ )
                {
+                  assert(D >= 0 && D < GLOBAL_MAX_INDEX_DIM);
                   const auto &obj = DomainList[D];
                   if( LastElem[D] < 0 )
                   {
@@ -1035,7 +1036,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
                         else
                         {
                            AddError = true;
-                           FIDim = D;
+                           FIDim = D+1;
                         }
                         break;
                      case TgdxDAction::dm_strict:
@@ -1044,7 +1045,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
                         else
                         {
                            AddError = true;
-                           FIDim = D;
+                           FIDim = D+1;
                         }
                         break;
                      case TgdxDAction::dm_expand:
@@ -1081,6 +1082,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
                   // Ensure that dimensions to the right have no bad UELs
                   for( int D2 { D + 1 }; D2 < FCurrentDim; D2++ )
                   {
+                     assert(D2 >= 0 && D2 < GLOBAL_MAX_INDEX_DIM);
                      if( LastElem[D2] < 0 )
                      {
                         ReportError( ERR_BADELEMENTINDEX );
@@ -1088,9 +1090,9 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
                         break;
                      }
                   }
-                  LastElem[FIDim] = -LastElem[FIDim];
+                  LastElem[FIDim-1] *= -1;
                   AddToErrorListDomErrs( LastElem, Avals.data() );// unmapped
-                  LastElem[FIDim] = -LastElem[FIDim];
+                  LastElem[FIDim-1] *= -1;
                   AddError = false;
                }
                else
@@ -1388,6 +1390,7 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
    else
    {
       AFDim = B;
+      assert(AFDim >= 1 && AFDim <= GLOBAL_MAX_INDEX_DIM);
       for( int D { AFDim - 1 }; D < FCurrentDim; D++ )
       {
          assert( D >= 0 );
