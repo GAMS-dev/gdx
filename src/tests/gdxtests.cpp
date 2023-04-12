@@ -2157,4 +2157,66 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
    std::filesystem::remove( "trnsport.gdx" );
 }
 
+TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
+{
+   auto fn { "twosets.gdx"s };
+   testWrite( fn, []( TGXFileObj &pgx ) {
+      StrIndexBuffers sib, sib2;
+      TgdxValues values {};
+
+      REQUIRE( pgx.gdxDataWriteStrStart( "k", "", 1, dt_set, 0 ) );
+      for( int i {}; i < 6; i++ )
+      {
+         sib.front() = "k"s + std::to_string( i + 3 );
+         REQUIRE(pgx.gdxDataWriteStr( sib.cptrs(), values.data() ));
+      }
+      REQUIRE( pgx.gdxDataWriteDone() );
+
+      REQUIRE( pgx.gdxDataWriteStrStart( "kk", "", 1, dt_set, 0 ) );
+      sib2.front() = "k"s;
+      REQUIRE( pgx.gdxSymbolSetDomain( sib2.cptrs() ) );
+      for( int i {}; i < 6; i++ )
+      {
+         sib.front() = "k"s + std::to_string( i + 3 );
+         REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), values.data() ) );
+      }
+      REQUIRE( pgx.gdxDataWriteDone() );
+   } );
+   testRead( fn, []( TGXFileObj &pgx ) {
+      int syNr;
+      REQUIRE( pgx.gdxFindSymbol( "kk", syNr ) );
+      REQUIRE_EQ( 2, syNr );
+      REQUIRE( pgx.gdxUELRegisterMapStart() );
+      for( int i { 1 }; i <= 3; i++ )
+      {
+         std::string s { "k" + std::to_string( i ) };
+         REQUIRE( pgx.gdxUELRegisterMap( i, s.c_str() ) );
+      }
+      REQUIRE( pgx.gdxUELRegisterDone() );
+
+      REQUIRE( pgx.gdxFilterRegisterStart( 138 ) );
+      for( int i { 1 }; i <= 3; i++ )
+         REQUIRE( pgx.gdxFilterRegister( i ) );
+      REQUIRE( pgx.gdxFilterRegisterDone() );
+
+      int numRecs;
+      std::array<int, 20> filter {};
+      filter.front() = 138;
+      REQUIRE( pgx.gdxDataReadFilteredStart( 2, filter.data(), numRecs ) );
+      REQUIRE_EQ( 1, numRecs );
+      int dimFrst;
+      TgdxValues values {};
+      TgdxUELIndex keys {};
+      int ctr {};
+      while( pgx.gdxDataReadMap( 1, keys.data(), values.data(), dimFrst ) )
+      {
+         REQUIRE_EQ( 3, keys.front() );
+         ctr++;
+      }
+      REQUIRE_EQ( 1, ctr );
+      REQUIRE( pgx.gdxDataReadDone() );
+   });
+   std::filesystem::remove( fn );
+}
+
 }// namespace gdx::tests::gdxtests
