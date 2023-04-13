@@ -2997,7 +2997,7 @@ int TGXFileObj::gdxSetTextNodeNr( int TxtNr, int Node )
    auto &obj = *SetTextList;
    if( TxtNr >= 0 && TxtNr < obj.size() && !*obj.GetObject( TxtNr ) )
    {
-      *obj.GetObject( TxtNr ) = static_cast<uint8_t>( Node );
+      *obj.GetObject( TxtNr ) = Node;
       return true;
    }
    return false;

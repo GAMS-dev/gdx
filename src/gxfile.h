@@ -323,7 +323,7 @@ using TIntlValueMapI64 = std::array<int64_t, vm_count>;
 using LinkedDataType = collections::datastorage::TLinkedData<int, double>;
 using LinkedDataIteratorType = collections::datastorage::TLinkedDataRec<int, double> *;
 
-using TSetTextList = TXCSStrHashListImpl<uint8_t>;
+using TSetTextList = TXCSStrHashListImpl<int>;
 
 using TNameList = TXStrHashListImpl<PgdxSymbRecord>;
 
