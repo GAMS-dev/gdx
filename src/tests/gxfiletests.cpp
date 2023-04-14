@@ -2,6 +2,7 @@
 #include "../gxfile.h"
 
 using namespace gdx;
+using namespace std::literals::string_literals;
 
 namespace gdx::tests::gxfiletests
 {
@@ -52,6 +53,13 @@ TEST_CASE( "Test making a good explanatory text function" )
    std::string expectedExplTxt2 { R"("Test 1"? and "Test 2")" };
    REQUIRE_EQ( expectedExplTxt2.length(), MakeGoodExplText( explTxt2 ) );
    REQUIRE( !strcmp( expectedExplTxt2.c_str(), explTxt2 ) );
+
+   // Make sure special chars (e.g. scandinavian alphabet, norwegian wind park names, ...) aren't
+   // treated as control chars and replaced with question mark (?)
+   char explTxt3[256] = "Skellefteå";
+   std::string expectedExplTxt3 { "Skellefteå"s };
+   REQUIRE_EQ( expectedExplTxt3.length(), MakeGoodExplText( explTxt3 ) );
+   REQUIRE( !strcmp( expectedExplTxt3.c_str(), explTxt3 ) );
 }
 
 TEST_CASE( "Test TIntegerMapping" )
