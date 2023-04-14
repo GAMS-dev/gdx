@@ -315,7 +315,7 @@ int MakeGoodExplText( char *s )
    {
       if( !utils::in( s[i], '\"', '\'' ) )
       {
-         if( s[i] < ' ' ) s[i] = '?';
+         if( (unsigned char)s[i] < ' ' ) s[i] = '?';
       }
       else
       {
