@@ -78,10 +78,9 @@ bool CanBeQuoted( const char *s )
 {
    if( !s ) return false;
    bool saw_single {}, saw_double {};
-   for( int i {}; true; i++ )
+   for( int i {}; s[i] != '\0'; i++ )
    {
-      char Ch = s[i];
-      if( s[i] == '\0' ) return true;
+      char Ch {s[i]};
       if( Ch == '\'' )
       {
          if( saw_double ) return false;
@@ -93,9 +92,9 @@ bool CanBeQuoted( const char *s )
          saw_double = true;
       }
       else if( static_cast<unsigned char>( Ch ) < ' ' )
-         return false; // NOTE: Not covered by unit tests yet.
+         return false;
    }
-   return true; // NOTE: Not covered by unit tests yet.
+   return true;
 }
 
 bool GoodUELString( const char *s, size_t slen )

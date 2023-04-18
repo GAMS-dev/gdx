@@ -28,6 +28,7 @@ TEST_CASE( "Test 'can be quoted' function" )
    REQUIRE( CanBeQuoted( "a\"bc" ) );
    REQUIRE( CanBeQuoted( "a'bc" ) );
    REQUIRE_FALSE( CanBeQuoted( "a'b\"c" ) );
+   REQUIRE_FALSE( CanBeQuoted( "ab\tc" ) );
 }
 
 TEST_CASE( "Test checking for good UEL string" )
