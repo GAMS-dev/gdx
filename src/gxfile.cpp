@@ -752,8 +752,11 @@ bool TGXFileObj::PrepareSymbolWrite( const std::string_view Caller,
    obj->SDataType = static_cast<gdxSyType>( AType );
    obj->SUserInfo = AUserInfo;
    obj->SSetText = false;
-   assignExplanatoryText( AText, obj->SExplTxt.data() );
-   //utils::assignViewToBuf( AText, obj->SExplTxt.data(), GMS_SSSIZE );
+   if(AText)
+   {
+      assignExplanatoryText( AText, obj->SExplTxt.data() );
+      //utils::assignViewToBuf( AText, obj->SExplTxt.data(), GMS_SSSIZE );
+   } else obj->SExplTxt.front() = '\0';
    MakeGoodExplText( obj->SExplTxt.data() );
    obj->SIsCompressed = CompressOut && ADim > 0;
    obj->SCommentsList = std::nullopt;
