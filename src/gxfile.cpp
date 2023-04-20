@@ -3282,7 +3282,6 @@ int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataSt
       }
       else
       {
-         // NOTE: Not covered by unit tests yet.
          ElemNrs[D] = UELTable->IndexOf( UelFilterStr[D] );
          if( ElemNrs[D] < 0 ) GoodIndx = false;
       }
@@ -3303,7 +3302,7 @@ int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataSt
          if( ElemNrs[D] == -1 )
             HisIndx[HisDim++] = SliceIndxs[D]->GetMapping( LastElem[D] );
          else if( ElemNrs[D] != LastElem[D] )
-            GoodIndx = false;// NOTE: Not covered by unit tests yet.
+            GoodIndx = false;
       }
       if( GoodIndx ) DP( HisIndx.data(), Values.data() );
    }
@@ -3316,14 +3315,13 @@ int TGXFileObj::gdxDataSliceUELS( const int *SliceKeyInt, char **KeyStr )
    int HisDim {};
    for( int D {}; D < FCurrentDim; D++ )
    {
-      if( !SliceElems[D].empty() )// NOTE: Not covered by unit tests yet.
+      if( !SliceElems[D].empty() )
          utils::assignStrToBuf( SliceElems[D], KeyStr[D] );
       else
       {
          int N = SliceRevMap[D]->GetMapping( SliceKeyInt[HisDim++] );
          if( N < 0 )
          {
-            // NOTE: Not covered by unit tests yet.
             KeyStr[D][0] = '?';
             KeyStr[D][1] = '\0';
          }

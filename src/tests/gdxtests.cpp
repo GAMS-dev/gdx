@@ -2023,28 +2023,79 @@ TEST_CASE( "Test reading methods with slices" )
          REQUIRE( pgx.gdxDataWriteStr( keys.cptrs(), values.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
+      REQUIRE( pgx.gdxDataWriteStrStart( "p", "nine element 2D parameter", 2, dt_par, 0 ) );
+      int ctr {1};
+      for( int i {}; i < 3; i++ )
+      {
+         for( int j {}; j < 3; j++ )
+         {
+            keys[0] = "a"s + std::to_string( i + 1 );
+            keys[1] = "b"s + std::to_string( j + 1 );
+            values[GMS_VAL_LEVEL] = ctr++;
+            REQUIRE( pgx.gdxDataWriteStr( keys.cptrs(), values.data() ) );
+         }
+      }
+      REQUIRE( pgx.gdxDataWriteDone() );
    } );
    testRead( fn, [&]( TGXFileObj &pgx ) {
-      TgdxUELIndex elemCountsPerDim {}, expectedCounts {};
+      TgdxUELIndex elemCountsPerDim {}, expectedCounts {}, keyIndices {};
+      StrIndexBuffers uelNames, uelFilterStrs;
+      int dim;
+
+      // Read 3-element set "i" fully (all filters are empty str)
       expectedCounts.front() = 3;
       REQUIRE( pgx.gdxDataReadSliceStart( 1, elemCountsPerDim.data() ) );
       REQUIRE_EQ( expectedCounts, elemCountsPerDim );
-      int dim;
-      StrIndexBuffers uelFilterStrs;
       uelFilterStrs.front() = ""s;
-      auto recordCallback = []( const int *keyIndices, const double *vals ) {
-         static int expKey {};
-         REQUIRE_EQ( expKey, keyIndices[0] );
-         expKey++;
-         expKey %= 3;
-      };
-      REQUIRE( pgx.gdxDataReadSlice( uelFilterStrs.cptrs(), dim, recordCallback ) );
+      
+      {
+         auto recordCallback = []( const int *keyIndices, const double *vals ) {
+            static int expKey {};
+            REQUIRE_EQ( expKey, keyIndices[0] );
+            expKey++;
+            expKey %= 3;
+         };
+         REQUIRE( pgx.gdxDataReadSlice( uelFilterStrs.cptrs(), dim, recordCallback ) );
+      }
 
-      TgdxUELIndex keyIndices {};
       keyIndices.front() = 1;
-      StrIndexBuffers uelNames;
       REQUIRE( pgx.gdxDataSliceUELS( keyIndices.data(), uelNames.ptrs() ) );
       REQUIRE_EQ( "i2"s, uelNames.front().str() );
+      REQUIRE( pgx.gdxDataReadDone() );
+
+      // For cartesian products {a1,a2,a3} x {b1,b2,b3} 2D parameter "p" only read tuples with (a2,*)
+      expectedCounts[0] = expectedCounts[1] = 3;
+      REQUIRE( pgx.gdxDataReadSliceStart( 2, elemCountsPerDim.data() ) );
+      REQUIRE_EQ( expectedCounts, elemCountsPerDim );
+
+      uelFilterStrs.front() = "XYZdoesNotExist"s;
+      REQUIRE_FALSE( pgx.gdxDataReadSlice( uelFilterStrs.cptrs(), dim, nullptr ) );
+      REQUIRE( pgx.gdxDataReadDone() );
+      REQUIRE( pgx.gdxDataReadSliceStart( 2, elemCountsPerDim.data() ) );
+
+      uelFilterStrs.front() = "a2"s;
+
+      {
+         auto recordCallback = []( const int *keyIndices, const double *vals ) {
+            static int expKey {};
+            REQUIRE_EQ( expKey, keyIndices[0] );
+            REQUIRE_EQ( 4+expKey, vals[GMS_VAL_LEVEL] );
+            expKey++;
+         };
+         REQUIRE( pgx.gdxDataReadSlice( uelFilterStrs.cptrs(), dim, recordCallback ) );
+      }
+
+      // Third record contained in slice (see above) has keys {a2,b3}
+      keyIndices.front() = 2;
+      REQUIRE( pgx.gdxDataSliceUELS( keyIndices.data(), uelNames.ptrs() ) );
+      REQUIRE_EQ( "a2"s, uelNames[0].str() );
+      REQUIRE_EQ( "b3"s, uelNames[1].str() );
+
+      // Test invalid record index
+      keyIndices.front() = 8;
+      REQUIRE( pgx.gdxDataSliceUELS( keyIndices.data(), uelNames.ptrs() ) );
+      REQUIRE_EQ( "a2"s, uelNames[0].str() );
+      REQUIRE_EQ( "?"s, uelNames[1].str() );
 
       REQUIRE( pgx.gdxDataReadDone() );
    } );
