@@ -1509,6 +1509,9 @@ TEST_CASE( "Test acronym facilities" )
       REQUIRE_EQ( 23, acroIndex );
       REQUIRE_EQ( 1, pgx.gdxAcronymCount() );
 
+      // trying to create a symbol with same name as an acronym that already exists should fail!
+      REQUIRE_FALSE( pgx.gdxDataWriteStrStart( "myacr", "sym with same name", 1, dt_set, 0 ) );
+
       // modify first acronym: change item name and explanatory text
       REQUIRE( pgx.gdxAcronymSetInfo( 1, "myacr_mod", "my acronym_mod", 23 ) );
       REQUIRE( pgx.gdxAcronymGetInfo( 1, acroName, acroText, acroIndex ) );

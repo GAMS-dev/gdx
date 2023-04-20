@@ -3839,7 +3839,7 @@ int TAcronymList::FindName( const char *Name )
 {
    for( int N {}; N < FList.GetCount(); N++ )
       if( utils::sameTextPChar( FList[N]->AcrName.c_str(), Name ) )
-         return N;// NOTE: Not covered by unit tests yet.
+         return N;
    return -1;
 }
 
