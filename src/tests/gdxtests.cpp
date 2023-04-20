@@ -2226,4 +2226,21 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
    std::filesystem::remove( fn );
 }
 
+TEST_CASE("Open append should report error for old GDX file versions") {
+   setEnvironmentVar( "GDXCONVERT", "v5" );
+   testWrite( "f.gdx", []( TGXFileObj &obj ) {} );
+   unsetEnvironmentVar( "GDXCONVERT" );
+
+   {
+      std::string errMsg;
+      TGXFileObj pgx { errMsg };
+      int errNr;
+      REQUIRE( pgx.gdxOpenAppend( "f.gdx", "gdxtests", errNr ) );
+      REQUIRE_GT( pgx.gdxErrorCount(), 0 );
+      REQUIRE_EQ( -100060, pgx.gdxGetLastError() );
+   }
+
+   std::filesystem::remove( "f.gdx" );
+}
+
 }// namespace gdx::tests::gdxtests

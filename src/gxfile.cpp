@@ -3373,7 +3373,6 @@ int TGXFileObj::gdxOpenAppend( const char *FileName, const char *Producer, int &
    if( !res || ErrNr != 0 ) return res;
    if( VersionRead < 7 )
    {
-      // NOTE: Not covered by unit tests yet.
       ReportError( ERR_FILETOOLDFORAPPEND );
       gdxClose();
       return res;
