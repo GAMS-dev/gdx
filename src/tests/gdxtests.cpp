@@ -390,7 +390,7 @@ TEST_CASE( "Test adding uels (mapped mode)" )
       // registering twice with same uel nr should not do anything
       REQUIRE( pgx.gdxUELRegisterMap( 3, "TheOnlyUEL" ) );
       // but with different number it should fail
-      REQUIRE_FALSE( pgx.gdxUELRegisterMap( 42, "TheOnlyUEL" ) ); 
+      REQUIRE_FALSE( pgx.gdxUELRegisterMap( 42, "TheOnlyUEL" ) );
       REQUIRE( pgx.gdxUELRegisterMap( 8, std::string( 63, 'i' ).c_str() ) );
       REQUIRE( pgx.gdxUELRegisterDone() );
    } );
@@ -2175,7 +2175,7 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
       for( int i {}; i < 6; i++ )
       {
          sib.front() = "k"s + std::to_string( i + 3 );
-         REQUIRE(pgx.gdxDataWriteStr( sib.cptrs(), values.data() ));
+         REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), values.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
 
@@ -2222,11 +2222,17 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
       }
       REQUIRE_EQ( 1, ctr );
       REQUIRE( pgx.gdxDataReadDone() );
-   });
+   } );
    std::filesystem::remove( fn );
 }
 
-TEST_CASE("Open append should report error for old GDX file versions") {
+TEST_CASE( "Open append should report error for old GDX file versions" )
+{
+   if( !hasGAMSinstalled() )
+   {
+      std::cout << "Skipping test since GAMS system is not found!" << std::endl;
+      return;
+   }
    setEnvironmentVar( "GDXCONVERT", "v5" );
    testWrite( "f.gdx", []( TGXFileObj &obj ) {} );
    unsetEnvironmentVar( "GDXCONVERT" );
