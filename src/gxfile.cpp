@@ -3703,7 +3703,7 @@ int TUELTable::AddUsrIndxNew( const char *s, size_t slen, int UelNr )
    }
    else if( res != UelNr )
    {
-      res = -1;// NOTE: Not covered by unit tests yet.
+      res = -1;
    }
    ResetMapToUserStatus();
    return res;

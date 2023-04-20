@@ -387,6 +387,10 @@ TEST_CASE( "Test adding uels (mapped mode)" )
       REQUIRE( pgx.gdxUELRegisterMapStart() );
       REQUIRE_FALSE( pgx.gdxUELRegisterMap( 3, std::string( 64, 'i' ).c_str() ) );
       REQUIRE( pgx.gdxUELRegisterMap( 3, "TheOnlyUEL" ) );
+      // registering twice with same uel nr should not do anything
+      REQUIRE( pgx.gdxUELRegisterMap( 3, "TheOnlyUEL" ) );
+      // but with different number it should fail
+      REQUIRE_FALSE( pgx.gdxUELRegisterMap( 42, "TheOnlyUEL" ) ); 
       REQUIRE( pgx.gdxUELRegisterMap( 8, std::string( 63, 'i' ).c_str() ) );
       REQUIRE( pgx.gdxUELRegisterDone() );
    } );
