@@ -2284,6 +2284,12 @@ TEST_CASE( "Open append should report error for old GDX file versions" )
       std::cout << "Skipping test since GAMS system is not found!" << std::endl;
       return;
    }
+
+#ifdef __APPLE__
+   std::cout << "Skipping legacy version GDX file open append test on macOS since gdxcopy does not support V5 and V6 there." << std::endl;
+   return;
+#endif
+
    setEnvironmentVar( "GDXCONVERT", "v5" );
    testWrite( "f.gdx", []( TGXFileObj &obj ) {} );
    unsetEnvironmentVar( "GDXCONVERT" );
