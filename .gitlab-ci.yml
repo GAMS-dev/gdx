@@ -3,6 +3,7 @@ stages:
   - install-gams
   - build
   - test
+  - docs
 
 variables:
   MACHINES_CONTAINER_REG:
@@ -168,3 +169,17 @@ test-wei:
     paths: [doctest_results_windows.xml]
     reports:
       junit: doctest_results_windows.xml
+
+doxygen-html:
+  stage: docs
+  when: always
+  tags: [linux]
+  image:
+    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    entrypoint: [""]
+  script:
+    - doxygen
+  artifacts:
+    name: doxygen-html-docs
+    paths: [docs/html]
+    expire_in: 1 day
