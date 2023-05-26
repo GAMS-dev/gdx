@@ -37,7 +37,7 @@ fetch-ci-scripts:
   script:
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
     - cp -R scripts-repo/ci .
-    - git clone  https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/gmszlib.git zlib
+    - git clone https://github.com/madler/zlib zlib
   artifacts:
     name: ci-scripts
     expire_in: 2 hours
