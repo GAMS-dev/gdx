@@ -3602,13 +3602,13 @@ int TGXFileObj::gdxDataReadRawFastEx( int SyNr, TDataStoreExProc_t DP, int &NrRe
       uInt64 local_Uptr {};
       local_Uptr.i = 0;
       local_Uptr.p = Uptr;
-      while( DoRead( AVals.data(), AFDim ) )
-         local_DP( LastElem.data(), AVals.data(), AFDim, local_Uptr.i );
+      while( DoRead( AVals.data(), AFDim ) && local_DP( LastElem.data(), AVals.data(), AFDim, local_Uptr.i ) )
+         ;
    }
    else
    {
-      while( DoRead( AVals.data(), AFDim ) )
-         DP( LastElem.data(), AVals.data(), AFDim, Uptr );
+      while( DoRead( AVals.data(), AFDim ) && DP( LastElem.data(), AVals.data(), AFDim, Uptr ) )
+         ;
    }
    gdxDataReadDone();
    return NrRecs >= 0;

@@ -61,9 +61,9 @@ using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
 using TDomainIndexProc_t = void ( * )( int RawIndex, int MappedIndex, void *Uptr );
 using TDataStoreProc_t = void ( * )( const int *Indx, const double *Vals );
 using TDataStoreFiltProc_t = int ( * )( const int *Indx, const double *Vals, void *Uptr );
-using TDataStoreExProc_t = void ( * )( const int *Indx, const double *Vals, const int afdim, void *Uptr );
+using TDataStoreExProc_t = int ( * )( const int *Indx, const double *Vals, const int afdim, void *Uptr );
 
-using TDataStoreExProc_F = void ( * )( const int *Indx, const double *Vals, const int afdim, int64_t Uptr );
+using TDataStoreExProc_F = int ( * )( const int *Indx, const double *Vals, const int afdim, int64_t Uptr );
 using TDataStoreFiltProc_F = int ( * )( const int *Indx, const double *Vals, int64_t Uptr );
 using TDomainIndexProc_F = void ( * )( int RawIndex, int MappedIndex, int64_t Uptr );
 
