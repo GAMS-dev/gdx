@@ -15,7 +15,7 @@ namespace gdx
 using TDomainIndexProc_t = void ( * )( int RawIndex, int MappedIndex, void *Uptr );
 using TDataStoreProc_t = void ( * )( const int *Indx, const double *Vals );
 using TDataStoreFiltProc_t = int ( * )( const int *Indx, const double *Vals, void *Uptr );
-using TDataStoreExProc_t = void ( * )( const int *Indx, const double *Vals, const int afdim, void *Uptr );
+using TDataStoreExProc_t = int ( * )( const int *Indx, const double *Vals, const int afdim, void *Uptr );
 
 using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
 using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;

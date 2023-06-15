@@ -584,6 +584,7 @@ TEST_CASE( "Test write and read record raw" )
 
       auto recordCallbackEx = []( const int *keys, const double *vals, int afdim, void *uptr ) {
          static_cast<std::list<std::tuple<int, double, int>> *>( uptr )->emplace_back( keys[0], vals[0], afdim );
+         return 1;
       };
       std::list<std::tuple<int, double, int>>
               collectedRecords {},
