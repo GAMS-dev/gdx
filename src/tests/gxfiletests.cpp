@@ -23,18 +23,20 @@ TEST_CASE( "Test checking if an identifier string is well formed" )
 
 TEST_CASE( "Test 'can be quoted' function" )
 {
-   REQUIRE_FALSE( CanBeQuoted( nullptr ) );
-   REQUIRE( CanBeQuoted( "abc" ) );
-   REQUIRE( CanBeQuoted( "a\"bc" ) );
-   REQUIRE( CanBeQuoted( "a'bc" ) );
-   REQUIRE_FALSE( CanBeQuoted( "a'b\"c" ) );
-   REQUIRE_FALSE( CanBeQuoted( "ab\tc" ) );
+   REQUIRE_FALSE( CanBeQuoted( nullptr, 0 ) );
+   REQUIRE( CanBeQuoted( "abc", 3 ) );
+   REQUIRE( CanBeQuoted( "a\"bc", 4 ) );
+   REQUIRE( CanBeQuoted( "a'bc", 4 ) );
+   REQUIRE_FALSE( CanBeQuoted( "a'b\"c", 5 ) );
+   REQUIRE_FALSE( CanBeQuoted( "ab\tc", 4 ) );
 }
 
 TEST_CASE( "Test checking for good UEL string" )
 {
    REQUIRE_FALSE( GoodUELString( nullptr, 0 ) );
    REQUIRE( GoodUELString( "abc", 3 ) );
+   REQUIRE_FALSE( GoodUELString( "abc\0d", 5 ));
+   REQUIRE_FALSE( GoodUELString( "a", 100 ));
    std::string tooLong( 64, 'x' );
    REQUIRE_FALSE( GoodUELString( tooLong.c_str(), tooLong.size() ) );
    std::string stillOk( 63, 'x' );

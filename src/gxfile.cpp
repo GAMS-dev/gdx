@@ -74,11 +74,11 @@ std::string QueryEnvironmentVariable( const std::string &Name )
 
 int64_t dblToI64( double x );
 
-bool CanBeQuoted( const char *s )
+bool CanBeQuoted( const char *s, size_t slen )
 {
    if( !s ) return false;
    bool saw_single {}, saw_double {};
-   for( int i {}; s[i] != '\0'; i++ )
+   for( int i {}; i < slen; i++ )
    {
       char Ch { s[i] };
       if( Ch == '\'' )
@@ -99,7 +99,7 @@ bool CanBeQuoted( const char *s )
 
 bool GoodUELString( const char *s, size_t slen )
 {
-   return slen < GLOBAL_UEL_IDENT_SIZE && CanBeQuoted( s );
+   return slen < GLOBAL_UEL_IDENT_SIZE && CanBeQuoted( s, slen );
 }
 
 const int MaxDimV148 = 10;

@@ -350,7 +350,7 @@ union uInt64
 };
 
 bool IsGoodIdent( const char *S );
-bool CanBeQuoted( const char *s );
+bool CanBeQuoted( const char *s, size_t slen );
 bool GoodUELString( const char *s, size_t slen );
 
 int ConvertGDXFile( const std::string &fn, const std::string &MyComp );
