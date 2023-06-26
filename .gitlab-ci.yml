@@ -51,6 +51,7 @@ build-leg:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
   script:
+    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py gcc build_log.txt warnings.xml
@@ -67,6 +68,7 @@ build-deg:
   when: on_success
   tags: [macos]
   script:
+    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py clang build_log.txt warnings.xml
@@ -83,6 +85,7 @@ build-dac:
   when: on_success
   tags: [macos-arm64]
   script:
+    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py clang build_log.txt warnings.xml
@@ -101,6 +104,7 @@ build-wei:
   image:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
   script:
+    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build  . --config Release -- -m | Tee-Object -FilePath 'build_log.txt'
     - python ci/report_for_log.py msvc build_log.txt warnings.xml
