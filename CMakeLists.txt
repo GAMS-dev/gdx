@@ -24,7 +24,7 @@ endif (UNIX)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(common
-		src/gclgms.h src/gclgms.c
+		src/gclgms.h
 		src/gmsstrm.h src/gmsstrm.cpp
 		src/gmsdata.h
 		src/datastorage.h
