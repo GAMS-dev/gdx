@@ -36,7 +36,7 @@
 #endif
 
 
-#include "../../gclgms.h"
+#include "gclgms.h"
 
 #if defined(_WIN32)
 # define GDX_CALLCONV __stdcall

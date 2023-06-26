@@ -31,7 +31,7 @@
 #if defined( GXFILE_DUMMY )
 #include "dummy/gdxdummy.h"
 #else
-#include "../gclgms.h"// for GMS_SSSIZE, GMS_VAL_LEVEL
+#include "gclgms.h"// for GMS_SSSIZE, GMS_VAL_LEVEL
 #include "../gdx.h"   // for TGXFileObj, TgdxValues
 #endif
 
