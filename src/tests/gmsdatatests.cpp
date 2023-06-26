@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "../gclgms.h" // for GLOBAL_MAX_INDEX_DIM
+#include "gclgms.h" // for GLOBAL_MAX_INDEX_DIM
 #include "../gmsdata.h"// for TTblGamsData, TTblGams...
 #include "doctest.h"   // for ResultBuilder, REQUIRE_EQ
 #include <algorithm>   // for fill
