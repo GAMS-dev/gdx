@@ -78,7 +78,7 @@ bool CanBeQuoted( const char *s, size_t slen )
 {
    if( !s ) return false;
    bool saw_single {}, saw_double {};
-   for( int i {}; i < slen; i++ )
+   for( int i {}; i < (int)slen; i++ )
    {
       char Ch { s[i] };
       if( Ch == '\'' )

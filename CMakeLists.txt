@@ -1,3 +1,5 @@
+# NOTE: make sure to copy gclgms.h from products/src/apiwrapper into src/
+
 cmake_minimum_required(VERSION 3.16)
 project(gdx)
 set(CMAKE_CXX_STANDARD 17)
@@ -24,7 +26,6 @@ endif (UNIX)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(common
-		src/gclgms.h
 		src/gmsstrm.h src/gmsstrm.cpp
 		src/gmsdata.h
 		src/datastorage.h
@@ -54,10 +55,10 @@ set(tests
 #set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_executable(gdxtest ${common} ${tests})
-target_include_directories(gdxtest PRIVATE zlib)
+target_include_directories(gdxtest PRIVATE zlib src)
 target_link_libraries(gdxtest ${mylibs})
 
-add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp src/tests/dummy/gdxcc.c)
+add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp src/gdxcc.c)
 target_link_libraries(gdxwraptest ${mylibs})
 target_compile_options(gdxwraptest PRIVATE -DGXFILE_DUMMY -DGC_NO_MUTEX)
 

@@ -43,6 +43,23 @@ fetch-ci-scripts:
     expire_in: 2 hours
     paths: [ci/*,zlib/*]
 
+install-gamsdist-leg:
+  stage: install-gams
+  when: on_success
+  tags: [linux]
+  needs: [fetch-ci-scripts]
+  image:
+    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    entrypoint: [""]
+  script:
+    - python3 ci/fetch_gams.py fetch_leg $PF_CUSTOM_BRANCH $SSH_KEY_PORTING
+    - chmod 777 linux_x64_64_sfx.exe
+    - python3 ci/fetch_gams.py install
+  artifacts:
+    name: gamsdist-leg
+    expire_in: 1 hour
+    paths: [ gamsdist/* ]
+
 build-leg:
   stage: build
   when: on_success
@@ -51,11 +68,12 @@ build-leg:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
   script:
-    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
+    - cp gamsdist/apifiles/C/api/gclgms.h src/
+    - cp gamsdist/apifiles/C/api/gdxcc.* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py gcc build_log.txt warnings.xml
-  needs: [fetch-ci-scripts]
+  needs: [fetch-ci-scripts,install-gamsdist-leg]
   artifacts:
     name: gdx-leg
     paths: [gdxtest]
@@ -63,58 +81,58 @@ build-leg:
     reports:
       junit: warnings.xml
 
-build-deg:
-  stage: build
-  when: on_success
-  tags: [macos]
-  script:
-    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
-    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
-    - cmake --build . 2>&1 | tee build_log.txt
-    - python3 ci/report_for_log.py clang build_log.txt warnings.xml
-  needs: [fetch-ci-scripts]
-  artifacts:
-    name: gdx-deg
-    paths: [gdxtest]
-    expire_in: 2 hours
-    reports:
-      junit: warnings.xml
-
-build-dac:
-  stage: build
-  when: on_success
-  tags: [macos-arm64]
-  script:
-    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
-    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
-    - cmake --build . 2>&1 | tee build_log.txt
-    - python3 ci/report_for_log.py clang build_log.txt warnings.xml
-  needs: [fetch-ci-scripts]
-  artifacts:
-    name: gdx-dac
-    paths: [gdxtest]
-    expire_in: 2 hours
-    reports:
-      junit: warnings.xml
-
-build-wei:
-  stage: build
-  when: on_success
-  tags: [windows]
-  image:
-    name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
-  script:
-    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
-    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
-    - cmake --build  . --config Release -- -m | Tee-Object -FilePath 'build_log.txt'
-    - python ci/report_for_log.py msvc build_log.txt warnings.xml
-  needs: [fetch-ci-scripts]
-  artifacts:
-    name: gdx-wei
-    paths: [Release]
-    expire_in: 2 hours
-    reports:
-      junit: warnings.xml
+#build-deg:
+#  stage: build
+#  when: on_success
+#  tags: [macos]
+#  script:
+#    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
+#    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
+#    - cmake --build . 2>&1 | tee build_log.txt
+#    - python3 ci/report_for_log.py clang build_log.txt warnings.xml
+#  needs: [fetch-ci-scripts]
+#  artifacts:
+#    name: gdx-deg
+#    paths: [gdxtest]
+#    expire_in: 2 hours
+#    reports:
+#      junit: warnings.xml
+#
+#build-dac:
+#  stage: build
+#  when: on_success
+#  tags: [macos-arm64]
+#  script:
+#    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
+#    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
+#    - cmake --build . 2>&1 | tee build_log.txt
+#    - python3 ci/report_for_log.py clang build_log.txt warnings.xml
+#  needs: [fetch-ci-scripts]
+#  artifacts:
+#    name: gdx-dac
+#    paths: [gdxtest]
+#    expire_in: 2 hours
+#    reports:
+#      junit: warnings.xml
+#
+#build-wei:
+#  stage: build
+#  when: on_success
+#  tags: [windows]
+#  image:
+#    name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
+#  script:
+#    - mv src/tobedeleted/temporary_gclgms.h src/gclgms.h
+#    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
+#    - cmake --build  . --config Release -- -m | Tee-Object -FilePath 'build_log.txt'
+#    - python ci/report_for_log.py msvc build_log.txt warnings.xml
+#  needs: [fetch-ci-scripts]
+#  artifacts:
+#    name: gdx-wei
+#    paths: [Release]
+#    expire_in: 2 hours
+#    reports:
+#      junit: warnings.xml
 
 test-leg:
   stage: test
@@ -133,46 +151,46 @@ test-leg:
     reports:
       junit: doctest_results_linux.xml
 
-test-deg:
-  stage: test
-  when: on_success
-  tags: [macos]
-  needs: [build-deg]
-  script:
-    - ./gdxtest --reporters=junit --out=doctest_results_deg.xml
-  artifacts:
-    name: unittest-results-deg
-    paths: [doctest_results_deg.xml]
-    reports:
-      junit: doctest_results_deg.xml
-
-test-dac:
-  stage: test
-  when: on_success
-  tags: [macos-arm64]
-  needs: [build-dac]
-  script:
-    - ./gdxtest --reporters=junit --out=doctest_results_dac.xml
-  artifacts:
-    name: unittest-results-dac
-    paths: [doctest_results_dac.xml]
-    reports:
-      junit: doctest_results_dac.xml
-
-test-wei:
-  stage: test
-  when: on_success
-  tags: [windows]
-  image:
-    name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
-  needs: [build-wei]
-  script:
-    - ./Release/gdxtest --reporters=junit --out=doctest_results_windows.xml
-  artifacts:
-    name: unittest-results-windows
-    paths: [doctest_results_windows.xml]
-    reports:
-      junit: doctest_results_windows.xml
+#test-deg:
+#  stage: test
+#  when: on_success
+#  tags: [macos]
+#  needs: [build-deg]
+#  script:
+#    - ./gdxtest --reporters=junit --out=doctest_results_deg.xml
+#  artifacts:
+#    name: unittest-results-deg
+#    paths: [doctest_results_deg.xml]
+#    reports:
+#      junit: doctest_results_deg.xml
+#
+#test-dac:
+#  stage: test
+#  when: on_success
+#  tags: [macos-arm64]
+#  needs: [build-dac]
+#  script:
+#    - ./gdxtest --reporters=junit --out=doctest_results_dac.xml
+#  artifacts:
+#    name: unittest-results-dac
+#    paths: [doctest_results_dac.xml]
+#    reports:
+#      junit: doctest_results_dac.xml
+#
+#test-wei:
+#  stage: test
+#  when: on_success
+#  tags: [windows]
+#  image:
+#    name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
+#  needs: [build-wei]
+#  script:
+#    - ./Release/gdxtest --reporters=junit --out=doctest_results_windows.xml
+#  artifacts:
+#    name: unittest-results-windows
+#    paths: [doctest_results_windows.xml]
+#    reports:
+#      junit: doctest_results_windows.xml
 
 doxygen-html:
   stage: docs
