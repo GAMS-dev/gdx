@@ -28,8 +28,8 @@
 #undef max
 #endif
 
-#if defined( GXFILE_DUMMY )
-#include "dummy/gdxdummy.h"
+#if defined( GXFILE_CPPWRAP )
+#include "gdxcppwrap.h"
 #else
 #include "gclgms.h" // for GMS_SSSIZE, GMS_VAL_LEVEL
 #include "../gdx.h"   // for TGXFileObj, TgdxValues
