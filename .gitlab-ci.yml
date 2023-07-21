@@ -55,7 +55,7 @@ install-gamsdist-leg:
     - python3 ci/fetch_gams.py fetch_leg $PF_CUSTOM_BRANCH $SSH_KEY_PORTING
     - |
       chmod 777 linux_x64_64_sfx.exe || :
-    - python3 ci/fetch_gams.py install $PF_CUSTOM_BRANCH
+    - python3 ci/fetch_gams.py install $PF_CUSTOM_BRANCH $SSH_KEY_PORTING
 
 build-leg:
   stage: build
