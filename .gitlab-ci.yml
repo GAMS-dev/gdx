@@ -35,7 +35,7 @@ fetch-ci-scripts:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [ "" ]
   script:
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
+    - git clone -b no-artifacts https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
     - cp -R scripts-repo/ci .
     - git clone https://github.com/madler/zlib zlib
   artifacts:
@@ -54,11 +54,7 @@ install-gamsdist-leg:
   script:
     - python3 ci/fetch_gams.py fetch_leg $PF_CUSTOM_BRANCH $SSH_KEY_PORTING
     - chmod 777 linux_x64_64_sfx.exe
-    - python3 ci/fetch_gams.py install
-  artifacts:
-    name: gamsdist-leg
-    expire_in: 1 hour
-    paths: [ gamsdist/* ]
+    - python3 ci/fetch_gams.py install $PF_CUSTOM_BRANCH
 
 build-leg:
   stage: build
@@ -68,8 +64,8 @@ build-leg:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
   script:
-    - cp gamsdist/apifiles/C/api/gclgms.h src/
-    - cp gamsdist/apifiles/C/api/gdxcc.* src/
+    - cp /cache/gams-installs/$PF_CUSTOM_BRANCH/apifiles/C/api/gclgms.h src/
+    - cp /cache/gams-installs/$PF_CUSTOM_BRANCH/apifiles/C/api/gdxcc.* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py gcc build_log.txt warnings.xml
