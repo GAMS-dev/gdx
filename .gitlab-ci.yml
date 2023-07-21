@@ -53,7 +53,8 @@ install-gamsdist-leg:
     entrypoint: [""]
   script:
     - python3 ci/fetch_gams.py fetch_leg $PF_CUSTOM_BRANCH $SSH_KEY_PORTING
-    - chmod 777 linux_x64_64_sfx.exe
+    - |
+      chmod 777 linux_x64_64_sfx.exe || :
     - python3 ci/fetch_gams.py install $PF_CUSTOM_BRANCH
 
 build-leg:
