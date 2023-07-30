@@ -35,7 +35,7 @@ fetch-ci-scripts:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [ "" ]
   script:
-    - git clone -b no-artifacts https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
+    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
     - cp -R scripts-repo/ci .
     - git clone https://github.com/madler/zlib zlib
   artifacts:
