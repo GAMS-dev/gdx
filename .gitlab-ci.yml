@@ -61,7 +61,7 @@ install-gamsdist-deg:
   needs: [fetch-ci-scripts]
   script:
     - GAMS_LICENSE=$GAMS_LICENSE python3 ci/fetch_gams.py fetch_and_install_deg $PF_CUSTOM_BRANCH $SSH_KEY_PORTING
-    - $HOME/cache/gams-installs/$PF_CUSTOM_BRANCH/gams
+    - $HOME/cache/gams-installs/`python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH`/gams
 
 install-gamsdist-dac:
   stage: install-gams
@@ -70,7 +70,7 @@ install-gamsdist-dac:
   needs: [fetch-ci-scripts]
   script:
     - GAMS_LICENSE=$GAMS_LICENSE python3 ci/fetch_gams.py fetch_and_install_dac $PF_CUSTOM_BRANCH $SSH_KEY_PORTING
-    - $HOME/cache/gams-installs/$PF_CUSTOM_BRANCH/gams
+    - $HOME/cache/gams-installs/`python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH`/gams
 
 build-leg:
   stage: build
@@ -80,8 +80,8 @@ build-leg:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
   script:
-    - cp /cache/gams-installs/$PF_CUSTOM_BRANCH/apifiles/C/api/gclgms.h src/
-    - cp /cache/gams-installs/$PF_CUSTOM_BRANCH/apifiles/C/api/gdxcc.* src/
+    - cp /cache/gams-installs/`python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH`/apifiles/C/api/gclgms.h src/
+    - cp /cache/gams-installs/`python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH`/apifiles/C/api/gdxcc.* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py gcc build_log.txt warnings.xml
@@ -98,8 +98,8 @@ build-deg:
   when: on_success
   tags: [macos]
   script:
-    - cp $HOME/cache/gams-installs/$PF_CUSTOM_BRANCH/apifiles/C/api/gclgms.h src/
-    - cp $HOME/cache/gams-installs/$PF_CUSTOM_BRANCH/apifiles/C/api/gdxcc.* src/
+    - cp $HOME/cache/gams-installs/`python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH`/apifiles/C/api/gclgms.h src/
+    - cp $HOME/cache/gams-installs/`python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH`/apifiles/C/api/gdxcc.* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py clang build_log.txt warnings.xml
@@ -116,8 +116,8 @@ build-dac:
   when: on_success
   tags: [macos-arm64]
   script:
-    - cp $HOME/cache/gams-installs/$PF_CUSTOM_BRANCH/apifiles/C/api/gclgms.h src/
-    - cp $HOME/cache/gams-installs/$PF_CUSTOM_BRANCH/apifiles/C/api/gdxcc.* src/
+    - cp $HOME/cache/gams-installs/`python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH`/apifiles/C/api/gclgms.h src/
+    - cp $HOME/cache/gams-installs/`python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH`/apifiles/C/api/gdxcc.* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py clang build_log.txt warnings.xml
