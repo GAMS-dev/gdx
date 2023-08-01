@@ -31,6 +31,7 @@ variables:
 build-leg-image:
   stage: image-build
   when: manual
+  tags: [linux]
   image:
     name: docker:20.10
   services:
