@@ -609,6 +609,41 @@ TEST_CASE( "Test write and read record raw" )
    std::filesystem::remove( fn );
 }
 
+TEST_CASE("Test write and read empty variable with custom special value mapping") {
+   std::string fn { "rwemptyvarequ.gdx" };
+   int key;
+   TgdxValues values {};
+   testWrite( fn, [&]( TGXFileObj &pgx ) {
+      // First symbol
+      // variable emptyvar 'A variable without any records';
+      REQUIRE( pgx.gdxDataWriteRawStart( "emptyvar", "A variable without any records", 0, dt_var, GMS_VARTYPE_FREE ) );
+      REQUIRE( pgx.gdxDataWriteDone() );
+
+      // Second symbol
+      // equation emptyequ 'An equation without any records';
+      REQUIRE( pgx.gdxDataWriteRawStart( "emptyequ", "An equation without any records", 0, dt_equ, GMS_EQUTYPE_N ) );
+      REQUIRE( pgx.gdxDataWriteDone() );
+   } );
+   testRead( fn, [&]( TGXFileObj &pgx ) {
+      //                               undef, NA,    +inf,  -inf,   eps
+      std::array<double, 5> customSV { 23.0,  3.141, 100.0, -100.0, 0.1 };
+      REQUIRE(pgx.gdxSetReadSpecialValues(customSV.data()));
+      int NrRecs, dimFrst;
+      // Empty variable
+      REQUIRE( pgx.gdxDataReadRawStart( 1, NrRecs ) );
+      REQUIRE( pgx.gdxDataReadRaw( &key, values.data(), dimFrst ) );
+      REQUIRE_EQ( std::array { 0.0, 0.0, -100.0, 100.0, 1.0 }, values );
+      REQUIRE( pgx.gdxDataReadDone() );
+
+      // Empty equation
+      REQUIRE( pgx.gdxDataReadRawStart( 2, NrRecs ) );
+      REQUIRE( pgx.gdxDataReadRaw( &key, values.data(), dimFrst ) );
+      REQUIRE_EQ( std::array { 0.0, 0.0, -100.0, 100.0, 1.0 }, values );
+      REQUIRE( pgx.gdxDataReadDone() );
+   } );
+   std::filesystem::remove( fn );
+}
+
 TEST_CASE( "Test write and read record in string mode" )
 {
    std::string fn { "rwrecordstr.gdx" };
