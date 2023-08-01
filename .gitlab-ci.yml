@@ -1,4 +1,5 @@
 stages:
+  - image-build
   - apiwrap
   - fetch-scripts
   - install-gams
@@ -27,13 +28,30 @@ variables:
     value: $BUILDS_SSH_USER
     description: "Username used for SSH connection to builds server"
 
+build-leg-image:
+  stage: image-build
+  when: manual
+  image:
+    name: docker:20.10
+  services:
+    - docker:20.10-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - mkdir -p $HOME/.docker
+    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
+  script:
+    - docker build -t ci/images/leg leg/gdx
+    - docker tag leg/gdx registry.gams.com/devel/gdx/leg/builder-gdx:latest
+    - docker push registry.gams.com/devel/gdx/leg/builder-gdx:latest
+
 apigenerator:
   stage: apiwrap
   when: always
   tags: [linux]
   dependencies: []
   image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    name: registry.gams.com/devel/gdx/leg/builder-gdx:latest
     entrypoint: [ "" ]
   script: # somehow I need absolute path for apidef arg
     - GVERSIONMAJOR=45 GVERSIONMINOR=0 GVERSIONRELEASE=0 python3 src/apigenerator/src/mkapi.py --apidef `pwd`/src/gdxapi.yaml --outputpath apifiles/ --output cc
