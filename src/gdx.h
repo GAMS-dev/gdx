@@ -1259,10 +1259,10 @@ public:
 
    /**
     * @brief Set the internal values for special values when reading a GDX file. Before calling this function, initialize the array of special values by calling gdxGetSpecialValues first. Always non-zero.
-    * @param AVals 7-element array of special values to be used for Eps, +Inf, -Inf, NA and Undef. Note that the values do not have to be unique.
+    * @param AVals 5-element array of special values to be used for Undef, NA, +Inf, -Inf, and Eps. Note that the values do not have to be unique.
     * @return Always non-zero.
     * @note Before calling this function, initialize the array of special values by calling gdxGetSpecialValues first.
-    * @attention AVals must have length of at least 7 double values.
+    * @attention AVals must have length of at least 5 double values.
     * @see gdxSetSpecialValues, gdxResetSpecialValues, gdxGetSpecialValues
     */
    int gdxSetReadSpecialValues( const double *AVals );
@@ -1496,6 +1496,8 @@ private:
    // This one is a helper function for a callback from a Fortran client
    void gdxGetDomainElements_DP_FC( int RawIndex, int MappedIndex, void *Uptr );
    int gdxDataReadRawFastFilt_DP_FC( const int *Indx, const double *Vals, void *Uptr );
+
+   void mapNonFinite(double *AVals, int count) const;
 
 public:
    bool gdxGetDomainElements_DP_CallByRef {},
