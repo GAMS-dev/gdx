@@ -42,7 +42,7 @@ build-leg-image:
     - mkdir -p $HOME/.docker
     - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
   script:
-    - docker build -t leg/gdx ci/images/leg
+    - docker build -t ci/images/leg leg/gdx
     - docker tag leg/gdx registry.gams.com/devel/gdx/leg/builder-gdx:latest
     - docker push registry.gams.com/devel/gdx/leg/builder-gdx:latest
 
