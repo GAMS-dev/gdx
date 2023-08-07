@@ -13,12 +13,12 @@ endif(CCACHE_FOUND)
 set(mylibs dl pthread)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGC_NO_MUTEX")
 if (MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /W3 /EHs /D_CRT_SECURE_NO_WARNINGS")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /W3 /EHs /D_CRT_SECURE_NO_WARNINGS /wd4267")
 	set(mylibs "")
 endif (MSVC)
 
 if (UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas -Wformat-truncation=0")
 	set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DZ_HAVE_UNISTD_H")
 endif (UNIX)
 
@@ -51,8 +51,9 @@ set(tests
 		src/tests/datastoragetests.cpp
 )
 
-#add_library(gdxcclib64 SHARED ${common})
-#set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
+add_library(gdxcclib64 SHARED ${common} generated/gdxcclib.cpp)
+target_include_directories(gdxcclib64 PRIVATE zlib src)
+set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_executable(gdxtest ${common} ${tests})
 target_include_directories(gdxtest PRIVATE zlib src)
