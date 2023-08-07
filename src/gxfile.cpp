@@ -1573,17 +1573,10 @@ bool TGXFileObj::ResultWillBeSorted( const int *ADomainNrs )
 
 void TGXFileObj::mapDefaultRecordValues(double *AVals) const
 {
-   const static std::array specValLiterals {
-           GMS_SV_UNDEF, // vm_valund=0
-           GMS_SV_NA,    // vm_valna =1
-           GMS_SV_PINF,  // vm_valpin=2
-           GMS_SV_MINF,  // vm_valmin=3
-           GMS_SV_EPS    // vm_valeps=4
-   };
    for(int i{}; i<GMS_VAL_MAX; i++) {
-      for(int j{}; j<(int)specValLiterals.size(); j++)
+      for(int j{}; j<GMS_SVIDX_NORMAL; j++)
       {
-         if(AVals[i] == specValLiterals[j])
+         if(AVals[i] == gmsSpecialValues[j])
          {
             AVals[i] = readIntlValueMapDbl[j];
             break;
