@@ -1571,13 +1571,24 @@ bool TGXFileObj::ResultWillBeSorted( const int *ADomainNrs )
    return true;
 }
 
-void TGXFileObj::mapNonFinite(double *AVals) const
+void TGXFileObj::mapDefaultRecordValues(double *AVals) const
 {
+   const static std::array specValLiterals {
+           GMS_SV_UNDEF, // vm_valund=0
+           GMS_SV_NA,    // vm_valna =1
+           GMS_SV_PINF,  // vm_valpin=2
+           GMS_SV_MINF,  // vm_valmin=3
+           GMS_SV_EPS    // vm_valeps=4
+   };
    for(int i{}; i<GMS_VAL_MAX; i++) {
-      if(AVals[i] == GMS_SV_PINF)
-         AVals[i] = readIntlValueMapDbl[vm_valpin];
-      else if(AVals[i] == GMS_SV_MINF)
-         AVals[i] = readIntlValueMapDbl[vm_valmin];
+      for(int j{}; j<(int)specValLiterals.size(); j++)
+      {
+         if(AVals[i] == specValLiterals[j])
+         {
+            AVals[i] = readIntlValueMapDbl[j];
+            break;
+         }
+      }
    }
 }
 
@@ -1594,12 +1605,12 @@ void TGXFileObj::GetDefaultRecord( double *Avals ) const
       case dt_var:
          ui = CurSyPtr->SUserInfo;
          std::memcpy( Avals, ui >= GMS_VARTYPE_UNKNOWN && ui <= GMS_VARTYPE_SEMIINT ? gmsDefRecVar[ui] : gmsDefRecVar[GMS_VARTYPE_UNKNOWN], sizeof( double ) * GMS_VAL_MAX );
-         mapNonFinite(Avals);
+         mapDefaultRecordValues( Avals );
          break;
       case dt_equ:
          ui = CurSyPtr->SUserInfo;
          std::memcpy( Avals, ui >= GMS_EQUTYPE_E && ui <= GMS_EQUTYPE_E + ( GMS_EQUTYPE_B + 1 ) ? gmsDefRecEqu[ui] : gmsDefRecEqu[GMS_EQUTYPE_E], sizeof( double ) * GMS_VAL_MAX );
-         mapNonFinite(Avals);
+         mapDefaultRecordValues( Avals );
          break;
       default:
          // NOTE: Not covered by unit tests yet.

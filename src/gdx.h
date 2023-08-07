@@ -1497,7 +1497,7 @@ private:
    void gdxGetDomainElements_DP_FC( int RawIndex, int MappedIndex, void *Uptr );
    int gdxDataReadRawFastFilt_DP_FC( const int *Indx, const double *Vals, void *Uptr );
 
-   void mapNonFinite(double *AVals) const;
+   void mapDefaultRecordValues(double *AVals) const;
 
 public:
    bool gdxGetDomainElements_DP_CallByRef {},
