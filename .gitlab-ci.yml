@@ -196,10 +196,12 @@ codechecker-leg:
   needs: [fetch-ci-scripts,apigenerator]
   allow_failure: false
   script:
-    - ls /usr/bin | grep clang
     - cp apifiles/* src/
     - cmake -DCMAKE_C_COMPILER=/usr/bin/clang-10 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-10 -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
-    - sh ci/codechecker.sh
+    - |
+      CodeChecker log -b "make -j4" -o compilation_database.json &&
+      CodeChecker analyze --analyzers clang-tidy clangsa -o reports compilation_database.json &&
+      CodeChecker parse --trim-path-prefix $(pwd) -e codeclimate reports > gl-code-quality-report.json || true
   after_script:
     - cat gl-code-quality-report.json
   artifacts:
