@@ -28,6 +28,7 @@ endif (UNIX)
 set(common
 		src/gmsstrm.h src/gmsstrm.cpp
 		src/gmsdata.h
+		src/batchalloc.h
 		src/datastorage.h
 		src/strhash.h
 		src/gmsobj.h

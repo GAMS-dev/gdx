@@ -57,7 +57,11 @@ typedef void( GDX_CALLCONV *gdxGetLoadPath_t )( char *s );
 extern gdxSetLoadPath_t gdxSetLoadPath;
 extern gdxGetLoadPath_t gdxGetLoadPath;
 
-typedef long long INT64;
+#if defined(_WIN32)
+typedef __int64 INT64;
+#else
+typedef signed long int INT64;
+#endif
 
 #ifndef GDX_INLINE
 #define GDX_INLINE inline
@@ -68,7 +72,7 @@ void GDX_CALLCONV doSetLoadPath( const char *s );
 void GDX_CALLCONV doGetLoadPath( char *s );
 int gdxFree( TGXFileRec_t **pgdx );
 int gdxCreate( TGXFileRec_t **pgdx, char *errBuf, int bufSize );
-void gdxCreateD( TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen );
+int gdxCreateD( TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen );
 void gdxDestroy( TGXFileRec_t **pgx );
 int gdxAcronymAdd( TGXFileRec_t *pgdx, const char *AName, const char *Txt, int AIndx );
 int gdxAcronymCount( TGXFileRec_t *pgdx );
@@ -176,8 +180,10 @@ GDX_INLINE void GDX_CALLCONV doGetLoadPath( char *s )
    memcpy( s, gdx::DLLLoadPath.c_str(), gdx::DLLLoadPath.size() );
 }
 
+#ifndef NO_SET_LOAD_PATH_DEF
 gdxSetLoadPath_t gdxSetLoadPath = doSetLoadPath;
 gdxGetLoadPath_t gdxGetLoadPath = doGetLoadPath;
+#endif
 
 GDX_INLINE int gdxCreate( TGXFileRec_t **TGXFile, char *errBuf, int bufSize )
 {
@@ -649,10 +655,10 @@ GDX_INLINE int gdxFree( TGXFileRec_t **TGXFile )
    return 1;
 }
 
-GDX_INLINE void gdxCreateD( TGXFileRec_t **TGXFile, const char *sysDir, char *msgBuf, int msgBufLen )
+GDX_INLINE int gdxCreateD( TGXFileRec_t **TGXFile, const char *sysDir, char *msgBuf, int msgBufLen )
 {
    doSetLoadPath( sysDir );
-   gdxCreate( TGXFile, msgBuf, msgBufLen );
+   return gdxCreate( TGXFile, msgBuf, msgBufLen );
 }
 
 GDX_INLINE int gdxDataReadRawFast( TGXFileRec_t *TGXFile, int SyNr, ::TDataStoreProc_t DP, int *NrRecs )

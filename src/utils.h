@@ -35,6 +35,8 @@
 #include <cstring>    // for memcpy, size_t, strcmp, strcpy, strlen
 #include <string>     // for string, char_traits
 #include <string_view>// for string_view, operator==, basic_string_view
+#include <algorithm>
+#include <vector>
 
 // ==============================================================================================================
 // Interface
@@ -191,4 +193,14 @@ inline char *NewString( const char *s,
    memSize += slen + 1;
    return buf;
 }
+
+template<class T>
+bool in( const T &val, const std::vector<T> &elems )
+{
+   return std::find( elems.begin(), elems.end(), val ) != elems.end();
+}
+
+std::vector<size_t> substrPositions( std::string_view s, std::string_view substr );
+std::string replaceSubstrs( std::string_view s, std::string_view substr, std::string_view replacement );
+
 }// namespace gdx::utils
