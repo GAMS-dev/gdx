@@ -133,4 +133,32 @@ int strConvCppToDelphi( const std::string_view s,
    std::memcpy( &delphistr[1], s.data(), l );
    return 0;
 }
+
+std::vector<size_t> substrPositions( const std::string_view s, const std::string_view substr )
+{
+   std::vector<size_t> positions;
+   for( size_t p { s.find( substr ) }; p != std::string::npos; p = s.find( substr, p + substr.size() ) )
+      positions.push_back( p );
+   return positions;
+}
+
+std::string replaceSubstrs( const std::string_view s, const std::string_view substr, const std::string_view replacement )
+{
+   if( substr == replacement ) return std::string { s };
+   std::string out {};
+   const int ssl = static_cast<int>( substr.length() );
+   const auto positions = substrPositions( s, substr );
+   for( int i = 0; i < (int) s.length(); i++ )
+   {
+      if( utils::in<size_t>( i, positions ) )
+      {
+         out += replacement;
+         i += ssl - 1;
+         continue;
+      }
+      out += s[i];
+   }
+   return out;
+}
+
 }// namespace gdx::utils

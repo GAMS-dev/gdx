@@ -30,6 +30,7 @@
 #include <cstring> // for memcpy, memset, size_t
 #include <limits>  // for numeric_limits
 #include <optional>// for nullopt, optional
+
 namespace gdx::collections::datastorage
 {
 template<typename KeyType, typename ValueType>
@@ -40,72 +41,17 @@ struct TLinkedDataRec;
 // When TLD_DYN_ARRAYS is active: No single item #TotalSize-bytes new allocations
 // but instead allocate big blocks (potentially wasting a couple bytes if items don't fit tightly)
 // also has space overhead for list of blocks to free it later
-#define TLD_BATCH_ALLOCS
+#define TSH_BATCH_ALLOCS
 
 #define TLD_TEMPLATE_HEADER template<typename KeyType, typename ValueType>
 #define TLD_REC_TYPE TLinkedDataRec<KeyType, ValueType>
 
-namespace gdx::collections::datastorage
-{
-
-#ifdef TLD_BATCH_ALLOCS
-struct DataBatch {
-   DataBatch *next;
-   uint8_t *ptr;
-   explicit DataBatch( size_t count ) : next {}, ptr { new uint8_t[count] } {}
-   ~DataBatch()
-   {
-      delete[] ptr;
-   }
-};
-
-template<int batchSize>
-class BatchAllocator
-{
-   DataBatch *head, *tail;
-   size_t offsetInTail;
-
-public:
-   BatchAllocator() : head {}, tail {}, offsetInTail {} {}
-
-   ~BatchAllocator()
-   {
-      clear();
-   }
-
-   void clear()
-   {
-      if( !head ) return;
-      DataBatch *next;
-      for( DataBatch *it = head; it; it = next )
-      {
-         next = it->next;
-         delete it;
-      }
-      head = tail = nullptr;
-   }
-
-   uint8_t *GetBytes( size_t count )
-   {
-      assert( count <= batchSize );
-      if( !head )
-      {
-         head = tail = new DataBatch { batchSize };
-         offsetInTail = 0;
-      }
-      else if( batchSize - offsetInTail < count )
-      {
-         tail->next = new DataBatch { batchSize };
-         tail = tail->next;
-         offsetInTail = 0;
-      }
-      auto res { tail->ptr + offsetInTail };
-      offsetInTail += count;
-      return res;
-   }
-};
+#ifdef TSH_BATCH_ALLOCS
+#include "batchalloc.h"
 #endif
 
+namespace gdx::collections::datastorage
+{
 TLD_TEMPLATE_HEADER
 struct TLinkedDataRec {
    TLinkedDataRec *RecNext {};
@@ -132,8 +78,8 @@ class TLinkedData
    using RecType = TLD_REC_TYPE;
    RecType *FHead, *FTail;
 
-#if defined( TLD_BATCH_ALLOCS )
-   BatchAllocator<960> batchAllocator;
+#if defined( TSH_BATCH_ALLOCS )
+   batchalloc::BatchAllocator batchAllocator {960};
 #endif
 
    bool IsSorted()
@@ -179,7 +125,7 @@ public:
 
    void Clear()
    {
-#if defined( TLD_BATCH_ALLOCS )
+#if defined( TSH_BATCH_ALLOCS )
       batchAllocator.clear();
 #else
       RecType *P { FHead };
@@ -202,7 +148,7 @@ public:
 
    RecType *AddItem( const KeyType *AKey, const ValueType *AData )
    {
-#if defined( TLD_BATCH_ALLOCS )
+#if defined( TSH_BATCH_ALLOCS )
       auto *node = reinterpret_cast<RecType *>( batchAllocator.GetBytes( FTotalSize ) );
 #else
       auto *node = reinterpret_cast<RecType *>( new uint8_t[FTotalSize] );

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "datastorage.h"// for BatchAllocator, TLD_BATCH_ALLOCS
+#include "datastorage.h"// for BatchAllocator, TSH_BATCH_ALLOCS
 #include "gmsdata.h"    // for TXIntList, TGrowArrayFxd
 #include "utils.h"      // for NewString, sameTextPChar, strCompare, toupper
 #include <cassert>      // for assert
@@ -55,9 +55,8 @@ template<typename T>
 class TXStrHashList
 {
 protected:
-#ifdef TLD_BATCH_ALLOCS
-   datastorage::BatchAllocator<960> batchAllocator;
-   datastorage::BatchAllocator<1024> batchStrAllocator;
+#ifdef TSH_BATCH_ALLOCS
+   batchalloc::BatchAllocator batchAllocator {960}, batchStrAllocator {1024};
 #endif
    std::vector<PHashBucket<T>> Buckets {};                    // sorted by order of insertion, no gaps
    std::unique_ptr<std::vector<PHashBucket<T>>> PHashTable {};// sorted by hash value, with gaps
@@ -206,7 +205,7 @@ public:
 
    void Clear()
    {
-#ifndef TLD_BATCH_ALLOCS
+#ifndef TSH_BATCH_ALLOCS
       for( auto bucket: Buckets )
       {
          delete[] bucket->StrP;
@@ -236,7 +235,7 @@ public:
    int StoreObject( const char *s, size_t slen, T AObj )
    {
       if( PHashTable ) ClearHashTable();
-#ifdef TLD_BATCH_ALLOCS
+#ifdef TSH_BATCH_ALLOCS
       auto PBuck = reinterpret_cast<PHashBucket<T>>( batchAllocator.GetBytes( sizeof( THashBucket<T> ) ) );
 #else
       PHashBucket<T> PBuck = new THashBucket<T> {};
@@ -251,7 +250,7 @@ public:
          FSorted = false;
       }
       FCount++;// ugly
-#ifdef TLD_BATCH_ALLOCS
+#ifdef TSH_BATCH_ALLOCS
       PBuck->StrP = reinterpret_cast<char *>( batchStrAllocator.GetBytes( slen + 1 ) );
 #else
       PBuck->StrP = new char[slen + 1];
@@ -273,7 +272,7 @@ public:
          else
             return PBuck->StrNr + ( OneBased ? 1 : 0 );
       }
-#ifdef TLD_BATCH_ALLOCS
+#ifdef TSH_BATCH_ALLOCS
       PBuck = reinterpret_cast<PHashBucket<T>>( batchAllocator.GetBytes( sizeof( THashBucket<T> ) ) );
 #else
       PBuck = new THashBucket<T> {};
@@ -289,7 +288,7 @@ public:
          FSorted = false;
       }
       FCount++;// ugly
-#ifdef TLD_BATCH_ALLOCS
+#ifdef TSH_BATCH_ALLOCS
       PBuck->StrP = reinterpret_cast<char *>( batchStrAllocator.GetBytes( slen + 1 ) );
 #else
       PBuck->StrP = new char[slen + 1];
@@ -401,7 +400,7 @@ public:
    void SetString( int N, const char *s, size_t slen )
    {
       auto bucket = Buckets[N - ( OneBased ? 1 : 0 )];
-#ifdef TLD_BATCH_ALLOCS
+#ifdef TSH_BATCH_ALLOCS
       // Storage for old string will leak temporarily but will be collected by batchAllocator.clear call
       bucket->StrP = reinterpret_cast<char *>( batchStrAllocator.GetBytes( slen + 1 ) );
 #else
