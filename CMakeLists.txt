@@ -53,16 +53,16 @@ set(tests
 )
 
 add_library(gdxcclib64 SHARED ${common} generated/gdxcclib.cpp)
-target_include_directories(gdxcclib64 PRIVATE zlib src)
+target_include_directories(gdxcclib64 PRIVATE zlib src generated)
 set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 add_executable(gdxtest ${common} ${tests})
-target_include_directories(gdxtest PRIVATE zlib src)
+target_include_directories(gdxtest PRIVATE zlib src generated)
 target_link_libraries(gdxtest ${mylibs})
 
-add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp src/gdxcc.c)
+add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp generated/gdxcc.c)
 target_link_libraries(gdxwraptest ${mylibs})
-target_include_directories(gdxwraptest PRIVATE src)
+target_include_directories(gdxwraptest PRIVATE src generated)
 target_compile_options(gdxwraptest PRIVATE -DGXFILE_CPPWRAP -DGC_NO_MUTEX)
 
 # Quickly run "include what you use" (https://include-what-you-use.org/) over project
