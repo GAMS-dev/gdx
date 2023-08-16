@@ -79,7 +79,7 @@ class TLinkedData
    RecType *FHead, *FTail;
 
 #if defined( TSH_BATCH_ALLOCS )
-   batchalloc::BatchAllocator batchAllocator {960};
+   batchalloc::BatchAllocator<960> batchAllocator;
 #endif
 
    bool IsSorted()

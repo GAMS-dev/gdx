@@ -16,10 +16,11 @@ struct DataBatch {
    }
 };
 
+template<int statBatchSize = 0>
 class BatchAllocator
 {
    DataBatch *head {}, *tail {};
-   size_t offsetInTail {}, batchSize { 1024 };
+   size_t offsetInTail {}, batchSize { statBatchSize ? statBatchSize : 1024 };
 
 public:
    explicit BatchAllocator( size_t _batchSize ) : batchSize { _batchSize } {}

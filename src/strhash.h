@@ -56,7 +56,8 @@ class TXStrHashList
 {
 protected:
 #ifdef TSH_BATCH_ALLOCS
-   batchalloc::BatchAllocator batchAllocator {960}, batchStrAllocator {1024};
+   batchalloc::BatchAllocator<960> batchAllocator;
+   batchalloc::BatchAllocator<1024> batchStrAllocator;
 #endif
    std::vector<PHashBucket<T>> Buckets {};                    // sorted by order of insertion, no gaps
    std::unique_ptr<std::vector<PHashBucket<T>>> PHashTable {};// sorted by hash value, with gaps
