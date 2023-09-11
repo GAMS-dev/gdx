@@ -2431,11 +2431,10 @@ int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
       {
          // NOTE: SSyNr of alias symbol objects is 0!
          DomSy = NameList->IndexOf( DomainIDs[D] );
-         if( DomSy <= -1 )
+         if( DomSy <= 0 ) // one-based so any valid index is >=1
          {
-            // NOTE: Not covered by unit tests yet.
             ReportError( ERR_UNKNOWNDOMAIN );
-            DomSy = -1;
+            DomSy = 0;
             res = false;
          }
       }

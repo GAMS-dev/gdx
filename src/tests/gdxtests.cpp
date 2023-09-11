@@ -2342,4 +2342,30 @@ TEST_CASE( "Open append should report error for old GDX file versions" )
    std::filesystem::remove( "f.gdx" );
 }
 
+TEST_CASE("Attempting writing relaxed domains as normal ones should not cause -1 domain indices") {
+   testWrite("relaxedDomains.gdx"s, [](TGXFileObj &obj) {
+      REQUIRE(obj.gdxDataWriteStrStart("x", "", 2, dt_var, 0));
+
+      StrIndexBuffers relaxedDomainNames;
+      relaxedDomainNames[0] = "i"s;
+      relaxedDomainNames[1] = "j"s;
+      REQUIRE_FALSE(obj.gdxSymbolSetDomain(relaxedDomainNames.cptrs()));
+      const int ERR_UNKNOWNDOMAIN = -100052;
+      REQUIRE_EQ(ERR_UNKNOWNDOMAIN, obj.gdxGetLastError());
+      REQUIRE(obj.gdxDataWriteDone());
+      REQUIRE(obj.gdxSymbolSetDomainX(1, relaxedDomainNames.cptrs()));
+   });
+   testRead("relaxedDomains.gdx"s, [](TGXFileObj &obj) {
+      std::array<int, 2> domainSyNrs {};
+      REQUIRE(obj.gdxSymbolGetDomain(1, domainSyNrs.data()));
+      REQUIRE_EQ(0, domainSyNrs[0]);
+      REQUIRE_EQ(0, domainSyNrs[1]);
+      StrIndexBuffers relaxedDomainNames;
+      REQUIRE(obj.gdxSymbolGetDomainX(1, relaxedDomainNames.ptrs()));
+      REQUIRE_EQ("i"s, relaxedDomainNames[0].str());
+      REQUIRE_EQ("j"s, relaxedDomainNames[1].str());
+   });
+   std::filesystem::remove( "relaxedDomains.gdx" );
+}
+
 }// namespace gdx::tests::gdxtests
