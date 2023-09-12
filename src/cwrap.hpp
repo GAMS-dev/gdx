@@ -23,6 +23,8 @@
  * SOFTWARE.
  */
 
+// Implement C-API via calling TGXFile C++ class
+
 #pragma once
 
 #include "gdx.h"    // for TGXFileObj, DLLLoadPath, TDataStoreProc_t, TDat...

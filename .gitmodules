@@ -1,3 +1,6 @@
 [submodule "src/apigenerator"]
 	path = src/apigenerator
 	url = ../apigenerator.git
+[submodule "src/doxy2yaml"]
+	path = src/doxy2yaml
+	url = ../doxy2yaml.git

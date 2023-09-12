@@ -1,0 +1,39 @@
+---
+title       : GAMS Data Exchange API
+prefix      : gdx
+apiversion  : 9
+compatibleversion : [9,8,7]
+
+DObject         : TGXFile
+#DObjectInt      : TGXFileObj
+DUnit           : gxfile
+ExtraUse        : gxdefs
+USE_XXXLOADPATH : true
+doc             : true
+MaxDimStyle     : gdx
+
+UseCD            : True
+extracUse        : '#include "gdx/src/cwrap.hpp"'
+clibuse          : True
+NOFORTRANCB      : False
+
+output :
+ - cc
+ - cclibdef
+ - cpplib
+ - dcb
+ - dcdef
+ - dcpdef
+ - ddec
+ - dcdefex
+ - dodef
+ - dodefex
+ - py
+ - vb
+ - cs
+ - f9def
+ - f9glu
+ - java
+ - doc
+
+#function and procedures
