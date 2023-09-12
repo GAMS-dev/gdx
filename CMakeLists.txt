@@ -69,3 +69,11 @@ target_compile_options(gdxwraptest PRIVATE -DGXFILE_CPPWRAP -DGC_NO_MUTEX)
 #find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
 #set_property(TARGET gdxcclib64 PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
 #set_property(TARGET gdxtest PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+
+add_executable(xp_example1 ${common} src/examples/xp_example1.cpp)
+target_include_directories(xp_example1 PRIVATE zlib src generated)
+target_link_libraries(xp_example1 ${mylibs})
+
+add_executable(xp_example2 ${common} src/examples/xp_example2.cpp generated/optcc.c)
+target_include_directories(xp_example2 PRIVATE zlib src generated)
+target_link_libraries(xp_example2 ${mylibs})
