@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: 'false'
       - name: Doxygen Action
         uses: mattnotmitt/doxygen-action@v1.9.5
         with:
