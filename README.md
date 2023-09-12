@@ -1,5 +1,7 @@
 # GAMS Data eXchange (GDX)
 
+<img src="gdxlogo.png" style="width:100px" alt="logo" />
+
 [[_TOC_]]
 
 ## Basic information on GDX file format
