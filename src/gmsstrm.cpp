@@ -82,6 +82,7 @@ int customFileOpen( const std::string &fName, CustomOpenAction mode, std::fstrea
          itsMode |= std::ios::in | std::ios::out;
          break;
    }
+   h->rdbuf()->pubsetbuf(nullptr, 0);
    h->open( fName, itsMode );
    bool f = h->fail();
    return f && !std::filesystem::exists( fName ) ? 2 : f;
