@@ -34,7 +34,6 @@
     <ClCompile Include="..\..\..\..\libs\gmszlib\trees.c" />
     <ClCompile Include="..\..\..\..\libs\gmszlib\uncompr.c" />
     <ClCompile Include="..\..\..\..\libs\gmszlib\zutil.c" />
-    <ClCompile Include="src\gclgms.c" />
     <ClCompile Include="src\gmsstrm.cpp" />
     <ClCompile Include="src\gxfile.cpp" />
     <ClCompile Include="src\tests\datastoragetests.cpp" />
@@ -59,7 +58,6 @@
     <ClInclude Include="..\..\..\..\libs\gmszlib\zconf.h" />
     <ClInclude Include="..\..\..\..\libs\gmszlib\zlib.h" />
     <ClInclude Include="..\..\..\..\libs\gmszlib\zutil.h" />
-    <ClInclude Include="src\gclgms.h" />
     <ClInclude Include="src\datastorage.h" />
     <ClInclude Include="src\gdx.h" />
     <ClInclude Include="src\gmsdata.h" />
@@ -126,10 +124,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\libs\gmszlib;$(IncludePath)</IncludePath>
+    <IncludePath>generated;C:\libs\gmszlib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\libs\gmszlib;$(IncludePath)</IncludePath>
+    <IncludePath>generated;C:\libs\gmszlib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

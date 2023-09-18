@@ -87,11 +87,15 @@ int customFileOpen( const std::string &fName, CustomOpenAction mode, std::fstrea
    return f && !std::filesystem::exists( fName ) ? 2 : f;
 }
 
+// TODO: AS: Evaluate if this should be closer to p3utils::p3FileRead in Delphi (e.g. using WinAPI ReadFile on Windows and POSIX read on UNIX)
 int customFileRead( std::fstream *h, char *buffer, uint32_t buflen, uint32_t &numRead )
 {
-   auto savedPos = h->tellg();
+   auto savedPos { h->tellg() };
    h->seekg( 0, h->end );
-   numRead = std::min<uint32_t>( static_cast<uint32_t>( h->tellg() - savedPos ), buflen );
+   auto bytesRemaining {static_cast<int64_t>( h->tellg() - savedPos )};
+   auto sNumRead {std::min<int64_t>( bytesRemaining, buflen )};
+   assert( sNumRead >= 0 );
+   numRead = static_cast<uint32_t>(sNumRead);
    h->seekg( savedPos );
    h->read( buffer, numRead );
    return h->bad() ? 1 : 0;

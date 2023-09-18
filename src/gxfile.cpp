@@ -1431,6 +1431,7 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
          uint8_t BSV;
          FFile->Read( &BSV, 1 );
          TgdxIntlValTyp SV { static_cast<TgdxIntlValTyp>( BSV ) };
+         assert( SV >= 0 && SV <= vm_count );
          AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap( FFile->ReadDouble() );
       }
       if( MapSetText && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set )

@@ -22,8 +22,6 @@
     <ClCompile Include="src\tests\utilstests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="src\gclgms.c">
-    </ClCompile>
     <ClCompile Include="src\gmsstrm.cpp">
     </ClCompile>
     <ClCompile Include="src\tests\strhashtests.cpp">
@@ -95,7 +93,6 @@
     <ClInclude Include="src\tests\doctest.h">
       <Filter>tests</Filter>
     </ClInclude>
-    <ClInclude Include="src\gclgms.h" />
     <ClInclude Include="src\datastorage.h" />
     <ClInclude Include="src\gmsdata.h" />
     <ClInclude Include="src\gmsobj.h" />
