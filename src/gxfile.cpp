@@ -1328,21 +1328,28 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
          int xv { vm_valund };
          for( ; xv < vm_normal; xv++ )
             if( i64 == intlValueMapI64[xv] ) break;
-         if( xv == vm_normal && dClass != DBL_FINITE )
+         if( xv == vm_normal )
          {
-            switch( dClass )
+            // vm_normal implies no -0.0 -> vm_valXYZ mapping existed!
+            // hence storing negative zero as vm_zero only scraps sign information
+            if( X == -0.0  )
+               xv = vm_zero;
+            else if(dClass != DBL_FINITE)
             {
-               case DBL_NINF:
-                  xv = vm_valmin;
-                  break;
-               case DBL_PINF:
-                  xv = vm_valpin;
-                  break;
-               case DBL_NAN:
-                  xv = vm_valna;
-                  break;
-               default:// NOTE: Not covered by unit tests yet.
-                  break;
+               switch( dClass )
+               {
+                  case DBL_NINF:
+                     xv = vm_valmin;
+                     break;
+                  case DBL_PINF:
+                     xv = vm_valpin;
+                     break;
+                  case DBL_NAN:
+                     xv = vm_valna;
+                     break;
+                  default:// NOTE: Not covered by unit tests yet.
+                     break;
+               }
             }
          }
          FFile->WriteByte( xv );

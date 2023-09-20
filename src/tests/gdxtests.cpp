@@ -2369,17 +2369,17 @@ TEST_CASE("Attempting writing relaxed domains as normal ones should not cause -1
 }
 
 TEST_CASE("Debug terrible file") {
-   std::string fn {"C:\\dockerhome\\bau_p.gdx"s};
+   std::string fn {R"(C:\dockerhome\bau_p.gdx)"};
    if(!std::filesystem::exists(fn)) return;
    testRead(fn, []( TGXFileObj &obj )
    {
       int numRecs, dimFrst, dim, typ, xSyNr;
-      std::array<char, 256> name;
+      std::array<char, 256> name {};
       obj.gdxFindSymbol( "X", xSyNr );
       obj.gdxSymbolInfo( xSyNr, name.data(), dim, typ );
       obj.gdxDataReadRawStart( xSyNr, numRecs );
-      std::array<int, 20> keys;
-      std::array<double, 5> vals;
+      std::array<int, 20> keys {};
+      std::array<double, 5> vals {};
       for (int i{}; i < numRecs; i++) {
          /*if( i + 1 >= 959 )
          {
@@ -2389,6 +2389,88 @@ TEST_CASE("Debug terrible file") {
       }
       obj.gdxDataReadDone();
    });
+}
+
+TEST_CASE( "Zero is special (no-mapping)" )
+{
+   const std::string fn { "zero_is_special_nomap.gdx"s };
+   testWrite( fn, []( TGXFileObj &obj ) {
+      obj.gdxDataWriteStrStart( "p", "rudimentary parameter", 1, dt_par, 0 );
+      StrIndexBuffers keys {};
+      std::array<double, GMS_VAL_MAX> vals {};
+      keys[0] = "i1"s;
+      // previously: vm_normal -> byte + full double = 9 bytes!!!
+      // now: vm_zero 1 byte but loosing negative sign
+      vals.front() = -0.0;
+      obj.gdxDataWriteStr( keys.cptrs(), vals.data() );
+      keys[0] = "i2"s;
+      vals.front() = +0.0; // vm_zero
+      obj.gdxDataWriteStr( keys.cptrs(), vals.data() );
+      obj.gdxDataWriteDone();
+   } );
+   testRead( fn, []( TGXFileObj &obj ) {
+      int numRecs;
+      obj.gdxDataReadStrStart( 1, numRecs );
+      REQUIRE_EQ( 2, numRecs );
+      int dimFrst;
+      StrIndexBuffers keys {};
+      std::array<double, GMS_VAL_MAX> vals {};
+      obj.gdxDataReadStr( keys.ptrs(), vals.data(), dimFrst );
+      // previously: vm_normal allows us to extract sign!
+      // now: vm_zero looses negative sign!
+      REQUIRE_EQ( +0.0, vals[0] );
+      obj.gdxDataReadStr( keys.ptrs(), vals.data(), dimFrst );
+      REQUIRE_EQ( +0.0, vals[0] ); // vm_zero is always +0
+      obj.gdxDataReadDone();
+   } );
+   std::filesystem::remove( fn );
+}
+
+TEST_CASE( "Zero is special (map -0 to eps)" )
+{
+   const std::string fn { "zero_is_special_map_eps.gdx"s };
+   testWrite( fn, []( TGXFileObj &obj ) {
+      std::array<double, sv_acronym+1> specVals {};
+      obj.gdxGetSpecialValues(specVals.data());
+      specVals[sv_valeps] = -0.0;
+      obj.gdxSetSpecialValues(specVals.data());
+      obj.gdxDataWriteStrStart( "p", "rudimentary parameter", 1, dt_par, 0 );
+      StrIndexBuffers keys {};
+      std::array<double, GMS_VAL_MAX> vals {};
+      keys[0] = "i1"s;
+      vals.front() = -0.0; // stored as one byte vm_valeps
+      obj.gdxDataWriteStr( keys.cptrs(), vals.data() );
+      keys[0] = "i2"s;
+      vals.front() = +0.0; // stored as one byte vm_zero
+      obj.gdxDataWriteStr( keys.cptrs(), vals.data() );
+      obj.gdxDataWriteDone();
+   } );
+   testRead( fn, []( TGXFileObj &obj ) {
+      int numRecs;
+      obj.gdxDataReadStrStart( 1, numRecs );
+      REQUIRE_EQ( 2, numRecs );
+      int dimFrst;
+      StrIndexBuffers keys {};
+      std::array<double, GMS_VAL_MAX> vals {};
+      obj.gdxDataReadStr( keys.ptrs(), vals.data(), dimFrst );
+      REQUIRE_EQ( GMS_SV_EPS, vals[0] ); // actually red as vm_valeps
+      obj.gdxDataReadStr( keys.ptrs(), vals.data(), dimFrst );
+      REQUIRE_EQ( +0.0, vals[0] ); // vm_zero
+      obj.gdxDataReadDone();
+
+      std::array<double, sv_acronym+1> specVals {};
+      obj.gdxGetSpecialValues(specVals.data());
+      specVals[sv_valeps] = -0.0;
+      obj.gdxSetReadSpecialValues(specVals.data());
+      obj.gdxDataReadStrStart( 1, numRecs );
+      REQUIRE_EQ( 2, numRecs );
+      obj.gdxDataReadStr( keys.ptrs(), vals.data(), dimFrst );
+      REQUIRE_EQ( -0.0, vals[0] ); // with reverse mapping back to -0.0 explicitly set
+      obj.gdxDataReadStr( keys.ptrs(), vals.data(), dimFrst );
+      REQUIRE_EQ( +0.0, vals[0] ); // vm_zero
+      obj.gdxDataReadDone();
+   } );
+   std::filesystem::remove( fn );
 }
 
 }// namespace gdx::tests::gdxtests
