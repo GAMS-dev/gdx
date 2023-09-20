@@ -2369,19 +2369,19 @@ TEST_CASE("Attempting writing relaxed domains as normal ones should not cause -1
 }
 
 TEST_CASE("Debug terrible file") {
-   std::string fn {"C:\\dockerhome\\pAmatrix_Figaro_reg.gdx"s};
+   std::string fn {"C:\\dockerhome\\bau_p.gdx"s};
    if(!std::filesystem::exists(fn)) return;
    testRead(fn, []( TGXFileObj &obj )
    {
-      int numRecs, dimFrst, dim, typ;
+      int numRecs, dimFrst, dim, typ, xSyNr;
       std::array<char, 256> name;
-      obj.gdxSymbolInfo( 2, name.data(), dim, typ );
-      obj.gdxDataReadRawStart( 2, numRecs );
+      obj.gdxFindSymbol( "X", xSyNr );
+      obj.gdxSymbolInfo( xSyNr, name.data(), dim, typ );
+      obj.gdxDataReadRawStart( xSyNr, numRecs );
       std::array<int, 20> keys;
       std::array<double, 5> vals;
-      assert( numRecs > 16538520 );
-      for (int i{}; i < 16538529; i++) {
-         /*if( i + 1 >= 16538518 )
+      for (int i{}; i < numRecs; i++) {
+         /*if( i + 1 >= 959 )
          {
             std::cout << std::endl;
          }*/

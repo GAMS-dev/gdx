@@ -1431,7 +1431,14 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
          uint8_t BSV;
          FFile->Read( &BSV, 1 );
          TgdxIntlValTyp SV { static_cast<TgdxIntlValTyp>( BSV ) };
-         assert( SV >= 0 && SV <= vm_count );
+         // Delphi doesn't bound check here and just writes adjacent junk
+         // but we at least consistently write 0
+         if (SV < 0 || SV >= vm_count) {
+            AVals[DV] = 0.0;
+            if(verboseTrace && TraceLevel >= TraceLevels::trl_errors)
+                std::cout << "WARNING: Special value (" << BSV << ") byte out of range {0,...,10}!" << std::endl;
+            continue;
+         }
          AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap( FFile->ReadDouble() );
       }
       if( MapSetText && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set )
