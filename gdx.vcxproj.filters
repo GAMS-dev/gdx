@@ -84,6 +84,7 @@
     <ClCompile Include="src\tests\gdxtests.cpp">
       <Filter>tests</Filter>
     </ClCompile>
+    <ClCompile Include="src\file.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\gxfile.h">
@@ -135,5 +136,6 @@
       <Filter>tests</Filter>
     </ClInclude>
     <ClInclude Include="src\gdx.h" />
+    <ClInclude Include="src\file.h" />
   </ItemGroup>
 </Project>

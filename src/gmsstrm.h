@@ -53,6 +53,8 @@ inline int compress( void *dest, unsigned long *destLen, const void *source, uns
 #include <zlib.h>
 #endif
 
+#include "file.h"
+
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
@@ -178,9 +180,17 @@ public:
    void ActiveWriteOpTextDumping( const std::string &dumpFilename );
 };
 
+#if defined(USE_FSTREAM)
+using FileImpl = gdx::file::FStreamFile;
+#elif defined(_WIN32)
+using FileImpl = gdx::file::WinAPIFile;
+#else
+using FileImpl = gdx::file::POSIXFile;
+#endif
+
 class TXFileStreamDelphi : public TXStreamDelphi
 {
-   std::unique_ptr<std::fstream> FS {};
+   FileImpl FS {};
    bool FileIsOpen {};
    std::string FFileName {}, FPassWord {};
 
