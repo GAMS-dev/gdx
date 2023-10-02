@@ -45,7 +45,7 @@ namespace gdx::tests::delphidifftests
 TEST_SUITE_BEGIN( "Validate against GAMS 43 Delphi GDX" );
 
 const static std::array skipFiles {"bau_p.gdx"s, "fnsqlog10.gdx"s, "testExcel.gdx"s};
-const static bool quiet {false};
+const static bool quiet {true};
 
 bool ends_with(const std::string &s, const std::string &suffix) {
    for(int i{}; i<suffix.length(); i++)
@@ -197,6 +197,127 @@ void createBigGDXFile() {
    gdx.gdxClose();
 }
 
+void readFileCpp(const std::string &fn) {
+   if(std::any_of(skipFiles.begin(), skipFiles.end(), [&](const std::string &skipFile) { return ends_with(fn, skipFile); }))
+      return;
+   if(!quiet)
+      std::cout << "Checking GDX file: "s << fn << std::endl;
+   std::string msg2;
+   gdx::TGXFileObj gdx{msg2};
+   REQUIRE(msg2.empty());
+   int ErrNr;
+   REQUIRE(gdx.gdxOpenRead(fn.c_str(), ErrNr));
+   REQUIRE_FALSE(gdx.gdxErrorCount());
+   REQUIRE_FALSE(ErrNr);
+   int nsyms1, nuels1;
+   REQUIRE(gdx.gdxSystemInfo(nsyms1, nuels1));
+   {
+      std::chrono::time_point<std::chrono::system_clock> last, start;
+      last = start = std::chrono::system_clock::now();
+      std::array<char, GMS_SSSIZE> uelLabel1 {};
+      int uelMap1;
+      for( int u { 1 }; u <= nuels1; u++ )
+      {
+         assert( gdx.gdxUMUelGet( u, uelLabel1.data(), uelMap1 ) );
+         showProgress<0>(last, start, u, nuels1);
+      }
+   }
+   std::array<char, GMS_SSSIZE> symName1 {}, explText1 {};
+   int syDim1, syTyp1, recCnt1, userInfo1, nrecs, dimFrst1, nvals;
+   std::array<int, GMS_MAX_INDEX_DIM> keys1 {};
+   std::array<double, GMS_VAL_MAX> values1 {};
+   for(int n{}; n<=nsyms1; n++) {
+      REQUIRE(gdx.gdxSymbolInfo(n, symName1.data(), syDim1, syTyp1));
+      REQUIRE_FALSE(gdx.gdxErrorCount());
+      nvals = syTyp1 < dt_var ? 1 : GMS_VAL_MAX;
+      REQUIRE(gdx.gdxSymbolInfoX(n, recCnt1, userInfo1, explText1.data()));
+      std::chrono::time_point<std::chrono::system_clock> last, start;
+      last = start = std::chrono::system_clock::now();
+      if(!recCnt1) continue;
+      REQUIRE(gdx.gdxDataReadRawStart(n, nrecs));
+      REQUIRE_EQ(recCnt1, nrecs);
+      for(int r{}; r<recCnt1; r++) {
+         assert(gdx.gdxDataReadRaw(keys1.data(), values1.data(), dimFrst1));
+         showProgress<1>(last, start, r, recCnt1);
+      }
+      REQUIRE(gdx.gdxDataReadDone());
+   }
+}
+
+void readRecursivelyCpp(const std::string &path) {
+   if(!quiet)
+      std::cout << "Descending into directory path: "s << path << std::endl;
+   for(const auto &entry : std::filesystem::directory_iterator(path)) {
+      std::string fn = entry.path().string();
+      if(entry.is_directory())
+         readRecursivelyCpp( fn );
+      else if(ends_with(fn, ".gdx"))
+         readFileCpp(fn);
+   }
+}
+
+void readFileDelphi(const std::string &fn) {
+   if(std::any_of(skipFiles.begin(), skipFiles.end(), [&](const std::string &skipFile) { return ends_with(fn, skipFile); }))
+      return;
+   if(!quiet)
+      std::cout << "Checking GDX file: "s << fn << std::endl;
+   std::array<char, 256> msg {};
+   ::gdxHandle_t pgx;
+   REQUIRE(::gdxCreateD(&pgx, "C:\\GAMS\\43", msg.data(), msg.size()));
+   REQUIRE(pgx);
+   REQUIRE_EQ('\0', msg.front());
+   REQUIRE_FALSE(::gdxErrorCount(pgx));
+   int ErrNr;
+   REQUIRE(::gdxOpenRead(pgx, fn.c_str(), &ErrNr));
+   REQUIRE_FALSE(ErrNr);
+   int nsyms2, nuels2;
+   REQUIRE(::gdxSystemInfo(pgx, &nsyms2, &nuels2));
+   {
+      std::chrono::time_point<std::chrono::system_clock> last, start;
+      last = start = std::chrono::system_clock::now();
+      std::array<char, GMS_SSSIZE> uelLabel2 {};
+      int uelMap2;
+      for( int u { 1 }; u <= nuels2; u++ )
+      {
+         assert( gdxUMUelGet( pgx, u, uelLabel2.data(), &uelMap2 ) );
+         showProgress<0>(last, start, u, nuels2);
+      }
+   }
+   std::array<char, GMS_SSSIZE>  symName2 {}, explText2 {};
+   int syDim2, syTyp2, recCnt2, userInfo2, nrecs, dimFrst2, nvals;
+   std::array<int, GMS_MAX_INDEX_DIM> keys2 {};
+   std::array<double, GMS_VAL_MAX> values2 {};
+   for(int n{}; n<=nsyms2; n++) {
+      REQUIRE(gdxSymbolInfo(pgx, n, symName2.data(), &syDim2, &syTyp2));
+      REQUIRE_FALSE(::gdxErrorCount(pgx));
+      nvals = syTyp2 < dt_var ? 1 : GMS_VAL_MAX;
+      REQUIRE(::gdxSymbolInfoX(pgx, n, &recCnt2, &userInfo2, explText2.data()));
+      std::chrono::time_point<std::chrono::system_clock> last, start;
+      last = start = std::chrono::system_clock::now();
+      if(!recCnt2) continue;
+      REQUIRE(::gdxDataReadRawStart(pgx, n, &nrecs));
+      REQUIRE_EQ(recCnt2, nrecs);
+      for(int r{}; r<recCnt2; r++) {
+         assert(::gdxDataReadRaw(pgx, keys2.data(), values2.data(), &dimFrst2));
+         showProgress<1>(last, start, r, recCnt2);
+      }
+      REQUIRE(::gdxDataReadDone(pgx));
+   }
+   ::gdxClose(pgx);
+}
+
+void readRecursivelyDelphi(const std::string &path) {
+   if(!quiet)
+      std::cout << "Descending into directory path: "s << path << std::endl;
+   for(const auto &entry : std::filesystem::directory_iterator(path)) {
+      std::string fn = entry.path().string();
+      if(entry.is_directory())
+         readRecursivelyDelphi( fn );
+      else if(ends_with(fn, ".gdx"))
+         readFileDelphi(fn);
+   }
+}
+
 TEST_CASE( "Read all contents of a GDX file with both GAMS 43 P3/Delphi-GDX and C++-GDX" )
 {
    //const std::string fn {R"(C:\dockerhome\pAmatrix_Figaro_reg.gdx)"};
@@ -204,7 +325,23 @@ TEST_CASE( "Read all contents of a GDX file with both GAMS 43 P3/Delphi-GDX and 
 
    //validateGDXFile("C:\\dockerhome\\mrb\\tr20.gdx");
 
-   validateRecursively(R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)");
+   //validateRecursively(R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)");
+
+   {
+      auto start { std::chrono::system_clock::now() };
+      //readRecursivelyDelphi( R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)" );
+      readRecursivelyDelphi( R"(C:\dockerhome)" );
+      auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::system_clock::now() - start ).count();
+      std::cout << "Elapsed time Delphi: "s << elapsed << std::endl;
+   }
+
+   {
+      auto start { std::chrono::system_clock::now() };
+      //readRecursivelyCpp( R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)" );
+      readRecursivelyCpp( R"(C:\dockerhome)" );
+      auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::system_clock::now() - start ).count();
+      std::cout << "Elapsed time C++: "s << elapsed << std::endl;
+   }
 
    //createBigGDXFile();
    //validateGDXFile("verybig.gdx");
