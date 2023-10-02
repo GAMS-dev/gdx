@@ -497,7 +497,7 @@ TEST_CASE( "Test write and read record raw" )
 
       // Sixth symbol
       // equation emptyequ 'An equation without any records';
-      REQUIRE( pgx.gdxDataWriteRawStart( "emptyequ", "An equation without any records", 0, dt_equ, GMS_EQUTYPE_L ) );
+      REQUIRE( pgx.gdxDataWriteRawStart( "emptyequ", "An equation without any records", 0, dt_equ, GMS_EQU_USERINFO_BASE + GMS_EQUTYPE_L ) );
       REQUIRE( pgx.gdxDataWriteDone() );
    } );
    testRead( fn, [&]( TGXFileObj &pgx ) {
@@ -554,12 +554,14 @@ TEST_CASE( "Test write and read record raw" )
 
       // Empty variable
       REQUIRE( pgx.gdxDataReadRawStart( 5, NrRecs ) );
+      REQUIRE_EQ(1, NrRecs);
       REQUIRE( pgx.gdxDataReadRaw( &key, values.data(), dimFrst ) );
       REQUIRE_EQ( std::array { 0.0, 0.0, 0.0, GMS_SV_PINF, 1.0 }, values );
       REQUIRE( pgx.gdxDataReadDone() );
 
       // Empty equation
       REQUIRE( pgx.gdxDataReadRawStart( 6, NrRecs ) );
+      REQUIRE_EQ(1, NrRecs);
       REQUIRE( pgx.gdxDataReadRaw( &key, values.data(), dimFrst ) );
       REQUIRE_EQ( std::array { 0.0, 0.0, GMS_SV_MINF, 0.0, 1.0 }, values );
       REQUIRE( pgx.gdxDataReadDone() );
@@ -621,7 +623,7 @@ TEST_CASE("Test write and read empty variable with custom special value mapping"
 
       // Second symbol
       // equation emptyequ 'An equation without any records';
-      REQUIRE( pgx.gdxDataWriteRawStart( "emptyequ", "An equation without any records", 0, dt_equ, GMS_EQUTYPE_N ) );
+      REQUIRE( pgx.gdxDataWriteRawStart( "emptyequ", "An equation without any records", 0, dt_equ, GMS_EQU_USERINFO_BASE + GMS_EQUTYPE_N ) );
       REQUIRE( pgx.gdxDataWriteDone() );
    } );
    testRead( fn, [&]( TGXFileObj &pgx ) {
