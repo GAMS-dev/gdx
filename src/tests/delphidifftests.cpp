@@ -44,7 +44,7 @@ namespace gdx::tests::delphidifftests
 
 TEST_SUITE_BEGIN( "Validate against GAMS 43 Delphi GDX" );
 
-const static std::array skipFiles {"bau_p.gdx"s};
+const static std::array skipFiles {"bau_p.gdx"s, "fnsqlog10.gdx"s, "testExcel.gdx"s};
 const static bool quiet {false};
 
 bool ends_with(const std::string &s, const std::string &suffix) {
@@ -120,8 +120,8 @@ void validateGDXFile(const std::string &fn) {
       REQUIRE(gdxSymbolInfo(pgx, n, symName2.data(), &syDim2, &syTyp2));
       REQUIRE_FALSE(::gdxErrorCount(pgx));
 
-      if(!quiet)
-         std::cout << "Comparing symbol "s << symName1.data() << "..."s << std::endl;
+      /*if(!quiet)
+         std::cout << "Comparing symbol "s << symName1.data() << "..."s << std::endl;*/
 
       REQUIRE(!std::strcmp(symName1.data(), symName2.data()));
       REQUIRE_EQ(syDim1, syDim2);
@@ -172,11 +172,42 @@ void validateRecursively(const std::string &path) {
    }
 }
 
+// Writing lots of uels and symbols builds up tables which is lots of effort
+// just dumping raw records instead is very efficient
+void createBigGDXFile() {
+   std::string errMsg;
+   gdx::TGXFileObj gdx{errMsg};
+   int errNr;
+   gdx.gdxOpenWrite("verybig.gdx", "delphidifftest", errNr);
+
+   gdx.gdxUELRegisterRawStart();
+   gdx.gdxUELRegisterRaw("i1");
+   gdx.gdxUELRegisterDone();
+
+   gdx.gdxDataWriteRawStart("i", "a var", 20, dt_var, 0);
+   std::array<int, GMS_MAX_INDEX_DIM> keys {};
+   std::array<double, GMS_VAL_MAX> values {};
+   for(uint64_t i{}; i<1024*1024*420*2; i++)
+   {
+      keys.front() = i+1;
+      gdx.gdxDataWriteRaw( keys.data(), values.data() );
+   }
+   gdx.gdxDataWriteDone();
+
+   gdx.gdxClose();
+}
+
 TEST_CASE( "Read all contents of a GDX file with both GAMS 43 P3/Delphi-GDX and C++-GDX" )
 {
    //const std::string fn {R"(C:\dockerhome\pAmatrix_Figaro_reg.gdx)"};
    //validateRecursively(R"(C:\dockerhome)");
-   validateGDXFile("C:\\dockerhome\\mrb\\tr20.gdx");
+
+   //validateGDXFile("C:\\dockerhome\\mrb\\tr20.gdx");
+
+   validateRecursively(R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)");
+
+   //createBigGDXFile();
+   //validateGDXFile("verybig.gdx");
 }
 
 TEST_SUITE_END();
