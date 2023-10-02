@@ -1617,7 +1617,7 @@ void TGXFileObj::GetDefaultRecord( double *Avals ) const
          break;
       case dt_equ:
          ui = CurSyPtr->SUserInfo;
-         std::memcpy( Avals, ui >= GMS_EQUTYPE_E && ui <= GMS_EQUTYPE_E + ( GMS_EQUTYPE_B + 1 ) ? gmsDefRecEqu[ui] : gmsDefRecEqu[GMS_EQUTYPE_E], sizeof( double ) * GMS_VAL_MAX );
+         std::memcpy( Avals, ui >= GMS_EQU_USERINFO_BASE + GMS_EQUTYPE_E && ui < GMS_EQU_USERINFO_BASE + GMS_EQUTYPE_MAX ? gmsDefRecEqu[ui-GMS_EQU_USERINFO_BASE] : gmsDefRecEqu[GMS_EQUTYPE_E], sizeof( double ) * GMS_VAL_MAX );
          mapDefaultRecordValues( Avals );
          break;
       default:
