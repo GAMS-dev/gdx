@@ -34,6 +34,7 @@
     <ClCompile Include="..\..\..\..\libs\gmszlib\trees.c" />
     <ClCompile Include="..\..\..\..\libs\gmszlib\uncompr.c" />
     <ClCompile Include="..\..\..\..\libs\gmszlib\zutil.c" />
+    <ClCompile Include="src\file.cpp" />
     <ClCompile Include="src\gmsstrm.cpp" />
     <ClCompile Include="src\gxfile.cpp" />
     <ClCompile Include="src\tests\datastoragetests.cpp" />
@@ -59,6 +60,7 @@
     <ClInclude Include="..\..\..\..\libs\gmszlib\zlib.h" />
     <ClInclude Include="..\..\..\..\libs\gmszlib\zutil.h" />
     <ClInclude Include="src\datastorage.h" />
+    <ClInclude Include="src\file.h" />
     <ClInclude Include="src\gdx.h" />
     <ClInclude Include="src\gmsdata.h" />
     <ClInclude Include="src\gmsobj.h" />

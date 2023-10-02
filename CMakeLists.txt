@@ -26,6 +26,7 @@ endif (UNIX)
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(common
+		src/file.h src/file.cpp
 		src/gmsstrm.h src/gmsstrm.cpp
 		src/gmsdata.h
 		src/batchalloc.h
@@ -50,6 +51,7 @@ set(tests
 		src/tests/gmsdatatests.cpp
 		src/tests/strhashtests.cpp
 		src/tests/datastoragetests.cpp
+		src/tests/filetests.cpp
 )
 
 set(delphi-diff
