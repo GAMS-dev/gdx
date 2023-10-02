@@ -52,6 +52,10 @@ set(tests
 		src/tests/datastoragetests.cpp
 )
 
+set(delphi-diff
+		src/tests/doctestmain.cpp
+		src/tests/delphidifftests.cpp)
+
 add_library(gdxcclib64 SHARED ${common} generated/gdxcclib.cpp)
 target_include_directories(gdxcclib64 PRIVATE zlib src generated)
 set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -59,6 +63,12 @@ set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 add_executable(gdxtest ${common} ${tests})
 target_include_directories(gdxtest PRIVATE zlib src generated)
 target_link_libraries(gdxtest ${mylibs})
+
+if(EXISTS C:/GAMS/43/apifiles/C/api/gdxcc.c)
+add_executable(delphi-diff-tests ${common} ${delphi-diff} C:/GAMS/43/apifiles/C/api/gdxcc.c)
+target_include_directories(delphi-diff-tests PRIVATE zlib src generated)
+target_link_libraries(delphi-diff-tests ${mylibs})
+endif()
 
 add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp generated/gdxcc.c)
 target_link_libraries(gdxwraptest ${mylibs})
