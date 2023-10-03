@@ -324,5 +324,5 @@ deploy-github:
   script:
     - PATH="/opt/github-release:${PATH}"
     - github-release
-    - GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v release -u GAMS-dev -r gdx -t example-tag -d "some text." -n "Example release"
-#    - github-release --verbose upload -s ${GITHUB_TOKEN} -R --user GAMS-dev --repo gdx --tag example-tag --name libgdxcclib64.so --file libgdxcclib64.so
+#    - GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v release -u GAMS-dev -r gdx -t example-tag -d "some text." -n "Example release"
+    - GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v upload -R -u GAMS-dev -r gdx -t example-tag -n libgdxcclib64.so -f libgdxcclib64.so
