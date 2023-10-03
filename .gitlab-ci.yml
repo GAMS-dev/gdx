@@ -317,7 +317,7 @@ deploy-github:
   when: always
   stage: deploy
   tags: [linux]
-  needs: [] # [build-leg, build-dac, build-wei, apigenerator]
+  needs: [build-leg, build-dac, build-wei, apigenerator]
   image:
     name: registry.gams.com/devel/gdx/leg/builder-deploy:latest
     entrypoint: [""]   # prevent startup.sh
