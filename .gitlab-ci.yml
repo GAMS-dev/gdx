@@ -325,5 +325,10 @@ deploy-github:
     - ls
     - PATH="/opt/github-release:${PATH}"
     - github-release
+    - cp Release/gdxcclib64.dll .
 #    - GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v release -u GAMS-dev -r gdx -t example-tag -d "some text." -n "Example release"
-    - GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v upload -R -u GAMS-dev -r gdx -t example-tag -n libgdxcclib64.so -f libgdxcclib64.so
+    - |
+      for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib
+      do
+        GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v upload -R -u GAMS-dev -r gdx -t example-tag -n $fn -f $fn
+      done
