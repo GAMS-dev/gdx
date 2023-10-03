@@ -323,4 +323,4 @@ deploy-github:
   dependencies: [build-leg, build-dac, build-wei, apigenerator]
   script:
     - PATH="/opt/github-release:${PATH}"
-    - TAG_NAME=$CI_COMMIT_TAG GITHUB_TOKEN=${GITHUB_TOKEN} github-release
+    -  github-release --verbose upload -s ${GITHUB_TOKEN} -R --user GAMS-dev --repo gdx --tag example-tag --name libgdxcclib64.so --file libgdxcclib64.so
