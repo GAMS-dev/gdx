@@ -322,6 +322,7 @@ deploy-github:
     name: registry.gams.com/devel/gdx/leg/builder-deploy:latest
     entrypoint: [""]   # prevent startup.sh
   script:
+    - ls
     - PATH="/opt/github-release:${PATH}"
     - github-release
 #    - GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v release -u GAMS-dev -r gdx -t example-tag -d "some text." -n "Example release"
