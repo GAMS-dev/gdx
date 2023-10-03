@@ -314,15 +314,15 @@ doxygen-html:
 #=======================================================================================================================
 
 deploy-github:
-  when: manual
+  when: always
   stage: deploy
   tags: [linux]
-  needs: [build-leg, build-dac, build-wei, apigenerator]
+  needs: [] # [build-leg, build-dac, build-wei, apigenerator]
   image:
     name: registry.gams.com/devel/gdx/leg/builder-deploy:latest
     entrypoint: [""]   # prevent startup.sh
   script:
     - PATH="/opt/github-release:${PATH}"
     - github-release
-    - github-release release -s ${GITHUB_TOKEN} --user GAMS-dev --repo gdx --tag example-tag --description "some text."
-    - github-release --verbose upload -s ${GITHUB_TOKEN} -R --user GAMS-dev --repo gdx --tag example-tag --name libgdxcclib64.so --file libgdxcclib64.so
+    - github-release --verbose release -s ${GITHUB_TOKEN} -u GAMS-dev --r gdx -t example-tag -d "some text." -n "Example release"
+#    - github-release --verbose upload -s ${GITHUB_TOKEN} -R --user GAMS-dev --repo gdx --tag example-tag --name libgdxcclib64.so --file libgdxcclib64.so
