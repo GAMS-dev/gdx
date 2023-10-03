@@ -2,7 +2,7 @@ name: Doxygen Action
 
 on:
   push:
-    branches: [ fix-doxygen-action ]
+    branches: [ main ]
 
 jobs:
   deploy:
