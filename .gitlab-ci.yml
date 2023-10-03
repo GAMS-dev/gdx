@@ -317,10 +317,11 @@ deploy-github:
   when: manual
   stage: deploy
   tags: [linux]
+  needs: []
   image:
     name: registry.gams.com/devel/gdx/leg/builder-deploy:latest
     entrypoint: [""]   # prevent startup.sh
   dependencies: [build-leg, build-dac, build-wei, apigenerator]
   script:
     - PATH="/opt/github-release:${PATH}"
-    -  github-release --verbose upload -s ${GITHUB_TOKEN} -R --user GAMS-dev --repo gdx --tag example-tag --name libgdxcclib64.so --file libgdxcclib64.so
+    -  github-release --verbose upload -s ${GITHUB_TOKEN} -R --user GAMS-dev --repo gdx --tag $CI_COMMIT_TAG --name libgdxcclib64.so --file libgdxcclib64.so
