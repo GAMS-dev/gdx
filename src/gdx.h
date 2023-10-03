@@ -1437,7 +1437,7 @@ private:
    int DataCount {}, NrMappedAdded {};
    std::array<TgdxElemSize, GLOBAL_MAX_INDEX_DIM> ElemType {};
    std::string MajContext;
-   std::array<std::optional<TIntegerMapping>, GLOBAL_MAX_INDEX_DIM> SliceIndxs, SliceRevMap;
+   std::array<TIntegerMapping, GLOBAL_MAX_INDEX_DIM> SliceIndxs {}, SliceRevMap {};
    int SliceSyNr {};
    std::array<std::string, GMS_MAX_INDEX_DIM> SliceElems;
    bool DoUncompress {},  // when reading

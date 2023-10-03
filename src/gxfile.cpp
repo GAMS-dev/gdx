@@ -1779,14 +1779,14 @@ int TGXFileObj::gdxDataReadDone()
       fmode = fr_init;
       return false;
    }
-   if( fmode == fr_slice )
+   /*if( fmode == fr_slice )
    {
       for( int D {}; D < GLOBAL_MAX_INDEX_DIM; D++ )
       {
-         SliceIndxs[D] = std::nullopt;
-         SliceRevMap[D] = std::nullopt;
+         SliceIndxs[D].reset();
+         SliceRevMap[D].reset();
       }
-   }
+   }*/
    if( NrMappedAdded )
    {
       int HighestIndex = UELTable->UsrUel2Ent->GetHighestIndex();
@@ -3267,25 +3267,25 @@ int TGXFileObj::gdxDataReadSliceStart( int SyNr, int *ElemCounts )
    int FDim;
    for( int D {}; D < FCurrentDim; D++ )
    {
-      SliceIndxs[D] = std::make_optional<TIntegerMapping>();
-      SliceRevMap[D] = std::make_optional<TIntegerMapping>();
+      SliceIndxs[D].reset();
+      SliceRevMap[D].reset();
    }
    while( DoRead( Values.data(), FDim ) )
       for( int D {}; D < FCurrentDim; D++ )
-         SliceIndxs[D]->SetMapping( LastElem[D], 1 );
+         SliceIndxs[D].SetMapping( LastElem[D], 1 );
 
    gdxDataReadDone();
 
    for( int D {}; D < FCurrentDim; D++ )
    {
-      auto &obj = *SliceIndxs[D];
+      auto &obj = SliceIndxs[D];
       int Cnt {};
       for( int N {}; N <= obj.GetHighestIndex(); N++ )
       {
          if( obj.GetMapping( N ) >= 0 )
          {
             obj.SetMapping( N, Cnt );// we keep it zero based
-            SliceRevMap[D]->SetMapping( Cnt, N );
+            SliceRevMap[D].SetMapping( Cnt, N );
             Cnt++;
          }
       }
@@ -3330,7 +3330,7 @@ int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataSt
       for( int D {}; D < FCurrentDim; D++ )
       {
          if( ElemNrs[D] == -1 )
-            HisIndx[HisDim++] = SliceIndxs[D]->GetMapping( LastElem[D] );
+            HisIndx[HisDim++] = SliceIndxs[D].GetMapping( LastElem[D] );
          else if( ElemNrs[D] != LastElem[D] )
             GoodIndx = false;
       }
@@ -3349,7 +3349,7 @@ int TGXFileObj::gdxDataSliceUELS( const int *SliceKeyInt, char **KeyStr )
          utils::assignStrToBuf( SliceElems[D], KeyStr[D] );
       else
       {
-         int N = SliceRevMap[D]->GetMapping( SliceKeyInt[HisDim++] );
+         int N = SliceRevMap[D].GetMapping( SliceKeyInt[HisDim++] );
          if( N < 0 )
          {
             KeyStr[D][0] = '?';
@@ -4023,6 +4023,15 @@ int TIntegerMapping::size() const
 bool TIntegerMapping::empty() const
 {
    return !FCapacity;
+}
+
+void TIntegerMapping::reset()
+{
+   FCapacity = FMapBytes = 0;
+   FMAXCAPACITY = std::numeric_limits<int>::max() + static_cast<int64_t>( 1 );
+   FHighestIndex = 0;
+   std::free(PMap);
+   PMap = nullptr;
 }
 
 TAcronym::TAcronym( const char *Name, const char *Text, int Map ) : AcrName { Name },

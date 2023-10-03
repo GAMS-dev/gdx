@@ -47,10 +47,14 @@ TEST_SUITE_BEGIN( "Validate against GAMS 43 Delphi GDX" );
 const static std::array skipFiles {"bau_p.gdx"s, "fnsqlog10.gdx"s, "testExcel.gdx"s};
 const static bool quiet {true};
 
-bool ends_with(const std::string &s, const std::string &suffix) {
+static bool ends_with(const std::string &s, const std::string &suffix) {
    for(int i{}; i<suffix.length(); i++)
       if(s[s.size()-1-i] != suffix[suffix.length()-1-i]) return false;
    return true;
+}
+
+static auto elapsed_time(const std::chrono::time_point<std::chrono::system_clock> &start) {
+   return std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::system_clock::now() - start ).count();
 }
 
 const static std::array phases {"uels"s, "records"s};
@@ -189,7 +193,7 @@ void createBigGDXFile() {
    std::array<double, GMS_VAL_MAX> values {};
    for(uint64_t i{}; i<1024*1024*420*2; i++)
    {
-      keys.front() = i+1;
+      keys.front() = (int)(i+1);
       gdx.gdxDataWriteRaw( keys.data(), values.data() );
    }
    gdx.gdxDataWriteDone();
@@ -318,6 +322,43 @@ void readRecursivelyDelphi(const std::string &path) {
    }
 }
 
+void readRecursivelyDelphiAndCpp(const std::string &path) {
+   if(!quiet)
+      std::cout << "Descending into directory path: "s << path << std::endl;
+   for(const auto &entry : std::filesystem::directory_iterator(path)) {
+      std::string fn = entry.path().string();
+      if(entry.is_directory())
+         readRecursivelyDelphiAndCpp( fn );
+      else if(ends_with(fn, ".gdx"))
+      {
+         auto start { std::chrono::system_clock::now() };
+         readFileCpp( fn );
+         auto elapsedCpp {elapsed_time(start)};
+         start = std::chrono::system_clock::now();
+         readFileDelphi( fn );
+         auto elapsedDelphi {elapsed_time(start)};
+         if(elapsedCpp > 500 && (double)elapsedCpp > (double)elapsedDelphi * 1.05)
+            std::cout << fn << ';' << (double)elapsedCpp/(double)elapsedDelphi*100.0 << "%;"s << elapsedCpp << ";"s << elapsedDelphi << std::endl;
+      }
+   }
+}
+
+void totalRuntimeDelphiVsCpp() {
+   {
+      auto start { std::chrono::system_clock::now() };
+      //readRecursivelyDelphi( R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)" );
+      readRecursivelyDelphi( R"(C:\dockerhome)" );
+      std::cout << "Elapsed time Delphi: "s << elapsed_time(start) << std::endl;
+   }
+
+   {
+      auto start { std::chrono::system_clock::now() };
+      //readRecursivelyCpp( R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)" );
+      readRecursivelyCpp( R"(C:\dockerhome)" );
+      std::cout << "Elapsed time C++: "s << elapsed_time(start) << std::endl;
+   }
+}
+
 TEST_CASE( "Read all contents of a GDX file with both GAMS 43 P3/Delphi-GDX and C++-GDX" )
 {
    //const std::string fn {R"(C:\dockerhome\pAmatrix_Figaro_reg.gdx)"};
@@ -327,21 +368,9 @@ TEST_CASE( "Read all contents of a GDX file with both GAMS 43 P3/Delphi-GDX and 
 
    //validateRecursively(R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)");
 
-   {
-      auto start { std::chrono::system_clock::now() };
-      //readRecursivelyDelphi( R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)" );
-      readRecursivelyDelphi( R"(C:\dockerhome)" );
-      auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::system_clock::now() - start ).count();
-      std::cout << "Elapsed time Delphi: "s << elapsed << std::endl;
-   }
+   readRecursivelyDelphiAndCpp(R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)");
 
-   {
-      auto start { std::chrono::system_clock::now() };
-      //readRecursivelyCpp( R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)" );
-      readRecursivelyCpp( R"(C:\dockerhome)" );
-      auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::system_clock::now() - start ).count();
-      std::cout << "Elapsed time C++: "s << elapsed << std::endl;
-   }
+   //totalRuntimeDelphiVsCpp();
 
    //createBigGDXFile();
    //validateGDXFile("verybig.gdx");

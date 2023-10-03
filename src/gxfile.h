@@ -225,6 +225,7 @@ public:
    void SetMapping( int F, int T );
    [[nodiscard]] int size() const;
    [[nodiscard]] bool empty() const;
+   void reset();
 };
 
 enum class TUELUserMapStatus
