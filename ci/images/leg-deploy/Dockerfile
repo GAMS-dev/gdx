@@ -1,14 +1,9 @@
+# Mostly stolen from @afust
 # Extends Ubuntu oldest still supported LTS
 FROM ubuntu:22.04
 
 RUN apt-get update &&       \
-    DEBIAN_FRONTEND=noninteractive apt-get install -yq     \
-    bzip2                   \
-    parallel                \
-    s3cmd                   \
-    subversion              \
-    unzip                   \
-    wget
+    DEBIAN_FRONTEND=noninteractive apt-get install -yq bzip2 parallel s3cmd subversion unzip wget
 
 ### Make github-release tool available (https://github.com/github-release/github-release)
 RUN wget https://cloud.gams.com/s/NJ26xfETjadAC23/download/github-release-binaries.zip  &&  \
