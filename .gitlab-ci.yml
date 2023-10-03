@@ -323,4 +323,6 @@ deploy-github:
     entrypoint: [""]   # prevent startup.sh
   script:
     - PATH="/opt/github-release:${PATH}"
-    -  github-release --verbose upload -s ${GITHUB_TOKEN} -R --user GAMS-dev --repo gdx --tag example-tag --name libgdxcclib64.so --file libgdxcclib64.so
+    - github-release
+    - github-release release -s ${GITHUB_TOKEN} --user GAMS-dev --repo gdx --tag example-tag --description "some text."
+    - github-release --verbose upload -s ${GITHUB_TOKEN} -R --user GAMS-dev --repo gdx --tag example-tag --name libgdxcclib64.so --file libgdxcclib64.so
