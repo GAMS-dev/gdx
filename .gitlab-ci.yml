@@ -314,7 +314,7 @@ doxygen-html:
 #=======================================================================================================================
 
 deploy-github:
-  when: always
+  when: manual
   stage: deploy
   tags: [linux]
   needs: [build-leg, build-dac, build-wei, apigenerator]
