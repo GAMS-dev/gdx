@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['posixfile_0',['POSIXFile',['../classgdx_1_1file_1_1POSIXFile.html',1,'gdx::file']]]
+  ['uint64_0',['uInt64',['../uniongdx_1_1uInt64.html',1,'gdx']]]
 ];
