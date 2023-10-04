@@ -34,7 +34,12 @@
 #include <list>
 #include <filesystem>
 
+#if defined(_WIN32)
 #include <C:/GAMS/43/apifiles/C/api/gdxcc.h>
+#else
+#include </home/andre/gamsdist43/apifiles/C/api/gdxcc.h>
+#endif
+
 #include "../gdx.h"
 
 using namespace std::literals::string_literals;
@@ -44,11 +49,17 @@ namespace gdx::tests::delphidifftests
 
 TEST_SUITE_BEGIN( "Validate against GAMS 43 Delphi GDX" );
 
+#if defined(_WIN32)
+    static std::string gams43SysDir {"C:\\GAMS\\43"s};
+#else
+    static std::string gams43SysDir {"/home/andre/gamsdist43"s};
+#endif
+
 const static std::array skipFiles {"bau_p.gdx"s};
 const static bool quiet {false};
 
 static bool ends_with(const std::string &s, const std::string &suffix) {
-   for(int i{}; i<suffix.length(); i++)
+   for(int i{}; i<(int)suffix.length(); i++)
       if(s[s.size()-1-i] != suffix[suffix.length()-1-i]) return false;
    return true;
 }
@@ -77,7 +88,8 @@ static void validateGDXFile(const std::string &fn) {
       std::cout << "Checking GDX file: "s << fn << std::endl;
    std::array<char, 256> msg {};
    ::gdxHandle_t pgx;
-   REQUIRE(::gdxCreateD(&pgx, "C:\\GAMS\\43", msg.data(), msg.size()));
+
+   REQUIRE(::gdxCreateD(&pgx, gams43SysDir.c_str(), msg.data(), msg.size()));
    REQUIRE(pgx);
    REQUIRE_EQ('\0', msg.front());
    std::string msg2;
@@ -227,13 +239,13 @@ static void readFileCpp(const std::string &fn) {
       }
    }
    std::array<char, GMS_SSSIZE> symName1 {}, explText1 {};
-   int syDim1, syTyp1, recCnt1, userInfo1, nrecs, dimFrst1, nvals;
+   int syDim1, syTyp1, recCnt1, userInfo1, nrecs, dimFrst1;
    std::array<int, GMS_MAX_INDEX_DIM> keys1 {};
    std::array<double, GMS_VAL_MAX> values1 {};
    for(int n{}; n<=nsyms1; n++) {
       REQUIRE(gdx.gdxSymbolInfo(n, symName1.data(), syDim1, syTyp1));
       REQUIRE_FALSE(gdx.gdxErrorCount());
-      nvals = syTyp1 < dt_var ? 1 : GMS_VAL_MAX;
+      auto nvals = syTyp1 < dt_var ? 1 : GMS_VAL_MAX;
       REQUIRE(gdx.gdxSymbolInfoX(n, recCnt1, userInfo1, explText1.data()));
       std::chrono::time_point<std::chrono::system_clock> last, start;
       last = start = std::chrono::system_clock::now();
@@ -267,7 +279,7 @@ static void readFileDelphi(const std::string &fn) {
       std::cout << "Checking GDX file: "s << fn << std::endl;
    std::array<char, 256> msg {};
    ::gdxHandle_t pgx;
-   REQUIRE(::gdxCreateD(&pgx, "C:\\GAMS\\43", msg.data(), msg.size()));
+   REQUIRE(::gdxCreateD(&pgx, gams43SysDir.c_str(), msg.data(), msg.size()));
    REQUIRE(pgx);
    REQUIRE_EQ('\0', msg.front());
    REQUIRE_FALSE(::gdxErrorCount(pgx));
@@ -288,13 +300,13 @@ static void readFileDelphi(const std::string &fn) {
       }
    }
    std::array<char, GMS_SSSIZE>  symName2 {}, explText2 {};
-   int syDim2, syTyp2, recCnt2, userInfo2, nrecs, dimFrst2, nvals;
+   int syDim2, syTyp2, recCnt2, userInfo2, nrecs, dimFrst2;
    std::array<int, GMS_MAX_INDEX_DIM> keys2 {};
    std::array<double, GMS_VAL_MAX> values2 {};
    for(int n{}; n<=nsyms2; n++) {
       REQUIRE(gdxSymbolInfo(pgx, n, symName2.data(), &syDim2, &syTyp2));
       REQUIRE_FALSE(::gdxErrorCount(pgx));
-      nvals = syTyp2 < dt_var ? 1 : GMS_VAL_MAX;
+      auto nvals = syTyp2 < dt_var ? 1 : GMS_VAL_MAX;
       REQUIRE(::gdxSymbolInfoX(pgx, n, &recCnt2, &userInfo2, explText2.data()));
       std::chrono::time_point<std::chrono::system_clock> last, start;
       last = start = std::chrono::system_clock::now();
@@ -368,7 +380,11 @@ TEST_CASE( "Read all contents of a GDX file with both GAMS 43 P3/Delphi-GDX and 
 
    //validateGDXFile("C:\\dockerhome\\mrb\\tr20.gdx");
 
+#if defined(_WIN32)
    validateRecursively(R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)");
+#else
+        validateRecursively("/home/andre/dockerhome");
+#endif
 
    //readRecursivelyDelphiAndCpp(R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)");
 

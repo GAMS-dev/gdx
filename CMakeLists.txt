@@ -19,14 +19,16 @@ endif (MSVC)
 
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas -Wformat-truncation=0")
-	set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DZ_HAVE_UNISTD_H")
 endif (UNIX)
+
+if (APPLE)
+	set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DZ_HAVE_UNISTD_H")
+endif (APPLE)
 
 # Makefile in devel/products/src/gdxio takes care of acquiring sources for zlib, skip in CMake builds so far
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 set(common
-		src/file.h src/file.cpp
 		src/gmsstrm.h src/gmsstrm.cpp
 		src/gmsdata.h
 		src/batchalloc.h
@@ -51,12 +53,7 @@ set(tests
 		src/tests/gmsdatatests.cpp
 		src/tests/strhashtests.cpp
 		src/tests/datastoragetests.cpp
-		src/tests/filetests.cpp
 )
-
-set(delphi-diff
-		src/tests/doctestmain.cpp
-		src/tests/delphidifftests.cpp)
 
 add_library(gdxcclib64 SHARED ${common} generated/gdxcclib.cpp)
 target_include_directories(gdxcclib64 PRIVATE zlib src generated)
@@ -66,10 +63,20 @@ add_executable(gdxtest ${common} ${tests})
 target_include_directories(gdxtest PRIVATE zlib src generated)
 target_link_libraries(gdxtest ${mylibs})
 
-if(EXISTS C:/GAMS/43/apifiles/C/api/gdxcc.c)
-add_executable(delphi-diff-tests ${common} ${delphi-diff} C:/GAMS/43/apifiles/C/api/gdxcc.c)
+if(UNIX)
+	set(gams43-apifiles-path /home/andre/gamsdist43/apifiles/C/api/)
+else()
+	set(gams43-apifiles-path C:/GAMS/43/apifiles/C/api/)
+endif()
+
+if(EXISTS ${gams43-apifiles-path}gdxcc.c)
+add_executable(delphi-diff-tests ${common}  src/tests/doctestmain.cpp
+		src/tests/delphidifftests.cpp  ${gams43-apifiles-path}gdxcc.c)
 target_include_directories(delphi-diff-tests PRIVATE zlib src generated)
 target_link_libraries(delphi-diff-tests ${mylibs})
+	if(UNIX)
+	target_compile_options(delphi-diff-tests PRIVATE -DGC_NO_MUTEX)
+	endif()
 endif()
 
 add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp generated/gdxcc.c)
