@@ -266,11 +266,12 @@ int64_t TXFileStreamDelphi::GetPosition()
 void TXFileStreamDelphi::SetPosition( int64_t P )
 {
    PhysPosition = P;
-   SetLastIOResult( FS.seek( P ) );
+   FS->seekp( P );
+   SetLastIOResult( FS->bad() ? 1 : 0 );
 }
 
 TXFileStreamDelphi::TXFileStreamDelphi( std::string AFileName, const FileAccessMode AMode )
-    : FFileName { std::move( AFileName ) }, FPassWord {}, FLastIOResult {}, PhysPosition {}
+    : FS {}, FFileName { std::move( AFileName ) }, FPassWord {}, FLastIOResult {}, PhysPosition {}
 {
    CustomOpenAction FMode { custOpenRead };
    switch( AMode )
@@ -288,14 +289,18 @@ TXFileStreamDelphi::TXFileStreamDelphi( std::string AFileName, const FileAccessM
       default:
          throw std::runtime_error( "TXFileStream.Create = "s + std::to_string( (int) AMode ) );
    }
-   SetLastIOResult( FS.open(FFileName, (gdx::file::FileOpenAction)FMode) );
+   FS = std::make_unique<std::fstream>();
+   SetLastIOResult( customFileOpen( FFileName, FMode, FS.get() ) );
    FileIsOpen = !FLastIOResult;
 }
 
 TXFileStreamDelphi::~TXFileStreamDelphi()
 {
    if( FileIsOpen )
-      SetLastIOResult( FS.close() );
+   {
+      FS->close();
+      SetLastIOResult( !FS->good() ? 1 : 0 );
+   }
 }
 
 void TXFileStreamDelphi::ApplyPassWord( const char *PR, char *PW, int Len, int64_t Offs )
@@ -314,12 +319,12 @@ uint32_t TXFileStreamDelphi::Read( void *Buffer, uint32_t Count )
 {
    uint32_t res;
    if( FPassWord.empty() )
-      SetLastIOResult( FS.read(static_cast<char *>( Buffer ), Count, res) );
+      SetLastIOResult( customFileRead( FS.get(), static_cast<char *>( Buffer ), Count, res ) );
    else
    {
       auto PW = static_cast<char *>( Buffer );
       std::vector<char> PR( Count );
-      SetLastIOResult( FS.read( PR.data(), Count, res ) );
+      SetLastIOResult( customFileRead( FS.get(), PR.data(), Count, res ) );
       ApplyPassWord( PR.data(), PW, (int) Count, PhysPosition );
    }
    PhysPosition += res;
@@ -329,13 +334,14 @@ uint32_t TXFileStreamDelphi::Read( void *Buffer, uint32_t Count )
 uint32_t TXFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
 {
    if( FPassWord.empty() )
-      SetLastIOResult( FS.write( static_cast<const char *>( Buffer ), Count ) );
+      FS->write( static_cast<const char *>( Buffer ), Count );
    else
    {
       auto PR = static_cast<const char *>( Buffer );
       std::vector<char> PW( Count );
       ApplyPassWord( PR, PW.data(), (int) Count, PhysPosition );
    }
+   SetLastIOResult( FS->bad() ? 1 : 0 );
    PhysPosition += Count;
    return Count;
 }
