@@ -1383,7 +1383,7 @@ public:
     *   call to read a record.
     * @param SyNr The index number of the symbol (range 0..NrSymbols); SyNr = 0 reads universe.
     * @param DP Procedure that will be called for each data record.
-    *   This procedure (return type=void) should have the following signature:
+    *   This function (return type=integer) should return whether reading continues (=0 for stop, >=1 otherwise) and should have the following signature:
     *       <ul><li>UEL index number keys (const int *),</li>
     *       <li>values (level, marginal, lower-, upper-bound, scale) (const double *),</li>
     *       <li>dimension of first change (int),</li>

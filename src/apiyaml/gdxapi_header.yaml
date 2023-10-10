@@ -13,7 +13,7 @@ doc             : true
 MaxDimStyle     : gdx
 
 UseCD            : True
-extracUse        : '#include "gdx/src/cwrap.hpp"'
+extracUse        : '#include "cwrap.hpp"'
 clibuse          : True
 NOFORTRANCB      : False
 
