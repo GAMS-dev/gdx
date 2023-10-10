@@ -102,8 +102,10 @@ apigenerator:
     - cp src/apigenerator/include/gc*.h apifiles
     - |
       for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h"; do
-        echo "Diffing 'apifiles/$f' with 'generated/$f'" 
-        if diff apifiles/$f generated/$f; then
+        echo "Diffing 'apifiles/$f' with 'generated/$f'"
+        diff apifiles/$f generated/$f
+        rc=$?
+        if [[ $rc -ne 0 ]]; then
           echo "Warning: $f stored in repo and freshly generated differ!"
         fi
       done
