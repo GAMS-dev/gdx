@@ -1423,7 +1423,7 @@ values (level, marginal, lower-, upper-bound, scale) (const double *)</li>
 <p >Use a callback function to read a symbol in raw mode. Using a callback procedure to read the data is faster because we no longer have to check the context for each call to read a record. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">SyNr</td><td>The index number of the symbol (range 0..NrSymbols); SyNr = 0 reads universe. </td></tr>
-    <tr><td class="paramname">DP</td><td>Procedure that will be called for each data record. This procedure (return type=void) should have the following signature: <ul>
+    <tr><td class="paramname">DP</td><td>Procedure that will be called for each data record. This function (return type=integer) should return whether reading continues (=0 for stop, &gt;=1 otherwise) and should have the following signature: <ul>
 <li>
 UEL index number keys (const int *), </li>
 <li>
