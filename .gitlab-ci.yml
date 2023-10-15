@@ -5,6 +5,7 @@ stages:
   - build
   - analyze
   - test
+  - leak-check
   - docs
   - deploy
 
@@ -126,17 +127,17 @@ fetch-ci-scripts:
   script:
     - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
     - cp -R scripts-repo/ci .
+    - cp -R scripts-repo/third-party/valgrind-codequality valgrind-codequality
     - git clone https://github.com/madler/zlib zlib
   artifacts:
     name: ci-scripts
     expire_in: 2 hours
-    paths: [ci/*,zlib/*]
+    paths: [ci/*,zlib/*,valgrind-codequality/*]
 
 #=======================================================================================================================
 
 build-leg:
   stage: build
-  when: on_success
   tags: [linux]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
@@ -154,9 +155,25 @@ build-leg:
     reports:
       junit: warnings.xml
 
+build-debug-leg:
+  stage: build
+  tags: [linux]
+  image:
+    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    entrypoint: [""]
+  script:
+    - cp apifiles/* src/
+    - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
+    - cmake --build . 2>&1
+    - mv gdxtest gdxtest_dbg
+  needs: [fetch-ci-scripts,apigenerator]
+  artifacts:
+    name: gdx-debug-leg
+    paths: [gdxtest_dbg]
+    expire_in: 2 hours
+
 build-deg:
   stage: build
-  when: on_success
   tags: [macos]
   script:
     - cp apifiles/* src/
@@ -173,7 +190,6 @@ build-deg:
 
 build-dac:
   stage: build
-  when: on_success
   tags: [macos-arm64]
   script:
     - cp apifiles/* src/
@@ -190,7 +206,6 @@ build-dac:
 
 build-wei:
   stage: build
-  when: on_success
   tags: [windows]
   image:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
@@ -236,7 +251,6 @@ codechecker-leg:
 
 test-leg:
   stage: test
-  when: on_success
   tags: [linux]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
@@ -254,7 +268,6 @@ test-leg:
 
 test-deg:
   stage: test
-  when: on_success
   tags: [macos]
   needs: [build-deg]
   script:
@@ -268,7 +281,6 @@ test-deg:
 
 test-dac:
   stage: test
-  when: on_success
   tags: [macos-arm64]
   needs: [build-dac]
   script:
@@ -282,7 +294,6 @@ test-dac:
 
 test-wei:
   stage: test
-  when: on_success
   tags: [windows]
   image:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
@@ -295,6 +306,26 @@ test-wei:
     paths: [./*.xml]
     reports:
       junit: doctest_results_*windows.xml
+
+#=======================================================================================================================
+
+leak-check-leg:
+  stage: leak-check
+  tags: [linux]
+  image:
+    name: registry.gams.com/devel/ciscripts/leg/builder-valgrind-codequality:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-debug-leg]
+  script:
+    - valgrind --leak-check=yes ./gdxtest_dbg
+    - valgrind --leak-check=yes --xml=yes --xml-file=valgrind_out.xml ./gdxtest_dbg
+    - PYTHONPATH=$PYTHONPATH:valgrind-codequality python3 -m valgrind_codequality --input-file valgrind_out.xml --output-file valgrind_out.json
+  artifacts:
+    name: leak-check-results-leg
+    expire_in: 2 hours
+    reports:
+      codequality: valgrind_out.json
+    paths: [valgrind_out.*]
 
 #=======================================================================================================================
 
