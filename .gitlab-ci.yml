@@ -11,26 +11,17 @@ stages:
 
 #=======================================================================================================================
 
+include:
+  - project: 'devel/ciscripts'
+    ref: rework-yaml
+    file: .install-jobs.yml
+  - project: 'devel/ciscripts'
+    ref: rework-yaml
+    file: .shared-vars.yml
+
 variables:
+  extends: .shared-variables
   GIT_SUBMODULE_STRATEGY: recursive
-  MACHINES_CONTAINER_REG:
-    value: registry.gams.com/devel/machines
-    description: "URL to the container registry of the machines repository"
-  PF_CUSTOM_BRANCH:
-    value: "master"
-    description: "Name of custom branch, 0 if published distribution with version as specified should be taken or X.Y.Z"
-  PF_BUILDS_WWW_PATH:
-    value: $BUILDS_WWW_PATH
-    description: "URL path prefix for builds server"
-  PF_BUILDS_SSH_PORT:
-    value: $BUILDS_SSH_PORT
-    description: "Port used for SSH connection to builds server"
-  PF_BUILDS_SSH_SERVER:
-    value: $BUILDS_SSH_SERVER
-    description: "URL of the build server"
-  PF_BUILDS_SSH_USER:
-    value: $BUILDS_SSH_USER
-    description: "Username used for SSH connection to builds server"
 
 #=======================================================================================================================
 
@@ -89,7 +80,6 @@ build-leg-deploy-image:
 
 apigenerator:
   stage: apiwrap
-  when: always
   tags: [linux]
   dependencies: []
   image:
@@ -112,27 +102,6 @@ apigenerator:
     name: apifiles
     expire_in: 2 hours
     paths: [ apifiles/* ]
-
-#=======================================================================================================================
-
-# also fetches zlib since CMake-build of doesn't automatigically gets its like the devel/products Makefile
-fetch-ci-scripts:
-  stage: fetch-scripts
-  when: always
-  tags: [linux]
-  dependencies: []
-  image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
-    entrypoint: [ "" ]
-  script:
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
-    - cp -R scripts-repo/ci .
-    - cp -R scripts-repo/third-party/valgrind-codequality valgrind-codequality
-    - git clone https://github.com/madler/zlib zlib
-  artifacts:
-    name: ci-scripts
-    expire_in: 2 hours
-    paths: [ci/*,zlib/*,valgrind-codequality/*]
 
 #=======================================================================================================================
 
@@ -331,7 +300,6 @@ leak-check-leg:
 
 doxygen-html:
   stage: docs
-  when: always
   tags: [linux]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
