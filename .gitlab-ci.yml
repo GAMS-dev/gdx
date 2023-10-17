@@ -125,10 +125,10 @@ fetch-ci-scripts:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [ "" ]
   script:
-    - git clone https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
+    - git clone --depth 1 --branch v0.0.1 https://gitlab-ci-token:${CI_JOB_TOKEN}@git.gams.com/devel/ciscripts.git scripts-repo
     - cp -R scripts-repo/ci .
     - cp -R scripts-repo/third-party/valgrind-codequality valgrind-codequality
-    - git clone https://github.com/madler/zlib zlib
+    - git clone --depth 1 https://github.com/madler/zlib zlib
   artifacts:
     name: ci-scripts
     expire_in: 2 hours
