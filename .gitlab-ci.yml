@@ -18,6 +18,9 @@ include:
   - project: 'devel/ciscripts'
     ref: rework-yaml
     file: .shared-vars.yml
+  - project: 'devel/ciscripts'
+    ref: rework-yaml
+    file: .image-build.yml
 
 variables:
   extends: .shared-variables
@@ -26,52 +29,19 @@ variables:
 #=======================================================================================================================
 
 build-leg-image:
-  stage: image-build
-  when: manual
-  tags: [linux]
-  image:
-    name: docker:20.10
-  services:
-    - docker:20.10-dind
-  variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-  before_script:
-    - mkdir -p $HOME/.docker
-    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
+  extends: .build-leg-image
   script:
     - docker build -t registry.gams.com/devel/gdx/leg/builder-gdx:latest ci/images/leg
     - docker push registry.gams.com/devel/gdx/leg/builder-gdx:latest
 
 build-leg-analyze-image:
-  stage: image-build
-  when: manual
-  tags: [linux]
-  image:
-    name: docker:20.10
-  services:
-    - docker:20.10-dind
-  variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-  before_script:
-    - mkdir -p $HOME/.docker
-    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
+  extends: .build-leg-image
   script:
     - docker build -t registry.gams.com/devel/gdx/leg/builder-analyze:latest ci/images/leg-analyze
     - docker push registry.gams.com/devel/gdx/leg/builder-analyze:latest
 
 build-leg-deploy-image:
-  stage: image-build
-  when: manual
-  tags: [linux]
-  image:
-    name: docker:20.10
-  services:
-    - docker:20.10-dind
-  variables:
-    DOCKER_TLS_CERTDIR: "/certs"
-  before_script:
-    - mkdir -p $HOME/.docker
-    - echo $DOCKER_AUTH_CONFIG > $HOME/.docker/config.json
+  extends: .build-leg-image
   script:
     - docker build -t registry.gams.com/devel/gdx/leg/builder-deploy:latest ci/images/leg-deploy
     - docker push registry.gams.com/devel/gdx/leg/builder-deploy:latest
