@@ -13,13 +13,10 @@ stages:
 
 include:
   - project: 'devel/ciscripts'
-    ref: rework-yaml
     file: .install-jobs.yml
   - project: 'devel/ciscripts'
-    ref: rework-yaml
     file: .shared-vars.yml
   - project: 'devel/ciscripts'
-    ref: rework-yaml
     file: .image-build.yml
 
 variables:
