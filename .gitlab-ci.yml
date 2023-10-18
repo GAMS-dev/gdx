@@ -18,6 +18,8 @@ include:
     file: .shared-vars.yml
   - project: 'devel/ciscripts'
     file: .image-build.yml
+  - project: 'devel/ciscripts'
+    file: .codechecker.yml
 
 variables:
   extends: .shared-variables
@@ -161,27 +163,11 @@ build-wei:
 #=======================================================================================================================
 
 codechecker-leg:
-  stage: analyze
-  tags: [linux]
-  image:
-    name: registry.gams.com/devel/gdx/leg/builder-analyze:latest
-    entrypoint: [""]
+  extends: .codechecker-leg
   needs: [fetch-ci-scripts,apigenerator]
-  allow_failure: false
   script:
     - cp apifiles/* src/
-    - cmake -DCMAKE_C_COMPILER=/usr/bin/clang-10 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-10 -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
-    - |
-      CodeChecker log -b "make -j4" -o compilation_database.json &&
-      CodeChecker analyze --analyzers clang-tidy clangsa -o reports compilation_database.json &&
-      CodeChecker parse --trim-path-prefix $(pwd) -e codeclimate reports > gl-code-quality-report.json || true
-  after_script:
-    - cat gl-code-quality-report.json
-  artifacts:
-    reports:
-      codequality: gl-code-quality-report.json
-    paths: [gl-code-quality-report.json]
-    expire_in: '2 mos'
+    - !reference .default-codecheck-script
 
 #=======================================================================================================================
 
