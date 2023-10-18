@@ -167,7 +167,7 @@ codechecker-leg:
   needs: [fetch-ci-scripts,apigenerator]
   script:
     - cp apifiles/* src/
-    - !reference .default-codecheck-script
+    - !reference [.default-codecheck-script, script]
 
 #=======================================================================================================================
 
