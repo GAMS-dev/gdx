@@ -1321,7 +1321,18 @@ public:
     */
    int gdxUMFindUEL( const char *Uel, int &UelNr, int &UelMap );
 
+   /**
+    * Get flag to store one dimensional sets as potential domains, false (0) saves lots of space
+    * for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly.
+    * @return 1 (true) iff. elements of 1-dim sets should be tracked for domain checking, 0 (false) otherwise.
+    */
    [[nodiscard]] int gdxStoreDomainSets() const;
+
+   /**
+    * Set flag to store one dimensional sets as potential domains, false (0) saves lots of space
+    * for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly.
+    * @param x 1 (true) iff. elements of 1-dim sets should be tracked for domain checking, 0 (false) otherwise.
+    */
    void gdxStoreDomainSetsSet( int x );
 
    /**
