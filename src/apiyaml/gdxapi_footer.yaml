@@ -11,6 +11,16 @@ properties:
     action      : w
     function    : StoreDomainSets
     description : Flag to store one dimensional sets as potential domains, false saves lots of space for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly.
+ - gdxAllowBogusDomains:
+     type        : bool
+     action      : r
+     function    : AllowBogusDomains
+     description : Flag to ignore using 1-dim sets as domain when their elements are not tracked.
+ - gdxAllowBogusDomains:
+     type        : bool
+     action      : w
+     function    : AllowBogusDomains
+     description : Flag to ignore using 1-dim sets as domain when their elements are not tracked.
 
 #function pointer definitions
 functionpointers:

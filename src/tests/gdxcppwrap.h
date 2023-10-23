@@ -456,6 +456,14 @@ public:
       ::gdxStoreDomainSetsSet( pgx, x );
    }
 
+   void gdxAllowBogusDomainsSet( int flag ) {
+      ::gdxAllowBogusDomainsSet( pgx, flag );
+   }
+
+   [[nodiscard]] int gdxAllowBogusDomains() {
+      return ::gdxAllowBogusDomains( pgx );
+   }
+
    int gdxOpenAppend( const char *FileName, const char *Producer, int &ErrNr )
    {
       return ::gdxOpenAppend( pgx, FileName, Producer, &ErrNr );

@@ -1331,9 +1331,23 @@ public:
    /**
     * Set flag to store one dimensional sets as potential domains, false (0) saves lots of space
     * for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly.
-    * @param x 1 (true) iff. elements of 1-dim sets should be tracked for domain checking, 0 (false) otherwise.
+    * @param flag 1 (true) iff. elements of 1-dim sets should be tracked for domain checking, 0 (false) otherwise.
     */
-   void gdxStoreDomainSetsSet( int x );
+   void gdxStoreDomainSetsSet( int flag );
+
+   /**
+    * Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    * @param flag 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored.
+    * Otherwise an error is raised (ERR_NODOMAINDATA).
+    */
+   void gdxAllowBogusDomainsSet( int flag );
+
+   /**
+    * Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    * @return 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored.
+    * Otherwise an error is raised (ERR_NODOMAINDATA).
+    */
+   [[nodiscard]] int gdxAllowBogusDomains();
 
    /**
     * @brief Read a symbol in Raw mode while applying a filter using a callback procedure. Returns zero if the operation is not possible.
@@ -1436,7 +1450,7 @@ private:
    std::unique_ptr<TFilterList> FilterList;
    TDFilter *CurFilter {};
    TDomainList DomainList {};
-   bool StoreDomainSets { true };
+   bool StoreDomainSets { true }, AllowBogusDomain { true };
    TIntlValueMapDbl intlValueMapDbl {}, readIntlValueMapDbl {};
    TIntlValueMapI64 intlValueMapI64 {};
    TraceLevels TraceLevel { TraceLevels::trl_all };
