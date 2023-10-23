@@ -55,10 +55,8 @@ apigenerator:
     name: registry.gams.com/devel/gdx/leg/builder-gdx:latest
     entrypoint: [ "" ]
   script:
-    # first generate gdxapi.yaml from files in src/apiyaml and GDX main header file with doxy2yaml-tool
-    - python3 src/doxy2yaml/doxy2yaml.py name=gdxapi header=../gdx.h indir=src/apiyaml outdir=`pwd`
     # somehow I need absolute path for apidef arg
-    - GVERSIONMAJOR=45 GVERSIONMINOR=0 GVERSIONRELEASE=0 python3 src/apigenerator/src/mkapi.py --apidef `pwd`/gdxapi.yaml --outputpath apifiles/ --output cc cpplib
+    - GVERSIONMAJOR=45 GVERSIONMINOR=0 GVERSIONRELEASE=0 python3 src/apigenerator/src/mkapi.py --apidef `pwd`/src/gdxapi.yaml --outputpath apifiles/ --output cc cpplib
     - cp src/apigenerator/include/gc*.h apifiles
     - |
       for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h"; do
@@ -70,7 +68,7 @@ apigenerator:
   artifacts:
     name: apifiles
     expire_in: 2 hours
-    paths: [ apifiles/* ]
+    paths: [apifiles/*]
 
 #=======================================================================================================================
 
