@@ -2475,4 +2475,48 @@ TEST_CASE( "Zero is special (map -0 to eps)" )
    std::filesystem::remove( fn );
 }
 
+TEST_CASE( "Test correct behavior of allow bogus domain flag" ) {
+   const std::string fn { "store_domain_sets_allow_bogus_domain.gdx"s };
+   testWrite( fn, []( TGXFileObj &obj ) {
+      // default should be on/true
+      REQUIRE(obj.gdxStoreDomainSets());
+      REQUIRE(obj.gdxAllowBogusDomains());
+      obj.gdxStoreDomainSetsSet(false);
+
+      obj.gdxDataWriteRawStart("i", "base set", 1, dt_set, 0);
+      obj.gdxDataWriteDone();
+
+      StrIndexBuffers domainNames;
+      domainNames[0] = "i"s;
+
+      obj.gdxDataWriteRawStart("j", "derived set", 1, dt_set, 0);
+      // This should be okay (or at least ignored) as the "allow bogus flag" is set
+      REQUIRE(obj.gdxSymbolSetDomain(domainNames.cptrs()));
+      REQUIRE_EQ(0, obj.gdxErrorCount());
+      obj.gdxDataWriteDone();
+
+      obj.gdxAllowBogusDomainsSet(false);
+
+      obj.gdxDataWriteRawStart("k", "derived set 2", 1, dt_set, 0);
+      // Now it is *not* okay anymore as the "allow bogus flag" is disabled
+      REQUIRE_FALSE(obj.gdxSymbolSetDomain(domainNames.cptrs()));
+      const int ERR_NODOMAINDATA {-100054};
+      REQUIRE_EQ(ERR_NODOMAINDATA, obj.gdxGetLastError());
+      obj.gdxDataWriteDone();
+
+      obj.gdxStoreDomainSetsSet(true);
+      obj.gdxDataWriteRawStart("l", "base set 2", 1, dt_set, 0);
+      obj.gdxDataWriteDone();
+
+      obj.gdxDataWriteRawStart("m", "derived set 3", 1, dt_set, 0);
+      // This should be okay again as the base set now has records tracked for domain check
+      domainNames[0] = "l"s;
+      REQUIRE(obj.gdxSymbolSetDomain(domainNames.cptrs()));
+      const int ERR_NOERROR {0};
+      REQUIRE_EQ(ERR_NOERROR, obj.gdxGetLastError());
+      obj.gdxDataWriteDone();
+   });
+   std::filesystem::remove( fn );
+}
+
 }// namespace gdx::tests::gdxtests

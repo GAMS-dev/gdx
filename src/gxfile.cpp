@@ -2459,6 +2459,14 @@ int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
          SyNr = DomSy;
          do {
             const auto *obj = ( *NameList->GetObject( SyNr ) );
+            if(!AllowBogusDomain &&
+                obj->SDim == 1 &&
+                utils::in(obj->SDataType, dt_set, dt_alias) &&
+                !(obj->SDataType == dt_alias ? *NameList->GetObject( obj->SUserInfo ) : obj)->SSetBitMap)
+            {
+               ReportError( ERR_NODOMAINDATA );
+               return false;
+            }
             if( obj->SDataType == dt_set ) break;
             if( obj->SDataType == dt_alias )
             {
@@ -3549,6 +3557,16 @@ int TGXFileObj::gdxStoreDomainSets() const
 void TGXFileObj::gdxStoreDomainSetsSet( int x )
 {
    StoreDomainSets = x;
+}
+
+int TGXFileObj::gdxAllowBogusDomains()
+{
+   return AllowBogusDomain;
+}
+
+void TGXFileObj::gdxAllowBogusDomainsSet( int flag )
+{
+   AllowBogusDomain = flag;
 }
 
 int TGXFileObj::gdxDataReadRawFastFilt( int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP )

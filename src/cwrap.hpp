@@ -165,6 +165,8 @@ int gdxCurrentDim( TGXFileRec_t *pgdx );
 int gdxRenameUEL( TGXFileRec_t *pgdx, const char *OldName, const char *NewName );
 int gdxStoreDomainSets( TGXFileRec_t *pgdx );
 void gdxStoreDomainSetsSet( TGXFileRec_t *pgdx, int x );
+int gdxAllowBogusDomains (TGXFileRec_t *pgdx);
+void gdxAllowBogusDomainsSet (TGXFileRec_t *pgdx, int x);
 int gdxDataReadRawFast( TGXFileRec_t *TGXFile, int SyNr, TDataStoreProc_t DP, int *NrRecs );
 int gdxDataReadRawFastFilt( TGXFileRec_t *TGXFile, int SyNr, const char *UelFilterStr[], TDataStoreFiltProc_t DP );
 int gdxDataReadRawFastEx( TGXFileRec_t *TGXFile, int SyNr, ::TDataStoreExProc_t DP, int *NrRecs, void *Uptr );
@@ -649,6 +651,16 @@ GDX_INLINE int gdxStoreDomainSets( TGXFileRec_t *TGXFile )
 GDX_INLINE void gdxStoreDomainSetsSet( TGXFileRec_t *TGXFile, int x )
 {
    reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxStoreDomainSetsSet( x );
+}
+
+GDX_INLINE int gdxAllowBogusDomains( TGXFileRec_t *TGXFile )
+{
+   return reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxAllowBogusDomains();
+}
+
+GDX_INLINE void gdxAllowBogusDomainsSet( TGXFileRec_t *TGXFile, int x )
+{
+   reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxAllowBogusDomainsSet( x );
 }
 
 GDX_INLINE int gdxFree( TGXFileRec_t **TGXFile )
