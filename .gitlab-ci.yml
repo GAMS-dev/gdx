@@ -193,7 +193,7 @@ test-leg:
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
-  needs: [build-leg]
+  needs: [build-leg,install-gamsdist-leg]
   script:
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
     - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ./gdxtest --reporters=junit --out=doctest_results_linux.xml
@@ -208,7 +208,7 @@ test-leg:
 test-deg:
   stage: test
   tags: [macos]
-  needs: [build-deg]
+  needs: [build-deg,install-gamsdist-deg]
   script:
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
     - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.8.dylib ./gdxtest --reporters=junit --out=doctest_results_deg.xml
@@ -222,7 +222,7 @@ test-deg:
 test-dac:
   stage: test
   tags: [macos-arm64]
-  needs: [build-dac]
+  needs: [build-dac,install-gamsdist-dac]
   script:
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
     - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.8.dylib ./gdxtest --reporters=junit --out=doctest_results_dac.xml
@@ -238,7 +238,7 @@ test-wei:
   tags: [windows]
   image:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
-  needs: [build-wei]
+  needs: [build-wei,install-gamsdist-wei]
   script:
     - $gmsdirname = Get-Content mygmsdir.tmp -Raw
     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
@@ -260,7 +260,7 @@ leak-check-leg:
   image:
     name: registry.gams.com/devel/ciscripts/leg/builder-valgrind-codequality:latest
     entrypoint: [""]
-  needs: [fetch-ci-scripts,build-debug-leg]
+  needs: [fetch-ci-scripts,build-debug-leg,install-gamsdist-leg]
   script:
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
     - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.8.dylib valgrind --leak-check=yes ./gdxtest_dbg
