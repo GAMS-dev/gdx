@@ -2,6 +2,7 @@ stages:
   - image-build
   - apiwrap
   - fetch-scripts
+  - install-gams
   - build
   - analyze
   - test
@@ -72,6 +73,20 @@ apigenerator:
     name: apifiles
     expire_in: 2 hours
     paths: [apifiles/*]
+
+#=======================================================================================================================
+
+install-gamsdist-leg:
+  extends: .install-gams-leg
+
+install-gamsdist-deg:
+  extends: .install-gams-deg
+
+install-gamsdist-dac:
+  extends: .install-gams-dac
+
+install-gamsdist-wei:
+  extends: .install-gams-wei
 
 #=======================================================================================================================
 
@@ -180,7 +195,8 @@ test-leg:
     entrypoint: [""]
   needs: [build-leg]
   script:
-    - ./gdxtest --reporters=junit --out=doctest_results_linux.xml
+    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ./gdxtest --reporters=junit --out=doctest_results_linux.xml
     - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_linux.xml
   artifacts:
     name: unittest-results-linux
@@ -194,7 +210,8 @@ test-deg:
   tags: [macos]
   needs: [build-deg]
   script:
-    - ./gdxtest --reporters=junit --out=doctest_results_deg.xml
+    - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
+    - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.8.dylib ./gdxtest --reporters=junit --out=doctest_results_deg.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_deg.xml
   artifacts:
     name: unittest-results-deg
@@ -207,7 +224,8 @@ test-dac:
   tags: [macos-arm64]
   needs: [build-dac]
   script:
-    - ./gdxtest --reporters=junit --out=doctest_results_dac.xml
+    - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
+    - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.8.dylib ./gdxtest --reporters=junit --out=doctest_results_dac.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_dac.xml
   artifacts:
     name: unittest-results-dac
@@ -222,6 +240,10 @@ test-wei:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
   needs: [build-wei]
   script:
+    - $gmsdirname = Get-Content mygmsdir.tmp -Raw
+    - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
+    - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
+    - $env:GAMSDIR = "$GAMS_PATH;$GAMS_PATH\gbin"
     - ./Release/gdxtest --reporters=junit --out=doctest_results_windows.xml
     - ./Release/gdxwraptest --reporters=junit --out=doctest_results_wrap_windows.xml
   artifacts:
@@ -240,7 +262,8 @@ leak-check-leg:
     entrypoint: [""]
   needs: [fetch-ci-scripts,build-debug-leg]
   script:
-    - valgrind --leak-check=yes ./gdxtest_dbg
+    - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
+    - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.8.dylib valgrind --leak-check=yes ./gdxtest_dbg
     - valgrind --leak-check=yes --xml=yes --xml-file=valgrind_out.xml ./gdxtest_dbg
     - PYTHONPATH=$PYTHONPATH:valgrind-codequality python3 -m valgrind_codequality --input-file valgrind_out.xml --output-file valgrind_out.json
   artifacts:
