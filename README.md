@@ -76,7 +76,9 @@ doctest and apigenerator are included in this repo (as file and submodule respec
 
 ## Reference documentation
 
-A full detailed Doxygen-generated API reference is available [here](http://devel.pages.gams.com/-/gdx/-/jobs/164979/artifacts/docs/html/index.html).
+A full detailed Doxygen-generated API reference is available [here](https://gams-dev.github.io/gdx/classgdx_1_1TGXFileObj.html).
+
+Alternatively it is available [here](@ref gdx::TGXFileObj)
 
 ## Introduction into using GDX API
 

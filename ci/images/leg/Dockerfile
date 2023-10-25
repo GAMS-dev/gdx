@@ -19,4 +19,4 @@ RUN yum -y install gcc make libcurl-devel zlib-devel openssl-devel expat-devel &
   yum -y autoremove && \
   yum clean all
 
-RUN pip3 install --user PyYAML Jinja2 Cerberus pandas
+RUN pip3 install --user PyYAML Jinja2 Cerberus pandas beautifulsoup4
