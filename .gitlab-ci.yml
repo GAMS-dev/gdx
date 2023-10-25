@@ -224,8 +224,7 @@ test-dac:
   tags: [macos-arm64]
   needs: [build-dac,install-gamsdist-dac]
   script:
-    - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
-    - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.8.dylib ./gdxtest --reporters=junit --out=doctest_results_dac.xml
+    - ./gdxtest --reporters=junit --out=doctest_results_dac.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_dac.xml
   artifacts:
     name: unittest-results-dac
@@ -262,8 +261,8 @@ leak-check-leg:
     entrypoint: [""]
   needs: [fetch-ci-scripts,build-debug-leg,install-gamsdist-leg]
   script:
-    - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
-    - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.8.dylib valgrind --leak-check=yes ./gdxtest_dbg
+    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" valgrind --leak-check=yes ./gdxtest_dbg
     - valgrind --leak-check=yes --xml=yes --xml-file=valgrind_out.xml ./gdxtest_dbg
     - PYTHONPATH=$PYTHONPATH:valgrind-codequality python3 -m valgrind_codequality --input-file valgrind_out.xml --output-file valgrind_out.json
   artifacts:
