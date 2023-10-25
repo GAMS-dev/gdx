@@ -55,11 +55,14 @@ apigenerator:
     name: registry.gams.com/devel/gdx/leg/builder-gdx:latest
     entrypoint: [ "" ]
   script:
+    - mkdir -p apifiles
+    - python3 src/yaml2doxy.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdx.h
     # somehow I need absolute path for apidef arg
-    - GVERSIONMAJOR=45 GVERSIONMINOR=0 GVERSIONRELEASE=0 python3 src/apigenerator/src/mkapi.py --apidef `pwd`/src/gdxapi.yaml --outputpath apifiles/ --output cc cpplib
+    - python3 src/apigenerator/src/mkapi.py --apidef `pwd`/src/gdxapi.yaml --outputpath apifiles/ --output cc cpplib
     - cp src/apigenerator/include/gc*.h apifiles
+    - cp src/gdx.h generated/gdx.h
     - |
-      for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h"; do
+      for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h" "gdx.h"; do
         echo "Diffing 'apifiles/$f' with 'generated/$f'"
         if ! diff apifiles/$f generated/$f; then
           echo "Warning: $f stored in repo and freshly generated differ!"

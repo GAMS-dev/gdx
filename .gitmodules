@@ -1,3 +1,4 @@
 [submodule "src/apigenerator"]
 	path = src/apigenerator
 	url = ../apigenerator.git
+	branch = cpp-func-attrs
