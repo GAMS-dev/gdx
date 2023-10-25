@@ -572,15 +572,7 @@ typedef int  (GDX_CALLCONV *gdxDataWriteMapStart_t) (gdxHandle_t pgdx, const cha
  * @param ExplTxt Explanatory text for the symbol (up to 255 characters).
  * @param Dimen Dimension of the symbol.
  * @param Typ Type of the symbol.
- * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
-<table>
-  <tr><td>Type</td><td>Value(s)</td></tr> 
-  <tr><td>Aliased Set</td><td>The symbol number of the aliased set, or zero for the universe</td></tr>
-  <tr><td>Set</td><td>Zero</td></tr>
-  <tr><td>Parameter</td><td>Zero</td></tr>
-  <tr><td>Variable</td><td>The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9</td></tr>
-  <tr><td>Equation</td><td>The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59</td></tr>
-</table>
+ * @param UserInfo User field value storing additional data; GAMS follows the following conventions: <table> <tr><td>Type</td><td>Value(s)</td></tr> <tr><td>Aliased Set</td><td>The symbol number of the aliased set, or zero for the universe</td></tr> <tr><td>Set</td><td>Zero</td></tr> <tr><td>Parameter</td><td>Zero</td></tr> <tr><td>Variable</td><td>The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9</td></tr> <tr><td>Equation</td><td>The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59</td></tr> </table>
  * @return Non-zero if the operation is possible, zero otherwise
  */
 GDX_FUNCPTR(gdxDataWriteMapStart);
@@ -603,14 +595,7 @@ typedef int  (GDX_CALLCONV *gdxDataWriteRawStart_t) (gdxHandle_t pgdx, const cha
  * @param ExplTxt Explanatory text for the symbol (up to 255 characters).
  * @param Dimen Dimension of the symbol (up to 20).
  * @param Typ Type of the symbol (set=0, parameter=1, variable=2, equation=3, alias=4).
- * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
-<table>
-  <tr> <td>Type</td> <td>Value(s)</td> </tr>
-  <tr> <td>Aliased Set</td> <td>The symbol number of the aliased set, or zero for the universe</td> </tr>
-  <tr> <td>Set</td> <td>Zero</td> </tr> <tr> <td>Parameter</td> <td>Zero</td> </tr>
-  <tr> <td>Variable</td> <td>The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9 </td> </tr>
-  <tr> <td>Equation</td> <td>The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59</td> </tr>
-</table>
+ * @param UserInfo User field value storing additional data; GAMS follows the following conventions: <table> <tr> <td>Type</td> <td>Value(s)</td> </tr> <tr> <td>Aliased Set</td> <td>The symbol number of the aliased set, or zero for the universe</td> </tr> <tr> <td>Set</td> <td>Zero</td> </tr> <tr> <td>Parameter</td> <td>Zero</td> </tr> <tr> <td>Variable</td> <td>The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9 </td> </tr> <tr> <td>Equation</td> <td>The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59</td> </tr> </table>
  * @return Non-zero if the operation is possible, zero otherwise.
  */
 GDX_FUNCPTR(gdxDataWriteRawStart);
@@ -982,15 +967,7 @@ typedef int  (GDX_CALLCONV *gdxSymbolInfoX_t) (gdxHandle_t pgdx, int SyNr, int *
  * @param pgdx gdx object handle
  * @param SyNr The symbol number (range 0..NrSymbols); return universe info when SyNr = 0.
  * @param RecCnt Total number of records stored (unmapped); for the universe (SyNr = 0) this is the number of entries when the GDX file was opened for reading.
- * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
-<table>
-  <tr> <td>Type</td> <td>Value(s)</td> </tr>
-  <tr> <td>Aliased Set</td> <td>The symbol number of the aliased set, or zero for the universe</td> </tr>
-  <tr> <td>Set</td> <td>Zero</td> </tr>
-  <tr> <td>Parameter</td> <td>Zero</td> </tr>
-  <tr> <td>Variable</td> <td>The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9 </td> </tr>
-  <tr> <td>Equation</td> <td>The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59</td> </tr>
-</table>
+ * @param UserInfo User field value storing additional data; GAMS follows the following conventions: <table> <tr> <td>Type</td> <td>Value(s)</td> </tr> <tr> <td>Aliased Set</td> <td>The symbol number of the aliased set, or zero for the universe</td> </tr> <tr> <td>Set</td> <td>Zero</td> </tr> <tr> <td>Parameter</td> <td>Zero</td> </tr> <tr> <td>Variable</td> <td>The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9 </td> </tr> <tr> <td>Equation</td> <td>The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59</td> </tr> </table>
  * @param ExplTxt Explanatory text for the symbol. Buffer for this output argument should be 256 bytes long.
  * @return Zero if the symbol number is not in the correct range, non-zero otherwise.
  */
