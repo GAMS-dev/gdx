@@ -74,14 +74,24 @@ public:
    void gdxStoreDomainSetsSet( int x );
 
    /**
-    * Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    * @brief Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    * @details Toggle allowing potentially unsafe writing of records to symbols with one dimensional sets as domain,
+    * when GDX has no lookup table for the elements of this set.
+    * This can happen when `gdxStoreDomainSets` was disabled by the user to save memory.
+    * For backwards compatability, this is enabled by default.
+    * When the user explicitly disables it, e.g. via `gdxAllowBogusDomainsSet(false)`, then using a one dimensional set as
+    * domain will cause a GDX error (ERR_NODOMAINDATA).
     * @param flag 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored.
     * Otherwise an error is raised (ERR_NODOMAINDATA).
     */
    void gdxAllowBogusDomainsSet( int flag );
 
    /**
-    * Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    * @brief Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    * @details In case the flag is enabled this is allowing potentially unsafe writing of records to symbols with
+    * one dimensional sets as domain, when GDX has no lookup table for the elements of this set.
+    * This can happen when `gdxStoreDomainSets` was disabled by the user to save memory.
+    * For backwards compatability, this is enabled by default.
     * @return 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored.
     * Otherwise an error is raised (ERR_NODOMAINDATA).
     */
@@ -178,10 +188,13 @@ public:
     * @brief Returns the value of the NextAutoAcronym variable and sets the variable to nv.
     * <ul>
     *  <li>
-    *   When we read from a GDX file and encounter an acronym that was not defined, we need to assign a new index for that acronym. The variable NextAutoAcronym is used for this purpose and is incremented for each new undefined acronym.
+    *   When we read from a GDX file and encounter an acronym that was not defined, we need to assign a
+    *   new index for that acronym. The variable NextAutoAcronym is used for this purpose and is incremented
+    *   for each new undefined acronym.
     *  </li>
     *  <li>
-    *   When NextAutoAcronym has a value of zero, the default, the value is ignored and the original index as stored in the GDX file is used for the index.
+    *   When NextAutoAcronym has a value of zero, the default, the value is ignored and the original index
+    *   as stored in the GDX file is used for the index.
     *  </li>
     * </ul>
     * @param NV New value for NextAutoAcronym; a value of less than zero is ignored.
@@ -193,10 +206,12 @@ public:
     * @brief Modify acronym information in the acronym table
     * <ul>
     *  <li>
-    *   When writing a GDX file, this function is used to provide the name of an acronym; in this case the Indx parameter must match.
+    *   When writing a GDX file, this function is used to provide the name of an acronym; in this case the
+    *   Indx parameter must match.
     *  </li>
     *  <li>
-    *   When reading a GDX file, this function is used to provide the acronym index, and the AName parameter must match.
+    *   When reading a GDX file, this function is used to provide the acronym index, and the AName
+    *   parameter must match.
     *  </li>
     * </ul>
     * @param N Index into acronym table (range 1..AcronymCount).
@@ -287,10 +302,12 @@ public:
     * @param Values Values for the record (level, marginal, lower-, upper-bound, scale).
     * @attention <ul>
     *  <li>
-    *   Same as gdxDataErrorRecordX but negative UEL index numbers (for domain violations) are inverted, so the index is always &gt;=0.
+    *   Same as gdxDataErrorRecordX but negative UEL index numbers (for domain violations) are inverted,
+    *   so the index is always &gt;=0.
     *  </li>
     *  <li>
-    *   KeyInt must be big enough to hold one UEL index for each dimension! Values must have length &gt;=5.
+    *   KeyInt must be big enough to hold one UEL index for each dimension! Values must have length
+    *   &gt;=5.
     *  </li>
     * </ul>
     * @return Non-zero if the record number is valid, zero otherwise.
@@ -329,7 +346,8 @@ public:
    /**
     * @brief Initialize the reading of a symbol in filtered mode. Returns zero if the operation is not possible.
     * @details Start reading data for a symbol in filtered mode.
-    *   Each filter action (1..Dimension) describes how each index should be treated when reading a data record.
+    *   Each filter action (1..Dimension) describes how each index should be treated when reading a data
+    *   record.
     *   When new unique elements are returned, they are added to the user index space automatically.
     *   The actual reading of records is done with DataReadMap.
     * 
@@ -364,7 +382,8 @@ public:
     *    DOMC_STRICT
     *   </td>
     *   <td>
-    *    If the unique element in this position does not map into user space, the record will not be available and is added to the error list instead
+    *    If the unique element in this position does not map into user space, the record will not be
+    *    available and is added to the error list instead
     *   </td>
     *  </tr>
     *  <tr>
@@ -372,7 +391,8 @@ public:
     *    FilterNumber
     *   </td>
     *   <td>
-    *    If the unique element in this position does not map into user space or is not enabled in this filter, the record will not be available and is added to the error list instead
+    *    If the unique element in this position does not map into user space or is not enabled in this
+    *    filter, the record will not be available and is added to the error list instead
     *   </td>
     *  </tr>
     * </table>
@@ -422,7 +442,8 @@ public:
     * @details Use a callback function to read a symbol in raw mode. Using a callback procedure to read the data is
     *   faster because we no longer have to check the context for each call to read a record.
     * @param SyNr The index number of the symbol (range 0..NrSymbols); SyNr = 0 reads universe.
-    * @param DP Procedure that will be called for each data record. This procedure (return type=void) should have the following signature:
+    * @param DP Procedure that will be called for each data record. This procedure (return type=void) should have
+    * the following signature:
     * <ul>
     *  <li>
     *   UEL index number keys (const int ),
@@ -443,7 +464,9 @@ public:
     * @details Use a callback function to read a symbol in raw mode. Using a callback procedure to read the data is
     *   faster because we no longer have to check the context for each call to read a record.
     * @param SyNr The index number of the symbol (range 0..NrSymbols); SyNr = 0 reads universe.
-    * @param DP Procedure that will be called for each data record. This function (return type=integer) should return whether reading continues (=0 for stop, &gt;=1 otherwise) and should have the following signature:
+    * @param DP Procedure that will be called for each data record. This function (return type=integer) should
+    * return whether reading continues (=0 for stop, &gt;=1 otherwise) and should have the following
+    * signature:
     * <ul>
     *  <li>
     *   UEL index number keys (const int ),
@@ -475,7 +498,8 @@ public:
     * @param UelFilterStr Each index can be fixed by setting the string for the unique element. Set an index position to the
     *   empty string in order not to fix that position. If the string is not-empty it should match an UEL
     *   name from the UEL table.
-    * @param DP Callback procedure which will be called for each available data item. This procedure (return type=void) should have the following signature:
+    * @param DP Callback procedure which will be called for each available data item. This procedure (return
+    * type=void) should have the following signature:
     * <ul>
     *  <li>
     *   UEL index number keys (const int ),
@@ -665,7 +689,8 @@ public:
     *    Variable
     *   </td>
     *   <td>
-    *    The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9
+    *    The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7,
+    *    semicontinous=8, semiinteger=9
     *   </td>
     *  </tr>
     *  <tr>
@@ -746,7 +771,8 @@ public:
     *    Variable
     *   </td>
     *   <td>
-    *    The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9
+    *    The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7,
+    *    semicontinous=8, semiinteger=9
     *   </td>
     *  </tr>
     *  <tr>
@@ -768,13 +794,15 @@ public:
     *   elements. Returns zero if the operation is not possible.
     * @details <ul>
     *  <li>
-    *   When writing data using string elements, each string element is added to the internal unique element (UEL) table and assigned an index.
+    *   When writing data using string elements, each string element is added to the internal unique
+    *   element (UEL) table and assigned an index.
     *  </li>
     *  <li>
     *   Writing using strings does not add the unique elements to the user mapped space.
     *  </li>
     *  <li>
-    *   Each element string must follow the GAMS rules for unique elements e.g. not exceeding 63 characters in length and not mixing single- and double-quotes.
+    *   Each element string must follow the GAMS rules for unique elements e.g. not exceeding 63
+    *   characters in length and not mixing single- and double-quotes.
     *  </li>
     * </ul>
     * @param KeyStr The index for this element using strings for the unique elements. One entry for each symbol
@@ -791,10 +819,12 @@ public:
     *   KeyStr should point to one string for each symbol dimension.
     *  </li>
     *  <li>
-    *   Each key string should not be longer than 63 characters. Values should be big enough to store 5 double values.
+    *   Each key string should not be longer than 63 characters. Values should be big enough to store 5
+    *   double values.
     *  </li>
     *  <li>
-    *   Make sure there is a key string for each symbol dimension and each key string does not exceed 63 characters.
+    *   Make sure there is a key string for each symbol dimension and each key string does not exceed 63
+    *   characters.
     *  </li>
     *  <li>
     *   Make sure values does not contain more than 5 entries.
@@ -918,7 +948,8 @@ public:
     * @brief Search for a symbol by name in the symbol table; the search is not case-sensitive.
     * <ul>
     *  <li>
-    *   When the symbol is found, SyNr contains the symbol number and the function returns a non-zero integer.
+    *   When the symbol is found, SyNr contains the symbol number and the function returns a non-zero
+    *   integer.
     *  </li>
     *  <li>
     *   When the symbol is not found, the function returns zero and SyNr is set to -1.
@@ -942,7 +973,8 @@ public:
     *   When reading a GDX file, the index is returned as the level value when reading a set.
     *  </li>
     * </ul>
-    * The Node number can be used as an index in a string table in the user space; the value is set by calling SetTextNodeNr.
+    * The Node number can be used as an index in a string table in the user space; the value is set by
+    * calling SetTextNodeNr.
     * <br/>
     * If the Node number was never assigned, it will be returned as zero.
     * @param TxtNr String table index.
@@ -1332,7 +1364,8 @@ public:
     *    Variable
     *   </td>
     *   <td>
-    *    The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7, semicontinous=8, semiinteger=9
+    *    The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7,
+    *    semicontinous=8, semiinteger=9
     *   </td>
     *  </tr>
     *  <tr>
