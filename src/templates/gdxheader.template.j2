@@ -74,14 +74,24 @@ public:
    void gdxStoreDomainSetsSet( int x );
 
    /**
-    * Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    * @brief Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    * @details Toggle allowing potentially unsafe writing of records to symbols with one dimensional sets as domain,
+    * when GDX has no lookup table for the elements of this set.
+    * This can happen when `gdxStoreDomainSets` was disabled by the user to save memory.
+    * For backwards compatability, this is enabled by default.
+    * When the user explicitly disables it, e.g. via `gdxAllowBogusDomainsSet(false)`, then using a one dimensional set as
+    * domain will cause a GDX error (ERR_NODOMAINDATA).
     * @param flag 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored.
     * Otherwise an error is raised (ERR_NODOMAINDATA).
     */
    void gdxAllowBogusDomainsSet( int flag );
 
    /**
-    * Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    * @brief Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    * @details In case the flag is enabled this is allowing potentially unsafe writing of records to symbols with
+    * one dimensional sets as domain, when GDX has no lookup table for the elements of this set.
+    * This can happen when `gdxStoreDomainSets` was disabled by the user to save memory.
+    * For backwards compatability, this is enabled by default.
     * @return 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored.
     * Otherwise an error is raised (ERR_NODOMAINDATA).
     */
