@@ -71,7 +71,7 @@ var searchData=
   ['gdxsettextnodenr_68',['gdxSetTextNodeNr',['../classgdx_1_1TGXFileObj.html#a2e17521127e04fb89454b49521c9be22',1,'gdx::TGXFileObj']]],
   ['gdxsettracelevel_69',['gdxSetTraceLevel',['../classgdx_1_1TGXFileObj.html#a18f40d7fd17618c9416464a480efc37b',1,'gdx::TGXFileObj']]],
   ['gdxstoredomainsets_70',['gdxStoreDomainSets',['../classgdx_1_1TGXFileObj.html#a5290760aefaf9af4ab092d68fd187642',1,'gdx::TGXFileObj']]],
-  ['gdxstoredomainsetsset_71',['gdxStoreDomainSetsSet',['../classgdx_1_1TGXFileObj.html#a5aa88feb1bb15e035596dbb87e630f0c',1,'gdx::TGXFileObj']]],
+  ['gdxstoredomainsetsset_71',['gdxStoreDomainSetsSet',['../classgdx_1_1TGXFileObj.html#a4a689e452ee5b20cfdf8d4147faadc2c',1,'gdx::TGXFileObj']]],
   ['gdxsymbindxmaxlength_72',['gdxSymbIndxMaxLength',['../classgdx_1_1TGXFileObj.html#af7de4b7f90ec26e71c54b6e1df1e8595',1,'gdx::TGXFileObj']]],
   ['gdxsymbmaxlength_73',['gdxSymbMaxLength',['../classgdx_1_1TGXFileObj.html#ab2ffa7df3ce6a691bc0c41737a012262',1,'gdx::TGXFileObj']]],
   ['gdxsymboladdcomment_74',['gdxSymbolAddComment',['../classgdx_1_1TGXFileObj.html#a0473b4f834a31d23e494ae5b1323f380',1,'gdx::TGXFileObj']]],
