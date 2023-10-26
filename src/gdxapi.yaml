@@ -371,18 +371,19 @@ functions:
       description: Read a symbol in Raw mode while applying a filter using a callback procedure. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>Read a slice of data, by fixing zero or more index positions in the data. When a data element is available, the callback procedure DP is called with the current index (as raw numbers) and the values.</p><p><b>See: </b><a href="#gdxDataReadRawFast">gdxDataReadRawFast</a>, <a href="#gdxDataReadSliceStart">gdxDataReadSliceStart</a>, <a href="#gdxDataSliceUELS">gdxDataSliceUELS</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>, <a href="#"></a>.</p>'
-      code: |-
-        auto DPCallBack = [](const int *Indx, const double *Vals, void *Uptr)
-        {
-          std::string s;
-          int UelMap;
-          ((TGXFileObj*)Uptr).gdxUMUelGet(Indx[1], s, UelMap);
-          std::cout << s << ' ' << Vals[vallevel] << std::endl;
-          return 1;
-        };
-        TgdxStrIndex IndxS;
-        IndxS[0] = "i200"; IndxS[1] = "";
-        pgx.gdxDataReadRawFastFilt(1, IndxS, DPCallBack);
+      code:
+        cpp: |-
+          auto DPCallBack = [](const int *Indx, const double *Vals, void *Uptr)
+          {
+            std::string s;
+            int UelMap;
+            ((TGXFileObj*)Uptr).gdxUMUelGet(Indx[1], s, UelMap);
+            std::cout << s << ' ' << Vals[vallevel] << std::endl;
+            return 1;
+          };
+          TgdxStrIndex IndxS;
+          IndxS[0] = "i200"; IndxS[1] = "";
+          pgx.gdxDataReadRawFastFilt(1, IndxS, DPCallBack);
   - gdxDataReadRawStart:
       type: int
       parameters:
@@ -455,13 +456,14 @@ functions:
       description: Initialize the reading of a symbol in string mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>Reading data using strings is the simplest way to read data. Every record read using DataReadStr will return the strings for the unique elements. Internal mapping is not affected by this function.</p><p><b>See: </b><a href="#gdxDataReadStr">gdxDataReadStr</a>, <a href="#gdxDataReadRawStart">gdxDataReadRawStart</a>, <a href="#gdxDataReadMapStart">gdxDataReadMapStart</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>.</p>'
-      code: |-
-        if(pgx.gdxDataReadStrStart(1,NrRecs)) {
-          while(pgx.gdxDataReadStr(Uels,Vals)) {
-            ...
+      code:
+        cpp: |-
+          if(pgx.gdxDataReadStrStart(1,NrRecs)) {
+            while(pgx.gdxDataReadStr(Uels,Vals)) {
+              ...
+            }
+            pgx.gdxDataReadDone();
           }
-          pgx.gdxDataReadDone();
-        }
   - gdxDataSliceUELS:
       type: int
       parameters:
@@ -737,18 +739,19 @@ functions:
         </p>
         <p><font color="red"><b>Attention: </b></font>Buffer supplied in out argument string Txt should be 256 bytes wide to prevent overflow!</p>
         <p><b>See: </b><a href="#gdxAddSetText">gdxAddSetText</a>, <a href="#gdxSetTextNodeNr">gdxSetTextNodeNr</a>.</p>
-      code: |-
-        // assumes we are reading using strings
-        while(pgx.gdxDataReadStr(Uels, Vals)) {
-           for(int D{}; D<Dim; D++)
-              std::cout << Uels[D] << " ";
-           int indx = std::round(Vals[vallevel]);
-           if(indx > 0) {
-              pgx.gdxGetElemText(indx, S, N);
-              std::cout << "txt = " << S << "Node = " << N;
-           }
-           std::cout << std::endl;
-        }
+      code:
+        cpp: |-
+          // assumes we are reading using strings
+          while(pgx.gdxDataReadStr(Uels, Vals)) {
+             for(int D{}; D<Dim; D++)
+                std::cout << Uels[D] << " ";
+             int indx = std::round(Vals[vallevel]);
+             if(indx > 0) {
+                pgx.gdxGetElemText(indx, S, N);
+                std::cout << "txt = " << S << "Node = " << N;
+             }
+             std::cout << std::endl;
+          }
   - gdxGetLastError:
       type: int
       description: Returns the last error number or zero if there was no error. Calling this function will clear the last error stored.
@@ -817,7 +820,8 @@ functions:
       details: |- 
         <p>If a file extension is not supplied, the extension ''.gdx'' will be used. The return code is a system dependent I/O error. When appending to a GDX file, the symbol table, uel table etc will be read and the whole setup will be treated as if all symbols were just written to the GDX file. Replacing a symbol is not allowed; it will generate a duplicate symbol error.</p>
         <p><b>See: </b><a href="#gdxOpenRead">gdxOpenRead</a>, <a href="#gdxOpenWrite">gdxOpenWrite</a>, <a href="#gdxOpenWriteEx">gdxOpenWriteEx</a>.</p>'
-      code: |-
+      code:
+        cpp: |-
           std::string Msg;
           TGXFileObj pgx {Msg}
           int ErrCode;
@@ -837,13 +841,14 @@ functions:
       description: Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.
       return: Returns non-zero if the file can be opened; zero otherwise.
       details: '<p>Open an existing GDX file for input. If a file extension is not supplied, the extension ''.gdx'' will be used. The return code is a system dependent I/O error. If the file was found, but is not a valid GDX file, the function GetLastError can be used to handle these type of errors.</p><p><b>See: </b><a href="#gdxOpenWrite">gdxOpenWrite</a>, <a href="#gdxGetLastError">gdxGetLastError</a>.</p>'
-      code: |-
-        std::string errMsg;
-        TGXFileObj pgx{errMsg};
-        pgx.gdxOpenRead("file1.gdx", ErrNr);
-        if(ErrNr) {
-          [...]
-        }
+      code:
+        cpp: |-
+          std::string errMsg;
+          TGXFileObj pgx{errMsg};
+          pgx.gdxOpenRead("file1.gdx", ErrNr);
+          if(ErrNr) {
+            [...]
+          }
   - gdxOpenReadEx:
       type: int
       parameters:
@@ -859,12 +864,13 @@ functions:
       description: Open a GDX file for reading allowing for skipping sections. Non-zero if the file can be opened, zero otherwise.
       return: Returns non-zero if the file can be opened; zero otherwise.
       details: '<p>Open an existing GDX file for input. If a file extension is not supplied, the extension ''.gdx'' will be used. The return code is a system dependent I/O error. If the file was found, but is not a valid GDX file, the function GetLastError can be used to handle these type of errors.</p><p><b>See: </b><a href="#gdxOpenWrite">gdxOpenWrite</a>, <a href="#gdxGetLastError">gdxGetLastError</a>.</p>'
-      code: |-
-        int ErrNr;
-        pgx.gdxOpenReadEx("file1.gdx", fmOpenRead, ErrNr);
-        if(ErrNr) {
-           [...]
-        }
+      code:
+        cpp: |-
+          int ErrNr;
+          pgx.gdxOpenReadEx("file1.gdx", fmOpenRead, ErrNr);
+          if(ErrNr) {
+             [...]
+          }
   - gdxOpenWrite:
       type: int
       parameters:
@@ -898,19 +904,20 @@ functions:
       description: Create a GDX file for writing with explicitly given compression flag. Non-zero if the file can be opened, zero otherwise.
       return: Returns non-zero if the file can be opened; zero otherwise.
       details: '<p>Open a new GDX file for output. If a file extension is not supplied, the extension ''.gdx'' will be used. The return code is a system dependent I/O error.</p><p><font color="red"><b>Attention: </b></font>When writing compressed, set the AutoConvert flag to zero so the file is not uncompressed after the gdxClose; see gdxAutoConvert.</p><p><b>See: </b><a href="#gdxOpenRead">gdxOpenRead</a>, <a href="#gdxOpenWrite">gdxOpenWrite</a>, <a href="#gdxAutoConvert">gdxAutoConvert</a>.</p>'
-      code: |-
-        std::string errMsg;
-        TGXFileObj pgx{errMsg};
-        if(!errMsg.empty()) {
-            std::cout << "Failure with GDX: " << errMsg << std::endl;
-            return;
-        }
-        int ErrCode;
-        pgx.gdxOpenWriteEx("file1.gdx", "Examples", 1, ErrCode);
-        pgx.gdxAutoConvert(0);
-        if(ErrCode) {
-        [ ... ]
-        }
+      code:
+        cpp: |-
+          std::string errMsg;
+          TGXFileObj pgx{errMsg};
+          if(!errMsg.empty()) {
+              std::cout << "Failure with GDX: " << errMsg << std::endl;
+              return;
+          }
+          int ErrCode;
+          pgx.gdxOpenWriteEx("file1.gdx", "Examples", 1, ErrCode);
+          pgx.gdxAutoConvert(0);
+          if(ErrCode) {
+          [ ... ]
+          }
   - gdxResetSpecialValues:
       type: int
       description: Reset the internal values for special values. Always non-zero.
@@ -1253,7 +1260,8 @@ functions:
         To achieve this, the symbols data is read and a tally is kept for the elements in the given index position.
         When a filter is specified, records that have elements in the specified index position that are outside the filter will be added to the list of DataErrorRecords.
         <p><b>See: </b><a href="#gdxDataErrorRecord">gdxDataErrorRecord</a>.</p>
-      code: |-
+      code:
+        cpp: |-
           int Cnt;
           auto DataDomainCB = [](int RawNr, int MappedNr, void *UPtr) {
               std::cout << RawNr << " (" << MappedNr << ")" << std::endl;

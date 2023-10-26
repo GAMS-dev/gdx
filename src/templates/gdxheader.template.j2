@@ -111,9 +111,9 @@ public:
     {%- if fvals.return %}
     * @return {{ beautify_html(fvals.return) }}
     {%- endif -%}
-    {%- if fvals.code %}
+    {%- if fvals.code and fvals.code.cpp %}
     * @code
-      {{ fvals.code|indent(6) }}
+      {{ fvals.code.cpp|indent(6) }}
     * @endcode
     {%- endif -%}
     {%- if triple and triple[1] %}
