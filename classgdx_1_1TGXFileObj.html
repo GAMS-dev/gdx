@@ -128,8 +128,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>SetTraceLevel</b> (Tr
 <tr class="memitem:a4a689e452ee5b20cfdf8d4147faadc2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a4a689e452ee5b20cfdf8d4147faadc2c">gdxStoreDomainSetsSet</a> (int x)</td></tr>
 <tr class="separator:a4a689e452ee5b20cfdf8d4147faadc2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb6f2da3823e3f3ac38cb7cd5ec1e376"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#acb6f2da3823e3f3ac38cb7cd5ec1e376">gdxAllowBogusDomainsSet</a> (int flag)</td></tr>
+<tr class="memdesc:acb6f2da3823e3f3ac38cb7cd5ec1e376"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).  <a href="classgdx_1_1TGXFileObj.html#acb6f2da3823e3f3ac38cb7cd5ec1e376">More...</a><br /></td></tr>
 <tr class="separator:acb6f2da3823e3f3ac38cb7cd5ec1e376"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57698ddd28d54176032cf015a1d6f6f6"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a57698ddd28d54176032cf015a1d6f6f6">gdxAllowBogusDomains</a> ()</td></tr>
+<tr class="memdesc:a57698ddd28d54176032cf015a1d6f6f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).  <a href="classgdx_1_1TGXFileObj.html#a57698ddd28d54176032cf015a1d6f6f6">More...</a><br /></td></tr>
 <tr class="separator:a57698ddd28d54176032cf015a1d6f6f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa82277b5095243030de46f35491e3cb8"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#aa82277b5095243030de46f35491e3cb8">gdxAcronymAdd</a> (const char *AName, const char *Txt, int AIndx)</td></tr>
 <tr class="memdesc:aa82277b5095243030de46f35491e3cb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a new acronym entry. This can be used to add entries before data is written. Returns negative value (&lt;0) if the entry is not added.  <a href="classgdx_1_1TGXFileObj.html#aa82277b5095243030de46f35491e3cb8">More...</a><br /></td></tr>
@@ -940,7 +942,9 @@ When reading a GDX file, this function is used to provide the acronym index, and
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets). </p><dl class="section return"><dt>Returns</dt><dd>1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA). </dd></dl>
+
+<p>Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets). </p>
+<p >In case the flag is enabled this is allowing potentially unsafe writing of records to symbols with one dimensional sets as domain, when GDX has no lookup table for the elements of this set. This can happen when <code>gdxStoreDomainSets</code> was disabled by the user to save memory. For backwards compatability, this is enabled by default. </p><dl class="section return"><dt>Returns</dt><dd>1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA). </dd></dl>
 
 </div>
 </div>
@@ -959,7 +963,9 @@ When reading a GDX file, this function is used to provide the acronym index, and
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets). </p><dl class="params"><dt>Parameters</dt><dd>
+
+<p>Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets). </p>
+<p >Toggle allowing potentially unsafe writing of records to symbols with one dimensional sets as domain, when GDX has no lookup table for the elements of this set. This can happen when <code>gdxStoreDomainSets</code> was disabled by the user to save memory. For backwards compatability, this is enabled by default. When the user explicitly disables it, e.g. via <code>gdxAllowBogusDomainsSet(false)</code>, then using a one dimensional set as domain will cause a GDX error (ERR_NODOMAINDATA). </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">flag</td><td>1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA). </td></tr>
   </table>
