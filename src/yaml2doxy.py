@@ -1,3 +1,5 @@
+import itertools
+
 from jinja2 import Environment, FileSystemLoader
 import yaml
 from bs4 import BeautifulSoup as bs
@@ -14,12 +16,20 @@ def no_paragraphs(s):
     return s.replace('<p>', '').replace('</p>', '')
 
 
+text_wrapper = textwrap.TextWrapper(width=100, break_long_words=False, replace_whitespace=False)
+
+
 def beautify_html(s):
     if s is None:
         return None
     if not contains_html(s):
         return wrap_text(s)
-    lines = str(bs(no_paragraphs(s), 'html.parser').prettify()).strip().split('\n')
+    raw_lines = str(bs(no_paragraphs(s), 'html.parser').prettify()).strip().split('\n')
+    lines = []
+    for line in raw_lines:
+        num_spaces = sum(1 for _ in itertools.takewhile(str.isspace, line))
+        for ix, narrow_line in enumerate(text_wrapper.fill(line).split('\n')):
+            lines.append(' ' * num_spaces + narrow_line if ix > 0 else narrow_line)
     return '\n'.join(('    * ' if ix > 0 else '') + line for ix, line in enumerate(lines))
 
 
@@ -39,9 +49,6 @@ def parse_details(s):
     if expl_txt.count(marker_note) == 1:
         expl_txt, note_txt = expl_txt.split(marker_note)
     return beautify_html(expl_txt), see_txt, beautify_html(attention_txt), beautify_html(note_txt)
-
-
-text_wrapper = textwrap.TextWrapper(width=100, break_long_words=False, replace_whitespace=False)
 
 
 def wrap_text(s):
