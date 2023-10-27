@@ -1,8 +1,46 @@
 # GAMS Data eXchange (GDX)
 
-<img src="gdxlogo.png" style="width:100px" alt="logo" />
+<img src="gdxlogo.png" style="width:50px" alt="logo" />
 
-[[_TOC_]]
+Table of Contents
+=================
+
+* [GAMS Data eXchange (GDX)](#gams-data-exchange-gdx)
+    * [Basic information on GDX file format](#basic-information-on-gdx-file-format)
+        * [Information contained inside a GDX file](#information-contained-inside-a-gdx-file)
+        * [Features of the GDX API](#features-of-the-gdx-api)
+    * [Setting up and building GDX](#setting-up-and-building-gdx)
+        * [Accessing GDX from a custom application](#accessing-gdx-from-a-custom-application)
+        * [Building GDX from source](#building-gdx-from-source)
+    * [Reference documentation](#reference-documentation)
+    * [Introduction into using GDX API](#introduction-into-using-gdx-api)
+        * [Writing data to a GDX file](#writing-data-to-a-gdx-file)
+        * [Writing data using strings](#writing-data-using-strings)
+        * [Writing data using integers (raw)](#writing-data-using-integers-raw)
+        * [Writing data using integers (mapped)](#writing-data-using-integers-mapped)
+        * [Reading data from a GDX file](#reading-data-from-a-gdx-file)
+        * [Reading data using strings](#reading-data-using-strings)
+        * [Reading data using integers (raw)](#reading-data-using-integers-raw)
+        * [Reading data using integers (Mapped)](#reading-data-using-integers-mapped)
+        * [Reading data using a filter](#reading-data-using-a-filter)
+        * [Dealing with acronyms](#dealing-with-acronyms)
+    * [Functions by Category](#functions-by-category)
+    * [Transition diagram](#transition-diagram)
+        * [Diagram for general operations](#diagram-for-general-operations)
+        * [Diagram for read operations](#diagram-for-read-operations)
+        * [Diagram for write operations](#diagram-for-write-operations)
+        * [Diagram for UEL operations](#diagram-for-uel-operations)
+    * [Example programs](#example-programs)
+        * [Example 1 (GAMS)](#example-1-gams)
+        * [Example 2 (C)](#example-2-c)
+        * [Example 3 (C++)](#example-3-c)
+        * [Example 4 (VB.NET)](#example-4-vbnet)
+        * [Example 6 (Python)](#example-6-python)
+        * [Example 7 (C#)](#example-7-c)
+        * [Example 8 (Java)](#example-8-java)
+    * [Conversion issues when moving from GAMS 22.5 to 22.6](#conversion-issues-when-moving-from-gams-225-to-226)
+    * [Files in the apifiles directory](#files-in-the-apifiles-directory)
+<!-- Created by https://github.com/ekalinin/github-markdown-toc -->
 
 ## Basic information on GDX file format
 
