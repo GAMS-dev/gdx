@@ -1276,277 +1276,276 @@ Example 6 (Python)</h2>
 <div class="line">    print(<span class="stringliteral">&quot;All done&quot;</span>)</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md32"></a>
 Example 7 (C#)</h2>
-<div class="fragment"><div class="line">///////////////////////////////////////////////////////////////</div>
-<div class="line">// This program generates demand data for a modified version //</div>
-<div class="line">// of the trnsport model or reads the solution back from a   //</div>
-<div class="line">// gdx file.                                                 //</div>
-<div class="line">//                                                           //</div>
-<div class="line">// Calling convention:                                       //</div>
-<div class="line">// Case 1:                                                   //</div>
-<div class="line">//    Parameter 1: GAMS system directory                     //</div>
-<div class="line">// The program creates a GDX file with demand data           //</div>
-<div class="line">// Case 2:                                                   //</div>
-<div class="line">//    Parameter 1: GAMS system directory                     //</div>
-<div class="line">//    Parameter 2: gdxfile                                   //</div>
-<div class="line">// The program reads the solution from the GDX file          //</div>
-<div class="line">// Paul van der Eijk Jun-12, 2002                            //</div>
-<div class="line">///////////////////////////////////////////////////////////////</div>
+<div class="fragment"><div class="line"> </div>
+<div class="line"><span class="comment">// This program generates demand data for a modified version //</span></div>
+<div class="line"><span class="comment">// of the trnsport model or reads the solution back from a   //</span></div>
+<div class="line"><span class="comment">// gdx file.                                                 //</span></div>
+<div class="line"><span class="comment">//                                                           //</span></div>
+<div class="line"><span class="comment">// Calling convention:                                       //</span></div>
+<div class="line"><span class="comment">// Case 1:                                                   //</span></div>
+<div class="line"><span class="comment">//    Parameter 1: GAMS system directory                     //</span></div>
+<div class="line"><span class="comment">// The program creates a GDX file with demand data           //</span></div>
+<div class="line"><span class="comment">// Case 2:                                                   //</span></div>
+<div class="line"><span class="comment">//    Parameter 1: GAMS system directory                     //</span></div>
+<div class="line"><span class="comment">//    Parameter 2: gdxfile                                   //</span></div>
+<div class="line"><span class="comment">// The program reads the solution from the GDX file          //</span></div>
+<div class="line"><span class="comment">// Paul van der Eijk Jun-12, 2002                            //</span></div>
+<div class="line"><span class="comment"></span> </div>
+<div class="line"><span class="keyword">using </span>System;</div>
+<div class="line"><span class="keyword">using </span>System.Collections.Generic;</div>
+<div class="line"><span class="keyword">using </span>System.Linq;</div>
+<div class="line"><span class="keyword">using </span>System.Text;</div>
 <div class="line"> </div>
-<div class="line">using System;</div>
-<div class="line">using System.Collections.Generic;</div>
-<div class="line">using System.Linq;</div>
-<div class="line">using System.Text;</div>
-<div class="line"> </div>
-<div class="line">namespace xp_example1</div>
+<div class="line"><span class="keyword">namespace </span>xp_example1</div>
 <div class="line">{</div>
-<div class="line">    class xp_example1</div>
+<div class="line">    <span class="keyword">class </span>xp_example1</div>
 <div class="line">    {</div>
-<div class="line">        static gdxcs gdx;</div>
-<div class="line">        static void ReportGDXError()</div>
+<div class="line">        <span class="keyword">static</span> gdxcs gdx;</div>
+<div class="line">        <span class="keyword">static</span> <span class="keywordtype">void</span> ReportGDXError()</div>
 <div class="line">        {</div>
-<div class="line">            string S = string.Empty;</div>
-<div class="line">            Console.WriteLine(&quot;**** Fatal GDX Error&quot;);</div>
+<div class="line">            <span class="keywordtype">string</span> S = <span class="keywordtype">string</span>.Empty;</div>
+<div class="line">            Console.WriteLine(<span class="stringliteral">&quot;**** Fatal GDX Error&quot;</span>);</div>
 <div class="line">            gdx.gdxErrorStr(gdx.gdxGetLastError(), ref S);</div>
-<div class="line">            Console.WriteLine(&quot;**** &quot; + S);</div>
+<div class="line">            Console.WriteLine(<span class="stringliteral">&quot;**** &quot;</span> + S);</div>
 <div class="line">            Environment.Exit(1);</div>
 <div class="line">        }</div>
 <div class="line"> </div>
-<div class="line">        static void ReportIOError(int N)</div>
+<div class="line">        <span class="keyword">static</span> <span class="keywordtype">void</span> ReportIOError(<span class="keywordtype">int</span> N)</div>
 <div class="line">        {</div>
-<div class="line">            Console.WriteLine(&quot;**** Fatal I/O Error = &quot; + N);</div>
+<div class="line">            Console.WriteLine(<span class="stringliteral">&quot;**** Fatal I/O Error = &quot;</span> + N);</div>
 <div class="line">            Environment.Exit(1);</div>
 <div class="line">        }</div>
 <div class="line"> </div>
-<div class="line">        static void WriteData(string s, double V)</div>
+<div class="line">        <span class="keyword">static</span> <span class="keywordtype">void</span> WriteData(<span class="keywordtype">string</span> s, <span class="keywordtype">double</span> V)</div>
 <div class="line">        {</div>
-<div class="line">            string[] Indx = new string[gamsglobals.maxdim];</div>
-<div class="line">            double[] Values = new double[gamsglobals.val_max];</div>
+<div class="line">            <span class="keywordtype">string</span>[] Indx = <span class="keyword">new</span> <span class="keywordtype">string</span>[gamsglobals.maxdim];</div>
+<div class="line">            <span class="keywordtype">double</span>[] Values = <span class="keyword">new</span> <span class="keywordtype">double</span>[gamsglobals.val_max];</div>
 <div class="line">            Indx[0] = s;</div>
 <div class="line">            Values[gamsglobals.val_level] = V;</div>
 <div class="line">            gdx.gdxDataWriteStr(Indx, Values);</div>
 <div class="line">        }</div>
 <div class="line"> </div>
-<div class="line">        static int Main(string[] args)</div>
+<div class="line">        <span class="keyword">static</span> <span class="keywordtype">int</span> Main(<span class="keywordtype">string</span>[] args)</div>
 <div class="line">        {</div>
-<div class="line">            string Msg = string.Empty;</div>
-<div class="line">            string Sysdir;</div>
-<div class="line">            string Producer = string.Empty;</div>
-<div class="line">            int ErrNr = 0;</div>
-<div class="line">            int rc;</div>
-<div class="line">            string[] Indx = new string[gamsglobals.maxdim];</div>
-<div class="line">            double[] Values = new double[gamsglobals.val_max];</div>
-<div class="line">            int VarNr = 0;</div>
-<div class="line">            int NrRecs = 0;</div>
-<div class="line">            int N = 0;</div>
-<div class="line">            int Dimen = 0;</div>
-<div class="line">            string VarName = string.Empty;</div>
-<div class="line">            int VarTyp = 0;</div>
-<div class="line">            int D;</div>
+<div class="line">            <span class="keywordtype">string</span> Msg = <span class="keywordtype">string</span>.Empty;</div>
+<div class="line">            <span class="keywordtype">string</span> Sysdir;</div>
+<div class="line">            <span class="keywordtype">string</span> Producer = <span class="keywordtype">string</span>.Empty;</div>
+<div class="line">            <span class="keywordtype">int</span> ErrNr = 0;</div>
+<div class="line">            <span class="keywordtype">int</span> rc;</div>
+<div class="line">            <span class="keywordtype">string</span>[] Indx = <span class="keyword">new</span> <span class="keywordtype">string</span>[gamsglobals.maxdim];</div>
+<div class="line">            <span class="keywordtype">double</span>[] Values = <span class="keyword">new</span> <span class="keywordtype">double</span>[gamsglobals.val_max];</div>
+<div class="line">            <span class="keywordtype">int</span> VarNr = 0;</div>
+<div class="line">            <span class="keywordtype">int</span> NrRecs = 0;</div>
+<div class="line">            <span class="keywordtype">int</span> N = 0;</div>
+<div class="line">            <span class="keywordtype">int</span> Dimen = 0;</div>
+<div class="line">            <span class="keywordtype">string</span> VarName = <span class="keywordtype">string</span>.Empty;</div>
+<div class="line">            <span class="keywordtype">int</span> VarTyp = 0;</div>
+<div class="line">            <span class="keywordtype">int</span> D;</div>
 <div class="line"> </div>
-<div class="line">            if (Environment.GetCommandLineArgs().Length != 2 &amp;&amp; Environment.GetCommandLineArgs().Length != 3)</div>
+<div class="line">            <span class="keywordflow">if</span> (Environment.GetCommandLineArgs().Length != 2 &amp;&amp; Environment.GetCommandLineArgs().Length != 3)</div>
 <div class="line">            {</div>
-<div class="line">                Console.WriteLine(&quot;**** XP_Example1: incorrect number of parameters&quot;);</div>
-<div class="line">                return 1;</div>
+<div class="line">                Console.WriteLine(<span class="stringliteral">&quot;**** XP_Example1: incorrect number of parameters&quot;</span>);</div>
+<div class="line">                <span class="keywordflow">return</span> 1;</div>
 <div class="line">            }</div>
 <div class="line"> </div>
 <div class="line">            String[] arguments = Environment.GetCommandLineArgs();</div>
 <div class="line">            Sysdir = arguments[1];</div>
-<div class="line">            Console.WriteLine(&quot;XP_Example1 using GAMS system directory: &quot; + Sysdir);</div>
+<div class="line">            Console.WriteLine(<span class="stringliteral">&quot;XP_Example1 using GAMS system directory: &quot;</span> + Sysdir);</div>
 <div class="line"> </div>
-<div class="line">            gdx = new gdxcs(Sysdir, ref Msg);</div>
-<div class="line">            if (Msg != string.Empty)</div>
+<div class="line">            gdx = <span class="keyword">new</span> gdxcs(Sysdir, ref Msg);</div>
+<div class="line">            <span class="keywordflow">if</span> (Msg != <span class="keywordtype">string</span>.Empty)</div>
 <div class="line">            {</div>
-<div class="line">                Console.WriteLine(&quot;**** Could not load GDX library&quot;);</div>
-<div class="line">                Console.WriteLine(&quot;**** &quot; + Msg);</div>
-<div class="line">                return 1;</div>
+<div class="line">                Console.WriteLine(<span class="stringliteral">&quot;**** Could not load GDX library&quot;</span>);</div>
+<div class="line">                Console.WriteLine(<span class="stringliteral">&quot;**** &quot;</span> + Msg);</div>
+<div class="line">                <span class="keywordflow">return</span> 1;</div>
 <div class="line">            }</div>
 <div class="line"> </div>
 <div class="line">            gdx.gdxGetDLLVersion(ref Msg);</div>
-<div class="line">            Console.WriteLine(&quot;Using GDX DLL version: &quot; + Msg);</div>
+<div class="line">            Console.WriteLine(<span class="stringliteral">&quot;Using GDX DLL version: &quot;</span> + Msg);</div>
 <div class="line"> </div>
-<div class="line">            if (Environment.GetCommandLineArgs().Length == 2)</div>
+<div class="line">            <span class="keywordflow">if</span> (Environment.GetCommandLineArgs().Length == 2)</div>
 <div class="line">            {</div>
-<div class="line">                //write demand data</div>
-<div class="line">                gdx.gdxOpenWrite(&quot;demanddata.gdx&quot;, &quot;xp_example1&quot;, ref ErrNr);</div>
-<div class="line">                if (ErrNr != 0) xp_example1.ReportIOError(ErrNr);</div>
-<div class="line">                if (gdx.gdxDataWriteStrStart(&quot;Demand&quot;, &quot;Demand data&quot;, 1, gamsglobals.dt_par, 0) == 0) ReportGDXError();</div>
-<div class="line">                WriteData(&quot;New-York&quot;, 324.0);</div>
-<div class="line">                WriteData(&quot;Chicago&quot;, 299.0);</div>
-<div class="line">                WriteData(&quot;Topeka&quot;, 274.0);</div>
-<div class="line">                if (gdx.gdxDataWriteDone() == 0) ReportGDXError();</div>
-<div class="line">                Console.WriteLine(&quot;Demand data written by xp_example1&quot;);</div>
+<div class="line">                <span class="comment">//write demand data</span></div>
+<div class="line">                gdx.gdxOpenWrite(<span class="stringliteral">&quot;demanddata.gdx&quot;</span>, <span class="stringliteral">&quot;xp_example1&quot;</span>, ref ErrNr);</div>
+<div class="line">                <span class="keywordflow">if</span> (ErrNr != 0) xp_example1.ReportIOError(ErrNr);</div>
+<div class="line">                <span class="keywordflow">if</span> (gdx.gdxDataWriteStrStart(<span class="stringliteral">&quot;Demand&quot;</span>, <span class="stringliteral">&quot;Demand data&quot;</span>, 1, gamsglobals.dt_par, 0) == 0) ReportGDXError();</div>
+<div class="line">                WriteData(<span class="stringliteral">&quot;New-York&quot;</span>, 324.0);</div>
+<div class="line">                WriteData(<span class="stringliteral">&quot;Chicago&quot;</span>, 299.0);</div>
+<div class="line">                WriteData(<span class="stringliteral">&quot;Topeka&quot;</span>, 274.0);</div>
+<div class="line">                <span class="keywordflow">if</span> (gdx.gdxDataWriteDone() == 0) ReportGDXError();</div>
+<div class="line">                Console.WriteLine(<span class="stringliteral">&quot;Demand data written by xp_example1&quot;</span>);</div>
 <div class="line">            }</div>
-<div class="line">            else</div>
+<div class="line">            <span class="keywordflow">else</span></div>
 <div class="line">            {</div>
 <div class="line">                rc = gdx.gdxOpenRead(arguments[2], ref ErrNr);</div>
-<div class="line">                if (ErrNr != 0) ReportIOError(ErrNr);</div>
+<div class="line">                <span class="keywordflow">if</span> (ErrNr != 0) ReportIOError(ErrNr);</div>
 <div class="line"> </div>
-<div class="line">                //read x variable back (non-default level values only)</div>
+<div class="line">                <span class="comment">//read x variable back (non-default level values only)</span></div>
 <div class="line">                gdx.gdxFileVersion(ref Msg, ref Producer);</div>
-<div class="line">                Console.WriteLine(&quot;GDX file written using version: &quot; + Msg);</div>
-<div class="line">                Console.WriteLine(&quot;GDX file written by: &quot; + Producer);</div>
+<div class="line">                Console.WriteLine(<span class="stringliteral">&quot;GDX file written using version: &quot;</span> + Msg);</div>
+<div class="line">                Console.WriteLine(<span class="stringliteral">&quot;GDX file written by: &quot;</span> + Producer);</div>
 <div class="line"> </div>
-<div class="line">                if (gdx.gdxFindSymbol(&quot;x&quot;, ref VarNr) == 0)</div>
+<div class="line">                <span class="keywordflow">if</span> (gdx.gdxFindSymbol(<span class="stringliteral">&quot;x&quot;</span>, ref VarNr) == 0)</div>
 <div class="line">                {</div>
-<div class="line">                    Console.WriteLine(&quot;**** Could not find variable X&quot;);</div>
-<div class="line">                    return 1;</div>
+<div class="line">                    Console.WriteLine(<span class="stringliteral">&quot;**** Could not find variable X&quot;</span>);</div>
+<div class="line">                    <span class="keywordflow">return</span> 1;</div>
 <div class="line">                }</div>
 <div class="line"> </div>
 <div class="line">                gdx.gdxSymbolInfo(VarNr, ref VarName, ref Dimen, ref VarTyp);</div>
-<div class="line">                if (Dimen != 2 || VarTyp != gamsglobals.dt_var)</div>
+<div class="line">                <span class="keywordflow">if</span> (Dimen != 2 || VarTyp != gamsglobals.dt_var)</div>
 <div class="line">                {</div>
-<div class="line">                    Console.WriteLine(&quot;**** X is not a two dimensional variable&quot;);</div>
-<div class="line">                    return 1;</div>
+<div class="line">                    Console.WriteLine(<span class="stringliteral">&quot;**** X is not a two dimensional variable&quot;</span>);</div>
+<div class="line">                    <span class="keywordflow">return</span> 1;</div>
 <div class="line">                }</div>
 <div class="line"> </div>
-<div class="line">                if (gdx.gdxDataReadStrStart(VarNr, ref NrRecs) == 0) ReportGDXError();</div>
+<div class="line">                <span class="keywordflow">if</span> (gdx.gdxDataReadStrStart(VarNr, ref NrRecs) == 0) ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">                Console.WriteLine(&quot;Variable X has &quot; + NrRecs + &quot; records&quot;);</div>
-<div class="line">                while (gdx.gdxDataReadStr(ref Indx, ref Values, ref N) != 0)</div>
+<div class="line">                Console.WriteLine(<span class="stringliteral">&quot;Variable X has &quot;</span> + NrRecs + <span class="stringliteral">&quot; records&quot;</span>);</div>
+<div class="line">                <span class="keywordflow">while</span> (gdx.gdxDataReadStr(ref Indx, ref Values, ref N) != 0)</div>
 <div class="line">                {</div>
-<div class="line">                    if(Values[gamsglobals.val_level] == 0.0) //skip level = 0.0 is default</div>
-<div class="line">                        continue;</div>
-<div class="line">                    for (D=0; D&lt;Dimen; D++)</div>
+<div class="line">                    <span class="keywordflow">if</span>(Values[gamsglobals.val_level] == 0.0) <span class="comment">//skip level = 0.0 is default</span></div>
+<div class="line">                        <span class="keywordflow">continue</span>;</div>
+<div class="line">                    <span class="keywordflow">for</span> (D=0; D&lt;Dimen; D++)</div>
 <div class="line">                    {</div>
 <div class="line">                        Console.Write(Indx[D]);</div>
-<div class="line">                        if (D &lt; Dimen-1) Console.Write(&quot;.&quot;);</div>
+<div class="line">                        <span class="keywordflow">if</span> (D &lt; Dimen-1) Console.Write(<span class="stringliteral">&quot;.&quot;</span>);</div>
 <div class="line">                    }</div>
-<div class="line">                    Console.WriteLine(&quot; = &quot; + Values[gamsglobals.val_level]);</div>
+<div class="line">                    Console.WriteLine(<span class="stringliteral">&quot; = &quot;</span> + Values[gamsglobals.val_level]);</div>
 <div class="line">                }</div>
-<div class="line">                Console.WriteLine(&quot;All solution values shown&quot;);</div>
+<div class="line">                Console.WriteLine(<span class="stringliteral">&quot;All solution values shown&quot;</span>);</div>
 <div class="line">                gdx.gdxDataReadDone();</div>
 <div class="line">            }</div>
 <div class="line">            ErrNr = gdx.gdxClose();</div>
-<div class="line">            if (ErrNr != 0) ReportIOError(ErrNr);</div>
-<div class="line">            return 0;</div>
+<div class="line">            <span class="keywordflow">if</span> (ErrNr != 0) ReportIOError(ErrNr);</div>
+<div class="line">            <span class="keywordflow">return</span> 0;</div>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">}</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md33"></a>
 Example 8 (Java)</h2>
-<div class="fragment"><div class="line">package com.gams.xp_examples;</div>
-<div class="line">import com.gams.api.*;</div>
+<div class="fragment"><div class="line"><span class="keyword">package </span>com.gams.xp_examples;</div>
+<div class="line"><span class="keyword">import</span> com.gams.api.*;</div>
 <div class="line"> </div>
-<div class="line">public class xp_example1 {</div>
-<div class="line">static final int maxdim = 20;</div>
+<div class="line"><span class="keyword">public</span> <span class="keyword">class </span>xp_example1 {</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> maxdim = 20;</div>
 <div class="line"> </div>
-<div class="line">static final int val_level    = 0;</div>
-<div class="line">static final int val_marginal = 1;</div>
-<div class="line">static final int val_lower    = 2;</div>
-<div class="line">static final int val_upper    = 3;</div>
-<div class="line">static final int val_scale    = 4;</div>
-<div class="line">static final int val_max      = 5;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> val_level    = 0;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> val_marginal = 1;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> val_lower    = 2;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> val_upper    = 3;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> val_scale    = 4;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> val_max      = 5;</div>
 <div class="line"> </div>
-<div class="line">static final int dt_set   = 0;</div>
-<div class="line">static final int dt_par   = 1;</div>
-<div class="line">static final int dt_var   = 2;</div>
-<div class="line">static final int dt_equ   = 3;</div>
-<div class="line">static final int dt_alias = 4;</div>
-<div class="line">static final int dt_max   = 5;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> dt_set   = 0;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> dt_par   = 1;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> dt_var   = 2;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> dt_equ   = 3;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> dt_alias = 4;</div>
+<div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="keywordtype">int</span> dt_max   = 5;</div>
 <div class="line"> </div>
-<div class="line">static gdx gdxio = new gdx();</div>
-<div class="line">static String[] Indx = new String[maxdim];</div>
-<div class="line">static double[] Values = new double[val_max];</div>
+<div class="line"><span class="keyword">static</span> gdx gdxio = <span class="keyword">new</span> gdx();</div>
+<div class="line"><span class="keyword">static</span> String[] Indx = <span class="keyword">new</span> String[maxdim];</div>
+<div class="line"><span class="keyword">static</span> <span class="keywordtype">double</span>[] Values = <span class="keyword">new</span> <span class="keywordtype">double</span>[val_max];</div>
 <div class="line">    </div>
-<div class="line">static void ReportGDXError() {</div>
-<div class="line">  String[] S = new String[1];</div>
+<div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> ReportGDXError() {</div>
+<div class="line">  String[] S = <span class="keyword">new</span> String[1];</div>
 <div class="line"> </div>
-<div class="line">  System.out.println(&quot;**** Fatal GDX Error&quot;);</div>
+<div class="line">  System.out.println(<span class="stringliteral">&quot;**** Fatal GDX Error&quot;</span>);</div>
 <div class="line">  gdxio.ErrorStr(gdxio.GetLastError(), S);</div>
-<div class="line">  System.out.println(&quot;**** &quot; + S[0]);</div>
+<div class="line">  System.out.println(<span class="stringliteral">&quot;**** &quot;</span> + S[0]);</div>
 <div class="line">  System.exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">static void ReportIOError(int N, String msg ) {</div>
-<div class="line">  System.out.println(&quot;**** Fatal I/O Error = &quot; + N + &quot; when calling &quot; + msg);</div>
+<div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> ReportIOError(<span class="keywordtype">int</span> N, String msg ) {</div>
+<div class="line">  System.out.println(<span class="stringliteral">&quot;**** Fatal I/O Error = &quot;</span> + N + <span class="stringliteral">&quot; when calling &quot;</span> + msg);</div>
 <div class="line">  System.exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">static void WriteData(String s, double V) {</div>
+<div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> WriteData(String s, <span class="keywordtype">double</span> V) {</div>
 <div class="line">  Indx[0] = s;</div>
 <div class="line">  Values[val_level] = V;</div>
 <div class="line">  gdxio.DataWriteStr(Indx,Values);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line"> public static void main (String[] args) {</div>
+<div class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="keywordtype">void</span> main (String[] args) {</div>
 <div class="line"> </div>
-<div class="line">  String[]    Msg = new String[1];</div>
-<div class="line">  String[]    Producer = new String[1];</div>
+<div class="line">  String[]    Msg = <span class="keyword">new</span> String[1];</div>
+<div class="line">  String[]    Producer = <span class="keyword">new</span> String[1];</div>
 <div class="line">  String      Sysdir;</div>
-<div class="line">  int[]       ErrNr = new int[1];</div>
-<div class="line">  int[]       VarNr = new int[1];</div>
-<div class="line">  int[]       NrRecs = new int[1];</div>
-<div class="line">  int[]       N = new int[1];</div>
-<div class="line">  int[]       Dim = new int[1];</div>
-<div class="line">  String[]    VarName = new String[1];</div>
-<div class="line">  int[]       VarTyp = new int[1];</div>
-<div class="line">  int         D;</div>
+<div class="line">  <span class="keywordtype">int</span>[]       ErrNr = <span class="keyword">new</span> <span class="keywordtype">int</span>[1];</div>
+<div class="line">  <span class="keywordtype">int</span>[]       VarNr = <span class="keyword">new</span> <span class="keywordtype">int</span>[1];</div>
+<div class="line">  <span class="keywordtype">int</span>[]       NrRecs = <span class="keyword">new</span> <span class="keywordtype">int</span>[1];</div>
+<div class="line">  <span class="keywordtype">int</span>[]       N = <span class="keyword">new</span> <span class="keywordtype">int</span>[1];</div>
+<div class="line">  <span class="keywordtype">int</span>[]       Dim = <span class="keyword">new</span> <span class="keywordtype">int</span>[1];</div>
+<div class="line">  String[]    VarName = <span class="keyword">new</span> String[1];</div>
+<div class="line">  <span class="keywordtype">int</span>[]       VarTyp = <span class="keyword">new</span> <span class="keywordtype">int</span>[1];</div>
+<div class="line">  <span class="keywordtype">int</span>         D;</div>
 <div class="line"> </div>
-<div class="line">  if (args.length &lt; 1 || args.length &gt; 2) {</div>
-<div class="line">    System.out.println(&quot;**** Example1: incorrect number of parameters&quot;);</div>
+<div class="line">  <span class="keywordflow">if</span> (args.length &lt; 1 || args.length &gt; 2) {</div>
+<div class="line">    System.out.println(<span class="stringliteral">&quot;**** Example1: incorrect number of parameters&quot;</span>);</div>
 <div class="line">    System.exit(1);</div>
 <div class="line">  }</div>
 <div class="line"> </div>
 <div class="line">  Sysdir = args[0];</div>
-<div class="line">  System.out.println(&quot;Example1 using GAMS system directory: &quot; + Sysdir);</div>
+<div class="line">  System.out.println(<span class="stringliteral">&quot;Example1 using GAMS system directory: &quot;</span> + Sysdir);</div>
 <div class="line"> </div>
-<div class="line">  if (gdxio.CreateD(Sysdir, Msg) != 1) {</div>
-<div class="line">    System.out.println(&quot;**** Could not load GDX library&quot;);</div>
-<div class="line">    System.out.println(&quot;**** &quot; + Msg[0]);</div>
+<div class="line">  <span class="keywordflow">if</span> (gdxio.CreateD(Sysdir, Msg) != 1) {</div>
+<div class="line">    System.out.println(<span class="stringliteral">&quot;**** Could not load GDX library&quot;</span>);</div>
+<div class="line">    System.out.println(<span class="stringliteral">&quot;**** &quot;</span> + Msg[0]);</div>
 <div class="line">    System.exit(1);</div>
 <div class="line">  }</div>
 <div class="line"> </div>
 <div class="line">  gdxio.GetDLLVersion(Msg);</div>
-<div class="line">  System.out.println(&quot;Using GDX DLL version: &quot; + Msg[0]);</div>
+<div class="line">  System.out.println(<span class="stringliteral">&quot;Using GDX DLL version: &quot;</span> + Msg[0]);</div>
 <div class="line"> </div>
-<div class="line">  if (1 == args.length) {</div>
-<div class="line">    /* Write demand data */</div>
-<div class="line">    gdxio.OpenWrite(&quot;demanddata.gdx&quot;, &quot;example1&quot;, ErrNr);</div>
-<div class="line">    if (ErrNr[0] != 0) ReportIOError(ErrNr[0],&quot;gdxOpenWrite&quot;);</div>
-<div class="line">    if (gdxio.DataWriteStrStart(&quot;Demand&quot;,&quot;Demand data&quot;,1,dt_par,0) != 1)</div>
+<div class="line">  <span class="keywordflow">if</span> (1 == args.length) {</div>
+<div class="line">    <span class="comment">/* Write demand data */</span></div>
+<div class="line">    gdxio.OpenWrite(<span class="stringliteral">&quot;demanddata.gdx&quot;</span>, <span class="stringliteral">&quot;example1&quot;</span>, ErrNr);</div>
+<div class="line">    <span class="keywordflow">if</span> (ErrNr[0] != 0) ReportIOError(ErrNr[0],<span class="stringliteral">&quot;gdxOpenWrite&quot;</span>);</div>
+<div class="line">    <span class="keywordflow">if</span> (gdxio.DataWriteStrStart(<span class="stringliteral">&quot;Demand&quot;</span>,<span class="stringliteral">&quot;Demand data&quot;</span>,1,dt_par,0) != 1)</div>
 <div class="line">      ReportGDXError();</div>
-<div class="line">    WriteData(&quot;New-York&quot;,324.0);</div>
-<div class="line">    WriteData(&quot;Chicago&quot; ,299.0);</div>
-<div class="line">    WriteData(&quot;Topeka&quot;  ,274.0);</div>
-<div class="line">    if (gdxio.DataWriteDone() != 1) ReportGDXError();</div>
-<div class="line">    System.out.println(&quot;Demand data written by example1\n&quot;);</div>
-<div class="line">  } else {</div>
+<div class="line">    WriteData(<span class="stringliteral">&quot;New-York&quot;</span>,324.0);</div>
+<div class="line">    WriteData(<span class="stringliteral">&quot;Chicago&quot;</span> ,299.0);</div>
+<div class="line">    WriteData(<span class="stringliteral">&quot;Topeka&quot;</span>  ,274.0);</div>
+<div class="line">    <span class="keywordflow">if</span> (gdxio.DataWriteDone() != 1) ReportGDXError();</div>
+<div class="line">    System.out.println(<span class="stringliteral">&quot;Demand data written by example1\n&quot;</span>);</div>
+<div class="line">  } <span class="keywordflow">else</span> {</div>
 <div class="line">    gdxio.OpenRead(args[1], ErrNr);</div>
-<div class="line">    if (ErrNr[0] != 0) ReportIOError(ErrNr[0],&quot;gdxOpenRead&quot;);</div>
+<div class="line">    <span class="keywordflow">if</span> (ErrNr[0] != 0) ReportIOError(ErrNr[0],<span class="stringliteral">&quot;gdxOpenRead&quot;</span>);</div>
 <div class="line">    gdxio.FileVersion(Msg,Producer);</div>
-<div class="line">    System.out.println(&quot;GDX file written using version: &quot; + Msg[0]);</div>
-<div class="line">    System.out.println(&quot;GDX file written by: &quot; + Producer[0]);</div>
+<div class="line">    System.out.println(<span class="stringliteral">&quot;GDX file written using version: &quot;</span> + Msg[0]);</div>
+<div class="line">    System.out.println(<span class="stringliteral">&quot;GDX file written by: &quot;</span> + Producer[0]);</div>
 <div class="line"> </div>
-<div class="line">    if (gdxio.FindSymbol(&quot;x&quot;,VarNr) != 1) {</div>
-<div class="line">      System.out.println(&quot;**** Could not find variable X&quot;);</div>
+<div class="line">    <span class="keywordflow">if</span> (gdxio.FindSymbol(<span class="stringliteral">&quot;x&quot;</span>,VarNr) != 1) {</div>
+<div class="line">      System.out.println(<span class="stringliteral">&quot;**** Could not find variable X&quot;</span>);</div>
 <div class="line">      System.exit(1);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    gdxio.SymbolInfo(VarNr[0],VarName,Dim,VarTyp);</div>
-<div class="line">    if (Dim[0] != 2 || dt_var != VarTyp[0]) {</div>
-<div class="line">      System.out.println(&quot;**** X is not a two dimensional variable: &quot; + Dim[0] + &quot;:&quot; + VarTyp[0]);</div>
+<div class="line">    <span class="keywordflow">if</span> (Dim[0] != 2 || dt_var != VarTyp[0]) {</div>
+<div class="line">      System.out.println(<span class="stringliteral">&quot;**** X is not a two dimensional variable: &quot;</span> + Dim[0] + <span class="stringliteral">&quot;:&quot;</span> + VarTyp[0]);</div>
 <div class="line">      System.exit(1);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
-<div class="line">    if (gdxio.DataReadStrStart(VarNr[0],NrRecs) != 1) ReportGDXError();</div>
-<div class="line">    System.out.println(&quot;Variable X has &quot; + NrRecs[0] + &quot; records&quot;);</div>
-<div class="line">    while (gdxio.DataReadStr(Indx,Values,N) != 0) {</div>
-<div class="line">      if (0 == Values[val_level]) continue; /* skip level 0.0 is default */</div>
-<div class="line">      for (D=0; D&lt;Dim[0]; D++) {</div>
+<div class="line">    <span class="keywordflow">if</span> (gdxio.DataReadStrStart(VarNr[0],NrRecs) != 1) ReportGDXError();</div>
+<div class="line">    System.out.println(<span class="stringliteral">&quot;Variable X has &quot;</span> + NrRecs[0] + <span class="stringliteral">&quot; records&quot;</span>);</div>
+<div class="line">    <span class="keywordflow">while</span> (gdxio.DataReadStr(Indx,Values,N) != 0) {</div>
+<div class="line">      <span class="keywordflow">if</span> (0 == Values[val_level]) <span class="keywordflow">continue</span>; <span class="comment">/* skip level 0.0 is default */</span></div>
+<div class="line">      <span class="keywordflow">for</span> (D=0; D&lt;Dim[0]; D++) {</div>
 <div class="line">          System.out.print(Indx[D]);</div>
-<div class="line">          if (D&lt;Dim[0]-1) System.out.print(&quot;.&quot;);</div>
+<div class="line">          <span class="keywordflow">if</span> (D&lt;Dim[0]-1) System.out.print(<span class="stringliteral">&quot;.&quot;</span>);</div>
 <div class="line">      }</div>
-<div class="line">      System.out.println(&quot; = &quot; + Values[val_level]);</div>
+<div class="line">      System.out.println(<span class="stringliteral">&quot; = &quot;</span> + Values[val_level]);</div>
 <div class="line">    }</div>
-<div class="line">    System.out.println(&quot;All solution values shown&quot;);</div>
+<div class="line">    System.out.println(<span class="stringliteral">&quot;All solution values shown&quot;</span>);</div>
 <div class="line">    gdxio.DataReadDone();</div>
 <div class="line">  }</div>
 <div class="line"> </div>
 <div class="line">  ErrNr[0] = gdxio.Close();</div>
-<div class="line">  if (ErrNr[0] != 0) ReportIOError(ErrNr[0],&quot;gdxClose&quot;);</div>
+<div class="line">  <span class="keywordflow">if</span> (ErrNr[0] != 0) ReportIOError(ErrNr[0],<span class="stringliteral">&quot;gdxClose&quot;</span>);</div>
 <div class="line"> </div>
-<div class="line">  if (gdxio.Free() != 1) {</div>
-<div class="line">    System.out.println(&quot;Problems unloading the GDX DLL&quot;);</div>
+<div class="line">  <span class="keywordflow">if</span> (gdxio.Free() != 1) {</div>
+<div class="line">    System.out.println(<span class="stringliteral">&quot;Problems unloading the GDX DLL&quot;</span>);</div>
 <div class="line">    System.exit(1);</div>
 <div class="line">  }</div>
 <div class="line"> </div>
