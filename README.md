@@ -1054,7 +1054,7 @@ int main(int argc, char *argv[]) {
 ```
 
 ### Example 4 (VB.NET)
-```
+```vb
 Module xp_example1
     '///////////////////////////////////////////////////////////////
     '// This program generates demand data for a modified version //
@@ -1279,7 +1279,7 @@ if __name__ == "__main__":
 ```
 
 ### Example 7 (C#)
-```
+```csharp
 ///////////////////////////////////////////////////////////////
 // This program generates demand data for a modified version //
 // of the trnsport model or reads the solution back from a   //
@@ -1429,7 +1429,7 @@ namespace xp_example1
 ```
 
 ### Example 8 (Java)
-```
+```java
 package com.gams.xp_examples;
 import com.gams.api.*;
 
