@@ -160,7 +160,7 @@ mapped) can be selected for each symbol; it cannot be changed while writing a sy
 Most code samples reference the following auxiliary function `ReportGDXError` to report the latest GDX error when the
 most recent call to the GDX API has reported a problem (usually by returning `false`).
 
-```c++
+```cpp
 void ReportGDXError(TGXFileObj &gdx) {
   std::array<char, GMS_SSSIZE> S;
   std::cout << "**** Fatal GDX Error" << std::endl;
@@ -179,7 +179,7 @@ Before writing data using a string based interface we can register strings for t
 *optional*. The only reason to register the strings beforehand is to enter the strings in a given order which may have
 advantages later in the modelling stage.
 
-```c++
+```cpp
 if(!gdx.gdxDataWriteStrStart("Demand","Demand data",1,dt_par,0))
    ReportGDXError();
 
@@ -205,7 +205,7 @@ The Raw interface assumes that the integers assigned to the strings range from o
 Before we can write data using the Raw interface, we have to register the strings for the unique elements. The GDX
 routines will assign an integer to the string that increases by one for every string registered.
 
-```c++
+```cpp
 if(!gdx.gdxUELRegisterRawStart())
    ReportGDXError();
 gdx.gdxUELRegisterRaw("New-York");
@@ -236,7 +236,7 @@ equivalent. The integers assigned to the unique elements should be greater equal
 
 Before we can write data using the Mapped interface, we have to register the strings for the unique elements.
 
-```c++
+```cpp
 if(!gdx.gdxUELRegisterMapStart())
    ReportGDXError();
 gdx.gdxUELRegisterMap(1000,"New-York");
@@ -284,7 +284,7 @@ mapped) can be selected for each symbol; it cannot be changed while writing a sy
 
 Reading data using strings does not require any unique element registration.
 
-```c++
+```cpp
 if(!gdx.gdxFindSymbol("x",SyNr)) {
    std::cout << "**** Could not find symbol X" << std::endl;
    exit(1);
@@ -316,7 +316,7 @@ dimensional parameter.
 Reading data using integers in Raw mode does not require the registration of unique elements. The read routine returns
 an integer for which we can find the string representation.
 
-```c++
+```cpp
 if(!gdx.gdxFindSymbol("x",SyNr) {
    std::cout << "**** Could not find symbol X" << std::endl;
    exit(1);
@@ -355,7 +355,7 @@ integer for which we can find the string representation.
 When the gdx file contains data elements that we never registered, the read function will not return these elements,
 they will be added to an internal list of error records instead.
 
-```c++
+```cpp
 if(!gdx.gdxUELRegisterMapStart())
    ReportGDXError();
 gdx.gdxUELRegisterMap(1000,"New-York");
@@ -423,7 +423,7 @@ Parameter A(I,*);
 ```
 Assuming we have read set `I` already, the following code snapshot illustrates how to read parameter `A`.
 
-```c++
+```cpp
 // Register the filter for set I; reference this filter with integer 123
 if(!gdx.gdxFilterRegisterStart(123))
    ReportGDXError();
@@ -495,7 +495,7 @@ and their corresponding index before reading any data. Doing so will replace the
 acronym indices stored in the GDX file by the one we provide.
 
 The example below illustrates these steps.
-```c++
+```cpp
 TGXFileObj gdx;
 TgdxUELIndex UELS;
 TgdxValues Vals;
@@ -938,7 +938,7 @@ int main (int argc, char *argv[]) {
 ```
 
 ### Example 3 (C++)
-```c++
+```cpp
  /*
    Use this command to compile the example:
    cl xp_example1.cpp ../C/api/gdxcc.c -I../C/api
