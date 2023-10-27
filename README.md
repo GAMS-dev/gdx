@@ -1,9 +1,6 @@
 # GAMS Data eXchange (GDX)
 
-<img src="gdxlogo.png" style="width:50px" alt="logo" />
-
-Table of Contents
-=================
+## Table of Contents
 
 * [GAMS Data eXchange (GDX)](#gams-data-exchange-gdx)
     * [Basic information on GDX file format](#basic-information-on-gdx-file-format)
