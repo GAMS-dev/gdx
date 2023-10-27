@@ -234,46 +234,43 @@ Writing data to a GDX file</h2>
 <p >Steps 3 - 6 can be repeated to write any number of symbols to the file. Once a symbol has been written to the file, it cannot be replaced. Currently, there are no facilities to overwrite a symbol or append data to an existing file.</p>
 <p >The following sections illustrate the basic steps for each type of interface. The method of writing (string, raw, or mapped) can be selected for each symbol; it cannot be changed while writing a symbol.</p>
 <p >Most code samples reference the following auxiliary function <code>ReportGDXError</code> to report the latest GDX error when the most recent call to the GDX API has reported a problem (usually by returning <code>false</code>).</p>
-<div class="fragment"><div class="line"> {c++}</div>
-<div class="line">void ReportGDXError(TGXFileObj &amp;gdx) {</div>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> ReportGDXError(TGXFileObj &amp;gdx) {</div>
 <div class="line">  std::array&lt;char, GMS_SSSIZE&gt; S;</div>
-<div class="line">  std::cout &lt;&lt; &quot;**** Fatal GDX Error&quot; &lt;&lt; std::endl;</div>
+<div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;**** Fatal GDX Error&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">  gdx.gdxErrorStr(gdx.gdxGetLastError(), S.data());</div>
-<div class="line">  std::cout &lt;&lt; &quot;**** &quot; &lt;&lt; S.data() &lt;&lt; std::endl;</div>
+<div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;**** &quot;</span> &lt;&lt; S.data() &lt;&lt; std::endl;</div>
 <div class="line">  exit(1);</div>
 <div class="line">}</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md11"></a>
 Writing data using strings</h2>
 <p >The String based interface is suitable when we want to use a string based index and do not want to maintain a mapping from strings to integers.</p>
 <p >Before writing data using a string based interface we can register strings for the unique elements, but this step is <em>optional</em>. The only reason to register the strings beforehand is to enter the strings in a given order which may have advantages later in the modelling stage.</p>
-<div class="fragment"><div class="line"> {c++}</div>
-<div class="line">if(!gdx.gdxDataWriteStrStart(&quot;Demand&quot;,&quot;Demand data&quot;,1,dt_par,0))</div>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataWriteStrStart(<span class="stringliteral">&quot;Demand&quot;</span>,<span class="stringliteral">&quot;Demand data&quot;</span>,1,dt_par,0))</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">IndxS[0] = &quot;New-York&quot;;</div>
+<div class="line">IndxS[0] = <span class="stringliteral">&quot;New-York&quot;</span>;</div>
 <div class="line">Values[0] = 324.0;</div>
 <div class="line">gdx.gdxDataWriteStr(IndxS,Values);</div>
 <div class="line"> </div>
-<div class="line">IndxS[0] = &quot;Chicago&quot;;</div>
+<div class="line">IndxS[0] = <span class="stringliteral">&quot;Chicago&quot;</span>;</div>
 <div class="line">Values[0] = 299.0;</div>
 <div class="line">gdx.gdxDataWriteStr(IndxS,Values);</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataWriteDone())</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataWriteDone())</div>
 <div class="line">   ReportGDXError();</div>
 </div><!-- fragment --><p >In this example we write two records for a parameter that has a dimension of one.</p>
 <h2><a class="anchor" id="autotoc_md12"></a>
 Writing data using integers (raw)</h2>
 <p >The Raw interface is suitable when we want to manage our own list of unique elements, and use an integer based index. The Raw interface assumes that the integers assigned to the strings range from one to the number of strings registered.</p>
 <p >Before we can write data using the Raw interface, we have to register the strings for the unique elements. The GDX routines will assign an integer to the string that increases by one for every string registered.</p>
-<div class="fragment"><div class="line"> {c++}</div>
-<div class="line">if(!gdx.gdxUELRegisterRawStart())</div>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span>(!gdx.gdxUELRegisterRawStart())</div>
 <div class="line">   ReportGDXError();</div>
-<div class="line">gdx.gdxUELRegisterRaw(&quot;New-York&quot;);</div>
-<div class="line">gdx.gdxUELRegisterRaw(&quot;Chicago&quot;);</div>
-<div class="line">if(!gdx.gdxUELRegisterDone())</div>
+<div class="line">gdx.gdxUELRegisterRaw(<span class="stringliteral">&quot;New-York&quot;</span>);</div>
+<div class="line">gdx.gdxUELRegisterRaw(<span class="stringliteral">&quot;Chicago&quot;</span>);</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxUELRegisterDone())</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataWriteRawStart(&quot;Demand&quot;,&quot;Demand data&quot;,1,dt_par,0))</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataWriteRawStart(<span class="stringliteral">&quot;Demand&quot;</span>,<span class="stringliteral">&quot;Demand data&quot;</span>,1,dt_par,0))</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
 <div class="line">IndxI[0] = 1;</div>
@@ -284,21 +281,20 @@ Writing data using integers (raw)</h2>
 <div class="line">Values[0] = 299.0;</div>
 <div class="line">gdx.gdxDataWriteRaw(IndxI,Values);</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataWriteDone())</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataWriteDone())</div>
 <div class="line">    ReportGDXError();</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md13"></a>
 Writing data using integers (mapped)</h2>
 <p >The Mapped interface is suitable when we want to manage our <em>own</em> list of unique elements, and use an integer based index. The mapped interface lets us select our own mapping between strings for the unique elements and their integer equivalent. The integers assigned to the unique elements should be greater equal one, and be unique for each element.</p>
 <p >Before we can write data using the Mapped interface, we have to register the strings for the unique elements.</p>
-<div class="fragment"><div class="line"> {c++}</div>
-<div class="line">if(!gdx.gdxUELRegisterMapStart())</div>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span>(!gdx.gdxUELRegisterMapStart())</div>
 <div class="line">   ReportGDXError();</div>
-<div class="line">gdx.gdxUELRegisterMap(1000,&quot;New-York&quot;);</div>
-<div class="line">gdx.gdxUELRegisterMap(2000,&quot;Chicago&quot;);</div>
-<div class="line">if(!gdx.gdxUELRegisterDone())</div>
+<div class="line">gdx.gdxUELRegisterMap(1000,<span class="stringliteral">&quot;New-York&quot;</span>);</div>
+<div class="line">gdx.gdxUELRegisterMap(2000,<span class="stringliteral">&quot;Chicago&quot;</span>);</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxUELRegisterDone())</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataWriteMapStart(&quot;Demand&quot;,&quot;Demand data&quot;,1,dt_par,0))</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataWriteMapStart(<span class="stringliteral">&quot;Demand&quot;</span>,<span class="stringliteral">&quot;Demand data&quot;</span>,1,dt_par,0))</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
 <div class="line">IndxI[0] = 1000;</div>
@@ -309,7 +305,7 @@ Writing data using integers (mapped)</h2>
 <div class="line">Values[0] = 299.0;</div>
 <div class="line">gdx.gdxDataWriteRaw(IndxS,Values);</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataWriteDone())</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataWriteDone())</div>
 <div class="line">    ReportGDXError();</div>
 </div><!-- fragment --><p >In this example we register two unique elements, and write a parameter of dimension one.</p>
 <h2><a class="anchor" id="autotoc_md14"></a>
@@ -331,100 +327,97 @@ Reading data from a GDX file</h2>
 <h2><a class="anchor" id="autotoc_md15"></a>
 Reading data using strings</h2>
 <p >Reading data using strings does not require any unique element registration.</p>
-<div class="fragment"><div class="line"> {c++}</div>
-<div class="line">if(!gdx.gdxFindSymbol(&quot;x&quot;,SyNr)) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;**** Could not find symbol X&quot; &lt;&lt; std::endl;</div>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span>(!gdx.gdxFindSymbol(<span class="stringliteral">&quot;x&quot;</span>,SyNr)) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;**** Could not find symbol X&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line">gdx.gdxSymbolInfo(SyNr,SyName,SyDim,SyTyp);</div>
-<div class="line">if(SyDim != 1 || SyTyp != dt_par) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;**** X is not a one dimensional parameter&quot; &lt;&lt; std::endl;</div>
+<div class="line"><span class="keywordflow">if</span>(SyDim != 1 || SyTyp != dt_par) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;**** X is not a one dimensional parameter&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataReadStrStart(SyNr,NrRecs))</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataReadStrStart(SyNr,NrRecs))</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">std::cout &lt;&lt; &quot;Parameter X has &quot; &lt;&lt; NrRecs &lt;&lt; &quot; records&quot; &lt;&lt; std::endl;</div>
+<div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Parameter X has &quot;</span> &lt;&lt; NrRecs &lt;&lt; <span class="stringliteral">&quot; records&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line"> </div>
-<div class="line">while(gdx.gdxDataReadStr(IndxS,Values,N))</div>
-<div class="line">   std::cout &lt;&lt; &quot;Record = &quot; &lt;&lt; IndxS[0] &lt;&lt; &quot; &quot; &lt;&lt; Values[0] &lt;&lt; &#39;\n&#39;;</div>
+<div class="line"><span class="keywordflow">while</span>(gdx.gdxDataReadStr(IndxS,Values,N))</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;Record = &quot;</span> &lt;&lt; IndxS[0] &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; Values[0] &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataReadDone())</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataReadDone())</div>
 <div class="line">   ReportGDXError();</div>
 </div><!-- fragment --><p >In this example we find the symbol by its name, and before reading the data we verify that the symbol represents a one dimensional parameter.</p>
 <h2><a class="anchor" id="autotoc_md16"></a>
 Reading data using integers (raw)</h2>
 <p >Reading data using integers in Raw mode does not require the registration of unique elements. The read routine returns an integer for which we can find the string representation.</p>
-<div class="fragment"><div class="line"> {c++}</div>
-<div class="line">if(!gdx.gdxFindSymbol(&quot;x&quot;,SyNr) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;**** Could not find symbol X&quot; &lt;&lt; std::endl;</div>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span>(!gdx.gdxFindSymbol(<span class="stringliteral">&quot;x&quot;</span>,SyNr) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;**** Could not find symbol X&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line">gdx.gdxSymbolInfo(SyNr,SyName,SyDim,SyTyp);</div>
-<div class="line">if(SyDim != 1 || SyTyp != dt_par) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;**** X is not a one dimensional parameter&quot; &lt;&lt; std::endl;</div>
+<div class="line"><span class="keywordflow">if</span>(SyDim != 1 || SyTyp != dt_par) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;**** X is not a one dimensional parameter&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataReadRawStart(SyNr,NrRecs))</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataReadRawStart(SyNr,NrRecs))</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">std::cout &lt;&lt; &quot;Parameter X has &quot;,NrRecs,&quot; records&quot;);</div>
+<div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Parameter X has &quot;</span>,NrRecs,<span class="stringliteral">&quot; records&quot;</span>);</div>
 <div class="line"> </div>
-<div class="line">while(gdx.gdxDataReadRaw(IndxI,Values,N)) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;Record = &quot; &lt;&lt; IndxI[0] &lt;&lt; &quot; = &quot; &lt;&lt; Values[0];</div>
+<div class="line"><span class="keywordflow">while</span>(gdx.gdxDataReadRaw(IndxI,Values,N)) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;Record = &quot;</span> &lt;&lt; IndxI[0] &lt;&lt; <span class="stringliteral">&quot; = &quot;</span> &lt;&lt; Values[0];</div>
 <div class="line">   gdx.gdxUMUelGet(IndxI[0],S,UsrMap);</div>
-<div class="line">   std::cout &lt;&lt; &quot; with string = &quot; &lt;&lt; S &lt;&lt; &#39;\n&#39;;</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot; with string = &quot;</span> &lt;&lt; S &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataReadDone())</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataReadDone())</div>
 <div class="line">   ReportGDXError();</div>
 </div><!-- fragment --><p >In this example we find the symbol by its name, and before reading the data we verify that the symbol represents a one dimensional parameter. When reading the data, we get a unique element as an integer. The integer value is used to get the corresponding string for the unique element.</p>
 <h2><a class="anchor" id="autotoc_md17"></a>
 Reading data using integers (Mapped)</h2>
 <p >Reading data using integers in Mapped mode requires the registration of unique elements. The read routine returns an integer for which we can find the string representation.</p>
 <p >When the gdx file contains data elements that we never registered, the read function will not return these elements, they will be added to an internal list of error records instead.</p>
-<div class="fragment"><div class="line"> {c++}</div>
-<div class="line">if(!gdx.gdxUELRegisterMapStart())</div>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span>(!gdx.gdxUELRegisterMapStart())</div>
 <div class="line">   ReportGDXError();</div>
-<div class="line">gdx.gdxUELRegisterMap(1000,&quot;New-York&quot;);</div>
-<div class="line">gdx.gdxUELRegisterMap(2000,&quot;Chicago&quot;);</div>
-<div class="line">if(!gdx.gdxUELRegisterDone())</div>
+<div class="line">gdx.gdxUELRegisterMap(1000,<span class="stringliteral">&quot;New-York&quot;</span>);</div>
+<div class="line">gdx.gdxUELRegisterMap(2000,<span class="stringliteral">&quot;Chicago&quot;</span>);</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxUELRegisterDone())</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxFindSymbol(&quot;x&quot;,SyNr)) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;**** Could not find symbol X&quot; &lt;&lt; std::endl;</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxFindSymbol(<span class="stringliteral">&quot;x&quot;</span>,SyNr)) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;**** Could not find symbol X&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line">gdx.gdxSymbolInfo(SyNr,SyName,SyDim,SyTyp);</div>
-<div class="line">if(SyDim != 1 || SyTyp != dt_par) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;**** X is not a one dimensional parameter&quot; &lt;&lt; std::endl;</div>
+<div class="line"><span class="keywordflow">if</span>(SyDim != 1 || SyTyp != dt_par) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;**** X is not a one dimensional parameter&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataReadMapStart(SyNr,NrRecs))</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataReadMapStart(SyNr,NrRecs))</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">std::cout &lt;&lt; &quot;Parameter X has &quot; &lt;&lt; NrRecs &lt;&lt; &quot; records&quot; &lt;&lt; std::endl;</div>
+<div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Parameter X has &quot;</span> &lt;&lt; NrRecs &lt;&lt; <span class="stringliteral">&quot; records&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line"> </div>
-<div class="line">for(int N{}; N&lt;NrRecs; N++) {</div>
-<div class="line">   if(gdx.gdxDataReadMap(N,IndxI,Values,N)) {</div>
-<div class="line">      std::cout &lt;&lt; &quot;Record = &quot; &lt;&lt; N &lt;&lt; &quot;  &quot; &lt;&lt; IndxI[0] &lt;&lt; &quot; = &quot; &lt;&lt; Values[0];</div>
+<div class="line"><span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{}; N&lt;NrRecs; N++) {</div>
+<div class="line">   <span class="keywordflow">if</span>(gdx.gdxDataReadMap(N,IndxI,Values,N)) {</div>
+<div class="line">      std::cout &lt;&lt; <span class="stringliteral">&quot;Record = &quot;</span> &lt;&lt; N &lt;&lt; <span class="stringliteral">&quot;  &quot;</span> &lt;&lt; IndxI[0] &lt;&lt; <span class="stringliteral">&quot; = &quot;</span> &lt;&lt; Values[0];</div>
 <div class="line">      GetUEL(gdx,IndxI[0],S);</div>
-<div class="line">      std::cout &lt;&lt; &quot; with string = &quot; &lt;&lt; S &lt;&lt; &#39;\n&#39;;</div>
+<div class="line">      std::cout &lt;&lt; <span class="stringliteral">&quot; with string = &quot;</span> &lt;&lt; S &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
 <div class="line">   }</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataReadDone())</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataReadDone())</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
 <div class="line">NrRecs = gdx.gdxDataErrorCount();</div>
-<div class="line">if(NrRecs &gt; 0)</div>
-<div class="line">   std::cout &lt;&lt; NrRecs &lt;&lt; &quot; records were skipped&quot; &lt;&lt; std::endl;</div>
+<div class="line"><span class="keywordflow">if</span>(NrRecs &gt; 0)</div>
+<div class="line">   std::cout &lt;&lt; NrRecs &lt;&lt; <span class="stringliteral">&quot; records were skipped&quot;</span> &lt;&lt; std::endl;</div>
 </div><!-- fragment --><p >In this example we register a few unique elements using our \own integer values. After verifying that we can find the symbol and that the symbol represents a one dimensional parameter we can read the data. The index for the parameter is returned using the integers we used when registering our elements. When we read the records in sequence, the index returned will be sorted with the first index position the most significant.</p>
 <p >After reading the data, we print the number of records that were skipped in the read routine.</p>
 <h2><a class="anchor" id="autotoc_md18"></a>
@@ -446,52 +439,51 @@ the record is flagged as an error record and the record will be skipped.    </td
 <p >Referring to the following GAMS fragment, we want to read the parameter <code>A</code>. The set <code>I</code> is the domain for the first index; there is no domain for the second index position: </p><div class="fragment"><div class="line">Set I /.../;</div>
 <div class="line">Parameter A(I,*);</div>
 </div><!-- fragment --><p> Assuming we have read set <code>I</code> already, the following code snapshot illustrates how to read parameter <code>A</code>.</p>
-<div class="fragment"><div class="line"> {c++}</div>
-<div class="line">// Register the filter for set I; reference this filter with integer 123</div>
-<div class="line">if(!gdx.gdxFilterRegisterStart(123))</div>
+<div class="fragment"><div class="line"><span class="comment">// Register the filter for set I; reference this filter with integer 123</span></div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxFilterRegisterStart(123))</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line">gdx.gdxFilterRegister(1000);</div>
 <div class="line">gdx.gdxFilterRegister(2000);</div>
-<div class="line">if(!gdx.gdxFilterRegisterDone()</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxFilterRegisterDone()</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">// set the filter</div>
-<div class="line">Filt[0] = 123; //filter for I</div>
-<div class="line">Filt[1] = -1; // expand</div>
+<div class="line"><span class="comment">// set the filter</span></div>
+<div class="line">Filt[0] = 123; <span class="comment">//filter for I</span></div>
+<div class="line">Filt[1] = -1; <span class="comment">// expand</span></div>
 <div class="line"> </div>
-<div class="line">// Remember highest mapped value in variable LastMapped</div>
+<div class="line"><span class="comment">// Remember highest mapped value in variable LastMapped</span></div>
 <div class="line">gdx.gdxUMUelInfo(NrUnMapped,LastMapped);</div>
 <div class="line"> </div>
-<div class="line">// Read parameter A as a 2 dimensional parameter</div>
-<div class="line">if(!gdx.gdxFindSymbol(&quot;A&quot;,SyNr) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;**** Could not find symbol A&quot; &lt;&lt; std::endl;</div>
+<div class="line"><span class="comment">// Read parameter A as a 2 dimensional parameter</span></div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxFindSymbol(<span class="stringliteral">&quot;A&quot;</span>,SyNr) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;**** Could not find symbol A&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line">gdx.gdxSymbolInfo(SyNr,SyName,SyDim,SyTyp);</div>
-<div class="line">if(SyDim != 2 || SyTyp != dt_par) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;**** A is not a two dimensional parameter&quot; &lt;&lt; std::endl;</div>
+<div class="line"><span class="keywordflow">if</span>(SyDim != 2 || SyTyp != dt_par) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;**** A is not a two dimensional parameter&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxReadFilteredStart(SyNr,Filt,NrRecs);</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxReadFilteredStart(SyNr,Filt,NrRecs);</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">for(int N{1}; N&lt;=NrRecs; N++) {</div>
-<div class="line">   if(gdx.gdxDataReadMap(N,IndxI,Values)) {</div>
-<div class="line">      // do something to process the record read (index, values)</div>
+<div class="line"><span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{1}; N&lt;=NrRecs; N++) {</div>
+<div class="line">   <span class="keywordflow">if</span>(gdx.gdxDataReadMap(N,IndxI,Values)) {</div>
+<div class="line">      <span class="comment">// do something to process the record read (index, values)</span></div>
 <div class="line">   }</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">if(!gdx.gdxDataReadDone()</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataReadDone()</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line">// see if there are new unique elements</div>
+<div class="line"><span class="comment">// see if there are new unique elements</span></div>
 <div class="line">gdx.gdxUMUelInfo(NrUnMapped,NewLastMapped);</div>
-<div class="line">if(NewLastMapped &gt; LastMapped) {</div>
-<div class="line">   for(int N{LastMapped + 1}; N&lt;=NewLastMapped; N++) {</div>
+<div class="line"><span class="keywordflow">if</span>(NewLastMapped &gt; LastMapped) {</div>
+<div class="line">   <span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{LastMapped + 1}; N&lt;=NewLastMapped; N++) {</div>
 <div class="line">      gdx.gdxGetUel(N,S);</div>
-<div class="line">      std::cout &lt;&lt; &quot;New element &quot; &lt;&lt; N &lt;&lt; &quot; = &quot; &lt;&lt; S &lt;&lt; &#39;\n&#39;;</div>
+<div class="line">      std::cout &lt;&lt; <span class="stringliteral">&quot;New element &quot;</span> &lt;&lt; N &lt;&lt; <span class="stringliteral">&quot; = &quot;</span> &lt;&lt; S &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
 <div class="line">   }</div>
 <div class="line">}</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md19"></a>
@@ -504,80 +496,79 @@ Dealing with acronyms</h2>
 <div class="line"> </div>
 <div class="line">i1 1.000,    i2 acro1,    i3 3.000,    i4 acro2,    i5 5.000</div>
 </div><!-- fragment --><p> As we write data to a GDX file, the system keeps track which acronyms were used in the data written. Before we close the GDX file, we share the identifiers used for each acronym used. When reading a GDX file, we share all acronym identifiers and their corresponding index before reading any data. Doing so will replace the acronym indices stored in the GDX file by the one we provide.</p>
-<p >The example below illustrates these steps. </p><div class="fragment"><div class="line"> {c++}</div>
-<div class="line">TGXFileObj gdx;</div>
+<p >The example below illustrates these steps. </p><div class="fragment"><div class="line">TGXFileObj gdx;</div>
 <div class="line">TgdxUELIndex UELS;</div>
 <div class="line">TgdxValues Vals;</div>
-<div class="line">int FDim, N, NrRecs, ErrNr, acrindx;</div>
+<div class="line"><span class="keywordtype">int</span> FDim, N, NrRecs, ErrNr, acrindx;</div>
 <div class="line">std::array&lt;char, GMS_SSIZE&gt; ErrMsg, acrtext, acrname;</div>
-<div class="line">//Check the library</div>
-<div class="line">if(!gdxGetReadyX(ErrMsg)) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;Error loading GDX library, msg = &quot; &lt;&lt; ErrMsg &lt;&lt; std::endl;</div>
+<div class="line"><span class="comment">//Check the library</span></div>
+<div class="line"><span class="keywordflow">if</span>(!gdxGetReadyX(ErrMsg)) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;Error loading GDX library, msg = &quot;</span> &lt;&lt; ErrMsg &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
-<div class="line">//Create GDX object and open file for writing</div>
+<div class="line"><span class="comment">//Create GDX object and open file for writing</span></div>
 <div class="line">gdx.gdxCreateX( ErrMsg);</div>
-<div class="line">gdx.gdxOpenWriteEx( &quot;test.gdx&quot;, &quot;testing&quot;, 0, ErrNr);</div>
+<div class="line">gdx.gdxOpenWriteEx( <span class="stringliteral">&quot;test.gdx&quot;</span>, <span class="stringliteral">&quot;testing&quot;</span>, 0, ErrNr);</div>
 <div class="line"> </div>
-<div class="line">//register some unique elements</div>
+<div class="line"><span class="comment">//register some unique elements</span></div>
 <div class="line">gdx.gdxUELRegisterRawStart();</div>
-<div class="line">for(int N{}; N&lt;5; N++)</div>
-<div class="line">   gdx.gdxUELRegisterRaw( &quot;uel&quot; + std::to_string(N));</div>
+<div class="line"><span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{}; N&lt;5; N++)</div>
+<div class="line">   gdx.gdxUELRegisterRaw( <span class="stringliteral">&quot;uel&quot;</span> + std::to_string(N));</div>
 <div class="line">gdx.gdxUELRegisterDone();</div>
 <div class="line"> </div>
-<div class="line">//write a parameter with two acronyms</div>
-<div class="line">gdx.gdxDataWriteRawStart( &quot;symb1&quot;, &quot;text for symb1&quot;, 1, dt_par, 0);</div>
-<div class="line">for(int N{}; N&lt;5; N++) {</div>
+<div class="line"><span class="comment">//write a parameter with two acronyms</span></div>
+<div class="line">gdx.gdxDataWriteRawStart( <span class="stringliteral">&quot;symb1&quot;</span>, <span class="stringliteral">&quot;text for symb1&quot;</span>, 1, dt_par, 0);</div>
+<div class="line"><span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{}; N&lt;5; N++) {</div>
 <div class="line">   UELS[0] = N;</div>
 <div class="line">   Vals[vallevel] = (N == 1 || N == 3) ? gdx.gdxAcronymValue( N) : N;</div>
 <div class="line">   gdx.gdxDataWriteRaw( UELS, Vals);</div>
 <div class="line">}</div>
 <div class="line">gdx.gdxDataWriteDone();</div>
 <div class="line"> </div>
-<div class="line">//provide the names for the acronyms used</div>
-<div class="line">for(int N{}; N&lt;gdx.gdxAcronymCount(); N++) {</div>
+<div class="line"><span class="comment">//provide the names for the acronyms used</span></div>
+<div class="line"><span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{}; N&lt;gdx.gdxAcronymCount(); N++) {</div>
 <div class="line">   gdx.gdxAcronymGetInfo( N, acrname, acrtext, acrindx);</div>
-<div class="line">   if(acrindx == 2)</div>
-<div class="line">      gdx.gdxAcronymSetInfo( N, &quot;acro1&quot;, &quot;Some text for acro1&quot;, acrindx)</div>
-<div class="line">   else if(acrindx == 4)</div>
-<div class="line">      gdx.gdxAcronymSetInfo( N, &quot;acro2&quot;, &quot;Some text for acro2&quot;, acrindx)</div>
+<div class="line">   <span class="keywordflow">if</span>(acrindx == 2)</div>
+<div class="line">      gdx.gdxAcronymSetInfo( N, <span class="stringliteral">&quot;acro1&quot;</span>, <span class="stringliteral">&quot;Some text for acro1&quot;</span>, acrindx)</div>
+<div class="line">   <span class="keywordflow">else</span> <span class="keywordflow">if</span>(acrindx == 4)</div>
+<div class="line">      gdx.gdxAcronymSetInfo( N, <span class="stringliteral">&quot;acro2&quot;</span>, <span class="stringliteral">&quot;Some text for acro2&quot;</span>, acrindx)</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">//final check for errors before we close the file</div>
+<div class="line"><span class="comment">//final check for errors before we close the file</span></div>
 <div class="line">N = gdx.gdxClose();</div>
-<div class="line">if(N) {</div>
+<div class="line"><span class="keywordflow">if</span>(N) {</div>
 <div class="line">   gdxErrorStr(Nil, N, ErrMsg);</div>
-<div class="line">   std::cout &lt;&lt; &quot;Error writing file = &quot; &lt;&lt; ErrMsg &lt;&lt; std::endl;</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;Error writing file = &quot;</span> &lt;&lt; ErrMsg &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line">gdx.gdxFree();</div>
 <div class="line"> </div>
-<div class="line">//open the file we just created</div>
+<div class="line"><span class="comment">//open the file we just created</span></div>
 <div class="line">gdx.gdxCreateX( ErrMsg);</div>
-<div class="line">gdx.gdxOpenRead( &quot;test.gdx&quot;, ErrNr);</div>
-<div class="line">if(ErrNr) {</div>
-<div class="line">   std::cout &lt;&lt; &quot;Error opening file, nr = &quot; &lt;&lt; ErrNr &lt;&lt; std::endl;</div>
+<div class="line">gdx.gdxOpenRead( <span class="stringliteral">&quot;test.gdx&quot;</span>, ErrNr);</div>
+<div class="line"><span class="keywordflow">if</span>(ErrNr) {</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;Error opening file, nr = &quot;</span> &lt;&lt; ErrNr &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">//give acronym indices using the name of the acronym</div>
-<div class="line">gdx.gdxAcronymSetInfo( 1, &quot;acro1&quot;, &quot;&quot;, 1000);</div>
-<div class="line">gdx.gdxAcronymSetInfo( 2, &quot;acro2&quot;, &quot;&quot;, 1001);</div>
+<div class="line"><span class="comment">//give acronym indices using the name of the acronym</span></div>
+<div class="line">gdx.gdxAcronymSetInfo( 1, <span class="stringliteral">&quot;acro1&quot;</span>, <span class="stringliteral">&quot;&quot;</span>, 1000);</div>
+<div class="line">gdx.gdxAcronymSetInfo( 2, <span class="stringliteral">&quot;acro2&quot;</span>, <span class="stringliteral">&quot;&quot;</span>, 1001);</div>
 <div class="line"> </div>
-<div class="line">//read the parameter</div>
+<div class="line"><span class="comment">//read the parameter</span></div>
 <div class="line">gdx.gdxDataReadRawStart( 1, NrRecs);</div>
-<div class="line">while(gdx.gdxDataReadRaw( UELs, Vals, FDim)) {</div>
+<div class="line"><span class="keywordflow">while</span>(gdx.gdxDataReadRaw( UELs, Vals, FDim)) {</div>
 <div class="line">   N = gdx.gdxAcronymIndex( Vals[vallevel]);</div>
-<div class="line">   if(!N) std::cout &lt;&lt; Vals[vallevel])</div>
-<div class="line">   else std::cout &lt;&lt; &quot;Acronym: index = &quot; &lt;&lt; N &lt;&lt; &#39;\n&#39;;</div>
+<div class="line">   <span class="keywordflow">if</span>(!N) std::cout &lt;&lt; Vals[vallevel])</div>
+<div class="line">   <span class="keywordflow">else</span> std::cout &lt;&lt; <span class="stringliteral">&quot;Acronym: index = &quot;</span> &lt;&lt; N &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
 <div class="line">}</div>
 <div class="line">gdx.gdxDataReadDone();</div>
 <div class="line"> </div>
 <div class="line">ErrNr = gdx.gdxClose();</div>
-<div class="line">//final error check before closing the file</div>
-<div class="line">if(ErrNr) {</div>
+<div class="line"><span class="comment">//final error check before closing the file</span></div>
+<div class="line"><span class="keywordflow">if</span>(ErrNr) {</div>
 <div class="line">   gdxErrorStr(nil, ErrNr, ErrMsg);</div>
-<div class="line">   std::cout &lt;&lt; &quot;Error reading file = &quot;, ErrMsg);</div>
+<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;Error reading file = &quot;</span>, ErrMsg);</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line">gdx.gdxFree();</div>
@@ -940,118 +931,117 @@ Example 2 (C)</h2>
 <div class="line">}</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md29"></a>
 Example 3 (C++)</h2>
-<div class="fragment"><div class="line"> {c++}</div>
-<div class="line"> /*</div>
-<div class="line">   Use this command to compile the example:</div>
-<div class="line">   cl xp_example1.cpp ../C/api/gdxcc.c -I../C/api</div>
-<div class="line"> */</div>
+<div class="fragment"><div class="line"> <span class="comment">/*</span></div>
+<div class="line"><span class="comment">   Use this command to compile the example:</span></div>
+<div class="line"><span class="comment">   cl xp_example1.cpp ../C/api/gdxcc.c -I../C/api</span></div>
+<div class="line"><span class="comment"> */</span></div>
 <div class="line"> </div>
-<div class="line">#include &lt;string&gt;</div>
-<div class="line">#include &lt;cstring&gt;</div>
-<div class="line">#include &lt;cstdlib&gt;</div>
-<div class="line">#include &lt;iostream&gt;</div>
-<div class="line">#include &quot;gdxcc.h&quot;</div>
+<div class="line"><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;cstring&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;cstdlib&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &lt;iostream&gt;</span></div>
+<div class="line"><span class="preprocessor">#include &quot;gdxcc.h&quot;</span></div>
 <div class="line"> </div>
-<div class="line">using namespace std;</div>
+<div class="line"><span class="keyword">using namespace </span>std;</div>
 <div class="line"> </div>
-<div class="line">static gdxStrIndexPtrs_t Indx;</div>
-<div class="line">static gdxStrIndex_t     IndxXXX;</div>
-<div class="line">static gdxValues_t       Values;</div>
+<div class="line"><span class="keyword">static</span> gdxStrIndexPtrs_t Indx;</div>
+<div class="line"><span class="keyword">static</span> gdxStrIndex_t     IndxXXX;</div>
+<div class="line"><span class="keyword">static</span> gdxValues_t       Values;</div>
 <div class="line"> </div>
-<div class="line">void ReportGDXError(gdxHandle_t PGX) {</div>
-<div class="line">    char S[GMS_SSSIZE];</div>
+<div class="line"><span class="keywordtype">void</span> ReportGDXError(gdxHandle_t PGX) {</div>
+<div class="line">    <span class="keywordtype">char</span> S[GMS_SSSIZE];</div>
 <div class="line"> </div>
-<div class="line">    std::cout &lt;&lt; &quot;**** Fatal GDX Error&quot; &lt;&lt; endl;</div>
+<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;**** Fatal GDX Error&quot;</span> &lt;&lt; endl;</div>
 <div class="line">    gdxErrorStr(PGX, gdxGetLastError(PGX), S);</div>
-<div class="line">    std::cout &lt;&lt; &quot;**** &quot; &lt;&lt; S &lt;&lt; endl;</div>
+<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;**** &quot;</span> &lt;&lt; S &lt;&lt; endl;</div>
 <div class="line">    exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">void ReportIOError(int N, const std::string &amp;msg) {</div>
-<div class="line">    std::cout &lt;&lt; &quot;**** Fatal I/O Error = &quot; &lt;&lt; N &lt;&lt; &quot; when calling &quot; &lt;&lt; msg &lt;&lt; endl;</div>
+<div class="line"><span class="keywordtype">void</span> ReportIOError(<span class="keywordtype">int</span> N, <span class="keyword">const</span> std::string &amp;msg) {</div>
+<div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;**** Fatal I/O Error = &quot;</span> &lt;&lt; N &lt;&lt; <span class="stringliteral">&quot; when calling &quot;</span> &lt;&lt; msg &lt;&lt; endl;</div>
 <div class="line">    exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">void WriteData(gdxHandle_t PGX, const char *s, const double V) {</div>
+<div class="line"><span class="keywordtype">void</span> WriteData(gdxHandle_t PGX, <span class="keyword">const</span> <span class="keywordtype">char</span> *s, <span class="keyword">const</span> <span class="keywordtype">double</span> V) {</div>
 <div class="line">    strcpy(Indx[0], s);</div>
 <div class="line">    Values[GMS_VAL_LEVEL] = V;</div>
-<div class="line">    gdxDataWriteStr(PGX, (const char **)Indx, Values);</div>
+<div class="line">    gdxDataWriteStr(PGX, (<span class="keyword">const</span> <span class="keywordtype">char</span> **)Indx, Values);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">int main(int argc, char *argv[]) {</div>
+<div class="line"><span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> *argv[]) {</div>
 <div class="line">    gdxHandle_t PGX = NULL;</div>
-<div class="line">    char        Msg[GMS_SSSIZE], Producer[GMS_SSSIZE], Sysdir[GMS_SSSIZE], VarName[GMS_SSSIZE];</div>
-<div class="line">    int         ErrNr;</div>
-<div class="line">    int         VarNr;</div>
-<div class="line">    int         NrRecs;</div>
-<div class="line">    int         N;</div>
-<div class="line">    int         Dim;</div>
-<div class="line">    int         VarTyp;</div>
-<div class="line">    int         D;</div>
+<div class="line">    <span class="keywordtype">char</span>        Msg[GMS_SSSIZE], Producer[GMS_SSSIZE], Sysdir[GMS_SSSIZE], VarName[GMS_SSSIZE];</div>
+<div class="line">    <span class="keywordtype">int</span>         ErrNr;</div>
+<div class="line">    <span class="keywordtype">int</span>         VarNr;</div>
+<div class="line">    <span class="keywordtype">int</span>         NrRecs;</div>
+<div class="line">    <span class="keywordtype">int</span>         N;</div>
+<div class="line">    <span class="keywordtype">int</span>         Dim;</div>
+<div class="line">    <span class="keywordtype">int</span>         VarTyp;</div>
+<div class="line">    <span class="keywordtype">int</span>         D;</div>
 <div class="line"> </div>
-<div class="line">    if (argc &lt; 2 || argc &gt; 3) {</div>
-<div class="line">        cout &lt;&lt; &quot;**** xp_Example1: incorrect number of parameters&quot; &lt;&lt; endl;</div>
+<div class="line">    <span class="keywordflow">if</span> (argc &lt; 2 || argc &gt; 3) {</div>
+<div class="line">        cout &lt;&lt; <span class="stringliteral">&quot;**** xp_Example1: incorrect number of parameters&quot;</span> &lt;&lt; endl;</div>
 <div class="line">        exit(1);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    strcpy(Sysdir, argv[1]);</div>
-<div class="line">    cout &lt;&lt; &quot;xp_Example1 using GAMS system directory: &quot; &lt;&lt; Sysdir &lt;&lt; endl;</div>
+<div class="line">    cout &lt;&lt; <span class="stringliteral">&quot;xp_Example1 using GAMS system directory: &quot;</span> &lt;&lt; Sysdir &lt;&lt; endl;</div>
 <div class="line"> </div>
-<div class="line">    if (!gdxCreateD(&amp;PGX, Sysdir, Msg, sizeof(Msg))) {</div>
-<div class="line">        cout &lt;&lt; &quot;**** Could not load GDX library&quot; &lt;&lt; endl &lt;&lt; &quot;**** &quot; &lt;&lt; Msg &lt;&lt; endl;</div>
+<div class="line">    <span class="keywordflow">if</span> (!gdxCreateD(&amp;PGX, Sysdir, Msg, <span class="keyword">sizeof</span>(Msg))) {</div>
+<div class="line">        cout &lt;&lt; <span class="stringliteral">&quot;**** Could not load GDX library&quot;</span> &lt;&lt; endl &lt;&lt; <span class="stringliteral">&quot;**** &quot;</span> &lt;&lt; Msg &lt;&lt; endl;</div>
 <div class="line">        exit(1);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
 <div class="line">    gdxGetDLLVersion(PGX, Msg);</div>
-<div class="line">    cout &lt;&lt; &quot;Using GDX DLL version: &quot; &lt;&lt; Msg &lt;&lt; endl;</div>
+<div class="line">    cout &lt;&lt; <span class="stringliteral">&quot;Using GDX DLL version: &quot;</span> &lt;&lt; Msg &lt;&lt; endl;</div>
 <div class="line"> </div>
 <div class="line">    GDXSTRINDEXPTRS_INIT(IndxXXX, Indx);</div>
 <div class="line"> </div>
-<div class="line">    if (2 == argc) {</div>
-<div class="line">        /* Write demand data */</div>
-<div class="line">        gdxOpenWrite(PGX, &quot;demanddata.gdx&quot;, &quot;xp_example1&quot;, &amp;ErrNr);</div>
-<div class="line">        if (ErrNr) ReportIOError(ErrNr, &quot;gdxOpenWrite&quot;);</div>
-<div class="line">        if (!gdxDataWriteStrStart(PGX, &quot;Demand&quot;, &quot;Demand data&quot;, 1, GMS_DT_PAR, 0))</div>
+<div class="line">    <span class="keywordflow">if</span> (2 == argc) {</div>
+<div class="line">        <span class="comment">/* Write demand data */</span></div>
+<div class="line">        gdxOpenWrite(PGX, <span class="stringliteral">&quot;demanddata.gdx&quot;</span>, <span class="stringliteral">&quot;xp_example1&quot;</span>, &amp;ErrNr);</div>
+<div class="line">        <span class="keywordflow">if</span> (ErrNr) ReportIOError(ErrNr, <span class="stringliteral">&quot;gdxOpenWrite&quot;</span>);</div>
+<div class="line">        <span class="keywordflow">if</span> (!gdxDataWriteStrStart(PGX, <span class="stringliteral">&quot;Demand&quot;</span>, <span class="stringliteral">&quot;Demand data&quot;</span>, 1, GMS_DT_PAR, 0))</div>
 <div class="line">            ReportGDXError(PGX);</div>
-<div class="line">        WriteData(PGX, &quot;New-York&quot;, 324.0);</div>
-<div class="line">        WriteData(PGX, &quot;Chicago&quot;, 299.0);</div>
-<div class="line">        WriteData(PGX, &quot;Topeka&quot;, 274.0);</div>
-<div class="line">        if (!gdxDataWriteDone(PGX)) ReportGDXError(PGX);</div>
-<div class="line">        cout &lt;&lt; &quot;Demand data written by example1&quot; &lt;&lt; endl;</div>
+<div class="line">        WriteData(PGX, <span class="stringliteral">&quot;New-York&quot;</span>, 324.0);</div>
+<div class="line">        WriteData(PGX, <span class="stringliteral">&quot;Chicago&quot;</span>, 299.0);</div>
+<div class="line">        WriteData(PGX, <span class="stringliteral">&quot;Topeka&quot;</span>, 274.0);</div>
+<div class="line">        <span class="keywordflow">if</span> (!gdxDataWriteDone(PGX)) ReportGDXError(PGX);</div>
+<div class="line">        cout &lt;&lt; <span class="stringliteral">&quot;Demand data written by example1&quot;</span> &lt;&lt; endl;</div>
 <div class="line">    }</div>
-<div class="line">    else {</div>
+<div class="line">    <span class="keywordflow">else</span> {</div>
 <div class="line">        gdxOpenRead(PGX, argv[2], &amp;ErrNr);</div>
-<div class="line">        if (ErrNr) ReportIOError(ErrNr, &quot;gdxOpenRead&quot;);</div>
+<div class="line">        <span class="keywordflow">if</span> (ErrNr) ReportIOError(ErrNr, <span class="stringliteral">&quot;gdxOpenRead&quot;</span>);</div>
 <div class="line">        gdxFileVersion(PGX, Msg, Producer);</div>
-<div class="line">        cout &lt;&lt; &quot;GDX file written using version: &quot; &lt;&lt; Msg &lt;&lt; endl;</div>
-<div class="line">        cout &lt;&lt; &quot;GDX file written by: &quot; &lt;&lt; Producer &lt;&lt; endl;</div>
+<div class="line">        cout &lt;&lt; <span class="stringliteral">&quot;GDX file written using version: &quot;</span> &lt;&lt; Msg &lt;&lt; endl;</div>
+<div class="line">        cout &lt;&lt; <span class="stringliteral">&quot;GDX file written by: &quot;</span> &lt;&lt; Producer &lt;&lt; endl;</div>
 <div class="line"> </div>
-<div class="line">        if (!gdxFindSymbol(PGX, &quot;x&quot;, &amp;VarNr)) {</div>
-<div class="line">            cout &lt;&lt; &quot;**** Could not find variable X&quot; &lt;&lt; endl;</div>
+<div class="line">        <span class="keywordflow">if</span> (!gdxFindSymbol(PGX, <span class="stringliteral">&quot;x&quot;</span>, &amp;VarNr)) {</div>
+<div class="line">            cout &lt;&lt; <span class="stringliteral">&quot;**** Could not find variable X&quot;</span> &lt;&lt; endl;</div>
 <div class="line">            exit(1);</div>
 <div class="line">        }</div>
 <div class="line"> </div>
 <div class="line">        gdxSymbolInfo(PGX, VarNr, VarName, &amp;Dim, &amp;VarTyp);</div>
-<div class="line">        if (Dim != 2 || GMS_DT_VAR != VarTyp) {</div>
-<div class="line">            cout &lt;&lt; &quot;**** X is not a two dimensional variable: &quot;</div>
-<div class="line">                &lt;&lt; Dim &lt;&lt; &quot;:&quot; &lt;&lt; VarTyp &lt;&lt; endl;</div>
+<div class="line">        <span class="keywordflow">if</span> (Dim != 2 || GMS_DT_VAR != VarTyp) {</div>
+<div class="line">            cout &lt;&lt; <span class="stringliteral">&quot;**** X is not a two dimensional variable: &quot;</span></div>
+<div class="line">                &lt;&lt; Dim &lt;&lt; <span class="stringliteral">&quot;:&quot;</span> &lt;&lt; VarTyp &lt;&lt; endl;</div>
 <div class="line">            exit(1);</div>
 <div class="line">        }</div>
 <div class="line"> </div>
-<div class="line">        if (!gdxDataReadStrStart(PGX, VarNr, &amp;NrRecs)) ReportGDXError(PGX);</div>
-<div class="line">        cout &lt;&lt; &quot;Variable X has &quot; &lt;&lt; NrRecs &lt;&lt; &quot; records&quot; &lt;&lt; endl;</div>
-<div class="line">        while (gdxDataReadStr(PGX, Indx, Values, &amp;N)) {</div>
-<div class="line">            if (0 == Values[GMS_VAL_LEVEL]) continue; /* skip level 0.0 is default */</div>
-<div class="line">            for (D = 0; D &lt; Dim; D++) cout &lt;&lt; (D ? &#39;.&#39; : &#39; &#39;) &lt;&lt; Indx[D];</div>
-<div class="line">            cout &lt;&lt; &quot; = &quot; &lt;&lt; Values[GMS_VAL_LEVEL] &lt;&lt; endl;</div>
+<div class="line">        <span class="keywordflow">if</span> (!gdxDataReadStrStart(PGX, VarNr, &amp;NrRecs)) ReportGDXError(PGX);</div>
+<div class="line">        cout &lt;&lt; <span class="stringliteral">&quot;Variable X has &quot;</span> &lt;&lt; NrRecs &lt;&lt; <span class="stringliteral">&quot; records&quot;</span> &lt;&lt; endl;</div>
+<div class="line">        <span class="keywordflow">while</span> (gdxDataReadStr(PGX, Indx, Values, &amp;N)) {</div>
+<div class="line">            <span class="keywordflow">if</span> (0 == Values[GMS_VAL_LEVEL]) <span class="keywordflow">continue</span>; <span class="comment">/* skip level 0.0 is default */</span></div>
+<div class="line">            <span class="keywordflow">for</span> (D = 0; D &lt; Dim; D++) cout &lt;&lt; (D ? <span class="charliteral">&#39;.&#39;</span> : <span class="charliteral">&#39; &#39;</span>) &lt;&lt; Indx[D];</div>
+<div class="line">            cout &lt;&lt; <span class="stringliteral">&quot; = &quot;</span> &lt;&lt; Values[GMS_VAL_LEVEL] &lt;&lt; endl;</div>
 <div class="line">        }</div>
-<div class="line">        cout &lt;&lt; &quot;All solution values shown&quot; &lt;&lt; endl;</div>
+<div class="line">        cout &lt;&lt; <span class="stringliteral">&quot;All solution values shown&quot;</span> &lt;&lt; endl;</div>
 <div class="line">        gdxDataReadDone(PGX);</div>
 <div class="line">    }</div>
 <div class="line"> </div>
-<div class="line">    if (ErrNr = gdxClose(PGX)) ReportIOError(ErrNr, &quot;gdxClose&quot;);</div>
+<div class="line">    <span class="keywordflow">if</span> (ErrNr = gdxClose(PGX)) ReportIOError(ErrNr, <span class="stringliteral">&quot;gdxClose&quot;</span>);</div>
 <div class="line"> </div>
-<div class="line">    return 0;</div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md30"></a>
 Example 4 (VB.NET)</h2>
