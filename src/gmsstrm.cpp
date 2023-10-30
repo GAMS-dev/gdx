@@ -733,10 +733,14 @@ void TMiBufferedStreamDelphi::WriteGmsDouble( double D )
 int TMiBufferedStreamDelphi::ReadGmsInteger()
 {
    uint8_t B;
-   Read( &B, 1 );
+   auto numBytesRead { Read( &B, 1 ) };
+   assert( numBytesRead == 1 );
+   // should not happen
+   if( !numBytesRead )
+      B = 0;
    std::array<uint8_t, 5> W {};
    W[0] = B & 15;
-   bool Neg = B >= 128;
+   bool Neg { B >= 128 };
    int C { ( B >> 4 ) & 7 };
    if( C > 0 ) Read( &W[1], C );
    int res {};
