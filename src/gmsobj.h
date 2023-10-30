@@ -95,6 +95,7 @@ public:
    {
       int res { FCount };
       if( res == FCapacity ) Grow();
+      assert(FList);
       FList[res] = Item;
       FCount++;
       if( OneBased ) res++;
@@ -124,7 +125,9 @@ public:
    {
       if( FCount == FCapacity ) Grow();
       if( OneBased ) Index--;
-      if( Index < FCount )// overlap so use memmove instead of memcpy
+      assert(FList);
+      // overlap so use memmove instead of memcpy
+      if( Index < FCount )
          std::memmove( &FList[Index + 1], &FList[Index], ( FCount - Index ) * sizeof( T * ) );
       FList[Index] = Item;
       FCount++;

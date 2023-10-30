@@ -3920,7 +3920,7 @@ void TAcronymList::LoadFromStream( gmsstrm::TXStreamDelphi &S )
 int TAcronymList::MemoryUsed()
 {
    // NOTE: Not covered by unit tests yet.
-   int res { (int) FList.MemoryUsed() + FList.GetCount() * (int) sizeof( TAcronym * ) };
+   int res { (int) FList.MemoryUsed() + FList.GetCount() * (int) sizeof( TAcronym ) };
    for( int N {}; N < FList.GetCount(); N++ )
       res += FList[N]->MemoryUsed();
    return res;

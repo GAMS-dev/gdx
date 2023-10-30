@@ -26,7 +26,7 @@ if (UNIX AND NOT APPLE)
 endif ()
 
 if (APPLE)
-	set(CMAKE_C_FLAGS "${CMAKE_CXX_FLAGS} -DZ_HAVE_UNISTD_H")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZ_HAVE_UNISTD_H")
 endif (APPLE)
 
 # Makefile in devel/products/src/gdxio takes care of acquiring sources for zlib, skip in CMake builds so far
