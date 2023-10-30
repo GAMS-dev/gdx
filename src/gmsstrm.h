@@ -131,8 +131,12 @@ protected:
    T ReadValue( RWType rwt )
    {
       T res;
+#if !defined(NDEBUG)
       auto numBytesRead { Read( &res, sizeof( T ) ) };
       assert(numBytesRead == sizeof( T ));
+#else
+      Read( &res, sizeof( T ) );
+#endif
       return res;
    }
 
