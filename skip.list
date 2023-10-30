@@ -3,3 +3,4 @@
 -*/generated/*
 -*/tests/doctest.h
 -/usr/include/*
+-*/apigenerator/*
