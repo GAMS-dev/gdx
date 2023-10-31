@@ -265,11 +265,13 @@ leak-check-leg:
     - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" valgrind --leak-check=yes ./gdxtest_dbg
     - valgrind --leak-check=yes --xml=yes --xml-file=valgrind_out.xml ./gdxtest_dbg
     - PYTHONPATH=$PYTHONPATH:valgrind-codequality python3 -m valgrind_codequality --input-file valgrind_out.xml --output-file valgrind_out.json
+    - python3 ci/codechecker_to_xml.py valgrind_out.json valgrind_junit.xml
   artifacts:
     name: leak-check-results-leg
     expire_in: 2 hours
     reports:
       codequality: valgrind_out.json
+      junit: valgrind_junit.xml
     paths: [valgrind_out.*]
 
 #=======================================================================================================================
