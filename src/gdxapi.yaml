@@ -44,12 +44,14 @@ functions:
           This function can be used to add entries before data is written. When entries are added implicitly use gdxAcronymSetInfo to update the table.
         </p>
         <p><b>See: </b><a href="#gdxAcronymGetInfo">gdxAcronymGetInfo</a>, <a href="#gdxAcronymCount">gdxAcronymCount</a>.</p>
+      group: Acronyms
   - gdxAcronymCount:
       type: int
       const: True
       description: Number of entries in the acronym table.
       return: The number of entries in the acronym table.
       details: '<p><b>See: </b><a href="#gdxAcronymSetInfo">gdxAcronymSetInfo</a>, <a href="#gdxAcronymSetInfo">gdxAcronymSetInfo</a>.</p>'
+      group: Acronyms
   - gdxAcronymGetInfo:
       type: int
       const: True
@@ -71,6 +73,7 @@ functions:
       details: |-
         <p><font color="red"><b>Attention: </b></font>Make sure AName is 64 bytes and Txt 256 bytes wide to prevent overflow!</p>
         <p><b>See: </b><a href="#gdxAcronymSetInfo">gdxAcronymSetInfo</a>, <a href="#gdxAcronymCount">gdxAcronymCount</a>.</p>
+      group: Acronyms
   - gdxAcronymGetMapping:
       type: int
       parameters:
@@ -91,6 +94,7 @@ functions:
       details: |-
         <p>When reading GDX data, we need to map indices for acronyms used in the GDX file to indices used by the reading program. There is a problem when not all acronyms have been registered before reading the GDX data. We need to map an undefined index we read to a new value. The value of NextAutoAcronym is used for that.</p>
         <p><b>See: </b><a href="#gdxAcronymGetInfo">gdxAcronymGetInfo</a>, <a href="#gdxAcronymCount">gdxAcronymCount</a>, <a href="#gdxAcronymNextNr">gdxAcronymNextNr</a>.</p>
+      group: Acronyms
   - gdxAcronymIndex:
       type: int
       const: True
@@ -101,6 +105,7 @@ functions:
       description: Get index value of an acronym. Returns zero if V does not represent an acronym.
       return: Index of acronym value V; zero if V does not represent an acronym.
       details: '<p><b>See: </b><a href="#gdxAcronymValue">gdxAcronymValue</a>.</p>'
+      group: Acronyms
   - gdxAcronymName:
       type: int
       parameters:
@@ -115,6 +120,7 @@ functions:
       details: |-
         <p><font color="red"><b>Attention: </b></font>Supplied buffer for AName should be 64 bytes long to prevent overflow!</p>
         <p><b>See: </b><a href="#gdxAcronymIndex">gdxAcronymIndex</a>.</p>
+      group: Acronyms
   - gdxAcronymNextNr:
       type: int
       parameters:
@@ -123,6 +129,7 @@ functions:
           description: New value for NextAutoAcronym; a value of less than zero is ignored.
       description: Returns the value of the NextAutoAcronym variable and sets the variable to nv. <ul><li>When we read from a GDX file and encounter an acronym that was not defined, we need to assign a new index for that acronym. The variable NextAutoAcronym is used for this purpose and is incremented for each new undefined acronym.</li> <li>When NextAutoAcronym has a value of zero, the default, the value is ignored and the original index as stored in the GDX file is used for the index.</li></ul>
       return: Previous value of NextAutoAcronym.
+      group: Acronyms
   - gdxAcronymSetInfo:
       type: int
       parameters:
@@ -141,6 +148,7 @@ functions:
       description: Modify acronym information in the acronym table <ul><li>When writing a GDX file, this function is used to provide the name of an acronym; in this case the Indx parameter must match.</li> <li>When reading a GDX file, this function is used to provide the acronym index, and the AName parameter must match.</li></ul>
       return: Non-zero if the index into the acronym table is valid; false otherwise.
       details: '<p><b>See: </b><a href="#gdxAcronymGetInfo">gdxAcronymGetInfo</a>, <a href="#gdxAcronymCount">gdxAcronymCount</a>.</p>'
+      group: Acronyms
   - gdxAcronymValue:
       type: D
       const: True
@@ -151,6 +159,7 @@ functions:
       description: Create an acronym value based on the index (AIndx should be greater than 0). Returns the calculated acronym value (zero if AIndx is <0).
       return: The calculated acronym value; zero if Indx is not positive.
       details: '<p><b>See: </b><a href="#gdxAcronymIndex">gdxAcronymIndex</a>.</p>'
+      group: Acronyms
   - gdxAddAlias:
       type: int
       parameters:
@@ -179,6 +188,7 @@ functions:
       details: |-
         <p><font color="red"><b>Attention: </b></font>Mixing of single- and double-quotes in the explanatory text will be resolved by replacing all quote character occurrences with the first one in the text.</p>
         <p><b>See: </b><a href="#gdxGetElemText">gdxGetElemText</a>, <a href="#gdxSetTextNodeNr">gdxSetTextNodeNr</a>.</p>
+      group: Text for UELs
   - gdxAutoConvert:
       type: int
       parameters:
@@ -192,12 +202,14 @@ functions:
       description: Close a GDX file that was previously opened for reading or writing. Before the file is closed, any pending write operations will be finished. This does not free the GDX in-memory object. This method will automatically be called when the GDX object lifetime ends (e.g. being out of scope).
       return: Returns the value of gdxGetLastError.
       details: '<p><b>See: </b><a href="#gdxOpenRead">gdxOpenRead</a>, <a href="#gdxOpenWrite">gdxOpenWrite</a>.</p>'
+      group: File (Open/Close)
   - gdxDataErrorCount:
       type: int
       const: True
       description: Query the number of error records.
       return: The number of error records available.
       details: '<p><p>After a write operation is finished (with gdxDataWriteDone), the data is sorted and written to the GDX file (for map- and string-mode). If there are duplicate records, the first record is written to the file and the duplicates are added to the error list.</p> <p>When reading data using a filtered read operation, data records that were filtered out because an index is not in the user index space or not in a filter are added the error list.</p></p><p><b>See: </b><a href="#gdxDataErrorRecord">gdxDataErrorRecord</a>.</p>'
+      group: Read Data
   - gdxDataErrorRecord:
       type: int
       parameters:
@@ -212,6 +224,7 @@ functions:
           description: Values for the record (level, marginal, lower-, upper-bound, scale).
       description: Retrieve an error record. Non-zero if the record number is valid.
       return: Non-zero if the record number is valid, zero otherwise.
+      group: Read Data
       details: |-
         <p>Does not indicate domain violation for filtered/strict read with negative indices.</p>
         <p><font color="red"><b>Attention: </b></font>
@@ -235,6 +248,7 @@ functions:
           description: Values for the record (level, marginal, lower-, upper-bound, scale).
       description: Retrieve an error record. Non-zero if the record number is valid.
       return: Non-zero if the record number is valid, zero otherwise.
+      group: Read Data
       details: |-
         <p>Also indicate domain violations for filtered/strict read with negative UEL index values.</p>
         <p><font color="red"><b>Attention: </b></font>
@@ -247,6 +261,7 @@ functions:
       description: Finish reading of a symbol in any mode (raw, mapped, string). . Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><b>See: </b><a href="#gdxDataReadRawStart">gdxDataReadRawStart</a>, <a href="#gdxDataReadMapStart">gdxDataReadMapStart</a>, <a href="#gdxDataReadStrStart">gdxDataReadStrStart</a>.</p>'
+      group: Read Data
   - gdxDataReadFilteredStart:
       type: int
       parameters:
@@ -261,6 +276,7 @@ functions:
           description: The maximum number of records available for reading. The actual number of records may be less when a filter is applied to the records read.
       description: Initialize the reading of a symbol in filtered mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Read Data
       details: |-
         <p><b>See: </b><a href="#gdxFilterRegisterStart">gdxFilterRegisterStart</a>, <a href="#gdxDataReadMap">gdxDataReadMap</a>, <a href="#gdxDataReadRawStart">gdxDataReadRawStart</a>, <a href="#gdxDataReadStrStart">gdxDataReadStrStart</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>.</p>
         <p>
@@ -295,6 +311,7 @@ functions:
           description: The first index position in KeyInt that changed.
       description: Read the next record in mapped mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Read Data
       details: '<p><b>See: </b><a href="#gdxDataReadMapStart">gdxDataReadMapStart</a>, <a href="#gdxDataReadFilteredStart">gdxDataReadFilteredStart</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>.</p>'
   - gdxDataReadMapStart:
       type: int
@@ -307,6 +324,7 @@ functions:
           description: The maximum number of records available for reading. The actual number of records may be less when a filter is applied to the records read.
       description: Initialize the reading of a symbol in mapped mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Read Data
       details: '<p><b>See: </b><a href="#gdxDataReadMap">gdxDataReadMap</a>, <a href="#gdxDataReadRawStart">gdxDataReadRawStart</a>, <a href="#gdxDataReadStrStart">gdxDataReadStrStart</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>.</p>'
   - gdxDataReadRaw:
       type: int
@@ -322,6 +340,7 @@ functions:
           description: The first index position in KeyInt that changed.
       description: Read the next record in raw mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise (e.g. no records left).
+      group: Read Data
       details: '<p><font color="red"><b>Attention: </b></font>KeyInt must be big enough to hold one UEL index for each dimension! Values must have length >=5.</p><p><b>See: </b><a href="#gdxDataReadRawStart">gdxDataReadRawStart</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>.</p>'
   - gdxDataReadRawFast:
       type: int
@@ -337,6 +356,7 @@ functions:
           description: The maximum number of records available for reading. The actual number of records may be less when a filter is applied to the records read.
       description: Read a symbol in Raw mode using a callback procedure. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Read Data
       details: '<p>Use a callback function to read a symbol in raw mode. Using a callback procedure to read the data is faster because we no longer have to check the context for each call to read a record.</p><p><b>See: </b><a href="#gdxDataReadRaw">gdxDataReadRaw</a>, <a href="#gdxDataReadMapStart">gdxDataReadMapStart</a>, <a href="#gdxDataReadStrStart">gdxDataReadStrStart</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>, <a href="#gdxDataReadRawFastFilt">gdxDataReadRawFastFilt</a>.</p>'
   - gdxDataReadRawFastEx:
       type: int
@@ -355,6 +375,7 @@ functions:
           description: Pointer to user memory that will be passed back with the callback.
       description: Read a symbol in Raw mode using a callback procedure. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Read Data
       details: '<p>Use a callback function to read a symbol in raw mode. Using a callback procedure to read the data is faster because we no longer have to check the context for each call to read a record.</p><p><b>See: </b><a href="#gdxDataReadRawFast">gdxDataReadRawFast</a>.</p>'
   - gdxDataReadRawFastFilt:
       type: int
@@ -370,6 +391,7 @@ functions:
           description: 'Callback procedure which will be called for each available data item. This procedure (return type=void) should have the following signature: <ul><li>UEL index number keys (const int ),</li> <li>values (level, marginal, lower-, upper-bound, scale) (const double ),</li> <li>pointer to custom data (void ).</li></ul>'
       description: Read a symbol in Raw mode while applying a filter using a callback procedure. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Read Data
       details: '<p>Read a slice of data, by fixing zero or more index positions in the data. When a data element is available, the callback procedure DP is called with the current index (as raw numbers) and the values.</p><p><b>See: </b><a href="#gdxDataReadRawFast">gdxDataReadRawFast</a>, <a href="#gdxDataReadSliceStart">gdxDataReadSliceStart</a>, <a href="#gdxDataSliceUELS">gdxDataSliceUELS</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>, <a href="#"></a>.</p>'
       code:
         cpp: |-
@@ -395,6 +417,7 @@ functions:
           description: The maximum number of records available for reading. The actual number of records may be less when a filter is applied to the records read.
       description: Initialize the reading of a symbol in raw mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Read Data
       details: '<p><b>See: </b><a href="#gdxDataReadRaw">gdxDataReadRaw</a>, <a href="#gdxDataReadMapStart">gdxDataReadMapStart</a>, <a href="#gdxDataReadStrStart">gdxDataReadStrStart</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>.</p>'
   - gdxDataReadSlice:
       type: int
@@ -411,6 +434,7 @@ functions:
       description: Read a slice of data from a data set, by fixing zero or more index positions in the data. When a data element is available, the callback procedure DP is called with the current index and the values. The indices used in the index vary from zero to the highest value minus one for that index position. This function can be called multiple times. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><font color="red"><b>Attention: </b></font>Supply one UEL filter str for each symbol dimension (up to 63 characters per str).</p><p><b>See: </b><a href="#gdxDataReadSliceStart">gdxDataReadSliceStart</a>, <a href="#gdxDataSliceUELS">gdxDataSliceUELS</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>.</p>'
+      group: Read Data
   - gdxDataReadSliceStart:
       type: int
       parameters:
@@ -422,6 +446,7 @@ functions:
           description: Array of integers, each position indicating the number of unique indices in that position.
       description: Prepare for the reading of a slice of data from a data set. The actual read of the data is done by calling gdxDataReadSlice. When finished reading, call gdxDataReadDone. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Read Data
       details: '<p><b>See: </b><a href="#gdxDataReadSlice">gdxDataReadSlice</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>.</p>'
   - gdxDataReadStr:
       type: int
@@ -437,6 +462,7 @@ functions:
           description: The first index position in KeyStr that changed.
       description: Read the next record using strings for the unique elements. The reading should be initialized by calling DataReadStrStart. Returns zero if the operation is not possible or if there is no more data.
       return: Non-zero if the operation is possible; return zero if the operation is not possible or if there is no more data.
+      group: Read Data
       details: |-
         <p>
           <font color="red"><b>Attention: </b></font>
@@ -456,6 +482,7 @@ functions:
       description: Initialize the reading of a symbol in string mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>Reading data using strings is the simplest way to read data. Every record read using DataReadStr will return the strings for the unique elements. Internal mapping is not affected by this function.</p><p><b>See: </b><a href="#gdxDataReadStr">gdxDataReadStr</a>, <a href="#gdxDataReadRawStart">gdxDataReadRawStart</a>, <a href="#gdxDataReadMapStart">gdxDataReadMapStart</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>.</p>'
+      group: Read Data
       code:
         cpp: |-
           if(pgx.gdxDataReadStrStart(1,NrRecs)) {
@@ -476,11 +503,13 @@ functions:
       description: Map a slice index in to the corresponding unique elements. After calling DataReadSliceStart, each index position is mapped from 0 to N(d)-1. This function maps this index space back in to unique elements represented as strings. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><font color="red"><b>Attention: </b></font>Both SliceKeyInt and KeyStr should match the symbol dimension with their length The string buffers pointed to by KeyStr should each be at least 64 bytes long to store up to 63 character UEL names.</p><p><b>See: </b><a href="#gdxDataReadSliceStart">gdxDataReadSliceStart</a>, <a href="#gdxDataReadDone">gdxDataReadDone</a>.</p>'
+      group: Read Data
   - gdxDataWriteDone:
       type: int
       description: Finish a write operation. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>For mapped- and string-mode the actual writing of the records to the GDX file happens here.</p><p><b>See: </b><a href="#gdxDataErrorCount">gdxDataErrorCount</a>, <a href="#gdxDataWriteRawStart">gdxDataWriteRawStart</a>, <a href="#gdxDataWriteMapStart">gdxDataWriteMapStart</a>, <a href="#gdxDataWriteStrStart">gdxDataWriteStrStart</a>.</p>'
+      group: Write Data
   - gdxDataWriteMap:
       type: int
       parameters:
@@ -493,6 +522,7 @@ functions:
       description: Write a data element in mapped mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><b>See: </b><a href="#gdxDataWriteMapStart">gdxDataWriteMapStart</a>, <a href="#gdxDataWriteDone">gdxDataWriteDone</a>.</p>'
+      group: Write Data
   - gdxDataWriteMapStart:
       type: int
       parameters:
@@ -523,6 +553,7 @@ functions:
       description: Start writing a new symbol in mapped mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise
       details: '<p><b>See: </b><a href="#gdxDataWriteMap">gdxDataWriteMap</a>, <a href="#gdxDataWriteDone">gdxDataWriteDone</a>.</p>'
+      group: Write Data
   - gdxDataWriteRaw:
       type: int
       parameters:
@@ -535,6 +566,7 @@ functions:
       description: Write a data element in raw mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><p>When writing data in raw mode, the index space used is based on the internal index space. The indices used are in the range 1..NrUels but this is not enforced. Before we can write in raw mode, the unique elements (strings) should be registered first.</p> <p>When writing raw, it assumed that the records are written in sorted order and that there are no duplicate records. Records that are not in sorted order or are duplicates will be added to the error list (see DataErrorCount and DataErrorRecord).</p></p><p><b>See: </b><a href="#gdxDataWriteRawStart">gdxDataWriteRawStart</a>, <a href="#gdxDataWriteDone">gdxDataWriteDone</a>.</p>'
+      group: Write Data
   - gdxDataWriteRawStart:
       type: int
       parameters:
@@ -564,6 +596,7 @@ functions:
       description: Start writing a new symbol in raw mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>Raw mode flushes new records immediately to the GDX file (unlike mapped or string mode). The key indices for the record are provided as unique element numbers.</p><p><b>See: </b><a href="#gdxDataWriteRaw">gdxDataWriteRaw</a>, <a href="#gdxDataWriteDone">gdxDataWriteDone</a>.</p>'
+      group: Write Data
   - gdxDataWriteStr:
       type: int
       parameters:
@@ -575,6 +608,7 @@ functions:
           description: The values for this element (level, marginal, lower-, upper-bound, scale).
       description: Write a data element in string mode. Each element string must follow the GAMS rules for unique elements. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Write Data
       details: |-
         <p>
           <ul>
@@ -616,6 +650,7 @@ functions:
       description: Start writing a new symbol in string mode. Returns zero if the operation is not possible or failed.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>Adds a new symbol and supplies the UEL keys of the records for each dimension as strings. UEL labels can be known or new (in which case they are added to the UEL table).</p><p><b>See: </b><a href="#gdxDataWriteStr">gdxDataWriteStr</a>, <a href="#gdxDataWriteDone">gdxDataWriteDone</a>.</p>'
+      group: Write Data
   - gdxGetDLLVersion:
       type: int
       static: True
@@ -626,12 +661,14 @@ functions:
       description: Returns a version descriptor of the library. Always non-zero.
       return: Always returns non-zero.
       details: '<p><font color="red"><b>Attention: </b></font>Output argument buffer V should be 256 bytes long.</p>'
+      group: Version/Information
   - gdxErrorCount:
       type: int
       const: True
       description: Returns the number of errors.
       return: Total number of errors encountered.
       details: '<p><b>See: </b><a href="#gdxGetLastError">gdxGetLastError</a>.</p>'
+      group: Errors
   - gdxErrorStr:
       type: int
       static: True
@@ -645,6 +682,7 @@ functions:
       description: Returns the text for a given error number. Always non-zero.
       return: Always returns non-zero.
       details: '<p><font color="red"><b>Attention: </b></font>Supplied buffer for error message ErrMsg should be at least 256 bytes long.</p><p><b>See: </b><a href="#gdxGetLastError">gdxGetLastError</a>.</p>'
+      group: Errors
   - gdxFileInfo:
       type: int
       const: True
@@ -657,6 +695,7 @@ functions:
           description: Compression used; 0= no compression, 1=zlib.
       description: Returns file format number and compression level used. Always non-zero.
       return: Always returns non-zero.
+      group: System/Symbol
   - gdxFileVersion:
       type: int
       const: True
@@ -670,6 +709,7 @@ functions:
       description: Return strings for file version and file producer. Always non-zero.
       return: Always non-zero.
       details: '<p><font color="red"><b>Attention: </b></font>Supplied buffers for FileStr and ProduceStr should be 256 bytes long to prevent overflow.</p><p><b>See: </b><a href="#gdxOpenWrite">gdxOpenWrite</a>, <a href="#gdxOpenWriteEx">gdxOpenWriteEx</a>.</p>'
+      group: Version/Information
   - gdxFilterExists:
       type: int
       parameters:
@@ -679,6 +719,7 @@ functions:
       description: Check if there is a filter defined based on its number as used in gdxFilterRegisterStart. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><b>See: </b><a href="#gdxFilterRegisterStart">gdxFilterRegisterStart</a>.</p>'
+      group: Filters
   - gdxFilterRegister:
       type: int
       parameters:
@@ -688,11 +729,13 @@ functions:
       description: Add a unique element to the current filter definition, zero if the index number is out of range or was never mapped into the user index space.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>Register a unique element as part of the current filter. The function returns false if the index number is out of range of valid user indices or the index was never mapped into the user index space.</p><p><b>See: </b><a href="#gdxFilterRegisterStart">gdxFilterRegisterStart</a>, <a href="#gdxFilterRegisterDone">gdxFilterRegisterDone</a>.</p>'
+      group: Filters
   - gdxFilterRegisterDone:
       type: int
       description: Finish registration of unique elements for a filter. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><b>See: </b><a href="#gdxFilterRegisterStart">gdxFilterRegisterStart</a>, <a href="#gdxFilterRegister">gdxFilterRegister</a>.</p>'
+      group: Filters
   - gdxFilterRegisterStart:
       type: int
       parameters:
@@ -702,6 +745,7 @@ functions:
       description: Define a unique element filter. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>Start the registration of a filter. A filter is used to map a number of elements to a single integer; the filter number. A filter number can later be used to specify a filter for an index position when reading data.</p><p><b>See: </b><a href="#gdxFilterRegister">gdxFilterRegister</a>, <a href="#gdxFilterRegisterDone">gdxFilterRegisterDone</a>, <a href="#gdxDataReadFilteredStart">gdxDataReadFilteredStart</a>.</p>'
+      group: Filters
   - gdxFindSymbol:
       type: int
       parameters:
@@ -714,6 +758,7 @@ functions:
       description: Search for a symbol by name in the symbol table; the search is not case-sensitive. <ul><li>When the symbol is found, SyNr contains the symbol number and the function returns a non-zero integer.</li> <li>When the symbol is not found, the function returns zero and SyNr is set to -1.</li></ul>
       return: Non-zero if the symbol is found, zero otherwise.
       details: '<p><b>See: </b><a href="#gdxSymbolInfo">gdxSymbolInfo</a>, <a href="#gdxSymbolInfoX">gdxSymbolInfoX</a>.</p>'
+      group: Information
   - gdxGetElemText:
       type: int
       parameters:
@@ -728,6 +773,7 @@ functions:
           description: Node number (user space) found for the entry.
       description: Retrieve the string and node number for an entry in the string table. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Text for UELs
       details: |-
         <p>
           <ul>
@@ -756,6 +802,7 @@ functions:
       type: int
       description: Returns the last error number or zero if there was no error. Calling this function will clear the last error stored.
       return: The error number, or zero if there was no error.
+      group: Errors
       details: |-
         <p>When an error is encountered, an error code is stored which can be retrieved with this function. If subsequent errors occur before this function is called, the first error code will be maintained. Calling this function will clear the last error stored.</p>
         <p><b>See: </b><a href="#gdxErrorCount">gdxErrorCount</a>.</p>
@@ -774,6 +821,7 @@ functions:
       details: |-
         <p><font color="red"><b>Attention: </b></font>Output argument array Avals should have size for 7 elements.</p>
         <p><b>See: </b><a href="#gdxResetSpecialValues">gdxResetSpecialValues</a>, <a href="#gdxSetSpecialValues">gdxSetSpecialValues</a>.</p>
+      group: Special values
   - gdxGetUEL:
       type: int
       const: True
@@ -790,6 +838,7 @@ functions:
         <p>Retrieve the string for an unique element based on a mapped index number.</p>
         <p><font color="red"><b>Attention: </b></font>Supplied buffer for storing the Uel name should be 64 bytes long to prevent overflow!</p>
         <p><b>See: </b><a href="#gdxUMUelGet">gdxUMUelGet</a>.</p>
+      group: Information
   - gdxMapValue:
       type: int
       parameters:
@@ -803,6 +852,7 @@ functions:
       return: Returns non-zero if D is a special value, zero otherwise.
       details: |-
         <p><b>See: </b><a href="#gdxGetSpecialValues">gdxGetSpecialValues</a>, <a href="#gdxSetSpecialValues">gdxSetSpecialValues</a>.</p>
+      group: Special values
   - gdxOpenAppend:
       type: int
       parameters:
@@ -820,6 +870,7 @@ functions:
       details: |- 
         <p>If a file extension is not supplied, the extension ''.gdx'' will be used. The return code is a system dependent I/O error. When appending to a GDX file, the symbol table, uel table etc will be read and the whole setup will be treated as if all symbols were just written to the GDX file. Replacing a symbol is not allowed; it will generate a duplicate symbol error.</p>
         <p><b>See: </b><a href="#gdxOpenRead">gdxOpenRead</a>, <a href="#gdxOpenWrite">gdxOpenWrite</a>, <a href="#gdxOpenWriteEx">gdxOpenWriteEx</a>.</p>'
+      group: File (Open/Close)
       code:
         cpp: |-
           std::string Msg;
@@ -841,6 +892,7 @@ functions:
       description: Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.
       return: Returns non-zero if the file can be opened; zero otherwise.
       details: '<p>Open an existing GDX file for input. If a file extension is not supplied, the extension ''.gdx'' will be used. The return code is a system dependent I/O error. If the file was found, but is not a valid GDX file, the function GetLastError can be used to handle these type of errors.</p><p><b>See: </b><a href="#gdxOpenWrite">gdxOpenWrite</a>, <a href="#gdxGetLastError">gdxGetLastError</a>.</p>'
+      group: File (Open/Close)
       code:
         cpp: |-
           std::string errMsg;
@@ -864,6 +916,7 @@ functions:
       description: Open a GDX file for reading allowing for skipping sections. Non-zero if the file can be opened, zero otherwise.
       return: Returns non-zero if the file can be opened; zero otherwise.
       details: '<p>Open an existing GDX file for input. If a file extension is not supplied, the extension ''.gdx'' will be used. The return code is a system dependent I/O error. If the file was found, but is not a valid GDX file, the function GetLastError can be used to handle these type of errors.</p><p><b>See: </b><a href="#gdxOpenWrite">gdxOpenWrite</a>, <a href="#gdxGetLastError">gdxGetLastError</a>.</p>'
+      group: File (Open/Close)
       code:
         cpp: |-
           int ErrNr;
@@ -886,6 +939,7 @@ functions:
       description: Open a new GDX file for output. Non-zero if the file can be opened, zero otherwise.
       return: Returns non-zero if the file can be opened; zero otherwise.
       details: '<p>Uses the environment variable GDXCOMPRESS to set compression argument for gdxOpenWriteEx. Potentially overwrites existing file with same name. If a file extension is not supplied, the extension ''.gdx'' will be used. The return code is a system dependent I/O error.</p><p><b>See: </b><a href="#gdxOpenRead">gdxOpenRead</a>, <a href="#gdxOpenWriteEx">gdxOpenWriteEx</a>.</p>'
+      group: File (Open/Close)
   - gdxOpenWriteEx:
       type: int
       parameters:
@@ -904,6 +958,7 @@ functions:
       description: Create a GDX file for writing with explicitly given compression flag. Non-zero if the file can be opened, zero otherwise.
       return: Returns non-zero if the file can be opened; zero otherwise.
       details: '<p>Open a new GDX file for output. If a file extension is not supplied, the extension ''.gdx'' will be used. The return code is a system dependent I/O error.</p><p><font color="red"><b>Attention: </b></font>When writing compressed, set the AutoConvert flag to zero so the file is not uncompressed after the gdxClose; see gdxAutoConvert.</p><p><b>See: </b><a href="#gdxOpenRead">gdxOpenRead</a>, <a href="#gdxOpenWrite">gdxOpenWrite</a>, <a href="#gdxAutoConvert">gdxAutoConvert</a>.</p>'
+      group: File (Open/Close)
       code:
         cpp: |-
           std::string errMsg;
@@ -923,6 +978,7 @@ functions:
       description: Reset the internal values for special values. Always non-zero.
       return: Always non-zero.
       details: '<p><b>See: </b><a href="#gdxSetSpecialValues">gdxSetSpecialValues</a>, <a href="#gdxGetSpecialValues">gdxGetSpecialValues</a>.</p>'
+      group: Special values
   - gdxSetHasText:
       type: int
       parameters:
@@ -932,6 +988,7 @@ functions:
       description: Test if any of the elements of the set has an associated text. Non-zero if the Set contains at least one unique element that has associated text, zero otherwise.
       return: Non-zero if the set contains at least one element that has associated text, zero otherwise.
       details: '<p><b>See: </b><a href="#gdxSystemInfo">gdxSystemInfo</a>, <a href="#gdxSymbolInfo">gdxSymbolInfo</a>.</p>'
+      group: Text for UELs
   - gdxSetReadSpecialValues:
       type: int
       parameters:
@@ -941,6 +998,7 @@ functions:
       description: Set the internal values for special values when reading a GDX file. Before calling this function, initialize the array of special values by calling gdxGetSpecialValues first. Always non-zero.
       return: Always non-zero.
       details: '<p><b>Note: </b>Before calling this function, initialize the array of special values by calling gdxGetSpecialValues first.</p><p><font color="red"><b>Attention: </b></font>AVals must have length of at least 5 double values.</p><p><b>See: </b><a href="#gdxSetSpecialValues">gdxSetSpecialValues</a>, <a href="#gdxResetSpecialValues">gdxResetSpecialValues</a>, <a href="#gdxGetSpecialValues">gdxGetSpecialValues</a>.</p>'
+      group: Special values
   - gdxSetSpecialValues:
       type: int
       parameters:
@@ -949,6 +1007,7 @@ functions:
           description: Array of special values to be used Undef (0), NA (1), +Inf (2), -Inf (3), and EPS (4). Note that the values have to be unique and AVals should have length 7.
       description: Set the internal values for special values. Before calling this function, initialize the array of special values by calling gdxGetSpecialValues first. Note, values in AVals have to be unique. Non-zero if all values specified are unique, zero otherwise.
       return: Non-zero if all values specified are unique, zero otherwise.
+      group: Special values
       details: |-
         <p><b>Note: </b>Before calling this function, initialize the array of special values by calling gdxGetSpecialValues first.</p>
           <p><font color="red"><b>Attention: </b></font>Size of AVals should be 7.</p>
@@ -965,6 +1024,7 @@ functions:
       description: Set the Node number for an entry in the string table. After registering a string with AddSetText, we can assign a node number for later retrieval. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>After registering a string with AddSetText, we can assign a node number for later retrieval. The node number is any integer which is stored without further restrictions.</p><p><b>See: </b><a href="#gdxAddSetText">gdxAddSetText</a>, <a href="#gdxGetElemText">gdxGetElemText</a>.</p>'
+      group: Text for UELs
   - gdxSetTraceLevel:
       type: int
       parameters:
@@ -976,6 +1036,7 @@ functions:
           description: A string to be included in the trace output (arbitrary length).
       description: Set the amount of trace (debug) information generated. Always non-zero.
       return: Always non-zero.
+      group: Version/Information
   - gdxSymbIndxMaxLength:
       type: int
       parameters:
@@ -988,11 +1049,13 @@ functions:
       description: Returns the length of the longest UEL used for every index position for a given symbol.
       return: The length of the longest UEL found in the data (over all dimensions).
       details: '<p><font color="red"><b>Attention: </b></font>Make sure LengthInfo can store one integer for each symbol dimension.</p><p><b>See: </b><a href="#gdxUELMaxLength">gdxUELMaxLength</a>.</p>'
+      group: Longest symbol UEL
   - gdxSymbMaxLength:
       type: int
       const: True
       description: Returns the length of the longest symbol name in the GDX file.
       return: The number of characters in the longest symbol name.
+      group: Longest symbol UEL
   - gdxSymbolAddComment:
       type: int
       parameters:
@@ -1005,6 +1068,7 @@ functions:
       description: Add a line of comment text for a symbol. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><font color="red"><b>Attention: </b></font>A line of comment text can not contain more than 255 characters but there are no other restrictions on it.</p><p><b>See: </b><a href="#gdxSymbolGetComment">gdxSymbolGetComment</a>.</p>'
+      group: Comment
   - gdxSymbolGetComment:
       type: int
       parameters:
@@ -1020,6 +1084,7 @@ functions:
       description: Retrieve a line of comment text for a symbol. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><font color="red"><b>Attention: </b></font>Output argument string buffer must have size of 256 bytes.</p><p><b>See: </b><a href="#gdxSymbolAddComment">gdxSymbolAddComment</a>.</p>'
+      group: Comment
   - gdxSymbolGetDomain:
       type: int
       parameters:
@@ -1032,6 +1097,7 @@ functions:
       description: Retrieve the domain of a symbol. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><font color="red"><b>Attention: </b></font>Integer array DomainSyNrs should be able to store one entry for each symbol dimension.</p><p><b>See: </b><a href="#gdxSymbolSetDomain">gdxSymbolSetDomain</a>, <a href="#gdxSymbolGetDomainX">gdxSymbolGetDomainX</a>.</p>'
+      group: Domain
   - gdxSymbolGetDomainX:
       type: int
       parameters:
@@ -1044,6 +1110,7 @@ functions:
       description: Retrieve the domain of a symbol (using relaxed or domain information). Returns zero if the operation is not possible.
       return: '<ul><li>0: If operation was not possible (Bad SyNr)</li> <li>1: No domain information was available</li> <li>2: Data used was defined using gdxSymbolSetDomainX</li> <li>3: Data used was defined using gdxSymbolSetDomain</li></ul>'
       details: '<p><font color="red"><b>Attention: </b></font>Make sure DomainIDs is able to store a domain name for each symbol dimension. Each domain name requires a 256 byte wide buffer to store its maximum of 255 characters.</p><p><b>See: </b><a href="#gdxSymbolSetDomainX">gdxSymbolSetDomainX</a>, <a href="#gdxSymbolSetDomain">gdxSymbolSetDomain</a>.</p>'
+      group: Domain
   - gdxSymbolDim:
       type: int
       parameters:
@@ -1053,6 +1120,7 @@ functions:
       description: Returns dimensionality of a symbol.
       return: -1 if the symbol number is not in the correct range, the symbol dimension otherwise.
       details: '<p><b>See: </b><a href="#gdxSymbolInfo">gdxSymbolInfo</a>, <a href="#gdxSymbolInfoX">gdxSymbolInfoX</a>, <a href="#gdxFindSymbol">gdxFindSymbol</a>.</p>'
+      group: System/Symbol
   - gdxSymbolInfo:
       type: int
       parameters:
@@ -1071,6 +1139,7 @@ functions:
       description: Returns information (name, dimension count, type) about a symbol from the symbol table. Returns zero if the symbol number is out of range, non-zero otherwise.
       return: Zero if the symbol number is not in the correct range, non-zero otherwise.
       details: '<p><font color="red"><b>Attention: </b></font>SyId must be 64 characters long.</p><p><b>See: </b><a href="#gdxSystemInfo">gdxSystemInfo</a>, <a href="#gdxSymbolInfoX">gdxSymbolInfoX</a>, <a href="#gdxSymbolDim">gdxSymbolDim</a>, <a href="#gdxFindSymbol">gdxFindSymbol</a>.</p>'
+      group: System/Symbol
   - gdxSymbolInfoX:
       type: int
       parameters:
@@ -1098,6 +1167,7 @@ functions:
       description: Returns additional information about a symbol. Returns zero if the symbol number is out of range, non-zero otherwise.
       return: Zero if the symbol number is not in the correct range, non-zero otherwise.
       details: '<p><font color="red"><b>Attention: </b></font>Make sure the output argument string buffer for ExplTxt has size of 256 bytes.</p><p><b>See: </b><a href="#gdxSystemInfo">gdxSystemInfo</a>, <a href="#gdxSymbolInfo">gdxSymbolInfo</a>, <a href="#gdxFindSymbol">gdxFindSymbol</a>.</p>'
+      group: System/Symbol
   - gdxSymbolSetDomain:
       type: int
       parameters:
@@ -1107,6 +1177,7 @@ functions:
       description: Define the domain of a symbol for which a write data operation just started using DataWriteRawStart, DataWriteMapStart or DataWriteStrStart. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><p>This function defines the domain for the symbol for which a write data operation just started using DataWriteRawStart, DataWriteMapStart or DataWriteStrStart. At this point the symbol and dimension is known, but no data has been written yet.</p> <p>Each identifier will be checked to be a one dimensional set or an alias. When a domain is specified, write operations will be domain checked; records violating the domain will be added the the internal error list (see DataErrorCount and DataErrorRecord).</p></p><p><font color="red"><b>Attention: </b></font>Make sure there is one buffer with size 64 bytes for each symbol dimension.</p><p><b>See: </b><a href="#gdxSymbolGetDomain">gdxSymbolGetDomain</a>.</p>'
+      group: Domain
   - gdxSymbolSetDomainX:
       type: int
       parameters:
@@ -1119,6 +1190,7 @@ functions:
       description: Define the domain of a symbol (relaxed version). Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>This function defines the relaxed domain information for the symbol SyNr. The identifiers will NOT be checked to be known one-dimensional sets, and no domain checking will be performed. This function can be called during or after the write operation. If domain checking is needed, use gdxSymbolSetDomain.</p><p><b>See: </b><a href="#gdxSymbolSetDomain">gdxSymbolSetDomain</a>, <a href="#gdxSymbolGetDomainX">gdxSymbolGetDomainX</a>.</p>'
+      group: Domain
   - gdxSystemInfo:
       type: int
       const: True
@@ -1131,17 +1203,20 @@ functions:
           description: Number of unique elements (UELs) stored in the GDX file.
       description: Returns the number of symbols and unique elements. Always non-zero.
       return: Returns a non-zero value.
+      group: System/Symbol
   - gdxUELMaxLength:
       type: int
       const: True
       description: Returns the length of the longest unique element (UEL) name.
       return: The length of the longest UEL name in the UEL table.
       details: '<p><b>See: </b><a href="#gdxSymbIndxMaxLength">gdxSymbIndxMaxLength</a>.</p>'
+      group: Longest symbol UEL
   - gdxUELRegisterDone:
       type: int
       description: Finish registration of unique elements. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><b>See: </b><a href="#gdxUELRegisterRawStart">gdxUELRegisterRawStart</a>, <a href="#gdxUELRegisterMapStart">gdxUELRegisterMapStart</a>, <a href="#gdxUELRegisterStrStart">gdxUELRegisterStrStart</a>.</p>'
+      group: Unique elements
   - gdxUELRegisterMap:
       type: int
       parameters:
@@ -1154,11 +1229,13 @@ functions:
       description: Register unique element in mapped mode. A unique element must follow the GAMS rules when it contains quote characters. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>UMap is the user assigned index for the element. Registering an element a second time is not considered an error as long as the same UMap is used. Assigning different elements with the same UMap value is an error. A unique element must follow the GAMS rules when it contains quote characters and not exceed 63 characters length.</p><p><b>See: </b><a href="#gdxUELRegisterMapStart">gdxUELRegisterMapStart</a>, <a href="#gdxUELRegisterDone">gdxUELRegisterDone</a>.</p>'
+      group: Unique elements
   - gdxUELRegisterMapStart:
       type: int
       description: Start registering unique elements in mapped mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><b>See: </b><a href="#gdxUELRegisterMap">gdxUELRegisterMap</a>, <a href="#gdxUELRegisterDone">gdxUELRegisterDone</a>.</p>'
+      group: Unique elements
   - gdxUELRegisterRaw:
       type: int
       parameters:
@@ -1168,11 +1245,13 @@ functions:
       description: Register unique element in raw mode. This can only be used while writing to a GDX file. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p>The unique element (UEL) is registered in raw mode, i.e. the internally assigned integer index is determined by the system. Can only be used while writing to a GDX file and gdxUELRegisterRawStart was called beforehand.</p><p><b>See: </b><a href="#gdxUELRegisterMap">gdxUELRegisterMap</a>, <a href="#gdxUELRegisterDone">gdxUELRegisterDone</a>.</p>'
+      group: Unique elements
   - gdxUELRegisterRawStart:
       type: int
       description: Start registering unique elements in raw mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><b>See: </b><a href="#gdxUELRegisterRaw">gdxUELRegisterRaw</a>, <a href="#gdxUELRegisterDone">gdxUELRegisterDone</a>.</p>'
+      group: Unique elements
   - gdxUELRegisterStr:
       type: int
       parameters:
@@ -1185,11 +1264,13 @@ functions:
       description: Register a unique element in string mode. A unique element must follow the GAMS rules when it contains quote characters. Non-zero if the element was registered, zero otherwise.
       return: Non-zero if the element was registered, zero otherwise.
       details: '<p>The unique element is registered in user mapped space. The returned index is the next higher value. Registering an element a second time is not considered an error and the same index position will be returned. A unique element must follow the GAMS rules when it contains quote characters. Can only be used while writing to a GDX file and gdxUELRegisterStrStart was called beforehand.</p><p><b>See: </b><a href="#gdxUELRegisterStrStart">gdxUELRegisterStrStart</a>, <a href="#gdxUELRegisterDone">gdxUELRegisterDone</a>.</p>'
+      group: Unique elements
   - gdxUELRegisterStrStart:
       type: int
       description: Start registering unique elements in string mode. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><b>See: </b><a href="#gdxUELRegisterStr">gdxUELRegisterStr</a>, <a href="#gdxUELRegisterDone">gdxUELRegisterDone</a>.</p>'
+      group: Unique elements
   - gdxUMFindUEL:
       type: int
       parameters:
@@ -1204,6 +1285,7 @@ functions:
           description: User mapping for the element or -1 if not found or the element was never mapped.
       description: Search for unique element by its string. Non-zero if the element was found, zero otherwise.
       return: Non-zero if the element was found, zero otherwise.
+      group: Unique elements
   - gdxUMUelGet:
       type: int
       parameters:
@@ -1219,6 +1301,7 @@ functions:
       description: Get a unique element using an unmapped index. Returns zero if the operation is not possible.
       return: Non-zero if the operation is possible, zero otherwise.
       details: '<p><font color="red"><b>Attention: </b></font>Make sure buffer for Uel is at least 64 bytes long to prevent potential overflow.</p><p><b>See: </b><a href="#gdxUMUelInfo">gdxUMUelInfo</a>, <a href="#gdxGetUEL">gdxGetUEL</a>.</p>'
+      group: Unique elements
   - gdxUMUelInfo:
       type: int
       const: True
@@ -1232,6 +1315,7 @@ functions:
       description: Return information about the unique elements (UELs). Always non-zero.
       return: Always returns non-zero.
       details: '<p><b>See: </b><a href="#gdxUMUelGet">gdxUMUelGet</a>.</p>'
+      group: Unique elements
   - gdxGetDomainElements:
       type: int
       parameters:
@@ -1255,6 +1339,7 @@ functions:
           description: User pointer; will be passed to the callback procedure.
       description: Get the unique elements for a given dimension of a given symbol.
       return: Non-zero if the operation is possible, zero otherwise.
+      group: Domain
       details: |-
         <p>Using the data of a symbol, get the unique elements for a given index position.
         To achieve this, the symbols data is read and a tally is kept for the elements in the given index position.
@@ -1278,6 +1363,7 @@ functions:
       description: Returns the dimension of the currently active symbol When reading or writing data, the dimension of the current active symbol is sometimes needed to convert arguments from strings to pchars (char ) etc.
       return: Dimension of current active symbol.
       details: '<p>When reading or writing data, the dimension of the current active symbol is sometimes needed to convert arguments from strings to pchars (char ) etc. The currently active symbol is selected e.g. by starting a write- or read-operation and choosing its symbol number (SyNr).</p><p><b>See: </b><a href="#gdxDataReadRawStart">gdxDataReadRawStart</a>, <a href="#gdxDataWriteRawStart">gdxDataWriteRawStart</a>.</p>'
+      group: System/Symbol
   - gdxRenameUEL:
       type: int
       parameters:
@@ -1290,6 +1376,7 @@ functions:
       description: Rename unique element OldName to NewName.
       return: Zero if the renaming was possible; non-zero is an error indicator.
       details: '<p><font color="red"><b>Attention: </b></font>String for unique element (UEL) which may not exceed a length of 63 characters. Furthermore a UEL string must not mix single- and double-quotes.</p>'
+      group: Unique elements
 
 # property names and actions
 properties:
