@@ -96,10 +96,14 @@ public:
     * Otherwise an error is raised (ERR_NODOMAINDATA).
     */
    [[nodiscard]] int gdxAllowBogusDomains();
-
-{% for function in obj.functions -%}
+{% for group in groups -%}
+{%- if group %}
+   /// \name {{group}}
+   /// @{
+{%- endif -%}
+{%- for function in gtf[group] -%}
     {%- set fobj = function.items()|first -%}
-    {%- set fvals = fobj|last %}
+    {%- set fvals = fobj|last -%}
     {%- if fvals.details -%}
     {%- set triple = parse_details(fvals.details) -%}
     {%- endif %}
@@ -136,6 +140,11 @@ public:
     {{map_type(fobj|first, parm_vals.type)}}{{parm|first}}{% if not loop.last %}, {% endif %}{% endfor -%}
     {%- if fvals.parameters %}{{' '}}{% endif %})
     {%- if fvals.const %} const{%- endif -%};
+{% endfor %}
+{%- if group %}
+   /// @}
+
+{% endif -%}
 {% endfor %}
 
 private:
