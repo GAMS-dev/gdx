@@ -92,18 +92,33 @@ def map_type_gen(func_ptrs):
 
     return map_type
 
+def collect_groups(functions):
+    groups = []
+    gtf = {}
+    for f in functions:
+        for name, attrs in f.items():
+            group = None if not 'group' in attrs else attrs['group']
+            if group and group not in groups:
+                groups.append(group)
+            if group in gtf:
+                gtf[group].append(f)
+            else:
+                gtf[group] = [f]
+    groups = [None] + sorted(groups)
+    return groups, gtf
+
+
 
 def generate_method_declarations(input_yaml_fn, template_folder, template_fn, output_header_fn):
     with open(input_yaml_fn) as fp:
         obj = yaml.load(fp, Loader=yaml.FullLoader)
-
+    groups, gtf = collect_groups(obj['functions'])
     env = Environment(loader=FileSystemLoader(template_folder))
     for f in [beautify_html, parse_details, wrap_text, map_type_gen(obj['functionpointers'])]:
         env.globals[f.__name__] = f
     template = env.get_template(template_fn)
-    ostr = template.render(obj=obj)
     with open(output_header_fn, 'w') as fp:
-        fp.write(ostr)
+        fp.write(template.render(obj=obj, groups=groups, gtf=gtf))
 
 
 def main():
