@@ -1,0 +1,148 @@
+/*
+* GAMS - General Algebraic Modeling System GDX API
+*
+* Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
+* Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+// Implement TGXFile C++ class via calling C-API
+
+#pragma once
+
+// This is a drop-in replacement for gdx.h
+// in order to make gxfiletests.cpp also useful
+// for testing the wrapped GDX DLL
+
+#include <string>
+#include <iostream>
+#include <array>
+#include "gdxcc.h"
+
+namespace gdx
+{
+
+using TDomainIndexProc_t = void ( * )( int RawIndex, int MappedIndex, void *Uptr );
+using TDataStoreProc_t = void ( * )( const int *Indx, const double *Vals );
+using TDataStoreFiltProc_t = int ( * )( const int *Indx, const double *Vals, void *Uptr );
+using TDataStoreExProc_t = int ( * )( const int *Indx, const double *Vals, const int afdim, void *Uptr );
+
+using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
+using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
+
+enum TgdxIntlValTyp
+{// values stored internally via the indicator byte
+   vm_valund,
+   vm_valna,
+   vm_valpin,
+   vm_valmin,
+   vm_valeps,
+   vm_zero,
+   vm_one,
+   vm_mone,
+   vm_half,
+   vm_two,
+   vm_normal,
+   vm_count
+};
+
+constexpr int DOMC_UNMAPPED = -2,// indicator for unmapped index pos
+        DOMC_EXPAND = -1,        // indicator growing index pos
+        DOMC_STRICT = 0;         // indicator mapped index pos
+
+// Description:
+//    Class for reading and writing gdx files
+class TGXFileObj
+{
+   gdxHandle_t pgx {};
+
+public:
+   enum class TraceLevels
+   {
+      trl_none,
+      trl_errors,
+      trl_some,
+      trl_all
+   };
+
+   explicit TGXFileObj( std::string &ErrMsg )
+   {
+      char buf[GMS_SSSIZE];
+      if( !::gdxLibraryLoaded() && !::gdxGetReady( buf, GMS_SSSIZE ) )
+         throw std::runtime_error( buf );
+      if( !::gdxCreate( &pgx, buf, GMS_SSSIZE ) )
+         throw std::runtime_error( buf );
+      ErrMsg.assign( buf );
+   }
+
+   ~TGXFileObj()
+   {
+      if( pgx )
+         ::gdxFree( &pgx );
+      ::gdxLibraryUnload();
+   }
+{% for function in obj.functions -%}
+{%- set fobj = function.items()|first -%}
+{%- set fvals = fobj|last -%}
+    {% set is_static = fvals.static and fobj|first == 'gdxErrorStr' %}
+    {% if is_static %}static {% endif %}{{ map_type(fobj|first, fvals.type) }}{{ fobj|first }}({% if fvals.parameters %}{{' '}}{% endif %}
+           {%- for parm in fvals.parameters -%}
+           {%- set parm_vals = parm.values()|first -%}
+           {{map_type(fobj|first, parm_vals.type)}}{{parm|first}}{% if not loop.last %}, {% endif %}{% endfor -%}
+           {%- if fvals.parameters %}{{' '}}{% endif %}){%- if fvals.const %} const{%- endif %}
+    {
+      return ::{{fobj|first}}( {% if is_static %}nullptr{% else %}pgx{% endif %}{% if fvals.parameters %},{% endif %} {% for parm in fvals.parameters -%}
+              {%- set parm_vals = parm.values()|first -%}
+              {{maybe_deref(parm|first,parm_vals.type,'&')}}{% if not loop.last %}, {% endif %}{% endfor -%}
+              {%- if fvals.parameters %}{{' '}}{% endif %});
+    }
+{% endfor %}
+   int gdxStoreDomainSets()
+   {
+      return ::gdxStoreDomainSets( pgx );
+   }
+
+   void gdxStoreDomainSetsSet( int x )
+   {
+      ::gdxStoreDomainSetsSet( pgx, x );
+   }
+
+   void gdxAllowBogusDomainsSet( int flag )
+   {
+      ::gdxAllowBogusDomainsSet( pgx, flag );
+   }
+
+   [[nodiscard]] int gdxAllowBogusDomains()
+   {
+      return ::gdxAllowBogusDomains( pgx );
+   }
+
+   int gdxUELMaxLength()
+   {
+      return ::gdxUELMaxLength( pgx );
+   }
+
+   int gdxGetDLLVersion( char *V ) const
+   {
+      return ::gdxGetDLLVersion( pgx, V );
+   }
+};
+
+}// namespace gdx
