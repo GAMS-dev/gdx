@@ -2,10 +2,12 @@ import itertools
 
 from jinja2 import Environment, FileSystemLoader
 import yaml
-from bs4 import BeautifulSoup as bs
+
 import re
 import textwrap
 import argparse
+
+no_html_beautify = False
 
 
 def contains_html(s):
@@ -22,9 +24,10 @@ text_wrapper = textwrap.TextWrapper(width=100, break_long_words=False, replace_w
 def beautify_html(s):
     if s is None:
         return None
-    if not contains_html(s):
+    if no_html_beautify or not contains_html(s):
         return wrap_text(s)
-    raw_lines = str(bs(no_paragraphs(s), 'html.parser').prettify()).strip().split('\n')
+    import bs4
+    raw_lines = str(bs4.BeautifulSoup(no_paragraphs(s), 'html.parser').prettify()).strip().split('\n')
     lines = []
     for line in raw_lines:
         num_spaces = sum(1 for _ in itertools.takewhile(str.isspace, line))
@@ -56,13 +59,13 @@ def wrap_text(s):
     return '\n'.join('    *   ' + line if ix > 0 else line for ix, line in enumerate(lines))
 
 
-def map_type_gen(func_ptrs):
+def map_type_gen(func_ptrs, for_cpp=True):
     type_map = dict(css='const char *',
                     cSI='const char **',
                     oSS='char *',
                     int='int',
                     vII='int *',
-                    Oint='int &',
+                    Oint='int &' if for_cpp else 'int *',
                     oSI='char **',
                     cRV='const double *',
                     vRV='double *',
@@ -71,7 +74,7 @@ def map_type_gen(func_ptrs):
                     cSVA='const double *',
                     ptr='void *',
                     D='double',
-                    int64='int64_t')
+                    int64='int64_t' if for_cpp else 'int')
 
     func_ptr_types = {
         func_name: func_attrs['function'] + '_t'
@@ -133,7 +136,11 @@ def main():
     p.add_argument('--output', type=str,
                    default='gdx.h',
                    help='Name of C++ GDX header file to be generated')
+    p.add_argument('--no_html_beautify', action='store_true')
     args = p.parse_args()
+    if args.no_html_beautify:
+        global no_html_beautify
+        no_html_beautify = True
     generate_method_declarations(args.input,
                                  args.template_folder,
                                  args.template,

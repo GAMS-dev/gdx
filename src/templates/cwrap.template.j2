@@ -1,0 +1,192 @@
+/*
+ * GAMS - General Algebraic Modeling System GDX API
+ *
+ * Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+// Implement C-API via calling TGXFile C++ class
+
+#pragma once
+
+#include "gdx.h"    // for TGXFileObj, DLLLoadPath, TDataStoreProc_t, TDat...
+#include <algorithm>// for min
+#include <cassert>  // for assert
+#include <cstring>  // for memcpy
+#include <string>   // for string
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#if defined( _WIN32 )
+#define GDX_CALLCONV __stdcall
+#else
+#define GDX_CALLCONV
+#endif
+
+typedef struct TGXFileRec TGXFileRec_t;
+
+typedef void( GDX_CALLCONV *TDataStoreProc_t )( const int Indx[], const double Vals[] );
+typedef int( GDX_CALLCONV *TDataStoreExProc_t )( const int Indx[], const double Vals[], int DimFrst, void *Uptr );
+typedef int( GDX_CALLCONV *TDataStoreExProc_F_t )( const int Indx[], const double Vals[], int afdim, long long Uptr );
+typedef void( GDX_CALLCONV *TDataStoreProc_F_t )( const int Indx[], const double Vals[] );
+typedef int( GDX_CALLCONV *TDataStoreFiltProc_t )( const int Indx[], const double Vals[], void *Uptr );
+typedef void( GDX_CALLCONV *TDomainIndexProc_t )( int RawIndex, int MappedIndex, void *Uptr );
+typedef int( GDX_CALLCONV *TDataStoreFiltProc_F_t )( const int Indx[], const double Vals[], long long *Uptr );
+typedef void( GDX_CALLCONV *TDomainIndexProc_F_t )( int *RawIndex, int *MappedIndex, void *Uptr );
+
+typedef void( GDX_CALLCONV *gdxSetLoadPath_t )( const char *s );
+typedef void( GDX_CALLCONV *gdxGetLoadPath_t )( char *s );
+extern gdxSetLoadPath_t gdxSetLoadPath;
+extern gdxGetLoadPath_t gdxGetLoadPath;
+
+#if defined(_WIN32)
+typedef __int64 INT64;
+#else
+typedef signed long int INT64;
+#endif
+
+#ifndef GDX_INLINE
+#define GDX_INLINE inline
+#endif
+
+// PROTOTYPES BEGIN
+{%- for function in obj.functions -%}
+{%- set fobj = function.items()|first -%}
+{%- set fvals = fobj|last %}
+{{ map_type(fobj|first, fvals.type) }}{{ fobj|first }}( TGXFileRec_t *pgdx{% if fvals.parameters %}{{', '}}{% endif %}
+{%- for parm in fvals.parameters -%}
+{%- set parm_vals = parm.values()|first -%}
+{{map_type(fobj|first, parm_vals.type)}}{{parm|first}}{% if not loop.last %}, {% endif %}{% endfor -%}
+{%- if fvals.parameters %}{{' '}}{% endif %});
+{%- endfor %}
+
+void GDX_CALLCONV doSetLoadPath( const char *s );
+void GDX_CALLCONV doGetLoadPath( char *s );
+int gdxFree( TGXFileRec_t **pgdx );
+int gdxCreate( TGXFileRec_t **pgdx, char *errBuf, int bufSize );
+int gdxCreateD( TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen );
+void gdxDestroy( TGXFileRec_t **pgx );
+int gdxStoreDomainSets( TGXFileRec_t *pgdx );
+void gdxStoreDomainSetsSet( TGXFileRec_t *pgdx, int x );
+int gdxAllowBogusDomains (TGXFileRec_t *pgdx);
+void gdxAllowBogusDomainsSet (TGXFileRec_t *pgdx, int x);
+void setCallByRef( TGXFileRec_t *TGXFile, const char *FuncName, int cbrValue );
+// PROTOTYPES END
+
+GDX_INLINE void GDX_CALLCONV doSetLoadPath( const char *s )
+{
+   gdx::DLLLoadPath.assign( s );
+}
+
+GDX_INLINE void GDX_CALLCONV doGetLoadPath( char *s )
+{
+   assert( gdx::DLLLoadPath.size() < 256 );
+   memcpy( s, gdx::DLLLoadPath.c_str(), gdx::DLLLoadPath.size() );
+}
+
+#ifndef NO_SET_LOAD_PATH_DEF
+gdxSetLoadPath_t gdxSetLoadPath = doSetLoadPath;
+gdxGetLoadPath_t gdxGetLoadPath = doGetLoadPath;
+#endif
+
+GDX_INLINE int gdxCreate( TGXFileRec_t **TGXFile, char *errBuf, int bufSize )
+{
+   std::string ErrMsg;
+   auto *pgx = new gdx::TGXFileObj { ErrMsg };
+   if( !ErrMsg.empty() )
+      memcpy( errBuf, ErrMsg.c_str(), std::min<int>( (int) ErrMsg.length() + 1, bufSize ) );
+   else
+      errBuf[0] = '\0';
+   *TGXFile = reinterpret_cast<TGXFileRec_t *>( pgx );
+   return true;
+}
+
+GDX_INLINE void gdxDestroy( TGXFileRec_t **pgx )
+{
+   delete(gdx::TGXFileObj *) *pgx;
+   *pgx = nullptr;
+}
+
+{%- for function in obj.functions -%}
+{%- set fobj = function.items()|first -%}
+{%- set fvals = fobj|last %}
+GDX_INLINE {{ map_type(fobj|first, fvals.type) }}{{ fobj|first }}( TGXFileRec_t *pgx{% if fvals.parameters %}{{', '}}{% endif %}
+        {%- for parm in fvals.parameters -%}
+        {%- set parm_vals = parm.values()|first -%}
+        {{map_type(fobj|first, parm_vals.type)}}{{parm|first}}{% if not loop.last %}, {% endif %}{% endfor -%}
+        {%- if fvals.parameters %}{{' '}}{% endif %})
+{
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->{{fobj|first}}(
+{%- for parm in fvals.parameters -%}
+{%- set parm_vals = parm.values()|first -%}
+{{maybe_deref(parm|first,parm_vals.type)}}{% if not loop.last %}, {% endif %}{% endfor -%}
+{%- if fvals.parameters %}{{' '}}{% endif %});
+}
+{% endfor %}
+
+GDX_INLINE int gdxStoreDomainSets( TGXFileRec_t *TGXFile )
+{
+   return reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxStoreDomainSets();
+}
+
+GDX_INLINE void gdxStoreDomainSetsSet( TGXFileRec_t *TGXFile, int x )
+{
+   reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxStoreDomainSetsSet( x );
+}
+
+GDX_INLINE int gdxAllowBogusDomains( TGXFileRec_t *TGXFile )
+{
+   return reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxAllowBogusDomains();
+}
+
+GDX_INLINE void gdxAllowBogusDomainsSet( TGXFileRec_t *TGXFile, int x )
+{
+   reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxAllowBogusDomainsSet( x );
+}
+
+GDX_INLINE int gdxFree( TGXFileRec_t **TGXFile )
+{
+   gdxDestroy( TGXFile );
+   return 1;
+}
+
+GDX_INLINE int gdxCreateD( TGXFileRec_t **TGXFile, const char *sysDir, char *msgBuf, int msgBufLen )
+{
+   doSetLoadPath( sysDir );
+   return gdxCreate( TGXFile, msgBuf, msgBufLen );
+}
+
+GDX_INLINE void setCallByRef( TGXFileRec_t *TGXFile, const char *FuncName, int cbrValue )
+{
+   const auto obj = reinterpret_cast<gdx::TGXFileObj *>( TGXFile );
+   if( !std::strcmp( FuncName, "gdxDataReadRawFastEx_DP" ) )
+      obj->gdxDataReadRawFastEx_DP_CallByRef = cbrValue;
+   else if( !std::strcmp( FuncName, "gdxDataReadRawFastFilt_DP" ) )
+      obj->gdxDataReadRawFastFilt_DP_CallByRef = cbrValue;
+   else if( !std::strcmp( FuncName, "gdxGetDomainElements_DP" ) )
+      obj->gdxGetDomainElements_DP_CallByRef = cbrValue;
+}
+
+#ifdef __cplusplus
+}
+#endif
