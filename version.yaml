@@ -27,9 +27,3 @@ GDX:
   file-version: 7
   api-version: 9
   technical-release: 1
-
-# Compatible and tested GAMS distribution version
-GAMS:
-  major: 46
-  minor: 0
-  gold: 0
