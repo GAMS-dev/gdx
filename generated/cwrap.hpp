@@ -312,19 +312,19 @@ GDX_INLINE int gdxDataReadRaw( TGXFileRec_t *pgx, int *KeyInt, double *Values, i
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataReadRaw(KeyInt, Values, *DimFrst );
 }
 
-GDX_INLINE int gdxDataReadRawFast( TGXFileRec_t *pgx, int SyNr, TDataStoreProc_t DP, int *NrRecs )
+GDX_INLINE int gdxDataReadRawFast( TGXFileRec_t *pgx, int SyNr, ::TDataStoreProc_t DP, int *NrRecs )
 {
-   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataReadRawFast(SyNr, DP, *NrRecs );
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataReadRawFast(SyNr, (gdx::TDataStoreProc_t) DP, *NrRecs );
 }
 
-GDX_INLINE int gdxDataReadRawFastEx( TGXFileRec_t *pgx, int SyNr, TDataStoreExProc_t DP, int *NrRecs, void *Uptr )
+GDX_INLINE int gdxDataReadRawFastEx( TGXFileRec_t *pgx, int SyNr, ::TDataStoreExProc_t DP, int *NrRecs, void *Uptr )
 {
-   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataReadRawFastEx(SyNr, DP, *NrRecs, Uptr );
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataReadRawFastEx(SyNr, (gdx::TDataStoreExProc_t) DP, *NrRecs, Uptr );
 }
 
-GDX_INLINE int gdxDataReadRawFastFilt( TGXFileRec_t *pgx, int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP )
+GDX_INLINE int gdxDataReadRawFastFilt( TGXFileRec_t *pgx, int SyNr, const char **UelFilterStr, ::TDataStoreFiltProc_t DP )
 {
-   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataReadRawFastFilt(SyNr, UelFilterStr, DP );
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataReadRawFastFilt(SyNr, UelFilterStr, (gdx::TDataStoreFiltProc_t) DP );
 }
 
 GDX_INLINE int gdxDataReadRawStart( TGXFileRec_t *pgx, int SyNr, int *NrRecs )
@@ -332,9 +332,9 @@ GDX_INLINE int gdxDataReadRawStart( TGXFileRec_t *pgx, int SyNr, int *NrRecs )
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataReadRawStart(SyNr, *NrRecs );
 }
 
-GDX_INLINE int gdxDataReadSlice( TGXFileRec_t *pgx, const char **UelFilterStr, int *Dimen, TDataStoreProc_t DP )
+GDX_INLINE int gdxDataReadSlice( TGXFileRec_t *pgx, const char **UelFilterStr, int *Dimen, ::TDataStoreProc_t DP )
 {
-   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataReadSlice(UelFilterStr, *Dimen, DP );
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataReadSlice(UelFilterStr, *Dimen, (gdx::TDataStoreProc_t) DP );
 }
 
 GDX_INLINE int gdxDataReadSliceStart( TGXFileRec_t *pgx, int SyNr, int *ElemCounts )
@@ -642,9 +642,9 @@ GDX_INLINE int gdxUMUelInfo( TGXFileRec_t *pgx, int *UelCnt, int *HighMap )
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxUMUelInfo(*UelCnt, *HighMap );
 }
 
-GDX_INLINE int gdxGetDomainElements( TGXFileRec_t *pgx, int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int *NrElem, void *Uptr )
+GDX_INLINE int gdxGetDomainElements( TGXFileRec_t *pgx, int SyNr, int DimPos, int FilterNr, ::TDomainIndexProc_t DP, int *NrElem, void *Uptr )
 {
-   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxGetDomainElements(SyNr, DimPos, FilterNr, DP, *NrElem, Uptr );
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxGetDomainElements(SyNr, DimPos, FilterNr, (gdx::TDomainIndexProc_t) DP, *NrElem, Uptr );
 }
 
 GDX_INLINE int gdxCurrentDim( TGXFileRec_t *pgx)

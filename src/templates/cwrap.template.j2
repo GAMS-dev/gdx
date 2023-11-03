@@ -133,13 +133,13 @@ GDX_INLINE void gdxDestroy( TGXFileRec_t **pgx )
 GDX_INLINE {{ map_type(fobj|first, fvals.type) }}{{ fobj|first }}( TGXFileRec_t *pgx{% if fvals.parameters %}{{', '}}{% endif %}
         {%- for parm in fvals.parameters -%}
         {%- set parm_vals = parm.values()|first -%}
-        {{map_type(fobj|first, parm_vals.type)}}{{parm|first}}{% if not loop.last %}, {% endif %}{% endfor -%}
+        {{fp_decor(None, map_type(fobj|first, parm_vals.type))}}{{parm|first}}{% if not loop.last %}, {% endif %}{% endfor -%}
         {%- if fvals.parameters %}{{' '}}{% endif %})
 {
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->{{fobj|first}}(
 {%- for parm in fvals.parameters -%}
 {%- set parm_vals = parm.values()|first -%}
-{{maybe_deref(parm|first,parm_vals.type)}}{% if not loop.last %}, {% endif %}{% endfor -%}
+{{fp_decor(map_type(fobj|first, parm_vals.type), maybe_deref(parm|first,parm_vals.type))}}{% if not loop.last %}, {% endif %}{% endfor -%}
 {%- if fvals.parameters %}{{' '}}{% endif %});
 }
 {% endfor %}
