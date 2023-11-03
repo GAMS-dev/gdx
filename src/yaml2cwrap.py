@@ -9,6 +9,15 @@ def maybe_deref(arg_name, arg_type, deref_char='*'):
     return (deref_char if arg_type == 'Oint' else '') + arg_name
 
 
+def fp_decor(t, s):
+    if s.strip().endswith('Proc_t'):
+        return '::' + s
+    elif s == 'DP':
+        return f'(gdx::{t.rstrip()}) {s}'
+    else:
+        return s
+
+
 def generate_c_wrapper(input, template_folder, template, output):
     with open(input) as fp:
         obj = yaml.load(fp, Loader=yaml.FullLoader)
@@ -16,6 +25,7 @@ def generate_c_wrapper(input, template_folder, template, output):
     cpp_wrap = template.endswith('gdxcppwrap.template.j2')
     env.globals['map_type'] = yaml2doxy.map_type_gen(obj['functionpointers'], for_cpp=cpp_wrap)
     env.globals['maybe_deref'] = maybe_deref
+    env.globals['fp_decor'] = fp_decor
     template = env.get_template(template)
     with open(output, 'w') as fp:
         fp.write(template.render(obj=obj))
