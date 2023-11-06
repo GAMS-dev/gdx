@@ -95,62 +95,11 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
   <div class="headertitle"><div class="title">GAMS Data eXchange (GDX) </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p ><a class="anchor" id="md_README"></a> </p>
+<div class="textblock"><p ><a class="anchor" id="md_README_filtered"></a></p>
 <h1><a class="anchor" id="autotoc_md1"></a>
-Table of Contents</h1>
-<ul>
-<li>GAMS Data eXchange (GDX)<ul>
-<li>Basic information on GDX file format<ul>
-<li>Information contained inside a GDX file</li>
-<li>Features of the GDX API</li>
-</ul>
-</li>
-<li>Setting up and building GDX<ul>
-<li>Accessing GDX from a custom application</li>
-<li>Building GDX from source</li>
-</ul>
-</li>
-<li>Reference documentation</li>
-<li>Introduction into using GDX API<ul>
-<li>Writing data to a GDX file</li>
-<li>Writing data using strings</li>
-<li>Writing data using integers (raw)</li>
-<li>Writing data using integers (mapped)</li>
-<li>Reading data from a GDX file</li>
-<li>Reading data using strings</li>
-<li>Reading data using integers (raw)</li>
-<li>Reading data using integers (Mapped)</li>
-<li>Reading data using a filter</li>
-<li>Dealing with acronyms</li>
-</ul>
-</li>
-<li>Functions by Category</li>
-<li>Transition diagram<ul>
-<li>Diagram for general operations</li>
-<li>Diagram for read operations</li>
-<li>Diagram for write operations</li>
-<li>Diagram for UEL operations</li>
-</ul>
-</li>
-<li>Example programs<ul>
-<li>Example 1 (GAMS)</li>
-<li>Example 2 (C)</li>
-<li>Example 3 (C++)</li>
-<li>Example 4 (VB.NET)</li>
-<li>Example 6 (Python)</li>
-<li>Example 7 (C#)</li>
-<li>Example 8 (Java)</li>
-</ul>
-</li>
-<li>Conversion issues when moving from GAMS 22.5 to 22.6</li>
-<li>Files in the apifiles directory</li>
-</ul>
-</li>
-</ul>
-<h1><a class="anchor" id="autotoc_md2"></a>
 Basic information on GDX file format</h1>
 <p >The GAMS modeling language is a domain specific language tailored towards mathematical optimization. The language reflects the basic building blocks (symbols) of an algebraic optimization model: Sets, parameters, scalars, decision variables, and equations. While declaring the symbols in the GAMS language is rather straightforward and concise, defining their values (which must be done prior to running the optimization for exogenous symbols like sets, parameters and scalars) might be comparatively cumbersome. In many applications, the actual data for the symbols is also already stored in some other location like a file or database. In order to have an efficient way to load data into a model, store the solution results and in general exchange information with other applications, the GDX file format was conceived.</p>
-<h2><a class="anchor" id="autotoc_md3"></a>
+<h2><a class="anchor" id="autotoc_md2"></a>
 Information contained inside a GDX file</h2>
 <ul>
 <li>Unique elements (strings used to identify set elements)</li>
@@ -169,7 +118,7 @@ Information contained inside a GDX file</h2>
 </ul>
 <p >Records are mapping from the domain of the symbol to the value space with up to 5 fields (level, marginal, lower bound, upper bound, scale)</p>
 <p >The actual data might be stored verbatim or compressed (using zlib).</p>
-<h2><a class="anchor" id="autotoc_md4"></a>
+<h2><a class="anchor" id="autotoc_md3"></a>
 Features of the GDX API</h2>
 <p >For efficiency reasons (both read/write-speeds and disk usage) the GDX format is a binary format that cannot be easily processed using a text editor. Hence, looking at the contents of a GDX file is ideally done via a graphical user interface like the GDX viewer included in GAMS Studio or the <code>gdxdump</code> console utility included in the GAMS distribution. In order to write conversion utilities between GDX and various other data file formats, an API is needed. This API has the following features:</p><ul>
 <li>Reading list of symbols and UELs</li>
@@ -178,9 +127,9 @@ Features of the GDX API</h2>
 <li>Bindings to multiple languages</li>
 </ul>
 <p >The GDX API is very powerful with fine-grained control and is also used at GAMS internally. There exist more comfortable object-oriented alternatives for programming languages like <code>gams-cpp</code> and GAMS Python.</p>
-<h1><a class="anchor" id="autotoc_md5"></a>
+<h1><a class="anchor" id="autotoc_md4"></a>
 Setting up and building GDX</h1>
-<h2><a class="anchor" id="autotoc_md6"></a>
+<h2><a class="anchor" id="autotoc_md5"></a>
 Accessing GDX from a custom application</h2>
 <p >The GDX API is available for multiple programming languages including:</p><ul>
 <li>C/C++</li>
@@ -189,7 +138,7 @@ Accessing GDX from a custom application</h2>
 <li>Python</li>
 </ul>
 <p >Depending on the language choice, the required steps to have it accessible from your development environment slightly differ.</p>
-<h2><a class="anchor" id="autotoc_md7"></a>
+<h2><a class="anchor" id="autotoc_md6"></a>
 Building GDX from source</h2>
 <p >The GDX library is written in C++ and built via CMake. This repository contains a GitLab CI YAML that describes a pipeline which builds GDX and runs the unit test suite.</p>
 <p >Please run </p><div class="fragment"><div class="line">git clone https://github.com/madler/zlib zlib</div>
@@ -204,11 +153,11 @@ Building GDX from source</h2>
 <li>CMake (build system)</li>
 <li>C++17 compiler (e.g. GCC, clang, MSVC, Intel C++)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md8"></a>
+<h1><a class="anchor" id="autotoc_md7"></a>
 Reference documentation</h1>
 <p >A full detailed Doxygen-generated API reference is available <a href="https://gams-dev.github.io/gdx/classgdx_1_1TGXFileObj.html">here</a>.</p>
 <p >Alternatively it is available <a class="el" href="classgdx_1_1TGXFileObj.html">here</a></p>
-<h1><a class="anchor" id="autotoc_md9"></a>
+<h1><a class="anchor" id="autotoc_md8"></a>
 Introduction into using GDX API</h1>
 <p >This document describes the Application Programmers Interface (API) for the GDX library. The GDX library is used to read or write GDX files. A GDX file is a file that stores the values of one or more GAMS symbols such as sets, parameters, variables, and equations. GDX files can be used to prepare data for a GAMS model, present results of a GAMS model, store results of the same model using different parameters etc. A GDX file does not store a model formulation or executable statements.</p>
 <p >GDX files are binary files that are portable between different platforms. They are written using the byte ordering native to the hardware platform they are created on, but can be read on a platform using a different byte ordering.</p>
@@ -218,7 +167,7 @@ Introduction into using GDX API</h1>
 <li>The <b>Raw</b> integer interface. An <code>n</code> dimensional element is represented as an array of integers. The integer used for each index position is obtained from the API after registering the string representation with the API.</li>
 <li>The <b>Mapped</b> integer interface. An <code>n</code> dimensional element is represented as an array of integers. The integer used for each index position is defined by the user. Before such an element can be used, its value and string has to be registered.</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md10"></a>
+<h2><a class="anchor" id="autotoc_md9"></a>
 Writing data to a GDX file</h2>
 <p >Creating a GDX file and writing one or more symbols to the file requires a number of steps:</p>
 <ol type="1">
@@ -242,7 +191,7 @@ Writing data to a GDX file</h2>
 <div class="line">  std::cout &lt;&lt; <span class="stringliteral">&quot;**** &quot;</span> &lt;&lt; S.data() &lt;&lt; std::endl;</div>
 <div class="line">  exit(1);</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md11"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md10"></a>
 Writing data using strings</h2>
 <p >The String based interface is suitable when we want to use a string based index and do not want to maintain a mapping from strings to integers.</p>
 <p >Before writing data using a string based interface we can register strings for the unique elements, but this step is <em>optional</em>. The only reason to register the strings beforehand is to enter the strings in a given order which may have advantages later in the modelling stage.</p>
@@ -260,7 +209,7 @@ Writing data using strings</h2>
 <div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataWriteDone())</div>
 <div class="line">   ReportGDXError();</div>
 </div><!-- fragment --><p >In this example we write two records for a parameter that has a dimension of one.</p>
-<h2><a class="anchor" id="autotoc_md12"></a>
+<h2><a class="anchor" id="autotoc_md11"></a>
 Writing data using integers (raw)</h2>
 <p >The Raw interface is suitable when we want to manage our own list of unique elements, and use an integer based index. The Raw interface assumes that the integers assigned to the strings range from one to the number of strings registered.</p>
 <p >Before we can write data using the Raw interface, we have to register the strings for the unique elements. The GDX routines will assign an integer to the string that increases by one for every string registered.</p>
@@ -284,7 +233,7 @@ Writing data using integers (raw)</h2>
 <div class="line"> </div>
 <div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataWriteDone())</div>
 <div class="line">    ReportGDXError();</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md13"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md12"></a>
 Writing data using integers (mapped)</h2>
 <p >The Mapped interface is suitable when we want to manage our <em>own</em> list of unique elements, and use an integer based index. The mapped interface lets us select our own mapping between strings for the unique elements and their integer equivalent. The integers assigned to the unique elements should be greater equal one, and be unique for each element.</p>
 <p >Before we can write data using the Mapped interface, we have to register the strings for the unique elements.</p>
@@ -309,7 +258,7 @@ Writing data using integers (mapped)</h2>
 <div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataWriteDone())</div>
 <div class="line">    ReportGDXError();</div>
 </div><!-- fragment --><p >In this example we register two unique elements, and write a parameter of dimension one.</p>
-<h2><a class="anchor" id="autotoc_md14"></a>
+<h2><a class="anchor" id="autotoc_md13"></a>
 Reading data from a GDX file</h2>
 <p >Opening an existing GDX file and reading one or more symbols from the file requires a number of steps:</p>
 <ol type="1">
@@ -325,7 +274,7 @@ Reading data from a GDX file</h2>
 </ol>
 <p >Steps 3 - 6 can be repeated to read any number of symbols from the file.</p>
 <p >The following sections illustrate the basic steps for each type of interface. The method of writing (string, raw or mapped) can be selected for each symbol; it cannot be changed while writing a symbol.</p>
-<h2><a class="anchor" id="autotoc_md15"></a>
+<h2><a class="anchor" id="autotoc_md14"></a>
 Reading data using strings</h2>
 <p >Reading data using strings does not require any unique element registration.</p>
 <div class="fragment"><div class="line"><span class="keywordflow">if</span>(!gdx.gdxFindSymbol(<span class="stringliteral">&quot;x&quot;</span>,SyNr)) {</div>
@@ -350,7 +299,7 @@ Reading data using strings</h2>
 <div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataReadDone())</div>
 <div class="line">   ReportGDXError();</div>
 </div><!-- fragment --><p >In this example we find the symbol by its name, and before reading the data we verify that the symbol represents a one dimensional parameter.</p>
-<h2><a class="anchor" id="autotoc_md16"></a>
+<h2><a class="anchor" id="autotoc_md15"></a>
 Reading data using integers (raw)</h2>
 <p >Reading data using integers in Raw mode does not require the registration of unique elements. The read routine returns an integer for which we can find the string representation.</p>
 <div class="fragment"><div class="line"><span class="keywordflow">if</span>(!gdx.gdxFindSymbol(<span class="stringliteral">&quot;x&quot;</span>,SyNr) {</div>
@@ -378,7 +327,7 @@ Reading data using integers (raw)</h2>
 <div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataReadDone())</div>
 <div class="line">   ReportGDXError();</div>
 </div><!-- fragment --><p >In this example we find the symbol by its name, and before reading the data we verify that the symbol represents a one dimensional parameter. When reading the data, we get a unique element as an integer. The integer value is used to get the corresponding string for the unique element.</p>
-<h2><a class="anchor" id="autotoc_md17"></a>
+<h2><a class="anchor" id="autotoc_md16"></a>
 Reading data using integers (Mapped)</h2>
 <p >Reading data using integers in Mapped mode requires the registration of unique elements. The read routine returns an integer for which we can find the string representation.</p>
 <p >When the gdx file contains data elements that we never registered, the read function will not return these elements, they will be added to an internal list of error records instead.</p>
@@ -421,7 +370,7 @@ Reading data using integers (Mapped)</h2>
 <div class="line">   std::cout &lt;&lt; NrRecs &lt;&lt; <span class="stringliteral">&quot; records were skipped&quot;</span> &lt;&lt; std::endl;</div>
 </div><!-- fragment --><p >In this example we register a few unique elements using our \own integer values. After verifying that we can find the symbol and that the symbol represents a one dimensional parameter we can read the data. The index for the parameter is returned using the integers we used when registering our elements. When we read the records in sequence, the index returned will be sorted with the first index position the most significant.</p>
 <p >After reading the data, we print the number of records that were skipped in the read routine.</p>
-<h2><a class="anchor" id="autotoc_md18"></a>
+<h2><a class="anchor" id="autotoc_md17"></a>
 Reading data using a filter</h2>
 <p >Reading data using a filter allows us to control the action for every index position. The type of action is specified using action codes and needs to be specified for every index position. The actual reading of the records is done with the gdxDataReadMap function.</p>
 <table class="markdownTable">
@@ -487,7 +436,7 @@ the record is flagged as an error record and the record will be skipped.    </td
 <div class="line">      std::cout &lt;&lt; <span class="stringliteral">&quot;New element &quot;</span> &lt;&lt; N &lt;&lt; <span class="stringliteral">&quot; = &quot;</span> &lt;&lt; S &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
 <div class="line">   }</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md19"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md18"></a>
 Dealing with acronyms</h2>
 <p >In GAMS we can use acronyms in places where we can use a floating point number as in the following example: </p><div class="fragment"><div class="line">set i /i1*i5/;</div>
 <div class="line">acronym acro1, acro2;</div>
@@ -573,7 +522,7 @@ Dealing with acronyms</h2>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line">gdx.gdxFree();</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md20"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md19"></a>
 Functions by Category</h1>
 <p >The following table organizes the functions by category:</p>
 <table class="markdownTable">
@@ -606,73 +555,9 @@ Functions by Category</h1>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Acronyms   </td><td class="markdownTableBodyNone">gdxAcronymIndex gdxAcronymValue gdxAcronymCount gdxAcronymGetInfo gdxAcronymSetInfo   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md21"></a>
-Transition diagram</h1>
-<p >Some GDX operations only make sense after running other routines for preparation beforehand. For example, writing records to a symbol in raw mode can only be done after the symbol has been "opened" for writing in raw mode. Hence, the GDX operations follow a state machine like logic that prevents the user from executing operations that are not sensible in the current state of the GDX object. The routines documented below follow certain input / output state transitions. Routines not documented below have no special state requirements.</p>
-<h2><a class="anchor" id="autotoc_md22"></a>
-Diagram for general operations</h2>
-<div class="fragment"><div class="line">graph TD</div>
-<div class="line">    f_notopen --&gt;|gdxOpenRead| fr_init</div>
-<div class="line">    f_notopen --&gt;|gdxOpenWrite| fr_init</div>
-<div class="line">    f_notopen --&gt;|gdxOpenWriteEx| fr_init</div>
-<div class="line">    f_init --&gt;|gdxClose| f_notopen</div>
-<div class="line">    fw_init --&gt;|gdxClose| f_notopen</div>
-<div class="line">    fr_init --&gt;|gdxSymbMaxLength| fr_init</div>
-<div class="line">    fr_init --&gt;|gdxUELMaxLength| fr_init</div>
-<div class="line">    fr_init --&gt;|gdxSymbIndxMaxLength| fr_init</div>
-<div class="line">    fr_init --&gt;|gdxAcronymSetInfo| fr_init</div>
-<div class="line">    fw_init --&gt;|gdxAcronymSetInfo| fw_init</div>
-</div><!-- fragment --> <h2><a class="anchor" id="autotoc_md23"></a>
-Diagram for read operations</h2>
-<div class="fragment"><div class="line">graph TD</div>
-<div class="line">    fr_init --&gt;|gdxDataReadRawStart*| fr_raw_data</div>
-<div class="line">    fr_init --&gt;|gdxDataReadMapStart*| fr_map_data</div>
-<div class="line">    fr_init --&gt;|gdxDataReadStrStart*| fr_str_data</div>
-<div class="line">    fr_init --&gt;|gdxDataReadFilteredStart*| fr_map_data</div>
-<div class="line">    fr_raw_data --&gt;|gdxDataReadRaw**| fr_raw_data</div>
-<div class="line">    fr_raw_data --&gt;|gdxDataReadRaw**| fr_init</div>
-<div class="line">    fr_map_data --&gt;|gdxDataReadMap**| fr_map_data</div>
-<div class="line">    fr_map_data --&gt;|gdxDataReadMap**| fr_init</div>
-<div class="line">    fr_str_data --&gt;|gdxDataReadStr**| fr_str_data</div>
-<div class="line">    fr_str_data --&gt;|gdxDataReadStr**| fr_init</div>
-<div class="line">    fr_raw_data --&gt;|gdxDataReadDone| fr_init</div>
-<div class="line">    fr_map_data --&gt;|gdxDataReadDone| fr_init</div>
-<div class="line">    fr_str_data --&gt;|gdxDataReadDone| fr_init</div>
-<div class="line">    fr_init --&gt;|gdxFilterRegisterStart| fr_filter</div>
-<div class="line">    fr_filter --&gt;|gdxFilterRegister| fr_filter</div>
-<div class="line">    fr_filter --&gt;|gdxFilterRegisterDone| fr_init</div>
-<div class="line">    fr_init --&gt;|gdxFilterExists| fr_init</div>
-</div><!-- fragment --><ul>
-<li><code>*</code> denotes symbol having data. Transition to <code>fr_init</code> if the symbol is empty.</li>
-<li><code>**</code> stay in <code>fr_{raw,map,str}_data</code> iff. there are more records to read, move to <code>fr_init</code> otherwise.</li>
-</ul>
-<h2><a class="anchor" id="autotoc_md24"></a>
-Diagram for write operations</h2>
-<div class="fragment"><div class="line">graph TD</div>
-<div class="line">    fw_init --&gt;|gdxDataWriteRawStart| fw_raw_data</div>
-<div class="line">    fw_init --&gt;|gdxDataWriteMapStart| fw_map_data</div>
-<div class="line">    fw_init --&gt;|gdxDataWriteStrStart| fw_str_data</div>
-<div class="line">    fw_raw_data --&gt;|gdxDataWriteRaw| fw_raw_data</div>
-<div class="line">    fw_map_data --&gt;|gdxDataWriteMap| fw_map_data</div>
-<div class="line">    fw_str_data --&gt;|gdxDataWriteStr| fw_str_data</div>
-<div class="line">    fw_raw_data --&gt;|gdxDataWriteDone| fw_init</div>
-<div class="line">    fw_map_data --&gt;|gdxDataWriteDone| fw_init</div>
-<div class="line">    fw_str_data --&gt;|gdxDataWriteDone| fw_init</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md25"></a>
-Diagram for UEL operations</h2>
-<div class="fragment"><div class="line">graph TD</div>
-<div class="line">    fr_init --&gt;|gdxUELRegisterRawStart| f_raw_elem</div>
-<div class="line">    f_raw_elem --&gt;|gdxUELRegisterRaw| f_raw_elem</div>
-<div class="line">    fr_init --&gt;|gdxUELRegisterRawStart| f_map_elem</div>
-<div class="line">    f_map_elem --&gt;|gdxUELRegisterRaw| f_map_elem</div>
-<div class="line">    fr_init --&gt;|gdxUELRegisterRawStart| f_str_elem</div>
-<div class="line">    f_str_elem --&gt;|gdxUELRegisterRaw| f_str_elem</div>
-<div class="line">    f_raw_elem --&gt;|gdxUELRegisterDone| fr_init</div>
-<div class="line">    f_map_elem --&gt;|gdxUELRegisterDone| fr_init</div>
-<div class="line">    f_str_elem --&gt;|gdxUELRegisterDone| fr_init</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md26"></a>
+<h1><a class="anchor" id="autotoc_md20"></a>
 Example programs</h1>
-<h2><a class="anchor" id="autotoc_md27"></a>
+<h2><a class="anchor" id="autotoc_md21"></a>
 Example 1 (GAMS)</h2>
 <p >In this modified version of the trnsport.gms model, we use an external program to generate data for the demand parameter. After we solve the model, we write the solution to a GDX file, and call the external program again to read the variable from the GDX file. </p><div class="fragment"><div class="line">$Title trnsport model using gdx files</div>
 <div class="line">$EOLCOM //</div>
@@ -733,7 +618,7 @@ Example 1 (GAMS)</h2>
 <div class="line">// These lines execute during the execution phase</div>
 <div class="line">execute_unload &#39;results.gdx&#39;,x;                     // write variable x to the gdx file</div>
 <div class="line">execute &#39;gdxexdp.exe %gams.sysdir% results.gdx&#39;; // do something with the solution</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md28"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md22"></a>
 Example 2 (C)</h2>
 <div class="fragment"><div class="line"><span class="comment">/*</span></div>
 <div class="line"><span class="comment">  Use this command to compile the example:</span></div>
@@ -930,7 +815,7 @@ Example 2 (C)</h2>
 <div class="line"> gdxFree(&amp;Tptr);</div>
 <div class="line"> </div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md29"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md23"></a>
 Example 3 (C++)</h2>
 <div class="fragment"><div class="line"> <span class="comment">/*</span></div>
 <div class="line"><span class="comment">   Use this command to compile the example:</span></div>
@@ -1044,7 +929,7 @@ Example 3 (C++)</h2>
 <div class="line"> </div>
 <div class="line">    <span class="keywordflow">return</span> 0;</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md30"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md24"></a>
 Example 4 (VB.NET)</h2>
 <div class="fragment"><div class="line">Module xp_example1</div>
 <div class="line">    &#39;///////////////////////////////////////////////////////////////</div>
@@ -1182,7 +1067,7 @@ Example 4 (VB.NET)</h2>
 <div class="line">        End If</div>
 <div class="line">    End Sub</div>
 <div class="line">End Module</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md31"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md25"></a>
 Example 6 (Python)</h2>
 <div class="fragment"><div class="line"><span class="keyword">import</span> argparse</div>
 <div class="line"><span class="keyword">import</span> sys</div>
@@ -1265,7 +1150,7 @@ Example 6 (Python)</h2>
 <div class="line">    <span class="keywordflow">if</span> <span class="keywordflow">not</span> gdx.gdxFree(gdx_h):</div>
 <div class="line">        <span class="keywordflow">raise</span> Exception(<span class="stringliteral">&quot;Error in gdxFree&quot;</span>)</div>
 <div class="line">    print(<span class="stringliteral">&quot;All done&quot;</span>)</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md32"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md26"></a>
 Example 7 (C#)</h2>
 <div class="fragment"><div class="line"> </div>
 <div class="line"><span class="comment">// This program generates demand data for a modified version //</span></div>
@@ -1412,7 +1297,7 @@ Example 7 (C#)</h2>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md33"></a>
+</div><!-- fragment --><h2><a class="anchor" id="autotoc_md27"></a>
 Example 8 (Java)</h2>
 <div class="fragment"><div class="line"><span class="keyword">package </span>com.gams.xp_examples;</div>
 <div class="line"><span class="keyword">import</span> com.gams.api.*;</div>
@@ -1543,7 +1428,7 @@ Example 8 (Java)</h2>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line">}</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md34"></a>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md28"></a>
 Conversion issues when moving from GAMS 22.5 to 22.6</h1>
 <ul>
 <li>maximum number of dimensions = 20 (was 10)</li>
@@ -1552,23 +1437,22 @@ Conversion issues when moving from GAMS 22.5 to 22.6</h1>
 <li>support for domain information</li>
 </ul>
 <p >Backward compatibility:</p><ul>
-<li>GAMS and all gdx utilites will write gdx files in the new format</li>
-<li>GAMS and all gdx utilites can read older gdx formats</li>
+<li>GAMS and all gdx utilities will write gdx files in the new format</li>
+<li>GAMS and all gdx utilities can read older gdx formats</li>
 <li>The gdxcopy utility can convert between different gdx formats (assuming that dimension and namelength is supported)</li>
 </ul>
 <p >Libraries:</p><ul>
-<li>gdxio.dll is still available but the new library is called gdxcclib64.dll (substitute .dll with the extension for your platform)</li>
-<li>gdxio.dll cannot read the new gdx format</li>
+<li><code>gdxio.dll</code> is still available but the new library is called <code>(lib)gdxcclib64.dll</code> (substitute <code>.dll</code> with the extension for your platform, e.g. <code>.so</code> or <code>.dylib</code>)</li>
+<li><code>gdxio.dll</code> cannot read the new gdx format</li>
 </ul>
 <p >API:</p><ul>
 <li>Functions in the library that used to return a boolean, now return an integer (zero for false, non-zero for true)</li>
-<li>Before we can read or write a gdx file, we need to create a valid gdx object. The function gdxCreate will create such an object</li>
-<li>The functions gdxOpenRead and gdxOpenWrite no longer create the gdx object pointer, they require an object pointer that has been initialized using gdxCreate or similar functions</li>
+<li>Before we can read or write a gdx file, we need to create a valid gdx object. The function <code>gdxCreate</code> will create such an object</li>
+<li>The functions <code>gdxOpenRead</code> and <code>gdxOpenWrite</code> no longer create the gdx object pointer, they require an object pointer that has been initialized using gdxCreate or similar functions</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md35"></a>
+<h1><a class="anchor" id="autotoc_md29"></a>
 Files in the apifiles directory</h1>
-<p >The following sections describe the various files included in the apifiles directory. All functions will use the gdxcclib library (like gdxcclib.dll on Windows). The entry points in the library can be loaded static (by the operating system) or dynamic. Dynamic loading provides more control when an entry point is missing or the interface has changed. Static loading will cause an exception to be generated for example for a missing entry point without much feedback about the error.</p>
-<p >For Delphi/Pascal two different interfaces are available; an object interface and a function interface. </p>
+<p >The following sections describe the various files included in the apifiles directory. All functions will use the gdxcclib library (like <code>gdxcclib64.dll</code> on Windows). The entry points in the library can be loaded static (by the operating system) or dynamic. Dynamic loading provides more control when an entry point is missing or the interface has changed. Static loading will cause an exception to be generated for example for a missing entry point without much feedback about the error. </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 </div><!-- doc-content -->
