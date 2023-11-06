@@ -7,6 +7,7 @@ stages:
   - analyze
   - test
   - leak-check
+  - perf-check
   - docs
   - deploy
 
@@ -284,6 +285,40 @@ leak-check-leg:
 
 #=======================================================================================================================
 
+perf-check-leg:
+  stage: perf-check
+  tags: [linux]
+  image:
+    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-leg,install-gamsdist-leg]
+  when: manual
+  script:
+    - SUITE_NAME=gdxfiles
+    - PERF_CALL="gams gdxperf procTreeMemMonitor=1 --RUN=suite --SUITE=${SUITE_NAME} --RUNDEFAULT=0 --RUNCAPI=1"
+    - ARCHIVE_NAME="gdxfiles.zip"
+    - curl https://cloud.gams.com/s/pxSEJNMWszJn3if/download/gdxfiles.zip > $ARCHIVE_NAME
+    - unzip $ARCHIVE_NAME -d $SUITE_NAME
+    - rm $ARCHIVE_NAME
+    - cp -R /cache/gams-installs/`cat gams_folder_leg.txt` mygamsdist # need local copy as we modify libgdxcclib64.so
+    - cp libgdxcclib64.so mygamsdist
+    - GAMS_PATH=`pwd`/mygamsdist/
+    - ${GAMS_PATH}apilib gdxperf
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ${PERF_CALL} | tee cppgdx.log
+    - rm -rf mygamsdist
+    - python3 ci/fetch_gams.py fetch_and_install dist43 $SSH_KEY_PORTING
+    - python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH $SSH_KEY_PORTING > gams43_folder_leg.txt
+    - GAMS_PATH=/cache/gams-installs/`cat gams43_folder_leg.txt`/
+    - ${GAMS_PATH}apilib gdxperf
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ${PERF_CALL} | tee delphigdx.log
+    - python3 ci/perflogparse.py | tee perf.json
+  artifacts:
+    name: gdxperf-logs
+    paths: [cppgdx.log,delphigdx.log,perf.json]
+    expire_in: 1 day
+
+#=======================================================================================================================
+
 doxygen-html:
   stage: docs
   tags: [linux]
@@ -291,7 +326,9 @@ doxygen-html:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
   script:
+    - python3 ci/readme_filter.py
     - doxygen
+    - rm README_filtered.md
   artifacts:
     name: doxygen-html-docs
     paths: [docs/html]
