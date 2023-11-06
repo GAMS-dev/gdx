@@ -326,7 +326,9 @@ doxygen-html:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
   script:
+    - python3 ci/readme_filter.py
     - doxygen
+    - rm README_filtered.md
   artifacts:
     name: doxygen-html-docs
     paths: [docs/html]

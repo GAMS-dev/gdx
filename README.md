@@ -1,5 +1,6 @@
 # GAMS Data eXchange (GDX)
 
+<!-- skip doxygen begin -->
 ## Table of Contents
 
 * [GAMS Data eXchange (GDX)](#gams-data-exchange-gdx)
@@ -38,6 +39,7 @@
     * [Conversion issues when moving from GAMS 22.5 to 22.6](#conversion-issues-when-moving-from-gams-225-to-226)
     * [Files in the apifiles directory](#files-in-the-apifiles-directory)
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
+<!-- skip doxygen end -->
 
 ## Basic information on GDX file format
 
@@ -594,7 +596,7 @@ The following table organizes the functions by category:
 | Longest symbol UEL  | gdxSymbMaxLength gdxUELMaxLength gdxSymbIndxMaxLength                                                                                                                                         |
 | Acronyms            | gdxAcronymIndex gdxAcronymValue gdxAcronymCount gdxAcronymGetInfo gdxAcronymSetInfo                                                                                                           |
 
-
+<!-- skip doxygen begin -->
 ## Transition diagram
 
 Some GDX operations only make sense after running other routines for preparation beforehand. For example, writing records
@@ -671,6 +673,7 @@ graph TD
     f_map_elem -->|gdxUELRegisterDone| fr_init
     f_str_elem -->|gdxUELRegisterDone| fr_init
 ```
+<!-- skip doxygen end -->
 
 ## Example programs
 
@@ -1569,33 +1572,25 @@ static void WriteData(String s, double V) {
 - support for domain information
 
 Backward compatibility:
-- GAMS and all gdx utilites will write gdx files in the new format
--  GAMS and all gdx utilites can read older gdx formats
--  The gdxcopy utility can convert between different gdx formats
+- GAMS and all gdx utilities will write gdx files in the new format
+- GAMS and all gdx utilities can read older gdx formats
+- The gdxcopy utility can convert between different gdx formats
   (assuming that dimension and namelength is supported)
 
 Libraries:
-- gdxio.dll is still available but the new library is called
-  gdxcclib64.dll (substitute .dll with the extension for your platform)
-- gdxio.dll cannot read the new gdx format
+- `gdxio.dll` is still available but the new library is called `(lib)gdxcclib64.dll` (substitute `.dll` with the extension for your platform, e.g. `.so` or `.dylib`)
+- `gdxio.dll` cannot read the new gdx format
 
 API:
-- Functions in the library that used to return a boolean, now return
-  an integer (zero for false, non-zero for true)
-- Before we can read or write a gdx file, we need to create a valid gdx object. The
-  function gdxCreate will create such an object
-- The functions gdxOpenRead and gdxOpenWrite no longer create the gdx object pointer,
-  they require an object pointer that has been initialized using gdxCreate or similar
-  functions
+- Functions in the library that used to return a boolean, now return  an integer (zero for false, non-zero for true)
+- Before we can read or write a gdx file, we need to create a valid gdx object. The  function `gdxCreate` will create such an object
+- The functions `gdxOpenRead` and `gdxOpenWrite` no longer create the gdx object pointer, they require an object pointer that has been initialized using gdxCreate or similar functions
 
 ## Files in the apifiles directory
 
 The following sections describe the various files included in the apifiles
-directory. All functions will use the gdxcclib library (like gdxcclib.dll on
+directory. All functions will use the gdxcclib library (like `gdxcclib64.dll` on
 Windows). The entry points in the library can be loaded static (by the operating system)
 or dynamic. Dynamic loading provides more control when an entry point is missing
 or the interface has changed. Static loading will cause an exception to be generated
 for example for a missing entry point without much feedback about the error.
-
-For Delphi/Pascal two different interfaces are available; an object interface and a
-function interface.
