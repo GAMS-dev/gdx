@@ -336,23 +336,45 @@ doxygen-html:
 
 #=======================================================================================================================
 
-deploy-github:
-  when: manual
+deploy-gitlab-github:
   stage: deploy
+  when: manual
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - if: $CI_COMMIT_BRANCH == 'main'
+      when: on_success
   tags: [linux]
   needs: [build-leg, build-dac, build-wei, apigenerator]
   image:
     name: registry.gams.com/devel/gdx/leg/builder-deploy:latest
     entrypoint: [""]   # prevent startup.sh
   script:
-    - ls
+    - GDX_TAG_NAME="`python3 ci/changelog_head.py tag_name`"
+    - GDX_RELEASE_NAME="${GDX_TAG_NAME}"
+    - GDX_DESCRIPTION="`python3 ci/changelog_head.py description`"
     - PATH="/opt/github-release:${PATH}"
-    - github-release
-    - cp Release/gdxcclib64.dll .
-    - cp apifiles/*.h apifiles/*.c apifiles/*.cpp .
-#    - GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v release -u GAMS-dev -r gdx -t example-tag -d "some text." -n "Example release"
+    - >
+      GITHUB_TOKEN=${GITHUB_TOKEN}
+      github-release
+      -v
+      release
+      -u GAMS-dev
+      -r gdx
+      -t "${GDX_TAG_NAME}"
+      -d "${GDX_DESCRIPTION}"
+      -n "${GDX_RELEASE_NAME}"
+    - sleep 10s # make sure the release is available to reference
+    - cp Release/gdxcclib64.dll apifiles/*.h apifiles/*.c apifiles/*.cpp .
     - |
       for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib gclgms.h gcmutex.h gdxcc.h gdxcc.c gdxcclib.cpp
       do
-        GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v upload -R -u GAMS-dev -r gdx -t example-tag -n $fn -f $fn
+        GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v upload -R -u GAMS-dev -r gdx -t "${GDX_TAG_NAME}" -n $fn -f $fn
       done
+    - >
+      release-cli
+      create
+      --name "${GDX_RELEASE_NAME}"
+      --tag-name "${GDX_TAG_NAME}"
+      --description "${GDX_DESCRIPTION}"
+      --ref "$CI_COMMIT_SHA"
