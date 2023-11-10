@@ -1,4 +1,7 @@
 ---
+- 7.9.2:
+    - Removed XCode project file for unit test suite as it is not maintained anymore.
+    - ...
 - 7.9.1:
     - First open source technical release of GDX eXPert-level API.
     - Added gdxAllowBogusDomains to get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
