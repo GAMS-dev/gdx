@@ -149,7 +149,7 @@ int LastError {}, LastRepError {};
 std::unique_ptr<TFilterList> FilterList;
 TDFilter *CurFilter {};
 TDomainList DomainList {};
-bool StoreDomainSets { true }, AllowBogusDomain { true };
+bool StoreDomainSets { true }, AllowBogusDomain { true }, MapAcrToNaN {};
 TIntlValueMapDbl intlValueMapDbl {}, readIntlValueMapDbl {};
 TIntlValueMapI64 intlValueMapI64 {};
 TraceLevels TraceLevel { TraceLevels::trl_all };

@@ -1492,6 +1492,27 @@ void GDX_CALLCONV d_gdxAllowBogusDomainsSet (gdxHandle_t pgdx,const int x)
   printNoReturn(gdxAllowBogusDomainsSet,1)
 }
 
+/** Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default.
+ * @param pgdx gdx object handle
+ */
+int  GDX_CALLCONV d_gdxMapAcronymsToNaN (gdxHandle_t pgdx)
+{
+  int d_s[]={15};
+  GAMS_UNUSED(pgdx)
+  printAndReturn(gdxMapAcronymsToNaN,0,int )
+}
+
+/** Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default.
+ * @param pgdx gdx object handle
+ */
+void GDX_CALLCONV d_gdxMapAcronymsToNaNSet (gdxHandle_t pgdx,const int x)
+{
+  int d_s[]={0,15};
+  GAMS_UNUSED(pgdx)
+  GAMS_UNUSED(x)
+  printNoReturn(gdxMapAcronymsToNaNSet,1)
+}
+
 
 /** return dirName on success, NULL on failure */
 static char *
@@ -1857,6 +1878,8 @@ XLibraryLoad (const char *dllName, char *errBuf, int errBufSize)
   {int s[]={0,15}; CheckAndLoad(gdxStoreDomainSetsSet,1,"C__"); }
   {int s[]={15}; CheckAndLoad(gdxAllowBogusDomains,0,"C__"); }
   {int s[]={0,15}; CheckAndLoad(gdxAllowBogusDomainsSet,1,"C__"); }
+  {int s[]={15}; CheckAndLoad(gdxMapAcronymsToNaN,0,"C__"); }
+  {int s[]={0,15}; CheckAndLoad(gdxMapAcronymsToNaNSet,1,"C__"); }
 
  return 0;
 

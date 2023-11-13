@@ -1,5 +1,6 @@
 ---
-- 7.9.2:
+- 7.10.0:
+    - Added boolean property gdxMapAcronymsToNaN (disabled by default) that maps all acronym values to special value "Not a Number" (NaN).
     - Removed XCode project file for unit test suite as it is not maintained anymore.
     - >
       Entries for property setters and getters in main header and wrappers are now automatically generated from API

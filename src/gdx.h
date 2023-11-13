@@ -101,6 +101,18 @@ public:
    void gdxAllowBogusDomainsSet(int flag);
 
    /**
+    * @brief Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default.
+    * @return 1 (true) iff. flag is set, 0 (false) otherwise.
+    */
+   [[nodiscard]] int gdxMapAcronymsToNaN() const;
+
+   /**
+    * @brief Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default.
+    * @param flag 1 (true) to enable and 0 (false) to disable flag.
+    */
+   void gdxMapAcronymsToNaNSet(int flag);
+
+   /**
     * @brief Add an alias for a set to the symbol table. One of the two identifiers has to be a known set, an
     *   alias or "*" (universe); the other identifier is used as the new alias for the given set. The
     *   function gdxSymbolInfoX can be used to retrieve the set or alias associated with the identifier; it
@@ -1688,7 +1700,7 @@ int LastError {}, LastRepError {};
 std::unique_ptr<TFilterList> FilterList;
 TDFilter *CurFilter {};
 TDomainList DomainList {};
-bool StoreDomainSets { true }, AllowBogusDomain { true };
+bool StoreDomainSets { true }, AllowBogusDomain { true }, MapAcrToNaN {};
 TIntlValueMapDbl intlValueMapDbl {}, readIntlValueMapDbl {};
 TIntlValueMapI64 intlValueMapI64 {};
 TraceLevels TraceLevel { TraceLevels::trl_all };

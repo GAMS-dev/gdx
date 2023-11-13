@@ -1419,6 +1419,16 @@ properties:
       disables it, e.g. via `gdxAllowBogusDomainsSet(false)`, then using a one dimensional set as domain will cause a
       GDX error (ERR_NODOMAINDATA). Param flag 1 (true) iff. using a 1-dim set as domain (when store domain sets option
       is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA).
+ - gdxMapAcronymsToNaN:
+    type        : bool
+    action      : r
+    function    : MapAcronymsToNaN
+    description : Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default.
+ - gdxMapAcronymsToNaN:
+    type        : bool
+    action      : w
+    function    : MapAcronymsToNaN
+    description : Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default.
 
 #function pointer definitions
 functionpointers:
