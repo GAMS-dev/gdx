@@ -2500,7 +2500,7 @@ TEST_CASE( "Test correct behavior of allow bogus domain flag" ) {
       obj.gdxDataWriteRawStart("k", "derived set 2", 1, dt_set, 0);
       // Now it is *not* okay anymore as the "allow bogus flag" is disabled
       REQUIRE_FALSE(obj.gdxSymbolSetDomain(domainNames.cptrs()));
-      const int ERR_NODOMAINDATA {-100054};
+      constexpr int ERR_NODOMAINDATA {-100054};
       REQUIRE_EQ(ERR_NODOMAINDATA, obj.gdxGetLastError());
       obj.gdxDataWriteDone();
 
@@ -2512,11 +2512,45 @@ TEST_CASE( "Test correct behavior of allow bogus domain flag" ) {
       // This should be okay again as the base set now has records tracked for domain check
       domainNames[0] = "l"s;
       REQUIRE(obj.gdxSymbolSetDomain(domainNames.cptrs()));
-      const int ERR_NOERROR {0};
+      constexpr int ERR_NOERROR {0};
       REQUIRE_EQ(ERR_NOERROR, obj.gdxGetLastError());
       obj.gdxDataWriteDone();
    });
    std::filesystem::remove( fn );
+}
+
+TEST_CASE( "Test option to map acronym indices to NaN" )
+{
+   constexpr int acroVal {23};
+   const std::string fn {"mapAcrToNaN.gdx"};
+   TgdxValues values {};
+   StrIndexBuffers keys;
+   testWrite( fn, [&]( TGXFileObj &pgx ) {
+      REQUIRE( pgx.gdxAcronymAdd( "myacr", "my acronym", acroVal ) );
+      REQUIRE(pgx.gdxDataWriteStrStart( "i", "", 1, dt_set, 0 ));
+      keys.front() = "i1"s;
+      values[GMS_VAL_LEVEL] = pgx.gdxAcronymValue( acroVal );
+      REQUIRE(pgx.gdxDataWriteStr( keys.cptrs(), values.data() ));
+      REQUIRE(pgx.gdxDataWriteDone());
+   });
+   testRead( fn, [&]( TGXFileObj &pgx ) {
+      std::array<double, GMS_SVIDX_MAX> specVals{};
+      pgx.gdxGetSpecialValues( specVals.data() );
+      double NaN { specVals[sv_valna] };
+      int numRecords;
+      REQUIRE(pgx.gdxDataReadStrStart( 1, numRecords ));
+      REQUIRE_EQ(1, numRecords);
+      int dimFrst;
+      REQUIRE(pgx.gdxDataReadStr( keys.ptrs(), values.data(), dimFrst ));
+      REQUIRE_EQ(acroVal, pgx.gdxAcronymIndex(values[GMS_VAL_LEVEL]));
+      REQUIRE(pgx.gdxDataReadDone());
+      pgx.gdxMapAcronymsToNaNSet(true);
+      REQUIRE(pgx.gdxDataReadStrStart( 1, numRecords ));
+      REQUIRE(pgx.gdxDataReadStr( keys.ptrs(), values.data(), dimFrst ));
+      REQUIRE_EQ(NaN, values[GMS_VAL_LEVEL]);
+      REQUIRE(pgx.gdxDataReadDone());
+   });
+   std::filesystem::remove(fn);
 }
 
 }// namespace gdx::tests::gdxtests

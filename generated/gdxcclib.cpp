@@ -204,6 +204,8 @@
 #define C__gdxStoreDomainSetsSet c__gdxstoredomainsetsset
 #define C__gdxAllowBogusDomains c__gdxallowbogusdomains
 #define C__gdxAllowBogusDomainsSet c__gdxallowbogusdomainsset
+#define C__gdxMapAcronymsToNaN c__gdxmapacronymstonan
+#define C__gdxMapAcronymsToNaNSet c__gdxmapacronymstonanset
 
 
 /* declarations shut up compiler warnings */
@@ -878,6 +880,16 @@ GDX_API int GDX_CALLCONV C__XCheck(const char *funcn, int ClNrArg, int Clsign[],
     return CheckSign(funcn,0,ClNrArg,DLLsign,Clsign,Msg);
   }
   else if(!strcmp(funcn,"gdxAllowBogusDomainsSet"))
+  {
+    DLLsign[0] = 0; DLLsign[1] = 15;
+    return CheckSign(funcn,1,ClNrArg,DLLsign,Clsign,Msg);
+  }
+  else if(!strcmp(funcn,"gdxMapAcronymsToNaN"))
+  {
+    DLLsign[0] = 15;
+    return CheckSign(funcn,0,ClNrArg,DLLsign,Clsign,Msg);
+  }
+  else if(!strcmp(funcn,"gdxMapAcronymsToNaNSet"))
   {
     DLLsign[0] = 0; DLLsign[1] = 15;
     return CheckSign(funcn,1,ClNrArg,DLLsign,Clsign,Msg);
@@ -2121,6 +2133,18 @@ GDX_API void GDX_CALLCONV C__gdxAllowBogusDomainsSet(TGXFileRec_t *TGXFile, int 
 GDX_API void GDX_CALLCONV C__gdxAllowBogusDomainsSet(TGXFileRec_t *TGXFile, int x)
 {
   gdxAllowBogusDomainsSet(TGXFile,x);
+}
+
+GDX_API int  GDX_CALLCONV C__gdxMapAcronymsToNaN(TGXFileRec_t *TGXFile);
+GDX_API int  GDX_CALLCONV C__gdxMapAcronymsToNaN(TGXFileRec_t *TGXFile)
+{
+  return gdxMapAcronymsToNaN(TGXFile);
+}
+
+GDX_API void GDX_CALLCONV C__gdxMapAcronymsToNaNSet(TGXFileRec_t *TGXFile, int x);
+GDX_API void GDX_CALLCONV C__gdxMapAcronymsToNaNSet(TGXFileRec_t *TGXFile, int x)
+{
+  gdxMapAcronymsToNaNSet(TGXFile,x);
 }
 
 #endif
