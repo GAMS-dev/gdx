@@ -99,6 +99,27 @@ public:
       ::gdxLibraryUnload();
    }
 
+
+    [[nodiscard]] int gdxStoreDomainSets() const
+    {
+      return ::gdxStoreDomainSets( pgx );
+    }
+
+    void gdxStoreDomainSetsSet(int flag)
+    {
+      ::gdxStoreDomainSetsSet( pgx, flag );
+    }
+
+    [[nodiscard]] int gdxAllowBogusDomains() const
+    {
+      return ::gdxAllowBogusDomains( pgx );
+    }
+
+    void gdxAllowBogusDomainsSet(int flag)
+    {
+      ::gdxAllowBogusDomainsSet( pgx, flag );
+    }
+
     int gdxAcronymAdd( const char *AName, const char *Txt, int AIndx )
     {
       return ::gdxAcronymAdd( pgx, AName, Txt, AIndx );
@@ -549,25 +570,6 @@ public:
       return ::gdxRenameUEL( pgx, OldName, NewName );
     }
 
-   int gdxStoreDomainSets()
-   {
-      return ::gdxStoreDomainSets( pgx );
-   }
-
-   void gdxStoreDomainSetsSet( int x )
-   {
-      ::gdxStoreDomainSetsSet( pgx, x );
-   }
-
-   void gdxAllowBogusDomainsSet( int flag )
-   {
-      ::gdxAllowBogusDomainsSet( pgx, flag );
-   }
-
-   [[nodiscard]] int gdxAllowBogusDomains()
-   {
-      return ::gdxAllowBogusDomains( pgx );
-   }
 
    int gdxUELMaxLength()
    {

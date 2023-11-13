@@ -1384,22 +1384,41 @@ properties:
     type        : bool
     action      : r
     function    : StoreDomainSets
-    description : Flag to store one dimensional sets as potential domains, false saves lots of space for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly.
+    description : >
+      Get flag to store one dimensional sets as potential domains, false (0) saves lots of space for large 1-dim sets
+      that are no domains but can create inconsistent GDX files if used incorrectly. Returns 1 (true) iff. elements of
+      1-dim sets should be tracked for domain checking, 0 (false) otherwise.
  - gdxStoreDomainSets:
     type        : bool
     action      : w
     function    : StoreDomainSets
-    description : Flag to store one dimensional sets as potential domains, false saves lots of space for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly.
+    description : >
+      Set flag to store one dimensional sets as potential domains, false (0) saves lots of space for large 1-dim sets
+      that are no domains but can create inconsistent GDX files if used incorrectly. Param flag 1 (true) iff. elements
+      of 1-dim sets should be tracked for domain checking, 0 (false) otherwise.
  - gdxAllowBogusDomains:
-       type        : bool
-       action      : r
-       function    : AllowBogusDomains
-       description : Flag to ignore using 1-dim sets as domain when their elements are not tracked.
+    type        : bool
+    action      : r
+    function    : AllowBogusDomains
+    description : >
+      Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+      In case the flag is enabled this is allowing potentially unsafe writing of records to symbols with one dimensional
+      sets as domain, when GDX has no lookup table for the elements of this set. This can happen when
+      `gdxStoreDomainSets` was disabled by the user to save memory. For backwards compatability, this is enabled by
+      default. Return 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be
+      ignored. Otherwise an error is raised (ERR_NODOMAINDATA).
  - gdxAllowBogusDomains:
-       type        : bool
-       action      : w
-       function    : AllowBogusDomains
-       description : Flag to ignore using 1-dim sets as domain when their elements are not tracked.
+    type        : bool
+    action      : w
+    function    : AllowBogusDomains
+    description : >
+      Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+      Toggle allowing potentially unsafe writing of records to symbols with one dimensional sets as domain,
+      when GDX has no lookup table for the elements of this set. This can happen when `gdxStoreDomainSets` was disabled
+      by the user to save memory. For backwards compatability, this is enabled by default. When the user explicitly
+      disables it, e.g. via `gdxAllowBogusDomainsSet(false)`, then using a one dimensional set as domain will cause a
+      GDX error (ERR_NODOMAINDATA). Param flag 1 (true) iff. using a 1-dim set as domain (when store domain sets option
+      is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA).
 
 #function pointer definitions
 functionpointers:

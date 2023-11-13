@@ -95,6 +95,7 @@ def map_type_gen(func_ptrs, for_cpp=True):
 
     return map_type
 
+
 def collect_groups(functions):
     groups = []
     gtf = {}
@@ -111,6 +112,16 @@ def collect_groups(functions):
     return groups, gtf
 
 
+def nice_property(prop):
+    name = list(prop.keys())[0]
+    res = dict(name=name)
+    res.update(prop[name])
+    return res
+
+
+def nice_properties(obj):
+    return [nice_property(p) for p in obj['properties']]
+
 
 def generate_method_declarations(input_yaml_fn, template_folder, template_fn, output_header_fn):
     with open(input_yaml_fn) as fp:
@@ -121,7 +132,7 @@ def generate_method_declarations(input_yaml_fn, template_folder, template_fn, ou
         env.globals[f.__name__] = f
     template = env.get_template(template_fn)
     with open(output_header_fn, 'w') as fp:
-        fp.write(template.render(obj=obj, groups=groups, gtf=gtf))
+        fp.write(template.render(obj=obj, groups=groups, gtf=gtf, properties=nice_properties(obj)))
 
 
 def main():

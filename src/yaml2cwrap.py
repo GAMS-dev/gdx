@@ -28,7 +28,7 @@ def generate_c_wrapper(input, template_folder, template, output):
     env.globals['fp_decor'] = fp_decor
     template = env.get_template(template)
     with open(output, 'w') as fp:
-        fp.write(template.render(obj=obj))
+        fp.write(template.render(obj=obj, properties=yaml2doxy.nice_properties(obj)))
 
 
 def main():
