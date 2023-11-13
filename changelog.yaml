@@ -1,6 +1,9 @@
 ---
 - 7.9.2:
     - Removed XCode project file for unit test suite as it is not maintained anymore.
+    - >
+      Entries for property setters and getters in main header and wrappers are now automatically generated from API
+      definition YAML via Jinja2 templates and not handwritten.
     - ...
 - 7.9.1:
     - First open source technical release of GDX eXPert-level API.

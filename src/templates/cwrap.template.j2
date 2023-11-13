@@ -86,10 +86,11 @@ int gdxFree( TGXFileRec_t **pgdx );
 int gdxCreate( TGXFileRec_t **pgdx, char *errBuf, int bufSize );
 int gdxCreateD( TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen );
 void gdxDestroy( TGXFileRec_t **pgx );
-int gdxStoreDomainSets( TGXFileRec_t *pgdx );
-void gdxStoreDomainSetsSet( TGXFileRec_t *pgdx, int x );
-int gdxAllowBogusDomains (TGXFileRec_t *pgdx);
-void gdxAllowBogusDomainsSet (TGXFileRec_t *pgdx, int x);
+{% for property in properties -%}
+{%- set isread = property.action == 'r' -%}
+{%- if isread -%}int {% else %}void {% endif -%}
+{{property.name}}{% if not isread %}Set{% endif %}( TGXFileRec_t *pgdx{% if not isread %}, int flag{%endif%});
+{% endfor -%}
 void setCallByRef( TGXFileRec_t *TGXFile, const char *FuncName, int cbrValue );
 // PROTOTYPES END
 
@@ -144,25 +145,15 @@ GDX_INLINE {{ map_type(fobj|first, fvals.type) }}{{ fobj|first }}( TGXFileRec_t 
 }
 {% endfor %}
 
-GDX_INLINE int gdxStoreDomainSets( TGXFileRec_t *TGXFile )
+{% for property in properties -%}
+{%- set isread = property.action == 'r' -%}
+GDX_INLINE {% if isread -%}int {% else %}void {% endif -%}
+{{property.name}}{% if not isread %}Set{% endif %}( TGXFileRec_t *pgx{% if not isread %}, int flag{%endif%})
 {
-   return reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxStoreDomainSets();
+   {% if isread %}return reinterpret_cast<gdx::TGXFileObj *>( pgx )->{{property.name}}();{% else %}reinterpret_cast<gdx::TGXFileObj *>( pgx )->{{property.name}}Set( flag );{% endif %}
 }
 
-GDX_INLINE void gdxStoreDomainSetsSet( TGXFileRec_t *TGXFile, int x )
-{
-   reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxStoreDomainSetsSet( x );
-}
-
-GDX_INLINE int gdxAllowBogusDomains( TGXFileRec_t *TGXFile )
-{
-   return reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxAllowBogusDomains();
-}
-
-GDX_INLINE void gdxAllowBogusDomainsSet( TGXFileRec_t *TGXFile, int x )
-{
-   reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxAllowBogusDomainsSet( x );
-}
+{% endfor -%}
 
 GDX_INLINE int gdxFree( TGXFileRec_t **TGXFile )
 {

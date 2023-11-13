@@ -3554,12 +3554,12 @@ int TGXFileObj::gdxStoreDomainSets() const
    return StoreDomainSets;
 }
 
-void TGXFileObj::gdxStoreDomainSetsSet( int x )
+void TGXFileObj::gdxStoreDomainSetsSet( int flag )
 {
-   StoreDomainSets = x;
+   StoreDomainSets = flag;
 }
 
-int TGXFileObj::gdxAllowBogusDomains()
+int TGXFileObj::gdxAllowBogusDomains() const
 {
    return AllowBogusDomain;
 }
