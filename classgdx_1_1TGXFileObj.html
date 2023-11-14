@@ -124,15 +124,23 @@ Public Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>SetTraceLevel</b> (TraceLevels tl)</td></tr>
 <tr class="separator:a112bd6898cabcb291e0f0d23a1f56659"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5290760aefaf9af4ab092d68fd187642"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a5290760aefaf9af4ab092d68fd187642">gdxStoreDomainSets</a> () const</td></tr>
+<tr class="memdesc:a5290760aefaf9af4ab092d68fd187642"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flag to store one dimensional sets as potential domains, false (0) saves lots of space for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly. Returns 1 (true) iff. elements of 1-dim sets should be tracked for domain checking, 0 (false) otherwise.  <a href="classgdx_1_1TGXFileObj.html#a5290760aefaf9af4ab092d68fd187642">More...</a><br /></td></tr>
 <tr class="separator:a5290760aefaf9af4ab092d68fd187642"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a689e452ee5b20cfdf8d4147faadc2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a4a689e452ee5b20cfdf8d4147faadc2c">gdxStoreDomainSetsSet</a> (int x)</td></tr>
-<tr class="separator:a4a689e452ee5b20cfdf8d4147faadc2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5aa88feb1bb15e035596dbb87e630f0c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a5aa88feb1bb15e035596dbb87e630f0c">gdxStoreDomainSetsSet</a> (int flag)</td></tr>
+<tr class="memdesc:a5aa88feb1bb15e035596dbb87e630f0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set flag to store one dimensional sets as potential domains, false (0) saves lots of space for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly. Param flag 1 (true) iff. elements of 1-dim sets should be tracked for domain checking, 0 (false) otherwise.  <a href="classgdx_1_1TGXFileObj.html#a5aa88feb1bb15e035596dbb87e630f0c">More...</a><br /></td></tr>
+<tr class="separator:a5aa88feb1bb15e035596dbb87e630f0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8dbb4eac89440b34955ec4bdd97a3147"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a8dbb4eac89440b34955ec4bdd97a3147">gdxAllowBogusDomains</a> () const</td></tr>
+<tr class="memdesc:a8dbb4eac89440b34955ec4bdd97a3147"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets). In case the flag is enabled this is allowing potentially unsafe writing of records to symbols with one dimensional sets as domain, when GDX has no lookup table for the elements of this set. This can happen when <code>gdxStoreDomainSets</code> was disabled by the user to save memory. For backwards compatability, this is enabled by default. Return 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA).  <a href="classgdx_1_1TGXFileObj.html#a8dbb4eac89440b34955ec4bdd97a3147">More...</a><br /></td></tr>
+<tr class="separator:a8dbb4eac89440b34955ec4bdd97a3147"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb6f2da3823e3f3ac38cb7cd5ec1e376"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#acb6f2da3823e3f3ac38cb7cd5ec1e376">gdxAllowBogusDomainsSet</a> (int flag)</td></tr>
-<tr class="memdesc:acb6f2da3823e3f3ac38cb7cd5ec1e376"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).  <a href="classgdx_1_1TGXFileObj.html#acb6f2da3823e3f3ac38cb7cd5ec1e376">More...</a><br /></td></tr>
+<tr class="memdesc:acb6f2da3823e3f3ac38cb7cd5ec1e376"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets). Toggle allowing potentially unsafe writing of records to symbols with one dimensional sets as domain, when GDX has no lookup table for the elements of this set. This can happen when <code>gdxStoreDomainSets</code> was disabled by the user to save memory. For backwards compatability, this is enabled by default. When the user explicitly disables it, e.g. via <code>gdxAllowBogusDomainsSet(false)</code>, then using a one dimensional set as domain will cause a GDX error (ERR_NODOMAINDATA). Param flag 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA).  <a href="classgdx_1_1TGXFileObj.html#acb6f2da3823e3f3ac38cb7cd5ec1e376">More...</a><br /></td></tr>
 <tr class="separator:acb6f2da3823e3f3ac38cb7cd5ec1e376"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a57698ddd28d54176032cf015a1d6f6f6"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a57698ddd28d54176032cf015a1d6f6f6">gdxAllowBogusDomains</a> ()</td></tr>
-<tr class="memdesc:a57698ddd28d54176032cf015a1d6f6f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).  <a href="classgdx_1_1TGXFileObj.html#a57698ddd28d54176032cf015a1d6f6f6">More...</a><br /></td></tr>
-<tr class="separator:a57698ddd28d54176032cf015a1d6f6f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22a8f3d3aa5d41615ecb4e41d64c9669"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a22a8f3d3aa5d41615ecb4e41d64c9669">gdxMapAcronymsToNaN</a> () const</td></tr>
+<tr class="memdesc:a22a8f3d3aa5d41615ecb4e41d64c9669"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default.  <a href="classgdx_1_1TGXFileObj.html#a22a8f3d3aa5d41615ecb4e41d64c9669">More...</a><br /></td></tr>
+<tr class="separator:a22a8f3d3aa5d41615ecb4e41d64c9669"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2d766eb279da81358bba0496a1dc35f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#af2d766eb279da81358bba0496a1dc35f">gdxMapAcronymsToNaNSet</a> (int flag)</td></tr>
+<tr class="memdesc:af2d766eb279da81358bba0496a1dc35f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default.  <a href="classgdx_1_1TGXFileObj.html#af2d766eb279da81358bba0496a1dc35f">More...</a><br /></td></tr>
+<tr class="separator:af2d766eb279da81358bba0496a1dc35f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac38540e57b8b2b29a0f37a7842bf5706"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#ac38540e57b8b2b29a0f37a7842bf5706">gdxAddAlias</a> (const char *Id1, const char *Id2)</td></tr>
 <tr class="memdesc:ac38540e57b8b2b29a0f37a7842bf5706"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add an alias for a set to the symbol table. One of the two identifiers has to be a known set, an alias or "*" (universe); the other identifier is used as the new alias for the given set. The function gdxSymbolInfoX can be used to retrieve the set or alias associated with the identifier; it is returned as the UserInfo parameter.  <a href="classgdx_1_1TGXFileObj.html#ac38540e57b8b2b29a0f37a7842bf5706">More...</a><br /></td></tr>
 <tr class="separator:ac38540e57b8b2b29a0f37a7842bf5706"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -942,8 +950,8 @@ When reading a GDX file, this function is used to provide the acronym index, and
 
 </div>
 </div>
-<a id="a57698ddd28d54176032cf015a1d6f6f6" name="a57698ddd28d54176032cf015a1d6f6f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a57698ddd28d54176032cf015a1d6f6f6">&#9670;&#160;</a></span>gdxAllowBogusDomains()</h2>
+<a id="a8dbb4eac89440b34955ec4bdd97a3147" name="a8dbb4eac89440b34955ec4bdd97a3147"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dbb4eac89440b34955ec4bdd97a3147">&#9670;&#160;</a></span>gdxAllowBogusDomains()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -952,13 +960,13 @@ When reading a GDX file, this function is used to provide the acronym index, and
           <td class="memname">int gdx::TGXFileObj::gdxAllowBogusDomains </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets). </p>
-<p >In case the flag is enabled this is allowing potentially unsafe writing of records to symbols with one dimensional sets as domain, when GDX has no lookup table for the elements of this set. This can happen when <code>gdxStoreDomainSets</code> was disabled by the user to save memory. For backwards compatability, this is enabled by default. </p><dl class="section return"><dt>Returns</dt><dd>1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA). </dd></dl>
+<p>Get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets). In case the flag is enabled this is allowing potentially unsafe writing of records to symbols with one dimensional sets as domain, when GDX has no lookup table for the elements of this set. This can happen when <code>gdxStoreDomainSets</code> was disabled by the user to save memory. For backwards compatability, this is enabled by default. Return 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA). </p>
+<dl class="section return"><dt>Returns</dt><dd>1 (true) iff. flag is set, 0 (false) otherwise. </dd></dl>
 
 </div>
 </div>
@@ -978,10 +986,10 @@ When reading a GDX file, this function is used to provide the acronym index, and
       </table>
 </div><div class="memdoc">
 
-<p>Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets). </p>
-<p >Toggle allowing potentially unsafe writing of records to symbols with one dimensional sets as domain, when GDX has no lookup table for the elements of this set. This can happen when <code>gdxStoreDomainSets</code> was disabled by the user to save memory. For backwards compatability, this is enabled by default. When the user explicitly disables it, e.g. via <code>gdxAllowBogusDomainsSet(false)</code>, then using a one dimensional set as domain will cause a GDX error (ERR_NODOMAINDATA). </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Set flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets). Toggle allowing potentially unsafe writing of records to symbols with one dimensional sets as domain, when GDX has no lookup table for the elements of this set. This can happen when <code>gdxStoreDomainSets</code> was disabled by the user to save memory. For backwards compatability, this is enabled by default. When the user explicitly disables it, e.g. via <code>gdxAllowBogusDomainsSet(false)</code>, then using a one dimensional set as domain will cause a GDX error (ERR_NODOMAINDATA). Param flag 1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA). </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">flag</td><td>1 (true) iff. using a 1-dim set as domain (when store domain sets option is disabled) should be ignored. Otherwise an error is raised (ERR_NODOMAINDATA). </td></tr>
+    <tr><td class="paramname">flag</td><td>1 (true) to enable and 0 (false) to disable flag. </td></tr>
   </table>
   </dd>
 </dl>
@@ -2620,7 +2628,7 @@ When the symbol is not found, the function returns zero and SyNr is set to -1.  
 <div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Get domain count = &quot;</span> &lt;&lt; cnt &lt;&lt; std::endl;</div>
 <div class="line">pgx.gdxGetDomainElements(1, 1, 7, DataDomainCB, cnt);</div>
 <div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Using filter 7; number of records in error list = &quot;</span> &lt;&lt; <a class="code hl_function" href="classgdx_1_1TGXFileObj.html#aaae21ed2293db76cdbd05dd06a94a775">gdxDataErrorCount</a>(PGX) &lt;&lt; std::endl;</div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_aaae21ed2293db76cdbd05dd06a94a775"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#aaae21ed2293db76cdbd05dd06a94a775">gdx::TGXFileObj::gdxDataErrorCount</a></div><div class="ttdeci">int gdxDataErrorCount() const</div><div class="ttdoc">Query the number of error records.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:2128</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_aaae21ed2293db76cdbd05dd06a94a775"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#aaae21ed2293db76cdbd05dd06a94a775">gdx::TGXFileObj::gdxDataErrorCount</a></div><div class="ttdeci">int gdxDataErrorCount() const</div><div class="ttdoc">Query the number of error records.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:2131</div></div>
 </div><!-- fragment --> </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a36c5e9b87188458bfca1d08e4595f4d7" title="Retrieve an error record. Non-zero if the record number is valid.">gdxDataErrorRecord</a> </dd></dl>
 
@@ -2801,6 +2809,52 @@ When reading a GDX file, the index is returned as the level value when reading a
 
 </div>
 </div>
+<a id="a22a8f3d3aa5d41615ecb4e41d64c9669" name="a22a8f3d3aa5d41615ecb4e41d64c9669"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22a8f3d3aa5d41615ecb4e41d64c9669">&#9670;&#160;</a></span>gdxMapAcronymsToNaN()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int gdx::TGXFileObj::gdxMapAcronymsToNaN </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default. </p>
+<dl class="section return"><dt>Returns</dt><dd>1 (true) iff. flag is set, 0 (false) otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="af2d766eb279da81358bba0496a1dc35f" name="af2d766eb279da81358bba0496a1dc35f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af2d766eb279da81358bba0496a1dc35f">&#9670;&#160;</a></span>gdxMapAcronymsToNaNSet()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void gdx::TGXFileObj::gdxMapAcronymsToNaNSet </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>flag</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">flag</td><td>1 (true) to enable and 0 (false) to disable flag. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a4316f65e6f0c68c3ca6f0a32671ea823" name="a4316f65e6f0c68c3ca6f0a32671ea823"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4316f65e6f0c68c3ca6f0a32671ea823">&#9670;&#160;</a></span>gdxMapValue()</h2>
 
@@ -2888,7 +2942,7 @@ When reading a GDX file, the index is returned as the level value when reading a
 <div class="line"><span class="keywordflow">if</span>(ErrCode) {</div>
 <div class="line">  [ ... ]</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a52f09635e83e11b65dcfdcbd617f0600"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a52f09635e83e11b65dcfdcbd617f0600">gdx::TGXFileObj::gdxOpenAppend</a></div><div class="ttdeci">int gdxOpenAppend(const char *FileName, const char *Producer, int &amp;ErrNr)</div><div class="ttdoc">Open an existing GDX file for output. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:3406</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a52f09635e83e11b65dcfdcbd617f0600"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a52f09635e83e11b65dcfdcbd617f0600">gdx::TGXFileObj::gdxOpenAppend</a></div><div class="ttdeci">int gdxOpenAppend(const char *FileName, const char *Producer, int &amp;ErrNr)</div><div class="ttdoc">Open an existing GDX file for output. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:3409</div></div>
 </div><!-- fragment --> </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a4a3b3e0ffdf3bbb17070e43ba7e98408" title="Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.">gdxOpenRead</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#ae53f311244734378f4de7c9c7eafdf67" title="Open a new GDX file for output. Non-zero if the file can be opened, zero otherwise.">gdxOpenWrite</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#a3a1538da866ff406cc50477f6bcdc63c" title="Create a GDX file for writing with explicitly given compression flag. Non-zero if the file can be ope...">gdxOpenWriteEx</a> </dd></dl>
 
@@ -2934,7 +2988,7 @@ When reading a GDX file, the index is returned as the level value when reading a
 <div class="line"><span class="keywordflow">if</span>(ErrNr) {</div>
 <div class="line">  [...]</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a4a3b3e0ffdf3bbb17070e43ba7e98408"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a4a3b3e0ffdf3bbb17070e43ba7e98408">gdx::TGXFileObj::gdxOpenRead</a></div><div class="ttdeci">int gdxOpenRead(const char *FileName, int &amp;ErrNr)</div><div class="ttdoc">Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:1715</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a4a3b3e0ffdf3bbb17070e43ba7e98408"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a4a3b3e0ffdf3bbb17070e43ba7e98408">gdx::TGXFileObj::gdxOpenRead</a></div><div class="ttdeci">int gdxOpenRead(const char *FileName, int &amp;ErrNr)</div><div class="ttdoc">Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:1718</div></div>
 </div><!-- fragment --> </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#ae53f311244734378f4de7c9c7eafdf67" title="Open a new GDX file for output. Non-zero if the file can be opened, zero otherwise.">gdxOpenWrite</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#a35273506e085ef6d885f94724ca02b86" title="Returns the last error number or zero if there was no error. Calling this function will clear the las...">gdxGetLastError</a> </dd></dl>
 
@@ -3344,12 +3398,14 @@ When reading a GDX file, the index is returned as the level value when reading a
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Get flag to store one dimensional sets as potential domains, false (0) saves lots of space for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly. </p><dl class="section return"><dt>Returns</dt><dd>1 (true) iff. elements of 1-dim sets should be tracked for domain checking, 0 (false) otherwise. </dd></dl>
+
+<p>Get flag to store one dimensional sets as potential domains, false (0) saves lots of space for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly. Returns 1 (true) iff. elements of 1-dim sets should be tracked for domain checking, 0 (false) otherwise. </p>
+<dl class="section return"><dt>Returns</dt><dd>1 (true) iff. flag is set, 0 (false) otherwise. </dd></dl>
 
 </div>
 </div>
-<a id="a4a689e452ee5b20cfdf8d4147faadc2c" name="a4a689e452ee5b20cfdf8d4147faadc2c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4a689e452ee5b20cfdf8d4147faadc2c">&#9670;&#160;</a></span>gdxStoreDomainSetsSet()</h2>
+<a id="a5aa88feb1bb15e035596dbb87e630f0c" name="a5aa88feb1bb15e035596dbb87e630f0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5aa88feb1bb15e035596dbb87e630f0c">&#9670;&#160;</a></span>gdxStoreDomainSetsSet()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3358,14 +3414,16 @@ When reading a GDX file, the index is returned as the level value when reading a
           <td class="memname">void gdx::TGXFileObj::gdxStoreDomainSetsSet </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>x</em></td><td>)</td>
+          <td class="paramname"><em>flag</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Set flag to store one dimensional sets as potential domains, false (0) saves lots of space for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly. </p><dl class="params"><dt>Parameters</dt><dd>
+
+<p>Set flag to store one dimensional sets as potential domains, false (0) saves lots of space for large 1-dim sets that are no domains but can create inconsistent GDX files if used incorrectly. Param flag 1 (true) iff. elements of 1-dim sets should be tracked for domain checking, 0 (false) otherwise. </p>
+<dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">flag</td><td>1 (true) iff. elements of 1-dim sets should be tracked for domain checking, 0 (false) otherwise. </td></tr>
+    <tr><td class="paramname">flag</td><td>1 (true) to enable and 0 (false) to disable flag. </td></tr>
   </table>
   </dd>
 </dl>
