@@ -1,12 +1,10 @@
 ---
-- 7.10.0:
+- 7.10.1:
+    - First open source release of GDX eXPert-level API. Compatible with GAMS 45.
+    - Added gdxAllowBogusDomains to get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
+    - Added script to automatically generate C-wrapper from API definition YAML file.
     - Added boolean property gdxMapAcronymsToNaN (disabled by default) that maps all acronym values to special value "Not a Number" (NaN).
     - Removed XCode project file for unit test suite as it is not maintained anymore.
     - >
       Entries for property setters and getters in main header and wrappers are now automatically generated from API
       definition YAML via Jinja2 templates and not handwritten.
-    - ...
-- 7.9.1:
-    - First open source technical release of GDX eXPert-level API.
-    - Added gdxAllowBogusDomains to get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
-    - Added script to automatically generate C-wrapper from API definition YAML file.
