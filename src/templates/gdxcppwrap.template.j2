@@ -98,42 +98,32 @@ public:
          ::gdxFree( &pgx );
       ::gdxLibraryUnload();
    }
+
+{% for property in properties -%}
+{%- set isread = property.action == 'r' %}
+   {% if isread -%}[[nodiscard]] int {% else %}void {% endif -%}
+{{property.name}}{% if not isread %}Set{% endif %}({% if not isread %}int flag{%endif%}){% if isread %} const{% endif %}
+   {
+     {% if isread %}return ::{{property.name}}( pgx );{% else %}::{{property.name}}Set( pgx, flag );{% endif %}
+   }
+{% endfor -%}
+
 {% for function in obj.functions -%}
 {%- set fobj = function.items()|first -%}
 {%- set fvals = fobj|last -%}
-    {% set is_static = fvals.static and fobj|first == 'gdxErrorStr' %}
-    {% if is_static %}static {% endif %}{{ map_type(fobj|first, fvals.type) }}{{ fobj|first }}({% if fvals.parameters %}{{' '}}{% endif %}
-           {%- for parm in fvals.parameters -%}
-           {%- set parm_vals = parm.values()|first -%}
-           {{map_type(fobj|first, parm_vals.type)}}{{parm|first}}{% if not loop.last %}, {% endif %}{% endfor -%}
-           {%- if fvals.parameters %}{{' '}}{% endif %}){%- if fvals.const %} const{%- endif %}
-    {
-      return ::{{fobj|first}}( {% if is_static %}nullptr{% else %}pgx{% endif %}{% if fvals.parameters %},{% endif %} {% for parm in fvals.parameters -%}
-              {%- set parm_vals = parm.values()|first -%}
-              {{maybe_deref(parm|first,parm_vals.type,'&')}}{% if not loop.last %}, {% endif %}{% endfor -%}
-              {%- if fvals.parameters %}{{' '}}{% endif %});
-    }
+   {% set is_static = fvals.static and fobj|first == 'gdxErrorStr' %}
+   {% if is_static %}static {% endif %}{{ map_type(fobj|first, fvals.type) }}{{ fobj|first }}({% if fvals.parameters %}{{' '}}{% endif %}
+          {%- for parm in fvals.parameters -%}
+          {%- set parm_vals = parm.values()|first -%}
+          {{map_type(fobj|first, parm_vals.type)}}{{parm|first}}{% if not loop.last %}, {% endif %}{% endfor -%}
+          {%- if fvals.parameters %}{{' '}}{% endif %}){%- if fvals.const %} const{%- endif %}
+   {
+     return ::{{fobj|first}}( {% if is_static %}nullptr{% else %}pgx{% endif %}{% if fvals.parameters %},{% endif %} {% for parm in fvals.parameters -%}
+             {%- set parm_vals = parm.values()|first -%}
+             {{maybe_deref(parm|first,parm_vals.type,'&')}}{% if not loop.last %}, {% endif %}{% endfor -%}
+             {%- if fvals.parameters %}{{' '}}{% endif %});
+   }
 {% endfor %}
-   int gdxStoreDomainSets()
-   {
-      return ::gdxStoreDomainSets( pgx );
-   }
-
-   void gdxStoreDomainSetsSet( int x )
-   {
-      ::gdxStoreDomainSetsSet( pgx, x );
-   }
-
-   void gdxAllowBogusDomainsSet( int flag )
-   {
-      ::gdxAllowBogusDomainsSet( pgx, flag );
-   }
-
-   [[nodiscard]] int gdxAllowBogusDomains()
-   {
-      return ::gdxAllowBogusDomains( pgx );
-   }
-
    int gdxUELMaxLength()
    {
       return ::gdxUELMaxLength( pgx );

@@ -167,10 +167,12 @@ int gdxFree( TGXFileRec_t **pgdx );
 int gdxCreate( TGXFileRec_t **pgdx, char *errBuf, int bufSize );
 int gdxCreateD( TGXFileRec_t **pgdx, const char *sysDir, char *msgBuf, int msgBufLen );
 void gdxDestroy( TGXFileRec_t **pgx );
-int gdxStoreDomainSets( TGXFileRec_t *pgdx );
-void gdxStoreDomainSetsSet( TGXFileRec_t *pgdx, int x );
-int gdxAllowBogusDomains (TGXFileRec_t *pgdx);
-void gdxAllowBogusDomainsSet (TGXFileRec_t *pgdx, int x);
+int gdxStoreDomainSets( TGXFileRec_t *pgdx);
+void gdxStoreDomainSetsSet( TGXFileRec_t *pgdx, int flag);
+int gdxAllowBogusDomains( TGXFileRec_t *pgdx);
+void gdxAllowBogusDomainsSet( TGXFileRec_t *pgdx, int flag);
+int gdxMapAcronymsToNaN( TGXFileRec_t *pgdx);
+void gdxMapAcronymsToNaNSet( TGXFileRec_t *pgdx, int flag);
 void setCallByRef( TGXFileRec_t *TGXFile, const char *FuncName, int cbrValue );
 // PROTOTYPES END
 
@@ -658,24 +660,34 @@ GDX_INLINE int gdxRenameUEL( TGXFileRec_t *pgx, const char *OldName, const char 
 }
 
 
-GDX_INLINE int gdxStoreDomainSets( TGXFileRec_t *TGXFile )
+GDX_INLINE int gdxStoreDomainSets( TGXFileRec_t *pgx)
 {
-   return reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxStoreDomainSets();
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxStoreDomainSets();
 }
 
-GDX_INLINE void gdxStoreDomainSetsSet( TGXFileRec_t *TGXFile, int x )
+GDX_INLINE void gdxStoreDomainSetsSet( TGXFileRec_t *pgx, int flag)
 {
-   reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxStoreDomainSetsSet( x );
+   reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxStoreDomainSetsSet( flag );
 }
 
-GDX_INLINE int gdxAllowBogusDomains( TGXFileRec_t *TGXFile )
+GDX_INLINE int gdxAllowBogusDomains( TGXFileRec_t *pgx)
 {
-   return reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxAllowBogusDomains();
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxAllowBogusDomains();
 }
 
-GDX_INLINE void gdxAllowBogusDomainsSet( TGXFileRec_t *TGXFile, int x )
+GDX_INLINE void gdxAllowBogusDomainsSet( TGXFileRec_t *pgx, int flag)
 {
-   reinterpret_cast<gdx::TGXFileObj *>( TGXFile )->gdxAllowBogusDomainsSet( x );
+   reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxAllowBogusDomainsSet( flag );
+}
+
+GDX_INLINE int gdxMapAcronymsToNaN( TGXFileRec_t *pgx)
+{
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxMapAcronymsToNaN();
+}
+
+GDX_INLINE void gdxMapAcronymsToNaNSet( TGXFileRec_t *pgx, int flag)
+{
+   reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxMapAcronymsToNaNSet( flag );
 }
 
 GDX_INLINE int gdxFree( TGXFileRec_t **TGXFile )

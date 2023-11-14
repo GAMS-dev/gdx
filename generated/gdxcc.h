@@ -237,6 +237,8 @@ int  GDX_CALLCONV d_gdxStoreDomainSets (gdxHandle_t pgdx);
 void GDX_CALLCONV d_gdxStoreDomainSetsSet (gdxHandle_t pgdx, const int x);
 int  GDX_CALLCONV d_gdxAllowBogusDomains (gdxHandle_t pgdx);
 void GDX_CALLCONV d_gdxAllowBogusDomainsSet (gdxHandle_t pgdx, const int x);
+int  GDX_CALLCONV d_gdxMapAcronymsToNaN (gdxHandle_t pgdx);
+void GDX_CALLCONV d_gdxMapAcronymsToNaNSet (gdxHandle_t pgdx, const int x);
 
 
 typedef int  (GDX_CALLCONV *gdxAcronymAdd_t) (gdxHandle_t pgdx, const char *AName, const char *Txt, int AIndx);
@@ -1154,6 +1156,16 @@ GDX_FUNCPTR(gdxAllowBogusDomains);
 
 typedef void (GDX_CALLCONV *gdxAllowBogusDomainsSet_t) (gdxHandle_t pgdx, const int x);
 GDX_FUNCPTR(gdxAllowBogusDomainsSet);
+
+typedef int  (GDX_CALLCONV *gdxMapAcronymsToNaN_t) (gdxHandle_t pgdx);
+/** Flag to map all acronym values to the GAMS "Not a Number" special value. Disabled by default.
+ *
+ * @param pgdx gdx object handle
+ */
+GDX_FUNCPTR(gdxMapAcronymsToNaN);
+
+typedef void (GDX_CALLCONV *gdxMapAcronymsToNaNSet_t) (gdxHandle_t pgdx, const int x);
+GDX_FUNCPTR(gdxMapAcronymsToNaNSet);
 
 #if defined(__cplusplus)
 }

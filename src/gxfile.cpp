@@ -1465,6 +1465,9 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
 double TGXFileObj::AcronymRemap( double V )
 {
    auto GetAsAcronym = [&]( double v ) {
+      if(MapAcrToNaN)
+         return intlValueMapDbl[GMS_SVIDX_NA];
+
       int orgIndx { static_cast<int>( std::round( v / Zvalacr ) ) },
               N { AcronymList->FindEntry( orgIndx ) },
               newIndx {};
@@ -3554,12 +3557,12 @@ int TGXFileObj::gdxStoreDomainSets() const
    return StoreDomainSets;
 }
 
-void TGXFileObj::gdxStoreDomainSetsSet( int x )
+void TGXFileObj::gdxStoreDomainSetsSet( int flag )
 {
-   StoreDomainSets = x;
+   StoreDomainSets = flag;
 }
 
-int TGXFileObj::gdxAllowBogusDomains()
+int TGXFileObj::gdxAllowBogusDomains() const
 {
    return AllowBogusDomain;
 }
@@ -3567,6 +3570,16 @@ int TGXFileObj::gdxAllowBogusDomains()
 void TGXFileObj::gdxAllowBogusDomainsSet( int flag )
 {
    AllowBogusDomain = flag;
+}
+
+int TGXFileObj::gdxMapAcronymsToNaN() const
+{
+   return MapAcrToNaN;
+}
+
+void TGXFileObj::gdxMapAcronymsToNaNSet( int flag )
+{
+   MapAcrToNaN = flag;
 }
 
 int TGXFileObj::gdxDataReadRawFastFilt( int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP )
