@@ -636,6 +636,11 @@ GDX_INLINE int gdxUMFindUEL( TGXFileRec_t *pgx, const char *Uel, int *UelNr, int
 
 GDX_INLINE int gdxUMUelGet( TGXFileRec_t *pgx, int UelNr, char *Uel, int *UelMap )
 {
+   if(!UelMap)
+   {
+     int tmpUelMap;
+     return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxUMUelGet(UelNr, Uel, tmpUelMap );
+   }
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxUMUelGet(UelNr, Uel, *UelMap );
 }
 

@@ -137,6 +137,8 @@ GDX_INLINE {{ map_type(fobj|first, fvals.type) }}{{ fobj|first }}( TGXFileRec_t 
         {{fp_decor(None, map_type(fobj|first, parm_vals.type))}}{{parm|first}}{% if not loop.last %}, {% endif %}{% endfor -%}
         {%- if fvals.parameters %}{{' '}}{% endif %})
 {
+   {% if fobj|first in custom_bodies %}{{custom_bodies[fobj|first]}}
+   {% endif -%}
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->{{fobj|first}}(
 {%- for parm in fvals.parameters -%}
 {%- set parm_vals = parm.values()|first -%}
