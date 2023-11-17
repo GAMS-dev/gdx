@@ -1,6 +1,7 @@
 # GAMS Data eXchange (GDX)
 
 <!-- skip doxygen begin -->
+
 ## Table of Contents
 
 * [GAMS Data eXchange (GDX)](#gams-data-exchange-gdx)
@@ -36,84 +37,123 @@
         * [Example 6 (Python)](#example-6-python)
         * [Example 7 (C#)](#example-7-c)
         * [Example 8 (Java)](#example-8-java)
-    * [Conversion issues when moving from GAMS 22.5 to 22.6](#conversion-issues-when-moving-from-gams-225-to-226)
-    * [Files in the apifiles directory](#files-in-the-apifiles-directory)
+
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
 <!-- skip doxygen end -->
 
 ## Basic information on GDX file format
 
-The GAMS modeling language is a domain specific language tailored towards mathematical optimization. The language reflects
-the basic building blocks (symbols) of an algebraic optimization model: Sets, parameters, scalars, decision variables, and
-equations. While declaring the symbols in the GAMS language is rather straightforward and concise, defining their values
-(which must be done prior to running the optimization for exogenous symbols like sets, parameters and scalars) might be
-comparatively cumbersome. In many applications, the actual data for the symbols is also already stored in some other 
-location like a file or database. In order to have an efficient way to load data into a model, store the solution 
-results and in general exchange information with other applications, the GDX file format was conceived.
+The [GAMS modeling language](https://www.gams.com/latest/docs/UG_MAIN.html#UG_Language_Environment) is a domain specific
+language tailored towards mathematical optimization. The language reflects the basic building blocks (symbols) of an
+algebraic optimization model:
+
+- [Sets](https://www.gams.com/latest/docs/UG_SetDefinition.html),
+- [parameters](https://www.gams.com/latest/docs/UG_Parameters.html),
+- [scalars](https://www.gams.com/latest/docs/UG_DataEntry.html#UG_DataEntry_Scalars),
+- [decision variables](https://www.gams.com/latest/docs/UG_Variables.html),
+- and [equations](https://www.gams.com/latest/docs/UG_Equations.html).
+
+While declaring the symbols in the GAMS language is rather straightforward and concise, defining their values (which
+must be done prior to running the optimization for exogenous symbols like sets, parameters and scalars) might be
+comparatively cumbersome. In many applications, the actual data for the symbols is also already stored in some other
+location like a file or database. In order to have an efficient way to load data into a model, store the solution
+results and in general exchange information with other applications, the
+[GDX file format](https://www.gams.com/latest/docs/UG_GDX.html) was conceived.
 
 ### Information contained inside a GDX file
+
 - Unique elements (strings used to identify set elements)
 - Acronyms as shorthand names for specific numeric values
 - Symbols
-  - with their attributes...
-    - Type: Set, Alias, Parameter, Scalar, Variable, Equation
-    - Dimensionality
-    - User info
-    - Explanatory text
-  - ...and data (records)
+    - with their attributes...
+        - Type: Set, Alias, Parameter, Scalar, Variable, Equation
+        - Dimensionality
+        - User info
+        - Explanatory text
+    - ...and data (records)
 
-Records are mapping from the domain of the symbol to the value space with up to 5 fields (level, marginal, lower bound, upper bound, scale)
+Records are mapping from the domain of the symbol to the value space with up to 5 fields (level, marginal, lower bound,
+upper bound, scale)
 
 The actual data might be stored verbatim or compressed (using zlib).
 
+*Please note:* a GDX file does **not** store a model formulation or executable statements.
+
 ### Features of the GDX API
-For efficiency reasons (both read/write-speeds and disk usage) the GDX format is a binary format that cannot be easily 
-processed using a text editor. Hence, looking at the contents of a GDX file is ideally done via a graphical user interface
-like the GDX viewer included in GAMS Studio or the `gdxdump` console utility included in the GAMS distribution. In order 
-to write conversion utilities between GDX and various other data file formats, an API is needed. This API has the following features:
+
+For efficiency reasons (both read/write-speeds and disk usage) the GDX format is a binary format that cannot be easily
+processed using a text editor. Hence, looking at the contents of a GDX file is ideally done via a graphical user
+interface
+like the GDX viewer included in GAMS Studio or the `gdxdump` console utility included in the GAMS distribution. In order
+to write conversion utilities between GDX and various other data file formats, an API is needed. This API has the
+following features:
+
 - Reading list of symbols and UELs
 - Reading data from a symbol (metadata, records)
 - Writing a new symbol (metadata, records)
 - Bindings to multiple languages
 
-The GDX API is very powerful with fine-grained control and is also used at GAMS internally. There exist more comfortable object-oriented
-alternatives for programming languages like `gams-cpp` and GAMS Python. 
+The GDX API is very powerful with fine-grained control and is also used at GAMS internally.
 
 ## Setting up and building GDX
 
 ### Accessing GDX from a custom application
-The GDX API is available for multiple programming languages including:
-- C/C++
-- .NET (Visual Basic, C#)
-- Java
-- Python
 
-Depending on the language choice, the required steps to have it accessible from your development environment slightly differ.
+The GDX API can be directly accessed from C/C++ via the library contained in this repository. Although there is a main
+GDX object for representing a file in this interface, it is mostly procedural and offers many functions operating on
+elementary data types instead of a sophisticated class hierarchy.
+
+For an easier to use object-oriented interface GAMS offers wrappers for multiple programming languages including:
+
+- [C++](https://www.gams.com/latest/docs/API_CPP_OVERVIEW.html) with source code available on
+  [GitHub](https://git.gams.com/devel/gams-cpp)
+- [.NET](https://www.gams.com/latest/docs/apis/dotnet/DOTNET_OVERVIEW.html) (Visual Basic, C#)
+- [Java](https://www.gams.com/latest/docs/API_JAVA_OVERVIEW.html)
+- [Python](https://www.gams.com/latest/docs/API_PY_CONTROL.html)
+
+Even more abstraction is offered by the GAMS Transfer libraries for
+[Python](https://www.gams.com/latest/docs/API_PY_GAMSTRANSFER.html) and
+[R](https://www.gams.com/latest/docs/API_R_GAMSTRANSFER.html).
 
 ### Building GDX from source
-The GDX library is written in C++ and built via CMake. This repository contains a GitLab CI YAML that describes a 
-pipeline which builds GDX and runs the unit test suite.
+
+The GDX library is written in C++17 and built via [CMake](https://cmake.org/).
+
+This repository contains a GitLab CI YAML that describes a pipeline which
+
+- builds GDX for all supported platforms (Windows, macOS, Linux) with Doxygen documentation, libraries, and examples,
+- runs its unit test suite,
+- checks for memory leaks with [valgrind memcheck](https://valgrind.org/docs/manual/mc-manual.html),
+- and checks for performance regressions against GAMS 43 legacy Delphi GDX library.
 
 Please run
+
 ```
 git clone https://github.com/madler/zlib zlib
 ```
-inside the root-directory of the `gdx`-repository to make ZLIB available.
 
-doctest and apigenerator are included in this repo (as file and submodule respectively).
+inside the root-directory of the `gdx`-repository to make the zlib compression library available.
+
+[doctest](https://github.com/doctest/doctest) and [apigenerator](https://github.com/GAMS-dev/apigenerator) are included
+in this repo (as file and submodule respectively).
 
 **Dependencies**:
-- ZLIB (compression library)
-- doctest
 
-**Build tools**: 
-- GAMS API generator (language binding/wrapper tool)
-- CMake (build system)
-- C++17 compiler (e.g. GCC, clang, MSVC, Intel C++)
+- [zlib](https://github.com/madler/zlib) (compression library)
+- [doctest](https://github.com/doctest/doctest)
+
+**Build tools**:
+
+- [GAMS API generator](https://github.com/GAMS-dev/apigenerator) (language binding/wrapper tool)
+- [CMake](https://cmake.org/) (build system)
+- C++17 compiler (e.g. [GCC](https://gcc.gnu.org/), [clang](https://clang.llvm.org/),
+  [MSVC](https://visualstudio.microsoft.com/),
+  [Intel C++](https://www.intel.com/content/www/us/en/developer/tools/oneapi/dpc-compiler.html#gs.12zqsa))
 
 ## Reference documentation
 
-A full detailed Doxygen-generated API reference is available [here](https://gams-dev.github.io/gdx/classgdx_1_1TGXFileObj.html).
+A full detailed Doxygen-generated API reference is
+available [here](https://gams-dev.github.io/gdx/classgdx_1_1TGXFileObj.html).
 
 ## Introduction into using GDX API
 
@@ -415,12 +455,15 @@ the gdxDataReadMap function.
 | Expand (-1)        | Map the unique element value to the user defined value. Use gdxGetUEL to get the string representation. If a user  mapping was not defined for this element, define a user mapping automatically using the next higher user map value.                                                                                  |
 | Filter number (>0) | Map the unique element value to the user defined value. Use gdxGetUEL to get the string representation. If the element is not enabled in the filter for this index position, the record is flagged as an error record and it will be skipped. The filter number is specified using the gdxFilterRegisterStart function. |                                                                                         
 
-Referring to the following GAMS fragment, we want to read the parameter `A`. The set `I` is the domain for the first index;
+Referring to the following GAMS fragment, we want to read the parameter `A`. The set `I` is the domain for the first
+index;
 there is no domain for the second index position:
+
 ```
 Set I /.../;
 Parameter A(I,*);
 ```
+
 Assuming we have read set `I` already, the following code snapshot illustrates how to read parameter `A`.
 
 ```cpp
@@ -476,18 +519,22 @@ if(NewLastMapped > LastMapped) {
 ### Dealing with acronyms
 
 In GAMS we can use acronyms in places where we can use a floating point number as in the following example:
+
 ```
 set i /i1*i5/;
 acronym acro1, acro2;
 parameter A(i) /i1=1, i2=acro1, i3=3, i4=acro2, i5=5/;
 display A;
 ```
+
 The result of the display statement looks like:
+
 ```
 ----      4 PARAMETER A
 
 i1 1.000,    i2 acro1,    i3 3.000,    i4 acro2,    i5 5.000
 ```
+
 As we write data to a GDX file, the system keeps track which acronyms were used in the
 data written. Before we close the GDX file, we share the identifiers
 used for each acronym used. When reading a GDX file, we share all acronym identifiers
@@ -495,6 +542,7 @@ and their corresponding index before reading any data. Doing so will replace the
 acronym indices stored in the GDX file by the one we provide.
 
 The example below illustrates these steps.
+
 ```cpp
 TGXFileObj gdx;
 TgdxUELIndex UELS;
@@ -595,12 +643,17 @@ The following table organizes the functions by category:
 | Acronyms            | gdxAcronymIndex gdxAcronymValue gdxAcronymCount gdxAcronymGetInfo gdxAcronymSetInfo                                                                                                           |
 
 <!-- skip doxygen begin -->
+
 ## Transition diagram
 
-Some GDX operations only make sense after running other routines for preparation beforehand. For example, writing records
-to a symbol in raw mode can only be done after the symbol has been "opened" for writing in raw mode. Hence, the GDX operations
-follow a state machine like logic that prevents the user from executing operations that are not sensible in the current state
-of the GDX object.  The routines documented below follow certain input / output state transitions. Routines not documented
+Some GDX operations only make sense after running other routines for preparation beforehand. For example, writing
+records
+to a symbol in raw mode can only be done after the symbol has been "opened" for writing in raw mode. Hence, the GDX
+operations
+follow a state machine like logic that prevents the user from executing operations that are not sensible in the current
+state
+of the GDX object. The routines documented below follow certain input / output state transitions. Routines not
+documented
 below have no special state requirements.
 
 ### Diagram for general operations
@@ -618,6 +671,7 @@ graph TD
     fr_init -->|gdxAcronymSetInfo| fr_init
     fw_init -->|gdxAcronymSetInfo| fw_init
 ```
+
 ### Diagram for read operations
 
 ```mermaid
@@ -645,6 +699,7 @@ graph TD
 - `**` stay in `fr_{raw,map,str}_data` iff. there are more records to read, move to `fr_init` otherwise.
 
 ### Diagram for write operations
+
 ```mermaid
 graph TD
     fw_init -->|gdxDataWriteRawStart| fw_raw_data
@@ -659,6 +714,7 @@ graph TD
 ```
 
 ### Diagram for UEL operations
+
 ```mermaid
 graph TD
     fr_init -->|gdxUELRegisterRawStart| f_raw_elem
@@ -671,12 +727,17 @@ graph TD
     f_map_elem -->|gdxUELRegisterDone| fr_init
     f_str_elem -->|gdxUELRegisterDone| fr_init
 ```
+
 <!-- skip doxygen end -->
 
 ## Example programs
 
 ### Example 1 (GAMS)
-In this modified version of the trnsport.gms model, we use an external program to generate data for the demand parameter. After we solve the model, we write the solution to a GDX file, and call the external program again to read the variable from the GDX file.
+
+In this modified version of the trnsport.gms model, we use an external program to generate data for the demand
+parameter. After we solve the model, we write the solution to a GDX file, and call the external program again to read
+the variable from the GDX file.
+
 ```
 $Title trnsport model using gdx files
 $EOLCOM //
@@ -740,6 +801,7 @@ execute 'gdxexdp.exe %gams.sysdir% results.gdx'; // do something with the soluti
 ```
 
 ### Example 2 (C)
+
 ```c
 /*
   Use this command to compile the example:
@@ -939,6 +1001,7 @@ int main (int argc, char *argv[]) {
 ```
 
 ### Example 3 (C++)
+
 ```cpp
  /*
    Use this command to compile the example:
@@ -1055,6 +1118,7 @@ int main(int argc, char *argv[]) {
 ```
 
 ### Example 4 (VB.NET)
+
 ```vb
 Module xp_example1
     '///////////////////////////////////////////////////////////////
@@ -1195,6 +1259,7 @@ End Module
 ```
 
 ### Example 6 (Python)
+
 ```python
 import argparse
 import sys
@@ -1219,7 +1284,7 @@ if __name__ == "__main__":
         if not gdx.gdxOpenWrite(gdx_h, "demanddata.gdx", "xp_example1")[0]:
             raise Exception("Error gdxOpenWrite")
         if not gdx.gdxDataWriteStrStart(
-            gdx_h, "Demand", "Demand data", 1, gdx.GMS_DT_PAR, 0
+                gdx_h, "Demand", "Demand data", 1, gdx.GMS_DT_PAR, 0
         ):
             raise Exception("Error gdxDataWriteStrStart")
 
@@ -1280,6 +1345,7 @@ if __name__ == "__main__":
 ```
 
 ### Example 7 (C#)
+
 ```csharp
 ///////////////////////////////////////////////////////////////
 // This program generates demand data for a modified version //
@@ -1430,6 +1496,7 @@ namespace xp_example1
 ```
 
 ### Example 8 (Java)
+
 ```java
 package com.gams.xp_examples;
 import com.gams.api.*;
@@ -1561,34 +1628,3 @@ static void WriteData(String s, double V) {
 
 }
 ```
-
-## Conversion issues when moving from GAMS 22.5 to 22.6
-
-- maximum number of dimensions = 20 (was 10)
-- maximum length of an identifier or unique element = 63 (was 31)
-- support for acronyms
-- support for domain information
-
-Backward compatibility:
-- GAMS and all gdx utilities will write gdx files in the new format
-- GAMS and all gdx utilities can read older gdx formats
-- The gdxcopy utility can convert between different gdx formats
-  (assuming that dimension and namelength is supported)
-
-Libraries:
-- `gdxio.dll` is still available but the new library is called `(lib)gdxcclib64.dll` (substitute `.dll` with the extension for your platform, e.g. `.so` or `.dylib`)
-- `gdxio.dll` cannot read the new gdx format
-
-API:
-- Functions in the library that used to return a boolean, now return  an integer (zero for false, non-zero for true)
-- Before we can read or write a gdx file, we need to create a valid gdx object. The  function `gdxCreate` will create such an object
-- The functions `gdxOpenRead` and `gdxOpenWrite` no longer create the gdx object pointer, they require an object pointer that has been initialized using gdxCreate or similar functions
-
-## Files in the apifiles directory
-
-The following sections describe the various files included in the apifiles
-directory. All functions will use the gdxcclib library (like `gdxcclib64.dll` on
-Windows). The entry points in the library can be loaded static (by the operating system)
-or dynamic. Dynamic loading provides more control when an entry point is missing
-or the interface has changed. Static loading will cause an exception to be generated
-for example for a missing entry point without much feedback about the error.
