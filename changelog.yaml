@@ -1,6 +1,7 @@
 ---
 - 7.10.2:
     - gdxUMUelGet was modified to accept a NULL pointer for the user UEL index mapping "UelMap".
+    - Added example programs xp_associative(_vec) and xp_dataWrite.
 - 7.10.1:
     - First open source release of GDX eXPert-level API. Compatible with GAMS 45.
     - Added gdxAllowBogusDomains to get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).
