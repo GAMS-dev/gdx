@@ -105,6 +105,7 @@ int gdxDataWriteMap( TGXFileRec_t *pgdx, const int *KeyInt, const double *Values
 int gdxDataWriteMapStart( TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
 int gdxDataWriteRaw( TGXFileRec_t *pgdx, const int *KeyInt, const double *Values );
 int gdxDataWriteRawStart( TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
+int gdxDataWriteRawStartKeyBounds( TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int *MinUELIndices, const int *MaxUELIndices );
 int gdxDataWriteStr( TGXFileRec_t *pgdx, const char **KeyStr, const double *Values );
 int gdxDataWriteStrStart( TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
 int gdxGetDLLVersion( TGXFileRec_t *pgdx, char *V );
@@ -382,6 +383,11 @@ GDX_INLINE int gdxDataWriteRaw( TGXFileRec_t *pgx, const int *KeyInt, const doub
 GDX_INLINE int gdxDataWriteRawStart( TGXFileRec_t *pgx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo )
 {
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataWriteRawStart(SyId, ExplTxt, Dimen, Typ, UserInfo );
+}
+
+GDX_INLINE int gdxDataWriteRawStartKeyBounds( TGXFileRec_t *pgx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int *MinUELIndices, const int *MaxUELIndices )
+{
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataWriteRawStartKeyBounds(SyId, ExplTxt, Dimen, Typ, UserInfo, MinUELIndices, MaxUELIndices );
 }
 
 GDX_INLINE int gdxDataWriteStr( TGXFileRec_t *pgx, const char **KeyStr, const double *Values )

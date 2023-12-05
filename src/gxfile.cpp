@@ -2213,6 +2213,18 @@ int TGXFileObj::gdxDataWriteRawStart( const char *SyId, const char *ExplTxt, int
    return true;
 }
 
+int TGXFileObj::gdxDataWriteRawStartKeyBounds( const char *SyId, const char *ExplTxt, int Dimen, int Typ,
+                                      int UserInfo, const int *MinUELIndices, const int *MaxUELIndices )
+{
+   if( !PrepareSymbolWrite( "DataWriteRawStart"s, SyId, ExplTxt, Dimen, Typ, UserInfo ) ) return false;
+   // we overwrite the initialization
+   std::memcpy(MinElem.data(), MinUELIndices, sizeof(int)*FCurrentDim);
+   std::memcpy(MaxElem.data(), MaxUELIndices, sizeof(int)*FCurrentDim);
+   InitDoWrite( -1 );
+   fmode = fw_dom_raw;
+   return true;
+}
+
 int TGXFileObj::gdxErrorCount() const
 {
    return ErrCntTotal;

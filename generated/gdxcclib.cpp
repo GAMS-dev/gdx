@@ -98,6 +98,7 @@
 #define C__gdxDataWriteMapStart c__gdxdatawritemapstart
 #define C__gdxDataWriteRaw c__gdxdatawriteraw
 #define C__gdxDataWriteRawStart c__gdxdatawriterawstart
+#define C__gdxDataWriteRawStartKeyBounds c__gdxdatawriterawstartkeybounds
 #define C__gdxDataWriteStr c__gdxdatawritestr
 #define C__gdxDataWriteStrStart c__gdxdatawritestrstart
 #define C__gdxGetDLLVersion c__gdxgetdllversion
@@ -165,6 +166,7 @@
 #define D__gdxDataSliceUELS d__gdxdatasliceuels
 #define D__gdxDataWriteMapStart d__gdxdatawritemapstart
 #define D__gdxDataWriteRawStart d__gdxdatawriterawstart
+#define D__gdxDataWriteRawStartKeyBounds d__gdxdatawriterawstartkeybounds
 #define D__gdxDataWriteStr d__gdxdatawritestr
 #define D__gdxDataWriteStrStart d__gdxdatawritestrstart
 #define D__gdxGetDLLVersion d__gdxgetdllversion
@@ -413,7 +415,7 @@ static int CheckSign(const char *funcn, int DLLNrArg, int ClNrArg, int DLLsign[]
 GDX_API int GDX_CALLCONV C__XCheck(const char *funcn, int ClNrArg, int Clsign[], char *Msg);
 GDX_API int GDX_CALLCONV C__XCheck(const char *funcn, int ClNrArg, int Clsign[], char *Msg)
 {
-  int DLLsign[7];
+  int DLLsign[8];
   if(!strcmp(funcn,"gdxAcronymAdd"))
   {
     DLLsign[0] = 3;DLLsign[1] = 11;DLLsign[2] = 11;DLLsign[3] = 3;
@@ -588,6 +590,11 @@ GDX_API int GDX_CALLCONV C__XCheck(const char *funcn, int ClNrArg, int Clsign[],
   {
     DLLsign[0] = 3;DLLsign[1] = 11;DLLsign[2] = 11;DLLsign[3] = 3;DLLsign[4] = 3;DLLsign[5] = 3;
     return CheckSign(funcn,5,ClNrArg,DLLsign,Clsign,Msg);
+  }
+  else if(!strcmp(funcn,"gdxDataWriteRawStartKeyBounds"))
+  {
+    DLLsign[0] = 3;DLLsign[1] = 11;DLLsign[2] = 11;DLLsign[3] = 3;DLLsign[4] = 3;DLLsign[5] = 3;DLLsign[6] = 51;DLLsign[7] = 51;
+    return CheckSign(funcn,7,ClNrArg,DLLsign,Clsign,Msg);
   }
   else if(!strcmp(funcn,"gdxDataWriteStr"))
   {
@@ -1145,6 +1152,12 @@ GDX_API int GDX_CALLCONV C__gdxDataWriteRawStart(TGXFileRec_t *TGXFile, const ch
   return gdxDataWriteRawStart(TGXFile, SyId, ExplTxt, Dimen, Typ, UserInfo);
 }
 
+GDX_API int GDX_CALLCONV C__gdxDataWriteRawStartKeyBounds(TGXFileRec_t *TGXFile, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int MinUELIndices[], const int MaxUELIndices[]);
+GDX_API int GDX_CALLCONV C__gdxDataWriteRawStartKeyBounds(TGXFileRec_t *TGXFile, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int MinUELIndices[], const int MaxUELIndices[])
+{
+  return gdxDataWriteRawStartKeyBounds(TGXFile, SyId, ExplTxt, Dimen, Typ, UserInfo, MinUELIndices, MaxUELIndices);
+}
+
 GDX_API int GDX_CALLCONV C__gdxDataWriteStr(TGXFileRec_t *TGXFile, const char *KeyStr[], const double Values[]);
 GDX_API int GDX_CALLCONV C__gdxDataWriteStr(TGXFileRec_t *TGXFile, const char *KeyStr[], const double Values[])
 {
@@ -1673,6 +1686,20 @@ GDX_API int GDX_CALLCONV D__gdxDataWriteRawStart(TGXFileRec_t *TGXFile, const ch
   ExplTxt_sst[(unsigned char) ExplTxt[0]] = '\0';
   gdxDataWriteRawStart_result = gdxDataWriteRawStart(TGXFile, SyId_sst, ExplTxt_sst, Dimen, Typ, UserInfo);
   return gdxDataWriteRawStart_result;
+}
+
+GDX_API int GDX_CALLCONV D__gdxDataWriteRawStartKeyBounds(TGXFileRec_t *TGXFile, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int MinUELIndices[], const int MaxUELIndices[]);
+GDX_API int GDX_CALLCONV D__gdxDataWriteRawStartKeyBounds(TGXFileRec_t *TGXFile, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int MinUELIndices[], const int MaxUELIndices[])
+{
+  int  gdxDataWriteRawStartKeyBounds_result;
+  char SyId_sst[256];
+  char ExplTxt_sst[256];
+  strncpy(SyId_sst,(char *) SyId + 1,(unsigned char) SyId[0]);
+  SyId_sst[(unsigned char) SyId[0]] = '\0';
+  strncpy(ExplTxt_sst,(char *) ExplTxt + 1,(unsigned char) ExplTxt[0]);
+  ExplTxt_sst[(unsigned char) ExplTxt[0]] = '\0';
+  gdxDataWriteRawStartKeyBounds_result = gdxDataWriteRawStartKeyBounds(TGXFile, SyId_sst, ExplTxt_sst, Dimen, Typ, UserInfo, MinUELIndices, MaxUELIndices);
+  return gdxDataWriteRawStartKeyBounds_result;
 }
 
 GDX_API int GDX_CALLCONV D__gdxDataWriteStr(TGXFileRec_t *TGXFile, const char *KeyStr, const double Values[]);

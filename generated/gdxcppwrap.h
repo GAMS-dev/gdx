@@ -305,6 +305,11 @@ public:
      return ::gdxDataWriteRawStart( pgx, SyId, ExplTxt, Dimen, Typ, UserInfo );
    }
 
+   int gdxDataWriteRawStartKeyBounds( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int *MinUELIndices, const int *MaxUELIndices )
+   {
+     return ::gdxDataWriteRawStartKeyBounds( pgx, SyId, ExplTxt, Dimen, Typ, UserInfo, MinUELIndices, MaxUELIndices );
+   }
+
    int gdxDataWriteStr( const char **KeyStr, const double *Values )
    {
      return ::gdxDataWriteStr( pgx, KeyStr, Values );
