@@ -101,7 +101,7 @@ def collect_groups(functions):
     gtf = {}
     for f in functions:
         for name, attrs in f.items():
-            group = None if not 'group' in attrs else attrs['group']
+            group = None if 'group' not in attrs else attrs['group']
             if group and group not in groups:
                 groups.append(group)
             if group in gtf:
