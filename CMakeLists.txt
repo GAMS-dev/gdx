@@ -84,6 +84,7 @@ set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 # Static library
 add_library(gdx-static STATIC ${common})
 target_include_directories(gdx-static PRIVATE ${inc-dirs})
+set_property(TARGET gdx-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Unit test suite (against statically compiled GDX)
 add_executable(gdxtest ${tests})
