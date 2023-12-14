@@ -59,7 +59,7 @@ apigenerator:
   script:
     - mkdir -p apifiles
     - python3 src/yaml2doxy.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdx.h
-    - python3 src/yaml2cwrap.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/cwrap.hpp
+    - python3 src/yaml2cwrap.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdxcwrap.hpp
     - >
       python3
       src/yaml2cwrap.py
@@ -72,7 +72,7 @@ apigenerator:
     - cp src/apigenerator/include/gc*.h apifiles
     - cp src/gdx.h generated/gdx.h
     - |
-      for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h" "gdx.h" "cwrap.hpp" "gdxcppwrap.h"; do
+      for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h" "gdx.h" "gdxcwrap.hpp" "gdxcppwrap.h"; do
         echo "Diffing 'apifiles/$f' with 'generated/$f'"
         if ! diff apifiles/$f generated/$f; then
           echo "Warning: $f stored in repo and freshly generated differ!"
@@ -376,7 +376,7 @@ deploy-gitlab-github:
     - cp Release/gdxcclib64.dll apifiles/*.h apifiles/*.c apifiles/*.cpp .
     - cp Release/gdx-static.lib libgdx-windows.lib
     - |
-      for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib libgdx-macos.a libgdx-linux.a libgdx-windows.lib gclgms.h gcmutex.h gdxcc.h gdxcc.c gdxcclib.cpp
+      for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib libgdx-macos.a libgdx-linux.a libgdx-windows.lib gclgms.h gcmutex.h gdxcc.h gdxcc.c gdxcwrap.hpp gdxcclib.cpp
       do
         GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v upload -R -u GAMS-dev -r gdx -t "${GDX_TAG_NAME}" -n $fn -f $fn
       done

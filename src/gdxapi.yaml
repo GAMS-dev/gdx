@@ -10,7 +10,7 @@ USE_XXXLOADPATH : true
 MaxDimStyle     : gdx
 
 UseCD            : True
-extracUse        : '#include "cwrap.hpp"'
+extracUse        : '#include "gdxcwrap.hpp"'
 clibuse          : True
 NOFORTRANCB      : False
 
