@@ -44,6 +44,7 @@ extern "C" {
 #endif
 
 typedef struct TGXFileRec TGXFileRec_t;
+typedef TGXFileRec_t* gdxHandle_t;
 
 typedef void( GDX_CALLCONV *TDataStoreProc_t )( const int Indx[], const double Vals[] );
 typedef int( GDX_CALLCONV *TDataStoreExProc_t )( const int Indx[], const double Vals[], int DimFrst, void *Uptr );
