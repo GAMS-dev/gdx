@@ -1,8 +1,8 @@
 ---
 title       : GAMS Data Exchange API
 prefix      : gdx
-apiversion  : 10
-compatibleversion : [10,9,8,7]
+apiversion  : 11
+compatibleversion : [11,10,9,8,7]
 
 DObject         : TGXFile
 DUnit           : gxfile
