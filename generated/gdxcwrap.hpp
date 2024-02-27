@@ -728,3 +728,4 @@ GDX_INLINE void setCallByRef( TGXFileRec_t *TGXFile, const char *FuncName, int c
 #ifdef __cplusplus
 }
 #endif
+
