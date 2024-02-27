@@ -1,5 +1,5 @@
 ---
-- 7.10.2:
+- 7.11.1:
     - gdxUMUelGet was modified to accept a NULL pointer for the user UEL index mapping "UelMap".
     - Added example programs xp_associative(_vec) and xp_dataWrite.
     - macOS libraries deployed with GitHub release are now universal (also support Intel) instead of only arm64.
