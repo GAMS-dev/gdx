@@ -1,4 +1,10 @@
 ---
+- 7.11.1:
+    - gdxUMUelGet was modified to accept a NULL pointer for the user UEL index mapping "UelMap".
+    - Added two new example programs xp_associative(_vec) and xp_dataWrite.
+    - macOS libraries deployed with GitHub release are now universal (also support Intel) instead of only arm64.
+    - Also release libraries for static linking on all platforms.
+    - Added gdxDataWriteRawStartKeyBounds that allows supplying UEL index lower and upper bounds per symbol dimension.
 - 7.10.1:
     - First open source release of GDX eXPert-level API. Compatible with GAMS 45.
     - Added gdxAllowBogusDomains to get flag to ignore using 1-dim sets as domain when their elements are not tracked (see gdxStoreDomainSets).

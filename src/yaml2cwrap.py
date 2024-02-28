@@ -18,6 +18,16 @@ def fp_decor(t, s):
         return s
 
 
+custom_bodies = {
+    'gdxUMUelGet':
+        '''if(!UelMap)
+   {
+     int tmpUelMap;
+     return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxUMUelGet(UelNr, Uel, tmpUelMap );
+   }'''
+}
+
+
 def generate_c_wrapper(input, template_folder, template, output):
     with open(input) as fp:
         obj = yaml.load(fp, Loader=yaml.FullLoader)
@@ -28,7 +38,7 @@ def generate_c_wrapper(input, template_folder, template, output):
     env.globals['fp_decor'] = fp_decor
     template = env.get_template(template)
     with open(output, 'w') as fp:
-        fp.write(template.render(obj=obj, properties=yaml2doxy.nice_properties(obj)))
+        fp.write(template.render(obj=obj, properties=yaml2doxy.nice_properties(obj), custom_bodies=custom_bodies))
 
 
 def main():
@@ -36,7 +46,7 @@ def main():
     ap.add_argument('--input', type=str,
                     default='gdxapi.yaml', help='YAML API definition input filename')
     ap.add_argument('--output', type=str,
-                    default='cwrap.hpp', help='Output GDX C-API wrapper header filename')
+                    default='gdxcwrap.hpp', help='Output GDX C-API wrapper header filename')
     ap.add_argument('--template', type=str,
                     default='cwrap.template.j2', help='Name of Jinja2 template file')
     ap.add_argument('--template_folder', type=str,

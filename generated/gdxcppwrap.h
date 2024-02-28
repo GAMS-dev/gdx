@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
 *
-* Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
-* Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
+* Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
+* Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -303,6 +303,11 @@ public:
    int gdxDataWriteRawStart( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo )
    {
      return ::gdxDataWriteRawStart( pgx, SyId, ExplTxt, Dimen, Typ, UserInfo );
+   }
+
+   int gdxDataWriteRawStartKeyBounds( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int *MinUELIndices, const int *MaxUELIndices )
+   {
+     return ::gdxDataWriteRawStartKeyBounds( pgx, SyId, ExplTxt, Dimen, Typ, UserInfo, MinUELIndices, MaxUELIndices );
    }
 
    int gdxDataWriteStr( const char **KeyStr, const double *Values )
