@@ -713,7 +713,7 @@ void TMiBufferedStreamDelphi::WriteGmsDouble( double D )
       }
       B = 128 | C;
       Write( &B, 1 );
-      Write( &Z.VA[C + 1], (uint32_t) Z.VA.size() - C );
+      Write( &Z.VA[C], (uint32_t) Z.VA.size() - C );
    }
    else
    {
