@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
 *
-* Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
-* Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
+* Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
+* Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -2549,6 +2549,31 @@ TEST_CASE( "Test option to map acronym indices to NaN" )
       REQUIRE(pgx.gdxDataReadStr( keys.ptrs(), values.data(), dimFrst ));
       REQUIRE_EQ(NaN, values[GMS_VAL_LEVEL]);
       REQUIRE(pgx.gdxDataReadDone());
+   });
+   std::filesystem::remove(fn);
+}
+
+TEST_CASE( "Test writing in raw mode with known UEL index bounds" )
+{
+   const std::string fn {"narrowKeys.gdx"};
+   testWrite(fn, [&](TGXFileObj &pgx) {
+      int uelNr;
+      REQUIRE(pgx.gdxUELRegisterStrStart());
+      REQUIRE(pgx.gdxUELRegisterStr("alpha", uelNr));
+      REQUIRE(pgx.gdxUELRegisterStr("beta", uelNr));
+      REQUIRE(pgx.gdxUELRegisterStr("gamma", uelNr));
+      REQUIRE(pgx.gdxUELRegisterDone());
+      std::array<int, 2> minUelIndices {1, 1}, maxUelIndices {1, 3};
+      REQUIRE(pgx.gdxDataWriteRawStartKeyBounds("i", "a small set", 2, dt_set, 0, minUelIndices.data(), maxUelIndices.data()));
+      std::array<int, GMS_MAX_INDEX_DIM> keys {};
+      const std::array<double, GMS_VAL_MAX> vals {};
+      keys.front() = 1;
+      for(int i{}; i<3; i++)
+      {
+         keys[1] = i+1;
+         REQUIRE(pgx.gdxDataWriteRaw( keys.data(), vals.data() ));
+      }
+      REQUIRE(pgx.gdxDataWriteDone());
    });
    std::filesystem::remove(fn);
 }

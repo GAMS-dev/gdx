@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -1593,6 +1593,79 @@ public:
     * @see gdxDataWriteRaw, gdxDataWriteDone
     */
    int gdxDataWriteRawStart( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
+
+   /**
+    * @brief Start writing a new symbol in raw mode with bounds for UEL key indices being known in advance.
+    *   This
+    *   helps potentially reducing the required storage for the keys as smaller integral datatypes can be
+    *   used.
+    *   Returns zero if the operation is not possible.
+    * @details Raw mode flushes new records immediately to the GDX file (unlike mapped or string mode). The key
+    *   indices for the record are provided as unique element numbers.
+    * @param SyId Name of the symbol (up to 63 characters). The first character of a symbol must be a letter.
+    *   Following symbol characters may be letters, digits, and underscores. Symbol names must be new and
+    *   unique.
+    * @param ExplTxt Explanatory text for the symbol (up to 255 characters).
+    * @param Dimen Dimension of the symbol (up to 20).
+    * @param Typ Type of the symbol (set=0, parameter=1, variable=2, equation=3, alias=4).
+    * @param UserInfo User field value storing additional data; GAMS follows the following conventions:
+    * <table>
+    *  <tr>
+    *   <td>
+    *    Type
+    *   </td>
+    *   <td>
+    *    Value(s)
+    *   </td>
+    *  </tr>
+    *  <tr>
+    *   <td>
+    *    Aliased Set
+    *   </td>
+    *   <td>
+    *    The symbol number of the aliased set, or zero for the universe
+    *   </td>
+    *  </tr>
+    *  <tr>
+    *   <td>
+    *    Set
+    *   </td>
+    *   <td>
+    *    Zero
+    *   </td>
+    *  </tr>
+    *  <tr>
+    *   <td>
+    *    Parameter
+    *   </td>
+    *   <td>
+    *    Zero
+    *   </td>
+    *  </tr>
+    *  <tr>
+    *   <td>
+    *    Variable
+    *   </td>
+    *   <td>
+    *    The variable type: binary=1, integer=2, positive=3, negative=4, free=5, sos1=6, sos2=7,
+    *    semicontinous=8, semiinteger=9
+    *   </td>
+    *  </tr>
+    *  <tr>
+    *   <td>
+    *    Equation
+    *   </td>
+    *   <td>
+    *    The equation type: eque=53, equg=54, equl=55, equn=56, equx=57, equc=58, equb=59
+    *   </td>
+    *  </tr>
+    * </table>
+    * @param MinUELIndices Minimum UEL indices for each symbol dimension. Can help with shrinking storage for keys.
+    * @param MaxUELIndices Maximum UEL indices for each symbol dimension. Can help with shrinking storage for keys.
+    * @return Non-zero if the operation is possible, zero otherwise.
+    * @see gdxDataWriteRaw, gdxDataWriteDone
+    */
+   int gdxDataWriteRawStartKeyBounds( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int *MinUELIndices, const int *MaxUELIndices );
 
    /**
     * @brief Write a data element in string mode. Each element string must follow the GAMS rules for unique

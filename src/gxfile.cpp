@@ -37,6 +37,7 @@
 #include <iostream> // for operator<<, basic_ostream, cout, ostream
 #include <map>      // for map, operator==, _Rb_tree_const_iterator
 #include <utility>  // for pair
+#include <sstream>
 
 #if defined( _WIN32 )
 #include <Windows.h>
@@ -50,7 +51,14 @@ using namespace std::literals::string_literals;
 namespace gdx
 {
 
+#if defined(NDEBUG)
+static std::stringstream debugStream;
+#else
+#define debugStream std::cout
+#endif
+
 std::string QueryEnvironmentVariable( const std::string &Name );
+
 std::string QueryEnvironmentVariable( const std::string &Name )
 {
 #if defined( _WIN32 )
@@ -394,7 +402,7 @@ int TGXFileObj::gdxOpenWrite( const char *FileName, const char *Producer, int &E
 int TGXFileObj::gdxOpenWriteEx( const char *FileName, const char *Producer, int Compr, int &ErrNr )
 {
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
-      std::cout << "gdxOpenWrite("s << FileName << ")\n"s;// NOTE: Not covered by unit tests yet.
+      debugStream << "gdxOpenWrite("s << FileName << ")\n"s;// NOTE: Not covered by unit tests yet.
 
    if( fmode != f_not_open )
    {
@@ -473,9 +481,9 @@ int TGXFileObj::gdxDataWriteStr( const char **KeyStr, const double *Values )
    {
       // NOTE: Not covered by unit tests yet.
       if( !CheckMode( "DataWriteStr"s, fw_str_data ) ) return false;
-      std::cout << "  Index =\n";
+      debugStream << "  Index =\n";
       for( int D {}; D < FCurrentDim; D++ )
-         std::cout << " " << KeyStr[D] << ( D + 1 < FCurrentDim ? "," : "" ) << "\n";
+         debugStream << " " << KeyStr[D] << ( D + 1 < FCurrentDim ? "," : "" ) << "\n";
    }
    // Could actually be GLOBAL_UEL_IDENT_SIZE but is ShortString in Delphi
    static std::array<char, GMS_SSSIZE> SVstorage;
@@ -530,7 +538,7 @@ int TGXFileObj::gdxDataWriteDone()
 int TGXFileObj::gdxClose()
 {
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
-      std::cout << "gdxClose("s << ( FFile ? FFile->GetFileName() : ""s ) << ")\n"s;// NOTE: Not covered by unit tests yet.
+      debugStream << "gdxClose("s << ( FFile ? FFile->GetFileName() : ""s ) << ")\n"s;// NOTE: Not covered by unit tests yet.
 
    std::string fnConv;
    if( utils::in( fmode, fw_raw_data, fw_map_data, fw_str_data ) )// unfinished write
@@ -702,7 +710,7 @@ int TGXFileObj::gdxResetSpecialValues()
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
    {
       // NOTE: Not covered by unit tests yet.
-      std::cout << "reset special vals, dump of readIntlValueMapDbl\n"s;
+      debugStream << "reset special vals, dump of readIntlValueMapDbl\n"s;
       const std::array<std::pair<std::string, int>, 5> svNameIndexPairs {
               { { "undef"s, sv_valund },
                 { "na"s, sv_valna },
@@ -710,7 +718,7 @@ int TGXFileObj::gdxResetSpecialValues()
                 { "min"s, sv_valmin },
                 { "eps"s, sv_valeps } } };
       for( auto &[svName, svIndex]: svNameIndexPairs )
-         std::cout << svName << "="s << readIntlValueMapDbl[svIndex] << '\n';
+         debugStream << svName << "="s << readIntlValueMapDbl[svIndex] << '\n';
    }
 
    copyIntlMapDblToI64( intlValueMapDbl, intlValueMapI64 );
@@ -806,7 +814,7 @@ bool TGXFileObj::MajorCheckMode( const std::string_view Routine, const TgxModeSe
 
 void TGXFileObj::WriteTrace( const std::string_view s ) const
 {
-   std::cout << "gdxTrace " << TraceStr << ": " << s << '\n';
+   debugStream << "gdxTrace " << TraceStr << ": " << s << '\n';
 }
 
 bool TGXFileObj::IsGoodNewSymbol( const char *s )
@@ -828,10 +836,10 @@ void TGXFileObj::ReportError( int N )
    {
       // NOTE: Not covered by unit tests yet.
       if( !MajContext.empty() )
-         std::cout << "Error after call to " << MajContext << '\n';
+         debugStream << "Error after call to " << MajContext << '\n';
       std::array<char, GMS_SSSIZE> s {};
       gdxErrorStr( N, s.data() );
-      std::cout << "Error = " << N << " : " << s.data() << "\n";
+      debugStream << "Error = " << N << " : " << s.data() << "\n";
    }
    SetError( N );
    LastRepError = N;
@@ -858,11 +866,11 @@ bool TGXFileObj::CheckMode( const std::string_view Routine, const TgxModeSet &MS
       return true;
    }
    SetError( ERR_BADMODE );
-   std::cout << "**** Error: " << Routine << " called out of context\n";
+   debugStream << "**** Error: " << Routine << " called out of context\n";
    if( !MajContext.empty() && !utils::sameText( MajContext, Routine ) )
-      std::cout << "     Previous major function called was " << MajContext << '\n';
-   std::cout << "     Current context = " << fmode_str[fmode] << '\n';
-   std::cout << "     Allowed = {";
+      debugStream << "     Previous major function called was " << MajContext << '\n';
+   debugStream << "     Current context = " << fmode_str[fmode] << '\n';
+   debugStream << "     Allowed = {";
    bool f { true };
    for( int M {}; M < tgxfilemode_count; M++ )
    {
@@ -870,11 +878,11 @@ bool TGXFileObj::CheckMode( const std::string_view Routine, const TgxModeSet &MS
       {
          if( f ) f = false;
          else
-            std::cout << ',';// NOTE: Not covered by unit tests yet.
-         std::cout << fmode_str[M];
+            debugStream << ',';// NOTE: Not covered by unit tests yet.
+         debugStream << fmode_str[M];
       }
    }
-   std::cout << "}\n";
+   debugStream << "}\n";
    return false;
 }
 
@@ -1139,7 +1147,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
          catch( std::exception &e )
          {
             // NOTE: Not covered by unit tests yet.
-            std::cout << "Exception: " << e.what() << "\n";
+            debugStream << "Exception: " << e.what() << "\n";
             AllocOk = false;
          }
       }
@@ -1238,10 +1246,10 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
    {
       // NOTE: Not covered by unit tests yet.
-      std::cout << "DoWrite index: "s;
+      debugStream << "DoWrite index: "s;
       for( int D {}; D < FCurrentDim; D++ )
-         std::cout << std::to_string( AElements[D] ) << ( D + 1 < FCurrentDim ? ","s : ""s );
-      std::cout << '\n';
+         debugStream << std::to_string( AElements[D] ) << ( D + 1 < FCurrentDim ? ","s : ""s );
+      debugStream << '\n';
    }
 
    int FDim { FCurrentDim + 1 }, delta {};
@@ -1361,7 +1369,7 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
          }
       }
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
-         std::cout << "level="s << AVals[GMS_VAL_LEVEL] << '\n';// NOTE: Not covered by unit tests yet.
+         debugStream << "level="s << AVals[GMS_VAL_LEVEL] << '\n';// NOTE: Not covered by unit tests yet.
    }
    DataCount++;
    if( utils::in( CurSyPtr->SDataType, dt_set, dt_alias ) )
@@ -1443,7 +1451,7 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
          if (SV < 0 || SV >= vm_count) {
             AVals[DV] = 0.0;
             if(verboseTrace && TraceLevel >= TraceLevels::trl_errors)
-                std::cout << "WARNING: Special value (" << BSV << ") byte out of range {0,...,10}!" << std::endl;
+                debugStream << "WARNING: Special value (" << BSV << ") byte out of range {0,...,10}!" << std::endl;
             continue;
          }
          AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap( FFile->ReadDouble() );
@@ -1457,7 +1465,7 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
             AVals[GMS_VAL_LEVEL] = MapSetText[D];
       }
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
-         std::cout << "level="s << AVals[GMS_VAL_LEVEL] << '\n';// NOTE: Not covered by unit tests yet.
+         debugStream << "level="s << AVals[GMS_VAL_LEVEL] << '\n';// NOTE: Not covered by unit tests yet.
    }
    return true;
 }
@@ -1865,7 +1873,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
    {
       // NOTE: Not covered by unit tests yet.
-      std::cout << "gdxOpenRead("s << Afn << ")\n"s;
+      debugStream << "gdxOpenRead("s << Afn << ")\n"s;
    }
 
    auto FileErrorNr = [&]() {
@@ -2176,10 +2184,10 @@ int TGXFileObj::gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst )
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
       {
          // NOTE: Not covered by unit tests yet.
-         std::cout << "DataReadRaw index: "s;
+         debugStream << "DataReadRaw index: "s;
          for( int D {}; D < FCurrentDim; D++ )
-            std::cout << std::to_string( KeyInt[D] ) << ( D + 1 < FCurrentDim ? ","s : ""s );
-         std::cout << '\n';
+            debugStream << std::to_string( KeyInt[D] ) << ( D + 1 < FCurrentDim ? ","s : ""s );
+         debugStream << '\n';
       }
       return true;
    }
@@ -2208,6 +2216,18 @@ int TGXFileObj::gdxDataWriteRawStart( const char *SyId, const char *ExplTxt, int
    // we overwrite the initialization
    std::fill_n( MinElem.begin(), FCurrentDim, 0 );// no assumptions about the range for a uel
    std::fill_n( MaxElem.begin(), FCurrentDim, std::numeric_limits<int>::max() );
+   InitDoWrite( -1 );
+   fmode = fw_dom_raw;
+   return true;
+}
+
+int TGXFileObj::gdxDataWriteRawStartKeyBounds( const char *SyId, const char *ExplTxt, int Dimen, int Typ,
+                                      int UserInfo, const int *MinUELIndices, const int *MaxUELIndices )
+{
+   if( !PrepareSymbolWrite( "DataWriteRawStart"s, SyId, ExplTxt, Dimen, Typ, UserInfo ) ) return false;
+   // we overwrite the initialization
+   std::memcpy(MinElem.data(), MinUELIndices, sizeof(int)*FCurrentDim);
+   std::memcpy(MaxElem.data(), MaxUELIndices, sizeof(int)*FCurrentDim);
    InitDoWrite( -1 );
    fmode = fw_dom_raw;
    return true;
@@ -2277,7 +2297,7 @@ int TGXFileObj::gdxGetSpecialValues( double *AVals )
       std::array svNames { "undef"s, "na"s, "posinf"s, "min"s, "eps"s };
       std::array svIndices { sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps };
       for( int i = 0; i < (int) svNames.size(); i++ )
-         std::cout << svNames[i] << "="s << AVals[svIndices[i]] << '\n';
+         debugStream << svNames[i] << "="s << AVals[svIndices[i]] << '\n';
    }
 
    return true;
@@ -2299,7 +2319,7 @@ int TGXFileObj::gdxSetSpecialValues( const double *AVals )
       std::array svNames { "undef"s, "na"s, "posinf"s, "min"s, "eps"s };
       std::array svIndices { sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps };
       for( int i = 0; i < (int) svNames.size(); i++ )
-         std::cout << svNames[i] << "="s << AVals[svIndices[i]] << '\n';
+         debugStream << svNames[i] << "="s << AVals[svIndices[i]] << '\n';
    }
 
    TIntlValueMapI64 tmpI64;
@@ -2326,11 +2346,11 @@ int TGXFileObj::gdxSetSpecialValues( const double *AVals )
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
    {
       // NOTE: Not covered by unit tests yet.
-      std::cout << "Read dump, readIntlValueMapDbl\n";
+      debugStream << "Read dump, readIntlValueMapDbl\n";
       std::array svNames { "undef"s, "na"s, "posinf"s, "min"s, "eps"s };
       std::array svIndices { sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps };
       for( int i = 0; i < (int) svNames.size(); i++ )
-         std::cout << svNames[i] << "="s << readIntlValueMapDbl[svIndices[i]] << '\n';
+         debugStream << svNames[i] << "="s << readIntlValueMapDbl[svIndices[i]] << '\n';
    }
 
    intlValueMapI64 = tmpI64;
@@ -2379,14 +2399,14 @@ int TGXFileObj::gdxSymbolGetDomainX( int SyNr, char **DomainIDs )
    if( verboseTrace && TraceLevel == TraceLevels::trl_all && utils::in( res, 2, 3 ) )
    {
       // NOTE: Not covered by unit tests yet.
-      std::cout << "GetDomain SyNr="s << SyNr << '\n';
+      debugStream << "GetDomain SyNr="s << SyNr << '\n';
       for( int D {}; D < SyPtr->SDim; D++ )
       {
          if( res == 2 )
-            std::cout << "SDomStrings["s << D << "]="s << SyPtr->SDomStrings[D] << '\n';
+            debugStream << "SDomStrings["s << D << "]="s << SyPtr->SDomStrings[D] << '\n';
          else if( res == 3 )
-            std::cout << "SDomSymbols["s << D << "]="s << SyPtr->SDomSymbols[D] << '\n';
-         std::cout << "DomainIDs["s << D << "]="s << DomainIDs[D] << '\n';
+            debugStream << "SDomSymbols["s << D << "]="s << SyPtr->SDomSymbols[D] << '\n';
+         debugStream << "DomainIDs["s << D << "]="s << DomainIDs[D] << '\n';
       }
    }
 
@@ -2432,9 +2452,9 @@ int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
    if( verboseTrace && TraceLevel == TraceLevels::trl_all )
    {
       // NOTE: Not covered by unit tests yet.
-      std::cout << "SetDomain\n"s;
+      debugStream << "SetDomain\n"s;
       for( int D {}; D < CurSyPtr->SDim; D++ )
-         std::cout << "DomainID["s << D << "]="s << DomainIDs[D] << '\n';
+         debugStream << "DomainID["s << D << "]="s << DomainIDs[D] << '\n';
    }
 
    int res { true };
@@ -2524,9 +2544,9 @@ int TGXFileObj::gdxSymbolSetDomainX( int SyNr, const char **DomainIDs )
    if( verboseTrace && TraceLevel == TraceLevels::trl_all )
    {
       // NOTE: Not covered by unit tests yet.
-      std::cout << "SetDomainX SyNr="s << SyNr << '\n';
+      debugStream << "SetDomainX SyNr="s << SyNr << '\n';
       for( int D {}; D < SyPtr->SDim; D++ )
-         std::cout << "DomainID["s << D << "]="s << DomainIDs[D] << '\n';
+         debugStream << "DomainID["s << D << "]="s << DomainIDs[D] << '\n';
    }
 
    if( SyPtr->SDim > 0 )
@@ -2569,7 +2589,7 @@ int TGXFileObj::gdxUELRegisterDone()
 int TGXFileObj::gdxUELRegisterRaw( const char *Uel )
 {
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
-      std::cout << "Uel=" << Uel << '\n';// NOTE: Not covered by unit tests yet.
+      debugStream << "Uel=" << Uel << '\n';// NOTE: Not covered by unit tests yet.
 
    if( ( TraceLevel >= TraceLevels::trl_all || fmode != f_raw_elem ) && !CheckMode( "UELRegisterRaw"s, f_raw_elem ) )
       return false;// NOTE: Not covered by unit tests yet.
@@ -2705,11 +2725,11 @@ int TGXFileObj::gdxDataWriteMap( const int *KeyInt, const double *Values )
    {
       // NOTE: Not covered by unit tests yet.
       if( !CheckMode( "DataWriteMap"s, fw_map_data ) ) return false;
-      std::cout << "   Index =";
+      debugStream << "   Index =";
       for( int D {}; D < FCurrentDim; D++ )
       {
-         std::cout << " " << std::to_string( KeyInt[D] );
-         if( D + 1 < FCurrentDim ) std::cout << ",";
+         debugStream << " " << std::to_string( KeyInt[D] );
+         if( D + 1 < FCurrentDim ) debugStream << ",";
       }
    }
    for( int D {}; D < FCurrentDim; D++ )
@@ -2747,7 +2767,7 @@ int TGXFileObj::gdxUELRegisterMap( int UMap, const char *Uel )
    {
       // NOTE: Not covered by unit tests yet.
       if( !CheckMode( "UELRegisterMap"s, f_map_elem ) ) return false;
-      std::cout << "   Enter UEL: " << SV << " with number " << UMap << "\n";
+      debugStream << "   Enter UEL: " << SV << " with number " << UMap << "\n";
    }
    if( ErrorCondition( GoodUELString( SV, svLen ), ERR_BADUELSTR ) ||
        ErrorCondition( UELTable->AddUsrIndxNew( SV, svLen, UMap ) >= 0, ERR_UELCONFLICT ) ) return false;
@@ -3184,7 +3204,7 @@ int TGXFileObj::gdxSetTraceLevel( int N, const char *s )
    //!! GetStdHandle(STD_OUTPUT_HANDLE) <> INVALID_HANDLE_VALUE;
    if( TraceLevel > TraceLevels::trl_errors )
    {
-      std::cout << std::endl;
+      debugStream << std::endl;
       WriteTrace( "Tracing at level "s + std::to_string( (int) TraceLevel ) );
    }
    return true;
@@ -3441,14 +3461,14 @@ int TGXFileObj::gdxSetReadSpecialValues( const double *AVals )
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
    {
       // NOTE: Not covered by unit tests yet.
-      std::cout << "gdxSetReadSpecialValues, dump of readIntlValueMapDbl\n";
+      debugStream << "gdxSetReadSpecialValues, dump of readIntlValueMapDbl\n";
       static const std::array<std::pair<std::string, int>, 5> svNameIndexPairs { { { "undef"s, sv_valund },
                                                                                    { "na"s, sv_valna },
                                                                                    { "posinf"s, sv_valpin },
                                                                                    { "min"s, sv_valmin },
                                                                                    { "eps"s, sv_valeps } } };
       for( const auto &[svName, svIndex]: svNameIndexPairs )
-         std::cout << svName << "="s << readIntlValueMapDbl[svIndex] << '\n';
+         debugStream << svName << "="s << readIntlValueMapDbl[svIndex] << '\n';
    }
 
    return true;

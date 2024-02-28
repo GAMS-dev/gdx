@@ -287,7 +287,7 @@ class TMiBufferedStreamDelphi : public TBufferedFileStreamDelphi
             if( v2 != patConstant ) order_type = PAT_BAD_ORDER;
          }
       }
-   };
+   }
 
    void DetermineByteOrder();
 

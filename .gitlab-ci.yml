@@ -59,7 +59,7 @@ apigenerator:
   script:
     - mkdir -p apifiles
     - python3 src/yaml2doxy.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdx.h
-    - python3 src/yaml2cwrap.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/cwrap.hpp
+    - python3 src/yaml2cwrap.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdxcwrap.hpp
     - >
       python3
       src/yaml2cwrap.py
@@ -72,7 +72,7 @@ apigenerator:
     - cp src/apigenerator/include/gc*.h apifiles
     - cp src/gdx.h generated/gdx.h
     - |
-      for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h" "gdx.h" "cwrap.hpp" "gdxcppwrap.h"; do
+      for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h" "gdx.h" "gdxcwrap.hpp" "gdxcppwrap.h"; do
         echo "Diffing 'apifiles/$f' with 'generated/$f'"
         if ! diff apifiles/$f generated/$f; then
           echo "Warning: $f stored in repo and freshly generated differ!"
@@ -110,10 +110,11 @@ build-leg:
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py gcc build_log.txt warnings.xml
+    - mv libgdx-static.a libgdx-linux.a
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-leg
-    paths: [gdxtest,gdxwraptest,libgdxcclib64.so]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -143,10 +144,11 @@ build-deg:
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py clang build_log.txt warnings.xml
+    - mv libgdx-static.a libgdx-macos.a
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-deg
-    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib,libgdx-macos.a]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -155,14 +157,20 @@ build-dac:
   stage: build
   tags: [macos-arm64]
   script:
+    - mv libgdxcclib64.dylib libgdxcclib64_deg.dylib
+    - mv libgdx-macos.a libgdx-macos-deg.a
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ci/report_for_log.py clang build_log.txt warnings.xml
-  needs: [fetch-ci-scripts,apigenerator]
+    - mv libgdxcclib64.dylib libgdxcclib64_dac.dylib
+    - mv libgdx-static.a libgdx-macos-dac.a
+    - lipo -create libgdxcclib64_deg.dylib libgdxcclib64_dac.dylib -output libgdxcclib64.dylib
+    - lipo -create libgdx-macos-deg.a libgdx-macos-dac.a -output libgdx-macos.a
+  needs: [fetch-ci-scripts,apigenerator,build-deg]
   artifacts:
     name: gdx-dac
-    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib,libgdx-macos.a]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -345,7 +353,7 @@ deploy-gitlab-github:
     - if: $CI_COMMIT_BRANCH == 'main'
       when: on_success
   tags: [linux]
-  needs: [build-leg, build-dac, build-wei, apigenerator]
+  needs: [build-leg,build-dac,build-wei,apigenerator]
   image:
     name: registry.gams.com/devel/gdx/leg/builder-deploy:latest
     entrypoint: [""]   # prevent startup.sh
@@ -366,8 +374,9 @@ deploy-gitlab-github:
       -n "${GDX_RELEASE_NAME}"
     - sleep 10s # make sure the release is available to reference
     - cp Release/gdxcclib64.dll apifiles/*.h apifiles/*.c apifiles/*.cpp .
+    - cp Release/gdx-static.lib libgdx-windows.lib
     - |
-      for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib gclgms.h gcmutex.h gdxcc.h gdxcc.c gdxcclib.cpp
+      for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib libgdx-macos.a libgdx-linux.a libgdx-windows.lib gclgms.h gcmutex.h gdxcc.h gdxcc.c gdxcwrap.hpp gdxcclib.cpp
       do
         GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v upload -R -u GAMS-dev -r gdx -t "${GDX_TAG_NAME}" -n $fn -f $fn
       done

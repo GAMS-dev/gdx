@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@ extern "C" {
 #endif
 
 typedef struct TGXFileRec TGXFileRec_t;
+typedef TGXFileRec_t* gdxHandle_t;
 
 typedef void( GDX_CALLCONV *TDataStoreProc_t )( const int Indx[], const double Vals[] );
 typedef int( GDX_CALLCONV *TDataStoreExProc_t )( const int Indx[], const double Vals[], int DimFrst, void *Uptr );
@@ -105,6 +106,7 @@ int gdxDataWriteMap( TGXFileRec_t *pgdx, const int *KeyInt, const double *Values
 int gdxDataWriteMapStart( TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
 int gdxDataWriteRaw( TGXFileRec_t *pgdx, const int *KeyInt, const double *Values );
 int gdxDataWriteRawStart( TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
+int gdxDataWriteRawStartKeyBounds( TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int *MinUELIndices, const int *MaxUELIndices );
 int gdxDataWriteStr( TGXFileRec_t *pgdx, const char **KeyStr, const double *Values );
 int gdxDataWriteStrStart( TGXFileRec_t *pgdx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo );
 int gdxGetDLLVersion( TGXFileRec_t *pgdx, char *V );
@@ -384,6 +386,11 @@ GDX_INLINE int gdxDataWriteRawStart( TGXFileRec_t *pgx, const char *SyId, const 
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataWriteRawStart(SyId, ExplTxt, Dimen, Typ, UserInfo );
 }
 
+GDX_INLINE int gdxDataWriteRawStartKeyBounds( TGXFileRec_t *pgx, const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo, const int *MinUELIndices, const int *MaxUELIndices )
+{
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataWriteRawStartKeyBounds(SyId, ExplTxt, Dimen, Typ, UserInfo, MinUELIndices, MaxUELIndices );
+}
+
 GDX_INLINE int gdxDataWriteStr( TGXFileRec_t *pgx, const char **KeyStr, const double *Values )
 {
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataWriteStr(KeyStr, Values );
@@ -636,6 +643,11 @@ GDX_INLINE int gdxUMFindUEL( TGXFileRec_t *pgx, const char *Uel, int *UelNr, int
 
 GDX_INLINE int gdxUMUelGet( TGXFileRec_t *pgx, int UelNr, char *Uel, int *UelMap )
 {
+   if(!UelMap)
+   {
+     int tmpUelMap;
+     return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxUMUelGet(UelNr, Uel, tmpUelMap );
+   }
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxUMUelGet(UelNr, Uel, *UelMap );
 }
 

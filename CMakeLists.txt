@@ -29,14 +29,12 @@ if (MSVC)
 endif (MSVC)
 
 if (UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas")
-endif (UNIX)
-
-if (APPLE)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZ_HAVE_UNISTD_H")
-elseif(UNIX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-truncation=0")
-endif (APPLE)
+	if(NOT APPLE)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-truncation=0")
+	endif (NOT APPLE)
+endif (UNIX)
 
 set(common
 		src/gmsstrm.h src/gmsstrm.cpp
@@ -65,12 +63,14 @@ set(tests
 		src/tests/datastoragetests.cpp
 )
 
+set(inc-dirs zlib src generated)
+
 # Dynamic library / shared object
 add_library(gdxcclib64 SHARED ${common} generated/gdxcclib.cpp )
 if(UNIX)
 	target_compile_options(gdxcclib64 PRIVATE -fvisibility=hidden)
 endif()
-target_include_directories(gdxcclib64 PRIVATE zlib src generated)
+target_include_directories(gdxcclib64 PRIVATE ${inc-dirs})
 if (APPLE)
 	set(cclib-link-options "-Bdynamic")
 elseif(UNIX) # Linux
@@ -81,10 +81,15 @@ endif()
 target_link_libraries(gdxcclib64 ${mylibs} ${cclib-link-options})
 set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
+# Static library
+add_library(gdx-static STATIC ${common})
+target_include_directories(gdx-static PRIVATE ${inc-dirs})
+set_property(TARGET gdx-static PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 # Unit test suite (against statically compiled GDX)
-add_executable(gdxtest ${common} ${tests})
-target_include_directories(gdxtest PRIVATE zlib src generated)
-target_link_libraries(gdxtest ${mylibs})
+add_executable(gdxtest ${tests})
+target_include_directories(gdxtest PRIVATE ${inc-dirs})
+target_link_libraries(gdxtest gdx-static ${mylibs})
 
 # Compare against Delphi reference behavior when running against GDX performance library files
 if(UNIX)
@@ -95,7 +100,7 @@ endif()
 if(EXISTS ${gams43-apifiles-path}gdxcc.c)
 add_executable(delphi-diff-tests ${common}  src/tests/doctestmain.cpp
 		src/tests/delphidifftests.cpp  ${gams43-apifiles-path}gdxcc.c)
-target_include_directories(delphi-diff-tests PRIVATE zlib src generated)
+target_include_directories(delphi-diff-tests PRIVATE ${inc-dirs})
 target_link_libraries(delphi-diff-tests ${mylibs})
 	if(UNIX)
 	target_compile_options(delphi-diff-tests PRIVATE -DGC_NO_MUTEX)
@@ -115,10 +120,35 @@ target_compile_options(gdxwraptest PRIVATE -DGXFILE_CPPWRAP -DGC_NO_MUTEX)
 
 # Standalone GDX example program 1
 add_executable(xp_example1 ${common} src/examples/xp_example1.cpp)
-target_include_directories(xp_example1 PRIVATE zlib src generated)
+target_include_directories(xp_example1 PRIVATE ${inc-dirs})
 target_link_libraries(xp_example1 ${mylibs})
 
 # Standalone GDX example program 2
 add_executable(xp_example2 ${common} src/examples/xp_example2.cpp generated/optcc.c)
-target_include_directories(xp_example2 PRIVATE zlib src generated)
+target_include_directories(xp_example2 PRIVATE ${inc-dirs})
 target_link_libraries(xp_example2 ${mylibs})
+
+# Standalone GDX example program 3 (associative "supply.demand" str -> double (level))
+add_executable(xp_associative ${common} src/examples/xp_associative.cpp)
+target_include_directories(xp_associative PRIVATE ${inc-dirs})
+target_link_libraries(xp_associative ${mylibs})
+
+# Standalone GDX example program 4 (associative {supply,demand} vector -> double (level))
+add_executable(xp_associative_vec ${common} src/examples/xp_associative_vec.cpp)
+target_include_directories(xp_associative_vec PRIVATE ${inc-dirs})
+target_link_libraries(xp_associative_vec ${mylibs})
+
+# Standalone GDX example program 5 (data write)
+if(UNIX)
+	set(cur-apifiles-path /home/andre/gamsdist/apifiles/C/api/)
+else()
+	set(cur-apifiles-path C:/GAMS/46/apifiles/C/api/)
+endif()
+if(EXISTS ${cur-apifiles-path}gmdcc.c)
+	add_executable(xp_dataWrite ${common} src/examples/xp_dataWrite.cpp ${cur-apifiles-path}gmdcc.c)
+	target_include_directories(xp_dataWrite PRIVATE ${inc-dirs} ${cur-apifiles-path})
+	target_link_libraries(xp_dataWrite ${mylibs})
+	if(UNIX)
+		target_compile_options(xp_dataWrite PRIVATE -DGC_NO_MUTEX)
+	endif()
+endif()
