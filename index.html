@@ -98,7 +98,15 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="textblock"><p ><a class="anchor" id="md_README_filtered"></a></p>
 <h1><a class="anchor" id="autotoc_md1"></a>
 Basic information on GDX file format</h1>
-<p >The GAMS modeling language is a domain specific language tailored towards mathematical optimization. The language reflects the basic building blocks (symbols) of an algebraic optimization model: Sets, parameters, scalars, decision variables, and equations. While declaring the symbols in the GAMS language is rather straightforward and concise, defining their values (which must be done prior to running the optimization for exogenous symbols like sets, parameters and scalars) might be comparatively cumbersome. In many applications, the actual data for the symbols is also already stored in some other location like a file or database. In order to have an efficient way to load data into a model, store the solution results and in general exchange information with other applications, the GDX file format was conceived.</p>
+<p >The <a href="https://www.gams.com/latest/docs/UG_MAIN.html#UG_Language_Environment">GAMS modeling language</a> is a domain specific language tailored towards mathematical optimization. The language reflects the basic building blocks (symbols) of an algebraic optimization model:</p>
+<ul>
+<li><a href="https://www.gams.com/latest/docs/UG_SetDefinition.html">Sets</a>,</li>
+<li><a href="https://www.gams.com/latest/docs/UG_Parameters.html">parameters</a>,</li>
+<li><a href="https://www.gams.com/latest/docs/UG_DataEntry.html#UG_DataEntry_Scalars">scalars</a>,</li>
+<li><a href="https://www.gams.com/latest/docs/UG_Variables.html">decision variables</a>,</li>
+<li>and <a href="https://www.gams.com/latest/docs/UG_Equations.html">equations</a>.</li>
+</ul>
+<p >While declaring the symbols in the GAMS language is rather straightforward and concise, defining their values (which must be done prior to running the optimization for exogenous symbols like sets, parameters and scalars) might be comparatively cumbersome. In many applications, the actual data for the symbols is also already stored in some other location like a file or database. In order to have an efficient way to load data into a model, store the solution results and in general exchange information with other applications, the <a href="https://www.gams.com/latest/docs/UG_GDX.html">GDX file format</a> was conceived.</p>
 <h2><a class="anchor" id="autotoc_md2"></a>
 Information contained inside a GDX file</h2>
 <ul>
@@ -118,45 +126,58 @@ Information contained inside a GDX file</h2>
 </ul>
 <p >Records are mapping from the domain of the symbol to the value space with up to 5 fields (level, marginal, lower bound, upper bound, scale)</p>
 <p >The actual data might be stored verbatim or compressed (using zlib).</p>
+<p ><em>Please note:</em> a GDX file does <b>not</b> store a model formulation or executable statements.</p>
 <h2><a class="anchor" id="autotoc_md3"></a>
 Features of the GDX API</h2>
-<p >For efficiency reasons (both read/write-speeds and disk usage) the GDX format is a binary format that cannot be easily processed using a text editor. Hence, looking at the contents of a GDX file is ideally done via a graphical user interface like the GDX viewer included in GAMS Studio or the <code>gdxdump</code> console utility included in the GAMS distribution. In order to write conversion utilities between GDX and various other data file formats, an API is needed. This API has the following features:</p><ul>
+<p >For efficiency reasons (both read/write-speeds and disk usage) the GDX format is a binary format that cannot be easily processed using a text editor. Hence, looking at the contents of a GDX file is ideally done via a graphical user interface like the GDX viewer included in GAMS Studio or the <code>gdxdump</code> console utility included in the GAMS distribution. In order to write conversion utilities between GDX and various other data file formats, an API is needed. This API has the following features:</p>
+<ul>
 <li>Reading list of symbols and UELs</li>
 <li>Reading data from a symbol (metadata, records)</li>
 <li>Writing a new symbol (metadata, records)</li>
 <li>Bindings to multiple languages</li>
 </ul>
-<p >The GDX API is very powerful with fine-grained control and is also used at GAMS internally. There exist more comfortable object-oriented alternatives for programming languages like <code>gams-cpp</code> and GAMS Python.</p>
+<p >The GDX API is very powerful with fine-grained control and is also used at GAMS internally.</p>
 <h1><a class="anchor" id="autotoc_md4"></a>
 Setting up and building GDX</h1>
 <h2><a class="anchor" id="autotoc_md5"></a>
 Accessing GDX from a custom application</h2>
-<p >The GDX API is available for multiple programming languages including:</p><ul>
-<li>C/C++</li>
-<li>.NET (Visual Basic, C#)</li>
-<li>Java</li>
-<li>Python</li>
+<p >The GDX API can be directly accessed from C/C++ via the library contained in this repository. Although there is a main GDX object for representing a file in this interface, it is mostly procedural and offers many functions operating on elementary data types instead of a sophisticated class hierarchy.</p>
+<p >For an easier to use object-oriented interface GAMS offers wrappers for multiple programming languages including:</p>
+<ul>
+<li><a href="https://www.gams.com/latest/docs/API_CPP_OVERVIEW.html">C++</a> with source code available on <a href="https://git.gams.com/devel/gams-cpp">GitHub</a></li>
+<li><a href="https://www.gams.com/latest/docs/apis/dotnet/DOTNET_OVERVIEW.html">.NET</a> (Visual Basic, C#)</li>
+<li><a href="https://www.gams.com/latest/docs/API_JAVA_OVERVIEW.html">Java</a></li>
+<li><a href="https://www.gams.com/latest/docs/API_PY_CONTROL.html">Python</a></li>
 </ul>
-<p >Depending on the language choice, the required steps to have it accessible from your development environment slightly differ.</p>
+<p >Even more abstraction is offered by the GAMS Transfer libraries for <a href="https://www.gams.com/latest/docs/API_PY_GAMSTRANSFER.html">Python</a> and <a href="https://www.gams.com/latest/docs/API_R_GAMSTRANSFER.html">R</a>.</p>
 <h2><a class="anchor" id="autotoc_md6"></a>
 Building GDX from source</h2>
-<p >The GDX library is written in C++ and built via CMake. This repository contains a GitLab CI YAML that describes a pipeline which builds GDX and runs the unit test suite.</p>
-<p >Please run </p><div class="fragment"><div class="line">git clone https://github.com/madler/zlib zlib</div>
-</div><!-- fragment --><p> inside the root-directory of the <code>gdx</code>-repository to make ZLIB available.</p>
-<p >doctest and apigenerator are included in this repo (as file and submodule respectively).</p>
-<p ><b>Dependencies</b>:</p><ul>
-<li>ZLIB (compression library)</li>
-<li>doctest</li>
+<p >The GDX library is written in C++17 and built via <a href="https://cmake.org/">CMake</a>.</p>
+<p >This repository contains a GitLab CI YAML that describes a pipeline which</p>
+<ul>
+<li>builds GDX for all supported platforms (Windows, macOS, Linux) with Doxygen documentation, libraries, and examples,</li>
+<li>runs its unit test suite,</li>
+<li>checks for memory leaks with <a href="https://valgrind.org/docs/manual/mc-manual.html">valgrind memcheck</a>,</li>
+<li>and checks for performance regressions against GAMS 43 legacy Delphi GDX library.</li>
 </ul>
-<p ><b>Build tools</b>:</p><ul>
-<li>GAMS API generator (language binding/wrapper tool)</li>
-<li>CMake (build system)</li>
-<li>C++17 compiler (e.g. GCC, clang, MSVC, Intel C++)</li>
+<p >Please run</p>
+<div class="fragment"><div class="line">git clone https://github.com/madler/zlib zlib</div>
+</div><!-- fragment --><p >inside the root-directory of the <code>gdx</code>-repository to make the zlib compression library available.</p>
+<p ><a href="https://github.com/doctest/doctest">doctest</a> and <a href="https://github.com/GAMS-dev/apigenerator">apigenerator</a> are included in this repo (as file and submodule respectively).</p>
+<p ><b>Dependencies</b>:</p>
+<ul>
+<li><a href="https://github.com/madler/zlib">zlib</a> (compression library)</li>
+<li><a href="https://github.com/doctest/doctest">doctest</a></li>
+</ul>
+<p ><b>Build tools</b>:</p>
+<ul>
+<li><a href="https://github.com/GAMS-dev/apigenerator">GAMS API generator</a> (language binding/wrapper tool)</li>
+<li><a href="https://cmake.org/">CMake</a> (build system)</li>
+<li>C++17 compiler (e.g. <a href="https://gcc.gnu.org/">GCC</a>, <a href="https://clang.llvm.org/">clang</a>, <a href="https://visualstudio.microsoft.com/">MSVC</a>, <a href="https://www.intel.com/content/www/us/en/developer/tools/oneapi/dpc-compiler.html#gs.12zqsa">Intel C++</a>)</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md7"></a>
 Reference documentation</h1>
 <p >A full detailed Doxygen-generated API reference is available <a href="https://gams-dev.github.io/gdx/classgdx_1_1TGXFileObj.html">here</a>.</p>
-<p >Alternatively it is available <a class="el" href="classgdx_1_1TGXFileObj.html">here</a></p>
 <h1><a class="anchor" id="autotoc_md8"></a>
 Introduction into using GDX API</h1>
 <p >This document describes the Application Programmers Interface (API) for the GDX library. The GDX library is used to read or write GDX files. A GDX file is a file that stores the values of one or more GAMS symbols such as sets, parameters, variables, and equations. GDX files can be used to prepare data for a GAMS model, present results of a GAMS model, store results of the same model using different parameters etc. A GDX file does not store a model formulation or executable statements.</p>
@@ -386,9 +407,10 @@ the record is flagged as an error record and the record will be skipped.    </td
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Filter number (&gt;0)   </td><td class="markdownTableBodyNone">Map the unique element value to the user defined value. Use gdxGetUEL to get the string representation. If the element is not enabled in the filter for this index position, the record is flagged as an error record and it will be skipped. The filter number is specified using the gdxFilterRegisterStart function.   </td></tr>
 </table>
-<p >Referring to the following GAMS fragment, we want to read the parameter <code>A</code>. The set <code>I</code> is the domain for the first index; there is no domain for the second index position: </p><div class="fragment"><div class="line">Set I /.../;</div>
+<p >Referring to the following GAMS fragment, we want to read the parameter <code>A</code>. The set <code>I</code> is the domain for the first index; there is no domain for the second index position:</p>
+<div class="fragment"><div class="line">Set I /.../;</div>
 <div class="line">Parameter A(I,*);</div>
-</div><!-- fragment --><p> Assuming we have read set <code>I</code> already, the following code snapshot illustrates how to read parameter <code>A</code>.</p>
+</div><!-- fragment --><p >Assuming we have read set <code>I</code> already, the following code snapshot illustrates how to read parameter <code>A</code>.</p>
 <div class="fragment"><div class="line"><span class="comment">// Register the filter for set I; reference this filter with integer 123</span></div>
 <div class="line"><span class="keywordflow">if</span>(!gdx.gdxFilterRegisterStart(123))</div>
 <div class="line">   ReportGDXError();</div>
@@ -438,15 +460,18 @@ the record is flagged as an error record and the record will be skipped.    </td
 <div class="line">}</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md18"></a>
 Dealing with acronyms</h2>
-<p >In GAMS we can use acronyms in places where we can use a floating point number as in the following example: </p><div class="fragment"><div class="line">set i /i1*i5/;</div>
+<p >In GAMS we can use acronyms in places where we can use a floating point number as in the following example:</p>
+<div class="fragment"><div class="line">set i /i1*i5/;</div>
 <div class="line">acronym acro1, acro2;</div>
 <div class="line">parameter A(i) /i1=1, i2=acro1, i3=3, i4=acro2, i5=5/;</div>
 <div class="line">display A;</div>
-</div><!-- fragment --><p> The result of the display statement looks like: </p><div class="fragment"><div class="line">----      4 PARAMETER A</div>
+</div><!-- fragment --><p >The result of the display statement looks like:</p>
+<div class="fragment"><div class="line">----      4 PARAMETER A</div>
 <div class="line"> </div>
 <div class="line">i1 1.000,    i2 acro1,    i3 3.000,    i4 acro2,    i5 5.000</div>
-</div><!-- fragment --><p> As we write data to a GDX file, the system keeps track which acronyms were used in the data written. Before we close the GDX file, we share the identifiers used for each acronym used. When reading a GDX file, we share all acronym identifiers and their corresponding index before reading any data. Doing so will replace the acronym indices stored in the GDX file by the one we provide.</p>
-<p >The example below illustrates these steps. </p><div class="fragment"><div class="line">TGXFileObj gdx;</div>
+</div><!-- fragment --><p >As we write data to a GDX file, the system keeps track which acronyms were used in the data written. Before we close the GDX file, we share the identifiers used for each acronym used. When reading a GDX file, we share all acronym identifiers and their corresponding index before reading any data. Doing so will replace the acronym indices stored in the GDX file by the one we provide.</p>
+<p >The example below illustrates these steps.</p>
+<div class="fragment"><div class="line">TGXFileObj gdx;</div>
 <div class="line">TgdxUELIndex UELS;</div>
 <div class="line">TgdxValues Vals;</div>
 <div class="line"><span class="keywordtype">int</span> FDim, N, NrRecs, ErrNr, acrindx;</div>
@@ -559,7 +584,8 @@ Functions by Category</h1>
 Example programs</h1>
 <h2><a class="anchor" id="autotoc_md21"></a>
 Example 1 (GAMS)</h2>
-<p >In this modified version of the trnsport.gms model, we use an external program to generate data for the demand parameter. After we solve the model, we write the solution to a GDX file, and call the external program again to read the variable from the GDX file. </p><div class="fragment"><div class="line">$Title trnsport model using gdx files</div>
+<p >In this modified version of the trnsport.gms model, we use an external program to generate data for the demand parameter. After we solve the model, we write the solution to a GDX file, and call the external program again to read the variable from the GDX file.</p>
+<div class="fragment"><div class="line">$Title trnsport model using gdx files</div>
 <div class="line">$EOLCOM //</div>
 <div class="line">  Sets</div>
 <div class="line">       i   canning plants   / seattle, san-diego /</div>
@@ -1092,7 +1118,7 @@ Example 6 (Python)</h2>
 <div class="line">        <span class="keywordflow">if</span> <span class="keywordflow">not</span> gdx.gdxOpenWrite(gdx_h, <span class="stringliteral">&quot;demanddata.gdx&quot;</span>, <span class="stringliteral">&quot;xp_example1&quot;</span>)[0]:</div>
 <div class="line">            <span class="keywordflow">raise</span> Exception(<span class="stringliteral">&quot;Error gdxOpenWrite&quot;</span>)</div>
 <div class="line">        <span class="keywordflow">if</span> <span class="keywordflow">not</span> gdx.gdxDataWriteStrStart(</div>
-<div class="line">            gdx_h, <span class="stringliteral">&quot;Demand&quot;</span>, <span class="stringliteral">&quot;Demand data&quot;</span>, 1, gdx.GMS_DT_PAR, 0</div>
+<div class="line">                gdx_h, <span class="stringliteral">&quot;Demand&quot;</span>, <span class="stringliteral">&quot;Demand data&quot;</span>, 1, gdx.GMS_DT_PAR, 0</div>
 <div class="line">        ):</div>
 <div class="line">            <span class="keywordflow">raise</span> Exception(<span class="stringliteral">&quot;Error gdxDataWriteStrStart&quot;</span>)</div>
 <div class="line"> </div>
@@ -1428,32 +1454,7 @@ Example 8 (Java)</h2>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line">}</div>
-</div><!-- fragment --><h1><a class="anchor" id="autotoc_md28"></a>
-Conversion issues when moving from GAMS 22.5 to 22.6</h1>
-<ul>
-<li>maximum number of dimensions = 20 (was 10)</li>
-<li>maximum length of an identifier or unique element = 63 (was 31)</li>
-<li>support for acronyms</li>
-<li>support for domain information</li>
-</ul>
-<p >Backward compatibility:</p><ul>
-<li>GAMS and all gdx utilities will write gdx files in the new format</li>
-<li>GAMS and all gdx utilities can read older gdx formats</li>
-<li>The gdxcopy utility can convert between different gdx formats (assuming that dimension and namelength is supported)</li>
-</ul>
-<p >Libraries:</p><ul>
-<li><code>gdxio.dll</code> is still available but the new library is called <code>(lib)gdxcclib64.dll</code> (substitute <code>.dll</code> with the extension for your platform, e.g. <code>.so</code> or <code>.dylib</code>)</li>
-<li><code>gdxio.dll</code> cannot read the new gdx format</li>
-</ul>
-<p >API:</p><ul>
-<li>Functions in the library that used to return a boolean, now return an integer (zero for false, non-zero for true)</li>
-<li>Before we can read or write a gdx file, we need to create a valid gdx object. The function <code>gdxCreate</code> will create such an object</li>
-<li>The functions <code>gdxOpenRead</code> and <code>gdxOpenWrite</code> no longer create the gdx object pointer, they require an object pointer that has been initialized using gdxCreate or similar functions</li>
-</ul>
-<h1><a class="anchor" id="autotoc_md29"></a>
-Files in the apifiles directory</h1>
-<p >The following sections describe the various files included in the apifiles directory. All functions will use the gdxcclib library (like <code>gdxcclib64.dll</code> on Windows). The entry points in the library can be loaded static (by the operating system) or dynamic. Dynamic loading provides more control when an entry point is missing or the interface has changed. Static loading will cause an exception to be generated for example for a missing entry point without much feedback about the error. </p>
-</div></div><!-- PageDoc -->
+</div><!-- fragment --> </div></div><!-- PageDoc -->
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

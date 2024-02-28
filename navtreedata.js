@@ -56,9 +56,7 @@ var NAVTREE =
         [ "Example 6 (Python)", "index.html#autotoc_md25", null ],
         [ "Example 7 (C#)", "index.html#autotoc_md26", null ],
         [ "Example 8 (Java)", "index.html#autotoc_md27", null ]
-      ] ],
-      [ "Conversion issues when moving from GAMS 22.5 to 22.6", "index.html#autotoc_md28", null ],
-      [ "Files in the apifiles directory", "index.html#autotoc_md29", null ]
+      ] ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],

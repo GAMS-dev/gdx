@@ -40,6 +40,7 @@ var classgdx_1_1TGXFileObj =
     [ "gdxDataWriteMapStart", "classgdx_1_1TGXFileObj.html#a7350fad4ba0a4010b6d53e62132937e6", null ],
     [ "gdxDataWriteRaw", "classgdx_1_1TGXFileObj.html#a08479eba2a07e327828b96098fbe14a6", null ],
     [ "gdxDataWriteRawStart", "classgdx_1_1TGXFileObj.html#a353576e44e5c307a26726a870ec3f39d", null ],
+    [ "gdxDataWriteRawStartKeyBounds", "classgdx_1_1TGXFileObj.html#a897d023fd95a72cba77de901255a6073", null ],
     [ "gdxDataWriteStr", "classgdx_1_1TGXFileObj.html#a1fdceb4091918007f4a4ca7819a43c20", null ],
     [ "gdxDataWriteStrStart", "classgdx_1_1TGXFileObj.html#a638d737c0364437390d5ffc731b31066", null ],
     [ "gdxErrorCount", "classgdx_1_1TGXFileObj.html#ae3d45de882c24b8d2acdd47417bfc561", null ],
