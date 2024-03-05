@@ -48,7 +48,9 @@ set(common
 		src/gdx.h
 		# ZLIB modules
 		# missing? run in project root: git clone https://github.com/madler/zlib zlib
-		zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c zlib/zutil.c
+		zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c
+		zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c
+		zlib/zutil.c
 )
 
 set(tests
@@ -91,22 +93,6 @@ add_executable(gdxtest ${tests})
 target_include_directories(gdxtest PRIVATE ${inc-dirs})
 target_link_libraries(gdxtest gdx-static ${mylibs})
 
-# Compare against Delphi reference behavior when running against GDX performance library files
-if(UNIX)
-	set(gams43-apifiles-path /home/andre/gamsdist43/apifiles/C/api/)
-else()
-	set(gams43-apifiles-path C:/GAMS/43/apifiles/C/api/)
-endif()
-if(EXISTS ${gams43-apifiles-path}gdxcc.c)
-add_executable(delphi-diff-tests ${common}  src/tests/doctestmain.cpp
-		src/tests/delphidifftests.cpp  ${gams43-apifiles-path}gdxcc.c)
-target_include_directories(delphi-diff-tests PRIVATE ${inc-dirs})
-target_link_libraries(delphi-diff-tests ${mylibs})
-	if(UNIX)
-	target_compile_options(delphi-diff-tests PRIVATE -DGC_NO_MUTEX)
-	endif()
-endif()
-
 # Unit test suite (against GDX dynamic library)
 add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp generated/gdxcc.c)
 target_link_libraries(gdxwraptest ${mylibs})
@@ -139,16 +125,27 @@ target_include_directories(xp_associative_vec PRIVATE ${inc-dirs})
 target_link_libraries(xp_associative_vec ${mylibs})
 
 # Standalone GDX example program 5 (data write)
-if(UNIX)
-	set(cur-apifiles-path /home/andre/gamsdist/apifiles/C/api/)
-else()
-	set(cur-apifiles-path C:/GAMS/46/apifiles/C/api/)
-endif()
-if(EXISTS ${cur-apifiles-path}gmdcc.c)
-	add_executable(xp_dataWrite ${common} src/examples/xp_dataWrite.cpp ${cur-apifiles-path}gmdcc.c)
-	target_include_directories(xp_dataWrite PRIVATE ${inc-dirs} ${cur-apifiles-path})
-	target_link_libraries(xp_dataWrite ${mylibs})
-	if(UNIX)
-		target_compile_options(xp_dataWrite PRIVATE -DGC_NO_MUTEX)
+# Needs path to GAMS distribution in environment variable GAMSDIR
+# (either directly or as first entry of semicolon separated list)
+if(DEFINED ENV{GAMSDIR})
+	set(ENTRIES $ENV{GAMSDIR})
+	string(FIND "${ENTRIES}" ";" index)
+	if(index GREATER -1) # contains multiple semicolon separated entries
+		string(REPLACE ";" "\n" ENTRIES "${ENTRIES}")
+		string(REGEX MATCH "^([^\n]*)" FIRST_ENTRY "${ENTRIES}")
+		string(REPLACE "\\" "/" FIRST_ENTRY "${FIRST_ENTRY}")
+		set(cur-apifiles-path ${FIRST_ENTRY})
+	else() # just one entry
+		set(cur-apifiles-path ${ENTRIES})
+	endif()
+	string(APPEND cur-apifiles-path "/apifiles/C/api/")
+	if(EXISTS ${cur-apifiles-path}gmdcc.c)
+		message(STATUS "Found expert-level API sources and headers in ${cur-apifiles-path}")
+		add_executable(xp_dataWrite ${common} src/examples/xp_dataWrite.cpp ${cur-apifiles-path}gmdcc.c)
+		target_include_directories(xp_dataWrite PRIVATE ${inc-dirs} ${cur-apifiles-path})
+		target_link_libraries(xp_dataWrite ${mylibs})
+		if(UNIX)
+			target_compile_options(xp_dataWrite PRIVATE -DGC_NO_MUTEX)
+		endif()
 	endif()
 endif()
