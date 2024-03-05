@@ -56,7 +56,7 @@ TEST_SUITE_BEGIN( "Validate against GAMS 43 Delphi GDX" );
 #endif
 
 const static std::array skipFiles {"bau_p.gdx"s};
-const static bool quiet {false};
+static constexpr bool quiet {false};
 
 static bool ends_with(const std::string &s, const std::string &suffix) {
    for(int i{}; i<(int)suffix.length(); i++)
@@ -188,35 +188,10 @@ static void validateRecursively(const std::string &path) {
    }
 }
 
-// Writing lots of uels and symbols builds up tables which is lots of effort
-// just dumping raw records instead is very efficient
-/*static void createBigGDXFile() {
-   std::string errMsg;
-   gdx::TGXFileObj gdx{errMsg};
-   int errNr;
-   gdx.gdxOpenWrite("verybig.gdx", "delphidifftest", errNr);
-
-   gdx.gdxUELRegisterRawStart();
-   gdx.gdxUELRegisterRaw("i1");
-   gdx.gdxUELRegisterDone();
-
-   gdx.gdxDataWriteRawStart("i", "a var", 20, dt_var, 0);
-   std::array<int, GMS_MAX_INDEX_DIM> keys {};
-   std::array<double, GMS_VAL_MAX> values {};
-   for(uint64_t i{}; i<1024*1024*420*2; i++)
-   {
-      keys.front() = (int)(i+1);
-      gdx.gdxDataWriteRaw( keys.data(), values.data() );
-   }
-   gdx.gdxDataWriteDone();
-
-   gdx.gdxClose();
-}*/
-
 static void readFileCpp(const std::string &fn) {
    if(std::any_of(skipFiles.begin(), skipFiles.end(), [&](const std::string &skipFile) { return ends_with(fn, skipFile); }))
       return;
-   if(!quiet)
+   if( !quiet)
       std::cout << "Checking GDX file: "s << fn << std::endl;
    std::string msg2;
    gdx::TGXFileObj gdx{msg2};
@@ -245,7 +220,6 @@ static void readFileCpp(const std::string &fn) {
    for(int n{}; n<=nsyms1; n++) {
       REQUIRE(gdx.gdxSymbolInfo(n, symName1.data(), syDim1, syTyp1));
       REQUIRE_FALSE(gdx.gdxErrorCount());
-      //auto nvals = syTyp1 < dt_var ? 1 : GMS_VAL_MAX;
       REQUIRE(gdx.gdxSymbolInfoX(n, recCnt1, userInfo1, explText1.data()));
       std::chrono::time_point<std::chrono::system_clock> last, start;
       last = start = std::chrono::system_clock::now();
@@ -306,7 +280,6 @@ static void readFileDelphi(const std::string &fn) {
    for(int n{}; n<=nsyms2; n++) {
       REQUIRE(gdxSymbolInfo(pgx, n, symName2.data(), &syDim2, &syTyp2));
       REQUIRE_FALSE(::gdxErrorCount(pgx));
-      //auto nvals = syTyp2 < dt_var ? 1 : GMS_VAL_MAX;
       REQUIRE(::gdxSymbolInfoX(pgx, n, &recCnt2, &userInfo2, explText2.data()));
       std::chrono::time_point<std::chrono::system_clock> last, start;
       last = start = std::chrono::system_clock::now();
@@ -357,43 +330,13 @@ static void readRecursivelyDelphiAndCpp(const std::string &path) {
    }
 }
 
-/*static void totalRuntimeDelphiVsCpp() {
-   {
-      auto start { std::chrono::system_clock::now() };
-      //readRecursivelyDelphi( R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)" );
-      readRecursivelyDelphi( R"(C:\dockerhome)" );
-      std::cout << "Elapsed time Delphi: "s << elapsed_time(start) << std::endl;
-   }
-
-   {
-      auto start { std::chrono::system_clock::now() };
-      //readRecursivelyCpp( R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)" );
-      readRecursivelyCpp( R"(C:\dockerhome)" );
-      std::cout << "Elapsed time C++: "s << elapsed_time(start) << std::endl;
-   }
-}*/
-
 TEST_CASE( "Read all contents of a GDX file with both GAMS 43 P3/Delphi-GDX and C++-GDX" )
 {
-   //const std::string fn {R"(C:\dockerhome\pAmatrix_Figaro_reg.gdx)"};
-   //validateRecursively(R"(C:\dockerhome)");
-
-   //validateGDXFile("C:\\dockerhome\\mrb\\tr20.gdx");
-
 #if defined(_WIN32)
    validateRecursively(R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)");
 #else
         validateRecursively("/home/andre/dockerhome");
 #endif
-
-   //readRecursivelyDelphiAndCpp(R"(G:\Shared drives\GAMS Performance Suite\gdxfiles)");
-
-   //totalRuntimeDelphiVsCpp();
-   /*for(int i{}; i<8; i++)
-      readDelphiAndCpp(R"(G:\Shared drives\GAMS Performance Suite\gdxfiles\apc\IO_Figaro_reg_sector_IO.gdx)", true);*/
-
-   //createBigGDXFile();
-   //validateGDXFile("verybig.gdx");
 }
 
 TEST_SUITE_END();
