@@ -1745,7 +1745,7 @@ public:
 
 
 private:
-std::unique_ptr<gmsstrm::TMiBufferedStreamDelphi> FFile;
+std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
 TgxFileMode fmode { f_not_open }, fmode_AftReg { f_not_open };
 enum
 {

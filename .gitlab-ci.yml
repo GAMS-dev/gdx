@@ -213,7 +213,7 @@ test-leg:
   needs: [build-leg,install-gamsdist-leg]
   script:
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ./gdxtest --reporters=junit --out=doctest_results_linux.xml
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_linux.xml
     - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_linux.xml
   artifacts:
     name: unittest-results-linux
@@ -228,7 +228,7 @@ test-deg:
   needs: [build-deg,install-gamsdist-deg]
   script:
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
-    - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.8.dylib ./gdxtest --reporters=junit --out=doctest_results_deg.xml
+    - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.12.dylib ./gdxtest --reporters=junit --out=doctest_results_deg.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_deg.xml
   artifacts:
     name: unittest-results-deg
@@ -241,7 +241,8 @@ test-dac:
   tags: [macos-arm64]
   needs: [build-dac,install-gamsdist-dac]
   script:
-    - ./gdxtest --reporters=junit --out=doctest_results_dac.xml
+    - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
+    - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.12.dylib ./gdxtest --reporters=junit --out=doctest_results_dac.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_dac.xml
   artifacts:
     name: unittest-results-dac
@@ -279,8 +280,8 @@ leak-check-leg:
   needs: [fetch-ci-scripts,build-debug-leg,install-gamsdist-leg]
   script:
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" valgrind --leak-check=yes ./gdxtest_dbg
-    - valgrind --leak-check=yes --xml=yes --xml-file=valgrind_out.xml ./gdxtest_dbg
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" valgrind --leak-check=yes ./gdxtest_dbg
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" valgrind --leak-check=yes --xml=yes --xml-file=valgrind_out.xml ./gdxtest_dbg
     - PYTHONPATH=$PYTHONPATH:valgrind-codequality python3 -m valgrind_codequality --input-file valgrind_out.xml --output-file valgrind_out.json
     - python3 ci/codechecker_to_xml.py valgrind_out.json valgrind_junit.xml
   artifacts:
@@ -312,13 +313,23 @@ perf-check-leg:
     - cp libgdxcclib64.so mygamsdist
     - GAMS_PATH=`pwd`/mygamsdist/
     - ${GAMS_PATH}apilib gdxperf
-    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ${PERF_CALL} | tee cppgdx.log
-    - rm -rf mygamsdist
-    - python3 ci/fetch_gams.py fetch_and_install dist43 $SSH_KEY_PORTING
-    - python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH $SSH_KEY_PORTING > gams43_folder_leg.txt
-    - GAMS_PATH=/cache/gams-installs/`cat gams43_folder_leg.txt`/
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ${PERF_CALL} | tee cppgdx.log
+#    - python3 ci/fetch_gams.py fetch_and_install dist43 $SSH_KEY_PORTING
+#    - python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH $SSH_KEY_PORTING > gams43_folder_leg.txt
+#    - GAMS_PATH=/cache/gams-installs/`cat gams43_folder_leg.txt`/
+    - G43_ARCHIVE="gamsdist43.tar.bz2"
+    - G43_CLOUD_URL="https://cloud.gams.com/s/o4Jyt46eZra5ctc/download/gamsdist43.tar.bz2"
+    - curl $G43_CLOUD_URL > $G43_ARCHIVE # fetch from web
+    - G43_DIR=gamsdist43_tmp
+    - G43_PATH=/cache/gams-installs/$G43_DIR
+    - mkdir -p $G43_PATH
+    - tar -xjf $G43_ARCHIVE -C $G43_PATH # extract
+    - rm $G43_ARCHIVE # clean zip
+    - GAMS_PATH=$G43_PATH/gams43.4_linux_x64_64_sfx/
+    - cp /builds/devel/gdx/mygamsdist/gamslice.txt $GAMS_PATH
     - ${GAMS_PATH}apilib gdxperf
     - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ${PERF_CALL} | tee delphigdx.log
+    - rm -rf mygamsdist $G43_PATH # clean GAMS 43 system dir
     - python3 ci/perflogparse.py | tee perf.json
   artifacts:
     name: gdxperf-logs

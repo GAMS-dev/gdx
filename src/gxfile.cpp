@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-#include "gmsstrm.h"
+#include "gdlib/gmsstrm.h"
 
 #include "gdx.h"
-#include "utils.h"  // for assignPCharToBuf, in, trimRight, assignStr...
+#include "gdlib/utils.h"
 #include <algorithm>// for fill_n, max, fill, sort
 #include <cassert>  // for assert
 #include <cmath>    // for round, isinf, isnan, isnormal, abs
@@ -45,7 +45,7 @@
 #undef GetObject
 #endif
 
-using namespace gdx::gmsstrm;
+using namespace gdlib::gmsstrm;
 using namespace std::literals::string_literals;
 
 namespace gdx
@@ -3934,14 +3934,14 @@ void TAcronymList::CheckEntry( int Map )
       AddEntry( "", "", Map );
 }
 
-void TAcronymList::SaveToStream( gmsstrm::TXStreamDelphi &S )
+void TAcronymList::SaveToStream( gdlib::gmsstrm::TXStreamDelphi &S )
 {
    S.WriteInteger( FList.GetCount() );
    for( int N {}; N < FList.GetCount(); N++ )
       FList[N]->SaveToStream( S );
 }
 
-void TAcronymList::LoadFromStream( gmsstrm::TXStreamDelphi &S )
+void TAcronymList::LoadFromStream( gdlib::gmsstrm::TXStreamDelphi &S )
 {
    int Cnt { S.ReadInteger() };
    FList.Clear();
