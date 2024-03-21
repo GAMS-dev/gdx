@@ -30,6 +30,7 @@ if (MSVC)
 endif (MSVC)
 
 if (UNIX)
+    # -fsanitize=undefined
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZ_HAVE_UNISTD_H")
     if (NOT APPLE AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")

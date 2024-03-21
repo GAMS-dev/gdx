@@ -120,9 +120,13 @@ protected:
       std::fill_n( PHashTable->begin(), HashTableSize, nullptr );
    }
 
+#if !defined(_WIN32)
+   __attribute__((no_sanitize("signed-integer-overflow")))
+#endif
    virtual int Hash( const char *s )
    {
       assert( HashTableSize > 0 );
+      // This will overflow eventually but it is okay (uint64_t is too expensive)
       /*unsigned */ int res {};
       for( int i {}; s[i] != '\0'; i++ )
          res = 211 * res + utils::toupper( s[i] );
@@ -543,9 +547,13 @@ template<typename T>
 class TXCSStrHashList : public TXStrHashList<T>
 {
 protected:
+#if !defined(_WIN32)
+   __attribute__((no_sanitize("signed-integer-overflow")))
+#endif
    int Hash( const char *s ) override
    {
       assert( this->HashTableSize > 0 );
+      // This will overflow eventually but it is okay (uint64_t is too expensive)
       /*unsigned */ int res {};
       for( int i {}; s[i] != '\0'; i++ )
          res = 211 * res + s[i];
