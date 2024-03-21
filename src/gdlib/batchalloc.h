@@ -36,7 +36,7 @@ namespace gdlib::batchalloc
 struct DataBatch {
    DataBatch *next;
    uint8_t *ptr;
-   explicit DataBatch( size_t count ) : next {}, ptr { new uint8_t[count] } {}
+   explicit DataBatch( const size_t count ) : next {}, ptr { new uint8_t[count] } {}
    ~DataBatch()
    {
       delete[] ptr;
@@ -71,6 +71,11 @@ public:
 
    uint8_t *GetBytes( size_t count )
    {
+      static_assert(batchSize % 8 == 0);
+      // add padding after block if its byte count doesn't align with 8 byte (64 bit)
+      constexpr int byteAlign {8};
+      if(count % byteAlign)
+         count = ((int)(count / byteAlign) + 1) * byteAlign;
       assert( count <= batchSize );
       if( !head )
       {

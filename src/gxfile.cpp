@@ -352,7 +352,7 @@ bool IsGoodIdent( const char *S )
    return i < GLOBAL_UEL_IDENT_SIZE;
 }
 
-static TgdxElemSize GetIntegerSize( int N )
+static TgdxElemSize GetIntegerSize( int64_t N )
 {
    if( N <= 0 ) return TgdxElemSize::sz_integer;
    else if( N <= 255 )
@@ -999,7 +999,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
       {
          MinElem[D] = FFile->ReadInteger();
          MaxElem[D] = FFile->ReadInteger();
-         ElemType[D] = GetIntegerSize( MaxElem[D] - MinElem[D] + 1 );
+         ElemType[D] = GetIntegerSize( static_cast<int64_t>(MaxElem[D]) - MinElem[D] + 1 );
       }
    }
    bool AllocOk { true };
@@ -1188,7 +1188,7 @@ void TGXFileObj::InitDoWrite( int NrRecs )
    for( int D {}; D < FCurrentDim; D++ )
    {
       LastElem[D] = INDEX_INITIAL;
-      ElemType[D] = GetIntegerSize( MaxElem[D] - MinElem[D] + 1 );
+      ElemType[D] = GetIntegerSize( static_cast<int64_t>(MaxElem[D]) - MinElem[D] + 1 );
       FFile->WriteInteger( MinElem[D] );
       FFile->WriteInteger( MaxElem[D] );
    }
@@ -2180,7 +2180,8 @@ int TGXFileObj::gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst )
    if( !DoRead( Values, DimFrst ) ) gdxDataReadDone();
    else
    {
-      std::memcpy( KeyInt, LastElem.data(), FCurrentDim * sizeof( int ) );
+      if(KeyInt)
+         std::memcpy( KeyInt, LastElem.data(), FCurrentDim * sizeof( int ) );
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
       {
          // NOTE: Not covered by unit tests yet.
