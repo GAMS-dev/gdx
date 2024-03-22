@@ -341,13 +341,12 @@ static bool DecodeDateFully(const double DateTime, uint16_t &Year, uint16_t &Mon
    Y += I;
    const auto res { isLeapYear( Y ) };
    const TDayTable *DayTable = &MonthDays[res];
-   uint16_t M {1};
-   while( true )
+   uint16_t M;
+   for( M=1; true; M++ )
    {
-      I = ( *DayTable )[M];
+      I = ( *DayTable )[M-1];
       if( D < I ) break;
       D -= I;
-      M++;
    }
    Year = Y;
    Month = M;

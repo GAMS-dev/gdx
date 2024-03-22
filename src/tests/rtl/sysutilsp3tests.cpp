@@ -27,6 +27,7 @@
 #include "gdlib/utils.h"
 #include "../doctest.h"
 #include <string>
+#include <chrono>
 
 using namespace std::literals::string_literals;
 using namespace rtl::sysutils_p3;
@@ -58,6 +59,25 @@ TEST_CASE( "Extract extension of filename" )
 {
    REQUIRE_EQ( ".pdf", ExtractFileExt( "xyz.pdf" ) );
    REQUIRE( ExtractFileExt( "xyz" ).empty() );
+}
+
+TEST_CASE( "Test decoding a date" )
+{
+   const auto now {Now()};
+   uint16_t year, month, day;
+   DecodeDate(now, year, month, day);
+   const auto nowRef {std::chrono::system_clock::now()};
+   const std::time_t tnow {std::chrono::system_clock::to_time_t(nowRef)};
+   const auto locTime {std::localtime(&tnow)};
+   REQUIRE_EQ(locTime->tm_year + 1900, year);
+   REQUIRE_EQ(locTime->tm_mon + 1, month);
+   REQUIRE_EQ(locTime->tm_mday, day);
+   double lastDayOfYear;
+   tryEncodeDate(2024, 12, 31, lastDayOfYear);
+   DecodeDate(lastDayOfYear, year, month, day);
+   REQUIRE_EQ(2024, year);
+   REQUIRE_EQ(12, month);
+   REQUIRE_EQ(31, day);
 }
 
 TEST_SUITE_END();
