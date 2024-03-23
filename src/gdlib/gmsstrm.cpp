@@ -63,7 +63,7 @@ namespace statlib
 {
 static void gstatMessage(const std::string &s)
 {
-   std::cout << "*** "s << s << '\n';
+   debugStream << "*** "s << s << '\n';
 }
 }
 #endif

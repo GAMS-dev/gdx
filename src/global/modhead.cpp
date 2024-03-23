@@ -27,5 +27,9 @@
 
 namespace global::modhead
 {
+#if defined(__IN_CPPMEX__)
 std::ofstream stubofs { "stubwarnings.txt" };
+#else
+std::ofstream stubofs;
+#endif
 }

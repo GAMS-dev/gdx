@@ -242,7 +242,7 @@ void TGmsList::IndentDone()
 
 void TGmsList::PushHeader( const std::string &debugstr )
 {
-   if( DebugHeader ) { std::cout << "\nPushHeader: " << debugstr << ", Lev = " << FNrHdrLines << " Sp = " << FHdrSp; }
+   if( DebugHeader ) { debugStream << "\nPushHeader: " << debugstr << ", Lev = " << FNrHdrLines << " Sp = " << FHdrSp; }
    if( FNrHdrLines >= MAX_HDR )
    {
       FNrHdrLines = 0;
@@ -663,14 +663,14 @@ void TGmsList::HeaderSingle( const std::string &s )
 void TGmsList::HeaderDrop( const std::string &debugstr )
 {
    if( FsuppressOutput ) return;
-   if( DebugHeader ) { std::cout << "\nHeaderDrop: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp << '\n'; }
+   if( DebugHeader ) { debugStream << "\nHeaderDrop: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp << '\n'; }
    HeaderDone( "HeaderDrop" );
    if( FHdrSp > 0 )
    {
       FNrHdrLines = FHdrStack[FHdrSp];
       FHdrSp--;
    }
-   if( DebugHeader ) { std::cout << "\nHeaderDrop_Finished: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp; }
+   if( DebugHeader ) { debugStream << "\nHeaderDrop_Finished: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp; }
 }
 
 void TGmsList::HeaderShowLast( int FromTop )
@@ -701,7 +701,7 @@ void TGmsList::HeaderShow( TIndxCode lxiCode, const std::string &ID )
 void TGmsList::HeaderDone( const std::string &debugstr )
 {
    if( FsuppressOutput ) return;
-   if( DebugHeader ) { std::cout << "\nHeaderDone: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp << '\n'; }
+   if( DebugHeader ) { debugStream << "\nHeaderDone: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp << '\n'; }
    if( FWrHeader )
    {
       if( !LineIsEmpty() ) PushHeader( "HeaderDone" );
@@ -712,7 +712,7 @@ void TGmsList::HeaderDone( const std::string &debugstr )
 void TGmsList::HeaderStart( const std::string &debugstr )
 {
    if( FsuppressOutput ) return;
-   if( DebugHeader ) { std::cout << "\nHeaderStart: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp << " " << ( FWrHeader ? 1 : 0 ); }
+   if( DebugHeader ) { debugStream << "\nHeaderStart: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp << " " << ( FWrHeader ? 1 : 0 ); }
 
    if( !LineIsEmpty() ) WrLn();
 

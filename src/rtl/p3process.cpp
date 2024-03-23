@@ -58,7 +58,7 @@ using namespace rtl::sysutils_p3;
 namespace rtl::p3process
 {
 
-static int debug = 0;
+constexpr int debug {0};
 
 class SocketInfo
 {
@@ -76,7 +76,7 @@ public:
    explicit SocketInfo( int n_ ) : n { n_ }, cpuCores( n_, -1 ), siblings( n_, -1 ), procCount( n_, 0 )
    {
       if( debug )
-         std::cout << "  SocketInfo: core size = " << cpuCores.size()
+         debugStream << "  SocketInfo: core size = " << cpuCores.size()
                    << "  n = " << n << "  cpuCores[n-1] " << cpuCores[n - 1]
                    << '\n';
    }
@@ -97,7 +97,8 @@ public:
          throw std::string( "physical ID must be positive" );
       if( k >= n )
       {// must grow
-         std::cout << "Growing: n = " << n << "  physical ID = " << k << '\n';
+         if( debug )
+            debugStream << "Growing: n = " << n << "  physical ID = " << k << '\n';
          n = k + 1;
          cpuCores.resize( n, -1 );
          siblings.resize( n, -1 );
@@ -112,7 +113,7 @@ public:
    void setCores( int k )
    {
       if( debug )
-         std::cout << "  setCores(" << k << ") with iSock = " << iSock << '\n';
+         debugStream << "  setCores(" << k << ") with iSock = " << iSock << '\n';
       if( iSock < 0 )
          throw std::string( "physical ID must be set prior to cpu cores" );
       if( k < 0 )
@@ -128,7 +129,7 @@ public:
    void setSiblings( int k )
    {
       if( debug )
-         std::cout << "  setSiblings(" << k << ") with iSock = " << iSock << '\n';
+         debugStream << "  setSiblings(" << k << ") with iSock = " << iSock << '\n';
       if( iSock < 0 )
          throw std::string( "physical ID must be set prior to cpu cores" );
       if( k < 0 )
@@ -223,7 +224,7 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
       proc = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX) buf;
       rc = GetLogicalProcessorInformationEx( relType, proc, &len );
       if( debug )
-         std::cout << "GLPIEx returns " << rc << '\n';
+         debugStream << "GLPIEx returns " << rc << '\n';
       if( !rc )
          return -1;// failure
       *nSockets = 0;
@@ -248,9 +249,9 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
                }
                if( debug )
                {
-                  std::cout << "  Found processor core relationship:" << '\n';
+                  debugStream << "  Found processor core relationship:" << '\n';
                   BYTE flags = proc->Processor.Flags;
-                  std::cout << "    SMT: "
+                  debugStream << "    SMT: "
                             << ( ( 0 == flags ) ? "no" : ( LTP_PC_SMT == flags ) ? "yes"
                                                                                  : "unknown" )
                             << '\n';
@@ -260,8 +261,8 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
                ++*nSockets;
                if( debug )
                {
-                  std::cout << "  Found processor package relationship:" << '\n';
-                  std::cout << "    GroupCount: " << proc->Processor.GroupCount << '\n';
+                  debugStream << "  Found processor package relationship:" << '\n';
+                  debugStream << "    GroupCount: " << proc->Processor.GroupCount << '\n';
                }
                break;
          }// switch
@@ -293,14 +294,14 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
       {
          (void) std::getline( cpuinfo, s );
          if( debug >= 3 )
-            std::cout << "line s : " << s << '\n';
+            debugStream << "line s : " << s << '\n';
          if( 0 == s.find( "processor" ) )
          {
             found = s.find( ":" );
             f = s.substr( found + 1 );
             k = std::stoi( f );
             if( debug )
-               std::cout << " GOT processor : " << f << "  " << k << '\n';
+               debugStream << " GOT processor : " << f << "  " << k << '\n';
             sInfo.nextProc( k );
             if( k < 0 )
                return -1;
@@ -311,7 +312,7 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
             f = s.substr( found + 1 );
             k = std::stoi( f );
             if( debug )
-               std::cout << " GOT physical id : " << f << "  " << k << '\n';
+               debugStream << " GOT physical id : " << f << "  " << k << '\n';
             sInfo.setPhysicalID( k );
          }
          else if( 0 == s.find( "siblings" ) )
@@ -320,7 +321,7 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
             f = s.substr( found + 1 );
             k = std::stoi( f );
             if( debug )
-               std::cout << " GOT siblings : " << f << "  " << k << '\n';
+               debugStream << " GOT siblings : " << f << "  " << k << '\n';
             sInfo.setSiblings( k );
          }
          else if( 0 == s.find( "cpu cores" ) )
@@ -329,7 +330,7 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
             f = s.substr( found + 1 );
             k = std::stoi( f );
             if( debug )
-               std::cout << " GOT cpu cores : " << f << "  " << k << '\n';
+               debugStream << " GOT cpu cores : " << f << "  " << k << '\n';
             sInfo.setCores( k );
          }
          else
@@ -337,7 +338,7 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
       }
       if( debug )
       {
-         std::cout << "read of /proc/cpuinfo finished: nProc = " << sInfo.nProc << '\n';
+         debugStream << "read of /proc/cpuinfo finished: nProc = " << sInfo.nProc << '\n';
       }
       sInfo.verify();
       *nSockets = sInfo.numSockets;
@@ -347,7 +348,7 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
    catch( std::string &msg )
    {
       if( debug )
-         std::cout << "Exception caught: msg = " << msg << '\n';
+         debugStream << "Exception caught: msg = " << msg << '\n';
       return -1;
    }
    catch( ... )
@@ -586,6 +587,12 @@ int P3SystemP( const std::string &CmdPtr, int &ProgRC )
    return res;
 }
 
+#if defined(__IN_CPPMEX__)
+#define myexit _exit
+#else
+#define myexit(x) while(false);
+#endif
+
 #ifndef _WIN32
 static int LibcForkExec( int argc, char *const argv[], int *exeRC )
 {
@@ -601,11 +608,11 @@ static int LibcForkExec( int argc, char *const argv[], int *exeRC )
    else if( !pid )
    { /* I am the child */
       if( execvp( argv[0], argv ) == -1 )
-         std::cout << "Failure to execute because: " << strerror( errno ) << '\n';
+         debugStream << "Failure to execute because: " << strerror( errno ) << '\n';
       execl( "/bin/sh", "/bin/sh", "-c", "exit 255", nullptr );
       /* if we are here, it is trouble */
       /* _exit() is a more immediate termination, less likely to flush stdio */
-      _exit( 255 ); /* -1 tells parent we could not exec */
+      myexit( 255 ); /* -1 tells parent we could not exec */
    }
    else
    { /* I am the parent */
@@ -665,11 +672,11 @@ static int libcASyncForkExec( int argc, char *const argv[], int *pid )
    {                          /* I am the child */
       (void) setpgid( 0, 0 ); /* make this process a new process group */
       if( execvp( argv[0], argv ) == -1 )
-         std::cout << "Failure to execute because: " << strerror( errno ) << '\n';
+         debugStream << "Failure to execute because: " << strerror( errno ) << '\n';
 
       /* if we are here, it is trouble */
       execl( "/bin/sh", "/bin/sh", "-c", "exit 127", NULL );
-      _exit( 127 ); /* consistent with & usage in bash */
+      myexit( 127 ); /* consistent with & usage in bash */
    }
    else
    {                             /* I am the parent */

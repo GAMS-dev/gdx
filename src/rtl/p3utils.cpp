@@ -796,8 +796,9 @@ bool p3GetFirstMACAddress( std::string &mac )
       {
          unsigned char mb[6];
          memcpy( mb, ifr.ifr_hwaddr.sa_data, 6 );
-         char buf[18];
-         sprintf( buf, "%02x:%02x:%02x:%02x:%02x:%02x", mb[0], mb[1], mb[2], mb[3], mb[4], mb[5] );
+         constexpr int bufSiz{18};
+         char buf[bufSiz];
+         std::snprintf( buf, sizeof(char)*bufSiz, "%02x:%02x:%02x:%02x:%02x:%02x", mb[0], mb[1], mb[2], mb[3], mb[4], mb[5] );
          mac.assign( buf );
          return true;
       }
@@ -914,7 +915,7 @@ bool p3GetFirstMACAddress( std::string &mac )
          continue;
       auto *mp = static_cast<unsigned char *>( currAddr->PhysicalAddress );
       char macBuf[18];
-      sprintf( static_cast<char *>( macBuf ), "%02x:%02x:%02x:%02x:%02x:%02x", mp[0], mp[1], mp[2], mp[3], mp[4], mp[5] );
+      _snprintf( static_cast<char *>( macBuf ), sizeof(char)*18, "%02x:%02x:%02x:%02x:%02x:%02x", mp[0], mp[1], mp[2], mp[3], mp[4], mp[5] );
       mac.assign( macBuf );
       if( IfOperStatusUp == currAddr->OperStatus )
       {
@@ -932,7 +933,7 @@ bool p3GetFirstMACAddress( std::string &mac )
 #endif
 }
 
-/* local use only: be sure to call with enough space for the sprintf */
+/* local use only: be sure to call with enough space for the snprintf */
 static void myStrError( int n, char *buf, size_t bufSiz )
 {
 #if defined( _WIN32 )

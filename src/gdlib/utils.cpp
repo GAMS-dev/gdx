@@ -46,6 +46,10 @@ using namespace std::literals::string_literals;
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
+#if defined(NDEBUG) && !defined(__IN_CPPMEX__)
+std::stringstream debugStream;
+#endif
+
 namespace utils
 {
 

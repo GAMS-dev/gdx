@@ -138,8 +138,14 @@
 #include <string.h>
 #include <assert.h>
 
+#if defined(__IN_CPPMEX__)
+#define myexit _exit
+#else
+#define myexit(x) while(false);
+#endif
+
 #ifdef DEBUG
-#define Bug(x) {fprintf(stderr, "%s\n", x); exit(1);}
+#define Bug(x) {fprintf(stderr, "%s\n", x); myexit(1);}
 #endif
 
 /* sometimes we put in a quick hack, sometimes we really mean to assert */
@@ -3395,6 +3401,7 @@ dtoaInfoLoc (void)
   double r, s, t;
   int rc2;
 
+#if defined(__IN_CPPMEX__)
   printf ("\n");
   printf ("------------------ dtoaInfoLoc ------------------\n");
   printf (" DTOA_USE_ND_BOUND : %d (%s)\n", (int) DTOA_USE_ND_BOUND,
@@ -3513,6 +3520,6 @@ dtoaInfoLoc (void)
   printf ("    k highwater mark : %d\n", kHW);
 #endif  /* defined(DTOA_INFO_LOC) */
   printf ("----------------------------------------------\n");
-
+#endif
   return rc;
 } /* dtoaInfoLoc */

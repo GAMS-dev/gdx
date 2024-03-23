@@ -31,6 +31,7 @@
 #include "../global/delphitypes.h"
 #include "gfileopen.h"
 #include "../rtl/sysutils_p3.h"
+#include "../gdlib/utils.h"
 
 using namespace global::delphitypes;
 using namespace std::literals::string_literals;
@@ -54,8 +55,8 @@ const std::array sAction { "ReWrite"s, "Reset"s, "Append"s };
 
 static void ReportRetry( std::string_view Func, std::string_view fn, TfoAction Action, int TryCount, int IORes1 )
 {
-   std::cout << "*** Retry count succeeded in function "s << Func << "\n";
-   std::cout << "*** Count = "s << std::to_string( TryCount ) << " Action = "s << sAction[Action] << " IORes = "s << IORes1 << " File = "s << fn << "\n";
+   debugStream << "*** Retry count succeeded in function "s << Func << "\n";
+   debugStream << "*** Count = "s << std::to_string( TryCount ) << " Action = "s << sAction[Action] << " IORes = "s << IORes1 << " File = "s << fn << "\n";
 }
 
 static int TextFileOpenRetry( const std::string &fn, bool ReTry, TfoAction Action, std::fstream &FileHandle, int &IORes )
@@ -85,13 +86,13 @@ static int TextFileOpenRetry( const std::string &fn, bool ReTry, TfoAction Actio
          FileHandle.open( fn, flags );
          if( !FileHandle.is_open() )
          {
-            std::cout << "Unable to open file "s << fn << '\n';
+            debugStream << "Unable to open file "s << fn << '\n';
             IORes = 1;
          }
       }
       else
       {
-         std::cout << "*** INFO: Tried opening file:\n*** "s << fn << " in TextFileOpenRetry.\n"s
+         debugStream << "*** INFO: Tried opening file:\n*** "s << fn << " in TextFileOpenRetry.\n"s
                    << "*** File does not exist. Maybe test, maybe problem."s << '\n';
          IORes = 1;
       }

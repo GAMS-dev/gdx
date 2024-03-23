@@ -51,12 +51,6 @@ using namespace std::literals::string_literals;
 namespace gdx
 {
 
-#if defined(NDEBUG)
-static std::stringstream debugStream;
-#else
-#define debugStream std::cout
-#endif
-
 std::string QueryEnvironmentVariable( const std::string &Name );
 
 std::string QueryEnvironmentVariable( const std::string &Name )

@@ -74,12 +74,12 @@ static bool tmElapsed( uint64_t &thenT, uint64_t minDiffT )
 
 static void staterror( const std::string &s )
 {
-   std::cout << "*** StatLib." << s << '\n';
+   debugStream << "*** StatLib." << s << '\n';
 }
 
 static void statuslerror( const std::string &s )
 {
-   std::cout << "*** gStatusL." << s << '\n';
+   debugStream << "*** gStatusL." << s << '\n';
 }
 
 bool opentextmsg( global::delphitypes::Text f, const std::string &fn, gdlib::gmsgen::tfileaction fa, std::string &msg );
@@ -175,7 +175,7 @@ bool statlibobj::TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction A
          FLogEnabled = true;
          FRedirFileName.clear();
          //Ffcon = new std::fstream("", std::ios_base::out);
-         Ffcon = &std::cout;
+         Ffcon = &debugStream;
          ioRes = Ffcon->good() ? 0 : Ffcon->rdstate();
          if( ioRes ) statuslerror( "LogOpen-2: cannot write to standard output"s );
          FStatus = sl_output;
@@ -402,7 +402,7 @@ void statlibobj::TGMSLogStream::LogWritePlain( const std::string &s )
    if( !FLogEnabled ) return;
    *Ffcon << s;
    if( FSaveAstat == 4 )
-      std::cout << s;
+      debugStream << s;
    Ffcon->flush();
 }
 
@@ -470,8 +470,8 @@ void statlibobj::TGMSLogStream::CheckOpen()
 {
    if( FStatus == sl_closed )
    {
-      Ffcon = &std::cout;// new std::fstream("", std::ios_base::out);
-      std::cout << "*** Log reopened as output\n";
+      Ffcon = &debugStream;// new std::fstream("", std::ios_base::out);
+      debugStream << "*** Log reopened as output\n";
       FStatus = sl_output;
    }
 }
@@ -567,7 +567,7 @@ void statlibobj::TGMSLogStream::write_gf( const std::string &msg )
    else
    {
       *Ffcon << msg;
-      if( FSaveAstat == 4 ) std::cout << msg;
+      if( FSaveAstat == 4 ) debugStream << msg;
    }
 }
 

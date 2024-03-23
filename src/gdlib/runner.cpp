@@ -39,13 +39,13 @@ TMsgHandler::TMsgHandler( const std::string &MsgPfx ) : FMsgPfx { MsgPfx }
 
 void TMsgHandler::ErrorMessage( int ec, const std::string &s )
 {
-   std::cout << "*** Error: "s + s << '\n';
+   debugStream << "*** Error: "s + s << '\n';
 }
 
 void TMsgHandler::LogMessage( const std::string &s ) const
 {
    if( FVerbose >= 1 )
-      std::cout << s << std::endl;
+      debugStream << s << std::endl;
 }
 
 void TMsgHandler::DebugMessage( const std::string &s ) const
