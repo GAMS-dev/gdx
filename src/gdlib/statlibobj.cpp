@@ -127,7 +127,10 @@ void statlibobj::TGMSLogStream::LogClose()
       if( FLogEnabled )
       {
          Flush();
-         if( FSaveAstat == 4 ) std::fflush( stdout );
+#if defined(__IN_CPPMEX__)
+         if( FSaveAstat == 4 )
+            std::fflush( stdout );
+#endif
          //Ffcon->close();
       }
       FStatus = sl_closed;
