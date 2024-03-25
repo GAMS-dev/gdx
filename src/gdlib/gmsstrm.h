@@ -403,11 +403,16 @@ class TBinaryTextFileIODelphi
 {
    std::unique_ptr<TBufferedFileStreamDelphi> FS{};
    std::unique_ptr<TGZipInputStream> gzFS{};
-   [[maybe_unused]] enum
+
+   // GCC <= 11 doesn't like the maybe_unused here
+#if !defined(__GNUC__) || ((__GNUC__ > 12) || (__GNUC__ == 12 && __GNUC_MINOR__ >= 0))
+   [[maybe_unused]]
+#endif
+   enum
    {
       fm_read,
       fm_write
-   } frw{fm_read};
+   } frw{fm_read} ;
    TFileSignature FFileSignature{fsign_text};
    uint8_t FMajorVersionRead{}, FMinorVersionRead{};
    int64_t FRewindPoint{};
