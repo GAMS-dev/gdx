@@ -633,7 +633,7 @@ public:
    virtual int Hash( const char *s )
    {
       assert( HashTableSize > 0 );
-      int res {};
+      unsigned int res {};
       for( int i {}; s[i] != '\0'; i++ )
          res = 211 * res + utils::toupper( s[i] );
       return ( res & 0x7FFFFFFF ) % HashTableSize;
@@ -920,7 +920,7 @@ protected:
    int Hash( const char *s ) override
    {
       assert( this->HashTableSize > 0 );
-      int res {};
+      unsigned int res {};
       for( int i {}; s[i] != '\0'; i++ )
          res = 211 * res + s[i];
       return ( res & 0x7FFFFFFF ) % this->HashTableSize;
