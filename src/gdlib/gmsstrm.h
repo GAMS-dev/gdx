@@ -405,7 +405,7 @@ class TBinaryTextFileIODelphi
    std::unique_ptr<TGZipInputStream> gzFS{};
 
    // GCC <= 11 doesn't like the maybe_unused here
-#if !defined(__GNUC__) || ((__GNUC__ > 12) || (__GNUC__ == 12 && __GNUC_MINOR__ >= 0))
+#if defined(_MSC_VER) || defined(__clang__) || !defined(__GNUC__) || ((__GNUC__ > 12) || (__GNUC__ == 12 && __GNUC_MINOR__ >= 0))
    [[maybe_unused]]
 #endif
    enum
