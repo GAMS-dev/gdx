@@ -412,7 +412,7 @@ class TBinaryTextFileIODelphi
    {
       fm_read,
       fm_write
-   } frw{fm_read} ;
+   } frw{fm_read};
    TFileSignature FFileSignature{fsign_text};
    uint8_t FMajorVersionRead{}, FMinorVersionRead{};
    int64_t FRewindPoint{};
