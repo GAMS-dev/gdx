@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['icontainspredicate_0',['IContainsPredicate',['../classgdx_1_1utils_1_1IContainsPredicate.html',1,'gdx::utils']]],
-  ['icontainspredicate_3c_20tgxfilemode_20_3e_1',['IContainsPredicate&lt; TgxFileMode &gt;',['../classgdx_1_1utils_1_1IContainsPredicate.html',1,'gdx::utils']]]
+  ['_7etgxfileobj_0',['~TGXFileObj',['../classgdx_1_1TGXFileObj.html#ace0b322387deb11ac80960bfa27684a5',1,'gdx::TGXFileObj']]]
 ];

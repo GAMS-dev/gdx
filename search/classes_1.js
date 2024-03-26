@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['databatch_0',['DataBatch',['../structgdx_1_1batchalloc_1_1DataBatch.html',1,'gdx::batchalloc']]]
+  ['uint64_0',['uInt64',['../uniongdx_1_1uInt64.html',1,'gdx']]]
 ];
