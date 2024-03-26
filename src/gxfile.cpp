@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-#include "gmsstrm.h"
+#include "gdlib/gmsstrm.h"
 
 #include "gdx.h"
-#include "utils.h"  // for assignPCharToBuf, in, trimRight, assignStr...
+#include "gdlib/utils.h"
 #include <algorithm>// for fill_n, max, fill, sort
 #include <cassert>  // for assert
 #include <cmath>    // for round, isinf, isnan, isnormal, abs
@@ -45,17 +45,11 @@
 #undef GetObject
 #endif
 
-using namespace gdx::gmsstrm;
+using namespace gdlib::gmsstrm;
 using namespace std::literals::string_literals;
 
 namespace gdx
 {
-
-#if defined(NDEBUG)
-static std::stringstream debugStream;
-#else
-#define debugStream std::cout
-#endif
 
 std::string QueryEnvironmentVariable( const std::string &Name );
 
@@ -352,7 +346,7 @@ bool IsGoodIdent( const char *S )
    return i < GLOBAL_UEL_IDENT_SIZE;
 }
 
-static TgdxElemSize GetIntegerSize( int N )
+static TgdxElemSize GetIntegerSize( int64_t N )
 {
    if( N <= 0 ) return TgdxElemSize::sz_integer;
    else if( N <= 255 )
@@ -999,7 +993,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
       {
          MinElem[D] = FFile->ReadInteger();
          MaxElem[D] = FFile->ReadInteger();
-         ElemType[D] = GetIntegerSize( MaxElem[D] - MinElem[D] + 1 );
+         ElemType[D] = GetIntegerSize( static_cast<int64_t>(MaxElem[D]) - MinElem[D] + 1 );
       }
    }
    bool AllocOk { true };
@@ -1188,7 +1182,7 @@ void TGXFileObj::InitDoWrite( int NrRecs )
    for( int D {}; D < FCurrentDim; D++ )
    {
       LastElem[D] = INDEX_INITIAL;
-      ElemType[D] = GetIntegerSize( MaxElem[D] - MinElem[D] + 1 );
+      ElemType[D] = GetIntegerSize( static_cast<int64_t>(MaxElem[D]) - MinElem[D] + 1 );
       FFile->WriteInteger( MinElem[D] );
       FFile->WriteInteger( MaxElem[D] );
    }
@@ -2180,7 +2174,8 @@ int TGXFileObj::gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst )
    if( !DoRead( Values, DimFrst ) ) gdxDataReadDone();
    else
    {
-      std::memcpy( KeyInt, LastElem.data(), FCurrentDim * sizeof( int ) );
+      if(KeyInt)
+         std::memcpy( KeyInt, LastElem.data(), FCurrentDim * sizeof( int ) );
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
       {
          // NOTE: Not covered by unit tests yet.
@@ -3934,14 +3929,14 @@ void TAcronymList::CheckEntry( int Map )
       AddEntry( "", "", Map );
 }
 
-void TAcronymList::SaveToStream( gmsstrm::TXStreamDelphi &S )
+void TAcronymList::SaveToStream( gdlib::gmsstrm::TXStreamDelphi &S )
 {
    S.WriteInteger( FList.GetCount() );
    for( int N {}; N < FList.GetCount(); N++ )
       FList[N]->SaveToStream( S );
 }
 
-void TAcronymList::LoadFromStream( gmsstrm::TXStreamDelphi &S )
+void TAcronymList::LoadFromStream( gdlib::gmsstrm::TXStreamDelphi &S )
 {
    int Cnt { S.ReadInteger() };
    FList.Clear();

@@ -34,17 +34,63 @@
     <ClCompile Include="..\..\..\..\libs\gmszlib\trees.c" />
     <ClCompile Include="..\..\..\..\libs\gmszlib\uncompr.c" />
     <ClCompile Include="..\..\..\..\libs\gmszlib\zutil.c" />
-    <ClCompile Include="src\gmsstrm.cpp" />
+    <ClCompile Include="src\gdlib\charmaps.cpp" />
+    <ClCompile Include="src\gdlib\cmdpar.cpp" />
+    <ClCompile Include="src\gdlib\datastorage.cpp" />
+    <ClCompile Include="src\gdlib\dblutil.cpp" />
+    <ClCompile Include="src\gdlib\gamsdirs.cpp" />
+    <ClCompile Include="src\gdlib\gfileopen.cpp" />
+    <ClCompile Include="src\gdlib\glookup.cpp" />
+    <ClCompile Include="src\gdlib\gmacro.cpp" />
+    <ClCompile Include="src\gdlib\gmsdata.cpp" />
+    <ClCompile Include="src\gdlib\gmsglob.cpp" />
+    <ClCompile Include="src\gdlib\gmsheapnew.cpp" />
+    <ClCompile Include="src\gdlib\gmslist.cpp" />
+    <ClCompile Include="src\gdlib\gmsobj.cpp" />
+    <ClCompile Include="src\gdlib\gmsonly.cpp" />
+    <ClCompile Include="src\gdlib\gmsstrm.cpp" />
+    <ClCompile Include="src\gdlib\obfuscatestr.cpp" />
+    <ClCompile Include="src\gdlib\runner.cpp" />
+    <ClCompile Include="src\gdlib\statlib.cpp" />
+    <ClCompile Include="src\gdlib\statlibobj.cpp" />
+    <ClCompile Include="src\gdlib\strhash.cpp" />
+    <ClCompile Include="src\gdlib\strutilx.cpp" />
+    <ClCompile Include="src\gdlib\utils.cpp" />
+    <ClCompile Include="src\gdlib\xcompress.cpp" />
+    <ClCompile Include="src\global\ctvproc.cpp" />
+    <ClCompile Include="src\global\gmslibname.cpp" />
+    <ClCompile Include="src\global\gmsspecs.cpp" />
+    <ClCompile Include="src\global\modhead.cpp" />
     <ClCompile Include="src\gxfile.cpp" />
-    <ClCompile Include="src\tests\datastoragetests.cpp" />
+    <ClCompile Include="src\rtl\dtoaLoc.c" />
+    <ClCompile Include="src\rtl\idglobal_p3.cpp" />
+    <ClCompile Include="src\rtl\math_p3.cpp" />
+    <ClCompile Include="src\rtl\p3io.cpp" />
+    <ClCompile Include="src\rtl\p3library.cpp" />
+    <ClCompile Include="src\rtl\p3platform.cpp" />
+    <ClCompile Include="src\rtl\p3process.cpp" />
+    <ClCompile Include="src\rtl\p3utils.cpp" />
+    <ClCompile Include="src\rtl\stdthread.cpp" />
+    <ClCompile Include="src\rtl\sysutils_p3.cpp" />
     <ClCompile Include="src\tests\doctestmain.cpp" />
+    <ClCompile Include="src\tests\gdlib\datastoragetests.cpp" />
+    <ClCompile Include="src\tests\gdlib\glookuptests.cpp" />
+    <ClCompile Include="src\tests\gdlib\gmacrotests.cpp" />
+    <ClCompile Include="src\tests\gdlib\gmsdatatests.cpp" />
+    <ClCompile Include="src\tests\gdlib\gmsheapnewtests.cpp" />
+    <ClCompile Include="src\tests\gdlib\gmsobjtests.cpp" />
+    <ClCompile Include="src\tests\gdlib\gmsstrmtests.cpp" />
+    <ClCompile Include="src\tests\gdlib\obfuscatestrtests.cpp" />
+    <ClCompile Include="src\tests\gdlib\strhashtests.cpp" />
+    <ClCompile Include="src\tests\gdlib\strutilxtests.cpp" />
+    <ClCompile Include="src\tests\gdlib\utilstests.cpp" />
+    <ClCompile Include="src\tests\gdlib\xcompresstests.cpp" />
     <ClCompile Include="src\tests\gdxtests.cpp" />
-    <ClCompile Include="src\tests\gmsdatatests.cpp" />
-    <ClCompile Include="src\tests\gmsobjtests.cpp" />
-    <ClCompile Include="src\tests\strhashtests.cpp" />
     <ClCompile Include="src\tests\gxfiletests.cpp" />
-    <ClCompile Include="src\tests\utilstests.cpp" />
-    <ClCompile Include="src\utils.cpp" />
+    <ClCompile Include="src\tests\rtl\p3iotests.cpp" />
+    <ClCompile Include="src\tests\rtl\p3utilstests.cpp" />
+    <ClCompile Include="src\tests\rtl\stdthreadtests.cpp" />
+    <ClCompile Include="src\tests\rtl\sysutilsp3tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\libs\gmszlib\crc32.h" />
@@ -58,16 +104,52 @@
     <ClInclude Include="..\..\..\..\libs\gmszlib\zconf.h" />
     <ClInclude Include="..\..\..\..\libs\gmszlib\zlib.h" />
     <ClInclude Include="..\..\..\..\libs\gmszlib\zutil.h" />
-    <ClInclude Include="src\datastorage.h" />
+    <ClInclude Include="src\gdlib\batchalloc.h" />
+    <ClInclude Include="src\gdlib\charmaps.h" />
+    <ClInclude Include="src\gdlib\cmdpar.h" />
+    <ClInclude Include="src\gdlib\datastorage.h" />
+    <ClInclude Include="src\gdlib\dblutil.h" />
+    <ClInclude Include="src\gdlib\gamsdirs.h" />
+    <ClInclude Include="src\gdlib\gfileopen.h" />
+    <ClInclude Include="src\gdlib\glookup.h" />
+    <ClInclude Include="src\gdlib\gmacro.h" />
+    <ClInclude Include="src\gdlib\gmsdata.h" />
+    <ClInclude Include="src\gdlib\gmsgen.h" />
+    <ClInclude Include="src\gdlib\gmsglob.h" />
+    <ClInclude Include="src\gdlib\gmsheapnew.h" />
+    <ClInclude Include="src\gdlib\gmslist.h" />
+    <ClInclude Include="src\gdlib\gmsobj.h" />
+    <ClInclude Include="src\gdlib\gmsonly.h" />
+    <ClInclude Include="src\gdlib\gmsstrm.h" />
+    <ClInclude Include="src\gdlib\obfuscatestr.h" />
+    <ClInclude Include="src\gdlib\runner.h" />
+    <ClInclude Include="src\gdlib\statlib.h" />
+    <ClInclude Include="src\gdlib\statlibobj.h" />
+    <ClInclude Include="src\gdlib\stattypes.h" />
+    <ClInclude Include="src\gdlib\strhash.h" />
+    <ClInclude Include="src\gdlib\strutilx.h" />
+    <ClInclude Include="src\gdlib\utils.h" />
+    <ClInclude Include="src\gdlib\xcompress.h" />
     <ClInclude Include="src\gdx.h" />
-    <ClInclude Include="src\gmsdata.h" />
-    <ClInclude Include="src\gmsobj.h" />
-    <ClInclude Include="src\gmsstrm.h" />
-    <ClInclude Include="src\strhash.h" />
+    <ClInclude Include="src\global\ctvproc.h" />
+    <ClInclude Include="src\global\delphitypes.h" />
+    <ClInclude Include="src\global\gmslibname.h" />
+    <ClInclude Include="src\global\gmsspecs.h" />
+    <ClInclude Include="src\global\modhead.h" />
+    <ClInclude Include="src\global\unit.h" />
     <ClInclude Include="src\gxfile.h" />
+    <ClInclude Include="src\rtl\dtoaLoc.h" />
+    <ClInclude Include="src\rtl\idglobal_p3.h" />
+    <ClInclude Include="src\rtl\math_p3.h" />
+    <ClInclude Include="src\rtl\p3io.h" />
+    <ClInclude Include="src\rtl\p3library.h" />
+    <ClInclude Include="src\rtl\p3platform.h" />
+    <ClInclude Include="src\rtl\p3process.h" />
+    <ClInclude Include="src\rtl\p3utils.h" />
+    <ClInclude Include="src\rtl\stdthread.h" />
+    <ClInclude Include="src\rtl\sysutils_p3.h" />
     <ClInclude Include="src\tests\doctest.h" />
     <ClInclude Include="src\tests\gdxtests.h" />
-    <ClInclude Include="src\utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -124,10 +206,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>generated;C:\libs\gmszlib;$(IncludePath)</IncludePath>
+    <IncludePath>src;generated;C:\libs\gmszlib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>generated;C:\libs\gmszlib;$(IncludePath)</IncludePath>
+    <IncludePath>src;generated;C:\libs\gmszlib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

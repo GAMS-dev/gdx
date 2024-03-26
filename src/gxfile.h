@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2023 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2023 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,12 +28,12 @@
 // Description:
 //  This unit defines the GDX Object as a C++ object.
 
-#include "datastorage.h"   // for TLinkedData
+#include "gdlib/datastorage.h"   // for TLinkedData
 #include "gclgms.h"        // for GLOBAL_MAX_INDEX_DIM, GMS_MAX_INDEX_DIM
-#include "gmsdata.h"       // for TTblGamsData
-#include "gmsobj.h"        // for TBooleanBitArray, TXList, TXStrings
-#include "strhash.h"       // for TXCSStrHashList, TXStrHashList
-#include "utils.h"         // for IContainsPredicate
+#include "gdlib/gmsdata.h"       // for TTblGamsData
+#include "gdlib/gmsobj.h"        // for TBooleanBitArray, TXList, TXStrings
+#include "gdlib/strhash.h"       // for TXCSStrHashList, TXStrHashList
+#include "gdlib/utils.h"
 #include <array>           // for array
 #include <cstdint>         // for int64_t, uint8_t
 #include <cstring>         // for size_t
@@ -44,7 +44,7 @@
 #include <string>          // for string
 #include <string_view>     // for string_view
 
-namespace gdx::gmsstrm
+namespace gdlib::gmsstrm
 {
 class TMiBufferedStreamDelphi;
 class TXStreamDelphi;
@@ -80,7 +80,7 @@ const std::string BADUEL_PREFIX = "?L__",
 
 struct TDFilter {
    int FiltNumber {}, FiltMaxUel {};
-   collections::gmsobj::TBooleanBitArray FiltMap {};
+   gdlib::gmsobj::TBooleanBitArray FiltMap {};
    bool FiltSorted {};
 
    TDFilter( int Nr, int UserHigh ) : FiltNumber { Nr },
@@ -106,7 +106,7 @@ struct TDFilter {
    }
 };
 
-using TSetBitMap = collections::gmsobj::TBooleanBitArray;
+using TSetBitMap = gdlib::gmsobj::TBooleanBitArray;
 
 enum class TgdxDAction
 {
@@ -123,7 +123,7 @@ struct TDomain {
 
 using TDomainList = std::array<TDomain, GLOBAL_MAX_INDEX_DIM>;
 
-using TCommentsList = collections::gmsobj::TXStrings;
+using TCommentsList = gdlib::gmsobj::TXStrings;
 
 struct TgdxSymbRecord {
    int SSyNr;
@@ -238,10 +238,10 @@ enum class TUELUserMapStatus
 };
 
 template<typename T>
-using TXStrHashListImpl = collections::strhash::TXStrHashList<T>;
+using TXStrHashListImpl = gdlib::strhash::TXStrHashList<T>;
 
 template<typename T>
-using TXCSStrHashListImpl = collections::strhash::TXCSStrHashList<T>;
+using TXCSStrHashListImpl = gdlib::strhash::TXCSStrHashList<T>;
 
 class TUELTable : public TXStrHashListImpl<int>
 {
@@ -265,8 +265,8 @@ public:
    const char *operator[]( int index ) const;
    void RenameEntry( int N, const char *s );
    [[nodiscard]] int MemoryUsed() const;
-   void SaveToStream( gmsstrm::TXStreamDelphi &S );
-   void LoadFromStream( gmsstrm::TXStreamDelphi &S );
+   void SaveToStream( gdlib::gmsstrm::TXStreamDelphi &S );
+   void LoadFromStream( gdlib::gmsstrm::TXStreamDelphi &S );
    TUELUserMapStatus GetMapToUserStatus();
    void ResetMapToUserStatus();
 };
@@ -279,17 +279,17 @@ struct TAcronym {
    bool AcrAutoGen {};
 
    TAcronym( const char *Name, const char *Text, int Map );
-   explicit TAcronym( gmsstrm::TXStreamDelphi &S );
+   explicit TAcronym( gdlib::gmsstrm::TXStreamDelphi &S );
    TAcronym() = default;
    virtual ~TAcronym() = default;
    [[nodiscard]] int MemoryUsed() const;
-   void SaveToStream( gmsstrm::TXStreamDelphi &S ) const;
+   void SaveToStream( gdlib::gmsstrm::TXStreamDelphi &S ) const;
    void SetNameAndText( const char *Name, const char *Text );
 };
 
 class TAcronymList
 {
-   collections::gmsobj::TXList<TAcronym> FList;
+   gdlib::gmsobj::TXList<TAcronym> FList;
 
 public:
    TAcronymList() = default;
@@ -298,8 +298,8 @@ public:
    int FindName( const char *Name );
    int AddEntry( const char *Name, const char *Text, int Map );
    void CheckEntry( int Map );
-   void SaveToStream( gmsstrm::TXStreamDelphi &S );
-   void LoadFromStream( gmsstrm::TXStreamDelphi &S );
+   void SaveToStream( gdlib::gmsstrm::TXStreamDelphi &S );
+   void LoadFromStream( gdlib::gmsstrm::TXStreamDelphi &S );
    int MemoryUsed();
    [[nodiscard]] int size() const;
    TAcronym &operator[]( int Index );
@@ -307,7 +307,7 @@ public:
 
 class TFilterList
 {
-   collections::gmsobj::TXList<TDFilter> FList;
+   gdlib::gmsobj::TXList<TDFilter> FList;
 
 public:
    TFilterList() = default;
@@ -321,15 +321,15 @@ public:
 using TIntlValueMapDbl = std::array<double, vm_count>;
 using TIntlValueMapI64 = std::array<int64_t, vm_count>;
 
-using LinkedDataType = collections::datastorage::TLinkedData<int, double>;
-using LinkedDataIteratorType = collections::datastorage::TLinkedDataRec<int, double> *;
+using LinkedDataType = gdlib::datastorage::TLinkedData<int, double>;
+using LinkedDataIteratorType = gdlib::datastorage::TLinkedDataRec<int, double> *;
 
 using TSetTextList = TXCSStrHashListImpl<int>;
 
 using TNameList = TXStrHashListImpl<PgdxSymbRecord>;
 
 template<typename T>
-using TTblGamsDataImpl = collections::gmsdata::TTblGamsData<T>;
+using TTblGamsDataImpl = gdlib::gmsdata::TTblGamsData<T>;
 
 using TDomainStrList = TXStrHashListImpl<uint8_t>;
 

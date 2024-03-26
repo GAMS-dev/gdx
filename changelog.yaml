@@ -1,4 +1,8 @@
 ---
+- 7.11.2:
+    - Added multiple auxiliary classes as preparation for soon to be released GDX related utilities.
+    - Fixed memory alignment in custom memory allocator.
+    - Prevent signed integer overflow in internally used hashmap class.
 - 7.11.1:
     - gdxUMUelGet was modified to accept a NULL pointer for the user UEL index mapping "UelMap".
     - Added two new example programs xp_associative(_vec) and xp_dataWrite.
