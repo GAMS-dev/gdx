@@ -630,9 +630,6 @@ constexpr int SCHASHSIZE0 = 10007,
         // we do not need it so big as maxint32: maxint32 / SCHASH_FACTOR_MIN is big enough
         SCHASHSIZE6 = 357913951;
 
-constexpr std::array schashSizes { SCHASHSIZE0, SCHASHSIZE1, SCHASHSIZE2, SCHASHSIZE3,
-   SCHASHSIZE4, SCHASHSIZE5, SCHASHSIZE6 };
-
 int getSCHashSize( int itemCount );
 
 struct THashRecord {

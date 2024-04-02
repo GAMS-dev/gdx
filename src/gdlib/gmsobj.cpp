@@ -75,6 +75,9 @@ void TQuickSortClass::QuickSort( int L, int R )
    }
 }
 
+constexpr std::array schashSizes { SCHASHSIZE0, SCHASHSIZE1, SCHASHSIZE2, SCHASHSIZE3,
+                                   SCHASHSIZE4, SCHASHSIZE5, SCHASHSIZE6 };
+
 int getSCHashSize( int itemCount )
 {
    int k { itemCount / SCHASH_FACTOR_MIN };
