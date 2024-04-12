@@ -19,21 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\libs\gmszlib\adler32.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\compress.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\crc32.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\deflate.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\gzclose.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\gzlib.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\gzread.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\gzwrite.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\infback.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\inffast.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\inflate.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\inftrees.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\trees.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\uncompr.c" />
-    <ClCompile Include="..\..\..\..\libs\gmszlib\zutil.c" />
     <ClCompile Include="src\gdlib\charmaps.cpp" />
     <ClCompile Include="src\gdlib\cmdpar.cpp" />
     <ClCompile Include="src\gdlib\datastorage.cpp" />
@@ -91,19 +76,23 @@
     <ClCompile Include="src\tests\rtl\p3utilstests.cpp" />
     <ClCompile Include="src\tests\rtl\stdthreadtests.cpp" />
     <ClCompile Include="src\tests\rtl\sysutilsp3tests.cpp" />
+    <ClCompile Include="zlib\adler32.c" />
+    <ClCompile Include="zlib\compress.c" />
+    <ClCompile Include="zlib\crc32.c" />
+    <ClCompile Include="zlib\deflate.c" />
+    <ClCompile Include="zlib\gzclose.c" />
+    <ClCompile Include="zlib\gzlib.c" />
+    <ClCompile Include="zlib\gzread.c" />
+    <ClCompile Include="zlib\gzwrite.c" />
+    <ClCompile Include="zlib\infback.c" />
+    <ClCompile Include="zlib\inffast.c" />
+    <ClCompile Include="zlib\inflate.c" />
+    <ClCompile Include="zlib\inftrees.c" />
+    <ClCompile Include="zlib\trees.c" />
+    <ClCompile Include="zlib\uncompr.c" />
+    <ClCompile Include="zlib\zutil.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\libs\gmszlib\crc32.h" />
-    <ClInclude Include="..\..\..\..\libs\gmszlib\deflate.h" />
-    <ClInclude Include="..\..\..\..\libs\gmszlib\gzguts.h" />
-    <ClInclude Include="..\..\..\..\libs\gmszlib\inffast.h" />
-    <ClInclude Include="..\..\..\..\libs\gmszlib\inffixed.h" />
-    <ClInclude Include="..\..\..\..\libs\gmszlib\inflate.h" />
-    <ClInclude Include="..\..\..\..\libs\gmszlib\inftrees.h" />
-    <ClInclude Include="..\..\..\..\libs\gmszlib\trees.h" />
-    <ClInclude Include="..\..\..\..\libs\gmszlib\zconf.h" />
-    <ClInclude Include="..\..\..\..\libs\gmszlib\zlib.h" />
-    <ClInclude Include="..\..\..\..\libs\gmszlib\zutil.h" />
     <ClInclude Include="src\gdlib\batchalloc.h" />
     <ClInclude Include="src\gdlib\charmaps.h" />
     <ClInclude Include="src\gdlib\cmdpar.h" />
@@ -150,6 +139,17 @@
     <ClInclude Include="src\rtl\sysutils_p3.h" />
     <ClInclude Include="src\tests\doctest.h" />
     <ClInclude Include="src\tests\gdxtests.h" />
+    <ClInclude Include="zlib\crc32.h" />
+    <ClInclude Include="zlib\deflate.h" />
+    <ClInclude Include="zlib\gzguts.h" />
+    <ClInclude Include="zlib\inffast.h" />
+    <ClInclude Include="zlib\inffixed.h" />
+    <ClInclude Include="zlib\inflate.h" />
+    <ClInclude Include="zlib\inftrees.h" />
+    <ClInclude Include="zlib\trees.h" />
+    <ClInclude Include="zlib\zconf.h" />
+    <ClInclude Include="zlib\zlib.h" />
+    <ClInclude Include="zlib\zutil.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -206,10 +206,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>src;generated;C:\libs\gmszlib;$(IncludePath)</IncludePath>
+    <IncludePath>src;generated;zlib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>src;generated;C:\libs\gmszlib;$(IncludePath)</IncludePath>
+    <IncludePath>src;generated;zlib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

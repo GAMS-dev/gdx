@@ -66,7 +66,7 @@ enum TIndxCode
 };
 
 struct TRINDXQUE {
-   TIndxCode QCode;
+   TIndxCode QCode {};
    std::string QTit;
 };
 

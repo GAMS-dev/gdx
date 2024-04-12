@@ -183,7 +183,13 @@ public:
             const size_t newByteCount { BaseAllocated * sizeof( uint8_t * ) };
             if( !PBase ) PBase = static_cast<TGADataBuffer **>( std::malloc( newByteCount ) );
             else
-               PBase = static_cast<TGADataBuffer **>( std::realloc( PBase, newByteCount ) );
+            {
+               const auto PBaseRA = static_cast<TGADataBuffer **>( std::realloc( PBase, newByteCount ) );
+               if( !PBaseRA && PBase )
+                  std::free( PBase );
+               PBase = PBaseRA;
+            }
+            assert( PBase );
          }
          PCurrentBuf = new TGADataBuffer;
          assert( BaseUsed >= 0 );

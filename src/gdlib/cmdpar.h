@@ -38,7 +38,7 @@ namespace gdlib::cmdpar
 
 // Parameter record
 struct TParamRec {
-   int key;         // key number
+   int key {};      // key number
    std::string keys;// key value
 };
 using PParamRec = TParamRec *;

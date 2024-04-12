@@ -30,6 +30,7 @@
 #include <set>
 #include <array>
 #include <limits>
+#include <cassert>
 
 
 // ==============================================================================================================
@@ -62,6 +63,7 @@ constexpr int numCharVals {std::numeric_limits<unsigned char>::max()+1};
 extern std::array<char, numCharVals> mapcharBuf;
 
 inline char mapchar(char c) {
+   assert( (unsigned char) c >= 0 && (unsigned char) c <= 255 );
    return mapcharBuf[(unsigned char)c];
 }
 

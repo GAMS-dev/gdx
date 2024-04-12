@@ -563,8 +563,10 @@ void spit( const std::string &fn, const std::string &contents )
 
 void assertOrMsg( bool condition, const std::string &msg )
 {
+#if !defined(NDEBUG)
    if( !condition )
       throw std::runtime_error( "Assertion failed: " + msg );
+#endif
 }
 
 // same as std::string::substr but silent when offset > input size

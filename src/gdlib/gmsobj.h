@@ -204,8 +204,13 @@ public:
          std::free( FList );
          FList = nullptr;
       }
-      else if(FListMemory > 0)
-         FList = static_cast<T **>( std::realloc( FList, FListMemory ) );
+      else if( FListMemory > 0 )
+      {
+         const auto FListRA = static_cast<T **>( std::realloc( FList, FListMemory ) );
+         if( !FListRA && FList )
+            std::free( FList );
+         FList = FListRA;
+      }
       FCapacity = NewCapacity;
    }
 

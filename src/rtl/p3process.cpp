@@ -1223,8 +1223,12 @@ bool p3IsPIDValid( global::delphitypes::Cardinal pid )
 #ifdef _WIN32
    DWORD p = pid;
    HANDLE hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, p );
-   if( hProcess ) CloseHandle( hProcess );
-   return hProcess;
+   if( hProcess )
+   {
+      CloseHandle( hProcess );
+      return true;
+   }
+   return false;
 #else
    int rc = unixPidStatus( pid );
    return rc == 1 || !rc;

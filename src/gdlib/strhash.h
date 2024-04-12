@@ -651,7 +651,7 @@ public:
 
    void HashTableReset( int ACnt )
    {
-      const int HashSize_1 = 997,
+      constexpr int HashSize_1 = 997,
                 HashSize_2 = 9973,
                 HashSize_3 = 99991,
                 HashSize_4 = 999979,

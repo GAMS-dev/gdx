@@ -893,7 +893,7 @@ bool p3GetFirstMACAddress( std::string &mac )
       if( ERROR_BUFFER_OVERFLOW == dwrc )
       {
          prevBufSiz = bufSiz;
-         free( addrBuf );
+         std::free( addrBuf );
          addrBuf = nullptr;
       }
       nTries++;
@@ -901,7 +901,7 @@ bool p3GetFirstMACAddress( std::string &mac )
    if( NO_ERROR != dwrc )
    {
       if( addrBuf )
-         free( addrBuf );
+         std::free( addrBuf );
       return false;
    }
    for( PIP_ADAPTER_ADDRESSES currAddr = addrBuf; currAddr; currAddr = currAddr->Next )
@@ -914,18 +914,18 @@ bool p3GetFirstMACAddress( std::string &mac )
       if( 6 != currAddr->PhysicalAddressLength )
          continue;
       auto *mp = static_cast<unsigned char *>( currAddr->PhysicalAddress );
-      char macBuf[18];
-      _snprintf( static_cast<char *>( macBuf ), sizeof(char)*18, "%02x:%02x:%02x:%02x:%02x:%02x", mp[0], mp[1], mp[2], mp[3], mp[4], mp[5] );
-      mac.assign( macBuf );
+      std::array<char, 18> macBuf {};
+      _snprintf( static_cast<char *>( macBuf.data() ), sizeof(char)*macBuf.size(), "%02x:%02x:%02x:%02x:%02x:%02x", mp[0], mp[1], mp[2], mp[3], mp[4], mp[5] );
+      mac.assign( macBuf.data() );
       if( IfOperStatusUp == currAddr->OperStatus )
       {
-         free( addrBuf );
+         std::free( addrBuf );
          return true;
       }
       halfDone = 1;
       return false;
    }
-   free( addrBuf );
+   std::free( addrBuf );
    return false;
    /* if _WIN32 */
 #else

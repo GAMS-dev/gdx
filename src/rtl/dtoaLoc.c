@@ -3397,11 +3397,10 @@ int DTOA_API DTOA_CALLCONV
 dtoaInfoLoc (void)
 {
   int rc = 0;
+#if defined(__IN_CPPMEX__)
   U w, x;
   double r, s, t;
   int rc2;
-
-#if defined(__IN_CPPMEX__)
   printf ("\n");
   printf ("------------------ dtoaInfoLoc ------------------\n");
   printf (" DTOA_USE_ND_BOUND : %d (%s)\n", (int) DTOA_USE_ND_BOUND,

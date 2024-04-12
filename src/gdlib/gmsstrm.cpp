@@ -1340,6 +1340,7 @@ void TMiBufferedStreamDelphi::WriteGmsDouble( double D )
       }
       B = 128 | C;
       Write( &B, 1 );
+      assert( C >= 0 && C <= 7 );
       Write( &Z.VA[C], static_cast<uint32_t>( Z.VA.size() ) - C );
    }
    else
@@ -1500,7 +1501,9 @@ TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const s
       const std::string src = FS->ReadString();
       std::array<char, 256> targBuf {};
       FS->ApplyPassWord( src.c_str(), targBuf.data(), (int) src.length(), verify_offset );
-      if( FS->RandString( static_cast<int>( src.length() ) ) != targBuf.data() ) return;
+      auto FSPtr { FS.get() };
+      assert( FSPtr );
+      if( FSPtr->RandString( static_cast<int>( src.length() ) ) != std::string(targBuf.data()) ) return;
    }
 
    FRewindPoint = FS->GetPosition();
@@ -1515,6 +1518,8 @@ TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const s
 TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const std::string &Producer, const std::string &PassWord, TFileSignature signature, bool comp, int &ErrNr, std::string &errMsg )
     : FS {std::make_unique<TBufferedFileStreamDelphi>( fn, fmCreate )}, frw{fm_write}, FFileSignature{signature}
 {
+   auto FSptr { FS.get() };
+   assert( FSptr );
    if( signature != fsign_text || !PassWord.empty() || comp )
    {
       FS->WriteByte( signature_header );
@@ -1529,7 +1534,7 @@ TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const s
       {
          FS->FlushBuffer();
          FS->SetPassWord( PassWord );
-         std::string src = FS->RandString( (int) PassWord.length() );
+         std::string src = FSptr->RandString( (int) PassWord.length() );
          std::array<char, 256> targBuf {};
          FS->ApplyPassWord( src.c_str(), targBuf.data(), (int) src.length(), verify_offset );
          FS->SetPassWord( "" );

@@ -2174,14 +2174,14 @@ int TGXFileObj::gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst )
    if( !DoRead( Values, DimFrst ) ) gdxDataReadDone();
    else
    {
-      if(KeyInt)
+      if( KeyInt )
          std::memcpy( KeyInt, LastElem.data(), FCurrentDim * sizeof( int ) );
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
       {
          // NOTE: Not covered by unit tests yet.
          debugStream << "DataReadRaw index: "s;
          for( int D {}; D < FCurrentDim; D++ )
-            debugStream << std::to_string( KeyInt[D] ) << ( D + 1 < FCurrentDim ? ","s : ""s );
+            debugStream << (KeyInt ? std::to_string( KeyInt[D] ) : "NULL"s) << ( D + 1 < FCurrentDim ? ","s : ""s );
          debugStream << '\n';
       }
       return true;

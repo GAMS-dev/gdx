@@ -193,6 +193,7 @@ public:
       auto Tail { reinterpret_cast<RecType **>( MyHeap.XGetMem64( AllocSize ) ) };
 #endif
       std::memset( Head, 0, sizeof( RecType * ) * AllocCount );
+      std::memset( Tail, 0, sizeof( RecType * ) * AllocCount );
       // Perform radix sort
       for( int D { FDimension - 1 }; D >= 0; D-- )
       {
