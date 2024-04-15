@@ -84,34 +84,9 @@ static void statuslerror( const std::string &s )
 
 bool opentextmsg( global::delphitypes::Text f, const std::string &fn, gdlib::gmsgen::tfileaction fa, std::string &msg );
 
-statlibobj::TGMSLogStream::TGMSLogStream( std::string &Msg ) : Fgfusrmem {},
-                                                               Fgfcb {},
-                                                               FIDE {}, FLogEnabled {},
-                                                               FNestLevel {},
-                                                               FFullFileName {}, FFileName {},
-                                                               FLineNr {},
-                                                               FMemory {},
-                                                               FShowOSMem {},
-                                                               FErrorCnt {},
-                                                               FStatus { sl_closed },
-                                                               Ffcon {},
-                                                               FLenLast {},
-                                                               FhasNewData {},
-                                                               FLastShowTicks { GetTickCount() },
-                                                               FLineStartTicks {},
-                                                               FPrevSecs {},
-                                                               FSpinChar {},
-                                                               FLastIsMsg {},
-                                                               FTraceLevel { 2 },
-                                                               FSaveAfn {},
-                                                               FSaveAstat {},
-                                                               FRedirFileName {}
+statlibobj::TGMSLogStream::TGMSLogStream( std::string &Msg ) : FLastShowTicks { GetTickCount() }
 {
    Msg.clear();
-}
-
-statlibobj::TGMSLogStream::~TGMSLogStream()
-{
 }
 
 void statlibobj::TGMSLogStream::registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem )
@@ -150,7 +125,7 @@ bool statlibobj::TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction A
       {
          Flush();
          if( FStatus == sl_file )
-            static_cast<std::ofstream *>( Ffcon )->close();
+            dynamic_cast<std::ofstream *>( Ffcon )->close();
       }
       FStatus = sl_closed;
    }
@@ -845,6 +820,7 @@ bool statlibobj::TGMSStatusStream::StatusDumpNext( std::string &msg )
 
    if( Fcopysysout )
    {
+      assert(Ffsysout);
       if( Ffsysout->eof() )
       {
          msg = "*** End of SysOut copy";
@@ -1262,7 +1238,37 @@ void statlibobj::TGMSStatusStream::StatusClose()
 
 bool statlibobj::TGMSStatusStream::StatusFileOpen( gdlib::gmsgen::tfileaction AAction, std::string &msg )
 {
+   if( checkfile(msg) )
+      msg.clear();
+   else return false;
+   Ffstat = new std::fstream{Ffnstat, std::ios::in};
+   bool newstat;
+   if(Ffstat->is_open()) {
+      std::string s;
+      if(!Ffstat->eof()) {
+         std::getline(*Ffstat, s);
+         if(!Ffstat->eof()) {
+            std::getline(*Ffstat, s);
+            if(!Ffstat->eof())
+               std::getline(*Ffstat, s);
+         }
+      }
+      // stars,' SOLVER DID NOT WRITE A STATUS FILE ', stars
+      //  012345
+      // '**** SOLVER DID NOT WRITE A STATUS FILE'
+      newstat = s.substr(5, 14) == "SOLVER DID NOT"s;
+      Ffstat->close();
+   } else newstat = true;
+   delete Ffstat;
+
+   // FIXME: Finish porting!
+
+   if(!newstat && AAction == forAppend) {
+   }
    return false;
+
+   // ...
+   STUBWARN();
 }
 
 void statlibobj::TGMSStatusStream::StatusWriteLn( const std::string &s )

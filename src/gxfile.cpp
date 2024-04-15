@@ -4023,6 +4023,7 @@ void TIntegerMapping::growMapping( int F )
    }
    FCapacity = currCap;
    FMapBytes = (int64_t) ( FCapacity * sizeof( int ) );
+   assert(FMapBytes);
    if( !PMap ) PMap = (int *) std::malloc( FMapBytes );
    else
    {
