@@ -134,10 +134,10 @@ struct TgdxSymbRecord {
    bool SSetText;
    std::array<char, GMS_SSSIZE> SExplTxt;
    bool SIsCompressed;
+   bool SScalarFrst;                  // not stored
    std::unique_ptr<int[]> SDomSymbols,// real domain info
-           SDomStrings;               // relaxed domain info
+                          SDomStrings;// relaxed domain info
    std::optional<TCommentsList> SCommentsList;
-   bool SScalarFrst;                      // not stored
    std::unique_ptr<TSetBitMap> SSetBitMap;// for 1-dim sets only
 };
 using PgdxSymbRecord = TgdxSymbRecord *;
