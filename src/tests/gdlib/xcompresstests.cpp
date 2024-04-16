@@ -31,6 +31,7 @@
 #include <cstring>
 #include <iostream>
 #include <cstdint>
+#include <cassert>
 
 using namespace std::literals::string_literals;
 using namespace gdlib::xcompress;
@@ -76,6 +77,7 @@ TEST_CASE( "Fundamental test" )
    {
       std::string loadMsg;
       LoadZLibLibrary( "gmszlib1", loadMsg );
+      assert(loadMsg.empty());
    }
    constexpr int countUpTo = 10, bigEnough = 50;
    char outBuf[50], srcBuf[countUpTo];

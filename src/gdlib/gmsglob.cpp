@@ -84,4 +84,5 @@ static void finalization()
 }
 
 UNIT_INIT_FINI();
+
 }// namespace gdlib::gmsglob

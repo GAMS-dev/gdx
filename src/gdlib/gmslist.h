@@ -122,9 +122,9 @@ public:
    TCaseAction CaseAction { casNone };
 
    void SetTitle( const std::string &s );
-   std::string GetTitle() const;
+   [[nodiscard]] std::string GetTitle() const;
 
-   int GetRightMargin() const;
+   [[nodiscard]] int GetRightMargin() const;
 
    void WrStrLn( const std::string &s );
    void WrStrBlock( const std::string &s );
@@ -151,14 +151,14 @@ public:
    void SetSysTitle( const std::string &Left, const std::string &Right );
    void SetSubTitle( const std::string &st );
 
-   int GetPageNumber() const;
-   int GetLineNumber() const;
-   std::string GetSubTitle() const;
-   std::string GetTitleLastWritten() const;
-   std::string GetSubTitleLastWritten() const;
-   int GetLinesOnPage() const;
+   [[nodiscard]] int GetPageNumber() const;
+   [[nodiscard]] int GetLineNumber() const;
+   [[nodiscard]] std::string GetSubTitle() const;
+   [[nodiscard]] std::string GetTitleLastWritten() const;
+   [[nodiscard]] std::string GetSubTitleLastWritten() const;
+   [[nodiscard]] int GetLinesOnPage() const;
 
-   bool LineIsEmpty() const;
+   [[nodiscard]] bool LineIsEmpty() const;
 
    void UsrWrite( const std::string &s );
 
@@ -169,9 +169,9 @@ public:
    void NewPage();
    void SetPageNumber( int n );
 
-   int StrBlockLength( const std::string &s, int Indent ) const;
+   [[nodiscard]] int StrBlockLength( const std::string &s, int Indent ) const;
 
-   int GetCharactersUsed() const;
+   [[nodiscard]] int GetCharactersUsed() const;
 
    void SetSubTitleLastWritten( const std::string &s );
 
@@ -216,17 +216,17 @@ public:
 
    void SetUserLeftMargin( int n );
    void SetUserRightMargin( int n );
-   int GetUserLeftMargin() const;
-   int GetUserRightMargin() const;
+   [[nodiscard]] int GetUserLeftMargin() const;
+   [[nodiscard]] int GetUserRightMargin() const;
 
-   int GetCharactersLeft() const
+   [[nodiscard]] int GetCharactersLeft() const
    {
       return FCharsLeft;
    }
 
    void SetIndent( int v );
 
-   std::string GetErrorStars() const;
+   [[nodiscard]] std::string GetErrorStars() const;
 
    void SetErrorStars( const std::string &s );
 

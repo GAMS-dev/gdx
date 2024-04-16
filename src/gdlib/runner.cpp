@@ -58,25 +58,25 @@ TRunner::TRunner() : FMsgHandler { "Runner"s }
 {
 }
 
-TRunner::~TRunner() {}
+TRunner::~TRunner() = default;
 
 void TRunner::ParamsAdd( const std::string &v )
 {
-   if( ErrorWhenRunning( "ParamsA" ) ) return;
+   if( ErrorWhenRunning( "ParamsA"s ) ) return;
    FParams.push_back( v );
    CommandLineChanged();
 }
 
 void TRunner::ParamsClear()
 {
-   if( ErrorWhenRunning( "ParamsClear" ) ) return;
+   if( ErrorWhenRunning( "ParamsClear"s ) ) return;
    FParams.clear();
    CommandLineChanged();
 }
 
 void TRunner::SetExecutable( const std::string &v )
 {
-   if( ErrorWhenRunning( "Executable" ) ) return;
+   if( ErrorWhenRunning( "Executable"s ) ) return;
    FExecutable = v;
    CommandLineChanged();
 }
@@ -153,13 +153,13 @@ std::string TRunner::GetWorkDir() const
 
 void TRunner::SetWorkDir( const std::string &v )
 {
-   if( ErrorWhenRunning( "WorkDir" ) ) return;
+   if( ErrorWhenRunning( "WorkDir"s ) ) return;
    FWorkDir = v;
 }
 
 void TRunner::SetInheritHandles( bool v )
 {
-   if( ErrorWhenRunning( "InheritHandles" ) ) return;
+   if( ErrorWhenRunning( "InheritHandles"s ) ) return;
    FInheritHandles = v;
 }
 
@@ -170,7 +170,7 @@ bool TRunner::GetInheritHandles() const
 
 void TRunner::SetUseShell( bool v )
 {
-   if( ErrorWhenRunning( "UseShell" ) ) return;
+   if( ErrorWhenRunning( "UseShell"s ) ) return;
    FUseShell = v;
    CommandLineChanged();
 }
@@ -197,7 +197,7 @@ void TRunner::SetVerbose( int v )
 
 void TRunner::SetVisible( TVisible v )
 {
-   if( ErrorWhenRunning( "Visible" ) ) return;
+   if( ErrorWhenRunning( "Visible"s ) ) return;
    FVisible = v;
 }
 

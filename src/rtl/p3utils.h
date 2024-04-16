@@ -56,7 +56,7 @@ std::string ParamStr( int index );
 int ParamStrCount();
 std::string loadPathVarName();
 bool PrefixLoadPath( const std::string &dir );
-bool PrefixEnv( const std::string &dir, std::string &evName );
+bool PrefixEnv( const std::string &dir, const std::string &evName );
 
 constexpr int NLocNames = 8;
 using TLocNames = std::vector<std::string>;
@@ -92,7 +92,7 @@ uint32_t P3GetEnvPC( const std::string &name, char *buf, uint32_t bufSize );
 int p3GetExecName( std::string &execName, std::string &msg );
 int p3GetLibName( std::string &libName, std::string &msg );
 
-bool p3GetMemoryInfo( int64_t &rss, int64_t &vss );
+bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss );
 
 void p3SetConsoleTitle( const std::string &s );
 void p3NoPopups();

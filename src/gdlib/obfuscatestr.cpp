@@ -28,11 +28,9 @@
 #include <memory>
 #include "obfuscatestr.h"
 #include "charmaps.h"
-#include "../global/delphitypes.h"
 #include "utils.h"
 
 using namespace gdlib::charmaps;
-using namespace global::delphitypes;
 
 namespace gdlib::obfuscatestr
 {

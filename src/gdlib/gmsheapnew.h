@@ -210,7 +210,7 @@ public:
    void GetSlotCnts( THeapSlotNr Slot, int64_t &cntGet, int64_t &cntFree, int64_t &cntAvail ) const;
    void GetBlockStats( int64_t &cntWrkBuffs, int64_t &cntActive, int64_t &sizeOtherMemory, int64_t &sizeHighMark ) const;
    void GetOtherStats( bool do64, int64_t &cntGet, int64_t &cntFree, int64_t &cntReAlloc, int64_t &sizeRUsed ) const;
-   int64_t GetFreeSlotSpace() const;
+   [[nodiscard]] int64_t GetFreeSlotSpace() const;
    bool SetMemoryLimit( double limit );
    void SetMemoryReportProc( const TMemoryReportProc &F );
 

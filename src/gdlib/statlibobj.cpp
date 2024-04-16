@@ -500,7 +500,7 @@ void statlibobj::TGMSLogStream::ShowStatLine()
       if( FNestLevel > 0 )
          s += std::string( FNestLevel, '.' ) + " "s;
       s += FFileName + "("s + std::to_string( FLineNr ) + ")"s;
-      int64_t rss, vss;
+      uint64_t rss, vss;
       if( FShowOSMem == 1 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) ) FMemory = (double) rss / 1e6;
       else if( FShowOSMem == 2 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) )
          FMemory = (double) vss / 1e6;

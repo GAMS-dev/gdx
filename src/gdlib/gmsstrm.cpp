@@ -119,7 +119,7 @@ static int customFileOpen( const std::string &fName, CustomOpenAction mode, std:
 static int customFileRead( std::fstream *h, char *buffer, uint32_t buflen, uint32_t &numRead )
 {
    auto savedPos { h->tellg() };
-   h->seekg( 0, h->end );
+   h->seekg( 0, std::basic_fstream<char, std::char_traits<char>>::end );
    auto bytesRemaining {static_cast<int64_t>( h->tellg() - savedPos )};
    auto sNumRead {std::min<int64_t>( bytesRemaining, buflen )};
    assert( sNumRead >= 0 );
@@ -1501,9 +1501,7 @@ TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const s
       const std::string src = FS->ReadString();
       std::array<char, 256> targBuf {};
       FS->ApplyPassWord( src.c_str(), targBuf.data(), (int) src.length(), verify_offset );
-      auto FSPtr { FS.get() };
-      assert( FSPtr );
-      if( FSPtr->RandString( static_cast<int>( src.length() ) ) != std::string(targBuf.data()) ) return;
+      if( gdlib::gmsstrm::TBufferedFileStreamDelphi::RandString( static_cast<int>( src.length() ) ) != std::string(targBuf.data()) ) return;
    }
 
    FRewindPoint = FS->GetPosition();
@@ -1518,8 +1516,6 @@ TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const s
 TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const std::string &Producer, const std::string &PassWord, TFileSignature signature, bool comp, int &ErrNr, std::string &errMsg )
     : FS {std::make_unique<TBufferedFileStreamDelphi>( fn, fmCreate )}, frw{fm_write}, FFileSignature{signature}
 {
-   auto FSptr { FS.get() };
-   assert( FSptr );
    if( signature != fsign_text || !PassWord.empty() || comp )
    {
       FS->WriteByte( signature_header );
@@ -1534,7 +1530,7 @@ TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const s
       {
          FS->FlushBuffer();
          FS->SetPassWord( PassWord );
-         std::string src = FSptr->RandString( (int) PassWord.length() );
+         std::string src = gdlib::gmsstrm::TBufferedFileStreamDelphi::RandString( (int) PassWord.length() );
          std::array<char, 256> targBuf {};
          FS->ApplyPassWord( src.c_str(), targBuf.data(), (int) src.length(), verify_offset );
          FS->SetPassWord( "" );

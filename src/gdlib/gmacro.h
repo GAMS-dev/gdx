@@ -106,7 +106,7 @@ public:
    char NextChNoBlank();
    void Advance( int L );
    void UndoNextCh();
-   char ChFromEnd( int Ofs ) const;
+   [[nodiscard]] char ChFromEnd( int Ofs ) const;
 };
 
 class TGAMSMacroList;
@@ -127,13 +127,13 @@ public:
    ~TGAMSMacro() = default;
 
    bool Define( const std::string &p, int &LUsed );
-   int GetArgCount() const;
-   std::string GetName() const;
+   [[nodiscard]] int GetArgCount() const;
+   [[nodiscard]] std::string GetName() const;
    void SetName( const std::string &name );
    bool GetParameters( const std::string &src, int &LUsed );
    void GetParameter( TPReader &Rdr, TPWriterCC &Wrt ) const;
-   std::string GetParam( int index ) const;
-   std::string GetBody() const;
+   [[nodiscard]] std::string GetParam( int index ) const;
+   [[nodiscard]] std::string GetBody() const;
    bool GetMacroBody( std::string &s );
    void Error( TErrTyp ErrTyp, const std::string &s ) const;
    void WriteToStream( gmsstrm::TXStreamDelphi &S ) const;
@@ -179,7 +179,7 @@ public:
    ~TGAMSMacroList();
 
    bool AddMacro( const std::string &Id, const std::string &p, int &LUsed, bool allowRedef, std::string &Msg );
-   bool AddToBody( const std::string &s ) const;
+   [[nodiscard]] bool AddToBody( const std::string &s ) const;
    std::string ExpandMacro( TGAMSMacro &macro, const std::string &src, int &LUsed );
    // Delphi version was with char* str with length info and char array string output parameter, bool return for success
    // Now using C++ strings and optional return (nullopt for fail)
@@ -188,8 +188,8 @@ public:
    void WriteToStream( gmsstrm::TXStreamDelphi &S ) const;
    int SetTraceLevel( int N );
    std::optional<std::string> GetMessage( int N );
-   int MsgCount() const;
-   int GetCount() const;
+   [[nodiscard]] int MsgCount() const;
+   [[nodiscard]] int GetCount() const;
    bool RenameMacro( const std::string &idold, const std::string &idnew );
 };
 }// namespace gdlib::gmacro

@@ -140,8 +140,6 @@ void gstatErrorCnt( int N );
 
 void dumpfilename( const std::string &prfx, bool enabled, const std::string &what, const std::string &gs, gmsgen::tfileaction fa, int ioResOrNeg );
 
-std::string GetRedirLogStr();
-
 bool gstatLogEnabled();
 
 // ...

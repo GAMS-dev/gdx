@@ -80,9 +80,9 @@ void *P3GetProcAddress( TLibHandle handle, const std::string &name )
 #else
    char *errMsg;
    dlerror();// clear the error state, will not happen on success
-   void *res = dlsym( handle, (char *) name.c_str() );
+   void *res = dlsym( handle, const_cast<char *>(name.c_str()) );
    errMsg = dlerror();
-   return NULL != errMsg ? nullptr : res;
+   return errMsg ? nullptr : res;
 #endif
 }
 

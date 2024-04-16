@@ -113,7 +113,8 @@ void P3_Str_dd0( const double x, char *s, const uint8_t sMax, size_t *eLen )
 {
    int decPos, isNeg;
    std::array<char, 32> dBuf;
-   char *pEnd, *p { dtoaLoc( x, 2, 15, dBuf.data(), sizeof( char ) * 32, &decPos, &isNeg, &pEnd ) };
+   char *pEnd;
+   const char *p { dtoaLoc( x, 2, 15, dBuf.data(), sizeof( char ) * 32, &decPos, &isNeg, &pEnd ) };
    if( decPos < 999 )
       dig2Exp( p, pEnd - p, decPos, isNeg, 23, 15, s, eLen );
    else

@@ -76,12 +76,6 @@ bool LoadZLibLibrary( const std::string &fn, std::string &LoadMsg )
    LoadMsg.clear();
    if( !ZLibHandle )
    {
-      static std::array<std::pair<std::string, void **>, 5> fncNamesAndPtrs = {
-              std::pair<std::string, void **> { "compress"s, (void **) &pcompress },
-              { "uncompress"s, (void **) &puncompress },
-              { "gzopen", (void **) &pgzReadOpen },
-              { "gzread", (void **) &pgzRead },
-              { "gzclose", (void **) &pgzReadClose } };
       const std::string Path = ExtractFilePathEx( fn );
       std::string baseName = ExtractFileNameEx( fn );
       if( baseName.empty() ) baseName = "gmszlib1";
@@ -89,6 +83,12 @@ bool LoadZLibLibrary( const std::string &fn, std::string &LoadMsg )
       ZLibHandle = P3LoadLibrary( wfn, LoadMsg );
       if( ZLibHandle && LoadMsg.empty() )
       {
+         static std::array<std::pair<std::string, void **>, 5> fncNamesAndPtrs = {
+                 std::pair<std::string, void **> { "compress"s, reinterpret_cast<void **>( &pcompress) },
+                 { "uncompress"s, reinterpret_cast<void **>(&puncompress) },
+                 { "gzopen", reinterpret_cast<void **>(&pgzReadOpen) },
+                 { "gzread", reinterpret_cast<void **>(&pgzRead) },
+                 { "gzclose", reinterpret_cast<void **>(&pgzReadClose) } };
          for( std::pair<std::string, void **> &pair: fncNamesAndPtrs )
             *pair.second = LoadEntry( pair.first, wfn );
       }

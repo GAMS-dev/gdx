@@ -89,7 +89,7 @@ TBigBlockMgr::~TBigBlockMgr()
 double TBigBlockMgr::MemoryUsedMB() const
 {
    {
-      int64_t rss {}, vss {};
+      uint64_t rss {}, vss {};
       if( showOSMem == 1 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) )
          return static_cast<double>( rss ) / 1e6;
       if( showOSMem == 2 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) )

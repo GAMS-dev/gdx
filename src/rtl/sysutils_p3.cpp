@@ -280,7 +280,7 @@ double Now()
    rc += tryEncodeTime( st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, tnow );
    return rc == 2 ? dnow + tnow : 0;
 #else
-   std::time_t t = std::time( 0 );
+   std::time_t t = std::time( nullptr );
    std::tm *loctime = std::localtime( &t );
 
    const auto current_time_since_epoch { std::chrono::system_clock::now().time_since_epoch() };
@@ -373,7 +373,7 @@ void Sleep( uint32_t milliseconds )
    ::Sleep( milliseconds );
 #else
    long nano;
-   struct timespec req, rem;
+   struct timespec req {}, rem {};
    req.tv_sec = milliseconds / 1000; /* whole seconds */
    nano = milliseconds % 1000;
    nano *= 1000000;

@@ -192,7 +192,7 @@ uint32_t P3GetEnvPC( const std::string &name, char *buf, uint32_t bufSize )
 #endif
 }
 
-bool p3GetMemoryInfo( int64_t &rss, int64_t &vss )
+bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss )
 {
 #if defined( _WIN32 )
    PROCESS_MEMORY_COUNTERS info;
@@ -283,7 +283,7 @@ std::string p3GetComputerName()
    }
    return res;
 #else
-   utsname uts;
+   utsname uts {};
    const int rc = uname( &uts );
    return rc >= 0 ? uts.nodename : ""s;
 #endif
@@ -330,7 +330,7 @@ int p3FileGetSize( Tp3FileHandle fs, int64_t &fileSize )
 int p3FileRead( Tp3FileHandle h, char *buffer, uint32_t buflen, uint32_t &numRead )
 {
    const auto savedPos = h->tellg();
-   h->seekg( 0, h->end );
+   h->seekg( 0, std::fstream::end );
    numRead = std::min<uint32_t>( static_cast<uint32_t>( h->tellg() - savedPos ), buflen );
    h->seekg( savedPos );
    h->read( buffer, numRead );
@@ -446,7 +446,7 @@ bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocN
 #ifndef _WIN32
 static bool homePlus( const std::string &dd1, const std::string &dd2, std::string &s )
 {
-   struct passwd *pw = getpwuid( getuid() );
+   const auto pw = getpwuid( getuid() );
    const char *homePath = pw->pw_dir;
    if( !homePath || !strlen( homePath ) ) return false;
    s = ""s + homePath + dd1 + dd2;
@@ -531,7 +531,6 @@ bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::s
       return true;
    }
 #endif
-   return false;
 }
 
 const std::string zeros = std::string( 54, '0' );
@@ -713,7 +712,7 @@ bool PrefixLoadPath( const std::string &dir )
      * if dir is not already the first directory in the list
      * returns true on success (prefixing worked or already there), false on failure
      */
-bool PrefixEnv( const std::string &dir, std::string &evName )
+bool PrefixEnv( const std::string &dir, const std::string &evName )
 {
    std::string trimDir { utils::trim( dir ) };
    if( trimDir.empty() ) return true;
@@ -758,19 +757,20 @@ bool p3GetFirstMACAddress( std::string &mac )
 {
 #if defined( __linux__ )
    {
-      ifreq ifr;
-      ifconf ifc;
-      char buf[1024];
-      int success = 0;
+      std::array<char, 1024> buffer {};
+      int success {};
 
       const int sock = socket( AF_INET, SOCK_DGRAM, IPPROTO_IP );
       if( sock == -1 )
          return false;
 
-      ifc.ifc_len = sizeof( buf );
-      ifc.ifc_buf = buf;
+      ifconf ifc {};
+      ifc.ifc_len = buffer.size();
+      ifc.ifc_buf = buffer.data();
       if( ioctl( sock, SIOCGIFCONF, &ifc ) == -1 )
          return false;
+
+      ifreq ifr {};
 
       {
          struct ifreq *it = ifc.ifc_req;
@@ -797,9 +797,9 @@ bool p3GetFirstMACAddress( std::string &mac )
          unsigned char mb[6];
          memcpy( mb, ifr.ifr_hwaddr.sa_data, 6 );
          constexpr int bufSiz{18};
-         char buf[bufSiz];
-         std::snprintf( buf, sizeof(char)*bufSiz, "%02x:%02x:%02x:%02x:%02x:%02x", mb[0], mb[1], mb[2], mb[3], mb[4], mb[5] );
-         mac.assign( buf );
+         std::array<char, bufSiz> buf {};
+         std::snprintf( buf.data(), sizeof(char)*bufSiz, "%02x:%02x:%02x:%02x:%02x:%02x", mb[0], mb[1], mb[2], mb[3], mb[4], mb[5] );
+         mac.assign( buf.data() );
          return true;
       }
 
@@ -934,7 +934,7 @@ bool p3GetFirstMACAddress( std::string &mac )
 }
 
 /* local use only: be sure to call with enough space for the snprintf */
-static void myStrError( int n, char *buf, size_t bufSiz )
+static void myStrError( int n, char *buf, const size_t bufSiz )
 {
 #if defined( _WIN32 )
    if( strerror_s( buf, bufSiz, n ) )
@@ -1026,9 +1026,7 @@ int p3GetExecName( std::string &execName, std::string &msg )
    }
 #else
    msg = "P3: not yet implemented";
-   int res = 9;
-   res = xGetExecName( execName, msg );
-   return res;
+   return xGetExecName( execName, msg );
 #endif
 }
 
@@ -1052,7 +1050,7 @@ static int xGetLibName( std::string &libName, std::string &msg )
       const int k = dladdr( reinterpret_cast<void *>( &xGetLibName ), &dlInfo );
       if( k > 0 )
       {
-         strncpy( tmpBuf, dlInfo.dli_fname, sizeof( tmpBuf ) );
+         strncpy( tmpBuf, dlInfo.dli_fname, sizeof( tmpBuf ) - 1 );
          tmpBuf[sizeof( tmpBuf ) - 1] = '\0';
          if( realpath( tmpBuf, libBuf ) )
             rc = 0;
@@ -1282,7 +1280,7 @@ bool p3SockSendEx(T_P3SOCKET s, const char *buf, int count, int &res, bool pollF
       if (! (fds->revents & POLLOUT))
          return false;
    }
-   const ssize_t ssz = send (s.socketfd, (const void *) buf, count, 0);
+   const ssize_t ssz = send (s.socketfd, reinterpret_cast<const void *>(buf), count, 0);
    if (ssz < 0) { // should never happen
       if ((EAGAIN == errno) || (EWOULDBLOCK == errno)) {
          res = -1; // no space or availability to write
@@ -1372,7 +1370,7 @@ static bool p3SockRecvEx( const T_P3SOCKET s, char *buf, int count, int &res, bo
       if( !( fds->revents & POLLIN ) )
          return false;
    }
-   const ssize_t ssz = recv( s.socketfd, (void *) buf, count, 0 );
+   const ssize_t ssz = recv( s.socketfd, reinterpret_cast<void *>( buf ), count, 0 );
    if( ssz < 0 )
    {
       if( EAGAIN == errno || EWOULDBLOCK == errno )

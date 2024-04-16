@@ -65,7 +65,7 @@ public:
 
    TParamRec GetParams( int n );
    [[nodiscard]] int GetParamCount() const;
-   std::string GetParamText( int key ) const;
+   [[nodiscard]] std::string GetParamText( int key ) const;
 };
 
 enum CndParamStatus

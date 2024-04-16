@@ -213,4 +213,4 @@ public:
 };
 
 
-};// namespace gdlib::statlibobj
+}// namespace gdlib::statlibobj
