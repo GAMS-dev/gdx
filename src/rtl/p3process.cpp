@@ -980,6 +980,7 @@ int win32ASyncCreateProc( const char *exeName, char *cmdLine, int newConsole, in
 
    CloseHandle( processInformation.hThread );
    /* CloseHandle (processInformation.hProcess); */
+   return 0;
 #else
    throw std::runtime_error( "Function should never be called on UNIX!" );
 #endif
