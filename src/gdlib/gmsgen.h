@@ -32,7 +32,6 @@
 
 namespace gdlib::gmsgen
 {
-using TCharSet = std::set<char>;
 using TAnsiCharArray = std::array<char, global::gmsspecs::BigIndex>;
 using PAnsiCharArray = TAnsiCharArray *;
 using DoubleArray = std::array<double, global::gmsspecs::BigIndex>;

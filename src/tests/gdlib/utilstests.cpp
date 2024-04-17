@@ -55,16 +55,6 @@ TEST_CASE( "Test character upper/lowercase conversion" )
    }
 }
 
-TEST_CASE( "Test set operations" )
-{
-   const std::set<int> a = { 1, 3, 5 },
-                       b = { 3, 5, 8 },
-                       expInterC = { 3, 5 },
-                       expUnionC = { 1, 3, 5, 8 };
-   REQUIRE_EQ( utils::intersectionOp( a, b ), expInterC );
-   REQUIRE_EQ( utils::unionOp( a, b ), expUnionC );
-}
-
 class ClassWithContains : public utils::IContainsPredicate<int>
 {
 public:
@@ -617,6 +607,21 @@ TEST_CASE( "Test creating a new C-style string on the heap from the contents of 
    REQUIRE_FALSE( utils::NewString( nullptr, 23 ) );
    REQUIRE( !std::strcmp( s.get(), "abc" ) );
    REQUIRE_EQ( 4, memSize );
+}
+
+TEST_CASE("Test charset type") {
+   utils::charset empty, a{'a'}, b{'b'}, c{'a', 'b', 'c'};
+   REQUIRE_FALSE(empty.contains('x'));
+   REQUIRE(a.contains('a'));
+   REQUIRE_FALSE(a.contains('b'));
+   REQUIRE(b.contains('b'));
+   REQUIRE_FALSE(b.contains('a'));
+   REQUIRE(c.contains('a'));
+   REQUIRE(c.contains('b'));
+   REQUIRE(c.contains('c'));
+   REQUIRE_FALSE(c.contains('d'));
+   c.erase('b');
+   REQUIRE_FALSE(c.contains('b'));
 }
 
 TEST_SUITE_END();

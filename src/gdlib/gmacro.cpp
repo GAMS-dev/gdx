@@ -52,7 +52,7 @@ bool strCompCaseInsensitive::operator()( const std::string &lhs, const std::stri
 }*/
 
 constexpr char CharConcat = '&';
-const std::set<char> IDFirst = utils::multiCharSetRanges( { { 'a', 'z' }, { 'A', 'Z' } } ),
+const utils::charset IDFirst = utils::multiCharSetRanges( { { 'a', 'z' }, { 'A', 'Z' } } ),
                      IDSecond = utils::multiCharSetRanges( { { 'a', 'z' }, { 'A', 'Z' }, { '0', '9' }, { '_', '_' } } );
 
 static bool GoodIdent( const std::string &id )

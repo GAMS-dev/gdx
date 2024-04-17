@@ -24,7 +24,6 @@
  */
 
 // FIXME: Get rid of too many "const std::string &" processing functions and use "std::string_view" or "const char *" instead!
-// FIXME: Get rid of std::set<T> functions and use bsSet based on std::bitset instead
 
 #include "utils.h"
 
@@ -524,7 +523,7 @@ std::list<std::string> split( const std::string_view s, char sep )
 std::list<std::string> splitWithQuotedItems( const std::string_view s )
 {
    constexpr char sep = ' ';
-   const std::set<char> &quoteChars = { '\"', '\'' };
+   const utils::charset quoteChars { '\"', '\'' };
    std::list<std::string> res;
    std::string cur;
    bool inQuote {};

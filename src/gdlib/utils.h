@@ -148,6 +148,41 @@ public:
    }
 };
 
+class charset {
+   std::bitset<256> chars {};
+   constexpr static int offset{128};
+
+public:
+   charset(const std::initializer_list<char> cs) {
+      for(char c : cs)
+         insert(c);
+   }
+   charset(const charset &other) : chars{other.chars} {}
+   charset() = default;
+
+   void insert(char c) {
+      chars.set(c+offset);
+   }
+
+   void insert(const charset &other) {
+      for(int i{}; i<256; i++)
+         if(other.chars[i])
+            chars.set(i);
+   }
+
+   [[nodiscard]] bool contains(char c) const {
+      return chars[c+offset];
+   }
+
+   void clear() {
+      chars.reset();
+   }
+
+   void erase(char c) {
+      chars.reset(c+offset);
+   }
+};
+
 inline char toupper( const char c )
 {
    return c >= 'a' && c <= 'z' ? static_cast<char>( c ^ 32 ) : c;
@@ -158,21 +193,19 @@ inline char tolower( const char c )
    return c >= 'A' && c <= 'Z' ? static_cast<char>( c ^ 32 ) : c;
 }
 
-// FIXME: Get rid of code using std::set as it is not very fast!
-template<class T>
-std::set<T> unionOp( const std::set<T> &a, const std::set<T> &b )
-{
-   std::set<T> res = a;
-   res.insert( b.begin(), b.end() );
+inline charset unionOp(const charset &a, const charset &b) {
+   charset res{a};
+   res.insert(b);
    return res;
 }
 
-inline void insertAllChars( std::set<char> &charset, const std::string_view chars )
+inline void insertAllChars( charset &charset, const std::string_view chars )
 {
-   charset.insert( chars.begin(), chars.end() );
+   for(char c : chars)
+      charset.insert(c);
 }
 
-inline void charRangeInsert( std::set<char> &charset, const char lbIncl, const char ubIncl )
+inline void charRangeInsert( charset &charset, const char lbIncl, const char ubIncl )
 {
    //for (char c : std::ranges::iota_view{ lbIncl, ubIncl + 1 })
    for( char c = lbIncl; c <= ubIncl; c++ )
@@ -183,6 +216,11 @@ template<class T>
 bool in( const T &val, const std::vector<T> &elems )
 {
    return std::find( elems.begin(), elems.end(), val ) != elems.end();
+}
+
+inline bool in( char c, const charset &elems )
+{
+   return elems.contains(c);
 }
 
 template<typename T>
@@ -242,21 +280,11 @@ bool in( const T &val,
    return coll.contains( val );
 }
 
-template<class T>
-std::set<T> intersectionOp( const std::set<T> &a, const std::set<T> &b )
-{
-   std::set<T> res;
-   for( const T &elem: a )
-      if( utils::in( elem, b ) )
-         res.insert( elem );
-   return res;
-}
-
-inline void charRangeInsertIntersecting( std::set<char> &charset, const char lbIncl, const char ubIncl, const std::set<char> &other )
+inline void charRangeInsertIntersecting( charset &charset, const char lbIncl, const char ubIncl, const class charset &other )
 {
    //for (char c : std::ranges::iota_view{ lbIncl, ubIncl + 1 })
    for( char c = lbIncl; c <= ubIncl; c++ )
-      if( utils::in<char>( c, other ) )
+      if( utils::in( c, other ) )
          charset.insert( c );
 }
 
@@ -382,9 +410,9 @@ void append( std::list<T> &l, const std::initializer_list<T> &elems )
 void permutAssign( std::string &lhs, const std::string &rhs,
                    const std::vector<int> &writeIndices, const std::vector<int> &readIndices );
 
-inline std::set<char> multiCharSetRanges( std::initializer_list<std::pair<char, char>> lbUbInclCharPairs )
+inline charset multiCharSetRanges( std::initializer_list<std::pair<char, char>> lbUbInclCharPairs )
 {
-   std::set<char> res;
+   charset res;
    for( const auto &[lb, ub]: lbUbInclCharPairs )
       charRangeInsert( res, lb, ub );
    return res;

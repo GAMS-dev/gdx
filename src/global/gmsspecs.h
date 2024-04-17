@@ -29,6 +29,7 @@
 #include <array>
 
 #include "delphitypes.h"
+#include "../gdlib/utils.h"
 
 // ==============================================================================================================
 // Interface
@@ -169,8 +170,8 @@ enum tsetstyp
    stypsets
 };
 
-const std::set<tvarstyp> varstypX { styppos, stypneg, stypfre };
-const std::set<tvarstyp> varstypI { stypbin, stypint, stypsos1, stypsos2, stypsemi, stypsemiint };
+const utils::bsSet<tvarstyp, stypsemiint+1>  varstypX { styppos, stypneg, stypfre },
+                                             varstypI { stypbin, stypint, stypsos1, stypsos2, stypsemi, stypsemiint };
 
 const std::array varstyptxt {
         "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };

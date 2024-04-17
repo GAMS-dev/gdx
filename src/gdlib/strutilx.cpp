@@ -376,14 +376,14 @@ bool SpecialStrAsInt( const std::string &s, int &v )
 
 std::string IncludeTrailingPathDelimiterEx( const std::string &S )
 {
-   std::set<char> myDelim = { PathDelim };
+   utils::charset myDelim = { PathDelim };
    if( OSFileType() == OSFileWIN ) myDelim.insert( '/' );
    return !S.empty() && utils::in( S.back(), myDelim ) ? S : S + PathDelim;
 }
 
 std::string ExcludeTrailingPathDelimiterEx( const std::string &S )
 {
-   std::set<char> myDelim = { PathDelim };
+   utils::charset myDelim = { PathDelim };
    if( OSFileType() == OSFileWIN ) myDelim.insert( '/' );
    return !S.empty() && utils::in( S.back(), myDelim ) ? S.substr( 0, S.length() - 1 ) : S;
 }
@@ -598,7 +598,7 @@ bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
 //  S: Source string
 // Returns:
 //  String with characters replaced
-std::string ReplaceChar( const std::set<char> &ChSet, const char New, const std::string &S )
+std::string ReplaceChar( const utils::charset &ChSet, const char New, const std::string &S )
 {
    std::string out = S;
    for( char &i: out )
