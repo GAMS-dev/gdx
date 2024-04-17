@@ -43,6 +43,11 @@ struct TProcInfo {
    uint32_t pid {};// process ID
    uint32_t tid {};// thread ID
    void *hProcess {};
+
+   void clear() {
+      pid = tid = 0;
+      hProcess = nullptr;
+   }
 };
 
 bool p3GetCPUInfo( int &nSockets, int &nCores, int &nThreads, int &coresPerSocket, int &threadsPerCore );

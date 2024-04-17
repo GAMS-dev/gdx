@@ -910,7 +910,7 @@ static int asyncSystem4Unix( const std::string &cmdPtr, TProcInfo &procInfo, std
 int p3ASyncSystemP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInfo, std::string &msg )
 {
    msg.clear();
-   memset( &procInfo, 0, sizeof( TProcInfo ) );
+   procInfo.clear();
    switch( OSFileType() )
    {
       case OSFileWIN:
@@ -993,7 +993,7 @@ int p3ASyncExecP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInf
    //const char **pargv;
    //std::string s, param;
 
-   memset( &procInfo, 0, sizeof( TProcInfo ) );
+   procInfo.clear();
    //int res { 1 };
    msg.clear();
 
@@ -1156,7 +1156,7 @@ bool killProcessTree( DWORD myprocID )
    HANDLE hSnap;
    HANDLE hChildProc, hProc;
 
-   memset( &pe, 0, sizeof( PROCESSENTRY32 ) );
+   std::memset( &pe, 0, sizeof( PROCESSENTRY32 ) );
    pe.dwSize = sizeof( PROCESSENTRY32 );
 
    hSnap = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
