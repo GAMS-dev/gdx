@@ -28,7 +28,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <filesystem>
-#include <fstream>
 #include <cassert>
 #include <cstring>
 #include "../gdlib/utils.h"
@@ -216,7 +215,7 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
    {
       len = 0;
       LOGICAL_PROCESSOR_RELATIONSHIP relType = RelationAll;
-      rc = GetLogicalProcessorInformationEx( relType, NULL, &len );
+      rc = GetLogicalProcessorInformationEx( relType, nullptr, &len );
       if( rc || ( ERROR_INSUFFICIENT_BUFFER != GetLastError() ) )
          return -1;// failure
       std::unique_ptr<unsigned char[]> uPtr( new unsigned char[len] );
@@ -264,6 +263,8 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
                   debugStream << "  Found processor package relationship:" << '\n';
                   debugStream << "    GroupCount: " << proc->Processor.GroupCount << '\n';
                }
+               break;
+            default:
                break;
          }// switch
          pos += proc->Size;
@@ -408,11 +409,11 @@ BOOL winProcInfo( int *coreCount, int *logicalCount )
    *logicalCount = -1;
 
    len = 0;
-   rc = GetLogicalProcessorInformationEx( RelationProcessorCore, NULL, &len );
+   rc = GetLogicalProcessorInformationEx( RelationProcessorCore, nullptr, &len );
    if( rc || ( ERROR_INSUFFICIENT_BUFFER != GetLastError() ) )
       return FALSE; /* failure */
    buf = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX) malloc( len );
-   if( NULL == buf )
+   if( !buf )
       return FALSE; /* failure */
    rc = GetLogicalProcessorInformationEx( RelationProcessorCore, buf, &len );
    if( !rc )
@@ -960,12 +961,12 @@ int win32ASyncCreateProc( const char *exeName, char *cmdLine, int newConsole, in
    if( !CreateProcessA(
                exeName,            /* ApplicationName */
                cmdLine,            /* lpCommandLine */
-               NULL,               /* lpProcessAttributes */
-               NULL,               /* lpThreadAttribute */
+               nullptr,               /* lpProcessAttributes */
+               nullptr,               /* lpThreadAttribute */
                inheritedHandles,   /* bInheritedHandles */
                nc,                 /* dwCreationFlags */
-               NULL,               /* lpEnvironment */
-               NULL,               /* lpCurrentDirectory */
+               nullptr,               /* lpEnvironment */
+               nullptr,               /* lpCurrentDirectory */
                &startupInfo,       /* lpStartupInfo */
                &processInformation /* lpProcessInformation */
                ) )
@@ -1046,7 +1047,7 @@ int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg )
    if( !h )
    {
       h = OpenProcess( PROCESS_ALL_ACCESS, FALSE, p );
-      if( NULL == h )
+      if( !h )
       {
          rc = GetLastError();
          switch( rc )

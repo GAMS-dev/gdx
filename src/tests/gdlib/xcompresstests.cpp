@@ -102,6 +102,7 @@ TEST_CASE( "Test compression and decompression" )
    {
       std::string loadMsg;
       LoadZLibLibrary( "gmszlib1", loadMsg );
+      REQUIRE(loadMsg.empty());
    }
    const std::string testStr { "Das ist ein Test!" };
    const auto blob = compressStringToBlob( testStr );

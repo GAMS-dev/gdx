@@ -40,9 +40,9 @@ enum TKillHow
 };
 
 struct TProcInfo {
-   uint32_t pid;// process ID
-   uint32_t tid;// thread ID
-   void *hProcess;
+   uint32_t pid {};// process ID
+   uint32_t tid {};// thread ID
+   void *hProcess {};
 };
 
 bool p3GetCPUInfo( int &nSockets, int &nCores, int &nThreads, int &coresPerSocket, int &threadsPerCore );
