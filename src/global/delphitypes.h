@@ -291,14 +291,6 @@ public:
    }
 };
 
-template<typename T>
-std::set<T> setUnion( const std::set<T> &A, const std::set<T> &B )
-{
-   std::set<T> C = A;
-   C.insert( B.begin(), B.end() );
-   return C;
-}
-
 inline double frac( double v )
 {
    return v - trunc( v );

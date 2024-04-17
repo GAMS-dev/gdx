@@ -32,6 +32,8 @@
 #include <limits>
 #include <cassert>
 
+#include "utils.h"
+
 
 // ==============================================================================================================
 // Interface
@@ -47,7 +49,7 @@ const char charff = '\f',
            chartab = '\t',
            char200 = static_cast<char>( 200 );
 
-extern std::set<char> digit,
+extern utils::charset digit,
         letter,
         alphanum,
         capletter,

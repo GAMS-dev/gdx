@@ -31,6 +31,8 @@
 #include <set>
 #include <cstdint>
 
+#include "utils.h"
+
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
@@ -106,7 +108,7 @@ constexpr int maxBOMLen { 4 };
 using tBomIndic = std::array<uint8_t, maxBOMLen>;
 bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg );
 
-std::string ReplaceChar( const std::set<char> &ChSet, char New, const std::string &S );
+std::string ReplaceChar( const utils::charset &ChSet, char New, const std::string &S );
 
 std::string ReplaceStr( const std::string &substr, const std::string &replacement, const std::string &S );
 

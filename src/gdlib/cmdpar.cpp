@@ -103,7 +103,7 @@ bool TCmdParams::AddParameters( int AInsP, const std::string &CmdLine )
       SkipBl();
       if( xr <= maxr )
       {
-         std::set<char> StopSet;
+         utils::charset StopSet;
          if( fparams[xr] != '"' ) StopSet = { ' ', '\t' };
          else
          {

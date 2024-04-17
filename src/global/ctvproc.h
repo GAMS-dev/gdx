@@ -30,6 +30,8 @@
 #include <array>
 #include <set>
 
+#include "../gdlib/utils.h"
+
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
@@ -60,7 +62,7 @@ const int procnameslength = 16;
 const std::array<std::string, procnameslength> procnames = {
         "NONE", "LP", "MIP", "RMIP", "NLP", "MCP", "MPEC", "RMPEC", "CNS", "DNLP", "RMINLP", "MINLP", "QCP", "MIQCP", "RMIQCP", "EMP" };
 
-const std::set<tprocname> pshortform = { procmcp, proccns },
+const utils::bsSet<tprocname, proccount> pshortform = { procmcp, proccns },
                           pdiscrete = { procmip, procrmip, procmpec, procrmpec, procrminlp, procminlp, procmiqcp, procrmiqcp, procemp },
                           pnonlinear = { procnlp, procmcp, procmpec, procrmpec, proccns, procdnlp, procrminlp, procminlp, procqcp, procmiqcp, procrmiqcp, procemp },
                           pcontinuous = { procnlp, procmcp, procmpec, proccns, procrminlp, procminlp, procqcp, procmiqcp, procrmiqcp, procemp },
