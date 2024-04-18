@@ -24,11 +24,12 @@
  */
 
 #include <cstring>
-#include "p3io.h"
-#include "dtoaLoc.h"
 #include <cassert>
 #include <cstdio>
 #include <array>
+
+#include "p3io.h"
+#include "dtoaLoc.h"
 
 namespace rtl::p3io
 {
@@ -122,6 +123,81 @@ void P3_Str_dd0( const double x, char *s, const uint8_t sMax, size_t *eLen )
       // inf or NaN: take string as returned
       dBuf[10] = '\0';// just in case, but should never be necessary
       padLeftC2P( dBuf.data(), std::strlen( dBuf.data() ), 23, s, sMax );
+   }
+}
+
+static inline char tolower( const char c )
+{
+   return c >= 'A' && c <= 'Z' ? static_cast<char>( c ^ 32 ) : c;
+}
+
+void P3_Val_dd(const char *s, double *d, int *code)
+{
+   const auto len {std::strlen(s)};
+   std::array<char, 256> buffer;
+   std::memcpy(buffer.data(), s, sizeof(char)*len);
+
+   // skip over blanks
+   // - Kylix 3 does not treat any other chars as whitespace
+   char *s2;
+   for (s2 = buffer.data(); ' ' == *s2;  s2++);
+   char *sd;
+   int sign {1};
+   if ('+' == *s2)
+      sd = s2+1;
+   else if ('-' == *s2) {
+      sign = -1;
+      sd = s2+1;
+   }
+   else
+      sd = s2;
+
+   /* guard against some special cases where strtod
+   * doesn't do the right thing for val():
+   *   the decimal string in front of the decimal exponent
+   *      must be nonempty for strtod, not so for val
+   *   hex input, starts with 0x or 0X
+   *   nan or inf (case insensitive)
+   */
+   char *end;
+   int locErrno;
+   if (*sd >= '0' && *sd <= '9') {
+      if ('x' == tolower(sd[1])) {
+         end = sd + 1;
+         *code = (int)(end - buffer.data() + 1);
+         *d = (*sd - '0');
+         return;
+      }
+      *d = strtodLoc (s2, &end, &locErrno);
+      if ('\0' == *end) // reached the end, things went OK
+         *code = 0;
+      else
+         *code = (int)(end - buffer.data() + 1);
+   } // if digit after space and sign char
+   else if ('.' == *sd) {
+      if ('\0' == sd[1]) {
+         // corner case of valid input not handled by strtod
+         *code = 0;
+         *d = 0;
+      }
+      else {
+         if ('e' == tolower(sd[1]))
+            *sd = '0';
+         *d = strtodLoc (sd, &end, &locErrno);
+         *d *= sign;
+         // reached the end, things went OK
+         if ('\0' == *end)
+            *code = 0;
+         else {
+            if (end <= sd)
+               end = sd + 1;
+            *code = (int)(end - buffer.data() + 1);
+         }
+      }
+   }
+   else { // not a digit, not a '.'
+      *d = 0;
+      *code = (int)(sd - buffer.data() + 1);
    }
 }
 
