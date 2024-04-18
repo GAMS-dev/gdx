@@ -86,14 +86,18 @@ static int TextFileOpenRetry( const std::string &fn, bool ReTry, TfoAction Actio
          FileHandle.open( fn, flags );
          if( !FileHandle.is_open() )
          {
+#if !defined(NDEBUG)
             debugStream << "Unable to open file "s << fn << '\n';
+#endif
             IORes = 1;
          }
       }
       else
       {
+#if !defined(NDEBUG)
          debugStream << "*** INFO: Tried opening file:\n*** "s << fn << " in TextFileOpenRetry.\n"s
                    << "*** File does not exist. Maybe test, maybe problem."s << '\n';
+#endif
          IORes = 1;
       }
       if( !IORes || !ReTry || res >= MaxTry ) break;
