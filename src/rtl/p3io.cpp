@@ -140,7 +140,7 @@ void P3_Val_dd(const char *s, double *d, int *code)
 void P3_Val_dd(const char *s, size_t slen, double *d, int *code)
 {
    std::array<char, 256> buffer;
-   std::memcpy(buffer.data(), s, sizeof(char)*slen+1);
+   std::memcpy(buffer.data(), s, sizeof(char)*(slen+1));
 
    // skip over blanks
    // - Kylix 3 does not treat any other chars as whitespace
@@ -203,6 +203,97 @@ void P3_Val_dd(const char *s, size_t slen, double *d, int *code)
    else { // not a digit, not a '.'
       *d = 0;
       *code = (int)(sd - buffer.data() + 1);
+   }
+}
+
+void P3_Val_i(const char *s, int *i, int *code)
+{
+   const auto len {std::strlen(s)};
+   P3_Val_i(s, len, i, code);
+}
+
+/* valid strings look like: [+|-][0x|$]d+,
+ * where d is a decimal digit unless preceded by the 0x or $,
+ * in which case it is a hex digit
+ */
+void P3_Val_i(const char *s, size_t slen, int *i, int *code)
+{
+   std::array<char, 256> buffer;
+   char *end, *s2, *sd;
+   long int li;
+   int sign = 1;
+
+   std::memcpy(buffer.data(), s, sizeof(char)*(slen+1));
+
+   /* skip over blanks
+   * - Kylix 3 does not treat any other chars as whitespace
+   */
+   for (s2 = (char *)buffer.data();  ' ' == *s2;  s2++);
+   if ('+' == *s2) {
+      sd = s2+1;
+   }
+   else if ('-' == *s2) {
+      sign = -1;
+      sd = s2+1;
+   }
+   else
+      sd = s2;
+
+   /* first check for the usual case - decimal digits */
+   if (((*sd > '0') && (*sd <= '9')) ||
+       (('0' == *sd) && ('\0' == sd[1] || (sd[1] >= '0' && sd[1] <= '9') )) ) {
+      li = strtol((char *)s2, (char **)&end, 10);
+      *i = li;
+      if ('\0' == *end) {         /* reached the end, things went OK */
+         *code = 0;
+      }
+      else
+         *code = (int)(end - (char *)buffer.data() + 1);
+      return;
+   }
+
+   /* if not a decimal string,
+   * must be either $ffff or 0xffff or an error */
+   if ('$' == *sd) {
+      if ((sd[1] >= '0' && sd[1] <= '9') || (sd[1] >= 'A' && sd[1] <= 'F')) { // isxdigit
+         if (-1 == sign)
+            *sd = '-';
+         else
+            sd++;
+         li = strtol((char *)sd, (char **)&end, 16);
+         *i = li;
+         if ('\0' == *end) {               /* reached the end, things went OK */
+            *code = 0;
+         }
+         else
+            *code = (int)(end - (char *)buffer.data() + 1);
+      }
+      else {
+         *i = 0;
+         sd++;
+         *code = (int)(sd - (char *)buffer.data() + 1);
+      }
+      return;
+   }
+   else if (('0' == *sd) &&
+            (('x' == sd[1]) || ('X' == sd[1]))
+   ) {
+      li = strtol((char *)s2, (char **)&end, 16);
+      *i = li;
+      if ('\0' == *end) {         /* reached the end, things went OK */
+         *code = 0;
+      }
+      else {
+         /* we alread read the 0x, that is not an error for val */
+         if (end < sd+2)
+            end = sd+2;
+         *code = (int)(end - (char *)buffer.data() + 1);
+      }
+      return;
+   }
+   else {
+      *i = 0;
+      *code = (int)(sd - (char *)buffer.data() + 1);
    }
 }
 

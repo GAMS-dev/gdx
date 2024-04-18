@@ -33,8 +33,13 @@ namespace rtl::p3io
 
 void dig2Exp( const char *dig, size_t digLen, int decPos, int isNeg, int width, int decimals, char *buf, size_t *bufLen );
 void padLeftC2P( const char eBuf[], size_t eLen, int width, char *s, uint8_t sMax );
+
 void P3_Str_dd0( double x, char *s, uint8_t sMax, size_t *eLen );
+
 void P3_Val_dd(const char *s, size_t slen, double *d, int *code);
 void P3_Val_dd(const char *s, double *d, int *code);
+
+void P3_Val_i(const char *s, size_t slen, int *i, int *code);
+void P3_Val_i(const char *s, int *i, int *code);
 
 }// namespace rtl::p3io

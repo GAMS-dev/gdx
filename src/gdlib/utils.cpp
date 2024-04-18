@@ -305,45 +305,11 @@ std::string replaceSubstrs( const std::string_view s, const std::string_view sub
    return out;
 }
 
-bool determineCode( const std::string &s, const std::function<bool( char )> &charIsLegalPredicate, int &code )
-{
-   // first check for offending char and return its position plus one (since 0 is code for "all ok")
-   for( int i {}; i < static_cast<int>( s.length() ); i++ )
-   {
-      if( const char c = s[i]; !charIsLegalPredicate( c ) )
-      {
-         code = i + 1;
-         return true;
-      }
-   }
-   code = 0;
-   return false;
-}
-
-bool determineCode( const char *s, const std::function<bool( char )> &charIsLegalPredicate, int &code )
-{
-   // first check for offending char and return its position plus one (since 0 is code for "all ok")
-   for( int i {}; s[i]; i++ )
-   {
-      if( const char c = s[i]; !charIsLegalPredicate( c ) )
-      {
-         code = i + 1;
-         return true;
-      }
-   }
-   code = 0;
-   return false;
-}
-
 // Mimicks Delphi System.Val, see:
 // https://docwiki.embarcadero.com/Libraries/Sydney/en/System.Val
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
 void val( const std::string &s, double &num, int &code )
 {
-   /*const static auto islegal = []( const char c ) {
-      return isdigit( c ) || c == '.' || toupper( c ) == 'E' || c == '-' || c == '+';
-   };
-   num = determineCode( s, islegal, code ) ? 0.0 : parseNumber( s );*/
    rtl::p3io::P3_Val_dd(s.c_str(), s.length(), &num, &code);
 }
 
@@ -352,52 +318,7 @@ void val( const std::string &s, double &num, int &code )
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
 void val(const char* s, int slen, double& num, int& code)
 {
-   /*const static auto islegal = []( const char c ) {
-      return isdigit( c ) || c == '.' || toupper( c ) == 'E' || c == '-' || c == '+';
-   };
-   num = determineCode( s, islegal, code ) ? 0.0 : parseNumber( s );*/
    rtl::p3io::P3_Val_dd(s, slen, &num, &code);
-}
-
-inline uint8_t hexval( char c )
-{
-   return c <= 9 ? c : c - 'A' + 10;
-}
-
-void parseHex( const std::string &s, int &num, int &code )
-{
-   const int off = s.front() == '$' ? 1 : 2;
-   int v {};
-   for( int exp = 0; exp < static_cast<int>( s.length() ) - off; exp++ )
-   {
-      const int i { static_cast<int>( s.length() ) - 1 - exp };
-      const char c = s[i];
-      if( !isalnum( c ) )
-      {
-         code = i;
-         return;
-      }
-      v += hexval( c ) * static_cast<int>( std::pow( 16, exp ) );
-   }
-   num = v;
-}
-
-void parseHex( const char *s, int slen, int &num, int &code )
-{
-   const int off = s[0] == '$' ? 1 : 2;
-   int v {};
-   for( int exp = 0; exp < slen - off; exp++ )
-   {
-      const int i { slen - 1 - exp };
-      const char c = s[i];
-      if( !isalnum( c ) )
-      {
-         code = i;
-         return;
-      }
-      v += hexval( c ) * static_cast<int>( std::pow( 16, exp ) );
-   }
-   num = v;
 }
 
 // Mimicks Delphi System.Val, see:
@@ -405,15 +326,7 @@ void parseHex( const char *s, int slen, int &num, int &code )
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
 void val( const std::string &s, int &num, int &code )
 {
-   if( ( s.length() >= 3 && s.front() == '0' && s[1] == 'x' ) || ( s.length() >= 2 && s.front() == '$' ) )
-   {
-      parseHex( s, num, code );
-      return;
-   }
-   const static auto islegal = []( const char c ) {
-      return isdigit( c ) || c == '-' || c == '+';
-   };
-   num = determineCode( s, islegal, code ) ? 0 : std::stoi( s );
+   rtl::p3io::P3_Val_i(s.c_str(), s.length(), &num, &code);
 }
 
 // Mimicks Delphi System.Val, see:
@@ -421,15 +334,7 @@ void val( const std::string &s, int &num, int &code )
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
 void val( const char *s, const int slen, int &num, int &code )
 {
-   if( ( slen >= 3 && s[0] == '0' && s[1] == 'x' ) || ( slen >= 2 && s[0] == '$' ) )
-   {
-      parseHex( s, num, code );
-      return;
-   }
-   const static auto islegal = []( const char c ) {
-      return isdigit( c ) || c == '-' || c == '+';
-   };
-   num = determineCode( s, islegal, code ) ? 0 : std::atoi( s );
+   rtl::p3io::P3_Val_i(s, slen, &num, &code);
 }
 
 inline std::string repeatChar( const int n, const char c )

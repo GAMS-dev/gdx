@@ -49,6 +49,12 @@ set(zlib-units
 )
 
 set(gdx-core
+        # needed for fast P3_Val_{i,dd}
+        src/rtl/dtoaLoc.h
+        src/rtl/dtoaLoc.c
+        src/rtl/p3io.h
+        src/rtl/p3io.cpp
+
         # gdlib essential units
         src/gdlib/gmsstrm.cpp
         src/gdlib/gmsstrm.h
