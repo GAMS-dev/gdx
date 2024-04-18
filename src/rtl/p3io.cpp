@@ -26,6 +26,7 @@
 #include <cstring>
 #include <cassert>
 #include <cstdio>
+#include <cstdlib>
 #include <array>
 
 #include "p3io.h"
