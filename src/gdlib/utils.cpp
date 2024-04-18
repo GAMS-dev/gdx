@@ -26,6 +26,7 @@
 // FIXME: Get rid of too many "const std::string &" processing functions and use "std::string_view" or "const char *" instead!
 
 #include "utils.h"
+#include "rtl/p3io.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -339,10 +340,11 @@ bool determineCode( const char *s, const std::function<bool( char )> &charIsLega
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
 void val( const std::string &s, double &num, int &code )
 {
-   const static auto islegal = []( const char c ) {
+   /*const static auto islegal = []( const char c ) {
       return isdigit( c ) || c == '.' || toupper( c ) == 'E' || c == '-' || c == '+';
    };
-   num = determineCode( s, islegal, code ) ? 0.0 : parseNumber( s );
+   num = determineCode( s, islegal, code ) ? 0.0 : parseNumber( s );*/
+   rtl::p3io::P3_Val_dd(s.c_str(), s.length(), &num, &code);
 }
 
 // Mimicks Delphi System.Val, see:
@@ -350,10 +352,11 @@ void val( const std::string &s, double &num, int &code )
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
 void val(const char* s, int slen, double& num, int& code)
 {
-   const static auto islegal = []( const char c ) {
+   /*const static auto islegal = []( const char c ) {
       return isdigit( c ) || c == '.' || toupper( c ) == 'E' || c == '-' || c == '+';
    };
-   num = determineCode( s, islegal, code ) ? 0.0 : parseNumber( s );
+   num = determineCode( s, islegal, code ) ? 0.0 : parseNumber( s );*/
+   rtl::p3io::P3_Val_dd(s, slen, &num, &code);
 }
 
 inline uint8_t hexval( char c )

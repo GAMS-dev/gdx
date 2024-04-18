@@ -134,8 +134,13 @@ static inline char tolower( const char c )
 void P3_Val_dd(const char *s, double *d, int *code)
 {
    const auto len {std::strlen(s)};
+   P3_Val_dd(s, len, d, code);
+}
+
+void P3_Val_dd(const char *s, size_t slen, double *d, int *code)
+{
    std::array<char, 256> buffer;
-   std::memcpy(buffer.data(), s, sizeof(char)*len);
+   std::memcpy(buffer.data(), s, sizeof(char)*slen+1);
 
    // skip over blanks
    // - Kylix 3 does not treat any other chars as whitespace
