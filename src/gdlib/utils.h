@@ -157,7 +157,7 @@ public:
       for(char c : cs)
          insert(c);
    }
-   charset(const charset &other) : chars{other.chars} {}
+   charset(const charset &other) = default;
    charset() = default;
 
    void insert(char c) {
@@ -393,6 +393,18 @@ template<typename T>
 const auto &nthRefConst( const std::list<T> &elems, int n )
 {
    return *( std::next( elems.begin(), n ) );
+}
+
+template<typename T>
+const auto &nthRefConst( const std::vector<T> &elems, int n )
+{
+   return elems[n];
+}
+
+template<typename T>
+auto &nthRef( std::vector<T> &elems, int n )
+{
+   return elems[n];
 }
 
 template<typename T>
