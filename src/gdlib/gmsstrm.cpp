@@ -632,6 +632,19 @@ void TGZipInputStream::ReadLine( std::vector<uint8_t> &buffer, int MaxInp, char 
    }
 }
 
+void TGZipInputStream::ReadLine( char *buffer, int MaxInp, char &LastChar )
+{
+   int Len {};
+   while( !utils::in<char>( LastChar, '\r', '\n', substChar ) || static_cast<int>( Len ) == MaxInp )
+   {
+      buffer[Len++] = LastChar;
+      if( NrLoaded - NrRead >= 1 )
+         LastChar = static_cast<char>( Buf[NrRead++] );
+      else if( !Read( &LastChar, 1 ) )
+         LastChar = substChar;
+   }
+}
+
 void TXStreamDelphi::ParWrite( RWType T )
 {
    Write( &T, 1 );
@@ -1596,6 +1609,30 @@ void TBinaryTextFileIODelphi::ReadLine( std::vector<uint8_t> &Buffer, int &Len, 
       }
    }
    Len = static_cast<int>(Buffer.size());
+}
+
+void TBinaryTextFileIODelphi::ReadLine( char *Buffer, int &Len, int MaxInp, char &LastChar )
+{
+   // moved here for performance reasons
+   // reading a single byte at a time is avoided this way
+   if( FFileSignature == fsign_gzip )
+      gzFS->ReadLine( Buffer, MaxInp, LastChar );
+   else
+   {
+      Len = 0;
+      while( !( utils::in( LastChar, substChar, '\n', '\r' ) || static_cast<int>( Len ) == MaxInp ) )
+      {
+         Buffer[Len++] = LastChar;
+         if( FS->NrLoaded - FS->NrRead >= 1 )
+         {// the simple case
+            LastChar = static_cast<char>( FS->BufPtr[FS->NrRead] );
+            FS->NrRead++;
+         }
+         // we should we fill the buffer???
+         else if( !FS->Read( &LastChar, 1 ) )
+            LastChar = substChar;
+      }
+   }
 }
 
 void TBinaryTextFileIODelphi::ReadLine( std::string &StrBuffer, int &Len, const int MaxInp, char &LastChar ) const

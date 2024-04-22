@@ -397,6 +397,7 @@ public:
 
    void ReadLine( std::string &buffer, int MaxInp, char &LastChar );
    void ReadLine( std::vector<uint8_t> &buffer, int MaxInp, char &LastChar );
+   void ReadLine( char *buffer, int MaxInp, char &LastChar );
 };
 
 class TBinaryTextFileIODelphi
@@ -426,6 +427,7 @@ public:
    uint32_t Read( char *Buffer, uint32_t Count );
    char ReadCharacter();
    void ReadLine( std::vector<uint8_t> &Buffer, int &Len, int MaxInp, char &LastChar );
+   void ReadLine( char *Buffer, int &Len, int MaxInp, char &LastChar );
    void ReadLine( std::string &StrBuffer, int &Len, int MaxInp, char &LastChar ) const;
    uint32_t Write( const char *Buffer, uint32_t Count ) const;
    bool UsesPassWord();
