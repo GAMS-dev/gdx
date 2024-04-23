@@ -45,12 +45,12 @@ namespace gdlib::glookup
 inline int CalcNextHashSize( const int Cnt, int &Nxt )
 {
    constexpr int
-           HashSize_1 = 997,
-           Next_1 = 1500,
+           HashSize_1 = 997, Next_1 = 1500,
            HashSize_2 = 9973, Next_2 = 15000,
            HashSize_3 = 99991, Next_3 = 150000,
            HashSize_4 = 999979, Next_4 = 1500000,
-           HashSize_5 = 9999991, Next_5 = std::numeric_limits<int>::max();
+           HashSize_5 = 9999991, Next_5 = 15000000,
+           HashSize_6 = 99999989, Next_6 = std::numeric_limits<int>::max();
    if( Cnt >= Next_4 )
    {
       Nxt = Next_5;
