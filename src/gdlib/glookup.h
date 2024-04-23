@@ -51,6 +51,11 @@ inline int CalcNextHashSize( const int Cnt, int &Nxt )
            HashSize_4 = 999979, Next_4 = 1500000,
            HashSize_5 = 9999991, Next_5 = 15000000,
            HashSize_6 = 99999989, Next_6 = std::numeric_limits<int>::max();
+   if (Cnt >= Next_5)
+   {
+      Nxt = Next_6;
+      return HashSize_6;
+   }
    if( Cnt >= Next_4 )
    {
       Nxt = Next_5;
