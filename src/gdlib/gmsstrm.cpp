@@ -583,7 +583,7 @@ TGZipInputStream::~TGZipInputStream()
 
 uint32_t TGZipInputStream::Read( void *buffer, uint32_t Count )
 {
-   const std::function<bool()> FillBuffer = [&]() {
+   const auto FillBuffer = [&]() -> bool {
       NrLoaded = gzread( pgz, Buf.data(), static_cast<int>( this->Buf.size() ) );
       NrRead = 0;
       return NrLoaded > 0;

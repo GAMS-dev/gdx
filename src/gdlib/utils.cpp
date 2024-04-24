@@ -53,12 +53,6 @@ std::stringstream debugStream;
 namespace utils
 {
 
-void parseHex( const std::string &s, int &num, int &code );
-void parseHex( const char *s, int slen, int &num, int &code );
-
-bool determineCode( const std::string &s, const std::function<bool( char )> &charIsLegalPredicate, int &code );
-bool determineCode( const char *s, const std::function<bool( char )> &charIsLegalPredicate, int &code );
-
 bool anychar( const std::function<bool( char )> &predicate, const std::string_view s )
 {
    return std::any_of( std::cbegin( s ), std::cend( s ), predicate );

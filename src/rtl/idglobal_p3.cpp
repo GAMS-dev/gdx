@@ -23,6 +23,11 @@
  * SOFTWARE.
  */
 
+#if defined(_WIN32)
+#include <Windows.h>
+#undef max
+#endif
+
 #include "idglobal_p3.h"
 #include <limits>
 
@@ -35,4 +40,16 @@ cardinal GetTickDiff( const cardinal AOldTickCount, const cardinal ANewTickCount
 {
    return ANewTickCount >= AOldTickCount ? ANewTickCount - AOldTickCount : std::numeric_limits<unsigned int>::max() - AOldTickCount + ANewTickCount;
 }
+
+uint64_t GetTickCount() {
+#if defined( _WIN32 )
+   return ::GetTickCount();
+#else
+  struct timeval tv;
+  gettimeofday (&tv, NULL);
+  uint64_t result = tv.tv_sec; /* force tv_sec to take the type of the result */
+  return result * 1000 + tv.tv_usec / 1000;
+#endif
+}
+
 }// namespace rtl::idglobal_p3

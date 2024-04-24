@@ -33,4 +33,5 @@ namespace rtl::idglobal_p3
 {
 typedef uint64_t cardinal;
 cardinal GetTickDiff( cardinal AOldTickCount, cardinal ANewTickCount );
+uint64_t GetTickCount();
 }// namespace rtl::idglobal_p3

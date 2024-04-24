@@ -226,7 +226,7 @@ public:
       T **PA;// local copy for speed
 
       // TODO: Use std::sort instead!
-      std::function<void( int, int )> QuickSort = [&]( int L, int R ) {
+      auto QuickSort = [&]( auto &_QuickSort, int L, int R ) -> void {
          strutilx::DelphiStrRef pPivotString {};
 
          auto compare2Pivot = [&]( int i ) {
@@ -273,13 +273,13 @@ public:
             if( ( j - L ) > ( R - i ) )
             {
                // left part is bigger, look right first
-               if( i < R ) QuickSort( i, R );// if necessary, sort the right part
+               if( i < R ) _QuickSort( _QuickSort, i, R );// if necessary, sort the right part
                i = L;                        // and move to the left part
                R = j;
             }
             else
             {                                // right part is bigger, look left first
-               if( L < j ) QuickSort( L, j );// if necessary, sort the left part
+               if( L < j ) _QuickSort( _QuickSort, L, j );// if necessary, sort the left part
                L = i;                        // and move to the right part
             }
          }
@@ -294,7 +294,7 @@ public:
       PA = FSrtIndx->data();// local copy for speed
       for( int N {}; N < static_cast<int>( RecList.size() ); N++ )
          ( *FSrtIndx )[N] = RecList[N];
-      QuickSort( 0, static_cast<int>( RecList.size() ) - 1 );
+      QuickSort( QuickSort, 0, static_cast<int>( RecList.size() ) - 1 );
    }
 
    void SortFinished()

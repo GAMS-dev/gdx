@@ -54,15 +54,9 @@ bool isMuxed()
 
 std::string termString;
 
-static uint64_t GetTickCount()
-{
-   const auto duration = std::chrono::system_clock::now().time_since_epoch();
-   return std::chrono::duration_cast<std::chrono::milliseconds>( duration ).count();
-}
-
 static bool tmElapsed( uint64_t &thenT, uint64_t minDiffT )
 {
-   auto nowT = GetTickCount();
+   auto nowT = rtl::idglobal_p3::GetTickCount();
    auto diffT = rtl::idglobal_p3::GetTickDiff( thenT, nowT );
    if( diffT > minDiffT )
    {
@@ -84,7 +78,7 @@ static void statuslerror( const std::string &s )
 
 bool opentextmsg( global::delphitypes::Text f, const std::string &fn, gdlib::gmsgen::tfileaction fa, std::string &msg );
 
-statlibobj::TGMSLogStream::TGMSLogStream( std::string &Msg ) : FLastShowTicks { GetTickCount() }
+statlibobj::TGMSLogStream::TGMSLogStream( std::string &Msg ) : FLastShowTicks { rtl::idglobal_p3::GetTickCount() }
 {
    Msg.clear();
 }
@@ -234,7 +228,7 @@ void statlibobj::TGMSLogStream::LogLineNr( int N )
    {
       FLineNr = N;
       FhasNewData = true;
-      FLineStartTicks = GetTickCount();
+      FLineStartTicks = rtl::idglobal_p3::GetTickCount();
       FSpinChar = ' ';
       //FPrevSecs = 0,
       //CndShowStatLine();
@@ -306,7 +300,7 @@ void statlibobj::TGMSLogStream::freshenEx()
 {
    if( FLogEnabled && FStatus == sl_output && FTraceLevel > 1 )
    {
-      auto nowT = GetTickCount();
+      auto nowT = rtl::idglobal_p3::GetTickCount();
       auto dt = rtl::idglobal_p3::GetTickDiff( FLineStartTicks, nowT );
       FLastShowTicks = nowT;
       auto secs = dt / 1000;
