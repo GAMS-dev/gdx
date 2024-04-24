@@ -26,6 +26,8 @@
 #if defined(_WIN32)
 #include <Windows.h>
 #undef max
+#else
+#include <sys/time.h>
 #endif
 
 #include "idglobal_p3.h"
@@ -45,9 +47,10 @@ uint64_t GetTickCount() {
 #if defined( _WIN32 )
    return ::GetTickCount();
 #else
-  struct timeval tv;
-  gettimeofday (&tv, NULL);
-  uint64_t result = tv.tv_sec; /* force tv_sec to take the type of the result */
+  timeval tv {};
+  gettimeofday (&tv, nullptr);
+  // force tv_sec to take the type of the result
+  uint64_t result = tv.tv_sec;
   return result * 1000 + tv.tv_usec / 1000;
 #endif
 }
