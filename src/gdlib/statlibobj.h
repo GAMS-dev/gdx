@@ -78,6 +78,8 @@ class TGMSLogStream
    void gstatStartWriting();
    void writeln_gf( const std::string &msg );
    void write_gf( const std::string &msg );
+   void writeln_gf( const char *msg );
+   void write_gf( const char *msg );
 
 public:
    explicit TGMSLogStream( std::string &Msg );

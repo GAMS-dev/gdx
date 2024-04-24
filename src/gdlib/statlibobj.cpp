@@ -52,7 +52,7 @@ bool isMuxed()
    return false;
 }
 
-std::string termString;
+static std::string termString;
 
 static bool tmElapsed( uint64_t &thenT, uint64_t minDiffT )
 {
@@ -78,18 +78,18 @@ static void statuslerror( const std::string &s )
 
 bool opentextmsg( global::delphitypes::Text f, const std::string &fn, gdlib::gmsgen::tfileaction fa, std::string &msg );
 
-statlibobj::TGMSLogStream::TGMSLogStream( std::string &Msg ) : FLastShowTicks { rtl::idglobal_p3::GetTickCount() }
+TGMSLogStream::TGMSLogStream( std::string &Msg ) : FLastShowTicks { rtl::idglobal_p3::GetTickCount() }
 {
    Msg.clear();
 }
 
-void statlibobj::TGMSLogStream::registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem )
+void TGMSLogStream::registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem )
 {
    Fgfcb = fptr;
    Fgfusrmem = usermem;
 }
 
-void statlibobj::TGMSLogStream::LogClose()
+void TGMSLogStream::LogClose()
 {
    if( FStatus != sl_closed )
    {
@@ -107,7 +107,7 @@ void statlibobj::TGMSLogStream::LogClose()
 }
 
 // FIXME: AS: Finish porting this method!
-bool statlibobj::TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction AAction, const std::string &Afn )
+bool TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction AAction, const std::string &Afn )
 {
    int ioRes;
    int IDECMDSrun;
@@ -182,12 +182,12 @@ bool statlibobj::TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction A
    return false;
 }
 
-void statlibobj::TGMSLogStream::LogReOpen()
+void TGMSLogStream::LogReOpen()
 {
    LogOpen( FSaveAstat, forAppend, FSaveAfn );
 }
 
-void statlibobj::TGMSLogStream::LogMessage( const std::string &s )
+void TGMSLogStream::LogMessage( const std::string &s )
 {
    if( !FLogEnabled ) return;
    Flush();
@@ -198,7 +198,7 @@ void statlibobj::TGMSLogStream::LogMessage( const std::string &s )
    FLastIsMsg = true;
 }
 
-void statlibobj::TGMSLogStream::LogFileName( const std::string &fn, int Lev )
+void TGMSLogStream::LogFileName( const std::string &fn, int Lev )
 {
    if( !FLogEnabled ) return;
    if( FhasNewData && FTraceLevel > 0 ) ShowStatLine();
@@ -222,7 +222,7 @@ void statlibobj::TGMSLogStream::LogFileName( const std::string &fn, int Lev )
 		std::cout << "--- " << nestpoints << " " << fn << "(" << Lev << ") 0 Mb" << '\n';*/
 }
 
-void statlibobj::TGMSLogStream::LogLineNr( int N )
+void TGMSLogStream::LogLineNr( int N )
 {
    if( FLogEnabled && N != FLineNr )
    {
@@ -243,7 +243,7 @@ void statlibobj::TGMSLogStream::LogLineNr( int N )
    }
 }
 
-void statlibobj::TGMSLogStream::LogAnchor( int N )
+void TGMSLogStream::LogAnchor( int N )
 {
    if( FLogEnabled )
    {
@@ -254,7 +254,7 @@ void statlibobj::TGMSLogStream::LogAnchor( int N )
    }
 }
 
-void statlibobj::TGMSLogStream::LogTitleAnchor( const std::string &Msg )
+void TGMSLogStream::LogTitleAnchor( const std::string &Msg )
 {
    if( FLogEnabled )
    {
@@ -264,13 +264,13 @@ void statlibobj::TGMSLogStream::LogTitleAnchor( const std::string &Msg )
    }
 }
 
-void statlibobj::TGMSLogStream::LogFileAnchor( bool err, const std::string &fn, int line, int col )
+void TGMSLogStream::LogFileAnchor( bool err, const std::string &fn, int line, int col )
 {
    if( !FLogEnabled ) return;
    doFileAnchor( err, fn, line, col );
 }
 
-void statlibobj::TGMSLogStream::LogMemory( double M )
+void TGMSLogStream::LogMemory( double M )
 {
    if( FLogEnabled && std::abs( M - FMemory ) > 0.5 )
    {
@@ -280,7 +280,7 @@ void statlibobj::TGMSLogStream::LogMemory( double M )
    }
 }
 
-void statlibobj::TGMSLogStream::LogErrrorCnt( int N )
+void TGMSLogStream::LogErrrorCnt( int N )
 {
 
    if( FLogEnabled && N != FErrorCnt )
@@ -291,12 +291,12 @@ void statlibobj::TGMSLogStream::LogErrrorCnt( int N )
    }
 }
 
-void statlibobj::TGMSLogStream::freshen()
+void TGMSLogStream::freshen()
 {
    if( FLogEnabled ) CndShowStatLine();
 }
 
-void statlibobj::TGMSLogStream::freshenEx()
+void TGMSLogStream::freshenEx()
 {
    if( FLogEnabled && FStatus == sl_output && FTraceLevel > 1 )
    {
@@ -317,7 +317,7 @@ void statlibobj::TGMSLogStream::freshenEx()
    }
 }
 
-void statlibobj::TGMSLogStream::LogDumpFilename( const std::string &prfx, bool enabled, const std::string &what, const std::string &gs, gdlib::gmsgen::tfileaction fa, int ioResOrNeg )
+void TGMSLogStream::LogDumpFilename( const std::string &prfx, bool enabled, const std::string &what, const std::string &gs, gdlib::gmsgen::tfileaction fa, int ioResOrNeg )
 {
    if( !enabled || !FLogEnabled ) return;
    std::string s { prfx + " "s + what + " "s };
@@ -340,7 +340,7 @@ void statlibobj::TGMSLogStream::LogDumpFilename( const std::string &prfx, bool e
       LogMessage( prfx + "MSG=" + SysErrorMessage( ioResOrNeg ) );
 }
 
-void statlibobj::TGMSLogStream::LogWriteLn( const std::string &s )
+void TGMSLogStream::LogWriteLn( const std::string &s )
 {
    if( FLogEnabled )
    {
@@ -355,7 +355,7 @@ void statlibobj::TGMSLogStream::LogWriteLn( const std::string &s )
    }
 }
 
-void statlibobj::TGMSLogStream::LogWrite( const std::string &p )
+void TGMSLogStream::LogWrite( const std::string &p )
 {
    const int blockSize = 255;
    if( p.empty() || !FLogEnabled ) return;
@@ -369,7 +369,7 @@ void statlibobj::TGMSLogStream::LogWrite( const std::string &p )
    if( !Fgfcb ) Ffcon->flush();
 }
 
-void statlibobj::TGMSLogStream::LogWritePlain( const std::string &s )
+void TGMSLogStream::LogWritePlain( const std::string &s )
 {
    if( !FLogEnabled ) return;
    *Ffcon << s;
@@ -378,7 +378,7 @@ void statlibobj::TGMSLogStream::LogWritePlain( const std::string &s )
    Ffcon->flush();
 }
 
-void statlibobj::TGMSLogStream::showCounts()
+void TGMSLogStream::showCounts()
 {
 #ifdef METER
    LogMessage( "DEBUG: TGMSLogStream usage counts:" );
@@ -389,56 +389,56 @@ void statlibobj::TGMSLogStream::showCounts()
 #endif
 }
 
-void statlibobj::TGMSLogStream::setIDErun( bool v )
+void TGMSLogStream::setIDErun( bool v )
 {
    FIDE = v;
 }
 
-bool statlibobj::TGMSLogStream::getLogEnabled() const
+bool TGMSLogStream::getLogEnabled() const
 {
    return FLogEnabled;
 }
 
-void statlibobj::TGMSLogStream::setLogEnabled( bool v )
+void TGMSLogStream::setLogEnabled( bool v )
 {
    FLogEnabled = v;
 }
 
-int statlibobj::TGMSLogStream::getTraceLevel() const
+int TGMSLogStream::getTraceLevel() const
 {
    return FTraceLevel;
 }
 
-void statlibobj::TGMSLogStream::setTraceLevel( int v )
+void TGMSLogStream::setTraceLevel( int v )
 {
    FTraceLevel = v;
 }
 
-std::string statlibobj::TGMSLogStream::getRedirFilename() const
+std::string TGMSLogStream::getRedirFilename() const
 {
    return FRedirFileName.empty() ? ""s : "\"" + FRedirFileName + "\"";
 }
 
-std::string statlibobj::TGMSLogStream::getRedirString() const
+std::string TGMSLogStream::getRedirString() const
 {
    if( FRedirFileName.empty() ) return ""s;
    std::string pf = FSaveAstat == 4 ? " | tee -a " : " >> ";
    return pf + getRedirFilename();
 }
 
-std::string statlibobj::TGMSLogStream::getShortRedirString( const std::string &Dir )
+std::string TGMSLogStream::getShortRedirString( const std::string &Dir )
 {
    if( FRedirFileName.empty() ) return ""s;
    auto k { Dir.find( FRedirFileName ) };
    return k == std::string::npos ? getRedirString() : " >> \"." + FRedirFileName.substr( Dir.length() ) + "\"";
 }
 
-void statlibobj::TGMSLogStream::SetOSMemory( int v )
+void TGMSLogStream::SetOSMemory( int v )
 {
    FShowOSMem = v;
 }
 
-void statlibobj::TGMSLogStream::CheckOpen()
+void TGMSLogStream::CheckOpen()
 {
    if( FStatus == sl_closed )
    {
@@ -448,7 +448,7 @@ void statlibobj::TGMSLogStream::CheckOpen()
    }
 }
 
-void statlibobj::TGMSLogStream::Flush()
+void TGMSLogStream::Flush()
 {
    if( FhasNewData && FTraceLevel > 0 ) ShowStatLine();
    if( FLenLast > 0 && FStatus != sl_closed )
@@ -461,7 +461,7 @@ void statlibobj::TGMSLogStream::Flush()
    FLastIsMsg = false;
 }
 
-void statlibobj::TGMSLogStream::doFileAnchor( bool err, const std::string &fn, int line, int col )
+void TGMSLogStream::doFileAnchor( bool err, const std::string &fn, int line, int col )
 {
    CheckOpen();
    std::string s { ( err ? "[ERR:"s : "[FIL:"s ) + "\"" + fn + "\"," + std::to_string( line ) + "," + std::to_string( col ) + "]" };
@@ -469,7 +469,7 @@ void statlibobj::TGMSLogStream::doFileAnchor( bool err, const std::string &fn, i
    FLenLast += static_cast<int>(s.length());
 }
 
-void statlibobj::TGMSLogStream::CndShowStatLine()
+void TGMSLogStream::CndShowStatLine()
 {
    if( FStatus == sl_output && FTraceLevel > 1 )
    {
@@ -479,7 +479,7 @@ void statlibobj::TGMSLogStream::CndShowStatLine()
    }
 }
 
-void statlibobj::TGMSLogStream::ShowStatLine()
+void TGMSLogStream::ShowStatLine()
 {
    if( FLineNr > 0 )
    {
@@ -490,7 +490,9 @@ void statlibobj::TGMSLogStream::ShowStatLine()
          FLenLast = 0;
          FLastIsMsg = false;
       }
-      std::string s = "--- "s;
+      static std::string s;
+      s.reserve( 256 );
+      s = "--- "s;
       if( FNestLevel > 0 )
          s += std::string( FNestLevel, '.' ) + " "s;
       s += FFileName + "("s + std::to_string( FLineNr ) + ")"s;
@@ -521,19 +523,19 @@ void statlibobj::TGMSLogStream::ShowStatLine()
    FhasNewData = false;
 }
 
-void statlibobj::TGMSLogStream::gstatStartWriting()
+void TGMSLogStream::gstatStartWriting()
 {
    CheckOpen();
    Flush();
 }
 
-void statlibobj::TGMSLogStream::writeln_gf( const std::string &msg )
+void TGMSLogStream::writeln_gf( const std::string &msg )
 {
-   write_gf( msg + termString );
+   write_gf( msg + termString);
 }
 
 
-void statlibobj::TGMSLogStream::write_gf( const std::string &msg )
+void TGMSLogStream::write_gf( const std::string &msg )
 {
    if( Fgfcb ) ( *Fgfcb )( msg, gdlib::stattypes::doLog, Fgfusrmem );
    else
@@ -543,6 +545,23 @@ void statlibobj::TGMSLogStream::write_gf( const std::string &msg )
    }
 }
 
+void TGMSLogStream::writeln_gf(const char* msg)
+{
+   static std::array<char, 256> ss;
+   const auto l { std::strlen( msg ) };
+   std::memcpy( ss.data(), msg, sizeof( char ) * l );
+   std::memcpy( &ss[l], termString.data(), sizeof( char ) * termString.size() );
+   write_gf( ss.data() );
+}
+
+void TGMSLogStream::write_gf(const char* msg) {
+   if( Fgfcb ) ( *Fgfcb )( msg, gdlib::stattypes::doLog, Fgfusrmem );
+   else
+   {
+      *Ffcon << msg;
+      if( FSaveAstat == 4 ) debugStream << msg;
+   }
+}
 
 void statlibobj::TGMSStatusStream::writeln_gf( const std::string &msg )
 {
