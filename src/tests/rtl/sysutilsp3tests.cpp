@@ -61,6 +61,24 @@ TEST_CASE( "Extract extension of filename" )
    REQUIRE( ExtractFileExt( "xyz" ).empty() );
 }
 
+TEST_CASE("Test extracting the path from an full filename path")
+{
+#if defined(_WIN32)
+   REQUIRE_EQ("C:\\home\\username"s, ExtractFilePath("C:\\home\\username\\xyz.gms"));
+#else
+   REQUIRE_EQ("/home/username"s, ExtractFilePath("/home/username/xyz.gms"));
+#endif
+}
+
+TEST_CASE("Test filename from a path")
+{
+#if defined(_WIN32)
+   REQUIRE_EQ("xyz.gms"s, ExtractFileName("C:\\home\\username\\xyz.gms"));
+#else
+   REQUIRE_EQ("xyz.gms"s, ExtractFileName("/home/username/xyz.gms"));
+#endif
+}
+
 TEST_CASE( "Test decoding a date" )
 {
    const auto now {Now()};

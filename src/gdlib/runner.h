@@ -28,6 +28,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 namespace gdlib::runner
 {
@@ -36,7 +37,7 @@ const int EC_Cannot_modify = 1;
 const int EC_Process_Active = 2;
 const int EC_Empty_CMD_Line = 3;
 
-enum TVisible
+enum TVisible : uint8_t
 {
    vis_hide,
    vis_minimized,

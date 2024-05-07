@@ -41,8 +41,8 @@ using namespace std::literals::string_literals;
 namespace gdlib::statlib
 {
 
-static std::unique_ptr<gdlib::statlibobj::TGMSLogStream> GMSLogObj;
-static std::unique_ptr<gdlib::statlibobj::TGMSStatusStream> GMSStatusObj;
+static gdlib::statlibobj::TGMSLogStream *GMSLogObj {};
+static gdlib::statlibobj::TGMSStatusStream *GMSStatusObj {};
 static std::string msg;
 
 void registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem );
@@ -254,12 +254,17 @@ void statusErrorFree()
 
 void initialization()
 {
-   GMSLogObj = std::make_unique<gdlib::statlibobj::TGMSLogStream>( msg );
-   GMSStatusObj = std::make_unique<gdlib::statlibobj::TGMSStatusStream>( msg );
+   // Maybe put on stack?
+   GMSLogObj = new gdlib::statlibobj::TGMSLogStream { msg };
+   GMSStatusObj = new gdlib::statlibobj::TGMSStatusStream { msg };
 }
 
 void finalization()
 {
+   delete GMSStatusObj;
+   delete GMSLogObj;
+   GMSStatusObj = nullptr;
+   GMSLogObj = nullptr;
 }
 
 UNIT_INIT_FINI();

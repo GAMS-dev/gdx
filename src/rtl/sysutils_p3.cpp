@@ -26,7 +26,6 @@
 #include <string>
 #include <filesystem>
 #include <cstring>
-#include <ctime>
 
 #include "sysutils_p3.h"
 #include "p3platform.h"
@@ -34,6 +33,11 @@
 
 #if defined( _WIN32 )
 #include <Windows.h>
+#include <io.h>
+#else
+#include <unistd.h>
+#include <sys/stat.h>
+#include <ctime>
 #endif
 
 using namespace global::delphitypes;
@@ -46,9 +50,8 @@ using namespace std::literals::string_literals;
 // ==============================================================================================================
 namespace rtl::sysutils_p3
 {
-namespace fs = std::filesystem;
-
 char PathDelim, DriveDelim, PathSep;
+static std::array<char, 3> PathAndDriveDelim {'?', '?', '\0'};
 std::string FileStopper, ExtStopper;
 
 std::string ExtractShortPathName( const std::string &FileName )
@@ -63,25 +66,29 @@ std::string ExtractShortPathName( const std::string &FileName )
 #endif
 }
 
-std::string ExtractFilePath( const std::string &pathOfExecutable )
+std::string ExtractFilePath( const std::string &FileName )
 {
-   return fs::path( pathOfExecutable ).parent_path().string();
+   return { FileName.begin(), FileName.begin()+LastDelimiter( PathAndDriveDelim.data() , FileName )};
 }
 
 std::string ExtractFileName( const std::string &FileName )
 {
-   return fs::path( FileName ).filename().string();
+   return {FileName.begin() + LastDelimiter(PathAndDriveDelim.data(), FileName) + 1, FileName.end()};
 }
 
 std::string ExtractFileExt( const std::string &FileName )
 {
-   const auto p = fs::path( FileName );
-   return p.has_extension() ? p.extension().string() : ""s;
+   const auto I { LastDelimiter(ExtStopper, FileName)};
+   return I > 0 && FileName[I] == '.' ? std::string {FileName.begin()+I, FileName.end()} : ""s;
 }
 
 bool FileExists( const std::string &FileName )
 {
-   return std::filesystem::exists( FileName );
+#if defined(_WIN32)
+   return !_access(FileName.c_str(), 0);
+#else
+   return !access(FileName.c_str(), F_OK);
+#endif
 }
 
 static TTimeStamp DateTimeToTimeStamp( tDateTime DateTime )
@@ -121,33 +128,114 @@ void DivMod( const int Dividend, const uint16_t Divisor, uint16_t &Result, uint1
    return Yr / 100 * 146097 / 4 + Yr % 100 * 1461 / 4 + (153 * Month + 2) / 5 + Day + 59 - 109572 + 1;
 }*/
 
+#if defined(_WIN32)
+static char * winErrMsg( int errNum, char *buf, int bufSiz )
+{
+   *buf = '\0';
+   if( 0 == errNum )
+      return buf;
+   BOOL brc = FormatMessageA(
+           FORMAT_MESSAGE_FROM_SYSTEM,
+           nullptr,
+           errNum,
+           MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),// Default language
+           buf,
+           bufSiz - 1,
+           nullptr );
+   if( !brc )
+   {
+      *buf = '\0';
+      return buf;
+   }
+   buf[bufSiz - 1] = '\0';
+
+   /* Trim the end of the line and terminate it with a null */
+   char *p = buf;
+   while( ( *p > 31 ) || ( 9 == *p ) )
+      ++p;
+   do {
+      *p-- = 0;
+   } while( ( p >= buf ) && ( ( '.' == *p ) || ( 33 > *p ) ) );
+   return buf;
+} /* winErrMsg */
+#endif
+
 std::string GetCurrentDir()
 {
-   return std::filesystem::current_path().string();
+   std::array<char, 256> buf;
+   buf.front() = '\0';
+#if defined(_WIN32)
+   int rc = GetCurrentDirectoryA(static_cast<DWORD>(sizeof(char)*buf.size()),buf.data());
+   if (!rc) {
+      winErrMsg( GetLastError(), buf.data(), sizeof( buf ) );
+      throw std::runtime_error( "GetCurrentDir failed"s + buf.data() );
+   }
+   else if (rc > buf.size() * sizeof(char))
+      throw std::runtime_error("GetCurrentDir failed: result too large for shortString"s);
+#else
+   if (!getcwd(buf.data(), buf.size())) {
+      if (ERANGE == errno) {
+         throw std::runtime_error("GetCurrentDir failed: result too large for shortString"s);
+      }
+      else {
+         char *p = strerror (errno);
+         if (p)
+            throw std::runtime_error("GetCurrentDir failed"s + p);
+         else
+            throw std::runtime_error("GetCurrentDir failed libc failure"s);
+      }
+   }
+   else {
+      // getcwd OK, but check if we can do better
+      // # if defined(__linux__) realpath() expected everywhere
+      const char *sym, *ss3;
+      sym = getenv("PWD");
+      char absp[4096];
+      if (sym) {     /* got something, check if it is really same as getcwd */
+         /* realpath(p,absp) converts the relative or symlink-ish path p
+       * to an absolute physical path absp */
+         ss3 = realpath(sym,absp);
+         if (ss3 && (!std::strcmp(buf.data(),absp)) && (std::strlen(sym) < 256)) {
+            std::strcpy(buf.data(),sym);
+         }
+      }
+   }
+#endif
+   return buf.data();
 }
 
 bool DirectoryExists( const std::string &Directory )
 {
-   const auto dp = std::filesystem::path( Directory );
-   return std::filesystem::exists( dp ) && std::filesystem::is_directory( dp );
+#if defined(_WIN32)
+   int attribs = GetFileAttributesA(Directory.c_str());
+   return -1 != attribs && (attribs & FILE_ATTRIBUTE_DIRECTORY);
+#else
+   struct stat statBuf;
+   return !stat(Directory.c_str(), &statBuf) ? S_ISDIR(statBuf.st_mode) : false;
+#endif
 }
 
 std::string SysErrorMessage( int errorCode )
 {
    const char *errMsg = strerror( errorCode );
-   if( !errMsg ) return "Unknown error " + std::to_string( errorCode );
+   if( !errMsg ) return "Unknown error " + rtl::sysutils_p3::IntToStr( errorCode );
    return errMsg;
 }
 
+// *FromDisk to avoid name collision
 bool DeleteFileFromDisk( const std::string &FileName )
 {
-   return std::filesystem::remove( std::filesystem::path( FileName ) );
+#if defined(_WIN32)
+   return DeleteFileA(FileName.c_str());
+#else
+   return unlink(FileName.c_str()) != -1;
+#endif
 }
 
 std::string QueryEnvironmentVariable( const std::string &Name )
 {
 #if defined( _WIN32 )
-   int len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 );
+   uint32_t len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 );
    if( !len ) return ""s;
    else
    {
@@ -206,6 +294,15 @@ bool isLeapYear( const int year )
    // FIXME: Redo this for removing chrono stuff from C++20
    //return std::chrono::year{ year }.is_leap();
    return (year % 4 == 0 && year % 4000 != 0 && year % 100 != 0) || year % 400 == 0;
+}
+
+int LastDelimiter(const char* Delimiters, const std::string& S)
+{
+   for( int i { static_cast<int>( S.length() ) - 1 }; i >= 0; i-- )
+      for( const char *c=Delimiters; *c != '\0'; c++ )
+         if( *c == S[i] )
+            return i;
+   return -1;
 }
 
 int LastDelimiter( const std::string &Delimiters, const std::string &S )
@@ -362,9 +459,11 @@ void DecodeDate( const tDateTime DateTime, uint16_t &Year, uint16_t &Month, uint
 
 bool RenameFile( const std::string &OldName, const std::string &NewName )
 {
-   std::error_code ec;
-   std::filesystem::rename( OldName, NewName, ec );
-   return !ec.value();
+#if defined(_WIN32)
+   return MoveFileA( OldName.c_str(), NewName.c_str() );
+#else
+   return !rename( OldName.c_str(), NewName.c_str() );
+#endif
 }
 
 void Sleep( uint32_t milliseconds )
@@ -391,10 +490,12 @@ std::string IntToStr( int64_t n )
     * we reflect positive to negative.  This addresses the two's complement
     * issue (we have one more negative integer than positive
     */
-   char res[255];
+   std::array<char, 256> res;
+   int64_t w2{};
    if(n < 0)
    {
       res[0] = '-';
+      w2 = 1;
    }
    else n *= -1;
    int64_t w {255};
@@ -403,10 +504,32 @@ std::string IntToStr( int64_t n )
       n /= 10;
    } while(n);
    while(w < 255)
+      res[w2++] = res[w++];
+   return {res.data(), (size_t)w2};
+}
+
+void IntToStr( int64_t n, char *res, size_t &len )
+{
+   /*
+    * instead of reflecting negative vals to positive,
+    * we reflect positive to negative.  This addresses the two's complement
+    * issue (we have one more negative integer than positive
+    */
+   int64_t w2{};
+   if(n < 0)
    {
-      w++;
+      res[0] = '-';
+      w2 = 1;
    }
-   return res;
+   else n *= -1;
+   int64_t w {255};
+   do {
+      res[w-- - 1] = '0' - (char)(n % 10);
+      n /= 10;
+   } while(n);
+   while(w < 255)
+      res[w2++] = res[w++];
+   len = (size_t)w2;
 }
 
 static void initialization()
@@ -414,16 +537,16 @@ static void initialization()
    switch( OSFileType() )
    {
       case OSFileWIN:
-         PathDelim = '\\';
-         DriveDelim = ':';
+         PathAndDriveDelim[0] = PathDelim = '\\';
+         PathAndDriveDelim[1] = DriveDelim = ':';
          PathSep = ';';
          FileStopper = "\\:";
          ExtStopper = "\\:.";
          break;
 
       case OSFileUNIX:
-         PathDelim = '/';
-         DriveDelim = '\0';
+         PathAndDriveDelim[0] = PathDelim = '/';
+         PathAndDriveDelim[1] = DriveDelim = '\0';
          PathSep = ':';
          FileStopper = "/";
          ExtStopper = "/.";

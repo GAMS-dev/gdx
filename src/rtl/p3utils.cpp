@@ -76,6 +76,7 @@
 #include <sys/proc_info.h>
 #include <libproc.h>
 #endif
+#include <gdlib/strutilx.h>
 
 using namespace rtl::sysutils_p3;
 using namespace rtl::p3platform;
@@ -204,13 +205,13 @@ bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss )
    return true; /* success */
 #elif defined( __linux )
    size_t sz;
-   FILE *fp = fopen( "/proc/self/statm", "r" );
+   FILE *fp = std::fopen( "/proc/self/statm", "r" );
    if( !fp )
       return false; /* failure */
    /* first two are VmSize, VmRSS */
    unsigned long urss, uvss;
    const int n = fscanf( fp, "%lu %lu", &uvss, &urss );
-   fclose( fp );
+   std::fclose( fp );
    if( 2 != n )
       return false; /* failure */
    sz = sysconf( _SC_PAGESIZE );
@@ -256,7 +257,7 @@ std::string p3GetUserName()
 #if defined( _WIN32 )
    auto res { "unknown"s };
    DWORD n {256};
-   std::array<char, 256> userName;
+   std::array<char, 256> userName {};
    if( GetUserNameA( userName.data(), &n ) )
       res.assign( userName.data() );
    return res;
@@ -275,12 +276,10 @@ std::string p3GetComputerName()
 {
 #ifdef _WIN32
    std::string res { "unknown" };
-   std::array<char, 256> computerName;
+   std::array<char, 256> computerName {};
    DWORD n = 256;
    if( GetComputerNameA( computerName.data(), &n ) )
-   {
       res.assign( computerName.data() );
-   }
    return res;
 #else
    utsname uts {};
@@ -289,59 +288,368 @@ std::string p3GetComputerName()
 #endif
 }
 
-int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle h )
+#if defined(_WIN32)
+// map the Windows codes returned by GetLastError to libc codes
+// use when making Windows API calls with P3, since P3 ioresult-ish codes
+// are expected to be libc codes on all platforms
+static int win2c( int rc )
 {
-   std::ios::openmode itsMode { std::ios::binary };
-   switch( mode )
+   int result;
+
+   switch( rc )
    {
-      case p3OpenRead:
-         itsMode |= std::ios::in;
+      case ERROR_FILE_NOT_FOUND:
+      case ERROR_PATH_NOT_FOUND:
+         result = ENOENT;
          break;
-      case p3OpenWrite:
-         itsMode |= std::ios::out;
+      case ERROR_TOO_MANY_OPEN_FILES:
+         result = EMFILE;
          break;
-      case p3OpenReadWrite:
-         itsMode |= std::ios::in | std::ios::out;
+      case ERROR_ACCESS_DENIED:
+         result = EACCES;
          break;
+      case ERROR_INVALID_HANDLE:
+         result = EBADF;
+         break;
+      case ERROR_NOT_ENOUGH_MEMORY:
+         result = ENOMEM;
+         break;
+      case ERROR_INVALID_ACCESS:
+         result = EACCES;
+         break;
+      case ERROR_NO_MORE_FILES:
+         result = ENFILE;
+         break;
+      case ERROR_SEEK_ON_DEVICE:
+         result = ESPIPE;
+         break;
+      case ERROR_INVALID_PARAMETER:
+      case ERROR_NEGATIVE_SEEK:
+         result = EINVAL;
+         break;
+      default:
+         result = 0; /* no guessing */
    }
-   h->open( fName, itsMode );
-   const bool f = h->fail();
-   return f && !std::filesystem::exists( fName ) ? 2 : f;
+   return result;
 }
 
-int p3FileClose( Tp3FileHandle h )
+static constexpr std::array<DWORD, 3> accessMode {
+        GENERIC_READ,
+        GENERIC_WRITE,
+        GENERIC_READ | GENERIC_WRITE };
+// this works for GDX so we do it: it is kind of silly to use the
+// shareMode var then but why not?
+static constexpr std::array<DWORD, 3> shareMode {
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE };
+static constexpr std::array<DWORD, 3> createHow {
+        OPEN_EXISTING,
+        CREATE_ALWAYS,
+        OPEN_ALWAYS };
+
+typedef BOOL( WINAPI *GetFileSizeEx_t )( HANDLE h, PLARGE_INTEGER fileSize );
+GetFileSizeEx_t pGetFileSizeEx {};
+int triedGetFileSizeEx {};
+
+typedef BOOL( WINAPI *SetFilePointerEx_t )( HANDLE h, LARGE_INTEGER distance, PLARGE_INTEGER newPointer, DWORD whence );
+SetFilePointerEx_t pSetFilePointerEx {};
+int triedSetFilePointerEx {};
+
+#endif
+
+static inline bool p3IsValidHandle(const Tp3FileHandle h) {
+#if defined( _WIN32 )
+   return h && INVALID_HANDLE_VALUE != h;
+#else
+   return h > 0;
+#endif
+}
+
+int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle &h )
 {
-   h->close();
-   return 0;
+#if defined(_WIN32)
+   DWORD lowMode;
+   HANDLE hFile;
+
+   lowMode = mode & 3;
+   if (3 == lowMode) {
+      h = INVALID_HANDLE_VALUE;
+      return ERROR_INVALID_PARAMETER;
+   }
+
+   if (fName.empty()) {
+      if (p3OpenRead == mode)
+         hFile = GetStdHandle(STD_INPUT_HANDLE);
+      else if (p3OpenWrite == mode)
+         hFile = GetStdHandle(STD_OUTPUT_HANDLE);
+      else {
+         h = INVALID_HANDLE_VALUE;
+         return ERROR_INVALID_PARAMETER;
+      }
+   }
+   else
+      hFile = CreateFileA (fName.c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
+                          createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
+   if (INVALID_HANDLE_VALUE == hFile) {
+      h = INVALID_HANDLE_VALUE;
+      int result = win2c(static_cast<int>(GetLastError()));
+      if (0 == result) { /* ouch: just pick a likely but non-specific code */
+         result = EACCES;
+      }
+      return result;
+   }
+   else {
+      h = hFile;
+      return 0;
+   }
+#else
+   if (fName.empty()) {
+      if (mode == Tp3FileOpenAction::p3OpenRead)
+         h = STDIN_FILENO;
+      else if (mode == Tp3FileOpenAction::p3OpenWrite)
+         h = STDOUT_FILENO;
+      else {
+         h = 0;
+         return -1;
+      }
+      return 0;
+   }
+   int flags = mode & 3;
+   // write-only or read-write
+   if (flags > 0)
+      flags |= O_CREAT;
+   if (flags & 1)
+      flags |= O_TRUNC;
+   int fd = open(fName.c_str(), flags, 0666);
+   if (-1 == fd) {
+      h = 0;
+      return errno;
+   }
+   int result = 0;
+   // before calling this a success, check for directory on read-only
+   struct stat statBuf {};
+   if (p3OpenRead == mode) {
+      int rc = fstat (fd, &statBuf);
+      if (rc)
+         result = errno;
+      else if (S_ISDIR(statBuf.st_mode))
+         result = EISDIR;
+   }
+   if (result) {
+      close(fd);
+      return result;
+   }
+   h = fd;
+   return result;
+#endif
+}
+
+int p3FileClose( Tp3FileHandle &h )
+{
+   if( !p3IsValidHandle( h ) ) return EBADF;
+   int res{};
+#if defined(_WIN32)
+   if( !CloseHandle( h ) )
+   {
+      res = win2c( static_cast<int>(GetLastError()) );
+      // ouch: just pick a likely but non-specific code
+      if( !res )
+         res = EIO;
+   }
+   h = INVALID_HANDLE_VALUE;
+#else
+   if( close( h ) )
+      res = errno;
+   h = 0;
+#endif
+   return res;
 }
 
 int p3FileGetSize( Tp3FileHandle fs, int64_t &fileSize )
 {
-   if( !fs->is_open() || fs->bad() ) return 1;
-   const std::streampos oldpos = fs->tellg();
-   fs->seekg( 0, std::ios::beg );
-   const std::streampos start = fs->tellg();
-   fs->seekg( 0, std::ios::end );
-   fileSize = fs->tellg() - start;
-   fs->seekg( oldpos );
-   return 0;
+   if( !p3IsValidHandle( fs ) ) return EBADF;
+   int res {};
+#if defined(_WIN32)
+   bool frc;
+   if (!triedGetFileSizeEx) {
+      auto k32 { GetModuleHandleA( "kernel32" ) };
+      pGetFileSizeEx = !k32 ? nullptr : (GetFileSizeEx_t) GetProcAddress(k32,"GetFileSizeEx");
+      triedGetFileSizeEx = 1;
+   }
+   if (pGetFileSizeEx)
+      frc = pGetFileSizeEx(fs, (PLARGE_INTEGER)&fileSize);
+   else {
+      DWORD tt;
+      frc = GetFileSize(fs, &tt);
+      fileSize = tt;
+   }
+   if(!frc) {
+      res = win2c(static_cast<int>(GetLastError()));
+      // ouch: just pick a likely but non-specific code
+      if (!res)
+         res = EACCES;
+   }
+#else
+   struct stat statBuf {};
+   if (fstat (fs, &statBuf))
+      res = errno;
+   else
+      fileSize = statBuf.st_size;
+#endif
+   return res;
 }
 
 int p3FileRead( Tp3FileHandle h, char *buffer, uint32_t buflen, uint32_t &numRead )
 {
-   const auto savedPos = h->tellg();
-   h->seekg( 0, std::fstream::end );
-   numRead = std::min<uint32_t>( static_cast<uint32_t>( h->tellg() - savedPos ), buflen );
-   h->seekg( savedPos );
-   h->read( buffer, numRead );
-   return h->bad() ? 1 : 0;
+   int res {};
+#if defined(_WIN32)
+   if( !ReadFile( h, buffer, buflen, (LPDWORD) &numRead, nullptr ) )
+   {
+      res = win2c( static_cast<int>(GetLastError()) );
+      if( !res ) // ouch: just pick a likely but non-specific code
+         res = EIO;
+   }
+#else
+   auto rc = read( h, buffer, buflen );
+   if( rc < 0 )
+   {
+      res = errno;
+      numRead = 0;
+   }
+   else numRead = rc;
+#endif
+   return res;
 }
 
 int p3FileWrite( Tp3FileHandle h, const char *buffer, uint32_t buflen, uint32_t &numWritten )
 {
-   h->write( buffer, buflen );
-   numWritten = buflen;
-   return h->bad() ? 1 : 0;
+   int res{};
+#if defined( _WIN32 )
+   if( !WriteFile( h, buffer, buflen, (LPDWORD) &numWritten, nullptr ) )
+   {
+      res = win2c( static_cast<int>(GetLastError()) );
+      // ouch: just pick a likely but non-specific code
+      if( !res )
+         res = EIO;
+   }
+#else
+   auto rc = write(h, buffer, buflen);
+   if (rc < 0) {
+      res = errno;
+      numWritten = 0;
+   }
+   else
+      numWritten = rc;
+#endif
+   return res;
+}
+
+int p3FileSetPointer(Tp3FileHandle h, int64_t distance, int64_t &newPointer, uint32_t whence)
+{
+   if( !p3IsValidHandle( h ) ) return EBADF;
+   int res {};
+#if defined(_WIN32)
+   if (!triedSetFilePointerEx) {
+      const auto k32 { GetModuleHandleA( "kernel32" ) };
+      pSetFilePointerEx = !k32 ? nullptr : (SetFilePointerEx_t) GetProcAddress(k32,"SetFilePointerEx");
+      triedSetFilePointerEx = 1;
+   }
+   // declared as a union - compiler rejects a cast
+   LARGE_INTEGER d;
+   d.QuadPart = distance;
+   bool frc;
+   if (pSetFilePointerEx)
+      frc = pSetFilePointerEx(h, d, (PLARGE_INTEGER) &newPointer, whence);
+   else {
+      DWORD trc = SetFilePointer(h, static_cast<LONG>(distance), nullptr, whence);
+      if( trc == INVALID_SET_FILE_POINTER )
+      {
+         frc = false;
+         newPointer = 0;
+      }
+      else {
+         newPointer = trc;
+         frc = true;
+      }
+   }
+   if(!frc) {
+      res = win2c( static_cast<int>(GetLastError()) );
+      if (!res)
+         res = EINVAL;
+   }
+#else
+   int w;
+   switch (whence) {
+      case p3_FILE_BEGIN:
+         w = SEEK_SET;
+         break;
+      case p3_FILE_CURRENT:
+         w = SEEK_CUR;
+         break;
+      case p3_FILE_END:
+         w = SEEK_END;
+         break;
+      default:
+         return EINVAL;
+   }
+   // check if conversion to off_t loses info
+   auto offset = (off_t)distance;
+   if (offset != distance) // only can happen on 32 bit machines?
+      return EOVERFLOW;
+   off_t newPos = lseek (h, offset, w);
+   if ((off_t)-1 == newPos)
+      return errno;
+   newPointer = newPos;
+#endif
+   return res;
+}
+
+int p3FileGetPointer(Tp3FileHandle h, int64_t &filePointer)
+{
+   if( !p3IsValidHandle( h ) ) return EBADF;
+#if defined(_WIN32)
+   if( !triedSetFilePointerEx )
+   {
+      const auto k32 {GetModuleHandleA( "kernel32" )};
+      pSetFilePointerEx = !k32 ? nullptr : (SetFilePointerEx_t) GetProcAddress( k32, "SetFilePointerEx" );
+      triedSetFilePointerEx = 1;
+   }
+   // declared as a union - compiler rejects a cast
+   LARGE_INTEGER d;
+   d.QuadPart = 0;
+   bool frc;
+   if( pSetFilePointerEx )
+      frc = pSetFilePointerEx( h, d, (PLARGE_INTEGER) &filePointer, p3_FILE_CURRENT );
+   else
+   {
+      DWORD trc = SetFilePointer( h, 0, nullptr, p3_FILE_CURRENT );
+      if( INVALID_SET_FILE_POINTER == trc )
+      {
+         frc = false;
+         filePointer = 0;
+      }
+      else
+      {
+         filePointer = trc;
+         frc = true;
+      }
+   }
+
+   if(!frc)
+   {
+      int res = win2c( static_cast<int>(GetLastError()) );
+      if( !res )
+         res = EINVAL;
+      return res;
+   }
+#else
+   off_t newPos = lseek( h, 0, SEEK_CUR );
+   if( (off_t) -1 == newPos )
+      return errno;
+   filePointer = newPos;
+#endif
+   return 0;
 }
 
 /*
@@ -444,12 +752,16 @@ bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocN
 }
 
 #ifndef _WIN32
+// set s := ${HOME} + dd1 + dd2
+// return true success, false on failure (e.g. too long or HOME not set)
 static bool homePlus( const std::string &dd1, const std::string &dd2, std::string &s )
 {
-   const auto pw = getpwuid( getuid() );
-   const char *homePath = pw->pw_dir;
-   if( !homePath || !strlen( homePath ) ) return false;
-   s = ""s + homePath + dd1 + dd2;
+   std::array<char, 256> buf;
+   auto len {P3GetEnvPC("HOME"s, buf.data(), buf.size())};
+   if(!len || len >= buf.size()) return false;
+   s.reserve(len+dd1.length()+dd2.length());
+   s.assign(buf.data());
+   s += dd1 + dd2;
    return true;
 }
 #endif
@@ -533,7 +845,7 @@ bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::s
 #endif
 }
 
-const std::string zeros = std::string( 54, '0' );
+const std::string zeros {std::string( 54, '0' )};
 
 int p3Chmod( const std::string &path, int mode )
 {
@@ -592,13 +904,13 @@ std::string getDigits( const int64_t i64 )
 {
    constexpr int M = 100000000, LOGM = 8;
    auto i = static_cast<int>( i64 );
-   if( i == i64 ) return std::to_string( i );
+   if( i == i64 ) return rtl::sysutils_p3::IntToStr( i );
    i = static_cast<int>( i64 % M );
-   std::string s = std::to_string( i );
+   std::string s = rtl::sysutils_p3::IntToStr( i );
    i = LOGM - static_cast<int>( s.length() );
    if( i > 0 ) s = std::string( i, '0' ) + s;
    i = static_cast<int>( i64 / M );
-   std::string res = std::to_string( i ) + s;
+   std::string res = rtl::sysutils_p3::IntToStr( i ) + s;
    // strip trailing zeros
    for( i = static_cast<int>( res.length() ) - 1; i >= 1 && res.back() == '0'; i-- )
       res.pop_back();
@@ -611,6 +923,7 @@ T myMin( T a, T b )
    return a < b ? a : b;
 }
 
+// FIXME: AS: This seems slow.
 std::string FloatToE( double y, int decimals )
 {
    auto myRoundTo = []( const double x, const int i ) -> double {
@@ -644,7 +957,7 @@ std::string FloatToE( double y, int decimals )
       }
       x = myRoundTo( x, decimals ) * rtl::math_p3::IntPower( 10.0, n );
    }
-   std::string s = std::to_string( x );
+   std::string s { gdlib::strutilx::DblToStr( x ) };
 
    // edit and fix sign
    int k = LastDelimiter( "+-", s );
@@ -881,14 +1194,12 @@ bool p3GetFirstMACAddress( std::string &mac )
    constexpr int maxTries = 3;
    PIP_ADAPTER_ADDRESSES addrBuf {};
    DWORD dwrc;
-   int halfDone = 0; /* if we have a MAC number for an interface that is down */
+   bool halfDone {}; // if we have a MAC number for an interface that is down
    do {
       constexpr ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
       addrBuf = static_cast<IP_ADAPTER_ADDRESSES *>( std::malloc( bufSiz ) );
       if( !addrBuf )
-      {
          return false;
-      }
       dwrc = GetAdaptersAddresses( AF_INET, flags, nullptr, addrBuf, &bufSiz );
       if( ERROR_BUFFER_OVERFLOW == dwrc )
       {
@@ -922,7 +1233,7 @@ bool p3GetFirstMACAddress( std::string &mac )
          std::free( addrBuf );
          return true;
       }
-      halfDone = 1;
+      halfDone = true;
       return false;
    }
    std::free( addrBuf );
@@ -949,22 +1260,22 @@ static int xGetExecName( std::string &execName, std::string &msg )
 {
    int rc { 8 };
    std::array<char, 4096> execBuf {};
-   std::array<char, 2048> tmpBuf {};
-
 #if defined( __APPLE__ )
+   std::array<char, 2048> tmpBuf {};
    auto pid = getpid();
    int k = proc_pidpath( pid, execBuf.data(), sizeof( char ) * execBuf.size() );
    execName.assign( execBuf.data() );
    if( k <= 0 )
    {
       myStrError( errno, tmpBuf.data(), sizeof( char ) * tmpBuf.size() );
-      msg = "proc_pidpath(pid="s + std::to_string( pid ) + ") failed: "s + std::string( tmpBuf.begin(), tmpBuf.end() );
+      msg = "proc_pidpath(pid="s + rtl::sysutils_p3::IntToStr( pid ) + ") failed: "s + std::string( tmpBuf.begin(), tmpBuf.end() );
       execName.clear();
       rc = 4;
    }
    else
       rc = 0;
 #elif defined( __linux )
+   std::array<char, 2048> tmpBuf {};
    auto ssz = readlink( "/proc/self/exe", execBuf.data(), sizeof( char ) * execBuf.size() );
    execName.assign( execBuf.data() );
    if( ssz < 0 )
@@ -982,7 +1293,7 @@ static int xGetExecName( std::string &execName, std::string &msg )
 #elif defined( _WIN32 )
    if( const auto k = GetModuleFileNameA( nullptr, execBuf.data(), static_cast<DWORD>(sizeof( char ) * execBuf.size()) ); !k )
    {
-      msg = "GetModuleFileName() failure: rc="s + std::to_string( k );
+      msg = "GetModuleFileName() failure: rc="s + rtl::sysutils_p3::IntToStr( k );
       execName.clear();
       rc = 4;
    }
@@ -995,7 +1306,6 @@ static int xGetExecName( std::string &execName, std::string &msg )
    execName.clear();
    msg = "not implemented for this platform"s;
 #endif
-
    return !rc && execName.length() > 255 ? 1 : rc;
 }
 
@@ -1080,7 +1390,7 @@ static int xGetLibName( std::string &libName, std::string &msg )
          k = static_cast<int>( GetModuleFileNameA( h, libBuf, sizeof( libBuf ) ) );
          if( 0 == k )
          {
-            msg = "GetModuleFileName() failure: rc="s + std::to_string(k);
+            msg = "GetModuleFileName() failure: rc="s + rtl::sysutils_p3::IntToStr(k);
             *libBuf = '\0';
             rc = 5;
          }
@@ -1089,7 +1399,7 @@ static int xGetLibName( std::string &libName, std::string &msg )
       }
       else
       {
-         msg = "GetModuleHandleEx() failure: rc="s + std::to_string(k);
+         msg = "GetModuleHandleEx() failure: rc="s + rtl::sysutils_p3::IntToStr(k);
          *libBuf = '\0';
          rc = 4;
       }
@@ -1106,9 +1416,7 @@ static int xGetLibName( std::string &libName, std::string &msg )
 int p3GetLibName( std::string &libName, std::string &msg )
 {
    return xGetLibName( libName, msg );
-
 #if defined( _WIN32 )
-   int res { 9 };
    libName.clear();
    if( !isLibrary() )
    {
@@ -1252,7 +1560,7 @@ bool p3SockSendEx(T_P3SOCKET s, const char *buf, int count, int &res, bool pollF
       if (! (fds->revents & POLLOUT))
          return false;
    }
-   int rc = send((SOCKET) s.wsocket, (const char *) buf, count, 0);
+   int rc = send(s.wsocket, buf, count, 0);
    if (SOCKET_ERROR == rc) { // should never happen
       res = WSAGetLastError();
       if (WSAEWOULDBLOCK == res) {

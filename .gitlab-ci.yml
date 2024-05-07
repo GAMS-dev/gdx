@@ -206,7 +206,7 @@ codechecker-leg:
 
 test-leg:
   stage: test
-  tags: [linux]
+  tags: [puma]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
@@ -273,7 +273,7 @@ test-wei:
 
 leak-check-leg:
   stage: leak-check
-  tags: [linux]
+  tags: [puma]
   image:
     name: registry.gams.com/devel/ciscripts/leg/builder-valgrind-codequality:latest
     entrypoint: [""]
@@ -296,7 +296,7 @@ leak-check-leg:
 
 perf-check-leg:
   stage: perf-check
-  tags: [linux]
+  tags: [puma]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
@@ -318,18 +318,24 @@ perf-check-leg:
 #    - python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH $SSH_KEY_PORTING > gams43_folder_leg.txt
 #    - GAMS_PATH=/cache/gams-installs/`cat gams43_folder_leg.txt`/
     - G43_ARCHIVE="gamsdist43.tar.bz2"
-    - G43_CLOUD_URL="https://cloud.gams.com/s/o4Jyt46eZra5ctc/download/gamsdist43.tar.bz2"
-    - curl $G43_CLOUD_URL > $G43_ARCHIVE # fetch from web
+    - G43_CLOUD_URL="$GAMS43_CLOUD_URL"
     - G43_DIR=gamsdist43_tmp
     - G43_PATH=/cache/gams-installs/$G43_DIR
-    - mkdir -p $G43_PATH
-    - tar -xjf $G43_ARCHIVE -C $G43_PATH # extract
-    - rm $G43_ARCHIVE # clean zip
     - GAMS_PATH=$G43_PATH/gams43.4_linux_x64_64_sfx/
+    - |
+      if [[ -d $GAMS_PATH ]]; then
+        echo "Found cached GAMS43 system directory. Skipping fetch and extract."
+      else
+        echo "No cached GAMS43 system directory found. Fetching and extracting!"
+        curl $G43_CLOUD_URL > $G43_ARCHIVE # fetch from web
+        mkdir -p $G43_PATH
+        tar -xjf $G43_ARCHIVE -C $G43_PATH # extract
+        rm $G43_ARCHIVE # clean zip
+      fi
     - cp /builds/devel/gdx/mygamsdist/gamslice.txt $GAMS_PATH
     - ${GAMS_PATH}apilib gdxperf
     - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.8.so" ${PERF_CALL} | tee delphigdx.log
-    - rm -rf mygamsdist $G43_PATH # clean GAMS 43 system dir
+    - rm -rf mygamsdist # clean temporary modded GAMS system dir but keep cached GAMS43 dir
     - python3 ci/perflogparse.py | tee perf.json
   artifacts:
     name: gdxperf-logs

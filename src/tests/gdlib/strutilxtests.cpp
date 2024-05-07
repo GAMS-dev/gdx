@@ -81,6 +81,7 @@ TEST_CASE( "Convert integer number to 'nice' string representation with given wi
 TEST_CASE( "Convert double to string" )
 {
    REQUIRE_EQ( "23", DblToStr( 23 ) );
+   REQUIRE_EQ( "-23", DblToStr( -23 ) );
    REQUIRE_EQ( "0", DblToStr( 0 ) );
    REQUIRE_EQ( "3.1415926", DblToStr( 3.1415926 ) );
    REQUIRE_EQ( "0.141592653589793", DblToStr( 0.14159265358979312 ) );
@@ -89,6 +90,15 @@ TEST_CASE( "Convert double to string" )
    REQUIRE_EQ( "0", DblToStrSep( 0, '.' ) );
    REQUIRE_EQ( "3.1415926", DblToStrSep( 3.1415926, '.' ) );
    REQUIRE_EQ( "0.141592653589793", DblToStrSep( 0.14159265358979312, '.' ) );
+
+   std::array<char, 256> buf{};
+   DblToStr(23, buf.data());
+   REQUIRE(!std::strcmp(buf.data(), "23"));
+
+   // Edge cases
+   REQUIRE_EQ("1E15", DblToStr(1e15));
+   REQUIRE_EQ("1E15", DblToStr(1e15+1));
+   REQUIRE_EQ("0.000101", DblToStr(1.01e-4));
 }
 
 TEST_CASE( "Test generating blank string of specified length" )

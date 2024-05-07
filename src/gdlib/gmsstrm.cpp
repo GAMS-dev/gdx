@@ -23,14 +23,6 @@
  * SOFTWARE.
  */
 
-/*
-* Important remarks by André:
-* At first I did not fully port the gmsstrms but instead tried to do a simpler solution just using C++ standard library IO streams
-* There I struggled with porting all features like encryption and compression.
-* Then I added new classes with suffix Delphi, these should replicate the Delphi classes in full detail
-* Long term I want to merge the simplified and full ports of the stream classes in order to get all functionality will still cleaning stuff up.
-*/
-
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
@@ -44,6 +36,8 @@
 #include <sstream>
 #include <fstream>
 
+#include "../rtl/sysutils_p3.h"
+
 #include "gclgms.h"
 
 #include "gmsstrm.h"
@@ -53,19 +47,10 @@
 //#include <format>
 
 using namespace std::literals::string_literals;
+using namespace rtl::p3utils;
 
 #if defined(__IN_CPPMEX__)
 #include "../gdlib/statlib.h"
-#include "../rtl/p3utils.h"
-using namespace rtl::p3utils;
-#else
-namespace statlib
-{
-static void gstatMessage(const std::string &s)
-{
-   debugStream << "*** "s << s << '\n';
-}
-}
 #endif
 
 // ==============================================================================================================
@@ -82,52 +67,17 @@ std::string SysErrorMessage( int errorCode )
    char *errMsg = errMsgBuf.data();
 #else
    char *errMsg = strerror( errorCode );
-   if( !errMsg ) return "Unknown error " + std::to_string( errorCode );
+   if( !errMsg ) return "Unknown error " + rtl::sysutils_p3::IntToStr( errorCode );
 #endif
    return errMsg;
 }
 
-enum CustomOpenAction
+enum CustomOpenAction : uint8_t
 {
    custOpenRead,
    custOpenWrite,
    custOpenReadWrite
 };
-
-static int customFileOpen( const std::string &fName, CustomOpenAction mode, std::fstream *h )
-{
-   std::ios::openmode itsMode { std::ios::binary };
-   switch( mode )
-   {
-      case custOpenRead:
-         itsMode |= std::ios::in;
-      break;
-      case custOpenWrite:
-         itsMode |= std::ios::out;
-      break;
-      case custOpenReadWrite:
-         itsMode |= std::ios::in | std::ios::out;
-      break;
-   }
-   h->rdbuf()->pubsetbuf(nullptr, 0);
-   h->open( fName, itsMode );
-   bool f = h->fail();
-   return f && !std::filesystem::exists( fName ) ? 2 : f;
-}
-
-// TODO: AS: Evaluate if this should be closer to p3utils::p3FileRead in Delphi (e.g. using WinAPI ReadFile on Windows and POSIX read on UNIX)
-static int customFileRead( std::fstream *h, char *buffer, uint32_t buflen, uint32_t &numRead )
-{
-   auto savedPos { h->tellg() };
-   h->seekg( 0, std::basic_fstream<char, std::char_traits<char>>::end );
-   auto bytesRemaining {static_cast<int64_t>( h->tellg() - savedPos )};
-   auto sNumRead {std::min<int64_t>( bytesRemaining, buflen )};
-   assert( sNumRead >= 0 );
-   numRead = static_cast<uint32_t>(sNumRead);
-   h->seekg( savedPos );
-   h->read( buffer, numRead );
-   return h->bad() ? 1 : 0;
-}
 
 constexpr uint8_t signature_header = 0xFF;
 const std::string signature_gams = "*GAMS*"s;
@@ -154,385 +104,12 @@ void reverseBytesMax8( const void *psrc, void *pdest, int sz )
    std::memcpy( pdest, flip.data(), n + 1 );
 }
 
-TBinaryTextFileIO *TBinaryTextFileIO::FromString( const std::string &contents, int &ErrNr )
-{
-   return new TBinaryTextFileIO { contents, ErrNr };
-}
-
-int TBinaryTextFileIO::GetLastIOResult() const
-{
-   return FLastIOResult;
-}
-
-// Corresponds to gmsstrm.TBinaryTextFileIO.OpenForRead from CMEX
-// AS: Not sure if it makes sense to duplicate the whole gmsstrm type hierarchy, since std::streams already do some of the low level lifting
-TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &PassWord, int &ErrNr, std::string &errmsg )
-: FS {std::make_unique<std::fstream>( fn, std::ios::in | std::ios::binary )}
-{
-   FCanCompress = true;
-   ErrNr = strmErrorNoError;
-   if( FS->rdstate() & std::ifstream::failbit )
-   {
-      statlib::gstatMessage( "Unable to open " + fn + " for reading!" );
-      FLastIOResult = 1;
-   }
-   else
-      FLastIOResult = 0;
-   ErrNr = FLastIOResult;
-   if( ErrNr )
-   {
-      errmsg = SysErrorMessage( ErrNr );
-      ErrNr = strmErrorIOResult;
-      return;
-   }
-   uint8_t B1 = ReadByte(), B2 = ReadByte();
-   if( B1 == 31 && B2 == 139 )
-   {
-      FFileSignature = fsign_gzip;
-      gzFS = std::make_unique<TGZipInputStream>( fn, errmsg );
-      if( !errmsg.empty() ) ErrNr = 1;
-      return;
-   }
-   std::string srcBuf;
-   srcBuf.resize( B2 );
-   if( B1 == signature_header ) Read( srcBuf.data(), B2 );
-   if( B1 != signature_header || srcBuf != signature_gams )
-   {
-      utils::tBomIndic fileStart = { B1, B2, ReadByte(), ReadByte() };
-      int BOMOffset;
-      if( !utils::checkBOMOffset( fileStart, BOMOffset, errmsg ) )
-      {
-         ErrNr = strmErrorEncoding;
-         return;
-      }
-      // TODO: Investigate of SetPosition does additional relevant stuff apart from doing seek(0), Nr{Read,Loaded}=0
-      FS->seekg( BOMOffset );
-      NrRead = NrLoaded = BOMOffset;
-      FRewindPoint = BOMOffset;
-      FMajorVersionRead = 0;
-      FMinorVersionRead = 0;
-      FFileSignature = fsign_text;
-      errmsg.clear();
-      return;
-   }
-   ErrNr = strmErrorGAMSHeader;
-   errmsg = "GAMS header not found";
-   char b {};
-   Read( &b, 1 );
-   FFileSignature = static_cast<TFileSignature>( utils::ord( b ) - utils::ord( 'A' ) );
-   ReadString();
-   FMajorVersionRead = ReadByte();
-   FMinorVersionRead = ReadByte();
-   char Ch { ReadChar() };
-   bool hasPswd = Ch == 'P';
-   if( !hasPswd && Ch != 'p' ) return;
-   Ch = ReadChar();
-   bool hasComp = Ch == 'C';
-   if( !hasComp && Ch != 'c' ) return;
-   if( hasPswd && PassWord.empty() )
-   {
-      ErrNr = strmErrorNoPassWord;
-      errmsg = "A Password is required";
-      return;
-   }
-   ErrNr = strmErrorIntegrity;
-   errmsg = "Integrity check failed";
-   if( hasPswd )
-   {
-      SetPassword( PassWord );
-      std::string src = ReadString(), targ;
-      ApplyPassword( src, targ, verify_offset );
-      if( targ != RandString( static_cast<int>( src.length() ) ) ) return;
-   }
-   // keep buffer logic going
-   FRewindPoint = FS->tellg();
-   SetCompression( true );
-   FS->seekg( FRewindPoint );
-   if( !hasComp ) SetCompression( false );
-   if( ReadString() != signature_gams ) return;
-   ErrNr = strmErrorNoError;
-   errmsg.clear();
-   if( !noBuffering ) offsetInBuffer = std::make_optional<uint64_t>( 0 );
-}
-
-/*
-     * Structure of the file header
-           header uncompressed / no password applied
-           B   #255
-           S   '*GAMS*'
-           B   file type
-           S   producer info
-           B   major version
-           B   minor version
-           C   P/p password used
-           C   C/c compression used
-           S   A 'random' ShortString of the length of the password based on the password length
-           S   '*GAMS*' encrypted compressed
-    */
-// Corresponds to gmsstrm.TBinaryTextFileIO.OpenForWrite from CMEX
-TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn,
-                                      const std::string &Producer,
-                                      const std::string &PassWord,
-                                      const TFileSignature signature,
-                                      bool comp,
-                                      int &ErrNr,
-                                      std::string &errmsg )
-: FS{std::make_unique<std::fstream>( fn, std::ios::out | std::ios::binary )}
-{
-   NrRead = NrWritten = 0;
-   FCanCompress = true;
-   FFileSignature = signature;
-   frw = fm_write;
-   ErrNr = strmErrorNoError;
-   if( FS->rdstate() & std::ifstream::failbit )
-   {
-      statlib::gstatMessage( "Unable to open " + fn + " for writing!" );
-      FLastIOResult = 1;
-   }
-   else
-      FLastIOResult = 0;
-   if( signature != fsign_text || !PassWord.empty() || comp )
-   {
-      WriteByte( signature_header );
-      WriteString( signature_gams );
-      WriteByte( signature + utils::ord('A') );
-      WriteString( Producer );
-      WriteByte( 1 );// version
-      WriteByte( 1 );// sub version
-      WriteByte( PassWord.empty() ? 'p' : 'P' );
-      WriteByte( comp ? 'C' : 'c' );
-      if( !PassWord.empty() )
-      {
-         FS->flush();
-         SetPassword( PassWord );
-         const std::string src = RandString( static_cast<int>( PassWord.length() ) );
-         std::string targ;
-         ApplyPassword( src, targ, verify_offset );
-         SetPassword( "" );
-         WriteString( targ );
-      }
-      if( comp ) SetCompression( true );
-      else
-         FS->flush();
-      SetPassword( PassWord );
-      // write a few bytes to be recognized later (compression / password is now active)
-      WriteString( signature_gams );
-   }
-   ErrNr = FLastIOResult;
-   if( !ErrNr )
-   {
-      ErrNr = strmErrorNoError;
-      errmsg.clear();
-   }
-   else
-      errmsg = SysErrorMessage( ErrNr );
-}
-
-TBinaryTextFileIO::~TBinaryTextFileIO() = default;
-
-uint32_t TBinaryTextFileIO::Read( char *Buffer, uint32_t Count )
-{
-   if( FFileSignature == fsign_gzip )
-      return static_cast<int>(gzFS->Read( Buffer, Count ));
-
-   uint32_t numBytesRetrieved { Count };
-
-   // offsetInBuffer < 0 skips buffering
-   if( !noBuffering && offsetInBuffer )
-   {
-      maybeFillReadBuffer();
-      const auto bytesRemaining = static_cast<uint32_t>( readBuffer.size() - *offsetInBuffer );
-      if( bytesRemaining < Count ) numBytesRetrieved = bytesRemaining;
-      std::memcpy( Buffer, &readBuffer[*offsetInBuffer], numBytesRetrieved );
-      *offsetInBuffer += numBytesRetrieved;
-      NrRead += numBytesRetrieved;
-   }
-   else
-   {
-      FS->read( Buffer, Count );
-      numBytesRetrieved = static_cast<int>( FS->gcount() );
-      NrRead += Count;
-   }
-   return numBytesRetrieved;
-}
-
-char TBinaryTextFileIO::ReadCharacter()
-{
-   char ch {};
-   Read( &ch, 1 );
-   return ch;
-}
-
-bool TBinaryTextFileIO::UsesPassWord() const
-{
-   return !FPassword.empty();
-}
-
-// FIXME: The behavior of this ReadLine differs from the corresponding Delphi method
-// This should be replaced by TBinaryTextFileIODelphi, which more closely resembles the Delphi code soon!
-void TBinaryTextFileIO::ReadLine( std::string &Buffer, int &Len, char &LastChar )
-{
-   if( FFileSignature == fsign_gzip )
-   {
-      gzFS->ReadLine( Buffer, std::numeric_limits<int>::max(), LastChar );
-      Len = static_cast<int>(Buffer.size());
-      return;
-   }
-
-   for( Buffer.clear(), Len = 0; !utils::in<char>( LastChar, '\r', '\n', static_cast<char>( std::ifstream::traits_type::eof() ) ) && Len < 80001; Len++ )
-   {
-      Buffer += LastChar;
-      if( Read( &LastChar, 1 ) <= 0 )
-         LastChar = std::ifstream::traits_type::eof();
-   }
-}
-
-uint32_t TBinaryTextFileIO::Write( const char *Buffer, uint32_t Count ) const
-{
-   assert( frw == fm_write && "TBinaryTextFileIO.Write" );
-   if( !FS ) return -1;
-   FS->write( Buffer, Count );
-   return Count;
-}
-
-void TBinaryTextFileIO::ReWind()
-{
-   FS->clear();
-   FS->seekg( 0 );
-   if( offsetInBuffer && lastReadCount > 0 ) lastReadCount = 0;
-}
-
-uint8_t TBinaryTextFileIO::ReadByte()
-{
-   if( Paranoid ) ParCheck( RWType::rw_byte );
-   char buf {};
-   Read( &buf, 1 );
-   return buf;
-}
-
-char TBinaryTextFileIO::ReadChar()
-{
-   if( Paranoid ) ParCheck( RWType::rw_byte );
-   char buf {};
-   Read( &buf, 1 );
-   return buf;
-}
-
-void TBinaryTextFileIO::ParCheck( RWType T )
-{
-   uint8_t B {};
-   Read( reinterpret_cast<char *>(&B), 1 );
-   if( B != static_cast<int>( T ) )
-   {
-      const std::string suffix {
-         B < static_cast<int>( RWType::rw_count ) ? RWTypeText[B] : "???"s + std::to_string( B )
-      };
-      throw std::runtime_error( "Stream check failed: Expected = " + RWTypeText[static_cast<int>( T )] + " Read = " + suffix );
-   }
-}
-
-std::string TBinaryTextFileIO::ReadString()
-{
-   if( Paranoid ) ParCheck( RWType::rw_string );
-   char len { 0 };
-   if( !Read( &len, 1 ) || !len ) return ""s;
-   std::string res;
-   res.resize( len );
-   Read( res.data(), len );
-   return res;
-}
-
-TBinaryTextFileIO::TBinaryTextFileIO( const std::string &contents, int &ErrNr )
-   : FS {std::make_unique<std::stringstream>( contents, std::fstream::in )}
-{
-   ErrNr = strmErrorNoError;
-}
-
-void TBinaryTextFileIO::SetPassword( const std::string &s )
-{
-   FPassword.clear();
-   if( s.empty() ) return;
-   bool BB {};
-   for( int K {}; K < static_cast<int>( s.length() ); K++ )
-   {
-      if( s[K] != ' ' ) BB = false;
-      else
-      {
-         if( BB ) continue;
-         BB = true;
-      }
-      auto B = static_cast<unsigned char>(s[K]);
-      if( !( B & 1 ) ) B >>= 1;
-      else B = static_cast<unsigned char>( 0x80 + ( B >> 1 ) );
-      FPassword += static_cast<char>(B);
-   }
-}
-
-void TBinaryTextFileIO::ApplyPassword( const std::string &PR, std::string &PW, int64_t Offs ) const
-{
-   const auto L = FPassword.length();
-   int FPwNxt = static_cast<int>( Offs % L );
-   std::transform( std::cbegin( PR ), std::cend( PR ), std::begin( PW ), [&]( const char c ) {
-      return static_cast<char>( utils::excl_or( c, FPassword[FPwNxt++ % L] ) );
-   } );
-}
-
-std::string TBinaryTextFileIO::RandString( int L )
-{
-   int Seed {};
-   auto RandCh = [&]() {
-      Seed = ( Seed * 12347 + 1023 ) & 0x7FFFFFF;
-      return static_cast<char>( Seed & 0xFF );
-   };
-   Seed = 1234 * L;
-   return utils::constructStr( L, [&]( int _ ) { return RandCh(); } );
-}
-
-void TBinaryTextFileIO::WriteByte( uint8_t B ) const
-{
-   if( Paranoid ) ParWrite( RWType::rw_byte );
-   FS->write( reinterpret_cast<const char *>( &B ), 1 );
-}
-
-void TBinaryTextFileIO::ParWrite( RWType T ) const
-{
-   const auto B { static_cast<uint8_t>( T ) };
-   FS->write( reinterpret_cast<const char *>( &B ), 1 );
-}
-
-void TBinaryTextFileIO::WriteString( const std::string_view s ) const
-{
-   static std::array<char, 256> buf {};
-   if( Paranoid ) ParWrite( RWType::rw_string );
-   utils::strConvCppToDelphi( s, buf.data() );
-   FS->write( buf.data(), static_cast<int>(s.length() + 1) );
-}
-
-void TBinaryTextFileIO::SetCompression( const bool V )
-{
-   if( ( FCompress || V ) && NrWritten > 0 )
-      FS->flush();
-   if( FCompress != V )
-      NrLoaded = NrRead = 0;
-   FCompress = V;
-}
-
-void TBinaryTextFileIO::maybeFillReadBuffer()
-{
-   if( !lastReadCount || *offsetInBuffer >= readBuffer.size() )
-   {
-      FS->read( readBuffer.data(), BufferSize );
-      lastReadCount = FS->gcount();
-      *offsetInBuffer = 0;
-   }
-}
-
 void CompressTextFile( const std::string &fn, const std::string &fo, const std::string &PassWord, bool Comp, int &ErrNr, std::string &ErrMsg )
 {
-   TBinaryTextFileIODelphi Fin { fn, "", ErrNr, ErrMsg };
+   TBinaryTextFileIO Fin { fn, "", ErrNr, ErrMsg };
    if( !ErrMsg.empty() ) return;
 
-   TBinaryTextFileIODelphi Fout { fo, "CompressTextFile", PassWord, fsign_text, Comp, ErrNr, ErrMsg };
+   TBinaryTextFileIO Fout { fo, "CompressTextFile", PassWord, fsign_text, Comp, ErrNr, ErrMsg };
    if( !ErrMsg.empty() ) return;
 
    std::array<char, 4096> Buffer {};
@@ -546,10 +123,10 @@ void CompressTextFile( const std::string &fn, const std::string &fo, const std::
 
 void UnCompressTextFile( const std::string &fn, const std::string &fo, const std::string &PassWord, int &ErrNr, std::string &ErrMsg )
 {
-   TBinaryTextFileIODelphi Fin { fn, PassWord, ErrNr, ErrMsg };
+   TBinaryTextFileIO Fin { fn, PassWord, ErrNr, ErrMsg };
    if( !ErrMsg.empty() ) return;
 
-   TBinaryTextFileIODelphi Fout { fo, "", "", fsign_text, false, ErrNr, ErrMsg };
+   TBinaryTextFileIO Fout { fo, "", "", fsign_text, false, ErrNr, ErrMsg };
    if( !ErrMsg.empty() ) return;
 
    constexpr int BufSize = 4096;
@@ -632,9 +209,9 @@ void TGZipInputStream::ReadLine( std::vector<uint8_t> &buffer, int MaxInp, char 
    }
 }
 
-void TGZipInputStream::ReadLine( char *buffer, int MaxInp, char &LastChar )
+void TGZipInputStream::ReadLine( char *buffer, int MaxInp, char &LastChar, int &Len )
 {
-   int Len {};
+   Len = 0;
    while( !utils::in<char>( LastChar, '\r', '\n', substChar ) || static_cast<int>( Len ) == MaxInp )
    {
       buffer[Len++] = LastChar;
@@ -645,113 +222,129 @@ void TGZipInputStream::ReadLine( char *buffer, int MaxInp, char &LastChar )
    }
 }
 
-void TXStreamDelphi::ParWrite( RWType T )
+void TXStream::ParWrite( RWType T )
 {
    Write( &T, 1 );
 }
 
-void TXStreamDelphi::ParCheck( RWType T )
+void TXStream::ParCheck( RWType T )
 {
    uint8_t B;
    Read( &B, 1 );
    if( B != static_cast<int>(T) )
    {
-      const std::string msg {( B >= static_cast<int>(RWType::rw_count) ? "???"s + std::to_string( B ) : RWTypeText[B] )};
+      const std::string msg {( B >= static_cast<int>(RWType::rw_count) ? "???"s + rtl::sysutils_p3::IntToStr( B ) : RWTypeText[B] )};
       throw std::runtime_error( "Stream check failed: Expected = "s + RWTypeText[static_cast<int>(T)] + " Read = "s + msg );
    }
 }
 
-void TXStreamDelphi::WriteString( const std::string_view s )
+void TXStream::WriteString( const std::string_view s )
 {
-   static std::array<char, 256> buf {};
+#ifdef WF_TEXT
    if( fstext )
    {
       static int cnt {};
       *fstext << "WriteString@" << GetPosition() << "#" << ++cnt << ": " << s << "\n";
    }
+#endif
+   static std::array<char, 256> buf {};
    if( Paranoid ) ParWrite( RWType::rw_string );
    utils::strConvCppToDelphi( s, buf.data() );
    Write( buf.data(), static_cast<uint32_t>( s.length() ) + 1 );
 }
 
-void TXStreamDelphi::WriteDouble( double x )
+void TXStream::WriteDouble( double x )
 {
+#ifdef WF_TEXT
    if( fstext )
    {
       static int cnt {};
       *fstext << "WriteDouble@" << GetPosition() << "#" << ++cnt << ": " << utils::asdelphifmt( x, 12 ) << '\n';
    }
+#endif
    WriteValue( RWType::rw_double, x );
 }
 
-void TXStreamDelphi::WriteInteger( int n )
+void TXStream::WriteInteger( int n )
 {
+#ifdef WF_TEXT
    if( fstext )
    {
       static int cnt {};
       *fstext << "WriteInteger@" << GetPosition() << "#" << ++cnt << ": " << n << '\n';
    }
+#endif
    WriteValue( RWType::rw_integer, n );
 }
 
-void TXStreamDelphi::WriteInt64( int64_t N )
+void TXStream::WriteInt64( int64_t N )
 {
+#ifdef WF_TEXT
    if( fstext )
    {
       static int cnt {};
       *fstext << "WriteInt64@" << GetPosition() << "#" << ++cnt << ": " << N << '\n';
    }
+#endif
    WriteValue( RWType::rw_int64, N );
 }
 
-void TXStreamDelphi::WriteByte( uint8_t b )
+void TXStream::WriteByte( uint8_t b )
 {
+#ifdef WF_TEXT
    if( fstext )
    {
       static int cnt {};
-      *fstext << "WriteByte@" << GetPosition() << "#" << ++cnt << ": " << std::to_string( b ) << '\n';
+      *fstext << "WriteByte@" << GetPosition() << "#" << ++cnt << ": " << rtl::sysutils_p3::IntToStr( b ) << '\n';
    }
+#endif
    WriteValue( RWType::rw_byte, b );
 }
 
-void TXStreamDelphi::WriteWord( uint16_t W )
+void TXStream::WriteWord( uint16_t W )
 {
+#ifdef WF_TEXT
    if( fstext )
    {
       static int cnt {};
       *fstext << "WriteWord@" << GetPosition() << "#" << ++cnt << ": " << W << '\n';
    }
+#endif
    WriteValue( RWType::rw_word, W );
 }
 
-void TXStreamDelphi::WriteBool( bool B )
+void TXStream::WriteBool( bool B )
 {
+#ifdef WF_TEXT
    if( fstext )
    {
       static int cnt {};
       *fstext << "WriteBool@" << GetPosition() << "#" << ++cnt << ": " << ( B ? "True" : "False" ) << '\n';
    }
+#endif
    WriteValue( RWType::rw_bool, B );
 }
 
-void TXStreamDelphi::WriteChar( char C )
+void TXStream::WriteChar( char C )
 {
+#ifdef WF_TEXT
    if( fstext )
    {
       static int cnt {};
       *fstext << "WriteChar@" << GetPosition() << "#" << ++cnt << ": " << C << '\n';
    }
+#endif
    WriteValue( RWType::rw_char, C );
 }
 
-void TXStreamDelphi::WritePChar( const char *s, int L )
+void TXStream::WritePChar( const char *s, int L )
 {
    if( Paranoid ) ParWrite( RWType::rw_pchar );
    WriteInteger( L );
    if( L > 0 ) Write( s, L );
 }
 
-std::string TXStreamDelphi::ReadString()
+std::string TXStream::ReadString()
 {
    if( Paranoid ) ParCheck( RWType::rw_string );
    uint8_t len {};
@@ -764,42 +357,42 @@ std::string TXStreamDelphi::ReadString()
    return s;
 }
 
-double TXStreamDelphi::ReadDouble()
+double TXStream::ReadDouble()
 {
    return ReadValue<double>( RWType::rw_double );
 }
 
-int TXStreamDelphi::ReadInteger()
+int TXStream::ReadInteger()
 {
    return ReadValue<int>( RWType::rw_integer );
 }
 
-uint8_t TXStreamDelphi::ReadByte()
+uint8_t TXStream::ReadByte()
 {
    return ReadValue<uint8_t>( RWType::rw_byte );
 }
 
-uint16_t TXStreamDelphi::ReadWord()
+uint16_t TXStream::ReadWord()
 {
    return ReadValue<uint16_t>( RWType::rw_word );
 }
 
-int64_t TXStreamDelphi::ReadInt64()
+int64_t TXStream::ReadInt64()
 {
    return ReadValue<int64_t>( RWType::rw_int64 );
 }
 
-bool TXStreamDelphi::ReadBool()
+bool TXStream::ReadBool()
 {
    return ReadValue<bool>( RWType::rw_bool );
 }
 
-char TXStreamDelphi::ReadChar()
+char TXStream::ReadChar()
 {
    return ReadValue<char>( RWType::rw_char );
 }
 
-std::string TXStreamDelphi::ReadPChar( int &L )
+std::string TXStream::ReadPChar( int &L )
 {
    if( Paranoid ) ParCheck( RWType::rw_pchar );
    L = ReadInteger();
@@ -812,13 +405,13 @@ std::string TXStreamDelphi::ReadPChar( int &L )
    return s;
 }
 
-std::string TXStreamDelphi::ReadPChar()
+std::string TXStream::ReadPChar()
 {
    int dummyLen;
    return ReadPChar(dummyLen);
 }
 
-void TXStreamDelphi::ReadPChar( char *P, int &L )
+void TXStream::ReadPChar( char *P, int &L )
 {
    if( Paranoid ) ParCheck( RWType::rw_pchar );
    L = ReadInteger();
@@ -830,17 +423,19 @@ void TXStreamDelphi::ReadPChar( char *P, int &L )
    }
 }
 
-void TXStreamDelphi::ActiveWriteOpTextDumping( const std::string &dumpFilename )
+void TXStream::ActiveWriteOpTextDumping( const std::string &dumpFilename )
 {
+#ifdef WF_TEXT
    fstext = std::make_unique<std::ofstream>( dumpFilename );
+#endif
 }
 
-void TXFileStreamDelphi::SetLastIOResult( int V )
+void TXFileStream::SetLastIOResult( int V )
 {
    if( !FLastIOResult ) FLastIOResult = V;
 }
 
-void TXFileStreamDelphi::SetPassWord( const std::string &s )
+void TXFileStream::SetPassWord( const std::string &s )
 {
    FPassWord.clear();
    if( s.empty() ) return;
@@ -860,12 +455,12 @@ void TXFileStreamDelphi::SetPassWord( const std::string &s )
    }
 }
 
-bool TXFileStreamDelphi::GetUsesPassWord() const
+bool TXFileStream::GetUsesPassWord() const
 {
    return !FPassWord.empty();
 }
 
-std::string TXFileStreamDelphi::RandString( int L )
+std::string TXFileStream::RandString( int L )
 {
    int Seed {};
    auto RandCh = [&]() {
@@ -876,64 +471,59 @@ std::string TXFileStreamDelphi::RandString( int L )
    return utils::constructStr( L, [&]( int i ) { return RandCh(); } );
 }
 
-int64_t TXFileStreamDelphi::GetSize()
+int64_t TXFileStream::GetSize()
 {
 #ifdef __IN_CPPMEX__
    int64_t res;
-   SetLastIOResult( p3FileGetSize( FS.get(), res ) );
+   SetLastIOResult( p3FileGetSize( FS, res ) );
    return res;
 #else
    return 0;
 #endif
 }
 
-int64_t TXFileStreamDelphi::GetPosition()
+int64_t TXFileStream::GetPosition()
 {
    return PhysPosition;
 }
 
-void TXFileStreamDelphi::SetPosition( int64_t P )
+void TXFileStream::SetPosition( int64_t P )
 {
    PhysPosition = P;
-   FS->seekp( P );
-   SetLastIOResult( FS->bad() ? 1 : 0 );
-   //SetLastIOResult(P3FileSetPointer(FS, P, NP, P3_FILE_BEGIN));
+   int64_t NP;
+   SetLastIOResult( rtl::p3utils::p3FileSetPointer( FS, P, NP, rtl::p3utils::p3_FILE_BEGIN ) );
 }
 
-TXFileStreamDelphi::TXFileStreamDelphi( std::string AFileName, const FileAccessMode AMode )
+TXFileStream::TXFileStream( std::string AFileName, const FileAccessMode AMode )
     : FFileName { std::move( AFileName ) }
 {
-   CustomOpenAction FMode { custOpenRead };
+   Tp3FileOpenAction FMode { p3OpenRead };
    switch( AMode )
    {
       case fmCreate:
       case fmOpenWrite:
-         FMode = custOpenWrite;
+         FMode = p3OpenWrite;
          break;
       case fmOpenRead:
-         FMode = custOpenRead;
+         FMode = p3OpenRead;
          break;
       case fmOpenReadWrite:
-         FMode = custOpenReadWrite;
+         FMode = p3OpenReadWrite;
          break;
       default:
-         throw std::runtime_error( "TXFileStream.Create = "s + std::to_string( AMode ) );
+         throw std::runtime_error( "TXFileStream.Create = "s + rtl::sysutils_p3::IntToStr( AMode ) );
    }
-   FS = std::make_unique<std::fstream>();
-   SetLastIOResult( customFileOpen( FFileName, FMode, FS.get() ) );
+   SetLastIOResult( p3FileOpen( FFileName, FMode, FS ) );
    FileIsOpen = !FLastIOResult;
 }
 
-TXFileStreamDelphi::~TXFileStreamDelphi()
+TXFileStream::~TXFileStream()
 {
    if( FileIsOpen )
-   {
-      FS->close();
-      SetLastIOResult( !FS->good() ? 1 : 0 );
-   }
+      SetLastIOResult( p3FileClose(FS) );
 }
 
-void TXFileStreamDelphi::ApplyPassWord( const char *PR, char *PW, int Len, int64_t Offs ) const
+void TXFileStream::ApplyPassWord( const char *PR, char *PW, int Len, int64_t Offs ) const
 {
    const auto L = static_cast<int>( FPassWord.length() );
    auto FPwNxt = static_cast<int>( Offs ) % L;
@@ -945,52 +535,53 @@ void TXFileStreamDelphi::ApplyPassWord( const char *PR, char *PW, int Len, int64
    }
 }
 
-uint32_t TXFileStreamDelphi::Read( void *Buffer, uint32_t Count )
+uint32_t TXFileStream::Read( void *Buffer, uint32_t Count )
 {
    uint32_t res;
    if( FPassWord.empty() )
-      SetLastIOResult( customFileRead( FS.get(), static_cast<char *>( Buffer ), Count, res ) );
+      SetLastIOResult( p3FileRead( FS, static_cast<char *>( Buffer ), Count, res ) );
    else
    {
       const auto PW = static_cast<char *>( Buffer );
       std::vector<char> PR( Count );
-      SetLastIOResult( customFileRead( FS.get(), PR.data(), Count, res ) );
+      SetLastIOResult( p3FileRead( FS, PR.data(), Count, res ) );
       ApplyPassWord( PR.data(), PW, static_cast<int>( Count ), PhysPosition );
    }
    PhysPosition += res;
    return res;
 }
 
-uint32_t TXFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
+uint32_t TXFileStream::Write( const void *Buffer, uint32_t Count )
 {
+   uint32_t res {};
    if( FPassWord.empty() )
-      FS->write( static_cast<const char *>( Buffer ), Count );
+      SetLastIOResult( p3FileWrite( FS, static_cast<const char *>( Buffer ), Count, res ) );
    else
    {
       const auto PR = static_cast<const char *>( Buffer );
       std::vector<char> PW( Count );
       ApplyPassWord( PR, PW.data(), static_cast<int>( Count ), PhysPosition );
+      SetLastIOResult( p3FileWrite( FS, PW.data(), Count, res ) );
    }
-   SetLastIOResult( FS->bad() ? 1 : 0 );
-   PhysPosition += Count;
-   return Count;
+   PhysPosition += res;
+   return res;
 }
 
-int TXFileStreamDelphi::GetLastIOResult()
+int TXFileStream::GetLastIOResult()
 {
    const int res { FLastIOResult };
    FLastIOResult = 0;
    return res;
 }
 
-std::string TXFileStreamDelphi::GetFileName() const
+std::string TXFileStream::GetFileName() const
 {
    return FFileName;
 }
 
-bool TBufferedFileStreamDelphi::FillBuffer()
+bool TBufferedFileStream::FillBuffer()
 {
-   if( !FCompress ) NrLoaded = TXFileStreamDelphi::Read( BufPtr.data(), BufSize );
+   if( !FCompress ) NrLoaded = TXFileStream::Read( BufPtr.data(), BufSize );
    else if( !FCanCompress )
    {
       NrLoaded = 0;
@@ -998,16 +589,16 @@ bool TBufferedFileStreamDelphi::FillBuffer()
    }
    else
    {
-      if( const uint16_t RLen = TXFileStreamDelphi::Read( &CBufPtr->cxHeader, sizeof( TCompressHeader ) );
+      if( const uint16_t RLen = TXFileStream::Read( &CBufPtr->cxHeader, sizeof( TCompressHeader ) );
          RLen < sizeof( TCompressHeader ) )
          NrLoaded = 0;
       else
       {
          const uint16_t WLen = ( CBufPtr->cxHeader.cxB1 << 8 ) + CBufPtr->cxHeader.cxB2;
-         if( !CBufPtr->cxHeader.cxTyp ) NrLoaded = TXFileStreamDelphi::Read( BufPtr.data(), WLen );
+         if( !CBufPtr->cxHeader.cxTyp ) NrLoaded = TXFileStream::Read( BufPtr.data(), WLen );
          else
          {
-            TXFileStreamDelphi::Read( &CBufPtr->cxData, WLen );
+            TXFileStream::Read( &CBufPtr->cxData, WLen );
             unsigned long XLen = BufSize;// we need a var parameter
             uncompress( BufPtr.data(), &XLen, &CBufPtr->cxData, WLen );
             NrLoaded = XLen;
@@ -1018,14 +609,14 @@ bool TBufferedFileStreamDelphi::FillBuffer()
    return NrLoaded > 0;
 }
 
-int64_t TBufferedFileStreamDelphi::GetPosition()
+int64_t TBufferedFileStream::GetPosition()
 {
    if( !NrWritten ) return PhysPosition - NrLoaded + NrRead;
    if( FCompress ) FlushBuffer();
    return PhysPosition + NrWritten;
 }
 
-void TBufferedFileStreamDelphi::SetPosition( int64_t p )
+void TBufferedFileStream::SetPosition( int64_t p )
 {
    if( NrWritten > 0 )
    {
@@ -1041,19 +632,19 @@ void TBufferedFileStreamDelphi::SetPosition( int64_t p )
          return;
       }
    }
-   TXFileStreamDelphi::SetPosition( p );
+   TXFileStream::SetPosition( p );
    NrLoaded = NrRead = 0;
 }
 
-int64_t TBufferedFileStreamDelphi::GetSize()
+int64_t TBufferedFileStream::GetSize()
 {
-   int64_t res { TXFileStreamDelphi::GetSize() };
+   int64_t res { TXFileStream::GetSize() };
    if( NrWritten > 0 ) res = std::max( res, PhysPosition + NrWritten );
    return res;
 }
 
-TBufferedFileStreamDelphi::TBufferedFileStreamDelphi( const std::string &FileName, uint16_t Mode )
-    : TXFileStreamDelphi { FileName, static_cast<FileAccessMode>( Mode ) },
+TBufferedFileStream::TBufferedFileStream( const std::string &FileName, uint16_t Mode )
+    : TXFileStream { FileName, static_cast<FileAccessMode>( Mode ) },
       NrLoaded {},
       NrRead {},
       NrWritten {},
@@ -1066,21 +657,21 @@ TBufferedFileStreamDelphi::TBufferedFileStreamDelphi( const std::string &FileNam
 {
 }
 
-TBufferedFileStreamDelphi::~TBufferedFileStreamDelphi()
+TBufferedFileStream::~TBufferedFileStream()
 {
    if( NrWritten > 0 )
       FlushBuffer();
    free( CBufPtr );
 }
 
-bool TBufferedFileStreamDelphi::FlushBuffer()
+bool TBufferedFileStream::FlushBuffer()
 {
    bool res { true };
    uint32_t ActWritten;
    if( !NrWritten ) return res;
    if( !FCompress || !FCanCompress )
    {
-      ActWritten = TXFileStreamDelphi::Write( BufPtr.data(), NrWritten );
+      ActWritten = TXFileStream::Write( BufPtr.data(), NrWritten );
       res = NrWritten == ActWritten;
    }
    else
@@ -1093,7 +684,7 @@ bool TBufferedFileStreamDelphi::FlushBuffer()
          CBufPtr->cxHeader.cxB1 = static_cast<uint8_t>( Len >> 8 );
          CBufPtr->cxHeader.cxB2 = Len & 0xFF;
          Len += sizeof( TCompressHeader );
-         ActWritten = TXFileStreamDelphi::Write( &CBufPtr->cxHeader.cxTyp, Len );
+         ActWritten = TXFileStream::Write( &CBufPtr->cxHeader.cxTyp, Len );
          res = Len == ActWritten;
       }
       else
@@ -1101,8 +692,8 @@ bool TBufferedFileStreamDelphi::FlushBuffer()
          CBufPtr->cxHeader.cxTyp = 0;// indicates no compression
          CBufPtr->cxHeader.cxB1 = NrWritten >> 8;
          CBufPtr->cxHeader.cxB2 = NrWritten & 0xFF;
-         TXFileStreamDelphi::Write( &CBufPtr->cxHeader.cxTyp, sizeof( TCompressHeader ) );
-         ActWritten = TXFileStreamDelphi::Write( BufPtr.data(), NrWritten );
+         TXFileStream::Write( &CBufPtr->cxHeader.cxTyp, sizeof( TCompressHeader ) );
+         ActWritten = TXFileStream::Write( BufPtr.data(), NrWritten );
          res = NrWritten == ActWritten;
       }
    }
@@ -1110,7 +701,7 @@ bool TBufferedFileStreamDelphi::FlushBuffer()
    return res;
 }
 
-uint32_t TBufferedFileStreamDelphi::Read( void *Buffer, uint32_t Count )
+uint32_t TBufferedFileStream::Read( void *Buffer, uint32_t Count )
 {
    if( NrWritten > 0 ) FlushBuffer();
    if( Count <= NrLoaded - NrRead )
@@ -1133,18 +724,18 @@ uint32_t TBufferedFileStreamDelphi::Read( void *Buffer, uint32_t Count )
    return UsrReadCnt;
 }
 
-char TBufferedFileStreamDelphi::ReadCharacter()
+char TBufferedFileStream::ReadCharacter()
 {
    if( NrWritten > 0 ) FlushBuffer();
    if( NrRead >= NrLoaded && !FillBuffer() ) return substChar;
    return static_cast<char>( BufPtr[NrRead++] );
 }
 
-uint32_t TBufferedFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
+uint32_t TBufferedFileStream::Write( const void *Buffer, uint32_t Count )
 {
    if( NrLoaded > 0 )
    {// we have been reading ahead
-      TXFileStreamDelphi::SetPosition( PhysPosition - NrLoaded + NrRead );
+      TXFileStream::SetPosition( PhysPosition - NrLoaded + NrRead );
       NrLoaded = NrRead = 0;
    }
    if( Count <= BufSize - NrWritten )
@@ -1168,12 +759,12 @@ uint32_t TBufferedFileStreamDelphi::Write( const void *Buffer, uint32_t Count )
    return UsrWriteCnt;
 }
 
-bool TBufferedFileStreamDelphi::IsEof()
+bool TBufferedFileStream::IsEof()
 {
    return NrRead >= NrLoaded && GetPosition() >= GetSize();
 }
 
-void TBufferedFileStreamDelphi::SetCompression( bool V )
+void TBufferedFileStream::SetCompression( bool V )
 {
    if( ( FCompress || V ) && NrWritten > 0 ) FlushBuffer();
    if( FCompress != V )
@@ -1181,19 +772,19 @@ void TBufferedFileStreamDelphi::SetCompression( bool V )
    FCompress = V;
 }
 
-bool TBufferedFileStreamDelphi::GetCompression() const { return FCompress; }
+bool TBufferedFileStream::GetCompression() const { return FCompress; }
 
-bool TBufferedFileStreamDelphi::GetCanCompress() const { return FCanCompress; }
+bool TBufferedFileStream::GetCanCompress() const { return FCanCompress; }
 
 
-void TMiBufferedStreamDelphi::DetermineByteOrder()
+void TMiBufferedStream::DetermineByteOrder()
 {
    initOrderCommon<uint16_t>( order_word, size_word, PAT_WORD );
    initOrderCommon<int>( order_integer, size_integer, PAT_INTEGER );
    initOrderCommon<double>( order_double, size_double, PAT_DOUBLE );
 }
 
-TMiBufferedStreamDelphi::TMiBufferedStreamDelphi( const std::string &FileName, uint16_t Mode ) : TBufferedFileStreamDelphi { FileName, Mode }
+TMiBufferedStream::TMiBufferedStream( const std::string &FileName, uint16_t Mode ) : TBufferedFileStream { FileName, Mode }
 {
    if( FLastIOResult ) return;
    if( Mode != FileAccessMode::fmCreate ) DetermineByteOrder();// we cannot update a mixed environment file!
@@ -1218,7 +809,7 @@ TMiBufferedStreamDelphi::TMiBufferedStreamDelphi( const std::string &FileName, u
 }
 
 //note: this only works when src and dest point to different areas
-void TMiBufferedStreamDelphi::ReverseBytes( void *psrc, void *pdest, int sz )
+void TMiBufferedStream::ReverseBytes( void *psrc, void *pdest, int sz )
 {
    auto pdestc {static_cast<char *>( pdest )},
         psrcc {static_cast<char *>( psrc )};
@@ -1231,7 +822,7 @@ void TMiBufferedStreamDelphi::ReverseBytes( void *psrc, void *pdest, int sz )
    }
 }
 
-int TMiBufferedStreamDelphi::GoodByteOrder() const
+int TMiBufferedStream::GoodByteOrder() const
 {
    int res {};
    if( order_word == PAT_BAD_SIZE ) res += 1;
@@ -1243,41 +834,45 @@ int TMiBufferedStreamDelphi::GoodByteOrder() const
    return res;
 }
 
-double TMiBufferedStreamDelphi::ReadDouble()
+double TMiBufferedStream::ReadDouble()
 {
    return ReadValueOrdered<double>( RWType::rw_double, order_double );
 }
 
-int TMiBufferedStreamDelphi::ReadInteger()
+int TMiBufferedStream::ReadInteger()
 {
    return ReadValueOrdered<int>( RWType::rw_integer, order_integer );
 }
 
-uint16_t TMiBufferedStreamDelphi::ReadWord()
+uint16_t TMiBufferedStream::ReadWord()
 {
    return ReadValueOrdered<uint16_t>( RWType::rw_word, order_word );
 }
 
-int64_t TMiBufferedStreamDelphi::ReadInt64()
+int64_t TMiBufferedStream::ReadInt64()
 {
    return ReadValueOrdered<int64_t>( RWType::rw_int64, order_integer );
 }
 
-bool TMiBufferedStreamDelphi::WordsNeedFlip() const
+bool TMiBufferedStream::WordsNeedFlip() const
 {
    return order_word;
 }
 
-bool TMiBufferedStreamDelphi::IntsNeedFlip() const
+bool TMiBufferedStream::IntsNeedFlip() const
 {
    return order_integer;
 }
 
-void TMiBufferedStreamDelphi::WriteGmsInteger( int N )
+void TMiBufferedStream::WriteGmsInteger( int N )
 {
-   static int cnt {};
+#ifdef WF_TEXT
    if( fstext )
+   {
+      static int cnt {};
       *fstext << "WriteGmsInteger@" << GetPosition() << "#" << ++cnt << ": " << N << '\n';
+   }
+#endif
 
    uint8_t B { static_cast<uint8_t>( N >= 0 ? 0 : 128 ) };
    if( N < 0 ) N = -N;
@@ -1294,7 +889,7 @@ void TMiBufferedStreamDelphi::WriteGmsInteger( int N )
    Write( W.data(), C + 1 );
 }
 
-enum tgmsvalue
+enum tgmsvalue : uint8_t
 {
    xvreal,
    xvund,
@@ -1318,11 +913,13 @@ static tgmsvalue mapval( double x )
    return k >= 1 && k <= static_cast<int>( kToRetMapping.size() ) ? kToRetMapping[k - 1] : xvacr;
 }
 
-void TMiBufferedStreamDelphi::WriteGmsDouble( double D )
+void TMiBufferedStream::WriteGmsDouble( double D )
 {
+#ifdef WF_TEXT
    static int cnt {};
    if( fstext )
       *fstext << "WriteGmsDouble@" << GetPosition() << "#" << ++cnt << ": " << utils::asdelphifmt( D ) << '\n';
+#endif
 
    const tgmsvalue gv = mapval( D );
    uint8_t B = gv;
@@ -1371,7 +968,7 @@ void TMiBufferedStreamDelphi::WriteGmsDouble( double D )
    }
 }
 
-int TMiBufferedStreamDelphi::ReadGmsInteger()
+int TMiBufferedStream::ReadGmsInteger()
 {
    uint8_t B;
 #if !defined( NDEBUG )
@@ -1399,7 +996,7 @@ int TMiBufferedStreamDelphi::ReadGmsInteger()
    return res;
 }
 
-double TMiBufferedStreamDelphi::ReadGmsDouble()
+double TMiBufferedStream::ReadGmsDouble()
 {
    constexpr static std::array<double, 9> bToRes { GMS_SV_UNDEF, GMS_SV_NA, GMS_SV_PINF, GMS_SV_MINF, GMS_SV_EPS, GMS_SV_ACR, 0.0, 1.0, -1.0 };
    const auto B { ReadByte() };
@@ -1434,8 +1031,8 @@ double TMiBufferedStreamDelphi::ReadGmsDouble()
    return Z.V;
 }
 
-TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const std::string &PassWord, int &ErrNr, std::string &errMsg )
-: FS{std::make_unique<TBufferedFileStreamDelphi>( fn, fmOpenRead )}
+TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &PassWord, int &ErrNr, std::string &errMsg )
+: FS{std::make_unique<TBufferedFileStream>( fn, fmOpenRead )}
 {
    ErrNr = FS->GetLastIOResult();
    if( ErrNr )
@@ -1514,7 +1111,7 @@ TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const s
       const std::string src = FS->ReadString();
       std::array<char, 256> targBuf {};
       FS->ApplyPassWord( src.c_str(), targBuf.data(), (int) src.length(), verify_offset );
-      if( gdlib::gmsstrm::TBufferedFileStreamDelphi::RandString( static_cast<int>( src.length() ) ) != std::string(targBuf.data()) ) return;
+      if( gdlib::gmsstrm::TBufferedFileStream::RandString( static_cast<int>( src.length() ) ) != std::string(targBuf.data()) ) return;
    }
 
    FRewindPoint = FS->GetPosition();
@@ -1526,8 +1123,8 @@ TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const s
    errMsg.clear();
 }
 
-TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const std::string &Producer, const std::string &PassWord, TFileSignature signature, bool comp, int &ErrNr, std::string &errMsg )
-    : FS {std::make_unique<TBufferedFileStreamDelphi>( fn, fmCreate )}, frw{fm_write}, FFileSignature{signature}
+TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &Producer, const std::string &PassWord, TFileSignature signature, bool comp, int &ErrNr, std::string &errMsg )
+    : FS {std::make_unique<TBufferedFileStream>( fn, fmCreate )}, frw{fm_write}, FFileSignature{signature}
 {
    if( signature != fsign_text || !PassWord.empty() || comp )
    {
@@ -1543,7 +1140,7 @@ TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const s
       {
          FS->FlushBuffer();
          FS->SetPassWord( PassWord );
-         std::string src = gdlib::gmsstrm::TBufferedFileStreamDelphi::RandString( (int) PassWord.length() );
+         std::string src = gdlib::gmsstrm::TBufferedFileStream::RandString( (int) PassWord.length() );
          std::array<char, 256> targBuf {};
          FS->ApplyPassWord( src.c_str(), targBuf.data(), (int) src.length(), verify_offset );
          FS->SetPassWord( "" );
@@ -1569,12 +1166,12 @@ TBinaryTextFileIODelphi::TBinaryTextFileIODelphi( const std::string &fn, const s
    }
 }
 
-uint32_t TBinaryTextFileIODelphi::Read( char *Buffer, uint32_t Count )
+uint32_t TBinaryTextFileIO::Read( char *Buffer, uint32_t Count )
 {
    return FFileSignature == fsign_gzip ? static_cast<int>( gzFS->Read( Buffer, Count ) ) : static_cast<int>( FS->Read( Buffer, Count ) );
 }
 
-char TBinaryTextFileIODelphi::ReadCharacter()
+char TBinaryTextFileIO::ReadCharacter()
 {
    if( FFileSignature == fsign_gzip )
    {
@@ -1586,7 +1183,7 @@ char TBinaryTextFileIODelphi::ReadCharacter()
    return FS->ReadCharacter();
 }
 
-void TBinaryTextFileIODelphi::ReadLine( std::vector<uint8_t> &Buffer, int &Len, int MaxInp, char &LastChar )
+void TBinaryTextFileIO::ReadLine( std::vector<uint8_t> &Buffer, int &Len, int MaxInp, char &LastChar )
 {
    // moved here for performance reasons
    // reading a single byte at a time is avoided this way
@@ -1611,16 +1208,16 @@ void TBinaryTextFileIODelphi::ReadLine( std::vector<uint8_t> &Buffer, int &Len, 
    Len = static_cast<int>(Buffer.size());
 }
 
-void TBinaryTextFileIODelphi::ReadLine( char *Buffer, int &Len, int MaxInp, char &LastChar )
+void TBinaryTextFileIO::ReadLine( char *Buffer, int &Len, int MaxInp, char &LastChar )
 {
    // moved here for performance reasons
    // reading a single byte at a time is avoided this way
    if( FFileSignature == fsign_gzip )
-      gzFS->ReadLine( Buffer, MaxInp, LastChar );
+      gzFS->ReadLine( Buffer, MaxInp, LastChar, Len );
    else
    {
       Len = 0;
-      while( !( utils::in( LastChar, substChar, '\n', '\r' ) || static_cast<int>( Len ) == MaxInp ) )
+      while( LastChar != substChar && LastChar != '\n' && LastChar != '\r' && static_cast<int>( Len ) != MaxInp )
       {
          Buffer[Len++] = LastChar;
          if( FS->NrLoaded - FS->NrRead >= 1 )
@@ -1635,7 +1232,7 @@ void TBinaryTextFileIODelphi::ReadLine( char *Buffer, int &Len, int MaxInp, char
    }
 }
 
-void TBinaryTextFileIODelphi::ReadLine( std::string &StrBuffer, int &Len, const int MaxInp, char &LastChar ) const
+void TBinaryTextFileIO::ReadLine( std::string &StrBuffer, int &Len, const int MaxInp, char &LastChar ) const
 {
    // moved here for performance reasons
    // reading a single byte at a time is avoided this way
@@ -1662,18 +1259,18 @@ void TBinaryTextFileIODelphi::ReadLine( std::string &StrBuffer, int &Len, const 
    Len = static_cast<int>( StrBuffer.size() );
 }
 
-uint32_t TBinaryTextFileIODelphi::Write( const char *Buffer, const uint32_t Count ) const
+uint32_t TBinaryTextFileIO::Write( const char *Buffer, const uint32_t Count ) const
 {
    assert( frw == fm_write && "TBinaryTextFileIO.Read" );
    return static_cast<uint32_t>( !FS ? -1 : FS->Write( Buffer, Count ) );
 }
 
-bool TBinaryTextFileIODelphi::UsesPassWord()
+bool TBinaryTextFileIO::UsesPassWord()
 {
    return FS && FS->GetUsesPassWord();
 }
 
-void TBinaryTextFileIODelphi::ReWind()
+void TBinaryTextFileIO::ReWind()
 {
    assert( frw == fm_read && "TBinaryTextFileIO.ReWind1" );
    assert( FS && "TBinaryTextFileIO.ReWind2" );
@@ -1681,7 +1278,7 @@ void TBinaryTextFileIODelphi::ReWind()
    if( FS->GetCompression() ) FS->ReadString();// skip verification string
 }
 
-int TBinaryTextFileIODelphi::GetLastIOResult()
+int TBinaryTextFileIO::GetLastIOResult()
 {
    return FS->GetLastIOResult();
 }

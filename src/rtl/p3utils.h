@@ -29,6 +29,10 @@
 #include <vector>
 #include <cstdint>
 
+#if !defined(_WIN32)
+#include <fcntl.h>
+#endif
+
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
@@ -61,7 +65,7 @@ bool PrefixEnv( const std::string &dir, const std::string &evName );
 constexpr int NLocNames = 8;
 using TLocNames = std::vector<std::string>;
 
-enum Tp3Location
+enum Tp3Location : uint8_t
 {
    p3Config,
    p3AppConfig,
@@ -100,20 +104,39 @@ void p3NoPopups();
 std::string p3GetUserName();
 std::string p3GetComputerName();
 
-using Tp3File = std::fstream;
-using Tp3FileHandle = std::fstream *;
-enum Tp3FileOpenAction
+#if defined(_WIN32)
+using Tp3FileHandle = void *; // from CreateFileA (fileapi.h)
+const Tp3FileHandle NullHandle = nullptr;
+#else
+using Tp3FileHandle = int; // from open (fcntl.h)
+const Tp3FileHandle NullHandle = 0;
+#endif
+
+enum Tp3FileOpenAction : uint8_t
 {
    p3OpenRead,
    p3OpenWrite,
    p3OpenReadWrite
 };
 
-int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle h );
-int p3FileClose( Tp3FileHandle h );
+// the constants FILE_* are the same as the Windows values - we depend on it!
+constexpr int
+        p3_FILE_BEGIN = 0,
+        p3_FILE_CURRENT = 1,
+        p3_FILE_END = 2;
+
+int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle &h );
+int p3FileClose( Tp3FileHandle &h );
+
+inline int p3FileClose( FILE *h) {
+   return fclose(h);
+}
 int p3FileRead( Tp3FileHandle h, char *buffer, uint32_t buflen, uint32_t &numRead );
 int p3FileWrite( Tp3FileHandle h, const char *buffer, uint32_t buflen, uint32_t &numWritten );
 int p3FileGetSize( Tp3FileHandle h, int64_t &fileSize );
+
+int p3FileSetPointer(Tp3FileHandle h, int64_t distance, int64_t &newPointer, uint32_t whence);
+int p3FileGetPointer(Tp3FileHandle h, int64_t &filePointer);
 
 bool p3GetFirstMACAddress( std::string &mac );
 

@@ -73,4 +73,29 @@ void InitChars( bool AllChars );
 void InitCharacterMaps();
 char DetermineQuote( const char *s );
 
+inline bool IsLetter( char c )
+{
+   return ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' );
+}
+
+inline bool IsDigit( char c )
+{
+   return c >= '0' && c <= '9';
+}
+
+inline bool IsLabelChar(char c)
+{
+   return IsLetter( c ) || IsDigit(c) || c == '_' || c == '+' || c == '-';
+}
+
+inline bool IsIdentChar(char c)
+{
+   return IsLetter( c ) || IsDigit(c) || c == '_';
+}
+
+inline bool IsTextQuote(char c)
+{
+   return c == '\'' || c == '\"';
+}
+
 }// namespace gdlib::charmaps

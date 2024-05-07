@@ -29,6 +29,9 @@
 #include "../global/modhead.h"
 #include "../global/gmsspecs.h"
 
+namespace rtl::p3io {
+struct P3File;
+}
 
 namespace gdlib::gmsgen
 {
@@ -36,7 +39,7 @@ using TAnsiCharArray = std::array<char, global::gmsspecs::BigIndex>;
 using PAnsiCharArray = TAnsiCharArray *;
 using DoubleArray = std::array<double, global::gmsspecs::BigIndex>;
 using PDoubleArray = DoubleArray *;
-using PTextFile = std::fstream *;
+using PTextFile = rtl::p3io::P3File *;
 
 using LongIntArray = std::array<int, global::gmsspecs::BigIndex>;
 using PLongIntArray = LongIntArray *;
@@ -47,7 +50,7 @@ using PBooleanArray = TBooleanArray *;
 using TByteDataArray = std::array<uint8_t, global::gmsspecs::BigIndex>;
 using PByteDataArray = TByteDataArray *;
 
-enum tfileaction
+enum tfileaction : uint8_t
 {
    forRead,
    forWrite,

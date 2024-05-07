@@ -32,7 +32,7 @@
 namespace gdlib::stattypes
 {
 
-enum tstatusproc
+enum tstatusproc : uint8_t
 {
    statusSignature,
    statusLine,

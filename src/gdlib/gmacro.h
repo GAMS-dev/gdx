@@ -31,10 +31,11 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <cstdint>
 
 namespace gdlib::gmsstrm
 {
-class TXStreamDelphi;
+class TXStream;
 }
 
 namespace gdlib::gmacro
@@ -50,16 +51,16 @@ class TParamList : public std::vector<std::string>
 
 public:
    TParamList();
-   explicit TParamList( gdlib::gmsstrm::TXStreamDelphi &S );
+   explicit TParamList( gdlib::gmsstrm::TXStream &S );
 
    void SetValue( int N, const std::string &S );
    [[nodiscard]] std::string GetValue( int N ) const;
    void FreeObject( int Index );
-   void WriteToStream( gdlib::gmsstrm::TXStreamDelphi &S ) const;
+   void WriteToStream( gdlib::gmsstrm::TXStream &S ) const;
    [[nodiscard]] int IndexOf( const std::string &s ) const;
 };
 
-enum TErrTyp
+enum TErrTyp : uint8_t
 {
    errInput,
    errDefinition,
@@ -123,7 +124,7 @@ public:
    TGAMSMacro() = default;
    TGAMSMacro( const TGAMSMacro &other ) = default;
    TGAMSMacro( std::string id, TGAMSMacroList &ML );
-   TGAMSMacro( gmsstrm::TXStreamDelphi &S, TGAMSMacroList &ML );
+   TGAMSMacro( gmsstrm::TXStream &S, TGAMSMacroList &ML );
    ~TGAMSMacro() = default;
 
    bool Define( const std::string &p, int &LUsed );
@@ -136,7 +137,7 @@ public:
    [[nodiscard]] std::string GetBody() const;
    bool GetMacroBody( std::string &s );
    void Error( TErrTyp ErrTyp, const std::string &s ) const;
-   void WriteToStream( gmsstrm::TXStreamDelphi &S ) const;
+   void WriteToStream( gmsstrm::TXStream &S ) const;
    void SubstituteParams( TPReader &Rdr, TPWriterCC &Wrt ) const;
    void SetValue( int N, const std::string &P );
    void GetValue( int N, std::string &P ) const;
@@ -144,7 +145,7 @@ public:
    bool AddToBody( const std::string &p );
 };
 
-// TODO: Evalute using a TXStrHashList for performance
+// TODO: FIXME: Evalute using a TXStrHashList for performance instead of std::map!!!
 
 struct MacroIndexPair {
    TGAMSMacro *macro;
@@ -175,7 +176,7 @@ public:
    friend TGAMSMacro;
 
    TGAMSMacroList() = default;
-   explicit TGAMSMacroList( gmsstrm::TXStreamDelphi &S );
+   explicit TGAMSMacroList( gmsstrm::TXStream &S );
    ~TGAMSMacroList();
 
    bool AddMacro( const std::string &Id, const std::string &p, int &LUsed, bool allowRedef, std::string &Msg );
@@ -185,7 +186,7 @@ public:
    // Now using C++ strings and optional return (nullopt for fail)
    std::optional<std::string> ExpandMacro( const std::string &id, const std::string &src, int &LUsed );
    bool GetDefinition( int N, std::string &Id, int &ArgCount, std::string &P ) const;
-   void WriteToStream( gmsstrm::TXStreamDelphi &S ) const;
+   void WriteToStream( gmsstrm::TXStream &S ) const;
    int SetTraceLevel( int N );
    std::optional<std::string> GetMessage( int N );
    [[nodiscard]] int MsgCount() const;

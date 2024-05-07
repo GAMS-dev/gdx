@@ -189,7 +189,7 @@ using Integer = int;
 using Smallint = int16_t;// short
 
 using tDateTime = double;
-using Text = std::fstream *;
+using Text = std::fstream*;
 
 // Both bounds are inclusive
 template<typename T, T lowerBoundIncl, T upperBoundIncl>

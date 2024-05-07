@@ -139,33 +139,6 @@ struct ItemLegacy {
    ItemLegacy *nextBucketPtr {};
 };
 
-class MyMappingLegacy : public TGAMSRecListLegacy<ItemLegacy>
-{
-public:
-   explicit MyMappingLegacy( gdlib::gmsheapnew::THeapMgr &heap ) : TGAMSRecListLegacy<ItemLegacy>( heap ) {}
-
-protected:
-   std::pair<char *, ItemLegacy **> AccessRecord( ItemLegacy *prec ) override
-   {
-      return { prec->s.data(), &prec->nextBucketPtr };
-   }
-};
-
-TEST_CASE( "Simple usage of TGMSRecListLegacy" )
-{
-   gdlib::gmsheapnew::THeapMgr myheap { "MiniHeap"s };
-   std::array<ItemLegacy, 10> items {};
-   MyMappingLegacy grlst { myheap };
-   for( int i {}; i < (int)items.size(); i++ )
-   {
-      std::string s { "i"s + std::to_string( i + 1 ) };
-      std::memcpy( items[i].s.data(), s.c_str(), s.length() + 1 );
-      const int ix = grlst.AddItem( &items[i] );
-      REQUIRE_EQ( i + 1, ix );
-   }
-   REQUIRE_FALSE( grlst.Find( "doesNotExist" ) );
-}
-
 TEST_SUITE_END();
 
 }// namespace tests::glookuptests

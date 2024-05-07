@@ -67,12 +67,12 @@ void testWritingOneByteIntoTextFile()
 
 TEST_CASE( "Use unbuffered file stream to write a file" )
 {
-   testWritingOneByteIntoTextFile<TXFileStreamDelphi>();
+   testWritingOneByteIntoTextFile<TXFileStream>();
 }
 
 TEST_CASE( "Use buffered file stream to write a file" )
 {
-   testWritingOneByteIntoTextFile<TBufferedFileStreamDelphi>();
+   testWritingOneByteIntoTextFile<TBufferedFileStream>();
 }
 
 TEST_CASE( "Use binary text file IO to write an uncompressed file" )
@@ -88,7 +88,7 @@ TEST_CASE( "Use binary text file IO to write an uncompressed file" )
    {
       int errNr;
       std::string errMsg;
-      TBinaryTextFileIODelphi fs { exampleFn, "testCppMEX"s, pw, compression ? TFileSignature::fsign_gzip : TFileSignature::fsign_text, compression, errNr, errMsg };
+      TBinaryTextFileIO fs { exampleFn, "testCppMEX"s, pw, compression ? TFileSignature::fsign_gzip : TFileSignature::fsign_text, compression, errNr, errMsg };
       REQUIRE( errMsg.empty() );
       char buf { 23 };
       REQUIRE_EQ( 1, fs.Write( &buf, 1 ) );
@@ -119,14 +119,14 @@ static void testWritingSingleLineModel( const bool useCompression, const bool us
       std::filesystem::remove( model_fn );
 
    {
-      TBinaryTextFileIODelphi Fout { model_fn, "SingleLineCompressDecompress"s, mypass, fsign_text, useCompression, ErrNr, ErrMsg };
+      TBinaryTextFileIO Fout { model_fn, "SingleLineCompressDecompress"s, mypass, fsign_text, useCompression, ErrNr, ErrMsg };
       Fout.Write( miniModelText.data(), static_cast<int>(miniModelText.size()) );
    }
 
    ErrMsg.clear();
 
    {
-      TBinaryTextFileIODelphi Fin { model_fn, mypass, ErrNr, ErrMsg };
+      TBinaryTextFileIO Fin { model_fn, mypass, ErrNr, ErrMsg };
       std::array<char, 4096> readBuf {};
       auto len = Fin.Read( readBuf.data(), static_cast<uint32_t>(readBuf.size()) );
       readBuf[len] = '\0';

@@ -49,7 +49,7 @@ TLibHandle P3LoadLibrary( const std::string &lib, std::string &loadMsg )
    const auto lastErr = GetLastError();
    SetErrorMode( oldMode );
    if( !hinstLib )
-      loadMsg = "Error message with code = "s + std::to_string( lastErr );
+      loadMsg = "Error message with code = "s + rtl::sysutils_p3::IntToStr( lastErr );
    return hinstLib;
 #else
    void *libHandle = dlopen( lib.c_str(), RTLD_NOW | RTLD_GLOBAL );
@@ -76,7 +76,7 @@ bool P3LibHandleIsNil( const TLibHandle handle )
 void *P3GetProcAddress( TLibHandle handle, const std::string &name )
 {
 #ifdef MY_WINPLATFORM
-   return GetProcAddress( (HMODULE) handle, name.c_str() );
+   return reinterpret_cast<void *>(GetProcAddress( (HMODULE) handle, name.c_str() ));
 #else
    char *errMsg;
    dlerror();// clear the error state, will not happen on success

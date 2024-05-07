@@ -37,21 +37,21 @@ constexpr int  MAX_HDR = 20,
                MAX_INDENTS = 5,
                MAX_INDXQUE = 5;
 
-enum TPageControl
+enum TPageControl : uint8_t
 {
    pcFillPage,
    pcFortran,
    pcNothing,
    pcFormFeed
 };
-enum TCaseAction
+enum TCaseAction : uint8_t
 {
    casNone,
    casToUpper,
    casToLower
 };
 
-enum TIndxCode
+enum TIndxCode : uint8_t
 {
    inxcNone,
    inxcSubTitle,
@@ -74,6 +74,8 @@ const std::array<std::string, 10> IndxCodeText = { "???", "SubTitle", "Solve Sum
 
 class TGmsList final
 {
+   std::array<char, 256> blanks;
+
    int FCharsLeft,
        FCharsWritten {},
        FFileLineNumber{1},
@@ -84,8 +86,8 @@ class TGmsList final
        FPageNumber{},
        FLstTitleLeftAligned{1};
    std::string FTitle, FSubTitle, FTitleLastWritten{}, FSubTitleLastWritten{};
-   std::ostream *PFile;
-   gmsgen::PTextFile PFileIndx;
+   FILE *PFile;
+   std::fstream *PFileIndx;
    bool FDoPageHeader{}, FDoLineHeader {true}, FAddSubTitleToIndex {}, FWrHeader {};
    std::string FCurrHeader{};
    std::array<std::string, MAX_HDR> FHdrStrStack;
@@ -101,8 +103,9 @@ class TGmsList final
    std::string FnextID;
    bool FsuppressOutput {};
 
-   static std::string TwoSidePadder( const std::string &S, int W, char blankChar, bool padLeft );
-   void SysStrWrite( const std::string &s );
+   static std::string TwoSidePadder( std::string_view S, int W, char blankChar, bool padLeft );
+   void SysStrWrite( std::string_view s );
+   void SysStrWrite( const char *s, size_t slen );
    void SysChWrite( char ch );
    void SysBlWrite( int n );
 
@@ -115,41 +118,41 @@ class TGmsList final
 public:
    bool ShowRuler{}, ShowMargins, DoubleSpace{}, DebugHeader{};
 
-   explicit TGmsList( std::ostream *ptf = nullptr, gmsgen::PTextFile ptinx = nullptr );
+   explicit TGmsList( FILE *ptf = nullptr, std::fstream *ptinx = nullptr );
    virtual ~TGmsList();
 
    TPageControl PageControl { pcNothing };
    TCaseAction CaseAction { casNone };
 
-   void SetTitle( const std::string &s );
+   void SetTitle( std::string_view s );
    [[nodiscard]] std::string GetTitle() const;
 
    [[nodiscard]] int GetRightMargin() const;
 
-   void WrStrLn( const std::string &s );
-   void WrStrBlock( const std::string &s );
+   void WrStrLn( std::string_view s );
+   void WrStrBlock( std::string_view s );
    void WrInt( int n );
-   void WrStr( const std::string &s );
-   void WrStrInt( const std::string &s, int N );
+   void WrStr( std::string_view s );
+   void WrStrInt( std::string_view s, int N );
    void WrDblFmt( double d, int m, int n );
    void WrIntFmt( int N, int D );
    bool ReqLines( int N );
    void ReqLinesSkip( int L, int S );
    void IndentDone();
-   void PushHeader( const std::string &debugstr );
+   void PushHeader( std::string_view debugstr );
    void WriteLineHeader();
    void LWrite( bool src );
 
-   static std::string PadLeft( const std::string &S, int W, char blankChar = ' ' );
-   static std::string PadRight( const std::string &S, int W, char blankChar = ' ' );
+   static std::string PadLeft( std::string_view S, int W, char blankChar = ' ' );
+   static std::string PadRight( std::string_view S, int W, char blankChar = ' ' );
 
-   void WrStrFmt( const std::string &s, int w );
+   void WrStrFmt( std::string_view s, int w );
    void WrLn( int times = 1 );
    void WrBl( int n );
    void WrCh( char ch );
 
-   void SetSysTitle( const std::string &Left, const std::string &Right );
-   void SetSubTitle( const std::string &st );
+   void SetSysTitle( std::string_view Left, std::string_view Right );
+   void SetSubTitle( std::string_view st );
 
    [[nodiscard]] int GetPageNumber() const;
    [[nodiscard]] int GetLineNumber() const;
@@ -160,22 +163,22 @@ public:
 
    [[nodiscard]] bool LineIsEmpty() const;
 
-   void UsrWrite( const std::string &s );
+   void UsrWrite( std::string_view s );
 
    void CheckIndxQue();
 
-   void WriteToIndex( TIndxCode ic, const std::string &t );
+   void WriteToIndex( TIndxCode ic, std::string_view t );
 
    void NewPage();
    void SetPageNumber( int n );
 
-   [[nodiscard]] int StrBlockLength( const std::string &s, int Indent ) const;
+   [[nodiscard]] int StrBlockLength( std::string_view s, int Indent ) const;
 
    [[nodiscard]] int GetCharactersUsed() const;
 
-   void SetSubTitleLastWritten( const std::string &s );
+   void SetSubTitleLastWritten( std::string_view s );
 
-   void SetTitleLastWritten( const std::string &s );
+   void SetTitleLastWritten( std::string_view s );
    void SetLinesOnPage( int n );
 
    void SetLineNumber( int n );
@@ -188,7 +191,7 @@ public:
 
    bool ReqCharacters( int N );
 
-   void WrStrBrk( const std::string &s, char brkch );
+   void WrStrBrk( std::string_view s, char brkch );
 
    void WrPChar( const char *P, int L );
 
@@ -196,21 +199,21 @@ public:
 
    void WrBoolFmt( bool b, int w );
 
-   void WrStrMod( const std::string &s, int M );
+   void WrStrMod( std::string_view s, int M );
 
-   void AddToIndex( TIndxCode ic, const std::string &t );
+   void AddToIndex( TIndxCode ic, std::string_view t );
 
-   void HeaderStart( const std::string &debugstr );
+   void HeaderStart( std::string_view debugstr );
 
-   void HeaderDone( const std::string &debugstr );
+   void HeaderDone( std::string_view debugstr );
 
-   void HeaderShow( TIndxCode lxiCode, const std::string &ID );
+   void HeaderShow( TIndxCode lxiCode, std::string_view ID );
 
    void HeaderShowLast( int FromTop );
 
-   void HeaderDrop( const std::string &debugstr );
+   void HeaderDrop( std::string_view debugstr );
 
-   void HeaderSingle( const std::string &s );
+   void HeaderSingle( std::string_view s );
 
    void IndentStart();
 
@@ -228,7 +231,7 @@ public:
 
    [[nodiscard]] std::string GetErrorStars() const;
 
-   void SetErrorStars( const std::string &s );
+   void SetErrorStars( std::string_view s );
 
    void SetSuppressOutput( bool v )
    {

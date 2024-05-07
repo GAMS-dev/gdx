@@ -50,7 +50,7 @@ public:
     */
    ~TGXFileObj();
 
-   enum class TraceLevels
+   enum class TraceLevels : uint8_t
    {
       trl_none,
       trl_errors,
@@ -1745,9 +1745,9 @@ public:
 
 
 private:
-std::unique_ptr<gdlib::gmsstrm::TMiBufferedStreamDelphi> FFile;
+std::unique_ptr<gdlib::gmsstrm::TMiBufferedStream> FFile;
 TgxFileMode fmode { f_not_open }, fmode_AftReg { f_not_open };
-enum
+enum : uint8_t
 {
    stat_notopen,
    stat_read,

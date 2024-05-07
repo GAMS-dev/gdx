@@ -49,7 +49,6 @@
 #endif
 
 using namespace std::literals::string_literals;
-namespace fs = std::filesystem;
 
 using namespace rtl::p3platform;
 using namespace rtl::sysutils_p3;
@@ -526,9 +525,9 @@ static int System4Win( const std::string &CmdPtr, bool inheritedHandles, int &Pr
    std::string cs = cspec ? cspec : ""s;
    if( cs.empty() )
    {
-      if( fs::exists( CMD_WIN7 ) )
+      if( FileExists( CMD_WIN7 ) )
          cs = CMD_WIN7;
-      else if( fs::exists( CMD_WINNT ) )
+      else if( FileExists( CMD_WINNT ) )
          cs = CMD_WINNT;
       else
          return 1;

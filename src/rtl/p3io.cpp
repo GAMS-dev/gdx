@@ -28,9 +28,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <array>
+#include <stdexcept>
 
 #include "p3io.h"
 #include "dtoaLoc.h"
+
+#if !defined(_WIN32)
+#include <sys/stat.h>
+#endif
 
 namespace rtl::p3io
 {
@@ -296,6 +301,151 @@ void P3_Val_i(const char *s, size_t slen, int *i, int *code)
       *i = 0;
       *code = (int)(sd - (char *)buffer.data() + 1);
    }
+}
+
+//=================================================================================
+
+uint8_t SYSTEM_filemode;
+
+constexpr uint8_t FM_RO = 0, // read-only
+                  FM_WO = 1, // write-only
+                  FM_RW = 2;// read-write
+
+static inline void P3SetMode(P3File *f, uint8_t mode) {
+   f->status = P3_OPEN | (mode & P3_MODEMASK);
+}
+
+
+
+void P3FileOpn( P3File *fil, uint8_t status, P3FileType type, uint32_t block_size )
+{
+   fil->f = nullptr;
+   fil->status = P3_CLOSED;
+   fil->block_size = block_size;
+
+   if (SYSTEM_filemode != FM_RO && SYSTEM_filemode != FM_WO)
+      SYSTEM_filemode = FM_RW;
+
+   // Set action to perform on file
+   // Weird case: s = _P3RESET and filemode = 1 (_FM_RO):
+   //   Do append, not write which erases the file
+   // 0: append, 4: reset, 8: rewrite, 12: update
+   uint8_t action {status}; // squash warning
+   if(status == P3_RESET && type) {
+      switch (SYSTEM_filemode) {
+         case FM_RO:
+            action = P3_RESET;
+            break;
+         case FM_WO:
+            action = P3_APPEND;
+            break;
+         case FM_RW:
+            action = P3_UPDATE;
+            break;
+         default:
+            throw std::runtime_error("Unknown system file mode!");
+      }
+   }
+
+   // Done setting action
+   if (!fil->nam.empty()) {  // Non-empty file name
+      errno = 0;
+      const char *str;
+
+#if defined(_WIN32)
+      if(type != ft_text_file) // DOS, binary file
+         switch (action) {
+            case P3_APPEND : str = "ab"; break;
+            case P3_RESET  : str = "rb"; break;
+            case P3_REWRITE: str = "wb"; break;
+               // NOTE: r+ below works for Paul's objtest.dpr, but w+ makes
+               // it write to stdout!!! FIGURE OUT WHY.
+            case P3_UPDATE : str = "rb+"; break;
+            default:
+               throw std::runtime_error("Unknown action!");
+         }
+      else
+#endif
+      {
+         // Unix and Windows text file
+         switch( action )
+         {
+            case P3_APPEND:
+               str = "a";
+               break;
+            case P3_RESET:
+               str = "r";
+               break;
+            case P3_REWRITE:
+               str = "w";
+               break;
+            case P3_UPDATE:
+               str = "r+";
+               break;
+            default:
+               throw std::runtime_error("Unknown action!");
+         }
+      }
+
+      fil->f = std::fopen(fil->nam.c_str(), str);
+      P3SetMode(fil,status); // changed below on errors
+
+      if (!fil->f)
+         fil->status = P3_CLOSED;
+      else {
+#if !defined(_WIN32)
+         struct stat statBuf {};
+         int rCode = fstat(fileno(fil->f), &statBuf);
+         if (rCode) {
+            (void) fclose (fil->f);
+            fil->f = nullptr;
+            fil->status = P3_CLOSED;
+            // FIXME: Error handling!
+         }
+         else if ((S_IFMT&statBuf.st_mode) == S_IFDIR) {
+            (void) fclose (fil->f);
+            fil->f = nullptr;
+            fil->status = P3_CLOSED;
+            // is a directory!
+            // FIXME: Error handling!
+         }
+#endif
+      }
+   }
+   else { // Empty file name. Assign to stdin/stdout, even if non-text file
+      // Note: Actually doesn't matter whether a text file, hence "1 ||" below
+      if (!type) {   // Text file without a name: stdin or stdout
+         if (status == P3_RESET) // If call was Reset (NOT action!) -> stdin
+            fil->f = stdin;
+         else  // use standard output
+            fil->f = stdout;
+         P3SetMode(fil,status);
+      }
+      else {
+         // Here: Assigned empty name to non-text file (or forgot to
+         //       assign name to it), now trying to open it...
+         fil->status = P3_CLOSED;     // still closed
+      }
+   }
+}
+
+void P3WriteFS(P3File *fil, const char *s)
+{
+   if(fil->status != P3_OPEN) return;
+   FILE *f = fil->f;
+   int nChars;
+   if (stdout == f) {
+      // print it with fprintf: this works faster on VIS for stdout */
+      nChars = std::fprintf (f, "%s", s);
+   }
+   else {
+      // skip fprintf, do it all with putc: faster for files?
+      nChars = 0;
+   }
+   // now handle special case where null byte stops fprintf early,
+   // or case where we don't use fprintf at all
+   for (int i = nChars; s[i] != '\0'; i++)
+      std::putc(s[i],f);
 }
 
 }// namespace rtl::p3io

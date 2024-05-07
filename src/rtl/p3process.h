@@ -33,7 +33,7 @@
 namespace rtl::p3process
 {
 
-enum TKillHow
+enum TKillHow : uint8_t
 {
    soft,
    hard
@@ -66,7 +66,7 @@ bool p3IsPIDValid( global::delphitypes::Cardinal pid );
 
 using tCtrlHandler = void(*)();
 
-enum CtrlHandlerState
+enum CtrlHandlerState : uint8_t
 {
    P3CtrlHandlerOK,
    P3CtrlHandlerWasEmpty,

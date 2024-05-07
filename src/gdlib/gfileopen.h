@@ -28,18 +28,27 @@
 
 #include <string>
 #include "../global/delphitypes.h"
+#include "../rtl/p3utils.h"
 
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
 namespace gdlib::gfileopen
 {
-
-
 int grRewrite( const std::string &fn, bool ReTry, std::fstream &FileHandle, int &IORes );
 int grReset( const std::string &fn, bool ReTry, std::fstream &FileHandle, int &IORes );
 int grAppend( const std::string &fn, bool ReTry, std::fstream &FileHandle, int &IORes );
 
+int grRewrite( const std::string &fn, bool ReTry, FILE *&FileHandle, int &IORes );
+int grReset( const std::string &fn, bool ReTry, FILE *&FileHandle, int &IORes );
+int grAppend( const std::string &fn, bool ReTry, FILE *&FileHandle, int &IORes );
+
 int grResetUntyped( const std::string &fn, int RecSize, bool ReTry, std::fstream &FileHandle, int &IORes );
 int grRewriteUntyped( const std::string &fn, int RecSize, bool ReTry, std::fstream &FileHandle, int &IORes );
+
+int grResetUntyped( const std::string &fn, int RecSize, bool ReTry, rtl::p3utils::Tp3FileHandle &FileHandle, int &IORes );
+int grRewriteUntyped( const std::string &fn, int RecSize, bool ReTry, rtl::p3utils::Tp3FileHandle &FileHandle, int &IORes );
+
+int grResetUntyped( const std::string &fn, int RecSize, bool ReTry, FILE *&FileHandle, int &IORes );
+int grRewriteUntyped( const std::string &fn, int RecSize, bool ReTry, FILE *&FileHandle, int &IORes );
 }// namespace gdlib::gfileopen
