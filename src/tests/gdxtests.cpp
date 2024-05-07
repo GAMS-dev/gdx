@@ -47,6 +47,7 @@
 #include <map>       // for map, operator!=, _Rb_tr...
 #include <tuple>     // for tuple
 #include <utility>   // for pair
+#include <fstream>
 
 #include "gdxtests.h"
 
@@ -1980,6 +1981,73 @@ TEST_CASE( "Test filter" )
       filterAction[0] = filterAction[1] = 23;
       REQUIRE_FALSE( pgx.gdxDataReadFilteredStart( 5, filterAction.data(), nrRecs ) );// symbol 'd'
    } );
+}
+
+TEST_CASE("Test filter example from README")
+{
+   if( !hasGAMSinstalled() )
+   {
+      std::cout << "Skipping test since GAMS system is not found!" << std::endl;
+      return;
+   }
+
+   const auto fn { "filtex.gms"s }, log_fn { "filtexLog.txt"s }, gdx_fn { "filtex.gdx"s };
+
+   {
+      std::ofstream ofs {fn};
+      ofs << "set I /New-York,Chicago,Topeka,Stockholm/;\nparameter A(I,*);\n"s;
+   }
+
+   auto rc = std::system( ( gamsToolCall( "gams"s ) + " "s + fn + " gdx=default lo=0 o=lf > " + log_fn ).c_str() );
+   REQUIRE_FALSE( rc );
+   std::filesystem::remove( fn );
+   std::filesystem::remove( log_fn );
+   std::filesystem::remove( "lf" );
+   // Roughly the example for the filter usage from the README.md comes here...
+   testRead( gdx_fn, []( TGXFileObj &gdx ) {
+      REQUIRE(gdx.gdxUELRegisterMapStart());
+      REQUIRE( gdx.gdxUELRegisterMap( 1000, "New-York" ) );
+      REQUIRE( gdx.gdxUELRegisterMap( 2000, "Chicago" ) );
+      REQUIRE(gdx.gdxUELRegisterDone());
+      REQUIRE( gdx.gdxFilterRegisterStart( 123 ) );
+      REQUIRE( gdx.gdxFilterRegister(1000) );
+      REQUIRE( gdx.gdxFilterRegister(2000) );
+      REQUIRE( gdx.gdxFilterRegisterDone() );
+      std::array<int, 2> filterAction {123, gdx::DOMC_EXPAND};
+      int NrUnMapped, LastMapped;
+      REQUIRE( gdx.gdxUMUelInfo( NrUnMapped, LastMapped ) );
+      int SyNr;
+      REQUIRE( gdx.gdxFindSymbol( "A", SyNr ) );
+      std::array<char, GMS_SSSIZE> SyName;
+      int SyDim, SyTyp;
+      REQUIRE( gdx.gdxSymbolInfo( SyNr, SyName.data(), SyDim, SyTyp ) );
+      REQUIRE_EQ( SyDim, 2 );
+      REQUIRE_EQ( SyTyp, dt_par );
+      int NrRecs;
+      REQUIRE( gdx.gdxDataReadFilteredStart( SyNr, filterAction.data(), NrRecs ) );
+      std::array<int, 2> IndxI;
+      std::array<double, GMS_VAL_MAX> Values;
+      int DimFrst;
+      for( int N { 1 }; N <= NrRecs; N++ )
+      {
+         REQUIRE( gdx.gdxDataReadMap( N, IndxI.data(), Values.data(), DimFrst ) );
+         // Do something with IndxI and Values here!
+      }
+      REQUIRE( gdx.gdxDataReadDone() );
+      int NewLastMapped;
+      // see if there are new unique elements
+      REQUIRE( gdx.gdxUMUelInfo( NrUnMapped, NewLastMapped ) );
+      if( NewLastMapped > LastMapped )
+      {
+         for( int N { LastMapped + 1 }; N <= NewLastMapped; N++ )
+         {
+            std::array<char, GMS_SSSIZE> S {};
+            REQUIRE( gdx.gdxGetUEL( N, S.data() ) );
+            //std::cout << "New element " << N << " = " << S.data() << '\n';
+         }
+      }
+   });
+   std::filesystem::remove( gdx_fn );
 }
 
 TEST_CASE( "Test setting trace level" )
