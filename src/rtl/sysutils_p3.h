@@ -69,7 +69,7 @@ extern std::string FileStopper, ExtStopper;
 
 std::string ExtractShortPathName( const std::string &FileName );
 
-std::string ExtractFilePath( const std::string &pathOfExecutable );
+std::string ExtractFilePath( const std::string &FileName );
 std::string ExtractFileName( const std::string &FileName );
 std::string ExtractFileExt( const std::string &FileName );
 bool FileExists( const std::string &FileName );
@@ -107,6 +107,7 @@ constexpr std::array<TDayTable, 2> MonthDays {{
    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
 }};
 
+int LastDelimiter( const char *Delimiters, const std::string &S );
 int LastDelimiter( const std::string &Delimiters, const std::string &S );
 
 using TFileName = std::string;
@@ -125,5 +126,6 @@ void FindClose( TSearchRec &F );
 void Sleep( uint32_t milliseconds );
 
 std::string IntToStr(int64_t N);
+void IntToStr(int64_t N, char *res, size_t &len );
 
 }// namespace rtl::sysutils_p3

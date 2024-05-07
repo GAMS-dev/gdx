@@ -26,6 +26,7 @@
 
 #include "cmdpar.h"
 #include "utils.h"
+#include "rtl/sysutils_p3.h"
 
 #include <cassert>
 #include <optional>
@@ -223,6 +224,6 @@ int TCmdParams::GetParamCount() const
 std::string TCmdParams::GetParamText( int key ) const
 {
    std::optional<std::string> name = utils::keyForValue( FKeyList, key );
-   return name ? *name : "?"s + std::to_string( key ) + "?"s;
+   return name ? *name : "?"s + rtl::sysutils_p3::IntToStr( key ) + "?"s;
 }
 }// namespace gdlib::cmdpar

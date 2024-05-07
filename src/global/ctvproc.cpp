@@ -42,6 +42,6 @@ tprocname getprocname( const std::string &id )
 
 std::string getproctext( tprocname p )
 {
-   return proctexts.at( p );
+   return proctexts[p];
 }
 }// namespace global::ctvproc

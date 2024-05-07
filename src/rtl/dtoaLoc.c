@@ -2656,7 +2656,7 @@ noReturnVal (const char *s, char *buf, size_t bufSiz, char **rve)
       *rve = NULL;
     return NULL;
   }
-  strcpy (buf, s);
+  memcpy(buf, s, sizeof(char)*(n+1));
   if (rve)
     *rve = buf + n;
   return buf;

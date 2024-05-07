@@ -80,6 +80,12 @@ public:
          hasSym.set( s );
    }
 
+   bool empty() const {
+      for( int s {}; s < card; s++ )
+         if( hasSym[s] ) return false;
+      return true;
+   }
+
    template<typename... Cdr>
    void insert( const T s, Cdr... cdr )
    {
@@ -430,14 +436,7 @@ inline charset multiCharSetRanges( std::initializer_list<std::pair<char, char>> 
    return res;
 }
 
-template<const char inflateChar = ' '>
-std::string strInflateWidth( const int num, const int targetStrLen )
-{
-   auto s = std::to_string( num );
-   const auto l = s.length();
-   if( l >= static_cast<size_t>( targetStrLen ) ) return s;
-   return std::string( targetStrLen - l, inflateChar ) + s;
-}
+std::string strInflateWidth( const int num, const int targetStrLen, const char inflateChar =  ' ');
 
 void removeTrailingCarriageReturnOrLineFeed( std::string &s );
 
@@ -472,7 +471,14 @@ bool sameTextPChar( const char *a,
 
 std::string_view trim( std::string_view s );
 
-std::string getLineWithSep( std::fstream &fs );
+std::string getLineWithSep( std::istream &fs );
+
+void getline( FILE *f, std::string &s );
+std::string getline( FILE *f );
+
+inline void fputstr(FILE* f, std::string_view s) {
+   fwrite( s.data(), sizeof( char ), s.length(), f );
+}
 
 std::string trim( const std::string &s );
 std::string trimRight( const std::string &s );
@@ -731,7 +737,21 @@ inline int pos( const char c, const std::string &s )
 }
 
 void copy_to_uppercase( const std::string &s, char *buf );
+void copy_to_uppercase( const char *s, char *buf );
 
 std::string IntToStrW( int n, int w, char blankChar = ' ' );
+
+void trimLeft( std::string &s );
+
+template<int N, int firstValid=0>
+inline int indexOfSameText(const std::array<std::string, N> &strs, const std::string &s) {
+   int i{firstValid};
+   for(const std::string &s2 : strs) {
+      if(sameText(s, s2))
+         return i;
+      i++;
+   }
+   return firstValid-1;
+}
 
 }// namespace utils

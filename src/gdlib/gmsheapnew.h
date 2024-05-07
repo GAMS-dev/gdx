@@ -178,6 +178,12 @@ public:
       XFreeMem(p, sizeof(T));
    }
 
+   template<typename T>
+   void XFreeMemVec(T *vec, int count)
+   {
+      XFreeMem( vec, count * sizeof( T ) );
+   }
+
    // With explicit destructor call for objs allocated via XGetMemCreat (placement-new)
    template<typename T>
    void XFreeMemDestr(T *p) {
@@ -205,6 +211,13 @@ public:
 
    void XFreeMem64andNil( void **P, int64_t Size );
    void XReAllocMem( void **P, int OldSize, int NewSize );
+
+   template<typename T>
+   void XReAllocMemVec(T** vec, int OldCount, int NewCount)
+   {
+      XReAllocMem( reinterpret_cast<void **>(vec), OldCount * sizeof( T ), NewCount * sizeof( T ) );
+   }
+
    void XReAllocMemNC( void **P, int OldSize, int NewSize );
    void XReAllocMem64( void **P, int64_t OldSize, int64_t NewSize );
    void GetSlotCnts( THeapSlotNr Slot, int64_t &cntGet, int64_t &cntFree, int64_t &cntAvail ) const;

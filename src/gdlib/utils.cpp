@@ -27,6 +27,7 @@
 
 #include "utils.h"
 #include "rtl/p3io.h"
+#include "rtl/sysutils_p3.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -125,6 +126,18 @@ std::string_view trim( const std::string_view s )
    return s.substr( firstNonBlank, lastNonBlank - firstNonBlank + 1 );
 }
 
+std::string getLineWithSep( std::istream &fs )
+{
+   std::string line;
+   std::getline( fs, line );
+   if( !fs.eof() )
+   {
+      fs.unget();
+      line.push_back( static_cast<char>( fs.get() ) );
+   }
+   return line;
+}
+
 bool sameTextAsAny( const std::string_view a, const std::initializer_list<std::string_view> &bs )
 {
    return any<std::string_view>( [&a]( const std::string_view b ) { return sameText( a, b ); }, bs );
@@ -133,18 +146,6 @@ bool sameTextAsAny( const std::string_view a, const std::initializer_list<std::s
 bool sameTextPrefix( const std::string_view s, const std::string_view prefix )
 {
    return sameText( s.substr( 0, prefix.length() ), prefix );
-}
-
-std::string getLineWithSep( std::fstream &fs )
-{
-   std::string line;
-   std::getline( fs, line );
-   if( !fs.eof() )
-   {
-      fs.unget();
-      line.push_back( static_cast<char>(fs.get()) );
-   }
-   return line;
 }
 
 bool hasNonBlank( const std::string_view s )
@@ -622,7 +623,7 @@ BinaryDiffMismatch::BinaryDiffMismatch( uint64_t offset, uint8_t lhs, uint8_t rh
 
 bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
 {
-   enum tBOM
+   enum tBOM : uint8_t
    {
       bUTF8,
       bUTF16BE,
@@ -711,11 +712,53 @@ void copy_to_uppercase( const std::string &s, char *buf )
    buf[j] = '\0';
 }
 
+void copy_to_uppercase( const char *s, char *buf )
+{
+   int j {};
+   for( const char *c = s; *c != '\0'; c++ )
+      buf[j++] = toupper( *c );
+   buf[j] = '\0';
+}
+
 std::string IntToStrW( const int n, const int w, const char blankChar )
 {
    if( w < 0 || w > 255 ) return ""s;
-   std::string t = std::to_string( n );
+   std::string t = rtl::sysutils_p3::IntToStr( n );
    return static_cast<int>( t.length() ) < w ? std::string( w - static_cast<int>( t.length() ), blankChar ) + t : t;
+}
+
+void trimLeft( std::string &s )
+{
+   size_t i;
+   for( i = 0; i < s.length(); i++ )
+      if( s[i] != ' ' ) break;
+   s.erase( 0, i );
+}
+
+void getline( FILE *f, std::string &s )
+{
+   constexpr int bsize {512};
+   std::array<char, bsize> buf;
+   if(!std::fgets( buf.data(), bsize, f ) && std::ferror(f))
+      return;
+   s.assign( buf.data() );
+}
+
+std::string getline( FILE *f )
+{
+   constexpr int bsize {512};
+   std::array<char, bsize> buf;
+   if(!std::fgets( buf.data(), bsize, f ) && std::ferror(f))
+      return {};
+   return buf.data();
+}
+
+std::string strInflateWidth( const int num, const int targetStrLen, const char inflateChar )
+{
+   auto s = rtl::sysutils_p3::IntToStr( num );
+   const auto l = s.length();
+   if( l >= static_cast<size_t>( targetStrLen ) ) return s;
+   return std::string( targetStrLen - l, inflateChar ) + s;
 }
 
 } // namespace utils

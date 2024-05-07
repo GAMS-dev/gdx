@@ -27,6 +27,7 @@
 #include "runner.h"
 #include "utils.h"
 #include "../rtl/p3process.h"
+#include "../rtl/sysutils_p3.h"
 
 using namespace std::literals::string_literals;
 
@@ -128,7 +129,7 @@ int TRunner::StartAndWait()
    {
       FMsgHandler.DebugMessage( "Direct call: "s + FCommandLine );
       int res { rtl::p3process::P3ExecP( FCommandLine, FProgRC ) };
-      FMsgHandler.DebugMessage( "Return = "s + std::to_string( res ) + " RC = "s + std::to_string( FProgRC ) );
+      FMsgHandler.DebugMessage( "Return = "s + rtl::sysutils_p3::IntToStr( res ) + " RC = "s + rtl::sysutils_p3::IntToStr( FProgRC ) );
       return res;
    }
 }

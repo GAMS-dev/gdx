@@ -34,6 +34,7 @@
 #include <string>
 #include <iostream>
 #include <array>
+#include <cstdint>
 #include "gdxcc.h"
 
 namespace gdx
@@ -47,7 +48,7 @@ using TDataStoreExProc_t = int ( * )( const int *Indx, const double *Vals, const
 using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
 using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
 
-enum TgdxIntlValTyp
+enum TgdxIntlValTyp : uint8_t
 {// values stored internally via the indicator byte
    vm_valund,
    vm_valna,
@@ -74,7 +75,7 @@ class TGXFileObj
    gdxHandle_t pgx {};
 
 public:
-   enum class TraceLevels
+   enum class TraceLevels : uint8_t
    {
       trl_none,
       trl_errors,

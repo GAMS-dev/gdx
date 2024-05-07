@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <cstdint>
 #include <cstddef>
 
@@ -41,5 +43,41 @@ void P3_Val_dd(const char *s, double *d, int *code);
 
 void P3_Val_i(const char *s, size_t slen, int *i, int *code);
 void P3_Val_i(const char *s, int *i, int *code);
+
+enum P3FileType : uint8_t
+{
+   ft_text_file,
+   ft_typed,
+   ft_untyped
+};
+
+enum P3FileMode : uint8_t
+{
+   P3_APPEND = 0,
+   P3_RESET = 4,
+   P3_REWRITE = 8,
+   P3_UPDATE = 12
+};
+
+enum P3FileState : uint8_t
+{
+   P3_UNASSIGNED,
+   P3_CLOSED,
+   P3_OPEN
+};
+
+constexpr uint8_t P3_MODEMASK = 12;
+
+struct P3File {
+   FILE *f;
+   uint8_t status;
+   uint32_t block_size;
+   std::string nam;
+};
+
+extern uint8_t SYSTEM_filemode;
+
+void P3FileOpn( P3File *fil, uint8_t status, P3FileType type, uint32_t block_size );
+void P3WriteFS(P3File *fil, const char *s);
 
 }// namespace rtl::p3io

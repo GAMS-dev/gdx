@@ -184,6 +184,16 @@ TEST_CASE( "Trim blanks from beginning and end of strings but not in between" )
    REQUIRE_EQ( "abc"s, utils::trim( "abc     "s ) );
 }
 
+TEST_CASE( "Trim space chars from the beginning of a string in place" ) {
+   std::string a{"    xyz "s}, b{}, c{"       "}, d{"xyz "};
+   for(std::string *s : {&a,&b,&c,&d})
+      utils::trimLeft(*s);
+   REQUIRE_EQ("xyz "s, a);
+   REQUIRE(b.empty());
+   REQUIRE(c.empty());
+   REQUIRE_EQ("xyz "s, d);
+}
+
 TEST_CASE( "Split string into parts using a separating character" )
 {
    REQUIRE_EQ( utils::split( "a;b;c"s, ';' ), std::list { "a"s, "b"s, "c"s } );

@@ -36,7 +36,7 @@ const int refreshInterval = 200, maxbuf = 2, maxerrchar = 150;
 
 bool isMuxed();
 
-enum tsl_status
+enum tsl_status : uint8_t
 {
    sl_closed,
    sl_file,
@@ -55,7 +55,7 @@ class TGMSLogStream
    int FShowOSMem {};
    int FErrorCnt {};
    tsl_status FStatus {sl_closed};
-   std::ostream *Ffcon {};
+   FILE *Ffcon {};
    int FLenLast {};
    bool FhasNewData {};
    uint64_t FLastShowTicks {}, FLineStartTicks {}, FPrevSecs {};
@@ -68,7 +68,7 @@ class TGMSLogStream
 
 #ifdef METER
    // measure the calls made to this object
-   int cntLogLineNr, cntLogMemory, cntFreshen;
+   int cntLogLineNr {}, cntLogMemory {}, cntFreshen {};
 #endif
 
    void CheckOpen();
@@ -147,7 +147,7 @@ class TGMSStatusStream
 {
    void *Fgfusrmem {};
    gdlib::stattypes::tgwrite *Fgfcb {};
-   global::delphitypes::Text Ffsysout {}, Ffstat;
+   FILE *Ffsysout {}, *Ffstat {};
    std::string Ffnstat;
    bool Fcopysysout {};
    bool Fwascopy {}, Fnofilename, Fstatusopen {};

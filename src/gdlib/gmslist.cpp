@@ -27,6 +27,8 @@
 #include <iostream>
 #include <cassert>
 
+#include "rtl/sysutils_p3.h"
+
 #include "gmslist.h"
 #include "strutilx.h"
 
@@ -59,7 +61,7 @@ std::array<int, inxcMessage + 1> IndxCodeLev { 0, 1, 1, 2, 2, 2, 2, 3, 2, 2 };
    return static_cast<TIndxCode>( 0 );
 }*/
 
-void TGmsList::SetTitle( const std::string &s )
+void TGmsList::SetTitle( std::string_view s )
 {
    FTitle = s;
    FDoPageHeader = s != FTitleLastWritten;
@@ -67,7 +69,7 @@ void TGmsList::SetTitle( const std::string &s )
 
 std::string TGmsList::GetTitle() const { return FTitle; }
 
-void TGmsList::WrStrLn( const std::string &s )
+void TGmsList::WrStrLn( std::string_view s )
 {
    if( FsuppressOutput ) return;
    WrStr( s );
@@ -81,18 +83,22 @@ void TGmsList::WrStrLn( const std::string &s )
 //   S: The string to be written
 // See Also:
 //   StrBlockLength
-void TGmsList::WrStrBlock( const std::string &s )
+void TGmsList::WrStrBlock( std::string_view s )
 {
+   if( FsuppressOutput ) return;
    if( s.empty() ) WrLn();
    else
    {
+      // FIXME: AS: This looks slow!
       for( std::string x { s }; !x.empty(); )
       {
          int k { FCharsLeft };
          WrStrLn( x.substr( 0, k ) );
-         x = k >= static_cast<int>( x.length() ) ? "" : x.substr( k, x.length() - k );
-         while( !x.empty() && x.front() == ' ' ) x = x.substr( 1, x.length() - 1 );
-         if( !x.empty() ) WrBl( FCharsLeft - k );
+         x = k >= static_cast<int>( x.length() ) ? ""s : x.substr( k, x.length() - k );
+         if( !x.empty() && x.front() == ' ' )
+            utils::trimLeft(x);
+         if( !x.empty() )
+            WrBl( FCharsLeft - k );
       }
    }
 }
@@ -100,10 +106,10 @@ void TGmsList::WrStrBlock( const std::string &s )
 void TGmsList::WrInt( int n )
 {
    if( FsuppressOutput ) return;
-   WrStr( std::to_string( n ) );
+   WrStr( rtl::sysutils_p3::IntToStr( n ) );
 }
 
-void TGmsList::WrStr( const std::string &s )
+void TGmsList::WrStr( std::string_view s )
 {
    if( FsuppressOutput ) return;
    if( (int) s.length() <= FCharsLeft )
@@ -122,7 +128,7 @@ void TGmsList::WrStr( const std::string &s )
       }
    }
 
-   const std::string &x { s };
+   const std::string_view &x { s };
    for( int k { FCharsLeft }; (int) x.length() > k && k > 0; k = FCharsLeft )
    {
       UsrWrite( x.substr( 1, k ) );
@@ -135,10 +141,12 @@ void TGmsList::WrStr( const std::string &s )
    }
 }
 
-void TGmsList::WrStrInt( const std::string &s, int N )
+void TGmsList::WrStrInt( std::string_view s, int N )
 {
    if( FsuppressOutput ) return;
-   WrStr( s + std::to_string( N ) );
+   std::string acc {s};
+   acc += rtl::sysutils_p3::IntToStr(N);
+   WrStr( acc );
 }
 
 // Brief:
@@ -178,7 +186,7 @@ void TGmsList::WrDblFmt( double d, int m, int n )
 void TGmsList::WrIntFmt( int N, int D )
 {
    if( FsuppressOutput ) return;
-   WrStr( PadLeft( std::to_string( N ), D, ' ' ) );
+   WrStr( PadLeft( rtl::sysutils_p3::IntToStr( N ), D, ' ' ) );
 }
 
 // Brief:
@@ -240,7 +248,7 @@ void TGmsList::IndentDone()
    }
 }
 
-void TGmsList::PushHeader( const std::string &debugstr )
+void TGmsList::PushHeader( std::string_view debugstr )
 {
    if( DebugHeader ) { debugStream << "\nPushHeader: " << debugstr << ", Lev = " << FNrHdrLines << " Sp = " << FHdrSp; }
    if( FNrHdrLines >= MAX_HDR )
@@ -263,7 +271,7 @@ void TGmsList::LWrite( bool src )
    else
    {
       if( FDoLineHeader && src ) WriteLineHeader();
-      if( PFile ) PFile->put( '\n' );
+      if( PFile ) fputc( '\n', PFile );
       FFileLineNumber++;
       FLinesOnPage++;
       if( FLinesOnPage >= FLinesPerPage ) FDoPageHeader = true;
@@ -273,12 +281,18 @@ void TGmsList::LWrite( bool src )
    CalcCharsLeft();
 }
 
-std::string TGmsList::TwoSidePadder( const std::string &S, int W, char blankChar, bool padLeft )
+std::string TGmsList::TwoSidePadder( std::string_view S, int W, char blankChar, bool padLeft )
 {
    const auto nblanks = static_cast<int>(W - S.length());
-   if( nblanks <= 0 ) return S;
-   const std::string blanks( nblanks, blankChar );
-   return padLeft ? blanks + S : S + blanks;
+   if( nblanks <= 0 ) return std::string { S };
+   std::string blanks( nblanks, blankChar );
+   if(padLeft) {
+      blanks += S;
+      return blanks;
+   }
+   std::string res{S};
+   res += blanks;
+   return res;
 }
 
 // Brief:
@@ -290,7 +304,7 @@ std::string TGmsList::TwoSidePadder( const std::string &S, int W, char blankChar
 //  String with additional blanks on the right
 // See Also:
 //  PadLeft
-std::string TGmsList::PadRight( const std::string &S, int W, char blankChar ) { return TwoSidePadder( S, W, blankChar, false ); }
+std::string TGmsList::PadRight( std::string_view S, int W, char blankChar ) { return TwoSidePadder( S, W, blankChar, false ); }
 
 // Brief:
 //  Pad a string on the left side with blanks
@@ -301,7 +315,7 @@ std::string TGmsList::PadRight( const std::string &S, int W, char blankChar ) { 
 //  String with additional blanks on the left
 // See Also:
 //  PadRight
-std::string TGmsList::PadLeft( const std::string &S, int W, char blankChar ) { return TwoSidePadder( S, W, blankChar, true ); }
+std::string TGmsList::PadLeft( std::string_view S, int W, char blankChar ) { return TwoSidePadder( S, W, blankChar, true ); }
 
 // Brief:
 //   Write a string left or right aligned in a field
@@ -310,7 +324,7 @@ std::string TGmsList::PadLeft( const std::string &S, int W, char blankChar ) { r
 //   S: The string to be written
 //   W: The minimum width of the field; when w >= 0 the string will
 //      right aligned, otherwise, it will be left aligned
-void TGmsList::WrStrFmt( const std::string &s, int w )
+void TGmsList::WrStrFmt( std::string_view s, int w )
 {
    if( FsuppressOutput ) return;
    WrStr( w >= 0 ? PadLeft( s, w ) : PadRight( s, -w ) );
@@ -337,14 +351,14 @@ void TGmsList::WrLn( int times )
 //   Left: Text to be displayed on the left side of the line
 //   Right: Text to be displayed on the right side of the line
 //          (will be followed by 'Page' and the page number
-void TGmsList::SetSysTitle( const std::string &Left, const std::string &Right )
+void TGmsList::SetSysTitle( std::string_view Left, std::string_view Right )
 {
    if( FsuppressOutput ) return;
    FSysTitleLeft = Left;
    FSysTitleRight = Right;
 }
 
-void TGmsList::SetSubTitle( const std::string &st )
+void TGmsList::SetSubTitle( std::string_view st )
 {
    FSubTitle = st;
    FAddSubTitleToIndex = true;
@@ -370,7 +384,7 @@ bool TGmsList::LineIsEmpty() const
    return FWrHeader ? FCurrHeader.empty() : !FCharsWritten;
 }
 
-void TGmsList::UsrWrite( const std::string &s )
+void TGmsList::UsrWrite( std::string_view s )
 {
    if( FWrHeader ) FCurrHeader += s;
    else
@@ -392,19 +406,26 @@ void TGmsList::CheckIndxQue()
    }
 }
 
-void TGmsList::SysStrWrite( const std::string &s )
+void TGmsList::SysStrWrite( std::string_view s )
 {
    if( !PFile ) return;
-   ( *PFile ) << std::string { CaseAction == casToUpper ? strutilx::UpperCase( s ) : ( CaseAction == casToLower ? strutilx::LowerCase( s ) : s ) };
+   utils::fputstr( PFile, ( CaseAction == casToUpper ? strutilx::UpperCase( s ) : ( CaseAction == casToLower ? strutilx::LowerCase( s ) : s ) ) );
    FCharsWritten += static_cast<int>( s.length() );
+}
+
+void TGmsList::SysStrWrite( const char *s, size_t slen )
+{
+   if( !PFile ) return;
+   fwrite( s, sizeof( char ), slen, PFile );
+   FCharsWritten += static_cast<int>(slen);
 }
 
 void TGmsList::SysChWrite( const char ch )
 {
    if( !PFile ) return;
    const char c { CaseAction == casToUpper ? (char) utils::toupper( ch ) : ( CaseAction == casToLower ? (char) utils::tolower( ch ) : ch ) };
-   PFile->put( c );
-   FCharsWritten += 1;
+   fputc( c, PFile );
+   FCharsWritten++;
 }
 
 void TGmsList::SysBlWrite( int n )
@@ -412,22 +433,24 @@ void TGmsList::SysBlWrite( int n )
    if( !PFile ) return;
    if( n > 0 )
    {
-      *PFile << std::string( n, ' ' );
+      fwrite( blanks.data(), sizeof( char ), n, PFile );
       FCharsWritten += n;
    }
 }
 
-void TGmsList::WriteToIndex( TIndxCode ic, const std::string &t )
+void TGmsList::WriteToIndex( TIndxCode ic, std::string_view t )
 {
    if( !PFileIndx ) return;
    ( *PFileIndx ) << 'a' + ic << " " << FFileLineNumber << " " << t;
 }
 
-TGmsList::TGmsList( std::ostream *ptf, gmsgen::PTextFile ptinx )
+TGmsList::TGmsList( FILE *ptf, std::fstream *ptinx )
     : PFile { ptf },
       PFileIndx { ptinx },
       Fstars { "****"s }
 {
+   std::memset( blanks.data(), ' ', sizeof( char ) * blanks.size()-1 );
+   blanks.back() = '\0';
    CalcCharsLeft();
    FCharsLeft = 0;
    ShowMargins = false;
@@ -488,7 +511,7 @@ void TGmsList::WritePageHeader()
       int N { 1 };
       while( L >= 10 )
       {
-         std::string s = PadLeft( std::to_string( N ), 10 );
+         std::string s = PadLeft( rtl::sysutils_p3::IntToStr( N ), 10 );
          N++;
          SysStrWrite( s );
          L -= 10;
@@ -505,7 +528,7 @@ void TGmsList::WritePageHeader()
       LWrite( false );
    }
 
-   std::string s { " Page " + std::to_string( FPageNumber ) };
+   std::string s { " Page " + rtl::sysutils_p3::IntToStr( FPageNumber ) };
    int L { static_cast<int>( FRightMargin - ( FSysTitleLeft.length() + FSysTitleRight.length() + s.length() ) ) };
    if( PageControl == pcFormFeed ) SysChWrite( '\f' );
    else if( PageControl == pcFortran )
@@ -576,7 +599,7 @@ void TGmsList::NewPage()
    }
 }
 
-int TGmsList::StrBlockLength( const std::string &s, int Indent ) const
+int TGmsList::StrBlockLength( std::string_view s, int Indent ) const
 {
    if( FsuppressOutput ) return 0;
    return static_cast<int>( s.length() ) / ( FRightMargin - Indent + 1 ) + 1;
@@ -605,13 +628,13 @@ void TGmsList::SetLinesOnPage( int n )
    if( FLinesOnPage >= FLinesPerPage ) FDoPageHeader = true;
 }
 
-void TGmsList::SetTitleLastWritten( const std::string &s )
+void TGmsList::SetTitleLastWritten( std::string_view s )
 {
    FTitleLastWritten = s;
    FSubTitleLastWritten.clear();
 }
 
-void TGmsList::SetSubTitleLastWritten( const std::string &s ) { FSubTitleLastWritten = s; }
+void TGmsList::SetSubTitleLastWritten( std::string_view s ) { FSubTitleLastWritten = s; }
 
 int TGmsList::GetCharactersUsed() const { return FRightMargin - FCharsLeft; }
 
@@ -652,15 +675,16 @@ int TGmsList::GetUserLeftMargin() const { return FUserLeftMargin + 1; }
 
 int TGmsList::GetUserRightMargin() const { return FUserRightMargin + 1; }
 
-void TGmsList::HeaderSingle( const std::string &s )
+void TGmsList::HeaderSingle( std::string_view s )
 {
+   if( FsuppressOutput ) return;
    HeaderStart( "HeaderSingle" );
    WrStrLn( s );
    HeaderDone( "HeaderSingle" );
    HeaderShow( inxcNone, "" );
 }
 
-void TGmsList::HeaderDrop( const std::string &debugstr )
+void TGmsList::HeaderDrop( std::string_view debugstr )
 {
    if( FsuppressOutput ) return;
    if( DebugHeader ) { debugStream << "\nHeaderDrop: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp << '\n'; }
@@ -685,7 +709,7 @@ void TGmsList::HeaderShowLast( int FromTop )
    }
 }
 
-void TGmsList::HeaderShow( TIndxCode lxiCode, const std::string &ID )
+void TGmsList::HeaderShow( TIndxCode lxiCode, std::string_view ID )
 {
    if( FsuppressOutput ) return;
    HeaderDone( "HeaderShow" );
@@ -698,7 +722,7 @@ void TGmsList::HeaderShow( TIndxCode lxiCode, const std::string &ID )
    }
 }
 
-void TGmsList::HeaderDone( const std::string &debugstr )
+void TGmsList::HeaderDone( std::string_view debugstr )
 {
    if( FsuppressOutput ) return;
    if( DebugHeader ) { debugStream << "\nHeaderDone: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp << '\n'; }
@@ -709,7 +733,7 @@ void TGmsList::HeaderDone( const std::string &debugstr )
    }
 }
 
-void TGmsList::HeaderStart( const std::string &debugstr )
+void TGmsList::HeaderStart( std::string_view debugstr )
 {
    if( FsuppressOutput ) return;
    if( DebugHeader ) { debugStream << "\nHeaderStart: " << debugstr << " Lev = " << FNrHdrLines << " Sp = " << FHdrSp << " " << ( FWrHeader ? 1 : 0 ); }
@@ -725,7 +749,7 @@ void TGmsList::HeaderStart( const std::string &debugstr )
    FWrHeader = true;
 }
 
-void TGmsList::AddToIndex( TIndxCode ic, const std::string &t )
+void TGmsList::AddToIndex( TIndxCode ic, std::string_view t )
 {
    if( FsuppressOutput ) return;
    if( PFileIndx )
@@ -741,7 +765,7 @@ void TGmsList::AddToIndex( TIndxCode ic, const std::string &t )
    }
 }
 
-void TGmsList::WrStrMod( const std::string &s, int M )
+void TGmsList::WrStrMod( std::string_view s, int M )
 {
    if( FsuppressOutput ) return;
    WrStr( gdlib::strutilx::PadRightMod( s, M ) );
@@ -786,24 +810,43 @@ void TGmsList::WrPCharLn( const int LineNr, const bool ShowLineNr, const char *P
 {
    auto WritePartialLine = [&]( const char *Str, const int Start, const int Length, int &NextPos ) {
       int p { Start };
-      const int Corr { PageControl == pcFortran ? 1 : 0 };
+      const auto Corr { PageControl == pcFortran ? 1 : 0 };
+      static std::array<char, 80003> buf;
+      int i {};
       do
       {
          const int k { ShowMargins && ( p == FUserLeftMargin || p == FUserRightMargin ) ? 2 : 1 };
          if( FCharsWritten - Corr + k > FRightMargin ) break;
-         if( k == 1 ) SysChWrite( Str[p] );
+         if( k == 1 )
+         {
+            //SysChWrite( Str[p] );
+            buf[i++] = Str[p];
+         }
          else
          {
-            if( p == FUserLeftMargin ) SysChWrite( '|' );
-            SysChWrite( Str[p] );
-            if( p == FUserRightMargin ) SysChWrite( '|' );
+            if( p == FUserLeftMargin )
+            {
+               //SysChWrite( '|' );
+               buf[i++] = '|';
+            }
+
+            //SysChWrite( Str[p] );
+            buf[i++] = Str[p];
+
+            if( p == FUserRightMargin )
+            {
+               //SysChWrite( '|' );
+               buf[i++] = '|';
+            }
          }
          p++;
       } while( p <= Length );
+      SysStrWrite( buf.data(), i );
       LWrite( true );
       NextPos = p;
    };
 
+   if( FsuppressOutput ) return;
    int wnr { strutilx::IntegerWidth( LineNr ) };
    if( wnr < MIN_WIDTH_LINENR ) wnr = MIN_WIDTH_LINENR;
    int p {}, NxtErrs {};
@@ -856,7 +899,7 @@ void TGmsList::WrPCharLn( const int LineNr, const bool ShowLineNr, const char *P
    }
 }
 
-void TGmsList::WrStrBrk( const std::string &s, char brkch )
+void TGmsList::WrStrBrk( std::string_view s, char brkch )
 {
    if( FsuppressOutput ) return;
    std::string x { s };
@@ -953,7 +996,7 @@ void TGmsList::SetIndent( int v )
 
 std::string TGmsList::GetErrorStars() const { return Fstars; }
 
-void TGmsList::SetErrorStars( const std::string &s ) { Fstars = s; }
+void TGmsList::SetErrorStars( std::string_view s ) { Fstars = s; }
 
 int TGmsList::GetRightMargin() const { return FRightMargin; }
 

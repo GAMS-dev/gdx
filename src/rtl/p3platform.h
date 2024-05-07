@@ -26,6 +26,7 @@
 #pragma once
 #include <string>
 #include <array>
+#include <cstdint>
 
 #if defined( _WIN32 )
 #define strcasecmp _stricmp
@@ -38,7 +39,7 @@
 // ==============================================================================================================
 namespace rtl::p3platform
 {
-enum tOSFileType
+enum tOSFileType : uint8_t
 {
    OSFileWIN,
    OSFileUNIX,
@@ -47,7 +48,7 @@ enum tOSFileType
 
 const std::array<std::string, 3> OSFileTypeText { "WIN", "UNIX", "XXX" };
 
-enum tOSPlatform
+enum tOSPlatform : uint8_t
 {
    OSWindowsNT,
    OSWindows64EMT,

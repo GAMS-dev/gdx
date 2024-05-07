@@ -52,8 +52,8 @@ public:
    }
 };
 
-std::string UpperCase( const std::string &s );
-std::string LowerCase( const std::string &s );
+std::string UpperCase( std::string_view s );
+std::string LowerCase( std::string_view s );
 
 std::string IntToNiceStrW( int64_t N, int Width );
 std::string IntToNiceStr( int N );
@@ -65,17 +65,15 @@ std::string ExcelColStr( int C );
 
 int IntegerWidth( int n );
 
-int PadModLength( const std::string &s, int M );
+int PadModLength( std::string_view s, int M );
 
-std::string PadRightMod( const std::string &s, int M );
+std::string PadRightMod( std::string_view s, int M );
 
 std::string DblToStrSep( double V, char DecimalSep );
+uint8_t DblToStrSep( double V, char DecimalSep, char *s );
 
 std::string DblToStr( double V );
-
-std::string DblToStrSepClassic( double V, char DecimalSep );
-
-void StrAssign( std::string &dest, const std::string &src );
+uint8_t DblToStr( double V, char *s );
 
 bool StrAsDoubleEx( const std::string &s, double &v );
 bool StrAsIntEx2( const std::string &s, int &v );
