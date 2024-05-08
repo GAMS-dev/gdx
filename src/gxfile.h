@@ -42,11 +42,9 @@
 #include <memory>          // for unique_ptr, allocator
 #include <optional>        // for optional
 #include <string>          // for string
-#include <string_view>     // for string_view
 
 namespace gdlib::gmsstrm
 {
-class TMiBufferedStream;
 class TXStream;
 }// namespace gdx::gmsstrm
 

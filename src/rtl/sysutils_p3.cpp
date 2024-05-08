@@ -23,26 +23,24 @@
  * SOFTWARE.
  */
 
-#include <string>
-#include <filesystem>
-#include <cstring>
+#include <string> // for string
+#include <cstring> // for strerror, size_t, strcmp, strcpy
 
 #include "sysutils_p3.h"
-#include "p3platform.h"
-#include "global/unit.h"
+#include "p3platform.h" // for OSFileType, tOSFileType
+#include "global/unit.h" // for UNIT_INIT_FINI
 
 #if defined( _WIN32 )
-#include <Windows.h>
-#include <io.h>
+   #include <Windows.h>
+   #include <io.h>
 #else
-#include <unistd.h>
-#include <sys/stat.h>
-#include <ctime>
+   #include <unistd.h> // for access, getcwd, unlink, F_OK
+   #include <sys/stat.h> // for stat, S_ISDIR
+   #include <sys/time.h> // for timeval, gettimeofday
 #endif
 
 using namespace global::delphitypes;
 using namespace rtl::p3platform;
-using namespace std::literals::chrono_literals;
 using namespace std::literals::string_literals;
 
 // ==============================================================================================================
@@ -377,17 +375,13 @@ double Now()
    rc += tryEncodeTime( st.wHour, st.wMinute, st.wSecond, st.wMilliseconds, tnow );
    return rc == 2 ? dnow + tnow : 0;
 #else
-   std::time_t t = std::time( nullptr );
-   std::tm *loctime = std::localtime( &t );
-
-   const auto current_time_since_epoch { std::chrono::system_clock::now().time_since_epoch() };
-   // FIXME: Redo this for C++20 to C++17 switch!!!
-   const auto current_milliseconds { std::chrono::duration_cast<std::chrono::milliseconds>( current_time_since_epoch ).count() % 1000 };
-
+   timeval tv;
+   tm lt;
+   if(gettimeofday(&tv, nullptr) || !localtime_r(&tv.tv_sec, &lt))
+      return 0.0;
    double dnow, tnow;
-   bool rc1 = tryEncodeDate( loctime->tm_year + 1900, loctime->tm_mon + 1, loctime->tm_mday, dnow );
-
-   bool rc2 = tryEncodeTime( loctime->tm_hour, loctime->tm_min, loctime->tm_sec, current_milliseconds, tnow );
+   const bool rc1 = tryEncodeDate( lt.tm_year + 1900, lt.tm_mon + 1, lt.tm_mday, dnow );
+   const bool rc2 = tryEncodeTime (lt.tm_hour, lt.tm_min, lt.tm_sec, tv.tv_usec/1000, tnow);
    return rc1 && rc2 ? dnow + tnow : 0.0;
 #endif
 }
@@ -481,7 +475,6 @@ void Sleep( uint32_t milliseconds )
 #endif
 }
 
-// TODO: AS: Test this function in an unit test!
 // SSN changed this to accept int64 arg. 27 Apr 03.
 std::string IntToStr( int64_t n )
 {
@@ -508,6 +501,7 @@ std::string IntToStr( int64_t n )
    return {res.data(), (size_t)w2};
 }
 
+// Buffer res must be at least 256 bytes wide!
 void IntToStr( int64_t n, char *res, size_t &len )
 {
    /*
@@ -515,21 +509,23 @@ void IntToStr( int64_t n, char *res, size_t &len )
     * we reflect positive to negative.  This addresses the two's complement
     * issue (we have one more negative integer than positive
     */
-   int64_t w2{};
-   if(n < 0)
+   int64_t w2 {};
+   if( n < 0 )
    {
       res[0] = '-';
       w2 = 1;
    }
-   else n *= -1;
-   int64_t w {255};
+   else
+      n *= -1;
+   int64_t w { 255 };
    do {
-      res[w-- - 1] = '0' - (char)(n % 10);
+      res[w-- - 1] = '0' - (char) ( n % 10 );
       n /= 10;
-   } while(n);
-   while(w < 255)
+   } while( n );
+   while( w < 255 )
       res[w2++] = res[w++];
-   len = (size_t)w2;
+   len = (size_t) w2;
+   res[len] = '\0';
 }
 
 static void initialization()

@@ -23,22 +23,22 @@
  * SOFTWARE.
  */
 
-#include "gdlib/gmsstrm.h"
-#include "rtl/sysutils_p3.h"
+#include "gdlib/gmsstrm.h" // for TMiBufferedStream, TXStream, File...
+#include "rtl/sysutils_p3.h" // for IntToStr
 
-#include "gdx.h"
-#include "gdlib/utils.h"
+#include "gdx.h" // for TGXFileObj, TGXFileObj::stat_write
+#include "gdlib/utils.h" // for in, debugStream, arrayWithValue
 #include <algorithm>// for fill_n, max, fill, sort
 #include <cassert>  // for assert
 #include <cmath>    // for round, isinf, isnan, isnormal, abs
 #include <cstdint>  // for int64_t, uint8_t
 #include <cstdio>   // for sprintf
 #include <cstdlib>  // for system, free, getenv, malloc, realloc, WEX...
-#include <exception>// for exception
+#if !defined(NDEBUG) || defined(__IN_CPPMEX__)
 #include <iostream> // for operator<<, basic_ostream, cout, ostream
+#endif
 #include <map>      // for map, operator==, _Rb_tree_const_iterator
 #include <utility>  // for pair
-#include <sstream>
 
 #if defined( _WIN32 )
 #include <Windows.h>

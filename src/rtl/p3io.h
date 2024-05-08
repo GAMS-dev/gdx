@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include <string>
-
-#include <cstdint>
+#include <cstdio>
 #include <cstddef>
+#include <cstdint>
+#include <string>
 
 namespace rtl::p3io
 {

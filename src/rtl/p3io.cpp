@@ -34,6 +34,7 @@
 #include "dtoaLoc.h"
 
 #if !defined(_WIN32)
+#include <sys/errno.h>
 #include <sys/stat.h>
 #endif
 

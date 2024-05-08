@@ -25,58 +25,56 @@
 
 #include "p3utils.h"
 
-#include <string>
-#include <cstring>
-#include <cassert>
-#include <filesystem>
-#include <fstream>
+#include <algorithm>               // for max, min
+#include <array>                   // for array
+#include <cassert>                 // for assert
+#include <cmath>                   // for abs
+#include <cstdlib>                 // for getenv, abs, realpath, setenv, uns...
+#include <cstring>                 // for memset, strcpy, strlen, memmove
+#include <filesystem>              // for path
+#include <string>                  // for basic_string, operator+, string
 
-#include "sysutils_p3.h"
-#include "../gdlib/utils.h"
+#include "../gdlib/strutilx.h"     // for DblToStr
+#include "../gdlib/utils.h"        // for in, trim, val
+#include "global/modhead.h"        // for STUBWARN
+#include "math_p3.h"               // for IntPower
+#include "p3platform.h"            // for tOSPlatform, OSPlatform, OSFileType
+#include "sysutils_p3.h"           // for ExtractFilePath, ExcludeTrailingPa...
 
-#ifdef _WIN32
-#pragma comment( lib, "iphlpapi.lib" )
-#pragma comment( lib, "Ws2_32.lib" )
-//#define _WINSOCK2API_
-#define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
-#include <Windows.h>
-#include <winsock2.h>
-#include <io.h>
-#include <psapi.h> /* enough if we run on Windows 7 or later */
-#include <iphlpapi.h>
-#include <shlobj.h>
-#include <IPTypes.h>
+#if defined(_WIN32)
+   // Windows
+   #pragma comment( lib, "iphlpapi.lib" )
+   #pragma comment( lib, "Ws2_32.lib" )
+   //#define _WINSOCK2API_
+   #define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
+   #include <Windows.h>
+   #include <winsock2.h>
+   #include <io.h>
+   #include <psapi.h> /* enough if we run on Windows 7 or later */
+   #include <iphlpapi.h>
+   #include <shlobj.h>
+   #include <IPTypes.h>
 #else
-
-#include <sys/socket.h>
-#if( defined( __linux__ ) || defined( __APPLE__ ) ) /* at least, maybe for others too */
-#if defined( __linux__ )
-#include <sys/ioctl.h>
-#include <net/if.h>
-#elif defined( __APPLE__ )
-#include <sys/ioctl.h>
-#include <sys/sysctl.h>
-#include <net/if.h>
-#include <net/if_dl.h>
+   // Unix
+   #include <sys/socket.h>
+   #include <sys/fcntl.h>
+   #include <sys/utsname.h>
+   #include <sys/stat.h>
+   #if( defined( __linux__ ) || defined( __APPLE__ ) ) /* at least, maybe for others too */
+      #include <net/if.h>
+      #include <sys/ioctl.h>
+      #if defined( __APPLE__ )
+         #include <sys/proc_info.h>
+         #include <sys/sysctl.h>
+         #include <net/if_dl.h>
+         #include <libproc.h>
+      #endif
+   #endif
+   #include <netinet/in.h>
+   #include <unistd.h>
+   #include <dlfcn.h>
+   #include <poll.h>
 #endif
-#endif
-#include <netinet/in.h>
-#include <sys/utsname.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <dlfcn.h>
-#include <poll.h>
-#endif
-
-#include "p3platform.h"
-#include "math_p3.h"
-
-#if defined( __APPLE__ )
-#include <sys/proc_info.h>
-#include <libproc.h>
-#endif
-#include <gdlib/strutilx.h>
 
 using namespace rtl::sysutils_p3;
 using namespace rtl::p3platform;
@@ -105,11 +103,13 @@ static bool setEnvironmentVariableUnix( const std::string &name, const std::stri
 
 static std::vector<std::string> paramstr;
 
+// TODO: Replace with port of original implementation that does not rely on std::filesytem
 std::string ExtractFileExt( const std::string &filename )
 {
    return std::filesystem::path( filename ).extension().string();
 }
 
+// TODO: Replace with port of original implementation that does not rely on std::filesytem
 std::string ChangeFileExt( const std::string &filename, const std::string &extension )
 {
    return std::filesystem::path( filename ).replace_extension( std::filesystem::path( extension ) ).string();

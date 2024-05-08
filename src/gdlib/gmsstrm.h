@@ -23,23 +23,17 @@
  * SOFTWARE.
  */
 
-
-
 #pragma once
 
-#include <optional>
-#include <array>      // for array
-#include <cstdint>    // for uint32_t, uint8_t, int64_t, uint16_t
-#include <cstring>    // for strlen
-#include <cassert>
-#include <fstream>    // for fstream, basic_fstream
-#include <map>        // for map
-#include <memory>     // for allocator, unique_ptr
-#include <string>     // for string, basic_string
-#include <string_view>// for string_view
-#include <vector>     // for vector
-
-#include "../rtl/p3utils.h"
+#include <array>                // for array
+#include <cassert>              // for assert
+#include <cstdint>              // for uint32_t, uint8_t, int64_t, uint16_t
+#include <cstring>              // for strlen
+#include <memory>               // for unique_ptr
+#include <string>               // for string, basic_string
+#include <string_view>          // for string_view
+#include <vector>               // for vector
+#include "../rtl/p3utils.h"     // for Tp3FileHandle
 
 #if defined( NO_ZLIB )
 inline int uncompress( void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen )

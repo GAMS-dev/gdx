@@ -25,13 +25,10 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <cstdint>
-
-#if !defined(_WIN32)
-#include <fcntl.h>
-#endif
+#include <cstdio>  // for fclose, FILE
+#include <cstdint>  // for uint32_t, int64_t, uint64_t, uint8_t
+#include <string>   // for basic_string, string
+#include <vector>   // for vector
 
 // ==============================================================================================================
 // Interface
