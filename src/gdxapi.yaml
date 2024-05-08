@@ -4,6 +4,8 @@ prefix      : gdx
 apiversion  : 11
 compatibleversion : [11,10,9,8,7]
 
+location  : https://gams-dev.github.io/gdx/
+
 DObject         : TGXFile
 DUnit           : gxfile
 USE_XXXLOADPATH : true
