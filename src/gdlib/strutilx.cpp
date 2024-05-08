@@ -23,22 +23,19 @@
  * SOFTWARE.
  */
 
-
-
 #include "strutilx.h"
-#include <string>
-#include <limits>
-#include <cmath>
-#include <cfloat>
-#include <array>
-#include <cassert>
-#include <cstring>
-
-#include "utils.h"
-
-#include "../rtl/sysutils_p3.h"
-#include "../rtl/p3platform.h"
-#include "../rtl/p3io.h"
+#include <algorithm>             // for min, transform, find
+#include <array>                 // for array
+#include <cassert>               // for assert
+#include <cmath>                 // for isinf, isnan, modf, trunc
+#include <cstring>               // for memcpy, strlen, memmove, size_t
+#include <limits>                // for numeric_limits
+#include <stdexcept>             // for runtime_error
+#include <string>                // for basic_string, string, operator+, all...
+#include "../rtl/p3io.h"         // for P3_Str_dd0
+#include "../rtl/p3platform.h"   // for OSFileType, tOSFileType
+#include "../rtl/sysutils_p3.h"  // for LastDelimiter, PathDelim, ExtractSho...
+#include "utils.h"               // for toupper, sameText, ord, in, val, cha...
 
 using namespace std::literals::string_literals;
 using namespace rtl::sysutils_p3;

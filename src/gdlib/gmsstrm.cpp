@@ -23,25 +23,24 @@
  * SOFTWARE.
  */
 
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <filesystem>
-#include <stdexcept>
-#include <string>
-#include <utility>
-#include <cassert>
-#include <sstream>
-#include <fstream>
-
-#include "../rtl/sysutils_p3.h"
-
-#include "gclgms.h"
-
 #include "gmsstrm.h"
-#include "utils.h"
+
+#include <algorithm>             // for min, max
+#include <cassert>               // for assert
+#include <cmath>                 // for round, abs
+#include <cstdint>               // for uint32_t, uint8_t, int64_t, uint16_t
+#include <cstdlib>               // for malloc, abs, free
+#include <cstring>               // for memcpy, strerror
+#include <functional>            // for function
+#include <stdexcept>             // for runtime_error
+#include <string>                // for basic_string, string, operator+, ope...
+#include <utility>               // for move
+
+#include "../rtl/sysutils_p3.h"  // for IntToStr
+#include "gclgms.h"              // for GMS_SV_ACR, GMS_SV_UNDEF, GMS_SV_EPS
+#include "global/delphitypes.h"  // for Bounded
+#include "rtl/p3utils.h"         // for Tp3FileOpenAction, p3FileRead, p3Fil...
+#include "utils.h"               // for in, ord, checkBOMOffset, constructStr
 
 // only supported by MSVC so far :(
 //#include <format>

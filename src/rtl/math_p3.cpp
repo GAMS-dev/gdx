@@ -24,8 +24,9 @@
  */
 
 #include "math_p3.h"
-#include "../global/modhead.h"
-#include <cmath>
+#include <cstdlib>              // for abs
+#include <cmath>                // for log1p
+#include "../global/modhead.h"  // for STUBWARN
 
 namespace rtl::math_p3
 {

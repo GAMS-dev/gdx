@@ -28,7 +28,9 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#if !defined(NDEBUG) || defined(__IN_CPPMEX__)
 #include <iostream>
+#endif
 #include <iterator>
 #include <initializer_list>
 #include <unordered_set>
