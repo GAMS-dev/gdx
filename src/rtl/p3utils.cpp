@@ -44,12 +44,12 @@
 #if defined(_WIN32)
    // Windows
    #ifndef __GNUC__
-   #pragma comment( lib, "iphlpapi.lib" )
-   #pragma comment( lib, "Ws2_32.lib" )
+      #pragma comment( lib, "iphlpapi.lib" )
+      #pragma comment( lib, "Ws2_32.lib" )
+      //#define _WINSOCK2API_
+      #define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
+      #include <winsock2.h>
    #endif
-   //#define _WINSOCK2API_
-   #define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
-   #include <winsock2.h>
    #include <Windows.h>
    #include <io.h>
    #include <psapi.h> /* enough if we run on Windows 7 or later */
