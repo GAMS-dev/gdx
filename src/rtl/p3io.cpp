@@ -308,6 +308,7 @@ void P3_Val_i(const char *s, size_t slen, int *i, int *code)
 
 uint8_t SYSTEM_filemode;
 
+#ifdef __IN_CPPMEX__
 constexpr uint8_t FM_RO = 0, // read-only
                   FM_WO = 1, // write-only
                   FM_RW = 2;// read-write
@@ -315,8 +316,6 @@ constexpr uint8_t FM_RO = 0, // read-only
 static inline void P3SetMode(P3File *f, uint8_t mode) {
    f->status = P3_OPEN | (mode & P3_MODEMASK);
 }
-
-
 
 void P3FileOpn( P3File *fil, uint8_t status, P3FileType type, uint32_t block_size )
 {
@@ -448,5 +447,6 @@ void P3WriteFS(P3File *fil, const char *s)
    for (int i = nChars; s[i] != '\0'; i++)
       std::putc(s[i],f);
 }
+#endif
 
 }// namespace rtl::p3io

@@ -77,7 +77,9 @@ struct P3File {
 
 extern uint8_t SYSTEM_filemode;
 
+#ifdef __IN_CPPMEX__
 void P3FileOpn( P3File *fil, uint8_t status, P3FileType type, uint32_t block_size );
-void P3WriteFS(P3File *fil, const char *s);
+void P3FileOpn(P3File *fil, const char *s);
+#endif
 
 }// namespace rtl::p3io
