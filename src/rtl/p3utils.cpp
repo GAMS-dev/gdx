@@ -43,12 +43,14 @@
 
 #if defined(_WIN32)
    // Windows
+   #ifndef __GNUC__
    #pragma comment( lib, "iphlpapi.lib" )
    #pragma comment( lib, "Ws2_32.lib" )
+   #endif
    //#define _WINSOCK2API_
    #define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
-   #include <Windows.h>
    #include <winsock2.h>
+   #include <Windows.h>
    #include <io.h>
    #include <psapi.h> /* enough if we run on Windows 7 or later */
    #include <iphlpapi.h>
@@ -766,6 +768,9 @@ static bool homePlus( const std::string &dd1, const std::string &dd2, std::strin
 }
 #endif
 
+#if defined(__MINGW32__) || defined(__MINGW64__)
+bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::string &locName ) { return false; }
+#else
 /*
      * Get the name of the directory to write config/data/doc/etc files to
      * return true on success (i.e. we can construct the name), false on failure
@@ -844,6 +849,7 @@ bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::s
    }
 #endif
 }
+#endif
 
 const std::string zeros {std::string( 54, '0' )};
 
@@ -1066,184 +1072,7 @@ void initParamStr( const int argc, const char **argv )
       paramstr[i] = argv[i];
 }
 
-bool p3GetFirstMACAddress( std::string &mac )
-{
-#if defined( __linux__ )
-   {
-      std::array<char, 1024> buffer {};
-      int success {};
-
-      const int sock = socket( AF_INET, SOCK_DGRAM, IPPROTO_IP );
-      if( sock == -1 )
-         return false;
-
-      ifconf ifc {};
-      ifc.ifc_len = buffer.size();
-      ifc.ifc_buf = buffer.data();
-      if( ioctl( sock, SIOCGIFCONF, &ifc ) == -1 )
-         return false;
-
-      ifreq ifr {};
-
-      {
-         struct ifreq *it = ifc.ifc_req;
-         const struct ifreq *const end = it + ( ifc.ifc_len / sizeof( struct ifreq ) );
-
-         for( ; it != end; ++it )
-         {
-            strcpy( ifr.ifr_name, it->ifr_name );
-            if( ioctl( sock, SIOCGIFFLAGS, &ifr ) == 0 )
-            {
-               if( ifr.ifr_flags & IFF_LOOPBACK ) /* don't count loopback */
-                  continue;
-               if( ioctl( sock, SIOCGIFHWADDR, &ifr ) == 0 )
-               {
-                  success = 1;
-                  break;
-               }
-            }
-         } /* loop over interfaces */
-      }
-
-      if( success )
-      {
-         unsigned char mb[6];
-         memcpy( mb, ifr.ifr_hwaddr.sa_data, 6 );
-         constexpr int bufSiz{18};
-         std::array<char, bufSiz> buf {};
-         std::snprintf( buf.data(), sizeof(char)*bufSiz, "%02x:%02x:%02x:%02x:%02x:%02x", mb[0], mb[1], mb[2], mb[3], mb[4], mb[5] );
-         mac.assign( buf.data() );
-         return true;
-      }
-
-      return false;
-   } /* if __linux__ */
-#elif defined( __APPLE__ )
-   {
-      char prevName[IF_NAMESIZE];
-      int mib[6];
-      int sock;
-      int halfDone = 0; /* true if we have a MAC number for an interface that is down */
-      struct ifconf ifc {
-      };
-      char buf[1024];
-      char buf2[1024];
-      unsigned char *mp;
-      struct ifreq ifr {
-      };
-      struct ifreq *it, *end;
-      size_t recLen, sz;
-      struct if_msghdr *ifm;
-      struct sockaddr_dl *sdl;
-
-      sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_IP );
-      if( sock < 0 ) return false;
-      ifc.ifc_len = sizeof( buf );
-      ifc.ifc_buf = buf;
-      if( ioctl( sock, SIOCGIFCONF, &ifc ) ) return false;
-      it = ifc.ifc_req;
-      end = (struct ifreq *) ( (unsigned char *) ifc.ifc_buf + ifc.ifc_len );
-
-      mib[0] = CTL_NET;
-      mib[1] = AF_ROUTE;
-      mib[2] = 0;
-      mib[3] = AF_LINK;
-      mib[3] = 0;
-      mib[4] = NET_RT_IFLIST;
-      prevName[0] = '\0';
-      for( ; it < end; it = (struct ifreq *) ( (unsigned char *) it + recLen ) )
-      {
-         recLen = _SIZEOF_ADDR_IFREQ( *it );
-         if( 0 == strcmp( it->ifr_name, prevName ) ) /* just checked it already */
-            continue;
-         (void) strcpy( prevName, it->ifr_name );
-         (void) strcpy( ifr.ifr_name, it->ifr_name );
-         if( ioctl( sock, SIOCGIFFLAGS, &ifr ) ) /* we should always get flags but if not skip ahead */
-            continue;
-         if( ifr.ifr_flags & IFF_LOOPBACK ) /* always skip loopback interfaces */
-            continue;
-         if( halfDone && ( 0 == ( ifr.ifr_flags & IFF_UP ) ) )
-            continue; /* we already have a MAC address for a down interface */
-         mib[5] = (int) if_nametoindex( it->ifr_name );
-         if( 0 == mib[5] )
-            continue; /* no valid index found */
-         sz = sizeof( buf2 );
-         if( sysctl( mib, 6, buf2, &sz, nullptr, 0 ) )
-            continue; /* sysctl call failed */
-         ifm = (struct if_msghdr *) buf2;
-         /* printf ("msglen 0 = %d\n", ifm->ifm_msglen); */
-         sdl = (struct sockaddr_dl *) ( ifm + 1 );
-         if( RTM_IFINFO != ifm->ifm_type )
-            continue; /* WTF */
-         mp = (unsigned char *) LLADDR( sdl );
-         constexpr int macBufSiz { 18 };
-         char macBuf[macBufSiz];
-         std::snprintf( (char *) macBuf, macBufSiz, "%02x:%02x:%02x:%02x:%02x:%02x",
-                        mp[0], mp[1], mp[2], mp[3], mp[4], mp[5] );
-         mac.assign( macBuf );
-         if( 0 != ( ifr.ifr_flags & IFF_UP ) )
-            return true;
-         else
-            halfDone = 1;
-      } /* loop over interfaces */
-      return false;
-   } /* if __APPLE__ */
-#elif defined( _WIN32 )
-   ULONG bufSiz{4096}, prevBufSiz{4096};
-   int nTries = 0;
-   constexpr int maxTries = 3;
-   PIP_ADAPTER_ADDRESSES addrBuf {};
-   DWORD dwrc;
-   bool halfDone {}; // if we have a MAC number for an interface that is down
-   do {
-      constexpr ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
-      addrBuf = static_cast<IP_ADAPTER_ADDRESSES *>( std::malloc( bufSiz ) );
-      if( !addrBuf )
-         return false;
-      dwrc = GetAdaptersAddresses( AF_INET, flags, nullptr, addrBuf, &bufSiz );
-      if( ERROR_BUFFER_OVERFLOW == dwrc )
-      {
-         prevBufSiz = bufSiz;
-         std::free( addrBuf );
-         addrBuf = nullptr;
-      }
-      nTries++;
-   } while( ERROR_BUFFER_OVERFLOW == dwrc && nTries < maxTries );
-   if( NO_ERROR != dwrc )
-   {
-      if( addrBuf )
-         std::free( addrBuf );
-      return false;
-   }
-   for( PIP_ADAPTER_ADDRESSES currAddr = addrBuf; currAddr; currAddr = currAddr->Next )
-   {
-      DWORD ifType = currAddr->IfType;
-      if( IF_TYPE_ETHERNET_CSMACD != ifType && IF_TYPE_IEEE80211 != ifType )
-         continue;
-      if( halfDone && IfOperStatusUp != currAddr->OperStatus )
-         continue; /* we already have a MAC address for a down interface */
-      if( 6 != currAddr->PhysicalAddressLength )
-         continue;
-      auto *mp = static_cast<unsigned char *>( currAddr->PhysicalAddress );
-      std::array<char, 18> macBuf {};
-      _snprintf( static_cast<char *>( macBuf.data() ), sizeof(char)*macBuf.size(), "%02x:%02x:%02x:%02x:%02x:%02x", mp[0], mp[1], mp[2], mp[3], mp[4], mp[5] );
-      mac.assign( macBuf.data() );
-      if( IfOperStatusUp == currAddr->OperStatus )
-      {
-         std::free( addrBuf );
-         return true;
-      }
-      halfDone = true;
-      return false;
-   }
-   std::free( addrBuf );
-   return false;
-   /* if _WIN32 */
-#else
-   return false;
-#endif
-}
-
+#ifndef _WIN32
 /* local use only: be sure to call with enough space for the snprintf */
 static void myStrError( int n, char *buf, const size_t bufSiz )
 {
@@ -1308,6 +1137,7 @@ static int xGetExecName( std::string &execName, std::string &msg )
 #endif
    return !rc && execName.length() > 255 ? 1 : rc;
 }
+#endif
 
 // return:0 on success, 1 if truncated result, 2 if not lib, >2 o/w
 int p3GetExecName( std::string &execName, std::string &msg )
@@ -1453,6 +1283,185 @@ int p3GetLibName( std::string &libName, std::string &msg )
    libName.clear();
    msg = "P3: not yet implemented"s;
    return 9;
+#endif
+}
+
+#ifdef __IN_CPPMEX__
+bool p3GetFirstMACAddress( std::string &mac )
+{
+#if defined( __linux__ )
+   {
+      std::array<char, 1024> buffer {};
+      int success {};
+
+      const int sock = socket( AF_INET, SOCK_DGRAM, IPPROTO_IP );
+      if( sock == -1 )
+         return false;
+
+      ifconf ifc {};
+      ifc.ifc_len = buffer.size();
+      ifc.ifc_buf = buffer.data();
+      if( ioctl( sock, SIOCGIFCONF, &ifc ) == -1 )
+         return false;
+
+      ifreq ifr {};
+
+      {
+         struct ifreq *it = ifc.ifc_req;
+         const struct ifreq *const end = it + ( ifc.ifc_len / sizeof( struct ifreq ) );
+
+         for( ; it != end; ++it )
+         {
+            strcpy( ifr.ifr_name, it->ifr_name );
+            if( ioctl( sock, SIOCGIFFLAGS, &ifr ) == 0 )
+            {
+               if( ifr.ifr_flags & IFF_LOOPBACK ) /* don't count loopback */
+                  continue;
+               if( ioctl( sock, SIOCGIFHWADDR, &ifr ) == 0 )
+               {
+                  success = 1;
+                  break;
+               }
+            }
+         } /* loop over interfaces */
+      }
+
+      if( success )
+      {
+         unsigned char mb[6];
+         memcpy( mb, ifr.ifr_hwaddr.sa_data, 6 );
+         constexpr int bufSiz{18};
+         std::array<char, bufSiz> buf {};
+         std::snprintf( buf.data(), sizeof(char)*bufSiz, "%02x:%02x:%02x:%02x:%02x:%02x", mb[0], mb[1], mb[2], mb[3], mb[4], mb[5] );
+         mac.assign( buf.data() );
+         return true;
+      }
+
+      return false;
+   } /* if __linux__ */
+#elif defined( __APPLE__ )
+   {
+      char prevName[IF_NAMESIZE];
+      int mib[6];
+      int sock;
+      int halfDone = 0; /* true if we have a MAC number for an interface that is down */
+      struct ifconf ifc {
+      };
+      char buf[1024];
+      char buf2[1024];
+      unsigned char *mp;
+      struct ifreq ifr {
+      };
+      struct ifreq *it, *end;
+      size_t recLen, sz;
+      struct if_msghdr *ifm;
+      struct sockaddr_dl *sdl;
+
+      sock = socket( PF_INET, SOCK_DGRAM, IPPROTO_IP );
+      if( sock < 0 ) return false;
+      ifc.ifc_len = sizeof( buf );
+      ifc.ifc_buf = buf;
+      if( ioctl( sock, SIOCGIFCONF, &ifc ) ) return false;
+      it = ifc.ifc_req;
+      end = (struct ifreq *) ( (unsigned char *) ifc.ifc_buf + ifc.ifc_len );
+
+      mib[0] = CTL_NET;
+      mib[1] = AF_ROUTE;
+      mib[2] = 0;
+      mib[3] = AF_LINK;
+      mib[3] = 0;
+      mib[4] = NET_RT_IFLIST;
+      prevName[0] = '\0';
+      for( ; it < end; it = (struct ifreq *) ( (unsigned char *) it + recLen ) )
+      {
+         recLen = _SIZEOF_ADDR_IFREQ( *it );
+         if( 0 == strcmp( it->ifr_name, prevName ) ) /* just checked it already */
+            continue;
+         (void) strcpy( prevName, it->ifr_name );
+         (void) strcpy( ifr.ifr_name, it->ifr_name );
+         if( ioctl( sock, SIOCGIFFLAGS, &ifr ) ) /* we should always get flags but if not skip ahead */
+            continue;
+         if( ifr.ifr_flags & IFF_LOOPBACK ) /* always skip loopback interfaces */
+            continue;
+         if( halfDone && ( 0 == ( ifr.ifr_flags & IFF_UP ) ) )
+            continue; /* we already have a MAC address for a down interface */
+         mib[5] = (int) if_nametoindex( it->ifr_name );
+         if( 0 == mib[5] )
+            continue; /* no valid index found */
+         sz = sizeof( buf2 );
+         if( sysctl( mib, 6, buf2, &sz, nullptr, 0 ) )
+            continue; /* sysctl call failed */
+         ifm = (struct if_msghdr *) buf2;
+         /* printf ("msglen 0 = %d\n", ifm->ifm_msglen); */
+         sdl = (struct sockaddr_dl *) ( ifm + 1 );
+         if( RTM_IFINFO != ifm->ifm_type )
+            continue; /* WTF */
+         mp = (unsigned char *) LLADDR( sdl );
+         constexpr int macBufSiz { 18 };
+         char macBuf[macBufSiz];
+         std::snprintf( (char *) macBuf, macBufSiz, "%02x:%02x:%02x:%02x:%02x:%02x",
+                        mp[0], mp[1], mp[2], mp[3], mp[4], mp[5] );
+         mac.assign( macBuf );
+         if( 0 != ( ifr.ifr_flags & IFF_UP ) )
+            return true;
+         else
+            halfDone = 1;
+      } /* loop over interfaces */
+      return false;
+   } /* if __APPLE__ */
+#elif defined( _WIN32 )
+   ULONG bufSiz{4096}/*, prevBufSiz{4096}*/;
+   int nTries = 0;
+   constexpr int maxTries = 3;
+   PIP_ADAPTER_ADDRESSES addrBuf {};
+   DWORD dwrc;
+   bool halfDone {}; // if we have a MAC number for an interface that is down
+   do {
+      constexpr ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
+      addrBuf = static_cast<IP_ADAPTER_ADDRESSES *>( std::malloc( bufSiz ) );
+      if( !addrBuf )
+         return false;
+      dwrc = GetAdaptersAddresses( AF_INET, flags, nullptr, addrBuf, &bufSiz );
+      if( ERROR_BUFFER_OVERFLOW == dwrc )
+      {
+         //prevBufSiz = bufSiz;
+         std::free( addrBuf );
+         addrBuf = nullptr;
+      }
+      nTries++;
+   } while( ERROR_BUFFER_OVERFLOW == dwrc && nTries < maxTries );
+   if( NO_ERROR != dwrc )
+   {
+      if( addrBuf )
+         std::free( addrBuf );
+      return false;
+   }
+   for( PIP_ADAPTER_ADDRESSES currAddr = addrBuf; currAddr; currAddr = currAddr->Next )
+   {
+      DWORD ifType = currAddr->IfType;
+      if( IF_TYPE_ETHERNET_CSMACD != ifType && IF_TYPE_IEEE80211 != ifType )
+         continue;
+      if( halfDone && IfOperStatusUp != currAddr->OperStatus )
+         continue; /* we already have a MAC address for a down interface */
+      if( 6 != currAddr->PhysicalAddressLength )
+         continue;
+      auto *mp = static_cast<unsigned char *>( currAddr->PhysicalAddress );
+      std::array<char, 18> macBuf {};
+      _snprintf( static_cast<char *>( macBuf.data() ), sizeof(char)*macBuf.size(), "%02x:%02x:%02x:%02x:%02x:%02x", mp[0], mp[1], mp[2], mp[3], mp[4], mp[5] );
+      mac.assign( macBuf.data() );
+      if( IfOperStatusUp == currAddr->OperStatus )
+      {
+         std::free( addrBuf );
+         return true;
+      }
+      halfDone = true;
+      return false;
+   }
+   std::free( addrBuf );
+   return false;
+   /* if _WIN32 */
+#else
+   return false;
 #endif
 }
 
@@ -1794,5 +1803,7 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse )
 #endif
    return res;
 }
+
+#endif // __IN_CPPMEX__
 
 }// namespace rtl::p3utils

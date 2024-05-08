@@ -135,6 +135,7 @@ int p3FileGetSize( Tp3FileHandle h, int64_t &fileSize );
 int p3FileSetPointer(Tp3FileHandle h, int64_t distance, int64_t &newPointer, uint32_t whence);
 int p3FileGetPointer(Tp3FileHandle h, int64_t &filePointer);
 
+#ifdef __IN_CPPMEX__
 bool p3GetFirstMACAddress( std::string &mac );
 
 union T_P3SOCKET {
@@ -158,6 +159,7 @@ bool p3SockRecvTimeout(T_P3SOCKET s, char *buf, int count, int &res, int timeOut
 
 T_P3SOCKET p3SockAcceptClientConn(T_P3SOCKET srvSock);
 T_P3SOCKET p3SockCreateServerSocket(int port, bool reuse);
+#endif // __IN_CPPMEX__
 
 // ...
 

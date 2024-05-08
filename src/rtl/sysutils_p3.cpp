@@ -163,12 +163,12 @@ std::string GetCurrentDir()
    std::array<char, 256> buf;
    buf.front() = '\0';
 #if defined(_WIN32)
-   int rc = GetCurrentDirectoryA(static_cast<DWORD>(sizeof(char)*buf.size()),buf.data());
+   const int rc = GetCurrentDirectoryA(static_cast<DWORD>(sizeof(char)*buf.size()),buf.data());
    if (!rc) {
       winErrMsg( GetLastError(), buf.data(), sizeof( buf ) );
       throw std::runtime_error( "GetCurrentDir failed"s + buf.data() );
    }
-   else if (rc > buf.size() * sizeof(char))
+   if (rc > static_cast<int>( buf.size() * sizeof(char) ))
       throw std::runtime_error("GetCurrentDir failed: result too large for shortString"s);
 #else
    if (!getcwd(buf.data(), buf.size())) {
