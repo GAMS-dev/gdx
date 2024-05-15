@@ -71,7 +71,8 @@ std::string ExtractFilePath( const std::string &FileName )
 
 std::string ExtractFileName( const std::string &FileName )
 {
-   return {FileName.begin() + LastDelimiter(PathAndDriveDelim.data(), FileName) + 1, FileName.end()};
+   const auto I { LastDelimiter( PathAndDriveDelim.data(), FileName ) };
+   return I == -1 ? FileName : std::string {FileName.begin() + I + 1, FileName.end()};
 }
 
 std::string ExtractFileExt( const std::string &FileName )
