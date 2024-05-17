@@ -38,6 +38,7 @@
 #include "statlibobj.h"
 #include "gmsgen.h"
 #include "global/unit.h"
+#include "rtl/p3process.h"
 
 using namespace gdlib::gmsgen;
 using namespace rtl::sysutils_p3;
@@ -105,13 +106,8 @@ void TGMSLogStream::LogClose()
    }
 }
 
-// FIXME: AS: Finish porting this method!
 bool TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction AAction, const std::string &Afn )
 {
-   int ioRes;
-   int IDECMDSrun;
-   //int IDECMDSrc;
-   //int IDECMDSsc;
    if( FStatus != sl_closed )
    {
       if( FLogEnabled )
@@ -134,6 +130,9 @@ bool TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction AAction, cons
    FSaveAfn = Afn;
    FSaveAstat = Astat;
 
+   int ioRes{};
+   bool res{};
+
    switch( Astat )
    {
       case 0:
@@ -155,20 +154,55 @@ bool TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction AAction, cons
 
       case 2:// file
       case 4:// file+stdout
+      {
          FLogEnabled = true;
          FRedirFileName = Afn;
-         IDECMDSrun = 0;
+         int IDECMDSrun = 0;
          while(IDECMDSrun <= 1)
          {
             IDECMDSrun += 2;
-            Ffcon = std::fopen( Afn.c_str(), "w" );//new std::ofstream(Afn);
-            if(AAction == forAppend)
+            const bool appendMode { AAction == forAppend };
+            Ffcon = std::fopen( Afn.c_str(), appendMode ? "a" : "w" );
+            if( !Ffcon )
             {
-               // ...
+               if( appendMode )
+                  Ffcon = std::fopen( Afn.c_str(), "w" );
+               ioRes = !Ffcon ? 1 : 0;
+            }
+            else
+               ioRes = 0;
+
+            // Try to close file in IDE
+            if( ioRes && rtl::p3platform::OSFileType() == rtl::p3platform::tOSFileType::OSFileWIN && IDECMDSrun <= 2 )
+            {
+               int IDECMDSsc;
+               if( const int IDECMDSrc = rtl::p3process::P3ExecP( "IDECmds View Close \""s + Afn + "\""s, IDECMDSsc ) )
+                  debugStream << "*** ExecRC="s << IntToStr(IDECMDSrc) << " Could not start ViewClose request on "s << Afn << '\n';
+               else if(IDECMDSsc)
+                  debugStream << "*** IDECmdsRC="s << IntToStr(IDECMDSrc) << " Viewclose request failed on "s << Afn << '\n';
+               else
+               {
+                  debugStream << "*** Issued ViewClose request on "s << Afn << '\n';
+                  utils::sleep(500);
+                  IDECMDSrun--;
+               }
             }
          }
-         // ...
-         STUBWARN();
+         if(!ioRes) FStatus = sl_file;
+         else
+         {
+            FStatus = sl_closed;
+            CheckOpen(); // switch to standard output
+            FSaveAstat = 3;
+            FSaveAfn.clear();
+            FRedirFileName.clear();
+            write_gf( "*** "s + (AAction == forAppend ? "Append"s : "Open"s) );
+            writeln_gf( " logfile error: (R="s + IntToStr( ioRes ) + ") FN=\""s + Afn + '\"' );
+            writeln_gf("*** Msg="s + SysErrorMessage( ioRes ));
+            writeln_gf( "*** Logging to standard output"s );
+            res = true;
+         }
+      }
          break;
 
       default:
@@ -179,7 +213,7 @@ bool TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction AAction, cons
       writeln_gf( "--- LogOption value 1 is deprecated, reset to 3"s );
 
    FLenLast = 0;
-   return false;
+   return res;
 }
 
 void TGMSLogStream::LogReOpen()
