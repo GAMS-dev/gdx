@@ -162,11 +162,21 @@ bool TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction AAction, cons
          {
             IDECMDSrun += 2;
             const bool appendMode { AAction == forAppend };
+            #ifndef _WIN32
             Ffcon = std::fopen( Afn.c_str(), appendMode ? "a" : "w" );
+            #else
+            Ffcon = std::fopen( Afn.c_str(), appendMode ? "ab" : "wb" );
+            #endif
             if( !Ffcon )
             {
                if( appendMode )
+               {
+                  #ifdef _WIN32
+                  Ffcon = std::fopen( Afn.c_str(), "wb" );
+                  #else
                   Ffcon = std::fopen( Afn.c_str(), "w" );
+                  #endif
+               }
                ioRes = !Ffcon ? 1 : 0;
             }
             else
@@ -796,6 +806,7 @@ bool TGMSStatusStream::StatusAppend( const std::string &fn, std::string &msg )
       return false;
    }
 
+   // shouldn't these be binary mode on windows?
    FILE *f { fopen( fn.c_str(), "a" ) };
    if( !f )
    {
@@ -1290,6 +1301,7 @@ bool TGMSStatusStream::StatusFileOpen( gdlib::gmsgen::tfileaction AAction, std::
    if( checkfile(msg) )
       msg.clear();
    else return false;
+   // shouldnt this be binary mode on windows?
    Ffstat = fopen( Ffnstat.c_str(), "r" );
    bool newstat;
    if(Ffstat) {
@@ -1482,6 +1494,7 @@ std::function<void( const std::string & )> TGMSStatusStream::commonStatusFunc( c
 bool opentextmsg( FILE *&f, const std::string &fn, gdlib::gmsgen::tfileaction fa, std::string &msg )
 {
    const char *mode {};
+   // shouldn't these be binary mode on Windows to avoid weird \r\n behavior?
    switch( fa )
    {
       case forRead:
@@ -1494,7 +1507,7 @@ bool opentextmsg( FILE *&f, const std::string &fn, gdlib::gmsgen::tfileaction fa
          mode = "a";
          break;
       default:
-         throw std::runtime_error( "Unknown file actio provided!"s );
+         throw std::runtime_error( "Unknown file action provided!"s );
    }
    f = fopen( fn.c_str(), mode );
    int ioRes { f ? 0 : errno };
