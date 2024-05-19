@@ -377,21 +377,19 @@ bool SpecialStrAsInt( const std::string &s, int &v )
 
 std::string IncludeTrailingPathDelimiterEx( const std::string &S )
 {
-   utils::charset myDelim = { PathDelim };
-   if( OSFileType() == OSFileWIN ) myDelim.insert( '/' );
-   return !S.empty() && utils::in( S.back(), myDelim ) ? S : S + PathDelim;
+   return !S.empty() && ( S.back() == PathDelim || (OSFileType() == OSFileWIN && S.back() == '/') ) ? S : S + PathDelim;
 }
 
 std::string ExcludeTrailingPathDelimiterEx( const std::string &S )
 {
-   utils::charset myDelim = { PathDelim };
-   if( OSFileType() == OSFileWIN ) myDelim.insert( '/' );
-   return !S.empty() && utils::in( S.back(), myDelim ) ? S.substr( 0, S.length() - 1 ) : S;
+   return !S.empty() && ( S.back() == PathDelim || (OSFileType() == OSFileWIN && S.back() == '/') ) ? std::string{S.begin(), S.end()-1} : S;
 }
 
 std::string ExtractFileNameEx( const std::string &FileName )
 {
-   return FileName.substr( LastDelimiter( ""s + PathDelim + ( OSFileType() == OSFileWIN ? "/" : "" ) + DriveDelim, FileName ) + 1 );
+   const static auto Delims {""s + PathDelim + ( OSFileType() == OSFileWIN ? "/" : "" ) + DriveDelim};
+   const auto offset {LastDelimiter( Delims, FileName ) + 1};
+   return std::string{FileName.begin()+offset, FileName.end()};
 }
 
 bool StrAsDoubleEx( const std::string &s, double &v )
@@ -542,7 +540,7 @@ std::string ChangeFileExtEx( const std::string &FileName, const std::string &Ext
 std::string ExtractFileExtEx( const std::string &FileName )
 {
    const int I { LastDelimiter( OSFileType() == OSFileWIN ? "\\/:." : "/.", FileName ) };
-   return I >= 0 && FileName[I] == '.' ? FileName.substr( I ) : ""s;
+   return I >= 0 && FileName[I] == '.' ? std::string{ FileName.begin() + I, FileName.end() } : ""s;
 }
 
 bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
