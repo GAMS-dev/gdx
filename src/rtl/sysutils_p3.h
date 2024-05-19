@@ -76,6 +76,10 @@ std::string ExtractShortPathName( const std::string &FileName );
 std::string ExtractFilePath( const std::string &FileName );
 std::string ExtractFileName( const std::string &FileName );
 std::string ExtractFileExt( const std::string &FileName );
+std::string ChangeFileExt( const std::string &filename, const std::string &extension );
+std::string CompleteFileExt( const std::string &filename, const std::string &extension );
+std::string ReplaceFileExt( const std::string &filename, const std::string &extension );
+
 bool FileExists( const std::string &FileName );
 bool DirectoryExists( const std::string &Directory );
 

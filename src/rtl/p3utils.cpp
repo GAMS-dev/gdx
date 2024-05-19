@@ -105,28 +105,6 @@ static bool setEnvironmentVariableUnix( const std::string &name, const std::stri
 
 static std::vector<std::string> paramstr;
 
-// TODO: Replace with port of original implementation that does not rely on std::filesytem
-std::string ExtractFileExt( const std::string &filename )
-{
-   return std::filesystem::path( filename ).extension().string();
-}
-
-// TODO: Replace with port of original implementation that does not rely on std::filesytem
-std::string ChangeFileExt( const std::string &filename, const std::string &extension )
-{
-   return std::filesystem::path( filename ).replace_extension( std::filesystem::path( extension ) ).string();
-}
-
-std::string CompleteFileExt( const std::string &filename, const std::string &extension )
-{
-   return ExtractFileExt( filename ).empty() ? ChangeFileExt( filename, extension ) : filename;
-}
-
-std::string ReplaceFileExt( const std::string &filename, const std::string &extension )
-{
-   return ChangeFileExt( filename, extension );
-}
-
 bool PrefixPath( const std::string &s )
 {
    if( s.empty() ) return true;

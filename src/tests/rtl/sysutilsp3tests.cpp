@@ -37,6 +37,13 @@ namespace tests::rtltests::sysutilsp3tests
 
 TEST_SUITE_BEGIN( "rtl::sysutils_p3" );
 
+#ifdef _WIN32
+TEST_CASE( "Extracting Windows short path name" )
+{
+   REQUIRE_EQ("C:\\PROGRA~1\\APPLIC~1"s, ExtractShortPathName( R"(C:\Program Files\Application Verifier)" ));
+}
+#endif
+
 TEST_CASE( "Remove trailing path delimiter from path" )
 {
    char sep = '/';
@@ -51,6 +58,7 @@ TEST_CASE( "Remove trailing path delimiter from path" )
 TEST_CASE( "Index of last delimiter in path" )
 {
    REQUIRE_EQ( 5, LastDelimiter( "/\\"s, "/some/path"s ) );
+   REQUIRE_EQ( 15, LastDelimiter( "/\\."s, "/some/path/file.txt"s ) );
    REQUIRE_EQ( 5, LastDelimiter( "/\\"s, "/some\\path"s ) );
    REQUIRE_EQ( -1, LastDelimiter( "/", "C:\\some\\path" ) );
 }
@@ -61,12 +69,22 @@ TEST_CASE( "Extract extension of filename" )
    REQUIRE( ExtractFileExt( "xyz" ).empty() );
 }
 
+TEST_CASE( "Change a file extension")
+{
+   REQUIRE_EQ("abc.cpp"s, ChangeFileExt("abc"s, ".cpp"s));
+   REQUIRE_EQ("abc.cpp"s, ChangeFileExt("abc.txt"s, ".cpp"s));
+}
+
 TEST_CASE("Test extracting the path from an full filename path")
 {
 #if defined(_WIN32)
-   REQUIRE_EQ("C:\\home\\username"s, ExtractFilePath("C:\\home\\username\\xyz.gms"));
+   REQUIRE_EQ("C:\\home\\username\\"s, ExtractFilePath("C:\\home\\username\\xyz.gms"s));
+   REQUIRE_EQ("C:\\home\\username\\"s, ExtractFilePath("C:\\home\\username\\"s));
+   REQUIRE_EQ("C:\\home\\"s, ExtractFilePath("C:\\home\\username"s));
 #else
    REQUIRE_EQ("/home/username"s, ExtractFilePath("/home/username/xyz.gms"));
+   REQUIRE_EQ("/home/username/"s, ExtractFilePath("/home/username/"));
+   REQUIRE_EQ("/home/"s, ExtractFilePath("/home/username"));
 #endif
 }
 
@@ -74,6 +92,8 @@ TEST_CASE("Test filename from a path")
 {
 #if defined(_WIN32)
    REQUIRE_EQ("xyz.gms"s, ExtractFileName("C:\\home\\username\\xyz.gms"));
+   REQUIRE_EQ("xyz.gms"s, ExtractFileName("C:\\home\\..\\xyz.gms"));
+   REQUIRE_EQ("xyz.gms"s, ExtractFileName("C:\\home\\xyz.gms"));
 #else
    REQUIRE_EQ("xyz.gms"s, ExtractFileName("/home/username/xyz.gms"));
 #endif

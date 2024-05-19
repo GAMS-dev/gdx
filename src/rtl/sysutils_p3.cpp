@@ -66,7 +66,8 @@ std::string ExtractShortPathName( const std::string &FileName )
 
 std::string ExtractFilePath( const std::string &FileName )
 {
-   return { FileName.begin(), FileName.begin()+LastDelimiter( PathAndDriveDelim.data() , FileName )};
+   const auto I {LastDelimiter( PathAndDriveDelim.data() , FileName )};
+   return I == -1 ? ""s : FileName.substr(0, I+1);
 }
 
 std::string ExtractFileName( const std::string &FileName )
@@ -311,6 +312,24 @@ int LastDelimiter( const std::string &Delimiters, const std::string &S )
          if( delim != '\0' && delim == S[i] )
             return i;
    return -1;
+}
+
+std::string ChangeFileExt( const std::string &filename, const std::string &extension )
+{
+   auto I {LastDelimiter( ExtStopper, filename )};
+   if(I == -1 || filename[I] != '.') I = static_cast<int>(filename.length());
+   return filename.substr(0, I) + extension;
+
+}
+
+std::string CompleteFileExt( const std::string &filename, const std::string &extension )
+{
+   return ExtractFileExt( filename ).empty() ? ChangeFileExt( filename, extension ) : filename;
+}
+
+std::string ReplaceFileExt( const std::string &filename, const std::string &extension )
+{
+   return ChangeFileExt( filename, extension );
 }
 
 int FindFirst( const std::string &Path, int Attr, TSearchRec &F )

@@ -75,11 +75,6 @@ enum Tp3Location : uint8_t
 bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocNames &locNames, int &eCount );
 bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::string &locName );
 
-std::string ExtractFileExt( const std::string &filename );
-std::string ChangeFileExt( const std::string &filename, const std::string &extension );
-std::string CompleteFileExt( const std::string &filename, const std::string &extension );
-std::string ReplaceFileExt( const std::string &filename, const std::string &extension );
-
 bool PrefixPath( const std::string &s );
 
 bool P3SetEnv( const std::string &name, const std::string &val );
