@@ -27,6 +27,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 #include <array>
 #include <stdexcept>
 
@@ -160,7 +161,7 @@ void P3_Str_d2( const double x, const int width, const int decimals, char *s, co
 
    char fmt[1024];
    std::sprintf(fmt, "%%%d.%df", width, decimals);
-   if(fabs(x) > 1.0e37)
+   if(std::fabs(x) > 1.0e37)
       std::sprintf(fmt, "%%%d.%dE", width, decimals);
    std::sprintf(s, fmt, x);
 }
