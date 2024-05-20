@@ -113,7 +113,7 @@ void TGmsList::WrInt( int n )
 void TGmsList::WrStr( std::string_view s )
 {
    if( FsuppressOutput ) return;
-   if( (int) s.length() <= FCharsLeft )
+   if( static_cast<int>( s.length() ) <= FCharsLeft )
    {
       UsrWrite( s );
       return;
@@ -122,7 +122,7 @@ void TGmsList::WrStr( std::string_view s )
    if( !LineIsEmpty() )
    {
       LWrite( true );
-      if( (int) s.length() <= FCharsLeft )
+      if( static_cast<int>( s.length() ) <= FCharsLeft )
       {
          UsrWrite( s );
          return;
@@ -130,7 +130,7 @@ void TGmsList::WrStr( std::string_view s )
    }
 
    const std::string_view &x { s };
-   for( int k { FCharsLeft }; (int) x.length() > k && k > 0; k = FCharsLeft )
+   for( int k { FCharsLeft }; static_cast<int>( x.length() ) > k && k > 0; k = FCharsLeft )
    {
       UsrWrite( x.substr( 1, k ) );
       LWrite( true );
@@ -161,35 +161,15 @@ void TGmsList::WrDblFmt( double d, int m, int n )
 {
    if( FsuppressOutput ) return;
 
-   /*std::array<char, 1024> s;
-   if(!m && !n)
-      rtl::p3io::P3_Str_d0(d, s.data());
-   else
-      rtl::p3io::P3_Str_d2(d, m, n, s.data(), 255);
-   WrStr(s.data());*/
-
-   std::ostringstream oss;
-
+   std::array<char, 1024> s;
    if( !m && !n )
    {
-      oss.precision( 14 );
-      oss << std::scientific << d;
-      std::string s = oss.str();
-      if( utils::strContains( s, 'e' ) )
-      {
-         const auto parts = utils::split( s, 'e' );
-         const std::string sign = utils::strContains( s, '-' ) ? "-"s : "+"s,
-                     exp = utils::replaceSubstrs( parts.back(), sign, ""s );
-         const std::string &base = parts.front();
-         s = base + 'E' + sign + std::string( 4 - exp.length(), '0' ) + exp;
-      }
-      WrStr( s );
-      return;
+      size_t expLen;
+      rtl::p3io::P3_Str_dd0( d, s.data(), 255, &expLen );
    }
-
-   oss.precision( n );
-   oss << d;
-   WrStr( PadLeft( oss.str(), m, ' ' ) );
+   else
+      rtl::p3io::P3_Str_dd2(d, m, n, s.data(), 255);
+   WrStr(s.data());
 }
 
 void TGmsList::WrIntFmt( int N, int D )
