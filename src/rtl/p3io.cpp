@@ -142,8 +142,8 @@ void P3_Str_dd1( const double x, int width, char *s, uint8_t sMax )
    if(decimals > 18)
       decimals = 18;
    char fmt[1024];
-   std::sprintf(fmt, "%%%d.%dE", width, decimals);
-   std::sprintf(s, fmt, x);
+   std::snprintf(fmt, sizeof(char)*1024, "%%%d.%dE", width, decimals);
+   std::snprintf(s, sizeof(char)*sMax, fmt, x);
 }
 
 void P3_Str_dd2( const double x, const int width, const int decimals, char *s, const uint8_t sMax )
@@ -155,10 +155,10 @@ void P3_Str_dd2( const double x, const int width, const int decimals, char *s, c
    }
 
    char fmt[1024];
-   std::sprintf(fmt, "%%%d.%df", width, decimals);
+   std::snprintf(fmt, sizeof(char)*1024, "%%%d.%df", width, decimals);
    if(std::fabs(x) > 1.0e37)
-      std::sprintf(fmt, "%%%d.%dE", width, decimals);
-   std::sprintf(s, fmt, x);
+      std::snprintf(fmt, sizeof(char)*1024, "%%%d.%dE", width, decimals);
+   std::snprintf(s, sizeof(char)*sMax, fmt, x);
 }
 
 static inline char tolower( const char c )
