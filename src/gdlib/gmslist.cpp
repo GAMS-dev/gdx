@@ -33,6 +33,7 @@
 #include "strutilx.h"
 
 #include "utils.h"
+#include "rtl/p3io.h"
 
 using namespace std::literals::string_literals;
 
@@ -159,6 +160,14 @@ void TGmsList::WrStrInt( std::string_view s, int N )
 void TGmsList::WrDblFmt( double d, int m, int n )
 {
    if( FsuppressOutput ) return;
+
+   /*std::array<char, 1024> s;
+   if(!m && !n)
+      rtl::p3io::P3_Str_d0(d, s.data());
+   else
+      rtl::p3io::P3_Str_d2(d, m, n, s.data(), 255);
+   WrStr(s.data());*/
+
    std::ostringstream oss;
 
    if( !m && !n )

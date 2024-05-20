@@ -133,6 +133,38 @@ void P3_Str_dd0( const double x, char *s, const uint8_t sMax, size_t *eLen )
    }
 }
 
+void P3_Str_d0( const double x, char *s )
+{
+   sprintf( s, "%23.14E", x );
+}
+
+void P3_Str_d1( const double x, int width, char *s, uint8_t sMax )
+{
+   if(width < 10)
+      width = 10;
+   auto decimals = width - 8;
+   if(decimals > 18)
+      decimals = 18;
+   char fmt[1024];
+   std::sprintf(fmt, "%%%d.%dE", width, decimals);
+   std::sprintf(s, fmt, x);
+}
+
+void P3_Str_d2( const double x, const int width, const int decimals, char *s, const uint8_t sMax )
+{
+   if(decimals < 0)
+   {
+      P3_Str_d1(x, width, s, sMax);
+      return;
+   }
+
+   char fmt[1024];
+   std::sprintf(fmt, "%%%d.%df", width, decimals);
+   if(fabs(x) > 1.0e37)
+      std::sprintf(fmt, "%%%d.%dE", width, decimals);
+   std::sprintf(s, fmt, x);
+}
+
 static inline char tolower( const char c )
 {
    return c >= 'A' && c <= 'Z' ? static_cast<char>( c ^ 32 ) : c;
