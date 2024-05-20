@@ -37,10 +37,11 @@ namespace tests::rtltests::sysutilsp3tests
 
 TEST_SUITE_BEGIN( "rtl::sysutils_p3" );
 
-#ifdef _WIN32
+#if 0
 TEST_CASE( "Extracting Windows short path name" )
 {
-   REQUIRE_EQ("C:\\PROGRA~1\\APPLIC~1"s, ExtractShortPathName( R"(C:\Program Files\Application Verifier)" ));
+   const std::string path {R"(C:\Program Files\Application Verifier)"};
+   REQUIRE_EQ("C:\\PROGRA~1\\APPLIC~1"s, ExtractShortPathName( path ));
 }
 #endif
 

@@ -56,7 +56,8 @@ std::string ExtractShortPathName( const std::string &FileName )
 {
 #if defined( _WIN32 )
    std::array<char, 260> buf;
-   GetShortPathNameA( FileName.c_str(), buf.data(), static_cast<DWORD>( sizeof( char ) * buf.size() ) );
+   auto rc = GetShortPathNameA( FileName.c_str(), buf.data(), static_cast<DWORD>( sizeof( char ) * buf.size() ) );
+   assert(rc);
    return buf.data();
 #else
    // TODO: Does this make sense?
