@@ -82,7 +82,7 @@ TEST_CASE("Test extracting the path from an full filename path")
    REQUIRE_EQ("C:\\home\\username\\"s, ExtractFilePath("C:\\home\\username\\"s));
    REQUIRE_EQ("C:\\home\\"s, ExtractFilePath("C:\\home\\username"s));
 #else
-   REQUIRE_EQ("/home/username"s, ExtractFilePath("/home/username/xyz.gms"));
+   REQUIRE_EQ("/home/username/"s, ExtractFilePath("/home/username/xyz.gms"));
    REQUIRE_EQ("/home/username/"s, ExtractFilePath("/home/username/"));
    REQUIRE_EQ("/home/"s, ExtractFilePath("/home/username"));
 #endif
