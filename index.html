@@ -411,38 +411,54 @@ the record is flagged as an error record and the record will be skipped.    </td
 <div class="fragment"><div class="line">Set I /.../;</div>
 <div class="line">Parameter A(I,*);</div>
 </div><!-- fragment --><p >Assuming we have read set <code>I</code> already, the following code snapshot illustrates how to read parameter <code>A</code>.</p>
-<div class="fragment"><div class="line"><span class="comment">// Register the filter for set I; reference this filter with integer 123</span></div>
+<div class="fragment"><div class="line"><span class="comment">// We wish to only read the values of A when the first label is either &quot;New-York&quot; or &quot;Chicago&quot;</span></div>
+<div class="line"><span class="comment">// For this, we assign a unique value to each one of the label, here we choose 1000 and 2000</span></div>
+<div class="line"><span class="comment">// Then, we register a filter with a unique ID, here 123.</span></div>
+<div class="line"><span class="comment">// Note that a filter ID cannot be reused. The filter is immutable after its creation</span></div>
+<div class="line">gdx.gdxUELRegisterMapStart();</div>
+<div class="line">gdx.gdxUELRegisterMap( 1000, <span class="stringliteral">&quot;New-York&quot;</span> );</div>
+<div class="line">gdx.gdxUELRegisterMap( 2000, <span class="stringliteral">&quot;Chicago&quot;</span> );</div>
+<div class="line">gdx.gdxUELRegisterDone();</div>
+<div class="line"><span class="comment">// Register the filter for set I; reference this filter with integer 123 (filter number)</span></div>
 <div class="line"><span class="keywordflow">if</span>(!gdx.gdxFilterRegisterStart(123))</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line">gdx.gdxFilterRegister(1000);</div>
 <div class="line">gdx.gdxFilterRegister(2000);</div>
-<div class="line"><span class="keywordflow">if</span>(!gdx.gdxFilterRegisterDone()</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxFilterRegisterDone())</div>
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// set the filter</span></div>
-<div class="line">Filt[0] = 123; <span class="comment">//filter for I</span></div>
-<div class="line">Filt[1] = -1; <span class="comment">// expand</span></div>
+<div class="line"><span class="comment">// set the filter actions</span></div>
+<div class="line">std::array filterAction {</div>
+<div class="line">   123, <span class="comment">//filter for I</span></div>
+<div class="line">   gdx::DOMC_EXPAND <span class="comment">// expand (=-1)</span></div>
+<div class="line">};</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Remember highest mapped value in variable LastMapped</span></div>
-<div class="line">gdx.gdxUMUelInfo(NrUnMapped,LastMapped);</div>
+<div class="line"><span class="keywordtype">int</span> NrUnMapped, LastMapped;</div>
+<div class="line">gdx.gdxUMUelInfo(NrUnMapped, LastMapped);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Read parameter A as a 2 dimensional parameter</span></div>
-<div class="line"><span class="keywordflow">if</span>(!gdx.gdxFindSymbol(<span class="stringliteral">&quot;A&quot;</span>,SyNr) {</div>
+<div class="line"><span class="keywordtype">int</span> SyNr;</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxFindSymbol(<span class="stringliteral">&quot;A&quot;</span>, SyNr) {</div>
 <div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;**** Could not find symbol A&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line">gdx.gdxSymbolInfo(SyNr,SyName,SyDim,SyTyp);</div>
+<div class="line">std::array&lt;char, GMS_SSSIZE&gt; SyName;</div>
+<div class="line"><span class="keywordtype">int</span> SyDim, SyTyp;</div>
+<div class="line">gdx.gdxSymbolInfo(SyNr, SyName.data(), SyDim, SyTyp);</div>
 <div class="line"><span class="keywordflow">if</span>(SyDim != 2 || SyTyp != dt_par) {</div>
 <div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;**** A is not a two dimensional parameter&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line">   exit(1);</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line"><span class="keywordflow">if</span>(!gdx.gdxReadFilteredStart(SyNr,Filt,NrRecs);</div>
+<div class="line"><span class="keywordtype">int</span> NrRecs;</div>
+<div class="line"><span class="keywordflow">if</span>(!gdx.gdxDataReadFilteredStart(SyNr, filterAction.data(), NrRecs));</div>
 <div class="line">   ReportGDXError();</div>
-<div class="line"> </div>
+<div class="line">   </div>
+<div class="line"><span class="keywordtype">int</span> DimFrst;</div>
 <div class="line"><span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{1}; N&lt;=NrRecs; N++) {</div>
-<div class="line">   <span class="keywordflow">if</span>(gdx.gdxDataReadMap(N,IndxI,Values)) {</div>
+<div class="line">   <span class="keywordflow">if</span>(gdx.gdxDataReadMap(N, IndxI, Values, DimFrst)) {</div>
 <div class="line">      <span class="comment">// do something to process the record read (index, values)</span></div>
 <div class="line">   }</div>
 <div class="line">}</div>
@@ -451,14 +467,17 @@ the record is flagged as an error record and the record will be skipped.    </td
 <div class="line">   ReportGDXError();</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// see if there are new unique elements</span></div>
-<div class="line">gdx.gdxUMUelInfo(NrUnMapped,NewLastMapped);</div>
+<div class="line"><span class="keywordtype">int</span> NewLastMapped;</div>
+<div class="line">gdx.gdxUMUelInfo(NrUnMapped, NewLastMapped);</div>
 <div class="line"><span class="keywordflow">if</span>(NewLastMapped &gt; LastMapped) {</div>
 <div class="line">   <span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{LastMapped + 1}; N&lt;=NewLastMapped; N++) {</div>
-<div class="line">      gdx.gdxGetUel(N,S);</div>
-<div class="line">      std::cout &lt;&lt; <span class="stringliteral">&quot;New element &quot;</span> &lt;&lt; N &lt;&lt; <span class="stringliteral">&quot; = &quot;</span> &lt;&lt; S &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
+<div class="line">      std::array&lt;char, GMS_SSSIZE&gt; S {};</div>
+<div class="line">      gdx.gdxGetUel(N,S.data());</div>
+<div class="line">      std::cout &lt;&lt; <span class="stringliteral">&quot;New element &quot;</span> &lt;&lt; N &lt;&lt; <span class="stringliteral">&quot; = &quot;</span> &lt;&lt; S.data() &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
 <div class="line">   }</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="autotoc_md18"></a>
+</div><!-- fragment --><p >A runnable version of this example can be found in the unit test suite under <code>/src/tests/gdxtests.cpp</code> as test case with the name "Test filter example from README".</p>
+<h2><a class="anchor" id="autotoc_md18"></a>
 Dealing with acronyms</h2>
 <p >In GAMS we can use acronyms in places where we can use a floating point number as in the following example:</p>
 <div class="fragment"><div class="line">set i /i1*i5/;</div>

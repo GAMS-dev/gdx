@@ -105,12 +105,12 @@ $(document).ready(function(){initNavTree('classgdx_1_1TGXFileObj.html',''); init
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a3c7cd8bed0ced83650b0224912d0dc2b"><td class="memItemLeft" align="right" valign="top"><a id="a3c7cd8bed0ced83650b0224912d0dc2b" name="a3c7cd8bed0ced83650b0224912d0dc2b"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>TraceLevels</b> { <b>trl_none</b>
+<tr class="memitem:a4c2c9263765e9ef7d2808647f52ee124"><td class="memItemLeft" align="right" valign="top"><a id="a4c2c9263765e9ef7d2808647f52ee124" name="a4c2c9263765e9ef7d2808647f52ee124"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>TraceLevels</b> : uint8_t { <b>trl_none</b>
 , <b>trl_errors</b>
 , <b>trl_some</b>
 , <b>trl_all</b>
  }</td></tr>
-<tr class="separator:a3c7cd8bed0ced83650b0224912d0dc2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:a4c2c9263765e9ef7d2808647f52ee124"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -2719,7 +2719,7 @@ When the symbol is not found, the function returns zero and SyNr is set to -1.  
 <div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Get domain count = &quot;</span> &lt;&lt; cnt &lt;&lt; std::endl;</div>
 <div class="line">pgx.gdxGetDomainElements(1, 1, 7, DataDomainCB, cnt);</div>
 <div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Using filter 7; number of records in error list = &quot;</span> &lt;&lt; <a class="code hl_function" href="classgdx_1_1TGXFileObj.html#aaae21ed2293db76cdbd05dd06a94a775">gdxDataErrorCount</a>(PGX) &lt;&lt; std::endl;</div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_aaae21ed2293db76cdbd05dd06a94a775"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#aaae21ed2293db76cdbd05dd06a94a775">gdx::TGXFileObj::gdxDataErrorCount</a></div><div class="ttdeci">int gdxDataErrorCount() const</div><div class="ttdoc">Query the number of error records.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:2133</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_aaae21ed2293db76cdbd05dd06a94a775"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#aaae21ed2293db76cdbd05dd06a94a775">gdx::TGXFileObj::gdxDataErrorCount</a></div><div class="ttdeci">int gdxDataErrorCount() const</div><div class="ttdoc">Query the number of error records.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:2134</div></div>
 </div><!-- fragment --> </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a36c5e9b87188458bfca1d08e4595f4d7" title="Retrieve an error record. Non-zero if the record number is valid.">gdxDataErrorRecord</a> </dd></dl>
 
@@ -3033,7 +3033,7 @@ When reading a GDX file, the index is returned as the level value when reading a
 <div class="line"><span class="keywordflow">if</span>(ErrCode) {</div>
 <div class="line">  [ ... ]</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a52f09635e83e11b65dcfdcbd617f0600"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a52f09635e83e11b65dcfdcbd617f0600">gdx::TGXFileObj::gdxOpenAppend</a></div><div class="ttdeci">int gdxOpenAppend(const char *FileName, const char *Producer, int &amp;ErrNr)</div><div class="ttdoc">Open an existing GDX file for output. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:3424</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a52f09635e83e11b65dcfdcbd617f0600"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a52f09635e83e11b65dcfdcbd617f0600">gdx::TGXFileObj::gdxOpenAppend</a></div><div class="ttdeci">int gdxOpenAppend(const char *FileName, const char *Producer, int &amp;ErrNr)</div><div class="ttdoc">Open an existing GDX file for output. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:3425</div></div>
 </div><!-- fragment --> </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a4a3b3e0ffdf3bbb17070e43ba7e98408" title="Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.">gdxOpenRead</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#ae53f311244734378f4de7c9c7eafdf67" title="Open a new GDX file for output. Non-zero if the file can be opened, zero otherwise.">gdxOpenWrite</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#a3a1538da866ff406cc50477f6bcdc63c" title="Create a GDX file for writing with explicitly given compression flag. Non-zero if the file can be ope...">gdxOpenWriteEx</a> </dd></dl>
 
@@ -3079,7 +3079,7 @@ When reading a GDX file, the index is returned as the level value when reading a
 <div class="line"><span class="keywordflow">if</span>(ErrNr) {</div>
 <div class="line">  [...]</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a4a3b3e0ffdf3bbb17070e43ba7e98408"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a4a3b3e0ffdf3bbb17070e43ba7e98408">gdx::TGXFileObj::gdxOpenRead</a></div><div class="ttdeci">int gdxOpenRead(const char *FileName, int &amp;ErrNr)</div><div class="ttdoc">Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:1720</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a4a3b3e0ffdf3bbb17070e43ba7e98408"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a4a3b3e0ffdf3bbb17070e43ba7e98408">gdx::TGXFileObj::gdxOpenRead</a></div><div class="ttdeci">int gdxOpenRead(const char *FileName, int &amp;ErrNr)</div><div class="ttdoc">Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:1721</div></div>
 </div><!-- fragment --> </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#ae53f311244734378f4de7c9c7eafdf67" title="Open a new GDX file for output. Non-zero if the file can be opened, zero otherwise.">gdxOpenWrite</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#a35273506e085ef6d885f94724ca02b86" title="Returns the last error number or zero if there was no error. Calling this function will clear the las...">gdxGetLastError</a> </dd></dl>
 
@@ -3243,7 +3243,7 @@ When reading a GDX file, the index is returned as the level value when reading a
 <div class="line"><span class="keywordflow">if</span>(ErrCode) {</div>
 <div class="line">[ ... ]</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a3a1538da866ff406cc50477f6bcdc63c"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a3a1538da866ff406cc50477f6bcdc63c">gdx::TGXFileObj::gdxOpenWriteEx</a></div><div class="ttdeci">int gdxOpenWriteEx(const char *FileName, const char *Producer, int Compr, int &amp;ErrNr)</div><div class="ttdoc">Create a GDX file for writing with explicitly given compression flag. Non-zero if the file can be ope...</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:396</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a3a1538da866ff406cc50477f6bcdc63c"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a3a1538da866ff406cc50477f6bcdc63c">gdx::TGXFileObj::gdxOpenWriteEx</a></div><div class="ttdeci">int gdxOpenWriteEx(const char *FileName, const char *Producer, int Compr, int &amp;ErrNr)</div><div class="ttdoc">Create a GDX file for writing with explicitly given compression flag. Non-zero if the file can be ope...</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:397</div></div>
 </div><!-- fragment --> </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a4a3b3e0ffdf3bbb17070e43ba7e98408" title="Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.">gdxOpenRead</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#ae53f311244734378f4de7c9c7eafdf67" title="Open a new GDX file for output. Non-zero if the file can be opened, zero otherwise.">gdxOpenWrite</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#ae0b2458fa7062edde0eedde8fc5ec40a" title="Returns the value of the AutoConvert variable and sets the variable to nv. When we close a new GDX fi...">gdxAutoConvert</a> </dd></dl>
 
