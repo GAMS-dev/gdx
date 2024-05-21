@@ -30,7 +30,7 @@
 // Interface
 namespace gdlib::gmsglob
 {
-enum tssymbol
+enum tssymbol : uint8_t
 {
    ssyeq,
    ssygt,

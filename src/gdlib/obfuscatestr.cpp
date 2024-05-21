@@ -28,11 +28,9 @@
 #include <memory>
 #include "obfuscatestr.h"
 #include "charmaps.h"
-#include "../global/delphitypes.h"
 #include "utils.h"
 
 using namespace gdlib::charmaps;
-using namespace global::delphitypes;
 
 namespace gdlib::obfuscatestr
 {
@@ -105,7 +103,7 @@ void obfuscateInit()
    {
       int fcharmapLen {};
       for( char c = std::numeric_limits<char>::min(); c < std::numeric_limits<char>::max(); c++ )
-         if( utils::in( c, identchar ) && !utils::in( c, lowletter ) ) fcharmapLen++;
+         if( IsIdentChar( c ) && !utils::in( c, lowletter ) ) fcharmapLen++;
       const int ffcharmapLen = 'Z' - 'A' + 1;
 
       SymbolCharMapPtr = std::make_unique<TObfuscateCharMap>( fcharmapLen, ffcharmapLen );
@@ -113,7 +111,7 @@ void obfuscateInit()
          SymbolCharMapPtr->FFCharMap[c - 'A'] = c;
       int i {};
       for( char c = std::numeric_limits<char>::min(); c < std::numeric_limits<char>::max(); c++ )
-         if( utils::in( c, identchar ) && !utils::in( c, lowletter ) )
+         if( IsIdentChar( c ) && !utils::in( c, lowletter ) )
             SymbolCharMapPtr->FCharmap[i++] = c;
    }
 

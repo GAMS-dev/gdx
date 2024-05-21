@@ -23,25 +23,17 @@
  * SOFTWARE.
  */
 
-
-
 #pragma once
 
-// Look at the gmsstrm.cpp file to get some comments on why there are *Delphi classes.
-
-#include <optional>
-#include <array>      // for array
-#include <cstdint>    // for uint32_t, uint8_t, int64_t, uint16_t
-#include <cstring>    // for strlen
-#include <cassert>
-#include <fstream>    // for fstream, basic_fstream
-#include <map>        // for map
-#include <memory>     // for allocator, unique_ptr
-#include <string>     // for string, basic_string
-#include <string_view>// for string_view
-#include <vector>     // for vector
-
-#include "../global/delphitypes.h"
+#include <array>                // for array
+#include <cassert>              // for assert
+#include <cstdint>              // for uint32_t, uint8_t, int64_t, uint16_t
+#include <cstring>              // for strlen
+#include <memory>               // for unique_ptr
+#include <string>               // for string, basic_string
+#include <string_view>          // for string_view
+#include <vector>               // for vector
+#include "../rtl/p3utils.h"     // for Tp3FileHandle
 
 #if defined( NO_ZLIB )
 inline int uncompress( void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen )
@@ -101,14 +93,7 @@ enum FileAccessMode
    fmOpenReadWrite = 0x002
 };
 
-// File Mode creation constants
-const std::map<FileAccessMode, std::string> modeStrs {
-        { fmCreate, "w" },
-        { fmOpenRead, "r" },
-        { fmOpenWrite, "w" },
-        { fmOpenReadWrite, "w+" } };
-
-enum class RWType
+enum class RWType : uint8_t
 {
    rw_byte,
    rw_bool,
@@ -122,46 +107,17 @@ enum class RWType
    rw_pstring,
    rw_count
 };
-const std::array<std::string, 10> RWTypeText = { "Byte", "Bool", "Char", "Word", "Integer", "Int64", "Double", "String", "PChar", "PString" };
-
-class TXStream
-{
-public:
-   virtual ~TXStream() = default;
-
-   virtual size_t Write( const char *buf, size_t count ) = 0;
-   virtual size_t Read( char *buf, size_t count ) const = 0;
-
-   virtual void WriteInteger( int N ) = 0;
-   virtual void WriteString( const std::string &s ) = 0;
-   virtual void WritePChar( const std::string &s ) = 0;
-
-   virtual void WriteByte( uint8_t b ) = 0;
-   virtual void WriteBool( bool B ) = 0;
-
-   [[nodiscard]] virtual std::string ReadString() const = 0;
-   [[nodiscard]] virtual int ReadInteger() const = 0;
-   [[nodiscard]] virtual uint8_t ReadByte() const = 0;
-   [[nodiscard]] virtual uint16_t ReadWord() const = 0;
-   [[nodiscard]] virtual bool ReadBool() const = 0;
-
-   [[nodiscard]] virtual uint64_t GetPosition() const = 0;
-   virtual void SetPosition( int P ) = 0;
-};
-
-class TMiBufferedFileStream : public TXStream
-{
-public:
-   [[nodiscard]] virtual bool WordsNeedFlip() const = 0;
-};
+const std::array<std::string, 10> RWTypeText { "Byte", "Bool", "Char", "Word", "Integer", "Int64", "Double", "String", "PChar", "PString" };
 
 /**
  * Defines the base class for a stream. Only to be used for defining derived objects.
  */
-class TXStreamDelphi
+class TXStream
 {
 protected:
+#ifdef WF_TEXT
    std::unique_ptr<std::ofstream> fstext {};
+#endif
 
    void ParWrite( RWType T );
    void ParCheck( RWType T );
@@ -192,7 +148,7 @@ protected:
    virtual int64_t GetSize() = 0;
 
 public:
-   virtual ~TXStreamDelphi() = default;
+   virtual ~TXStream() = default;
 
    virtual uint32_t Read( void *Buffer, uint32_t Count ) = 0;
    virtual uint32_t Write( const void *Buffer, uint32_t Count ) = 0;
@@ -234,11 +190,11 @@ public:
    void ActiveWriteOpTextDumping( const std::string &dumpFilename );
 };
 
-class TXFileStreamDelphi : public TXStreamDelphi
+class TXFileStream : public TXStream
 {
-   friend class TBinaryTextFileIODelphi;
+   friend class TBinaryTextFileIO;
 
-   std::unique_ptr<std::fstream> FS {};
+   rtl::p3utils::Tp3FileHandle FS {};
    bool FileIsOpen {};
    std::string FFileName {}, FPassWord {};
 
@@ -253,8 +209,8 @@ protected:
    void SetPosition( int64_t P ) override;
 
 public:
-   TXFileStreamDelphi( std::string AFileName, FileAccessMode AMode );
-   ~TXFileStreamDelphi() override;
+   TXFileStream( std::string AFileName, FileAccessMode AMode );
+   ~TXFileStream() override;
 
    void ApplyPassWord( const char *PR, char *PW, int Len, int64_t Offs ) const;
    uint32_t Read( void *Buffer, uint32_t Count ) override;
@@ -280,9 +236,9 @@ struct TCompressBuffer {
 };
 using PCompressBuffer = TCompressBuffer *;
 
-class TBufferedFileStreamDelphi : public TXFileStreamDelphi
+class TBufferedFileStream : public TXFileStream
 {
-   friend class TBinaryTextFileIODelphi;
+   friend class TBinaryTextFileIO;
 
    uint32_t NrLoaded, NrRead, NrWritten, BufSize, CBufSize;
 
@@ -297,8 +253,8 @@ protected:
    int64_t GetSize() override;
 
 public:
-   TBufferedFileStreamDelphi( const std::string &FileName, uint16_t Mode );
-   ~TBufferedFileStreamDelphi() override;
+   TBufferedFileStream( const std::string &FileName, uint16_t Mode );
+   ~TBufferedFileStream() override;
    bool FlushBuffer();
    uint32_t Read( void *Buffer, uint32_t Count ) override;
    char ReadCharacter();
@@ -315,7 +271,7 @@ public:
 
 void reverseBytesMax8( const void *psrc, void *pdest, int sz );
 
-class TMiBufferedStreamDelphi : public TBufferedFileStreamDelphi
+class TMiBufferedStream : public TBufferedFileStream
 {
    uint8_t order_word {}, order_integer {}, order_double {}, size_word {}, size_integer {}, size_double {};
    bool NormalOrder {};
@@ -361,7 +317,7 @@ class TMiBufferedStreamDelphi : public TBufferedFileStreamDelphi
    void DetermineByteOrder();
 
 public:
-   TMiBufferedStreamDelphi( const std::string &FileName, uint16_t Mode );
+   TMiBufferedStream( const std::string &FileName, uint16_t Mode );
    static void ReverseBytes( void *psrc, void *pdest, int sz );
    [[nodiscard]] int GoodByteOrder() const;
    double ReadDouble() override;
@@ -376,7 +332,7 @@ public:
    double ReadGmsDouble();
 };
 
-enum TFileSignature
+enum TFileSignature : uint8_t
 {
    fsign_text,
    fsign_blocktext,
@@ -387,7 +343,7 @@ class TGZipInputStream final
 {
    gzFile pgz;
    std::vector<uint8_t> Buf;
-   global::delphitypes::LongWord NrLoaded {}, NrRead {};
+   uint32_t NrLoaded {}, NrRead {};
 
 public:
    TGZipInputStream( const std::string &fn, std::string &ErrMsg );
@@ -397,18 +353,19 @@ public:
 
    void ReadLine( std::string &buffer, int MaxInp, char &LastChar );
    void ReadLine( std::vector<uint8_t> &buffer, int MaxInp, char &LastChar );
+   void ReadLine( char *buffer, int MaxInp, char &LastChar, int &Len );
 };
 
-class TBinaryTextFileIODelphi
+class TBinaryTextFileIO
 {
-   std::unique_ptr<TBufferedFileStreamDelphi> FS{};
+   std::unique_ptr<TBufferedFileStream> FS{};
    std::unique_ptr<TGZipInputStream> gzFS{};
 
    // GCC <= 11 doesn't like the maybe_unused here
 #if defined(_MSC_VER) || defined(__clang__) || !defined(__GNUC__) || ((__GNUC__ > 12) || (__GNUC__ == 12 && __GNUC_MINOR__ >= 0))
    [[maybe_unused]]
 #endif
-   enum
+   enum : uint8_t
    {
       fm_read,
       fm_write
@@ -419,81 +376,19 @@ class TBinaryTextFileIODelphi
 
 public:
    // OpenForRead
-   TBinaryTextFileIODelphi( const std::string &fn, const std::string &PassWord, int &ErrNr, std::string &errMsg );
+   TBinaryTextFileIO( const std::string &fn, const std::string &PassWord, int &ErrNr, std::string &errMsg );
    // OpenForWrite
-   TBinaryTextFileIODelphi( const std::string &fn, const std::string &Producer, const std::string &PassWord, TFileSignature signature, bool comp, int &ErrNr, std::string &errMsg );
+   TBinaryTextFileIO( const std::string &fn, const std::string &Producer, const std::string &PassWord, TFileSignature signature, bool comp, int &ErrNr, std::string &errMsg );
 
    uint32_t Read( char *Buffer, uint32_t Count );
    char ReadCharacter();
    void ReadLine( std::vector<uint8_t> &Buffer, int &Len, int MaxInp, char &LastChar );
+   void ReadLine( char *Buffer, int &Len, int MaxInp, char &LastChar );
    void ReadLine( std::string &StrBuffer, int &Len, int MaxInp, char &LastChar ) const;
    uint32_t Write( const char *Buffer, uint32_t Count ) const;
    bool UsesPassWord();
    void ReWind();
    int GetLastIOResult();
-};
-
-class TBinaryTextFileIO
-{
-   std::unique_ptr<std::iostream> FS;
-   std::unique_ptr<TGZipInputStream> gzFS;
-   enum
-   {
-      fm_read,
-      fm_write
-   } frw {};
-   TFileSignature FFileSignature {};
-   uint8_t FMajorVersionRead {}, FMinorVersionRead {};
-   std::streampos FRewindPoint {};
-
-   uint32_t NrLoaded {}, NrRead {}, NrWritten {};
-
-   int FLastIOResult {};
-
-   bool FCanCompress {}, FCompress {};
-   std::string FPassword {};
-
-   const bool noBuffering { false };
-   std::array<char, BufferSize> readBuffer {};
-   uint64_t lastReadCount {};
-   std::optional<uint64_t> offsetInBuffer {std::nullopt};
-   void maybeFillReadBuffer();
-
-   [[nodiscard]] int GetLastIOResult() const;
-
-   static std::string RandString( int L );
-
-   void SetCompression( bool V );
-
-   // Read/write from/to string buffer that is filled with a copy of contents
-   explicit TBinaryTextFileIO( const std::string &contents, int &ErrNr );
-
-public:
-   static TBinaryTextFileIO *FromString( const std::string &contents, int &ErrNr );
-
-   // Read/write from/to actual file
-   TBinaryTextFileIO( const std::string &fn, const std::string &PassWord, int &ErrNr, std::string &errmsg );
-   TBinaryTextFileIO( const std::string &fn, const std::string &Producer, const std::string &PassWord, TFileSignature signature, bool comp, int &ErrNr, std::string &errmsg );
-   ~TBinaryTextFileIO();
-
-   uint32_t Read( char *Buffer, uint32_t Count );
-   char ReadCharacter();
-   void ReadLine( std::string &Buffer, int &Len, char &LastChar );
-   uint32_t Write( const char *Buffer, uint32_t Count ) const;
-   [[nodiscard]] bool UsesPassWord() const;
-   void ReWind();
-
-   uint8_t ReadByte();
-   char ReadChar();
-   void ParCheck( RWType T );
-   std::string ReadString();
-
-   void WriteByte( uint8_t B ) const;
-   void ParWrite( RWType T ) const;
-   void WriteString( std::string_view s ) const;
-
-   void SetPassword( const std::string &s );
-   void ApplyPassword( const std::string &PR, std::string &PW, int64_t Offs ) const;
 };
 
 void CompressTextFile( const std::string &fn, const std::string &fo, const std::string &PassWord, bool Comp, int &ErrNr, std::string &ErrMsg );

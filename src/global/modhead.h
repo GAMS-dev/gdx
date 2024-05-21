@@ -27,6 +27,8 @@
 
 #include <fstream>
 
+#ifdef __IN_CPPMEX__
+
 #ifndef STUBWARN
 #define STUBWARN()                                                                                                                                                       \
    if( global::modhead::stubofs.is_open() )                                                                                                                              \
@@ -38,6 +40,13 @@
 #define STUBWARN_MSG( msg )                                                                                                                                                                  \
    global::modhead::stubofs << "WARNING: " << ( msg ) << " when calling stub method " << __FUNCTION__ << " in line " << __LINE__ << " of file " << __FILE__ << ":" << __LINE__ << std::endl; \
    global::modhead::stubofs.flush();
+#endif
+
+#else
+   #ifndef STUBWARN
+   #define STUBWARN() ;
+   #define STUBWARN_MSG(msg) ;
+   #endif
 #endif
 
 namespace global::modhead

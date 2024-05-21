@@ -25,17 +25,18 @@
 
 #pragma once
 
-#include <map>
 #include <string>
 #include <array>
 #include <set>
+
+#include "../gdlib/utils.h"
 
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
 namespace global::ctvproc
 {
-enum tprocname
+enum tprocname : uint8_t
 {
    procnone,
    proclp,
@@ -60,7 +61,7 @@ const int procnameslength = 16;
 const std::array<std::string, procnameslength> procnames = {
         "NONE", "LP", "MIP", "RMIP", "NLP", "MCP", "MPEC", "RMPEC", "CNS", "DNLP", "RMINLP", "MINLP", "QCP", "MIQCP", "RMIQCP", "EMP" };
 
-const std::set<tprocname> pshortform = { procmcp, proccns },
+const utils::bsSet<tprocname, proccount+1> pshortform = { procmcp, proccns },
                           pdiscrete = { procmip, procrmip, procmpec, procrmpec, procrminlp, procminlp, procmiqcp, procrmiqcp, procemp },
                           pnonlinear = { procnlp, procmcp, procmpec, procrmpec, proccns, procdnlp, procrminlp, procminlp, procqcp, procmiqcp, procrmiqcp, procemp },
                           pcontinuous = { procnlp, procmcp, procmpec, proccns, procrminlp, procminlp, procqcp, procmiqcp, procrmiqcp, procemp },
@@ -70,23 +71,23 @@ const std::set<tprocname> pshortform = { procmcp, proccns },
                           pdskiplist = { procnone },
                           pdpairs = { procmcp, procmpec, procrmpec, proccns, procemp };
 
-const std::map<tprocname, std::string> proctexts = {
-        { procnone, "NONE" },
-        { proclp, "Linear Programming" },
-        { procmip, "Mixed-Integer Programming" },
-        { procrmip, "Relaxed Mixed-Integer Programming" },
-        { procnlp, "Non-Linear Programming" },
-        { procmcp, "Mixed Complementarity Problems" },
-        { procmpec, "Mathematical Programs with Equilibrium Constraints" },
-        { procrmpec, "Relaxed Mathematical Programs with Equilibrium Constraints" },
-        { proccns, "Constrained Nonlinear Systems" },
-        { procdnlp, "Non-Linear Programming with Discontinuous Derivatives" },
-        { procrminlp, "Relaxed Mixed-Integer Non-Linear Programming" },
-        { procminlp, "Mixed-Integer Non-Linear Programming" },
-        { procqcp, "Quadratically Constrained Programs" },
-        { procmiqcp, "Mixed Integer Quadratically Constrained Programs" },
-        { procrmiqcp, "Relaxed Mixed Integer Quadratically Constrained Programs" },
-        { procemp, "Extended Mathematical Programs" } };
+const std::array<std::string, 16> proctexts {
+         "NONE" ,
+         "Linear Programming" ,
+         "Mixed-Integer Programming" ,
+         "Relaxed Mixed-Integer Programming" ,
+         "Non-Linear Programming" ,
+         "Mixed Complementarity Problems" ,
+         "Mathematical Programs with Equilibrium Constraints" ,
+         "Relaxed Mathematical Programs with Equilibrium Constraints" ,
+         "Constrained Nonlinear Systems" ,
+         "Non-Linear Programming with Discontinuous Derivatives" ,
+         "Relaxed Mixed-Integer Non-Linear Programming" ,
+         "Mixed-Integer Non-Linear Programming" ,
+         "Quadratically Constrained Programs" ,
+         "Mixed Integer Quadratically Constrained Programs" ,
+         "Relaxed Mixed Integer Quadratically Constrained Programs",
+         "Extended Mathematical Programs"};
 
 tprocname getprocname( const std::string &id );
 std::string getproctext( tprocname p );

@@ -28,7 +28,6 @@
 #include <stdexcept>
 #include <iostream>
 #include <filesystem>
-#include <fstream>
 #include <cassert>
 #include <cstring>
 #include "../gdlib/utils.h"
@@ -41,7 +40,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <signal.h>
+#include <csignal>
 #include <fcntl.h>
 
 #if defined( __APPLE__ )
@@ -50,7 +49,6 @@
 #endif
 
 using namespace std::literals::string_literals;
-namespace fs = std::filesystem;
 
 using namespace rtl::p3platform;
 using namespace rtl::sysutils_p3;
@@ -84,7 +82,7 @@ public:
    void nextProc( int k )
    {
       if( k < 0 )
-         throw std::string( "processor ID must be positive" );
+         throw std::runtime_error( "processor ID must be positive" );
       nProc++;
       iSock = -1;
    }// nextProc
@@ -92,9 +90,9 @@ public:
    void setPhysicalID( int k )
    {
       if( iSock >= 0 )
-         throw std::string( "physical ID already set for this processor" );
+         throw std::runtime_error( "physical ID already set for this processor" );
       if( k < 0 )
-         throw std::string( "physical ID must be positive" );
+         throw std::runtime_error( "physical ID must be positive" );
       if( k >= n )
       {// must grow
          if( debug )
@@ -115,35 +113,35 @@ public:
       if( debug )
          debugStream << "  setCores(" << k << ") with iSock = " << iSock << '\n';
       if( iSock < 0 )
-         throw std::string( "physical ID must be set prior to cpu cores" );
+         throw std::runtime_error( "physical ID must be set prior to cpu cores" );
       if( k < 0 )
-         throw std::string( "cpu cores must be positive" );
+         throw std::runtime_error( "cpu cores must be positive" );
       // std::cout << "    cpuCores curr is " << cpuCores[iSock] << '\n';
       if( cpuCores[iSock] < 0 )
       {// first "cpu cores" line
          cpuCores[iSock] = k;
       }
       else if( cpuCores[iSock] != k )
-         throw std::string( "conflicting cpu cores values detected" );
+         throw std::runtime_error( "conflicting cpu cores values detected" );
    }// setCores
    void setSiblings( int k )
    {
       if( debug )
          debugStream << "  setSiblings(" << k << ") with iSock = " << iSock << '\n';
       if( iSock < 0 )
-         throw std::string( "physical ID must be set prior to cpu cores" );
+         throw std::runtime_error( "physical ID must be set prior to cpu cores" );
       if( k < 0 )
-         throw std::string( "siblings must be positive" );
+         throw std::runtime_error( "siblings must be positive" );
       // std::cout << "    siblings curr is " << siblings[iSock] << '\n';
       if( siblings[iSock] < 0 )
       {// first "siblings" line
          siblings[iSock] = k;
       }
       else if( siblings[iSock] != k )
-         throw std::string( "conflicting siblings values detected" );
+         throw std::runtime_error( "conflicting siblings values detected" );
    }// siblings
    // verify: when all the data is in, check it out and compute some totals
-   void verify( void )
+   void verify()
    {
       int s = 0;// socket count
       int p = 0;// processor count
@@ -156,14 +154,14 @@ public:
          if( procCount[i] <= 0 )
          {
             if( ( -1 != siblings[i] ) || ( -1 != cpuCores[i] ) )
-               throw std::string( "incomplete/inconsistent cpuinfo detected" );
+               throw std::runtime_error( "incomplete/inconsistent cpuinfo detected" );
          }
          else
          {
             if( ( siblings[i] <= 0 ) || ( cpuCores[i] <= 0 ) )
-               throw std::string( "incomplete/inconsistent cpuinfo detected" );
+               throw std::runtime_error( "incomplete/inconsistent cpuinfo detected" );
             if( procCount[i] != siblings[i] )
-               throw std::string( "incomplete/inconsistent cpuinfo detected" );
+               throw std::runtime_error( "incomplete/inconsistent cpuinfo detected" );
             s++;
             p += procCount[i];
             numCores += cpuCores[i];
@@ -177,9 +175,9 @@ public:
          }
       }// loop over sockets
       if( p != nProc )
-         throw std::string( "incomplete/inconsistent cpuinfo detected" );
+         throw std::runtime_error( "incomplete/inconsistent cpuinfo detected" );
       if( ( s != numSockets ) || ( s <= 0 ) )
-         throw std::string( "incomplete/inconsistent cpuinfo detected" );
+         throw std::runtime_error( "incomplete/inconsistent cpuinfo detected" );
    }// verify
 };  // end SocketInfo
 
@@ -216,7 +214,7 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
    {
       len = 0;
       LOGICAL_PROCESSOR_RELATIONSHIP relType = RelationAll;
-      rc = GetLogicalProcessorInformationEx( relType, NULL, &len );
+      rc = GetLogicalProcessorInformationEx( relType, nullptr, &len );
       if( rc || ( ERROR_INSUFFICIENT_BUFFER != GetLastError() ) )
          return -1;// failure
       std::unique_ptr<unsigned char[]> uPtr( new unsigned char[len] );
@@ -265,6 +263,8 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
                   debugStream << "    GroupCount: " << proc->Processor.GroupCount << '\n';
                }
                break;
+            default:
+               break;
          }// switch
          pos += proc->Size;
       }// for loop over structures
@@ -286,7 +286,7 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
    SocketInfo sInfo( 4 );
    try
    {
-      std::ifstream cpuinfo( "/proc/cpuinfo" );
+      std::ifstream cpuinfo( "/proc/cpuinfo"s );
       std::string s, f;
       size_t found;
       int k;
@@ -295,9 +295,9 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
          (void) std::getline( cpuinfo, s );
          if( debug >= 3 )
             debugStream << "line s : " << s << '\n';
-         if( 0 == s.find( "processor" ) )
+         if( 0 == s.find( "processor"s ) )
          {
-            found = s.find( ":" );
+            found = s.find( ':' );
             f = s.substr( found + 1 );
             k = std::stoi( f );
             if( debug )
@@ -306,27 +306,27 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
             if( k < 0 )
                return -1;
          }
-         else if( 0 == s.find( "physical id" ) )
+         else if( 0 == s.find( "physical id"s ) )
          {// socket ID
-            found = s.find( ":" );
+            found = s.find( ':' );
             f = s.substr( found + 1 );
             k = std::stoi( f );
             if( debug )
                debugStream << " GOT physical id : " << f << "  " << k << '\n';
             sInfo.setPhysicalID( k );
          }
-         else if( 0 == s.find( "siblings" ) )
+         else if( 0 == s.find( "siblings"s ) )
          {// # of siblings on this socket
-            found = s.find( ":" );
+            found = s.find( ':' );
             f = s.substr( found + 1 );
             k = std::stoi( f );
             if( debug )
                debugStream << " GOT siblings : " << f << "  " << k << '\n';
             sInfo.setSiblings( k );
          }
-         else if( 0 == s.find( "cpu cores" ) )
+         else if( 0 == s.find( "cpu cores"s ) )
          {// # of cpu cores on this socket
-            found = s.find( ":" );
+            found = s.find( ':' );
             f = s.substr( found + 1 );
             k = std::stoi( f );
             if( debug )
@@ -345,7 +345,7 @@ static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
       *nCores = sInfo.numCores;
       *nThreads = sInfo.nProc;
    }
-   catch( std::string &msg )
+   catch( const std::string &msg )
    {
       if( debug )
          debugStream << "Exception caught: msg = " << msg << '\n';
@@ -408,11 +408,11 @@ BOOL winProcInfo( int *coreCount, int *logicalCount )
    *logicalCount = -1;
 
    len = 0;
-   rc = GetLogicalProcessorInformationEx( RelationProcessorCore, NULL, &len );
+   rc = GetLogicalProcessorInformationEx( RelationProcessorCore, nullptr, &len );
    if( rc || ( ERROR_INSUFFICIENT_BUFFER != GetLastError() ) )
       return FALSE; /* failure */
    buf = (PSYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX) malloc( len );
-   if( NULL == buf )
+   if( !buf )
       return FALSE; /* failure */
    rc = GetLogicalProcessorInformationEx( RelationProcessorCore, buf, &len );
    if( !rc )
@@ -525,9 +525,9 @@ static int System4Win( const std::string &CmdPtr, bool inheritedHandles, int &Pr
    std::string cs = cspec ? cspec : ""s;
    if( cs.empty() )
    {
-      if( fs::exists( CMD_WIN7 ) )
+      if( FileExists( CMD_WIN7 ) )
          cs = CMD_WIN7;
-      else if( fs::exists( CMD_WINNT ) )
+      else if( FileExists( CMD_WINNT ) )
          cs = CMD_WINNT;
       else
          return 1;
@@ -704,7 +704,7 @@ static int unixPidStatus( int p )
    int fd, p2;
    ssize_t numRead;
    char state;
-   struct stat sb; /* stat() buffer */
+   struct stat sb {}; /* stat() buffer */
 
    std::snprintf( filename, fnBufSiz, "/proc/%d", p );
    if( -1 == stat( filename, &sb ) )
@@ -723,16 +723,16 @@ static int unixPidStatus( int p )
    * 2796 (firefox) S  where we have
    *  pid  cmdline  status */
    sbuf[numRead] = '\0';
-   numRead = sscanf( sbuf, "%d", &p2 );
+   numRead = std::sscanf( sbuf, "%d", &p2 );
    if( 1 != numRead )
       return 3;
    tmp = strchr( sbuf, '(' ) + 1;
    t2 = strrchr( sbuf, ')' );
-   if( NULL == tmp || NULL == t2 )
+   if( !tmp || !t2 )
       return 3;
    *t2 = '\0';
    t2 = t2 + 2;// skip ") "
-   numRead = sscanf( t2, "%c", &state );
+   numRead = std::sscanf( t2, "%c", &state );
    if( 1 != numRead )
       return 3;
    // printf ("DEBUG: in isZombie: read %d (%s) %c\n", p2, tmp, state);
@@ -743,10 +743,8 @@ static int unixPidStatus( int p )
       case 'S':    /* sleeping */
       case 'T':    /* traced or stopped */
          return 0; /* valid, non-zombie process */
-         break;
       case 'Z': /* zombie */
          return 1;
-         break;
       default:
          return 3;
    }
@@ -776,7 +774,7 @@ static bool killProcGroupUnix( pid_t p, TKillHow how )
                return result;
             else if( rc < 1 )
             {                   /* running, not a zombie */
-               usleep( 20000 ); /* 20 millisecs */
+               usleep( 20000 ); /* 20 milliseconds */
                                 /* printf ("waiting for zombie\n"); */
             }
             else
@@ -819,7 +817,7 @@ static void uglyGmsUnzipHack( std::list<std::string> &args )
    }
 }
 
-static int ForkWithSplitArgs( std::function<int( int, char *const[], int * )> forkExecFunc, const std::string &s, int &ProgRC )
+static int ForkWithSplitArgs( const std::function<int( int, char *const[], int * )> &forkExecFunc, const std::string &s, int &ProgRC )
 {
    std::list<std::string> args = utils::splitWithQuotedItems( s );
    uglyGmsUnzipHack( args );
@@ -911,7 +909,7 @@ static int asyncSystem4Unix( const std::string &cmdPtr, TProcInfo &procInfo, std
 int p3ASyncSystemP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInfo, std::string &msg )
 {
    msg.clear();
-   memset( &procInfo, 0, sizeof( TProcInfo ) );
+   procInfo.clear();
    switch( OSFileType() )
    {
       case OSFileWIN:
@@ -962,12 +960,12 @@ int win32ASyncCreateProc( const char *exeName, char *cmdLine, int newConsole, in
    if( !CreateProcessA(
                exeName,            /* ApplicationName */
                cmdLine,            /* lpCommandLine */
-               NULL,               /* lpProcessAttributes */
-               NULL,               /* lpThreadAttribute */
+               nullptr,               /* lpProcessAttributes */
+               nullptr,               /* lpThreadAttribute */
                inheritedHandles,   /* bInheritedHandles */
                nc,                 /* dwCreationFlags */
-               NULL,               /* lpEnvironment */
-               NULL,               /* lpCurrentDirectory */
+               nullptr,               /* lpEnvironment */
+               nullptr,               /* lpCurrentDirectory */
                &startupInfo,       /* lpStartupInfo */
                &processInformation /* lpProcessInformation */
                ) )
@@ -982,10 +980,10 @@ int win32ASyncCreateProc( const char *exeName, char *cmdLine, int newConsole, in
 
    CloseHandle( processInformation.hThread );
    /* CloseHandle (processInformation.hProcess); */
+   return 0;
 #else
    throw std::runtime_error( "Function should never be called on UNIX!" );
 #endif
-   return 0;
 }
 
 int p3ASyncExecP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInfo, std::string &msg )
@@ -994,7 +992,7 @@ int p3ASyncExecP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInf
    //const char **pargv;
    //std::string s, param;
 
-   memset( &procInfo, 0, sizeof( TProcInfo ) );
+   procInfo.clear();
    //int res { 1 };
    msg.clear();
 
@@ -1006,7 +1004,6 @@ int p3ASyncExecP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInf
          strcpy( cmdPtrBuf.data(), cmdPtr.c_str() );
          return win32ASyncCreateProc( nullptr, cmdPtrBuf.data(), newConsole, 1, procInfo );
       }
-      break;
       case OSFileUNIX:
       {
 #ifndef _WIN32
@@ -1049,7 +1046,7 @@ int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg )
    if( !h )
    {
       h = OpenProcess( PROCESS_ALL_ACCESS, FALSE, p );
-      if( NULL == h )
+      if( !h )
       {
          rc = GetLastError();
          switch( rc )
@@ -1114,7 +1111,7 @@ int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg )
 			msg ="Invalid PID";
 			return 0;
 		}*/
-   if( ( 0 != procInfo.tid ) || ( 0 != procInfo.hProcess ) )
+   if( procInfo.tid || procInfo.hProcess )
    { /* we only use/set the pid on non-windows  */
       msg = "Corrupt or bogus procInfo";
       return 0;
@@ -1158,7 +1155,7 @@ bool killProcessTree( DWORD myprocID )
    HANDLE hSnap;
    HANDLE hChildProc, hProc;
 
-   memset( &pe, 0, sizeof( PROCESSENTRY32 ) );
+   std::memset( &pe, 0, sizeof( PROCESSENTRY32 ) );
    pe.dwSize = sizeof( PROCESSENTRY32 );
 
    hSnap = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
@@ -1223,8 +1220,12 @@ bool p3IsPIDValid( global::delphitypes::Cardinal pid )
 #ifdef _WIN32
    DWORD p = pid;
    HANDLE hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, p );
-   if( hProcess ) CloseHandle( hProcess );
-   return hProcess;
+   if( hProcess )
+   {
+      CloseHandle( hProcess );
+      return true;
+   }
+   return false;
 #else
    int rc = unixPidStatus( pid );
    return rc == 1 || !rc;
@@ -1290,7 +1291,6 @@ CtrlHandlerState P3InstallCtrlHandler( tCtrlHandler newHandler )
       return P3CtrlHandlerOK;
    }
 #endif
-   return P3CtrlHandlerSysFail;
 }
 
 int P3UninstallCtrlHandler()
@@ -1308,7 +1308,6 @@ int P3UninstallCtrlHandler()
    CtrlHandler = nullptr;
    return rc || oldAction.sa_handler != p3CtrlCHandler ? P3CtrlHandlerSysFail : P3CtrlHandlerOK;
 #endif
-   return P3CtrlHandlerSysFail;
 }
 
 tCtrlHandler P3GetCtrlHandler()

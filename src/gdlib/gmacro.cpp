@@ -23,11 +23,13 @@
  * SOFTWARE.
  */
 
-
-#include "gmacro.h"
 #include <cassert>
 #include <cstring>
 #include <utility>
+
+#include "../rtl/sysutils_p3.h"
+
+#include "gmacro.h"
 #include "utils.h"
 #include "gmsstrm.h"
 
@@ -52,7 +54,7 @@ bool strCompCaseInsensitive::operator()( const std::string &lhs, const std::stri
 }*/
 
 constexpr char CharConcat = '&';
-const std::set<char> IDFirst = utils::multiCharSetRanges( { { 'a', 'z' }, { 'A', 'Z' } } ),
+const utils::charset IDFirst = utils::multiCharSetRanges( { { 'a', 'z' }, { 'A', 'Z' } } ),
                      IDSecond = utils::multiCharSetRanges( { { 'a', 'z' }, { 'A', 'Z' }, { '0', '9' }, { '_', '_' } } );
 
 static bool GoodIdent( const std::string &id )
@@ -60,7 +62,7 @@ static bool GoodIdent( const std::string &id )
    return !id.empty() && utils::in( id.front(), IDFirst ) && std::all_of( id.begin() + 1, id.end(), [&]( char c ) { return utils::in( c, IDSecond ); } );
 }
 
-TGAMSMacroList::TGAMSMacroList( gdlib::gmsstrm::TXStreamDelphi &S )
+TGAMSMacroList::TGAMSMacroList( gdlib::gmsstrm::TXStream &S )
 {
    [[maybe_unused]] const int V{S.ReadInteger()};
    assert(V <= 1 && "Incompatible Macro format");
@@ -133,7 +135,7 @@ bool TGAMSMacroList::GetDefinition( const int N, std::string &Id, int &ArgCount,
    if( !res )
    {
       Id.clear();
-      Wrt.StoreStr( "Bad index "s + std::to_string( N ) );
+      Wrt.StoreStr( "Bad index "s + rtl::sysutils_p3::IntToStr( N ) );
       ArgCount = 0;
    }
    else
@@ -157,7 +159,7 @@ bool TGAMSMacroList::GetDefinition( const int N, std::string &Id, int &ArgCount,
    return res;
 }
 
-void TGAMSMacroList::WriteToStream( gmsstrm::TXStreamDelphi &S ) const
+void TGAMSMacroList::WriteToStream( gmsstrm::TXStream &S ) const
 {
    S.WriteInteger( 1 );// version
    S.WriteInteger( static_cast<int>( MacList.size() ) );
@@ -283,7 +285,7 @@ void TGAMSMacroList::AddMsgStr( const std::string &s, const std::string &p )
 
 TGAMSMacro::TGAMSMacro( std::string id, TGAMSMacroList &ML ) : Name( std::move( id ) ), FML( &ML ) {}
 
-TGAMSMacro::TGAMSMacro( gmsstrm::TXStreamDelphi &S, TGAMSMacroList &ML ) :
+TGAMSMacro::TGAMSMacro( gmsstrm::TXStream &S, TGAMSMacroList &ML ) :
    Name( S.ReadString() ), FML( &ML ), Params( S ), Body( S.ReadPChar() )
 {
 }
@@ -349,9 +351,12 @@ bool TGAMSMacro::AddToBody( const std::string &p )
       int firstNonBlankIx = 0;
       if( L > 2 )
       {
-         const auto nbit = std::find_if( p.begin(), p.end(), []( char c ) { return c != ' '; } );
-         if( nbit != p.end() )
-            firstNonBlankIx = static_cast<int>( nbit - p.begin() );
+         for(int nbix{}; nbix < static_cast<int>(p.size()); nbix++) {
+            if(p[nbix] != ' ') {
+               firstNonBlankIx = nbix;
+               break;
+            }
+         }
       }
       const int numCharsDroppedFromBack = Rdr.ChFromEnd( 1 ) != CharConcat ? 1 : 2;
       auto itslen = L - firstNonBlankIx - numCharsDroppedFromBack;
@@ -507,7 +512,7 @@ std::string TGAMSMacro::GetParam( int index ) const { return Params[index]; }
 
 void TGAMSMacro::SetValue( const int N, const std::string &P )
 {
-   if( FML->FTrace >= 2 ) AddMsgStr( ": SetParam-in"s + std::to_string( N + 1 ) + ": ", P );
+   if( FML->FTrace >= 2 ) AddMsgStr( ": SetParam-in"s + rtl::sysutils_p3::IntToStr( N + 1 ) + ": ", P );
    TPReader Rdr { P };
    TPWriterCC Wrt {};
    char Ch { ' ' };
@@ -585,7 +590,7 @@ void TGAMSMacro::SetValue( const int N, const std::string &P )
       } while( FML->ErrorFree && !done );
    }
 
-   if( FML->FTrace >= 2 ) AddMsgStr( ": SetParam-out"s + std::to_string( N + 1 ) + ": ", Wrt.ps );
+   if( FML->FTrace >= 2 ) AddMsgStr( ": SetParam-out"s + rtl::sysutils_p3::IntToStr( N + 1 ) + ": ", Wrt.ps );
    Params.SetValue( N, Wrt.ps );
 }
 
@@ -596,10 +601,10 @@ void TGAMSMacro::GetValue( const int N, std::string &P ) const
 
 void TGAMSMacro::AddMsgStr( const std::string &s, const std::string &p ) const
 {
-   FML->AddMsgStr( Name + "[" + std::to_string( FML->CallList.size() ) + "] " + s, p );
+   FML->AddMsgStr( Name + "[" + rtl::sysutils_p3::IntToStr( FML->CallList.size() ) + "] " + s, p );
 }
 
-void TGAMSMacro::WriteToStream( gmsstrm::TXStreamDelphi &S ) const
+void TGAMSMacro::WriteToStream( gmsstrm::TXStream &S ) const
 {
    S.WriteString( Name );
    Params.WriteToStream( S );
@@ -779,7 +784,7 @@ void TPWriterCC::StoreCh( char ch )
 
 TParamList::TParamList() = default;
 
-TParamList::TParamList( gmsstrm::TXStreamDelphi &S )
+TParamList::TParamList( gmsstrm::TXStream &S )
 {
    for( int N = S.ReadInteger(); N > 0; N-- )
       push_back( S.ReadString() );
@@ -800,7 +805,7 @@ void TParamList::FreeObject( const int Index )
    SetValue( Index, "" );
 }
 
-void TParamList::WriteToStream( gmsstrm::TXStreamDelphi &S ) const
+void TParamList::WriteToStream( gmsstrm::TXStream &S ) const
 {
    S.WriteInteger( static_cast<int>( size() ) );
    for( const auto &s: *this )

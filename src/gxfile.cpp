@@ -23,21 +23,22 @@
  * SOFTWARE.
  */
 
-#include "gdlib/gmsstrm.h"
+#include "gdlib/gmsstrm.h" // for TMiBufferedStream, TXStream, File...
+#include "rtl/sysutils_p3.h" // for IntToStr
 
-#include "gdx.h"
-#include "gdlib/utils.h"
+#include "gdx.h" // for TGXFileObj, TGXFileObj::stat_write
+#include "gdlib/utils.h" // for in, debugStream, arrayWithValue
 #include <algorithm>// for fill_n, max, fill, sort
 #include <cassert>  // for assert
 #include <cmath>    // for round, isinf, isnan, isnormal, abs
 #include <cstdint>  // for int64_t, uint8_t
 #include <cstdio>   // for sprintf
 #include <cstdlib>  // for system, free, getenv, malloc, realloc, WEX...
-#include <exception>// for exception
+#if !defined(NDEBUG) || defined(__IN_CPPMEX__)
 #include <iostream> // for operator<<, basic_ostream, cout, ostream
+#endif
 #include <map>      // for map, operator==, _Rb_tree_const_iterator
 #include <utility>  // for pair
-#include <sstream>
 
 #if defined( _WIN32 )
 #include <Windows.h>
@@ -409,7 +410,7 @@ int TGXFileObj::gdxOpenWriteEx( const char *FileName, const char *Producer, int 
       LastError = ErrNr;
       return false;
    }
-   FFile = std::make_unique<TMiBufferedStreamDelphi>( FileName, FileAccessMode::fmCreate );
+   FFile = std::make_unique<TMiBufferedStream>( FileName, FileAccessMode::fmCreate );
    ErrNr = FFile->GetLastIOResult();
    if( ErrNr )
    {
@@ -741,7 +742,7 @@ bool TGXFileObj::PrepareSymbolWrite( const std::string_view Caller,
    if( !MajorCheckMode( Caller, fw_init ) ) return false;
 
    if( TraceLevel >= TraceLevels::trl_some )
-      WriteTrace( "Symbol = "s + AName + ", Dim = "s + std::to_string( ADim ) );
+      WriteTrace( "Symbol = "s + AName + ", Dim = "s + rtl::sysutils_p3::IntToStr( ADim ) );
 
    if( !IsGoodNewSymbol( AName ) ) return false;
 
@@ -939,8 +940,8 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
    }
 
    if( verboseTrace && TraceLevel >= TraceLevels::trl_some )// NOTE: Not covered by unit tests yet.
-      WriteTrace( "Symbol = "s + std::to_string( SyNr ) +
-                  ( CurSyPtr ? ", Dim = "s + std::to_string( CurSyPtr->SDim ) : ""s ) );
+      WriteTrace( "Symbol = "s + rtl::sysutils_p3::IntToStr( SyNr ) +
+                  ( CurSyPtr ? ", Dim = "s + rtl::sysutils_p3::IntToStr( CurSyPtr->SDim ) : ""s ) );
 
    DeltaForRead = VersionRead <= 6 ? MaxDimV148 : FCurrentDim;
    for( int D {}; D < FCurrentDim; D++ )
@@ -1195,7 +1196,7 @@ const int64_t
         expoMask { (int64_t) 0x7ff00000 << 32 },
         mantMask { ~( signMask | expoMask ) };
 
-enum TDblClass
+enum TDblClass : uint8_t
 {
    DBL_NAN,  // any sort of NaN
    DBL_NINF, // negative infinity
@@ -1242,7 +1243,7 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
       // NOTE: Not covered by unit tests yet.
       debugStream << "DoWrite index: "s;
       for( int D {}; D < FCurrentDim; D++ )
-         debugStream << std::to_string( AElements[D] ) << ( D + 1 < FCurrentDim ? ","s : ""s );
+         debugStream << rtl::sysutils_p3::IntToStr( AElements[D] ) << ( D + 1 < FCurrentDim ? ","s : ""s );
       debugStream << '\n';
    }
 
@@ -1887,7 +1888,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
       ErrNr = ERR_NOFILE;
       return FileNoGood();
    }
-   FFile = std::make_unique<TMiBufferedStreamDelphi>( Afn, filemode );
+   FFile = std::make_unique<TMiBufferedStream>( Afn, filemode );
    ErrNr = FFile->GetLastIOResult();
    if( ErrNr ) return FileNoGood();
    if( FFile->GoodByteOrder() )
@@ -2054,7 +2055,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
       FFile->SetCompression( DoUncompress );
       FFile->SetPosition( DomStrPos );
       if( ErrorCondition( FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER1 ) ) return FileErrorNr();
-      DomainStrList->LoadFromStream<TXStreamDelphi>( *FFile );
+      DomainStrList->LoadFromStream<TXStream>( *FFile );
       if( ErrorCondition( FFile->ReadString() == MARK_DOMS, ERR_OPEN_DOMSMARKER2 ) ) return FileErrorNr();
       while( true )
       {
@@ -2174,14 +2175,14 @@ int TGXFileObj::gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst )
    if( !DoRead( Values, DimFrst ) ) gdxDataReadDone();
    else
    {
-      if(KeyInt)
+      if( KeyInt )
          std::memcpy( KeyInt, LastElem.data(), FCurrentDim * sizeof( int ) );
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
       {
          // NOTE: Not covered by unit tests yet.
          debugStream << "DataReadRaw index: "s;
          for( int D {}; D < FCurrentDim; D++ )
-            debugStream << std::to_string( KeyInt[D] ) << ( D + 1 < FCurrentDim ? ","s : ""s );
+            debugStream << (KeyInt ? rtl::sysutils_p3::IntToStr( KeyInt[D] ) : "NULL"s) << ( D + 1 < FCurrentDim ? ","s : ""s );
          debugStream << '\n';
       }
       return true;
@@ -2245,7 +2246,7 @@ int TGXFileObj::gdxGetElemText( int TxtNr, char *Txt, int &Node )
       return false;// NOTE: Not covered by unit tests yet.
    if( TxtNr < 0 || TxtNr >= SetTextList->size() )
    {
-      utils::assignStrToBuf( BADStr_PREFIX + std::to_string( TxtNr ), Txt, GMS_SSSIZE );
+      utils::assignStrToBuf( BADStr_PREFIX + rtl::sysutils_p3::IntToStr( TxtNr ), Txt, GMS_SSSIZE );
       return false;
    }
    else
@@ -2636,7 +2637,7 @@ int TGXFileObj::gdxUMUelGet( int UelNr, char *Uel, int &UelMap )
    }
    else
    {
-      utils::assignStrToBuf( BADUEL_PREFIX + std::to_string( UelNr ), Uel );
+      utils::assignStrToBuf( BADUEL_PREFIX + rtl::sysutils_p3::IntToStr( UelNr ), Uel );
       UelMap = -1;
       return false;
    }
@@ -2699,7 +2700,7 @@ int TGXFileObj::gdxGetUEL( int uelNr, char *Uel ) const
    int EN = UELTable->UsrUel2Ent->GetMapping( uelNr );
    if( EN >= 1 ) utils::assignPCharToBuf( ( *UELTable )[EN], Uel );
    else
-      utils::assignStrToBuf( BADUEL_PREFIX + std::to_string( uelNr ), Uel );
+      utils::assignStrToBuf( BADUEL_PREFIX + rtl::sysutils_p3::IntToStr( uelNr ), Uel );
    return EN >= 1;
 }
 
@@ -2723,7 +2724,7 @@ int TGXFileObj::gdxDataWriteMap( const int *KeyInt, const double *Values )
       debugStream << "   Index =";
       for( int D {}; D < FCurrentDim; D++ )
       {
-         debugStream << " " << std::to_string( KeyInt[D] );
+         debugStream << " " << rtl::sysutils_p3::IntToStr( KeyInt[D] );
          if( D + 1 < FCurrentDim ) debugStream << ",";
       }
    }
@@ -2980,7 +2981,7 @@ int TGXFileObj::gdxAcronymSetInfo( int N, const char *AName, const char *Txt, in
    };
 
    if( TraceLevel >= TraceLevels::trl_some )
-      WriteTrace( "AcronymSetInfo: "s + AName + " index = " + std::to_string( AIndx ) );
+      WriteTrace( "AcronymSetInfo: "s + AName + " index = " + rtl::sysutils_p3::IntToStr( AIndx ) );
 
    if( ErrorCondition( N >= 1 || N <= (int) AcronymList->size(), ERR_BADACRONUMBER ) ) return false;
    auto &obj = ( *AcronymList )[N - 1];
@@ -3017,7 +3018,7 @@ int TGXFileObj::gdxAcronymNextNr( int nv )
 int TGXFileObj::gdxAcronymGetMapping( int N, int &orgIndx, int &newIndx, int &autoIndex )
 {
    if( TraceLevel >= TraceLevels::trl_some )
-      WriteTrace( "AcronymGetMapping: N = "s + std::to_string( N ) );
+      WriteTrace( "AcronymGetMapping: N = "s + rtl::sysutils_p3::IntToStr( N ) );
    if( ErrorCondition( N >= 1 || N <= (int) AcronymList->size(), ERR_BADACRONUMBER ) ) return false;
    const auto &obj = ( *AcronymList )[N - 1];
    orgIndx = obj.AcrMap;
@@ -3200,7 +3201,7 @@ int TGXFileObj::gdxSetTraceLevel( int N, const char *s )
    if( TraceLevel > TraceLevels::trl_errors )
    {
       debugStream << std::endl;
-      WriteTrace( "Tracing at level "s + std::to_string( (int) TraceLevel ) );
+      WriteTrace( "Tracing at level "s + rtl::sysutils_p3::IntToStr( (int) TraceLevel ) );
    }
    return true;
 }
@@ -3237,7 +3238,7 @@ int TGXFileObj::gdxAcronymName( double V, char *AName )
    else
    {
       int N { AcronymList->FindEntry( Indx ) };
-      utils::assignStrToBuf( N < 0 ? "UnknownAcronym"s + std::to_string( Indx ) : ( *AcronymList )[N].AcrName, AName, GMS_SSSIZE );
+      utils::assignStrToBuf( N < 0 ? "UnknownAcronym"s + rtl::sysutils_p3::IntToStr( Indx ) : ( *AcronymList )[N].AcrName, AName, GMS_SSSIZE );
       return true;
    }
    return false;
@@ -3829,12 +3830,12 @@ int TUELTable::MemoryUsed() const
    return (int) TXStrHashListImpl<int>::MemoryUsed() + UsrUel2Ent->MemoryUsed();
 }
 
-void TUELTable::SaveToStream( TXStreamDelphi &S )
+void TUELTable::SaveToStream( TXStream &S )
 {
    TXStrHashListImpl<int>::SaveToStream( S );
 }
 
-void TUELTable::LoadFromStream( TXStreamDelphi &S )
+void TUELTable::LoadFromStream( TXStream &S )
 {
    // NOTE: Not covered by unit tests yet.
    TXStrHashListImpl<int>::LoadFromStream( S );
@@ -3929,14 +3930,14 @@ void TAcronymList::CheckEntry( int Map )
       AddEntry( "", "", Map );
 }
 
-void TAcronymList::SaveToStream( gdlib::gmsstrm::TXStreamDelphi &S )
+void TAcronymList::SaveToStream( gdlib::gmsstrm::TXStream &S )
 {
    S.WriteInteger( FList.GetCount() );
    for( int N {}; N < FList.GetCount(); N++ )
       FList[N]->SaveToStream( S );
 }
 
-void TAcronymList::LoadFromStream( gdlib::gmsstrm::TXStreamDelphi &S )
+void TAcronymList::LoadFromStream( gdlib::gmsstrm::TXStream &S )
 {
    int Cnt { S.ReadInteger() };
    FList.Clear();
@@ -4023,6 +4024,7 @@ void TIntegerMapping::growMapping( int F )
    }
    FCapacity = currCap;
    FMapBytes = (int64_t) ( FCapacity * sizeof( int ) );
+   assert(FMapBytes);
    if( !PMap ) PMap = (int *) std::malloc( FMapBytes );
    else
    {
@@ -4087,7 +4089,7 @@ TAcronym::TAcronym( const char *Name, const char *Text, int Map ) : AcrName { Na
    MakeGoodExplText( AcrText.data() );
 }
 
-TAcronym::TAcronym( TXStreamDelphi &S ) : AcrName { S.ReadString() },
+TAcronym::TAcronym( TXStream &S ) : AcrName { S.ReadString() },
                                           AcrText { S.ReadString() },
                                           AcrMap { S.ReadInteger() }
 {
@@ -4098,9 +4100,9 @@ int TAcronym::MemoryUsed() const
    return 2 + (int) AcrName.length() + (int) AcrText.length();
 }
 
-void TAcronym::SaveToStream( TXStreamDelphi &S ) const
+void TAcronym::SaveToStream( TXStream &S ) const
 {
-   S.WriteString( AcrName.empty() ? "UnknownACRO"s + std::to_string( AcrMap ) : AcrName );
+   S.WriteString( AcrName.empty() ? "UnknownACRO"s + rtl::sysutils_p3::IntToStr( AcrMap ) : AcrName );
    S.WriteString( AcrText );
    S.WriteInteger( AcrMap );
 }

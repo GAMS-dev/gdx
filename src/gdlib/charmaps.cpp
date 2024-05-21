@@ -34,28 +34,11 @@
 namespace gdlib::charmaps
 {
 
-// TODO: AS: Make these bitset or something else more efficient!
-std::set<char> digit, letter, alphanum, capletter, lowletter, identchar, labelchar, textquote, setcomch;
+utils::charset digit, letter, alphanum, capletter, lowletter, identchar, labelchar, textquote, setcomch;
 
-char quotecharx;
+char quotecharx {};
 
 std::array<char, numCharVals> mapcharBuf;
-
-static std::set<char> computeWhitelistedCharacters()
-{
-   std::set<char> whitelistedChars;
-   utils::charRangeInsertIntersecting( whitelistedChars, 'A', 'Z', letter );
-   utils::charRangeInsertIntersecting( whitelistedChars, 'a', 'z', letter );
-   utils::charRangeInsertIntersecting( whitelistedChars, '0', '9', digit );
-   constexpr std::array mapToSelf { ' ', '!', '"', '#', '$', '%', '&', '(', ')',
-                                  '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@',
-                                  '\\', '_', '\'', '[', ']', '^', '|', '`', '}', '{', '~',
-                                  //'�', '�', '�', '�', '�',
-                                  // maybe these weirdos are not needed when AllChars is active
-                                  ( (char) -61 ), ( (char) -92 ), ( (char) -68 ), ( (char) -50 ), ( (char) -75 ), ( (char) -100 ) };
-   whitelistedChars.insert( mapToSelf.begin(), mapToSelf.end() );
-   return whitelistedChars;
-}
 
 void InitChars( const bool AllChars )
 {
@@ -68,34 +51,16 @@ void InitChars( const bool AllChars )
       return;
    }
 
-   const auto whitelistedChars = computeWhitelistedCharacters();
-
    // everything not explicitly whitelisted afterward kills the compilation (or is it ignored?)?
    for( unsigned char c = std::numeric_limits<unsigned char>::min(); c <= std::numeric_limits<unsigned char>::max(); c++ )
       mapcharBuf[c] = std::char_traits<char>::eof();
-
-   // maybe these weirdos are not needed when AllChars is active
-   /*const std::map<char, char> mappedChars = {
-			{'ä', 'a'},
-			{'ü', 'u'},
-			{'ö', 'o'},
-			{((char)-61), 'a'},
-			{((char)-92), 'e'},
-			{((char)-68), 'u'},
-			{((char)-50), 'e'},
-			{((char)-75), 'p'},
-			{((char)-100), 'U'}
-		};
-
-		for(char i : whitelistedChars)
-			mapchar[i] = utils::in(i, mappedChars) ? mappedChars.at(i) : i;*/
 }
 
 void InitCharacterMaps()
 {
    // set other characeter arrays useful in compiler and execution
    // make sets empty first
-   const std::set<char> Empty;
+   const utils::charset Empty;
    capletter = textquote = digit = lowletter = letter = identchar = Empty;
    utils::charRangeInsert( digit, '0', '9' );
 

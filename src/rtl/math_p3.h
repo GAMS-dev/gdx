@@ -26,11 +26,12 @@
 #pragma once
 
 #include <set>
+#include <cstdint>
 
 namespace rtl::math_p3
 {
 
-enum TFPUException
+enum TFPUException : uint8_t
 {
    exInvalidOp,
    exDenormalized,

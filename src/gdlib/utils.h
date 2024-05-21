@@ -28,7 +28,9 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#if !defined(NDEBUG) || defined(__IN_CPPMEX__)
 #include <iostream>
+#endif
 #include <iterator>
 #include <initializer_list>
 #include <unordered_set>
@@ -78,6 +80,12 @@ public:
    {
       for( const T s: syms )
          hasSym.set( s );
+   }
+
+   bool empty() const {
+      for( int s {}; s < card; s++ )
+         if( hasSym[s] ) return false;
+      return true;
    }
 
    template<typename... Cdr>
@@ -148,6 +156,41 @@ public:
    }
 };
 
+class charset {
+   std::bitset<256> chars {};
+   constexpr static int offset{128};
+
+public:
+   charset(const std::initializer_list<char> cs) {
+      for(char c : cs)
+         insert(c);
+   }
+   charset(const charset &other) = default;
+   charset() = default;
+
+   void insert(char c) {
+      chars.set(c+offset);
+   }
+
+   void insert(const charset &other) {
+      for(int i{}; i<256; i++)
+         if(other.chars[i])
+            chars.set(i);
+   }
+
+   [[nodiscard]] bool contains(char c) const {
+      return chars[c+offset];
+   }
+
+   void clear() {
+      chars.reset();
+   }
+
+   void erase(char c) {
+      chars.reset(c+offset);
+   }
+};
+
 inline char toupper( const char c )
 {
    return c >= 'a' && c <= 'z' ? static_cast<char>( c ^ 32 ) : c;
@@ -158,21 +201,19 @@ inline char tolower( const char c )
    return c >= 'A' && c <= 'Z' ? static_cast<char>( c ^ 32 ) : c;
 }
 
-// FIXME: Get rid of code using std::set as it is not very fast!
-template<class T>
-std::set<T> unionOp( const std::set<T> &a, const std::set<T> &b )
-{
-   std::set<T> res = a;
-   res.insert( b.begin(), b.end() );
+inline charset unionOp(const charset &a, const charset &b) {
+   charset res{a};
+   res.insert(b);
    return res;
 }
 
-inline void insertAllChars( std::set<char> &charset, const std::string_view chars )
+inline void insertAllChars( charset &charset, const std::string_view chars )
 {
-   charset.insert( chars.begin(), chars.end() );
+   for(char c : chars)
+      charset.insert(c);
 }
 
-inline void charRangeInsert( std::set<char> &charset, const char lbIncl, const char ubIncl )
+inline void charRangeInsert( charset &charset, const char lbIncl, const char ubIncl )
 {
    //for (char c : std::ranges::iota_view{ lbIncl, ubIncl + 1 })
    for( char c = lbIncl; c <= ubIncl; c++ )
@@ -183,6 +224,11 @@ template<class T>
 bool in( const T &val, const std::vector<T> &elems )
 {
    return std::find( elems.begin(), elems.end(), val ) != elems.end();
+}
+
+inline bool in( char c, const charset &elems )
+{
+   return elems.contains(c);
 }
 
 template<typename T>
@@ -242,21 +288,11 @@ bool in( const T &val,
    return coll.contains( val );
 }
 
-template<class T>
-std::set<T> intersectionOp( const std::set<T> &a, const std::set<T> &b )
-{
-   std::set<T> res;
-   for( const T &elem: a )
-      if( utils::in( elem, b ) )
-         res.insert( elem );
-   return res;
-}
-
-inline void charRangeInsertIntersecting( std::set<char> &charset, const char lbIncl, const char ubIncl, const std::set<char> &other )
+inline void charRangeInsertIntersecting( charset &charset, const char lbIncl, const char ubIncl, const class charset &other )
 {
    //for (char c : std::ranges::iota_view{ lbIncl, ubIncl + 1 })
    for( char c = lbIncl; c <= ubIncl; c++ )
-      if( utils::in<char>( c, other ) )
+      if( utils::in( c, other ) )
          charset.insert( c );
 }
 
@@ -368,6 +404,18 @@ const auto &nthRefConst( const std::list<T> &elems, int n )
 }
 
 template<typename T>
+const auto &nthRefConst( const std::vector<T> &elems, int n )
+{
+   return elems[n];
+}
+
+template<typename T>
+auto &nthRef( std::vector<T> &elems, int n )
+{
+   return elems[n];
+}
+
+template<typename T>
 auto nth( const std::initializer_list<T> &elems, int n )
 {
    return *( std::next( elems.begin(), n ) );
@@ -382,22 +430,15 @@ void append( std::list<T> &l, const std::initializer_list<T> &elems )
 void permutAssign( std::string &lhs, const std::string &rhs,
                    const std::vector<int> &writeIndices, const std::vector<int> &readIndices );
 
-inline std::set<char> multiCharSetRanges( std::initializer_list<std::pair<char, char>> lbUbInclCharPairs )
+inline charset multiCharSetRanges( std::initializer_list<std::pair<char, char>> lbUbInclCharPairs )
 {
-   std::set<char> res;
+   charset res;
    for( const auto &[lb, ub]: lbUbInclCharPairs )
       charRangeInsert( res, lb, ub );
    return res;
 }
 
-template<const char inflateChar = ' '>
-std::string strInflateWidth( const int num, const int targetStrLen )
-{
-   auto s = std::to_string( num );
-   const auto l = s.length();
-   if( l >= static_cast<size_t>( targetStrLen ) ) return s;
-   return std::string( targetStrLen - l, inflateChar ) + s;
-}
+std::string strInflateWidth( const int num, const int targetStrLen, const char inflateChar =  ' ');
 
 void removeTrailingCarriageReturnOrLineFeed( std::string &s );
 
@@ -432,7 +473,14 @@ bool sameTextPChar( const char *a,
 
 std::string_view trim( std::string_view s );
 
-std::string getLineWithSep( std::fstream &fs );
+std::string getLineWithSep( std::istream &fs );
+
+void getline( FILE *f, std::string &s );
+std::string getline( FILE *f );
+
+inline void fputstr(FILE* f, std::string_view s) {
+   fwrite( s.data(), sizeof( char ), s.length(), f );
+}
 
 std::string trim( const std::string &s );
 std::string trimRight( const std::string &s );
@@ -691,7 +739,21 @@ inline int pos( const char c, const std::string &s )
 }
 
 void copy_to_uppercase( const std::string &s, char *buf );
+void copy_to_uppercase( const char *s, char *buf );
 
 std::string IntToStrW( int n, int w, char blankChar = ' ' );
+
+void trimLeft( std::string &s );
+
+template<int N, int firstValid=0>
+inline int indexOfSameText(const std::array<std::string, N> &strs, const std::string &s) {
+   int i{firstValid};
+   for(const std::string &s2 : strs) {
+      if(sameText(s, s2))
+         return i;
+      i++;
+   }
+   return firstValid-1;
+}
 
 }// namespace utils

@@ -30,6 +30,9 @@
 #include <set>
 #include <array>
 #include <limits>
+#include <cassert>
+
+#include "utils.h"
 
 
 // ==============================================================================================================
@@ -46,7 +49,7 @@ const char charff = '\f',
            chartab = '\t',
            char200 = static_cast<char>( 200 );
 
-extern std::set<char> digit,
+extern utils::charset digit,
         letter,
         alphanum,
         capletter,
@@ -62,11 +65,37 @@ constexpr int numCharVals {std::numeric_limits<unsigned char>::max()+1};
 extern std::array<char, numCharVals> mapcharBuf;
 
 inline char mapchar(char c) {
+   assert( (unsigned char) c >= 0 && (unsigned char) c <= 255 );
    return mapcharBuf[(unsigned char)c];
 }
 
 void InitChars( bool AllChars );
 void InitCharacterMaps();
 char DetermineQuote( const char *s );
+
+inline bool IsLetter( char c )
+{
+   return ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' );
+}
+
+inline bool IsDigit( char c )
+{
+   return c >= '0' && c <= '9';
+}
+
+inline bool IsLabelChar(char c)
+{
+   return IsLetter( c ) || IsDigit(c) || c == '_' || c == '+' || c == '-';
+}
+
+inline bool IsIdentChar(char c)
+{
+   return IsLetter( c ) || IsDigit(c) || c == '_';
+}
+
+inline bool IsTextQuote(char c)
+{
+   return c == '\'' || c == '\"';
+}
 
 }// namespace gdlib::charmaps

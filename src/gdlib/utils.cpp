@@ -24,9 +24,10 @@
  */
 
 // FIXME: Get rid of too many "const std::string &" processing functions and use "std::string_view" or "const char *" instead!
-// FIXME: Get rid of std::set<T> functions and use bsSet based on std::bitset instead
 
 #include "utils.h"
+#include "rtl/p3io.h"
+#include "rtl/sysutils_p3.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -52,12 +53,6 @@ std::stringstream debugStream;
 
 namespace utils
 {
-
-void parseHex( const std::string &s, int &num, int &code );
-void parseHex( const char *s, int slen, int &num, int &code );
-
-bool determineCode( const std::string &s, const std::function<bool( char )> &charIsLegalPredicate, int &code );
-bool determineCode( const char *s, const std::function<bool( char )> &charIsLegalPredicate, int &code );
 
 bool anychar( const std::function<bool( char )> &predicate, const std::string_view s )
 {
@@ -131,6 +126,18 @@ std::string_view trim( const std::string_view s )
    return s.substr( firstNonBlank, lastNonBlank - firstNonBlank + 1 );
 }
 
+std::string getLineWithSep( std::istream &fs )
+{
+   std::string line;
+   std::getline( fs, line );
+   if( !fs.eof() )
+   {
+      fs.unget();
+      line.push_back( static_cast<char>( fs.get() ) );
+   }
+   return line;
+}
+
 bool sameTextAsAny( const std::string_view a, const std::initializer_list<std::string_view> &bs )
 {
    return any<std::string_view>( [&a]( const std::string_view b ) { return sameText( a, b ); }, bs );
@@ -139,18 +146,6 @@ bool sameTextAsAny( const std::string_view a, const std::initializer_list<std::s
 bool sameTextPrefix( const std::string_view s, const std::string_view prefix )
 {
    return sameText( s.substr( 0, prefix.length() ), prefix );
-}
-
-std::string getLineWithSep( std::fstream &fs )
-{
-   std::string line;
-   std::getline( fs, line );
-   if( !fs.eof() )
-   {
-      fs.unget();
-      line.push_back( static_cast<char>(fs.get()) );
-   }
-   return line;
 }
 
 bool hasNonBlank( const std::string_view s )
@@ -305,45 +300,12 @@ std::string replaceSubstrs( const std::string_view s, const std::string_view sub
    return out;
 }
 
-bool determineCode( const std::string &s, const std::function<bool( char )> &charIsLegalPredicate, int &code )
-{
-   // first check for offending char and return its position plus one (since 0 is code for "all ok")
-   for( int i {}; i < static_cast<int>( s.length() ); i++ )
-   {
-      if( const char c = s[i]; !charIsLegalPredicate( c ) )
-      {
-         code = i + 1;
-         return true;
-      }
-   }
-   code = 0;
-   return false;
-}
-
-bool determineCode( const char *s, const std::function<bool( char )> &charIsLegalPredicate, int &code )
-{
-   // first check for offending char and return its position plus one (since 0 is code for "all ok")
-   for( int i {}; s[i]; i++ )
-   {
-      if( const char c = s[i]; !charIsLegalPredicate( c ) )
-      {
-         code = i + 1;
-         return true;
-      }
-   }
-   code = 0;
-   return false;
-}
-
 // Mimicks Delphi System.Val, see:
 // https://docwiki.embarcadero.com/Libraries/Sydney/en/System.Val
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
 void val( const std::string &s, double &num, int &code )
 {
-   const static auto islegal = []( const char c ) {
-      return isdigit( c ) || c == '.' || toupper( c ) == 'E' || c == '-' || c == '+';
-   };
-   num = determineCode( s, islegal, code ) ? 0.0 : parseNumber( s );
+   rtl::p3io::P3_Val_dd(s.c_str(), s.length(), &num, &code);
 }
 
 // Mimicks Delphi System.Val, see:
@@ -351,51 +313,7 @@ void val( const std::string &s, double &num, int &code )
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
 void val(const char* s, int slen, double& num, int& code)
 {
-   const static auto islegal = []( const char c ) {
-      return isdigit( c ) || c == '.' || toupper( c ) == 'E' || c == '-' || c == '+';
-   };
-   num = determineCode( s, islegal, code ) ? 0.0 : parseNumber( s );
-}
-
-inline uint8_t hexval( char c )
-{
-   return c <= 9 ? c : c - 'A' + 10;
-}
-
-void parseHex( const std::string &s, int &num, int &code )
-{
-   const int off = s.front() == '$' ? 1 : 2;
-   int v {};
-   for( int exp = 0; exp < static_cast<int>( s.length() ) - off; exp++ )
-   {
-      const int i { static_cast<int>( s.length() ) - 1 - exp };
-      const char c = s[i];
-      if( !isalnum( c ) )
-      {
-         code = i;
-         return;
-      }
-      v += hexval( c ) * static_cast<int>( std::pow( 16, exp ) );
-   }
-   num = v;
-}
-
-void parseHex( const char *s, int slen, int &num, int &code )
-{
-   const int off = s[0] == '$' ? 1 : 2;
-   int v {};
-   for( int exp = 0; exp < slen - off; exp++ )
-   {
-      const int i { slen - 1 - exp };
-      const char c = s[i];
-      if( !isalnum( c ) )
-      {
-         code = i;
-         return;
-      }
-      v += hexval( c ) * static_cast<int>( std::pow( 16, exp ) );
-   }
-   num = v;
+   rtl::p3io::P3_Val_dd(s, slen, &num, &code);
 }
 
 // Mimicks Delphi System.Val, see:
@@ -403,15 +321,7 @@ void parseHex( const char *s, int slen, int &num, int &code )
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
 void val( const std::string &s, int &num, int &code )
 {
-   if( ( s.length() >= 3 && s.front() == '0' && s[1] == 'x' ) || ( s.length() >= 2 && s.front() == '$' ) )
-   {
-      parseHex( s, num, code );
-      return;
-   }
-   const static auto islegal = []( const char c ) {
-      return isdigit( c ) || c == '-' || c == '+';
-   };
-   num = determineCode( s, islegal, code ) ? 0 : std::stoi( s );
+   rtl::p3io::P3_Val_i(s.c_str(), s.length(), &num, &code);
 }
 
 // Mimicks Delphi System.Val, see:
@@ -419,15 +329,7 @@ void val( const std::string &s, int &num, int &code )
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
 void val( const char *s, const int slen, int &num, int &code )
 {
-   if( ( slen >= 3 && s[0] == '0' && s[1] == 'x' ) || ( slen >= 2 && s[0] == '$' ) )
-   {
-      parseHex( s, num, code );
-      return;
-   }
-   const static auto islegal = []( const char c ) {
-      return isdigit( c ) || c == '-' || c == '+';
-   };
-   num = determineCode( s, islegal, code ) ? 0 : std::atoi( s );
+   rtl::p3io::P3_Val_i(s, slen, &num, &code);
 }
 
 inline std::string repeatChar( const int n, const char c )
@@ -524,7 +426,7 @@ std::list<std::string> split( const std::string_view s, char sep )
 std::list<std::string> splitWithQuotedItems( const std::string_view s )
 {
    constexpr char sep = ' ';
-   const std::set<char> &quoteChars = { '\"', '\'' };
+   const utils::charset quoteChars { '\"', '\'' };
    std::list<std::string> res;
    std::string cur;
    bool inQuote {};
@@ -563,8 +465,10 @@ void spit( const std::string &fn, const std::string &contents )
 
 void assertOrMsg( bool condition, const std::string &msg )
 {
+#if !defined(NDEBUG)
    if( !condition )
       throw std::runtime_error( "Assertion failed: " + msg );
+#endif
 }
 
 // same as std::string::substr but silent when offset > input size
@@ -719,7 +623,7 @@ BinaryDiffMismatch::BinaryDiffMismatch( uint64_t offset, uint8_t lhs, uint8_t rh
 
 bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
 {
-   enum tBOM
+   enum tBOM : uint8_t
    {
       bUTF8,
       bUTF16BE,
@@ -808,11 +712,53 @@ void copy_to_uppercase( const std::string &s, char *buf )
    buf[j] = '\0';
 }
 
+void copy_to_uppercase( const char *s, char *buf )
+{
+   int j {};
+   for( const char *c = s; *c != '\0'; c++ )
+      buf[j++] = toupper( *c );
+   buf[j] = '\0';
+}
+
 std::string IntToStrW( const int n, const int w, const char blankChar )
 {
    if( w < 0 || w > 255 ) return ""s;
-   std::string t = std::to_string( n );
+   std::string t = rtl::sysutils_p3::IntToStr( n );
    return static_cast<int>( t.length() ) < w ? std::string( w - static_cast<int>( t.length() ), blankChar ) + t : t;
+}
+
+void trimLeft( std::string &s )
+{
+   size_t i;
+   for( i = 0; i < s.length(); i++ )
+      if( s[i] != ' ' ) break;
+   s.erase( 0, i );
+}
+
+void getline( FILE *f, std::string &s )
+{
+   constexpr int bsize {512};
+   std::array<char, bsize> buf;
+   if(!std::fgets( buf.data(), bsize, f ) && std::ferror(f))
+      return;
+   s.assign( buf.data() );
+}
+
+std::string getline( FILE *f )
+{
+   constexpr int bsize {512};
+   std::array<char, bsize> buf;
+   if(!std::fgets( buf.data(), bsize, f ) && std::ferror(f))
+      return {};
+   return buf.data();
+}
+
+std::string strInflateWidth( const int num, const int targetStrLen, const char inflateChar )
+{
+   auto s = rtl::sysutils_p3::IntToStr( num );
+   const auto l = s.length();
+   if( l >= static_cast<size_t>( targetStrLen ) ) return s;
+   return std::string( targetStrLen - l, inflateChar ) + s;
 }
 
 } // namespace utils

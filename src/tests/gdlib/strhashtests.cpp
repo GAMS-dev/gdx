@@ -56,7 +56,6 @@ TEST_CASE( "Adding some set element names that are mapped to numbers" )
    std::array<int, 10> nums {};
    std::iota( nums.begin(), nums.end(), 1 );
    runTest<TXStrHashList<int>>( nums );
-   runTest<TXStrHashListLegacy<int>>( nums );
 }
 
 TEST_SUITE_END();

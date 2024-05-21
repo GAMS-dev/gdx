@@ -23,22 +23,19 @@
  * SOFTWARE.
  */
 
-
-
 #include "strutilx.h"
-#include <string>
-#include <limits>
-#include <cmath>
-#include <cfloat>
-#include <array>
-#include <cassert>
-#include <cstring>
-
-#include "utils.h"
-
-#include "../rtl/sysutils_p3.h"
-#include "../rtl/p3platform.h"
-#include "../rtl/p3io.h"
+#include <algorithm>             // for min, transform, find
+#include <array>                 // for array
+#include <cassert>               // for assert
+#include <cmath>                 // for isinf, isnan, modf, trunc
+#include <cstring>               // for memcpy, strlen, memmove, size_t
+#include <limits>                // for numeric_limits
+#include <stdexcept>             // for runtime_error
+#include <string>                // for basic_string, string, operator+, all...
+#include "../rtl/p3io.h"         // for P3_Str_dd0
+#include "../rtl/p3platform.h"   // for OSFileType, tOSFileType
+#include "../rtl/sysutils_p3.h"  // for LastDelimiter, PathDelim, ExtractSho...
+#include "utils.h"               // for toupper, sameText, ord, in, val, cha...
 
 using namespace std::literals::string_literals;
 using namespace rtl::sysutils_p3;
@@ -53,16 +50,16 @@ namespace gdlib::strutilx
 const std::string MAXINT_S = "maxint"s, MININT_S = "minint"s;
 const std::string MAXDOUBLE_S = "maxdouble"s, EPSDOUBLE_S = "eps", MINDOUBLE_S = "mindouble";
 
-std::string UpperCase( const std::string &s )
+std::string UpperCase( const std::string_view s )
 {
-   std::string out = s;
+   std::string out { s };
    std::transform( s.begin(), s.end(), out.begin(), utils::toupper );
    return out;
 }
 
-std::string LowerCase( const std::string &s )
+std::string LowerCase( const std::string_view s )
 {
-   std::string out = s;
+   std::string out { s };
    std::transform( s.begin(), s.end(), out.begin(), utils::tolower );
    return out;
 }
@@ -155,16 +152,18 @@ int IntegerWidth( int n )
    return res;
 }
 
-int PadModLength( const std::string &s, const int M )
+int PadModLength( std::string_view s, const int M )
 {
    int res { static_cast<int>( s.length() ) };
    if( M > 0 && res % M != 0 ) res += M - res % M;
    return res;
 }
 
-std::string PadRightMod( const std::string &s, const int M )
+std::string PadRightMod( std::string_view s, const int M )
 {
-   return s + BlankStr( PadModLength( s, M ) - static_cast<int>(s.length()) );
+   std::string res{s};
+   res += BlankStr( PadModLength( s, M ) - static_cast<int>(s.length()) );
+   return res;
 }
 
 // Brief:
@@ -207,37 +206,19 @@ static int RChSetPos( const char *Cs, const char *S, const int slen )
    return -1;
 }
 
-// FIXME: Always returns 27?
-/*static std::string quickDblToStr( double V )
+static uint8_t DblToStrSepCore(double V, const char DecimalSep, char *s)
 {
-   constexpr int precision = DBL_DIG - 1;
-   std::string buf( 1 + 1 + 1 + precision + 1 + 1 + 1 + 5 + 1, '\0' );
-   snprintf( buf.data(), buf.size(), "%.*e", precision, V );
-   buf.resize( strlen( buf.data() ) );
-   return buf;
-}*/
-
-// Closer port of corresponding Delphi function (faster?)
-// Brief:
-//   Convert a double to its string representation
-//   using the fullest precision.
-// Parameters:
-//   V: Value to be converted to a string
-// Returns:
-//   String representation of V
-std::string DblToStrSepClassic( double V, const char DecimalSep )
-{
-   if( V == 0.0 )
-      return "0"s;
-   //std::string s = quickDblToStr( V );
-   constexpr int SSIZE {255};
-   std::array<char, SSIZE> s;
-   size_t eLen{};
-   rtl::p3io::P3_Str_dd0( V, s.data(), SSIZE, &eLen );
-   const int slen = static_cast<int>(std::strlen(s.data()));
-   if( V < 0.0 ) V = -V;
-   const auto  k { RChSetPos( "+-" , s.data(), slen ) },
-               j { LChPos( '.', s.data() ) };
+   size_t eLen {};
+   rtl::p3io::P3_Str_dd0( V, s, 255, &eLen );
+   // output string has E notation (https://en.wikipedia.org/wiki/Scientific_notation#E_notation)
+   // example: 2.30000000000000E+0001 for 23
+   const auto slen = static_cast<int>( std::strlen( s ) );
+   if( V < 0.0 )
+      V = -V;
+   const auto k { RChSetPos( "+-", s, slen ) },
+           j { LChPos( '.', s ) };
+   assert(k > -1); // exponent should always have sign
+   assert(j > -1);
    if( V >= 1e-4 && V < 1e15 )
    {
       int e, scrap;
@@ -282,6 +263,7 @@ std::string DblToStrSepClassic( double V, const char DecimalSep )
    }
    else
    {
+      assert(k >= 0);
       if( s[k] == '+' )
          s[k] = ' ';
       for( int i = k + 1; i < slen; i++ )
@@ -305,6 +287,23 @@ std::string DblToStrSepClassic( double V, const char DecimalSep )
             break;
       }
    }
+   return slen;
+}
+
+// Closer port of corresponding Delphi function (faster?)
+// Brief:
+//   Convert a double to its string representation
+//   using the fullest precision.
+// Parameters:
+//   V: Value to be converted to a string
+// Returns:
+//   String representation of V
+std::string DblToStrSep( double V, const char DecimalSep )
+{
+   if( V == 0.0 )
+      return "0"s;
+   std::array<char, 256> s;
+   const auto slen { DblToStrSepCore( V, DecimalSep, s.data() ) };
    // only with short strings
    std::string res;
    res.reserve( slen );
@@ -313,24 +312,26 @@ std::string DblToStrSepClassic( double V, const char DecimalSep )
    return res;
 }
 
-// FIXME: This is slow, why is DblToStrSepClassic not active?
-std::string DblToStrSep( const double V, const char DecimalSep )
+uint8_t DblToStrSep(double V, const char DecimalSep, char* sout)
 {
-   return DblToStrSepClassic(V, DecimalSep);
-
-   // FIXME: eval01 works with this line but it breaks eval08
-   //std::string x = std::to_string(V);
-
-   /*std::ostringstream ss;
-   ss.precision( std::numeric_limits<double>::max_digits10 );
-   ss << V;
-   std::string s = ss.str();
-   // FIXME: Temporarily using a dirty hack to workaround the eval01 vs. eval08 issues
-   if( utils::ends_with( s, "999" ) ) s = std::to_string( V );
-   utils::replaceChar( '.', DecimalSep, s );
-   utils::replaceChar( ',', DecimalSep, s );
-   s = utils::trimZeroesRight( s, DecimalSep );
-   return s.back() == '.' || s.back() == DecimalSep || s.back() == ',' ? s.substr( 0, s.length() - 1 ) : s;*/
+   if (V == 0.0) {
+      sout[0] = '0';
+      sout[1] = '\0';
+      return 1;
+   }
+   uint8_t slen = DblToStrSepCore( V, DecimalSep, sout );
+   // only with short strings
+   int i {};
+   for( int l {}; l < slen; i++, l++ )
+   {
+      if( sout[l] == ' ' )
+      {
+         while( sout[++l] == ' ' && sout[l] != '\0' )
+            ;
+      }
+      sout[i] = sout[l];
+   }
+   return i - 1;
 }
 
 std::string DblToStr( const double V )
@@ -338,9 +339,9 @@ std::string DblToStr( const double V )
    return DblToStrSep( V, '.' );
 }
 
-void StrAssign( std::string &dest, const std::string &src )
+uint8_t DblToStr(double V, char* s)
 {
-   dest = src;
+   return DblToStrSep( V, '.', s );
 }
 
 bool StrAsIntEx( const std::string &s, int &v )
@@ -376,21 +377,19 @@ bool SpecialStrAsInt( const std::string &s, int &v )
 
 std::string IncludeTrailingPathDelimiterEx( const std::string &S )
 {
-   std::set<char> myDelim = { PathDelim };
-   if( OSFileType() == OSFileWIN ) myDelim.insert( '/' );
-   return !S.empty() && utils::in( S.back(), myDelim ) ? S : S + PathDelim;
+   return !S.empty() && ( S.back() == PathDelim || (OSFileType() == OSFileWIN && S.back() == '/') ) ? S : S + PathDelim;
 }
 
 std::string ExcludeTrailingPathDelimiterEx( const std::string &S )
 {
-   std::set<char> myDelim = { PathDelim };
-   if( OSFileType() == OSFileWIN ) myDelim.insert( '/' );
-   return !S.empty() && utils::in( S.back(), myDelim ) ? S.substr( 0, S.length() - 1 ) : S;
+   return !S.empty() && ( S.back() == PathDelim || (OSFileType() == OSFileWIN && S.back() == '/') ) ? std::string{S.begin(), S.end()-1} : S;
 }
 
 std::string ExtractFileNameEx( const std::string &FileName )
 {
-   return FileName.substr( LastDelimiter( ""s + PathDelim + ( OSFileType() == OSFileWIN ? "/" : "" ) + DriveDelim, FileName ) + 1 );
+   const static auto Delims {""s + PathDelim + ( OSFileType() == OSFileWIN ? "/" : "" ) + DriveDelim};
+   const auto offset {LastDelimiter( Delims, FileName ) + 1};
+   return std::string{FileName.begin()+offset, FileName.end()};
 }
 
 bool StrAsDoubleEx( const std::string &s, double &v )
@@ -534,19 +533,19 @@ std::string CompleteFileExtEx( const std::string &FileName, const std::string &E
 
 std::string ChangeFileExtEx( const std::string &FileName, const std::string &Extension )
 {
-   const int I { LastDelimiter( OSFileType() == OSFileWIN ? "\\/:."s : "/."s, FileName ) };
+   const int I { LastDelimiter( OSFileType() == OSFileWIN ? "\\/:." : "/.", FileName ) };
    return FileName.substr( 0, I == -1 || FileName[I] != '.' ? static_cast<int>( FileName.length() ) : I ) + Extension;
 }
 
 std::string ExtractFileExtEx( const std::string &FileName )
 {
-   const int I { LastDelimiter( OSFileType() == OSFileWIN ? "\\/:."s : "/."s, FileName ) };
-   return I >= 0 && FileName[I] == '.' ? FileName.substr( I ) : ""s;
+   const int I { LastDelimiter( OSFileType() == OSFileWIN ? "\\/:." : "/.", FileName ) };
+   return I >= 0 && FileName[I] == '.' ? std::string{ FileName.begin() + I, FileName.end() } : ""s;
 }
 
 bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
 {
-   enum tBOM
+   enum tBOM : uint8_t
    {
       bUTF8,
       bUTF16BE,
@@ -598,7 +597,7 @@ bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
 //  S: Source string
 // Returns:
 //  String with characters replaced
-std::string ReplaceChar( const std::set<char> &ChSet, const char New, const std::string &S )
+std::string ReplaceChar( const utils::charset &ChSet, const char New, const std::string &S )
 {
    std::string out = S;
    for( char &i: out )

@@ -36,7 +36,7 @@ const int refreshInterval = 200, maxbuf = 2, maxerrchar = 150;
 
 bool isMuxed();
 
-enum tsl_status
+enum tsl_status : uint8_t
 {
    sl_closed,
    sl_file,
@@ -45,30 +45,30 @@ enum tsl_status
 
 class TGMSLogStream
 {
-   void *Fgfusrmem;
-   gdlib::stattypes::tgwrite *Fgfcb;
-   bool FIDE, FLogEnabled;
-   int FNestLevel;
+   void *Fgfusrmem {};
+   gdlib::stattypes::tgwrite *Fgfcb {};
+   bool FIDE {}, FLogEnabled {};
+   int FNestLevel {};
    std::string FFullFileName, FFileName;
-   int FLineNr;
-   double FMemory;
-   int FShowOSMem;
-   int FErrorCnt;
-   tsl_status FStatus;
-   std::ostream *Ffcon;
-   int FLenLast;
-   bool FhasNewData;
-   uint64_t FLastShowTicks, FLineStartTicks, FPrevSecs;
-   char FSpinChar;
-   bool FLastIsMsg;
-   int FTraceLevel;
+   int FLineNr {};
+   double FMemory {};
+   int FShowOSMem {};
+   int FErrorCnt {};
+   tsl_status FStatus {sl_closed};
+   FILE *Ffcon {};
+   int FLenLast {};
+   bool FhasNewData {};
+   uint64_t FLastShowTicks {}, FLineStartTicks {}, FPrevSecs {};
+   char FSpinChar {};
+   bool FLastIsMsg {};
+   int FTraceLevel{2};
    std::string FSaveAfn;
-   int FSaveAstat;
+   int FSaveAstat {};
    std::string FRedirFileName;
 
 #ifdef METER
    // measure the calls made to this object
-   int cntLogLineNr, cntLogMemory, cntFreshen;
+   int cntLogLineNr {}, cntLogMemory {}, cntFreshen {};
 #endif
 
    void CheckOpen();
@@ -78,10 +78,12 @@ class TGMSLogStream
    void gstatStartWriting();
    void writeln_gf( const std::string &msg );
    void write_gf( const std::string &msg );
+   void writeln_gf( const char *msg );
+   void write_gf( const char *msg );
 
 public:
    explicit TGMSLogStream( std::string &Msg );
-   virtual ~TGMSLogStream();
+   virtual ~TGMSLogStream() = default;
 
    void registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem );
    void LogClose();
@@ -106,14 +108,14 @@ public:
    // Properties
    void setIDErun( bool v );
 
-   bool getLogEnabled() const;
+   [[nodiscard]] bool getLogEnabled() const;
    void setLogEnabled( bool v );
 
-   int getTraceLevel() const;
+   [[nodiscard]] int getTraceLevel() const;
    void setTraceLevel( int v );
 
-   std::string getRedirFilename() const;
-   std::string getRedirString() const;
+   [[nodiscard]] std::string getRedirFilename() const;
+   [[nodiscard]] std::string getRedirString() const;
    std::string getShortRedirString( const std::string &Dir );
 
    void SetOSMemory( int v );
@@ -123,21 +125,21 @@ public:
 
 struct rcerrtxt {
    std::string errtxt;
-   rcerrtxt *tnxttxt;
+   rcerrtxt *tnxttxt {};
 };
 using trcerrtxt = rcerrtxt *;
 
 struct rcerrtyp {
-   int errcnt;
-   rcerrtyp *tnxttyp;
-   trcerrtxt txtindx;
+   int errcnt {};
+   rcerrtyp *tnxttyp {};
+   trcerrtxt txtindx {};
 };
 using trcerrtyp = rcerrtyp *;
 
 struct rcerrrec {
-   int seqno, colnum;
-   rcerrrec *tnxtrc;
-   trcerrtyp tfrsttyp;
+   int seqno {}, colnum {};
+   rcerrrec *tnxtrc {};
+   trcerrtyp tfrsttyp {};
 };
 using trcerrrec = rcerrrec *;
 
@@ -145,7 +147,7 @@ class TGMSStatusStream
 {
    void *Fgfusrmem {};
    gdlib::stattypes::tgwrite *Fgfcb {};
-   global::delphitypes::Text Ffsysout {}, Ffstat;
+   FILE *Ffsysout {}, *Ffstat {};
    std::string Ffnstat;
    bool Fcopysysout {};
    bool Fwascopy {}, Fnofilename, Fstatusopen {};
@@ -169,7 +171,7 @@ class TGMSStatusStream
    std::function<void( const std::string & )> commonStatusFunc( const std::string &s1, const std::string &s2 );
 
 public:
-   TGMSStatusStream( std::string &Msg );
+   explicit TGMSStatusStream( std::string &Msg );
    virtual ~TGMSStatusStream();
 
    void registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem );
@@ -213,4 +215,4 @@ public:
 };
 
 
-};// namespace gdlib::statlibobj
+}// namespace gdlib::statlibobj

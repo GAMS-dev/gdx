@@ -42,12 +42,10 @@
 #include <memory>          // for unique_ptr, allocator
 #include <optional>        // for optional
 #include <string>          // for string
-#include <string_view>     // for string_view
 
 namespace gdlib::gmsstrm
 {
-class TMiBufferedStreamDelphi;
-class TXStreamDelphi;
+class TXStream;
 }// namespace gdx::gmsstrm
 
 //======================================================================================================================
@@ -108,7 +106,7 @@ struct TDFilter {
 
 using TSetBitMap = gdlib::gmsobj::TBooleanBitArray;
 
-enum class TgdxDAction
+enum class TgdxDAction : uint8_t
 {
    dm_unmapped,
    dm_strict,
@@ -134,15 +132,15 @@ struct TgdxSymbRecord {
    bool SSetText;
    std::array<char, GMS_SSSIZE> SExplTxt;
    bool SIsCompressed;
+   bool SScalarFrst;                  // not stored
    std::unique_ptr<int[]> SDomSymbols,// real domain info
-           SDomStrings;               // relaxed domain info
+                          SDomStrings;// relaxed domain info
    std::optional<TCommentsList> SCommentsList;
-   bool SScalarFrst;                      // not stored
    std::unique_ptr<TSetBitMap> SSetBitMap;// for 1-dim sets only
 };
 using PgdxSymbRecord = TgdxSymbRecord *;
 
-enum TgdxIntlValTyp
+enum TgdxIntlValTyp : uint8_t
 {// values stored internally via the indicator byte
    vm_valund,
    vm_valna,
@@ -158,7 +156,7 @@ enum TgdxIntlValTyp
    vm_count
 };
 
-enum TgxFileMode
+enum TgxFileMode : uint8_t
 {
    f_not_open,
    fr_init,
@@ -196,7 +194,7 @@ public:
 const TgxModeSet AnyWriteMode { fw_init, fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data, fw_map_data, fw_str_data },
         AnyReadMode { fr_init, fr_raw_data, fr_map_data, fr_mapr_data, fr_str_data };
 
-enum class TgdxElemSize
+enum class TgdxElemSize : uint8_t
 {
    sz_byte,
    sz_word,
@@ -228,7 +226,7 @@ public:
    void reset();
 };
 
-enum class TUELUserMapStatus
+enum class TUELUserMapStatus : uint8_t
 {
    map_unknown,
    map_unsorted,
@@ -265,8 +263,8 @@ public:
    const char *operator[]( int index ) const;
    void RenameEntry( int N, const char *s );
    [[nodiscard]] int MemoryUsed() const;
-   void SaveToStream( gdlib::gmsstrm::TXStreamDelphi &S );
-   void LoadFromStream( gdlib::gmsstrm::TXStreamDelphi &S );
+   void SaveToStream( gdlib::gmsstrm::TXStream &S );
+   void LoadFromStream( gdlib::gmsstrm::TXStream &S );
    TUELUserMapStatus GetMapToUserStatus();
    void ResetMapToUserStatus();
 };
@@ -279,11 +277,11 @@ struct TAcronym {
    bool AcrAutoGen {};
 
    TAcronym( const char *Name, const char *Text, int Map );
-   explicit TAcronym( gdlib::gmsstrm::TXStreamDelphi &S );
+   explicit TAcronym( gdlib::gmsstrm::TXStream &S );
    TAcronym() = default;
    virtual ~TAcronym() = default;
    [[nodiscard]] int MemoryUsed() const;
-   void SaveToStream( gdlib::gmsstrm::TXStreamDelphi &S ) const;
+   void SaveToStream( gdlib::gmsstrm::TXStream &S ) const;
    void SetNameAndText( const char *Name, const char *Text );
 };
 
@@ -298,8 +296,8 @@ public:
    int FindName( const char *Name );
    int AddEntry( const char *Name, const char *Text, int Map );
    void CheckEntry( int Map );
-   void SaveToStream( gdlib::gmsstrm::TXStreamDelphi &S );
-   void LoadFromStream( gdlib::gmsstrm::TXStreamDelphi &S );
+   void SaveToStream( gdlib::gmsstrm::TXStream &S );
+   void LoadFromStream( gdlib::gmsstrm::TXStream &S );
    int MemoryUsed();
    [[nodiscard]] int size() const;
    TAcronym &operator[]( int Index );
@@ -333,7 +331,7 @@ using TTblGamsDataImpl = gdlib::gmsdata::TTblGamsData<T>;
 
 using TDomainStrList = TXStrHashListImpl<uint8_t>;
 
-enum tvarvaltype
+enum tvarvaltype : uint8_t
 {
    vallevel,   // 1
    valmarginal,// 2

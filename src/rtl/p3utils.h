@@ -25,9 +25,10 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <cstdint>
+#include <cstdio>  // for fclose, FILE
+#include <cstdint>  // for uint32_t, int64_t, uint64_t, uint8_t
+#include <string>   // for basic_string, string
+#include <vector>   // for vector
 
 // ==============================================================================================================
 // Interface
@@ -56,12 +57,12 @@ std::string ParamStr( int index );
 int ParamStrCount();
 std::string loadPathVarName();
 bool PrefixLoadPath( const std::string &dir );
-bool PrefixEnv( const std::string &dir, std::string &evName );
+bool PrefixEnv( const std::string &dir, const std::string &evName );
 
 constexpr int NLocNames = 8;
 using TLocNames = std::vector<std::string>;
 
-enum Tp3Location
+enum Tp3Location : uint8_t
 {
    p3Config,
    p3AppConfig,
@@ -73,11 +74,6 @@ enum Tp3Location
 
 bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocNames &locNames, int &eCount );
 bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::string &locName );
-
-std::string ExtractFileExt( const std::string &filename );
-std::string ChangeFileExt( const std::string &filename, const std::string &extension );
-std::string CompleteFileExt( const std::string &filename, const std::string &extension );
-std::string ReplaceFileExt( const std::string &filename, const std::string &extension );
 
 bool PrefixPath( const std::string &s );
 
@@ -92,7 +88,7 @@ uint32_t P3GetEnvPC( const std::string &name, char *buf, uint32_t bufSize );
 int p3GetExecName( std::string &execName, std::string &msg );
 int p3GetLibName( std::string &libName, std::string &msg );
 
-bool p3GetMemoryInfo( int64_t &rss, int64_t &vss );
+bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss );
 
 void p3SetConsoleTitle( const std::string &s );
 void p3NoPopups();
@@ -100,21 +96,41 @@ void p3NoPopups();
 std::string p3GetUserName();
 std::string p3GetComputerName();
 
-using Tp3File = std::fstream;
-using Tp3FileHandle = std::fstream *;
-enum Tp3FileOpenAction
+#if defined(_WIN32)
+using Tp3FileHandle = void *; // from CreateFileA (fileapi.h)
+const Tp3FileHandle NullHandle = nullptr;
+#else
+using Tp3FileHandle = int; // from open (fcntl.h)
+const Tp3FileHandle NullHandle = 0;
+#endif
+
+enum Tp3FileOpenAction : uint8_t
 {
    p3OpenRead,
    p3OpenWrite,
    p3OpenReadWrite
 };
 
-int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle h );
-int p3FileClose( Tp3FileHandle h );
+// the constants FILE_* are the same as the Windows values - we depend on it!
+constexpr int
+        p3_FILE_BEGIN = 0,
+        p3_FILE_CURRENT = 1,
+        p3_FILE_END = 2;
+
+int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle &h );
+int p3FileClose( Tp3FileHandle &h );
+
+inline int p3FileClose( FILE *h) {
+   return fclose(h);
+}
 int p3FileRead( Tp3FileHandle h, char *buffer, uint32_t buflen, uint32_t &numRead );
 int p3FileWrite( Tp3FileHandle h, const char *buffer, uint32_t buflen, uint32_t &numWritten );
 int p3FileGetSize( Tp3FileHandle h, int64_t &fileSize );
 
+int p3FileSetPointer(Tp3FileHandle h, int64_t distance, int64_t &newPointer, uint32_t whence);
+int p3FileGetPointer(Tp3FileHandle h, int64_t &filePointer);
+
+#ifdef __IN_CPPMEX__
 bool p3GetFirstMACAddress( std::string &mac );
 
 union T_P3SOCKET {
@@ -138,6 +154,7 @@ bool p3SockRecvTimeout(T_P3SOCKET s, char *buf, int count, int &res, int timeOut
 
 T_P3SOCKET p3SockAcceptClientConn(T_P3SOCKET srvSock);
 T_P3SOCKET p3SockCreateServerSocket(int port, bool reuse);
+#endif // __IN_CPPMEX__
 
 // ...
 

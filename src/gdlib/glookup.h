@@ -33,6 +33,8 @@
 #include <cassert>
 #include <limits>
 
+#include "../rtl/sysutils_p3.h"
+
 #include "strutilx.h"
 #include "utils.h"
 #include "gmsonly.h"
@@ -45,12 +47,17 @@ namespace gdlib::glookup
 inline int CalcNextHashSize( const int Cnt, int &Nxt )
 {
    constexpr int
-           HashSize_1 = 997,
-           Next_1 = 1500,
+           HashSize_1 = 997, Next_1 = 1500,
            HashSize_2 = 9973, Next_2 = 15000,
            HashSize_3 = 99991, Next_3 = 150000,
            HashSize_4 = 999979, Next_4 = 1500000,
-           HashSize_5 = 9999991, Next_5 = std::numeric_limits<int>::max();
+           HashSize_5 = 9999991, Next_5 = 15000000,
+           HashSize_6 = 99999989, Next_6 = std::numeric_limits<int>::max();
+   if (Cnt >= Next_5)
+   {
+      Nxt = Next_6;
+      return HashSize_6;
+   }
    if( Cnt >= Next_4 )
    {
       Nxt = Next_5;
@@ -221,7 +228,7 @@ public:
       T **PA;// local copy for speed
 
       // TODO: Use std::sort instead!
-      std::function<void( int, int )> QuickSort = [&]( int L, int R ) {
+      auto QuickSort = [&]( auto &_QuickSort, int L, int R ) -> void {
          strutilx::DelphiStrRef pPivotString {};
 
          auto compare2Pivot = [&]( int i ) {
@@ -268,13 +275,13 @@ public:
             if( ( j - L ) > ( R - i ) )
             {
                // left part is bigger, look right first
-               if( i < R ) QuickSort( i, R );// if necessary, sort the right part
+               if( i < R ) _QuickSort( _QuickSort, i, R );// if necessary, sort the right part
                i = L;                        // and move to the left part
                R = j;
             }
             else
             {                                // right part is bigger, look left first
-               if( L < j ) QuickSort( L, j );// if necessary, sort the left part
+               if( L < j ) _QuickSort( _QuickSort, L, j );// if necessary, sort the left part
                L = i;                        // and move to the right part
             }
          }
@@ -289,7 +296,7 @@ public:
       PA = FSrtIndx->data();// local copy for speed
       for( int N {}; N < static_cast<int>( RecList.size() ); N++ )
          ( *FSrtIndx )[N] = RecList[N];
-      QuickSort( 0, static_cast<int>( RecList.size() ) - 1 );
+      QuickSort( QuickSort, 0, static_cast<int>( RecList.size() ) - 1 );
    }
 
    void SortFinished()
@@ -347,6 +354,7 @@ class TBucketPtrArray;
 template<typename T>
 class TBucketArray
 {
+protected:
    PBaseArray FBaseArray {};
    int FBucketSize { 0x80000 }, FCount {}, FCapacity {}, FBaseCnt {}, FBaseCap {}, FRecSize {}, FDivisor {};
    gdlib::gmsheapnew::THeapMgr &Fmyheap;
@@ -390,7 +398,7 @@ public:
       if( FCount == FCapacity )
       {
          if( FCapacity > std::numeric_limits<int>::max() - FDivisor )
-            throw std::runtime_error( "TBucketArray.AddItem: Capacity = " + std::to_string( FCapacity ) + ", Addition = " + std::to_string( FDivisor ) + ", Maximum = " + std::to_string( std::numeric_limits<int>::max() ) );
+            throw std::runtime_error( "TBucketArray.AddItem: Capacity = " + rtl::sysutils_p3::IntToStr( FCapacity ) + ", Addition = " + rtl::sysutils_p3::IntToStr( FDivisor ) + ", Maximum = " + rtl::sysutils_p3::IntToStr( std::numeric_limits<int>::max() ) );
 
          FBaseCnt++;
          if( FBaseCnt >= FBaseCap )
@@ -429,9 +437,9 @@ public:
       if( Cnt > FCount )
       {
          std::string msg { "TBucketArray: DeleteAtEnd, Cnt = " };
-         msg.append( std::to_string( Cnt ) );
+         msg.append( rtl::sysutils_p3::IntToStr( Cnt ) );
          msg.append( ", Count = " );
-         msg.append( std::to_string( FCount ) );
+         msg.append( rtl::sysutils_p3::IntToStr( FCount ) );
          throw std::runtime_error( msg );
       }
       FCount -= Cnt;
@@ -440,7 +448,7 @@ public:
    void ReduceSize( int NewCount )
    {
       if( NewCount < 0 || NewCount > FCount )
-         throw std::runtime_error( "TBucketArray: ReduceSize NewCount = " + std::to_string( NewCount ) );
+         throw std::runtime_error( "TBucketArray: ReduceSize NewCount = " + rtl::sysutils_p3::IntToStr( NewCount ) );
       FCount = NewCount;
    }
 
@@ -472,146 +480,6 @@ public:
       if( N >= this->FCount ) AddItem( p );
       else
          *reinterpret_cast<T **>( TBucketArray<T>::ItemPtr( N ) ) = p;
-   }
-};
-
-template<typename T>
-class TGAMSRecListLegacy
-{
-   std::unique_ptr<TBucketPtrArray<T>> HashTable {};
-   uint32_t HashSize {};
-   int ReHashCnt {};
-   TBucketPtrArray<T> RecList;
-   T **FSrtIndx {};
-   int FSrtCount {};
-   gmsheapnew::THeapMgr &Fmyheap;
-
-   uint32_t Hash( const char *s )
-   {
-      uint32_t res {};
-      for( int k {}; s[k] != '\0'; k++ )
-         res = 23 * res + utils::toupper( s[k] );
-      return res % HashSize;
-   }
-
-   void HashTableReset( int ACnt )
-   {
-      HashSize = CalcNextHashSize( ACnt, ReHashCnt );
-      if( !HashTable ) HashTable = std::make_unique<TBucketPtrArray<T>>( Fmyheap );
-      for( uint32_t N {}; N < HashSize; N++ )
-         HashTable->SetItem( N, nullptr );
-   }
-
-   void HashAll()
-   {
-      HashTableReset( RecList.GetCount() );
-      for( int N {}; N < RecList.GetCount(); N++ )
-      {
-         auto PRec { RecList.GetItem( N ) };
-         auto [Ps, PBuck] = AccessRecord( PRec );
-         auto HV { Hash( Ps ) };
-         *PBuck = ( *HashTable )[HV];
-         HashTable->SetItem( HV, PRec );
-      }
-   }
-
-protected:
-   virtual std::pair<char *, T **> AccessRecord( T *prec ) = 0;
-
-public:
-   explicit TGAMSRecListLegacy( gmsheapnew::THeapMgr &Amyheap ) : RecList { Amyheap }, Fmyheap { Amyheap } {}
-
-   virtual ~TGAMSRecListLegacy()
-   {
-      SortFinished();
-   }
-
-   void ClearHashTable()
-   {
-      HashTable = nullptr;
-      HashSize = 0;
-   }
-
-   T *Find( const char *s )
-   {
-      if( !HashTable ) HashAll();
-      assert( HashTable );
-      if( !HashTable ) return nullptr;
-      for( T *res { ( *HashTable )[Hash( s )] }; res; )
-      {
-         auto [ps, pbuck] = AccessRecord( res );
-         if( utils::sameTextPChar( s, ps ) ) return res;
-         res = *pbuck;
-      }
-      return nullptr;
-   }
-
-   int StoreEntry( T *PRec )
-   {
-      assert( !HashTable && "Store Entry" );
-      return RecList.AddItem( PRec ) + 1;
-   }
-
-   int AddItem( T *PRec )
-   {
-      if( !HashTable || RecList.GetCount() > ReHashCnt ) HashAll();
-      auto res { RecList.AddItem( PRec ) + 1 };
-      auto [ps, pbuck] = AccessRecord( PRec );
-      auto HV { Hash( ps ) };
-      assert( HashTable );
-      if( HashTable )
-      {
-         *pbuck = ( *HashTable )[HV];
-         HashTable->SetItem( HV, PRec );
-      }
-      return res;
-   }
-
-   [[nodiscard]] int MemoryUsed() const
-   {
-      // FIXME: Implement me!
-      return 0;
-   }
-
-   void ReNameEntry( T *PRec, const char *OldName )
-   {
-      // FIXME: Impelment me!
-   }
-
-   void SortEntries()
-   {
-      // FIXME: Implement me!
-   }
-
-   void DeleteLasts( int n )
-   {
-      for( int i { 1 }; i <= n; i++ )
-         RecList.DeleteLast();
-   }
-
-   void SortFinished()
-   {
-      if( FSrtCount )
-      {
-         Fmyheap.XFreeMem( FSrtIndx, FSrtCount * sizeof( T * ) );
-         FSrtIndx = nullptr;
-         FSrtCount = 0;
-      }
-   }
-
-   [[nodiscard]] int GetCount() const { return RecList.GetCount(); }
-
-   T *GetEntryPtr( int N )
-   {
-      if( N >= 1 && N <= RecList.GetCount() ) return RecList.GetItem( N - 1 );
-      throw std::runtime_error( "TGAMSRecList: Index = " + std::to_string( N ) + ", Max = " + std::to_string( RecList.FCount ) );
-   }
-
-   T *GetSortedEntryPtr( int N )
-   {
-      if( FSrtCount != RecList.GetCount() ) SortEntries();
-      if( N >= 1 && N <= FSrtCount ) return FSrtIndx[N - 1];
-      throw std::runtime_error( "TGAMSRecList: Sorted index = " + std::to_string( N ) + ", Max = " + std::to_string( RecList.FCount ) );
    }
 };
 

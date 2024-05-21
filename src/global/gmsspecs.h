@@ -29,6 +29,7 @@
 #include <array>
 
 #include "delphitypes.h"
+#include "../gdlib/utils.h"
 
 // ==============================================================================================================
 // Interface
@@ -83,7 +84,7 @@ const double defiterlim = 2.0e9;//default iterlim
 //   This enumerated type can be used in a Delphi program directly;
 //   Programs using the DLL should use the integer values instead
 //   This avoids passing enums
-enum TgdxSpecialValue
+enum TgdxSpecialValue : uint8_t
 {
    sv_valund,// 0: Undefined
    sv_valna, // 1: Not Available
@@ -100,7 +101,7 @@ enum TgdxSpecialValue
 //  This enumerated type can be used in a Delphi program directly;
 //  Programs using the DLL should use the integer values instead
 //  This avoids passing enums
-enum TgdxDataType
+enum TgdxDataType : uint8_t
 {
    dt_set, // 0: Set
    dt_par, // 1: Parameter
@@ -123,7 +124,7 @@ const int gms_dt_set = 0,// TgdxDataType
           gms_dt_equ = 3,
           gms_dt_alias = 4;
 
-enum tgmsvalue
+enum tgmsvalue : uint8_t
 {
    xvreal,
    xvund,
@@ -133,7 +134,7 @@ enum tgmsvalue
    xveps,
    xvacr
 };
-enum txgmsvalue
+enum txgmsvalue : uint8_t
 {
    vneg,
    vzero,
@@ -150,7 +151,7 @@ tgmsvalue mapval( double x );
 txgmsvalue xmapval( double x );
 
 // check loadAll in utilcomp.pas when one of these gets extended
-enum tvarstyp
+enum tvarstyp : uint8_t
 {
    stypunknwn,
    stypbin,
@@ -163,19 +164,19 @@ enum tvarstyp
    stypsemi,
    stypsemiint
 };
-enum tsetstyp
+enum tsetstyp : uint8_t
 {
    stypsetm,
    stypsets
 };
 
-const std::set<tvarstyp> varstypX { styppos, stypneg, stypfre };
-const std::set<tvarstyp> varstypI { stypbin, stypint, stypsos1, stypsos2, stypsemi, stypsemiint };
+const utils::bsSet<tvarstyp, stypsemiint+1>  varstypX { styppos, stypneg, stypfre },
+                                             varstypI { stypbin, stypint, stypsos1, stypsos2, stypsemi, stypsemiint };
 
 const std::array varstyptxt {
         "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };
 
-enum tequstyp
+enum tequstyp : uint8_t
 {
    styeque,
    styequg,
@@ -190,7 +191,7 @@ enum tequstyp
 extern std::array<int, styequb + 1> equstypInfo;
 
 //                   0        1            2        3           4
-enum tvarvaltype
+enum tvarvaltype : uint8_t
 {
    vallevel,
    valmarginal,

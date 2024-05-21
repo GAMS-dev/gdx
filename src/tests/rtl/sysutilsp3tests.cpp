@@ -37,6 +37,14 @@ namespace tests::rtltests::sysutilsp3tests
 
 TEST_SUITE_BEGIN( "rtl::sysutils_p3" );
 
+#if 0
+TEST_CASE( "Extracting Windows short path name" )
+{
+   const std::string path {R"(C:\Program Files\Application Verifier)"};
+   REQUIRE_EQ("C:\\PROGRA~1\\APPLIC~1"s, ExtractShortPathName( path ));
+}
+#endif
+
 TEST_CASE( "Remove trailing path delimiter from path" )
 {
    char sep = '/';
@@ -51,6 +59,7 @@ TEST_CASE( "Remove trailing path delimiter from path" )
 TEST_CASE( "Index of last delimiter in path" )
 {
    REQUIRE_EQ( 5, LastDelimiter( "/\\"s, "/some/path"s ) );
+   REQUIRE_EQ( 15, LastDelimiter( "/\\."s, "/some/path/file.txt"s ) );
    REQUIRE_EQ( 5, LastDelimiter( "/\\"s, "/some\\path"s ) );
    REQUIRE_EQ( -1, LastDelimiter( "/", "C:\\some\\path" ) );
 }
@@ -59,6 +68,36 @@ TEST_CASE( "Extract extension of filename" )
 {
    REQUIRE_EQ( ".pdf", ExtractFileExt( "xyz.pdf" ) );
    REQUIRE( ExtractFileExt( "xyz" ).empty() );
+}
+
+TEST_CASE( "Change a file extension")
+{
+   REQUIRE_EQ("abc.cpp"s, ChangeFileExt("abc"s, ".cpp"s));
+   REQUIRE_EQ("abc.cpp"s, ChangeFileExt("abc.txt"s, ".cpp"s));
+}
+
+TEST_CASE("Test extracting the path from an full filename path")
+{
+#if defined(_WIN32)
+   REQUIRE_EQ("C:\\home\\username\\"s, ExtractFilePath("C:\\home\\username\\xyz.gms"s));
+   REQUIRE_EQ("C:\\home\\username\\"s, ExtractFilePath("C:\\home\\username\\"s));
+   REQUIRE_EQ("C:\\home\\"s, ExtractFilePath("C:\\home\\username"s));
+#else
+   REQUIRE_EQ("/home/username/"s, ExtractFilePath("/home/username/xyz.gms"));
+   REQUIRE_EQ("/home/username/"s, ExtractFilePath("/home/username/"));
+   REQUIRE_EQ("/home/"s, ExtractFilePath("/home/username"));
+#endif
+}
+
+TEST_CASE("Test filename from a path")
+{
+#if defined(_WIN32)
+   REQUIRE_EQ("xyz.gms"s, ExtractFileName("C:\\home\\username\\xyz.gms"));
+   REQUIRE_EQ("xyz.gms"s, ExtractFileName("C:\\home\\..\\xyz.gms"));
+   REQUIRE_EQ("xyz.gms"s, ExtractFileName("C:\\home\\xyz.gms"));
+#else
+   REQUIRE_EQ("xyz.gms"s, ExtractFileName("/home/username/xyz.gms"));
+#endif
 }
 
 TEST_CASE( "Test decoding a date" )
@@ -78,6 +117,24 @@ TEST_CASE( "Test decoding a date" )
    REQUIRE_EQ(2024, year);
    REQUIRE_EQ(12, month);
    REQUIRE_EQ(31, day);
+}
+
+TEST_CASE("Test integer to string conversion")
+{
+   REQUIRE_EQ("23"s, rtl::sysutils_p3::IntToStr( 23 ));
+   REQUIRE_EQ("1024"s, rtl::sysutils_p3::IntToStr( 1024 ));
+   REQUIRE_EQ(std::to_string(std::numeric_limits<int>::max()), rtl::sysutils_p3::IntToStr( std::numeric_limits<int>::max() ));
+   REQUIRE_EQ("-23"s, rtl::sysutils_p3::IntToStr( -23 ));
+   REQUIRE_EQ("0"s, rtl::sysutils_p3::IntToStr( 0 ));
+   std::array<char, 256> buf {};
+   size_t len {};
+   rtl::sysutils_p3::IntToStr( 23, buf.data(), len );
+   REQUIRE_EQ(2, len);
+   REQUIRE_EQ(buf.front(), '2');
+   REQUIRE_EQ(buf[1], '3');
+   REQUIRE_EQ(buf[2], '\0');
+   for(int i{}; i<123; i++)
+      REQUIRE_EQ(std::to_string(i), rtl::sysutils_p3::IntToStr(i));
 }
 
 TEST_SUITE_END();

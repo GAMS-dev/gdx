@@ -23,13 +23,13 @@
  * SOFTWARE.
  */
 
-
-
 #pragma once
-#include <string>
-#include <array>
-#include <set>
-#include <cstdint>
+
+#include <array>                // for array
+#include <cstdint>              // for uint8_t, int64_t
+#include <string>               // for string, basic_string
+#include <string_view>          // for string_view, basic_string_view
+#include "utils.h"              // for charset
 
 // ==============================================================================================================
 // Interface
@@ -50,8 +50,8 @@ public:
    }
 };
 
-std::string UpperCase( const std::string &s );
-std::string LowerCase( const std::string &s );
+std::string UpperCase( std::string_view s );
+std::string LowerCase( std::string_view s );
 
 std::string IntToNiceStrW( int64_t N, int Width );
 std::string IntToNiceStr( int N );
@@ -63,17 +63,15 @@ std::string ExcelColStr( int C );
 
 int IntegerWidth( int n );
 
-int PadModLength( const std::string &s, int M );
+int PadModLength( std::string_view s, int M );
 
-std::string PadRightMod( const std::string &s, int M );
+std::string PadRightMod( std::string_view s, int M );
 
 std::string DblToStrSep( double V, char DecimalSep );
+uint8_t DblToStrSep( double V, char DecimalSep, char *s );
 
 std::string DblToStr( double V );
-
-std::string DblToStrSepClassic( double V, char DecimalSep );
-
-void StrAssign( std::string &dest, const std::string &src );
+uint8_t DblToStr( double V, char *s );
 
 bool StrAsDoubleEx( const std::string &s, double &v );
 bool StrAsIntEx2( const std::string &s, int &v );
@@ -106,7 +104,7 @@ constexpr int maxBOMLen { 4 };
 using tBomIndic = std::array<uint8_t, maxBOMLen>;
 bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg );
 
-std::string ReplaceChar( const std::set<char> &ChSet, char New, const std::string &S );
+std::string ReplaceChar( const utils::charset &ChSet, char New, const std::string &S );
 
 std::string ReplaceStr( const std::string &substr, const std::string &replacement, const std::string &S );
 

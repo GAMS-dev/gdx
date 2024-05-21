@@ -38,7 +38,7 @@ namespace gdlib::cmdpar
 
 // Parameter record
 struct TParamRec {
-   int key;         // key number
+   int key {};      // key number
    std::string keys;// key value
 };
 using PParamRec = TParamRec *;
@@ -65,7 +65,7 @@ public:
 
    TParamRec GetParams( int n );
    [[nodiscard]] int GetParamCount() const;
-   std::string GetParamText( int key ) const;
+   [[nodiscard]] std::string GetParamText( int key ) const;
 };
 
 enum CndParamStatus

@@ -49,11 +49,16 @@ class ShortStringHeap
    char *buf;
 
 public:
-   ShortStringHeap( const char *s )
+   ShortStringHeap(const ShortStringHeap &other) {
+      buf = new char[other.buf[0]+2];
+      std::memcpy(buf, other.buf, sizeof(char)*buf[0]+2);
+   }
+
+   explicit ShortStringHeap( const char *s )
    {
       auto l { std::strlen( s ) };
       buf = new char[l + 2];
-      buf[0] = (uint8_t) l;
+      buf[0] = static_cast<uint8_t>( l );
       std::memcpy( &buf[1], s, l + 1 );
    }
 
@@ -62,12 +67,12 @@ public:
       delete[] buf;
    }
 
-   std::string string() const
+   [[nodiscard]] std::string string() const
    {
       return &buf[1];
    }
 
-   char *c_str() const
+   [[nodiscard]] char *c_str() const
    {
       return &buf[1];
    }
@@ -77,12 +82,12 @@ public:
       return buf;
    }
 
-   uint8_t size() const
+   [[nodiscard]] uint8_t size() const
    {
       return (uint8_t) buf[0];
    }
 
-   bool empty() const
+   [[nodiscard]] bool empty() const
    {
       return !(uint8_t) buf[0];
    }
@@ -97,7 +102,7 @@ public:
 
    ShortStringHeap &operator=( const std::string &s )
    {
-      buf[0] = (uint8_t) s.length();
+      buf[0] = static_cast<uint8_t>( s.length() );
       std::memcpy( &buf[1], s.c_str(), s.length() + 1 );
       return *this;
    }
@@ -105,21 +110,21 @@ public:
 
 class ShortString
 {
-   uint8_t length;
-   std::array<char, 255> buf;
+   uint8_t length {};
+   std::array<char, 255> buf {};
 
 public:
-   ShortString( const char *s ) : length { (uint8_t) std::strlen( s ) }
+   explicit ShortString( const char *s ) : length { (uint8_t) std::strlen( s ) }
    {
       assert( std::strlen( s ) <= 254 );
       std::memcpy( buf.data(), s, length + 1 );
    }
 
-   ShortString( const std::string &s ) : ShortString( s.c_str() )
+   explicit ShortString( const std::string &s ) : ShortString( s.c_str() )
    {
    }
 
-   std::string string() const
+   [[nodiscard]] std::string string() const
    {
       return buf.data();
    }
@@ -134,12 +139,12 @@ public:
       return (char *) &length;
    }
 
-   uint8_t size() const
+   [[nodiscard]] uint8_t size() const
    {
       return length;
    }
 
-   bool empty() const
+   [[nodiscard]] bool empty() const
    {
       return !length;
    }
@@ -184,7 +189,7 @@ using Integer = int;
 using Smallint = int16_t;// short
 
 using tDateTime = double;
-using Text = std::fstream *;
+using Text = std::fstream*;
 
 // Both bounds are inclusive
 template<typename T, T lowerBoundIncl, T upperBoundIncl>
@@ -285,14 +290,6 @@ public:
       return &value;
    }
 };
-
-template<typename T>
-std::set<T> setUnion( const std::set<T> &A, const std::set<T> &B )
-{
-   std::set<T> C = A;
-   C.insert( B.begin(), B.end() );
-   return C;
-}
 
 inline double frac( double v )
 {

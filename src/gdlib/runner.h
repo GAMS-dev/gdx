@@ -28,6 +28,7 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 namespace gdlib::runner
 {
@@ -36,7 +37,7 @@ const int EC_Cannot_modify = 1;
 const int EC_Process_Active = 2;
 const int EC_Empty_CMD_Line = 3;
 
-enum TVisible
+enum TVisible : uint8_t
 {
    vis_hide,
    vis_minimized,
@@ -53,7 +54,7 @@ class TMsgHandler
 public:
    friend class TRunner;
 
-   TMsgHandler( const std::string &MsgPfx );
+   explicit TMsgHandler( const std::string &MsgPfx );
    static void ErrorMessage( int ec, const std::string &s );
    void LogMessage( const std::string &s ) const;
    void DebugMessage( const std::string &s ) const;
@@ -85,24 +86,24 @@ public:
    void SetExecutable( const std::string &v );
    std::string GetExecutable();
 
-   bool IsRunning() const;
+   [[nodiscard]] bool IsRunning() const;
 
-   std::string GetWorkDir() const;
+   [[nodiscard]] std::string GetWorkDir() const;
    void SetWorkDir( const std::string &v );
 
    void SetInheritHandles( bool v );
-   bool GetInheritHandles() const;
+   [[nodiscard]] bool GetInheritHandles() const;
 
    void SetUseShell( bool v );
-   bool GetUseShell() const;
+   [[nodiscard]] bool GetUseShell() const;
 
    int GetVerbose();
    void SetVerbose( int v );
 
    void SetVisible( TVisible v );
-   TVisible GetVisible() const;
+   [[nodiscard]] TVisible GetVisible() const;
 
-   int GetProgRC() const;
+   [[nodiscard]] int GetProgRC() const;
 };
 
 }// namespace gdlib::runner

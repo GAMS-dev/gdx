@@ -33,16 +33,21 @@
 namespace rtl::p3process
 {
 
-enum TKillHow
+enum TKillHow : uint8_t
 {
    soft,
    hard
 };
 
 struct TProcInfo {
-   uint32_t pid;// process ID
-   uint32_t tid;// thread ID
-   void *hProcess;
+   uint32_t pid {};// process ID
+   uint32_t tid {};// thread ID
+   void *hProcess {};
+
+   void clear() {
+      pid = tid = 0;
+      hProcess = nullptr;
+   }
 };
 
 bool p3GetCPUInfo( int &nSockets, int &nCores, int &nThreads, int &coresPerSocket, int &threadsPerCore );
@@ -61,7 +66,7 @@ bool p3IsPIDValid( global::delphitypes::Cardinal pid );
 
 using tCtrlHandler = void(*)();
 
-enum CtrlHandlerState
+enum CtrlHandlerState : uint8_t
 {
    P3CtrlHandlerOK,
    P3CtrlHandlerWasEmpty,

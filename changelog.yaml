@@ -1,4 +1,10 @@
 ---
+- 7.11.3:
+    - Reworked internally used file IO streams to utilize low-level WinAPI/POSIX functions instead of the more heavyweight std::fstream.
+    - Use more efficient integer to string conversion procedure for tracing outputs.
+    - Reduced width of trace level and file mode enum values from 4 byte to 1 byte.
+    - Adjusted compiler flags for new clang-based Intel C++ compiler in CMake project.
+    - Many performance improvements in auxiliary classes to be used by future GDX utilities.
 - 7.11.2:
     - Added multiple auxiliary classes as preparation for soon to be released GDX related utilities.
     - Fixed memory alignment in custom memory allocator.

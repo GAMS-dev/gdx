@@ -24,7 +24,11 @@
  */
 
 #pragma once
-#include "../global/delphitypes.h"
+
+#include <cstdint>                 // for uint16_t, int64_t, uint32_t
+#include <array>                    // for array
+#include <string>                   // for string, basic_string
+#include "../global/delphitypes.h"  // for tDateTime
 
 // ==============================================================================================================
 // Interface
@@ -69,9 +73,13 @@ extern std::string FileStopper, ExtStopper;
 
 std::string ExtractShortPathName( const std::string &FileName );
 
-std::string ExtractFilePath( const std::string &pathOfExecutable );
+std::string ExtractFilePath( const std::string &FileName );
 std::string ExtractFileName( const std::string &FileName );
 std::string ExtractFileExt( const std::string &FileName );
+std::string ChangeFileExt( const std::string &filename, const std::string &extension );
+std::string CompleteFileExt( const std::string &filename, const std::string &extension );
+std::string ReplaceFileExt( const std::string &filename, const std::string &extension );
+
 bool FileExists( const std::string &FileName );
 bool DirectoryExists( const std::string &Directory );
 
@@ -107,6 +115,7 @@ constexpr std::array<TDayTable, 2> MonthDays {{
    {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
 }};
 
+int LastDelimiter( const char *Delimiters, const std::string &S );
 int LastDelimiter( const std::string &Delimiters, const std::string &S );
 
 using TFileName = std::string;
@@ -125,5 +134,6 @@ void FindClose( TSearchRec &F );
 void Sleep( uint32_t milliseconds );
 
 std::string IntToStr(int64_t N);
+void IntToStr(int64_t N, char *res, size_t &len );
 
 }// namespace rtl::sysutils_p3

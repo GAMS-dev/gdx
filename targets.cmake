@@ -35,9 +35,9 @@ target_include_directories(gdxwraptest PRIVATE src generated)
 target_compile_options(gdxwraptest PRIVATE -DGXFILE_CPPWRAP -DGC_NO_MUTEX)
 
 # Quickly run "include what you use" (https://include-what-you-use.org/) over project
-#find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
-#set_property(TARGET gdxcclib64 PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
-#set_property(TARGET gdxtest PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+#[[find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
+set_property(TARGET gdxcclib64 PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+set_property(TARGET gdxtest PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})]]
 
 # Standalone GDX example program 1
 add_executable(xp_example1 ${gdx-core} src/examples/xp_example1.cpp)

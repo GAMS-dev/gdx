@@ -10,6 +10,7 @@ endif (CCACHE_FOUND)
 
 set(mylibs dl pthread m)
 
+#set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_SKIP_RPATH FALSE)
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 
@@ -24,13 +25,24 @@ else ()
 endif (APPLE)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGC_NO_MUTEX")
-if (MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17 /W3 /EHs /D_CRT_SECURE_NO_WARNINGS /wd4267 /wd4996")
+
+if (MSVC OR CMAKE_HOST_WIN32 OR CMAKE_GENERATOR_TOOLSET STREQUAL "ClangCL")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /D_CRT_SECURE_NO_WARNINGS /wd4267 /wd4996")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /EHs /D_CRT_SECURE_NO_WARNINGS /wd4267 /wd4996")
+    if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+    else()
+        # use strict floating point mode and not fast, as some 0.0 become eps in GDX files in fast mode for Intel clang
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:precise -Wno-microsoft-include")
+    endif ()
+    if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable")
+    endif ()
     set(mylibs "")
-endif (MSVC)
+endif ()
 
 if (UNIX)
-    # -fsanitize=undefined
+    # -fsanitize=undefined -fno-inline
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZ_HAVE_UNISTD_H")
     if (NOT APPLE AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
@@ -49,11 +61,27 @@ set(zlib-units
 )
 
 set(gdx-core
+        # P3 runtime library
+        src/rtl/dtoaLoc.h
+        src/rtl/dtoaLoc.c
+        src/rtl/p3io.h
+        src/rtl/p3io.cpp
+        src/rtl/p3utils.h
+        src/rtl/p3utils.cpp
+        src/rtl/sysutils_p3.h
+        src/rtl/sysutils_p3.cpp
+        src/rtl/p3platform.h
+        src/rtl/p3platform.cpp
+        src/rtl/math_p3.h
+        src/rtl/math_p3.cpp
+
         # gdlib essential units
         src/gdlib/gmsstrm.cpp
         src/gdlib/gmsstrm.h
         src/gdlib/utils.h
         src/gdlib/utils.cpp
+        src/gdlib/strutilx.h
+        src/gdlib/strutilx.cpp
 
         # GDX specific units
         src/gxfile.h

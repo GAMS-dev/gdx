@@ -25,14 +25,63 @@
 
 #pragma once
 
-#include <cstdint>
+#include <cstdio>
 #include <cstddef>
+#include <cstdint>
+#include <string>
 
 namespace rtl::p3io
 {
 
 void dig2Exp( const char *dig, size_t digLen, int decPos, int isNeg, int width, int decimals, char *buf, size_t *bufLen );
-void padLeftC2P( const char eBuf[], size_t eLen, int width, char *s, uint8_t sMax );
+void padLeftC2P( const char *eBuf, size_t eLen, int width, char *s, uint8_t sMax );
+
 void P3_Str_dd0( double x, char *s, uint8_t sMax, size_t *eLen );
+void P3_Str_dd1(double x, int width, char *s, uint8_t sMax);
+void P3_Str_dd2(double x, int width, int decimals, char *s, uint8_t sMax);
+
+void P3_Val_dd(const char *s, size_t slen, double *d, int *code);
+void P3_Val_dd(const char *s, double *d, int *code);
+
+void P3_Val_i(const char *s, size_t slen, int *i, int *code);
+void P3_Val_i(const char *s, int *i, int *code);
+
+enum P3FileType : uint8_t
+{
+   ft_text_file,
+   ft_typed,
+   ft_untyped
+};
+
+enum P3FileMode : uint8_t
+{
+   P3_APPEND = 0,
+   P3_RESET = 4,
+   P3_REWRITE = 8,
+   P3_UPDATE = 12
+};
+
+enum P3FileState : uint8_t
+{
+   P3_UNASSIGNED,
+   P3_CLOSED,
+   P3_OPEN
+};
+
+constexpr uint8_t P3_MODEMASK = 12;
+
+struct P3File {
+   FILE *f;
+   uint8_t status;
+   uint32_t block_size;
+   std::string nam;
+};
+
+extern uint8_t SYSTEM_filemode;
+
+#ifdef __IN_CPPMEX__
+void P3FileOpn( P3File *fil, uint8_t status, P3FileType type, uint32_t block_size );
+void P3FileOpn(P3File *fil, const char *s);
+#endif
 
 }// namespace rtl::p3io

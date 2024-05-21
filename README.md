@@ -456,8 +456,7 @@ the gdxDataReadMap function.
 | Filter number (>0) | Map the unique element value to the user defined value. Use gdxGetUEL to get the string representation. If the element is not enabled in the filter for this index position, the record is flagged as an error record and it will be skipped. The filter number is specified using the gdxFilterRegisterStart function. |                                                                                         
 
 Referring to the following GAMS fragment, we want to read the parameter `A`. The set `I` is the domain for the first
-index;
-there is no domain for the second index position:
+index; there is no domain for the second index position:
 
 ```
 Set I /.../;
@@ -467,38 +466,54 @@ Parameter A(I,*);
 Assuming we have read set `I` already, the following code snapshot illustrates how to read parameter `A`.
 
 ```cpp
-// Register the filter for set I; reference this filter with integer 123
+// We wish to only read the values of A when the first label is either "New-York" or "Chicago"
+// For this, we assign a unique value to each one of the label, here we choose 1000 and 2000
+// Then, we register a filter with a unique ID, here 123.
+// Note that a filter ID cannot be reused. The filter is immutable after its creation
+gdx.gdxUELRegisterMapStart();
+gdx.gdxUELRegisterMap( 1000, "New-York" );
+gdx.gdxUELRegisterMap( 2000, "Chicago" );
+gdx.gdxUELRegisterDone();
+// Register the filter for set I; reference this filter with integer 123 (filter number)
 if(!gdx.gdxFilterRegisterStart(123))
    ReportGDXError();
 gdx.gdxFilterRegister(1000);
 gdx.gdxFilterRegister(2000);
-if(!gdx.gdxFilterRegisterDone()
+if(!gdx.gdxFilterRegisterDone())
    ReportGDXError();
 
-// set the filter
-Filt[0] = 123; //filter for I
-Filt[1] = -1; // expand
+// set the filter actions
+std::array filterAction {
+   123, //filter for I
+   gdx::DOMC_EXPAND // expand (=-1)
+};
 
 // Remember highest mapped value in variable LastMapped
-gdx.gdxUMUelInfo(NrUnMapped,LastMapped);
+int NrUnMapped, LastMapped;
+gdx.gdxUMUelInfo(NrUnMapped, LastMapped);
 
 // Read parameter A as a 2 dimensional parameter
-if(!gdx.gdxFindSymbol("A",SyNr) {
+int SyNr;
+if(!gdx.gdxFindSymbol("A", SyNr) {
    std::cout << "**** Could not find symbol A" << std::endl;
    exit(1);
 }
 
-gdx.gdxSymbolInfo(SyNr,SyName,SyDim,SyTyp);
+std::array<char, GMS_SSSIZE> SyName;
+int SyDim, SyTyp;
+gdx.gdxSymbolInfo(SyNr, SyName.data(), SyDim, SyTyp);
 if(SyDim != 2 || SyTyp != dt_par) {
    std::cout << "**** A is not a two dimensional parameter" << std::endl;
    exit(1);
 }
 
-if(!gdx.gdxReadFilteredStart(SyNr,Filt,NrRecs);
+int NrRecs;
+if(!gdx.gdxDataReadFilteredStart(SyNr, filterAction.data(), NrRecs));
    ReportGDXError();
-
+   
+int DimFrst;
 for(int N{1}; N<=NrRecs; N++) {
-   if(gdx.gdxDataReadMap(N,IndxI,Values)) {
+   if(gdx.gdxDataReadMap(N, IndxI, Values, DimFrst)) {
       // do something to process the record read (index, values)
    }
 }
@@ -507,14 +522,19 @@ if(!gdx.gdxDataReadDone()
    ReportGDXError();
 
 // see if there are new unique elements
-gdx.gdxUMUelInfo(NrUnMapped,NewLastMapped);
+int NewLastMapped;
+gdx.gdxUMUelInfo(NrUnMapped, NewLastMapped);
 if(NewLastMapped > LastMapped) {
    for(int N{LastMapped + 1}; N<=NewLastMapped; N++) {
-      gdx.gdxGetUel(N,S);
-      std::cout << "New element " << N << " = " << S << '\n';
+      std::array<char, GMS_SSSIZE> S {};
+      gdx.gdxGetUel(N,S.data());
+      std::cout << "New element " << N << " = " << S.data() << '\n';
    }
 }
 ```
+
+A runnable version of this example can be found in the unit test suite under `/src/tests/gdxtests.cpp` as test
+case with the name "Test filter example from README".
 
 ### Dealing with acronyms
 

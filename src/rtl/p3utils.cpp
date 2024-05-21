@@ -25,56 +25,57 @@
 
 #include "p3utils.h"
 
-#include <string>
-#include <cstring>
-#include <cassert>
-#include <filesystem>
-#include <fstream>
+#include <algorithm>               // for max, min
+#include <array>                   // for array
+#include <cassert>                 // for assert
+#include <cmath>                   // for abs
+#include <cstdlib>                 // for getenv, abs, realpath, setenv, uns...
+#include <cstring>                 // for memset, strcpy, strlen, memmove
+#include <filesystem>              // for path
+#include <string>                  // for basic_string, operator+, string
 
-#include "sysutils_p3.h"
-#include "../gdlib/utils.h"
+#include "../gdlib/strutilx.h"     // for DblToStr
+#include "../gdlib/utils.h"        // for in, trim, val
+#include "global/modhead.h"        // for STUBWARN
+#include "math_p3.h"               // for IntPower
+#include "p3platform.h"            // for tOSPlatform, OSPlatform, OSFileType
+#include "sysutils_p3.h"           // for ExtractFilePath, ExcludeTrailingPa...
 
-#ifdef _WIN32
-#pragma comment( lib, "iphlpapi.lib" )
-#pragma comment( lib, "Ws2_32.lib" )
-//#define _WINSOCK2API_
-#define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
-#include <Windows.h>
-#include <winsock2.h>
-#include <io.h>
-#include <psapi.h> /* enough if we run on Windows 7 or later */
-#include <iphlpapi.h>
-#include <shlobj.h>
-#include <IPTypes.h>
+#if defined(_WIN32)
+   // Windows
+   #ifndef __GNUC__
+      #pragma comment( lib, "iphlpapi.lib" )
+      #pragma comment( lib, "Ws2_32.lib" )
+      //#define _WINSOCK2API_
+      #define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
+      #include <winsock2.h>
+   #endif
+   #include <Windows.h>
+   #include <io.h>
+   #include <psapi.h> /* enough if we run on Windows 7 or later */
+   #include <iphlpapi.h>
+   #include <shlobj.h>
+   #include <IPTypes.h>
 #else
-
-#include <sys/socket.h>
-#if( defined( __linux__ ) || defined( __APPLE__ ) ) /* at least, maybe for others too */
-#if defined( __linux__ )
-#include <sys/ioctl.h>
-#include <net/if.h>
-#elif defined( __APPLE__ )
-#include <sys/ioctl.h>
-#include <sys/sysctl.h>
-#include <net/if.h>
-#include <net/if_dl.h>
-#endif
-#endif
-#include <netinet/in.h>
-#include <sys/utsname.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <pwd.h>
-#include <dlfcn.h>
-#include <poll.h>
-#endif
-
-#include "p3platform.h"
-#include "math_p3.h"
-
-#if defined( __APPLE__ )
-#include <sys/proc_info.h>
-#include <libproc.h>
+   // Unix
+   #include <sys/socket.h>
+   #include <sys/fcntl.h>
+   #include <sys/utsname.h>
+   #include <sys/stat.h>
+   #if( defined( __linux__ ) || defined( __APPLE__ ) ) /* at least, maybe for others too */
+      #include <net/if.h>
+      #include <sys/ioctl.h>
+      #if defined( __APPLE__ )
+         #include <sys/proc_info.h>
+         #include <sys/sysctl.h>
+         #include <net/if_dl.h>
+         #include <libproc.h>
+      #endif
+   #endif
+   #include <netinet/in.h>
+   #include <unistd.h>
+   #include <dlfcn.h>
+   #include <poll.h>
 #endif
 
 using namespace rtl::sysutils_p3;
@@ -103,26 +104,6 @@ static bool setEnvironmentVariableUnix( const std::string &name, const std::stri
 #endif
 
 static std::vector<std::string> paramstr;
-
-std::string ExtractFileExt( const std::string &filename )
-{
-   return std::filesystem::path( filename ).extension().string();
-}
-
-std::string ChangeFileExt( const std::string &filename, const std::string &extension )
-{
-   return std::filesystem::path( filename ).replace_extension( std::filesystem::path( extension ) ).string();
-}
-
-std::string CompleteFileExt( const std::string &filename, const std::string &extension )
-{
-   return ExtractFileExt( filename ).empty() ? ChangeFileExt( filename, extension ) : filename;
-}
-
-std::string ReplaceFileExt( const std::string &filename, const std::string &extension )
-{
-   return ChangeFileExt( filename, extension );
-}
 
 bool PrefixPath( const std::string &s )
 {
@@ -192,7 +173,7 @@ uint32_t P3GetEnvPC( const std::string &name, char *buf, uint32_t bufSize )
 #endif
 }
 
-bool p3GetMemoryInfo( int64_t &rss, int64_t &vss )
+bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss )
 {
 #if defined( _WIN32 )
    PROCESS_MEMORY_COUNTERS info;
@@ -204,13 +185,13 @@ bool p3GetMemoryInfo( int64_t &rss, int64_t &vss )
    return true; /* success */
 #elif defined( __linux )
    size_t sz;
-   FILE *fp = fopen( "/proc/self/statm", "r" );
+   FILE *fp = std::fopen( "/proc/self/statm", "r" );
    if( !fp )
       return false; /* failure */
    /* first two are VmSize, VmRSS */
    unsigned long urss, uvss;
    const int n = fscanf( fp, "%lu %lu", &uvss, &urss );
-   fclose( fp );
+   std::fclose( fp );
    if( 2 != n )
       return false; /* failure */
    sz = sysconf( _SC_PAGESIZE );
@@ -256,7 +237,7 @@ std::string p3GetUserName()
 #if defined( _WIN32 )
    auto res { "unknown"s };
    DWORD n {256};
-   std::array<char, 256> userName;
+   std::array<char, 256> userName {};
    if( GetUserNameA( userName.data(), &n ) )
       res.assign( userName.data() );
    return res;
@@ -275,73 +256,380 @@ std::string p3GetComputerName()
 {
 #ifdef _WIN32
    std::string res { "unknown" };
-   std::array<char, 256> computerName;
+   std::array<char, 256> computerName {};
    DWORD n = 256;
    if( GetComputerNameA( computerName.data(), &n ) )
-   {
       res.assign( computerName.data() );
-   }
    return res;
 #else
-   utsname uts;
+   utsname uts {};
    const int rc = uname( &uts );
    return rc >= 0 ? uts.nodename : ""s;
 #endif
 }
 
-int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle h )
+#if defined(_WIN32)
+// map the Windows codes returned by GetLastError to libc codes
+// use when making Windows API calls with P3, since P3 ioresult-ish codes
+// are expected to be libc codes on all platforms
+static int win2c( int rc )
 {
-   std::ios::openmode itsMode { std::ios::binary };
-   switch( mode )
+   int result;
+
+   switch( rc )
    {
-      case p3OpenRead:
-         itsMode |= std::ios::in;
+      case ERROR_FILE_NOT_FOUND:
+      case ERROR_PATH_NOT_FOUND:
+         result = ENOENT;
          break;
-      case p3OpenWrite:
-         itsMode |= std::ios::out;
+      case ERROR_TOO_MANY_OPEN_FILES:
+         result = EMFILE;
          break;
-      case p3OpenReadWrite:
-         itsMode |= std::ios::in | std::ios::out;
+      case ERROR_ACCESS_DENIED:
+         result = EACCES;
          break;
+      case ERROR_INVALID_HANDLE:
+         result = EBADF;
+         break;
+      case ERROR_NOT_ENOUGH_MEMORY:
+         result = ENOMEM;
+         break;
+      case ERROR_INVALID_ACCESS:
+         result = EACCES;
+         break;
+      case ERROR_NO_MORE_FILES:
+         result = ENFILE;
+         break;
+      case ERROR_SEEK_ON_DEVICE:
+         result = ESPIPE;
+         break;
+      case ERROR_INVALID_PARAMETER:
+      case ERROR_NEGATIVE_SEEK:
+         result = EINVAL;
+         break;
+      default:
+         result = 0; /* no guessing */
    }
-   h->open( fName, itsMode );
-   const bool f = h->fail();
-   return f && !std::filesystem::exists( fName ) ? 2 : f;
+   return result;
 }
 
-int p3FileClose( Tp3FileHandle h )
+static constexpr std::array<DWORD, 3> accessMode {
+        GENERIC_READ,
+        GENERIC_WRITE,
+        GENERIC_READ | GENERIC_WRITE };
+// this works for GDX so we do it: it is kind of silly to use the
+// shareMode var then but why not?
+static constexpr std::array<DWORD, 3> shareMode {
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE };
+static constexpr std::array<DWORD, 3> createHow {
+        OPEN_EXISTING,
+        CREATE_ALWAYS,
+        OPEN_ALWAYS };
+
+typedef BOOL( WINAPI *GetFileSizeEx_t )( HANDLE h, PLARGE_INTEGER fileSize );
+GetFileSizeEx_t pGetFileSizeEx {};
+int triedGetFileSizeEx {};
+
+typedef BOOL( WINAPI *SetFilePointerEx_t )( HANDLE h, LARGE_INTEGER distance, PLARGE_INTEGER newPointer, DWORD whence );
+SetFilePointerEx_t pSetFilePointerEx {};
+int triedSetFilePointerEx {};
+
+#endif
+
+static inline bool p3IsValidHandle(const Tp3FileHandle h) {
+#if defined( _WIN32 )
+   return h && INVALID_HANDLE_VALUE != h;
+#else
+   return h > 0;
+#endif
+}
+
+int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle &h )
 {
-   h->close();
-   return 0;
+#if defined(_WIN32)
+   DWORD lowMode;
+   HANDLE hFile;
+
+   lowMode = mode & 3;
+   if (3 == lowMode) {
+      h = INVALID_HANDLE_VALUE;
+      return ERROR_INVALID_PARAMETER;
+   }
+
+   if (fName.empty()) {
+      if (p3OpenRead == mode)
+         hFile = GetStdHandle(STD_INPUT_HANDLE);
+      else if (p3OpenWrite == mode)
+         hFile = GetStdHandle(STD_OUTPUT_HANDLE);
+      else {
+         h = INVALID_HANDLE_VALUE;
+         return ERROR_INVALID_PARAMETER;
+      }
+   }
+   else
+      hFile = CreateFileA (fName.c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
+                          createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
+   if (INVALID_HANDLE_VALUE == hFile) {
+      h = INVALID_HANDLE_VALUE;
+      int result = win2c(static_cast<int>(GetLastError()));
+      if (0 == result) { /* ouch: just pick a likely but non-specific code */
+         result = EACCES;
+      }
+      return result;
+   }
+   else {
+      h = hFile;
+      return 0;
+   }
+#else
+   if (fName.empty()) {
+      if (mode == Tp3FileOpenAction::p3OpenRead)
+         h = STDIN_FILENO;
+      else if (mode == Tp3FileOpenAction::p3OpenWrite)
+         h = STDOUT_FILENO;
+      else {
+         h = 0;
+         return -1;
+      }
+      return 0;
+   }
+   int flags = mode & 3;
+   // write-only or read-write
+   if (flags > 0)
+      flags |= O_CREAT;
+   if (flags & 1)
+      flags |= O_TRUNC;
+   int fd = open(fName.c_str(), flags, 0666);
+   if (-1 == fd) {
+      h = 0;
+      return errno;
+   }
+   int result = 0;
+   // before calling this a success, check for directory on read-only
+   struct stat statBuf {};
+   if (p3OpenRead == mode) {
+      int rc = fstat (fd, &statBuf);
+      if (rc)
+         result = errno;
+      else if (S_ISDIR(statBuf.st_mode))
+         result = EISDIR;
+   }
+   if (result) {
+      close(fd);
+      return result;
+   }
+   h = fd;
+   return result;
+#endif
+}
+
+int p3FileClose( Tp3FileHandle &h )
+{
+   if( !p3IsValidHandle( h ) ) return EBADF;
+   int res{};
+#if defined(_WIN32)
+   if( !CloseHandle( h ) )
+   {
+      res = win2c( static_cast<int>(GetLastError()) );
+      // ouch: just pick a likely but non-specific code
+      if( !res )
+         res = EIO;
+   }
+   h = INVALID_HANDLE_VALUE;
+#else
+   if( close( h ) )
+      res = errno;
+   h = 0;
+#endif
+   return res;
 }
 
 int p3FileGetSize( Tp3FileHandle fs, int64_t &fileSize )
 {
-   if( !fs->is_open() || fs->bad() ) return 1;
-   const std::streampos oldpos = fs->tellg();
-   fs->seekg( 0, std::ios::beg );
-   const std::streampos start = fs->tellg();
-   fs->seekg( 0, std::ios::end );
-   fileSize = fs->tellg() - start;
-   fs->seekg( oldpos );
-   return 0;
+   if( !p3IsValidHandle( fs ) ) return EBADF;
+   int res {};
+#if defined(_WIN32)
+   bool frc;
+   if (!triedGetFileSizeEx) {
+      auto k32 { GetModuleHandleA( "kernel32" ) };
+      pGetFileSizeEx = !k32 ? nullptr : (GetFileSizeEx_t) GetProcAddress(k32,"GetFileSizeEx");
+      triedGetFileSizeEx = 1;
+   }
+   if (pGetFileSizeEx)
+      frc = pGetFileSizeEx(fs, (PLARGE_INTEGER)&fileSize);
+   else {
+      DWORD tt;
+      frc = GetFileSize(fs, &tt);
+      fileSize = tt;
+   }
+   if(!frc) {
+      res = win2c(static_cast<int>(GetLastError()));
+      // ouch: just pick a likely but non-specific code
+      if (!res)
+         res = EACCES;
+   }
+#else
+   struct stat statBuf {};
+   if (fstat (fs, &statBuf))
+      res = errno;
+   else
+      fileSize = statBuf.st_size;
+#endif
+   return res;
 }
 
 int p3FileRead( Tp3FileHandle h, char *buffer, uint32_t buflen, uint32_t &numRead )
 {
-   const auto savedPos = h->tellg();
-   h->seekg( 0, h->end );
-   numRead = std::min<uint32_t>( static_cast<uint32_t>( h->tellg() - savedPos ), buflen );
-   h->seekg( savedPos );
-   h->read( buffer, numRead );
-   return h->bad() ? 1 : 0;
+   int res {};
+#if defined(_WIN32)
+   if( !ReadFile( h, buffer, buflen, (LPDWORD) &numRead, nullptr ) )
+   {
+      res = win2c( static_cast<int>(GetLastError()) );
+      if( !res ) // ouch: just pick a likely but non-specific code
+         res = EIO;
+   }
+#else
+   auto rc = read( h, buffer, buflen );
+   if( rc < 0 )
+   {
+      res = errno;
+      numRead = 0;
+   }
+   else numRead = rc;
+#endif
+   return res;
 }
 
 int p3FileWrite( Tp3FileHandle h, const char *buffer, uint32_t buflen, uint32_t &numWritten )
 {
-   h->write( buffer, buflen );
-   numWritten = buflen;
-   return h->bad() ? 1 : 0;
+   int res{};
+#if defined( _WIN32 )
+   if( !WriteFile( h, buffer, buflen, (LPDWORD) &numWritten, nullptr ) )
+   {
+      res = win2c( static_cast<int>(GetLastError()) );
+      // ouch: just pick a likely but non-specific code
+      if( !res )
+         res = EIO;
+   }
+#else
+   auto rc = write(h, buffer, buflen);
+   if (rc < 0) {
+      res = errno;
+      numWritten = 0;
+   }
+   else
+      numWritten = rc;
+#endif
+   return res;
+}
+
+int p3FileSetPointer(Tp3FileHandle h, int64_t distance, int64_t &newPointer, uint32_t whence)
+{
+   if( !p3IsValidHandle( h ) ) return EBADF;
+   int res {};
+#if defined(_WIN32)
+   if (!triedSetFilePointerEx) {
+      const auto k32 { GetModuleHandleA( "kernel32" ) };
+      pSetFilePointerEx = !k32 ? nullptr : (SetFilePointerEx_t) GetProcAddress(k32,"SetFilePointerEx");
+      triedSetFilePointerEx = 1;
+   }
+   // declared as a union - compiler rejects a cast
+   LARGE_INTEGER d;
+   d.QuadPart = distance;
+   bool frc;
+   if (pSetFilePointerEx)
+      frc = pSetFilePointerEx(h, d, (PLARGE_INTEGER) &newPointer, whence);
+   else {
+      DWORD trc = SetFilePointer(h, static_cast<LONG>(distance), nullptr, whence);
+      if( trc == INVALID_SET_FILE_POINTER )
+      {
+         frc = false;
+         newPointer = 0;
+      }
+      else {
+         newPointer = trc;
+         frc = true;
+      }
+   }
+   if(!frc) {
+      res = win2c( static_cast<int>(GetLastError()) );
+      if (!res)
+         res = EINVAL;
+   }
+#else
+   int w;
+   switch (whence) {
+      case p3_FILE_BEGIN:
+         w = SEEK_SET;
+         break;
+      case p3_FILE_CURRENT:
+         w = SEEK_CUR;
+         break;
+      case p3_FILE_END:
+         w = SEEK_END;
+         break;
+      default:
+         return EINVAL;
+   }
+   // check if conversion to off_t loses info
+   auto offset = (off_t)distance;
+   if (offset != distance) // only can happen on 32 bit machines?
+      return EOVERFLOW;
+   off_t newPos = lseek (h, offset, w);
+   if ((off_t)-1 == newPos)
+      return errno;
+   newPointer = newPos;
+#endif
+   return res;
+}
+
+int p3FileGetPointer(Tp3FileHandle h, int64_t &filePointer)
+{
+   if( !p3IsValidHandle( h ) ) return EBADF;
+#if defined(_WIN32)
+   if( !triedSetFilePointerEx )
+   {
+      const auto k32 {GetModuleHandleA( "kernel32" )};
+      pSetFilePointerEx = !k32 ? nullptr : (SetFilePointerEx_t) GetProcAddress( k32, "SetFilePointerEx" );
+      triedSetFilePointerEx = 1;
+   }
+   // declared as a union - compiler rejects a cast
+   LARGE_INTEGER d;
+   d.QuadPart = 0;
+   bool frc;
+   if( pSetFilePointerEx )
+      frc = pSetFilePointerEx( h, d, (PLARGE_INTEGER) &filePointer, p3_FILE_CURRENT );
+   else
+   {
+      DWORD trc = SetFilePointer( h, 0, nullptr, p3_FILE_CURRENT );
+      if( INVALID_SET_FILE_POINTER == trc )
+      {
+         frc = false;
+         filePointer = 0;
+      }
+      else
+      {
+         filePointer = trc;
+         frc = true;
+      }
+   }
+
+   if(!frc)
+   {
+      int res = win2c( static_cast<int>(GetLastError()) );
+      if( !res )
+         res = EINVAL;
+      return res;
+   }
+#else
+   off_t newPos = lseek( h, 0, SEEK_CUR );
+   if( (off_t) -1 == newPos )
+      return errno;
+   filePointer = newPos;
+#endif
+   return 0;
 }
 
 /*
@@ -444,16 +732,23 @@ bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocN
 }
 
 #ifndef _WIN32
+// set s := ${HOME} + dd1 + dd2
+// return true success, false on failure (e.g. too long or HOME not set)
 static bool homePlus( const std::string &dd1, const std::string &dd2, std::string &s )
 {
-   struct passwd *pw = getpwuid( getuid() );
-   const char *homePath = pw->pw_dir;
-   if( !homePath || !strlen( homePath ) ) return false;
-   s = ""s + homePath + dd1 + dd2;
+   std::array<char, 256> buf;
+   auto len {P3GetEnvPC("HOME"s, buf.data(), buf.size())};
+   if(!len || len >= buf.size()) return false;
+   s.reserve(len+dd1.length()+dd2.length());
+   s.assign(buf.data());
+   s += dd1 + dd2;
    return true;
 }
 #endif
 
+#if defined(__MINGW32__) || defined(__MINGW64__)
+bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::string &locName ) { return false; }
+#else
 /*
      * Get the name of the directory to write config/data/doc/etc files to
      * return true on success (i.e. we can construct the name), false on failure
@@ -531,10 +826,10 @@ bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::s
       return true;
    }
 #endif
-   return false;
 }
+#endif
 
-const std::string zeros = std::string( 54, '0' );
+const std::string zeros {std::string( 54, '0' )};
 
 int p3Chmod( const std::string &path, int mode )
 {
@@ -593,13 +888,13 @@ std::string getDigits( const int64_t i64 )
 {
    constexpr int M = 100000000, LOGM = 8;
    auto i = static_cast<int>( i64 );
-   if( i == i64 ) return std::to_string( i );
+   if( i == i64 ) return rtl::sysutils_p3::IntToStr( i );
    i = static_cast<int>( i64 % M );
-   std::string s = std::to_string( i );
+   std::string s = rtl::sysutils_p3::IntToStr( i );
    i = LOGM - static_cast<int>( s.length() );
    if( i > 0 ) s = std::string( i, '0' ) + s;
    i = static_cast<int>( i64 / M );
-   std::string res = std::to_string( i ) + s;
+   std::string res = rtl::sysutils_p3::IntToStr( i ) + s;
    // strip trailing zeros
    for( i = static_cast<int>( res.length() ) - 1; i >= 1 && res.back() == '0'; i-- )
       res.pop_back();
@@ -612,6 +907,7 @@ T myMin( T a, T b )
    return a < b ? a : b;
 }
 
+// FIXME: AS: This seems slow.
 std::string FloatToE( double y, int decimals )
 {
    auto myRoundTo = []( const double x, const int i ) -> double {
@@ -645,7 +941,7 @@ std::string FloatToE( double y, int decimals )
       }
       x = myRoundTo( x, decimals ) * rtl::math_p3::IntPower( 10.0, n );
    }
-   std::string s = std::to_string( x );
+   std::string s { gdlib::strutilx::DblToStr( x ) };
 
    // edit and fix sign
    int k = LastDelimiter( "+-", s );
@@ -713,7 +1009,7 @@ bool PrefixLoadPath( const std::string &dir )
      * if dir is not already the first directory in the list
      * returns true on success (prefixing worked or already there), false on failure
      */
-bool PrefixEnv( const std::string &dir, std::string &evName )
+bool PrefixEnv( const std::string &dir, const std::string &evName )
 {
    std::string trimDir { utils::trim( dir ) };
    if( trimDir.empty() ) return true;
@@ -754,23 +1050,239 @@ void initParamStr( const int argc, const char **argv )
       paramstr[i] = argv[i];
 }
 
+#ifndef _WIN32
+/* local use only: be sure to call with enough space for the snprintf */
+static void myStrError( int n, char *buf, const size_t bufSiz )
+{
+#if defined( _WIN32 )
+   if( strerror_s( buf, bufSiz, n ) )
+      (void) std::snprintf( buf, bufSiz, "errno = %d", n );
+#else
+   if( strerror_r( n, buf, bufSiz ) )
+      (void) std::snprintf( buf, bufSiz, "errno = %d", n );
+#endif
+}
+
+static int xGetExecName( std::string &execName, std::string &msg )
+{
+   int rc { 8 };
+   std::array<char, 4096> execBuf {};
+#if defined( __APPLE__ )
+   std::array<char, 2048> tmpBuf {};
+   auto pid = getpid();
+   int k = proc_pidpath( pid, execBuf.data(), sizeof( char ) * execBuf.size() );
+   execName.assign( execBuf.data() );
+   if( k <= 0 )
+   {
+      myStrError( errno, tmpBuf.data(), sizeof( char ) * tmpBuf.size() );
+      msg = "proc_pidpath(pid="s + rtl::sysutils_p3::IntToStr( pid ) + ") failed: "s + std::string( tmpBuf.begin(), tmpBuf.end() );
+      execName.clear();
+      rc = 4;
+   }
+   else
+      rc = 0;
+#elif defined( __linux )
+   std::array<char, 2048> tmpBuf {};
+   auto ssz = readlink( "/proc/self/exe", execBuf.data(), sizeof( char ) * execBuf.size() );
+   execName.assign( execBuf.data() );
+   if( ssz < 0 )
+   {
+      myStrError( errno, tmpBuf.data(), tmpBuf.size() * sizeof( char ) );
+      msg = "readlink(/proc/self/exe,...) failure: "s + std::string( tmpBuf.begin(), tmpBuf.end() );
+      execName.clear();
+      rc = 4;
+   }
+   else
+   {
+      ssz = std::min<int>( execBuf.size() - 1, ssz );
+      rc = 0;
+   }
+#elif defined( _WIN32 )
+   if( const auto k = GetModuleFileNameA( nullptr, execBuf.data(), static_cast<DWORD>(sizeof( char ) * execBuf.size()) ); !k )
+   {
+      msg = "GetModuleFileName() failure: rc="s + rtl::sysutils_p3::IntToStr( k );
+      execName.clear();
+      rc = 4;
+   }
+   else
+   {
+      rc = 0;
+      execName.assign( execBuf.data() );
+   }
+#else
+   execName.clear();
+   msg = "not implemented for this platform"s;
+#endif
+   return !rc && execName.length() > 255 ? 1 : rc;
+}
+#endif
+
+// return:0 on success, 1 if truncated result, 2 if not lib, >2 o/w
+int p3GetExecName( std::string &execName, std::string &msg )
+{
+   execName.clear();
+#if defined( _WIN32 )
+   std::array<char, 256> buf {};
+   auto rc = GetModuleFileNameA( nullptr, buf.data(), (int) buf.size() );
+   if( !rc )
+   {
+      msg = "GetModuleFileNameA call failed";
+      return 3;
+   }
+   else if( rc >= 256 )
+   {
+      buf.back() = '\0';
+      execName.assign( buf.data() );
+      msg = "result truncated to 255 chars";
+      return 1;
+   }
+   else
+   {
+      execName.assign( buf.data() );
+      msg.clear();
+      return 0;
+   }
+#else
+   msg = "P3: not yet implemented";
+   return xGetExecName( execName, msg );
+#endif
+}
+
+// FIXME: Do not always return false!
+static bool isLibrary()
+{
+   return false;
+}
+
+static int xGetLibName( std::string &libName, std::string &msg )
+{
+   char libBuf[4096];
+   msg.clear();
+   int rc;
+
+#if defined( __linux ) || defined( __APPLE__ )
+   {
+      char tmpBuf[2048];
+      static_assert( sizeof( tmpBuf ) == 2048 );
+      Dl_info dlInfo;
+      const int k = dladdr( reinterpret_cast<void *>( &xGetLibName ), &dlInfo );
+      if( k > 0 )
+      {
+         strncpy( tmpBuf, dlInfo.dli_fname, sizeof( tmpBuf ) - 1 );
+         tmpBuf[sizeof( tmpBuf ) - 1] = '\0';
+         if( realpath( tmpBuf, libBuf ) )
+            rc = 0;
+         else
+         {
+            myStrError( errno, tmpBuf, sizeof( tmpBuf ) );
+            msg = "realpath() failure: "s + tmpBuf;
+            *libBuf = '\0';
+            rc = 5;
+         }
+      }
+      else
+      {
+         msg = "dladdr() failure"s;
+         *libBuf = '\0';
+         rc = 4;
+      }
+   }
+#elif defined( _WIN32 )
+   {
+      HMODULE h;
+      int k = GetModuleHandleEx( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                                     GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                             reinterpret_cast<LPCTSTR>( &xGetLibName ), &h );
+      if( k )
+      { /* OK: got a handle */
+         k = static_cast<int>( GetModuleFileNameA( h, libBuf, sizeof( libBuf ) ) );
+         if( 0 == k )
+         {
+            msg = "GetModuleFileName() failure: rc="s + rtl::sysutils_p3::IntToStr(k);
+            *libBuf = '\0';
+            rc = 5;
+         }
+         else
+            rc = 0;
+      }
+      else
+      {
+         msg = "GetModuleHandleEx() failure: rc="s + rtl::sysutils_p3::IntToStr(k);
+         *libBuf = '\0';
+         rc = 4;
+      }
+   }
+#else
+   *libBuf = '\0';
+   msg = "not implemented for this platform"s;
+   rc = 8;
+#endif
+   libName.assign( libBuf );
+   return 0 == rc && strlen( libBuf ) > 255 ? 1 : rc;
+} /* xGetLibName */
+
+int p3GetLibName( std::string &libName, std::string &msg )
+{
+   return xGetLibName( libName, msg );
+#if defined( _WIN32 )
+   libName.clear();
+   if( !isLibrary() )
+   {
+      msg = "Not called from a library"s;
+      return 2;
+   }
+   std::array<char, 256> buf;
+   HMODULE hinstance;
+   auto rc { GetModuleFileNameA( hinstance, buf.data(), static_cast<DWORD>(buf.size()) ) };
+   if( !rc )
+   {
+      msg = "GetModuleFileNameA call failed"s;
+      return 3;
+   }
+   else if( rc >= 256 )
+   {
+      libName.assign( buf.data() );
+      msg = "Result truncated to 255 characters"s;
+      return 1;
+   }
+   else
+   {
+      libName.assign( buf.data() );
+      msg.clear();
+      return 0;
+   }
+#else
+   if( !isLibrary() )
+   {
+      libName.clear();
+      msg = "Not called from a library"s;
+      return 2;
+   }
+   libName.clear();
+   msg = "P3: not yet implemented"s;
+   return 9;
+#endif
+}
+
+#ifdef __IN_CPPMEX__
 bool p3GetFirstMACAddress( std::string &mac )
 {
 #if defined( __linux__ )
    {
-      ifreq ifr;
-      ifconf ifc;
-      char buf[1024];
-      int success = 0;
+      std::array<char, 1024> buffer {};
+      int success {};
 
       const int sock = socket( AF_INET, SOCK_DGRAM, IPPROTO_IP );
       if( sock == -1 )
          return false;
 
-      ifc.ifc_len = sizeof( buf );
-      ifc.ifc_buf = buf;
+      ifconf ifc {};
+      ifc.ifc_len = buffer.size();
+      ifc.ifc_buf = buffer.data();
       if( ioctl( sock, SIOCGIFCONF, &ifc ) == -1 )
          return false;
+
+      ifreq ifr {};
 
       {
          struct ifreq *it = ifc.ifc_req;
@@ -797,9 +1309,9 @@ bool p3GetFirstMACAddress( std::string &mac )
          unsigned char mb[6];
          memcpy( mb, ifr.ifr_hwaddr.sa_data, 6 );
          constexpr int bufSiz{18};
-         char buf[bufSiz];
-         std::snprintf( buf, sizeof(char)*bufSiz, "%02x:%02x:%02x:%02x:%02x:%02x", mb[0], mb[1], mb[2], mb[3], mb[4], mb[5] );
-         mac.assign( buf );
+         std::array<char, bufSiz> buf {};
+         std::snprintf( buf.data(), sizeof(char)*bufSiz, "%02x:%02x:%02x:%02x:%02x:%02x", mb[0], mb[1], mb[2], mb[3], mb[4], mb[5] );
+         mac.assign( buf.data() );
          return true;
       }
 
@@ -876,24 +1388,22 @@ bool p3GetFirstMACAddress( std::string &mac )
       return false;
    } /* if __APPLE__ */
 #elif defined( _WIN32 )
-   ULONG bufSiz{4096}, prevBufSiz{4096};
+   ULONG bufSiz{4096}/*, prevBufSiz{4096}*/;
    int nTries = 0;
    constexpr int maxTries = 3;
    PIP_ADAPTER_ADDRESSES addrBuf {};
    DWORD dwrc;
-   int halfDone = 0; /* if we have a MAC number for an interface that is down */
+   bool halfDone {}; // if we have a MAC number for an interface that is down
    do {
       constexpr ULONG flags = GAA_FLAG_INCLUDE_PREFIX;
       addrBuf = static_cast<IP_ADAPTER_ADDRESSES *>( std::malloc( bufSiz ) );
       if( !addrBuf )
-      {
          return false;
-      }
       dwrc = GetAdaptersAddresses( AF_INET, flags, nullptr, addrBuf, &bufSiz );
       if( ERROR_BUFFER_OVERFLOW == dwrc )
       {
-         prevBufSiz = bufSiz;
-         free( addrBuf );
+         //prevBufSiz = bufSiz;
+         std::free( addrBuf );
          addrBuf = nullptr;
       }
       nTries++;
@@ -901,7 +1411,7 @@ bool p3GetFirstMACAddress( std::string &mac )
    if( NO_ERROR != dwrc )
    {
       if( addrBuf )
-         free( addrBuf );
+         std::free( addrBuf );
       return false;
    }
    for( PIP_ADAPTER_ADDRESSES currAddr = addrBuf; currAddr; currAddr = currAddr->Next )
@@ -914,239 +1424,22 @@ bool p3GetFirstMACAddress( std::string &mac )
       if( 6 != currAddr->PhysicalAddressLength )
          continue;
       auto *mp = static_cast<unsigned char *>( currAddr->PhysicalAddress );
-      char macBuf[18];
-      _snprintf( static_cast<char *>( macBuf ), sizeof(char)*18, "%02x:%02x:%02x:%02x:%02x:%02x", mp[0], mp[1], mp[2], mp[3], mp[4], mp[5] );
-      mac.assign( macBuf );
+      std::array<char, 18> macBuf {};
+      _snprintf( static_cast<char *>( macBuf.data() ), sizeof(char)*macBuf.size(), "%02x:%02x:%02x:%02x:%02x:%02x", mp[0], mp[1], mp[2], mp[3], mp[4], mp[5] );
+      mac.assign( macBuf.data() );
       if( IfOperStatusUp == currAddr->OperStatus )
       {
-         free( addrBuf );
+         std::free( addrBuf );
          return true;
       }
-      halfDone = 1;
+      halfDone = true;
       return false;
    }
-   free( addrBuf );
+   std::free( addrBuf );
    return false;
    /* if _WIN32 */
 #else
    return false;
-#endif
-}
-
-/* local use only: be sure to call with enough space for the snprintf */
-static void myStrError( int n, char *buf, size_t bufSiz )
-{
-#if defined( _WIN32 )
-   if( strerror_s( buf, bufSiz, n ) )
-      (void) std::snprintf( buf, bufSiz, "errno = %d", n );
-#else
-   if( strerror_r( n, buf, bufSiz ) )
-      (void) std::snprintf( buf, bufSiz, "errno = %d", n );
-#endif
-}
-
-static int xGetExecName( std::string &execName, std::string &msg )
-{
-   int rc { 8 };
-   std::array<char, 4096> execBuf {};
-   std::array<char, 2048> tmpBuf {};
-
-#if defined( __APPLE__ )
-   auto pid = getpid();
-   int k = proc_pidpath( pid, execBuf.data(), sizeof( char ) * execBuf.size() );
-   execName.assign( execBuf.data() );
-   if( k <= 0 )
-   {
-      myStrError( errno, tmpBuf.data(), sizeof( char ) * tmpBuf.size() );
-      msg = "proc_pidpath(pid="s + std::to_string( pid ) + ") failed: "s + std::string( tmpBuf.begin(), tmpBuf.end() );
-      execName.clear();
-      rc = 4;
-   }
-   else
-      rc = 0;
-#elif defined( __linux )
-   auto ssz = readlink( "/proc/self/exe", execBuf.data(), sizeof( char ) * execBuf.size() );
-   execName.assign( execBuf.data() );
-   if( ssz < 0 )
-   {
-      myStrError( errno, tmpBuf.data(), tmpBuf.size() * sizeof( char ) );
-      msg = "readlink(/proc/self/exe,...) failure: "s + std::string( tmpBuf.begin(), tmpBuf.end() );
-      execName.clear();
-      rc = 4;
-   }
-   else
-   {
-      ssz = std::min<int>( execBuf.size() - 1, ssz );
-      rc = 0;
-   }
-#elif defined( _WIN32 )
-   if( const auto k = GetModuleFileNameA( nullptr, execBuf.data(), static_cast<DWORD>(sizeof( char ) * execBuf.size()) ); !k )
-   {
-      msg = "GetModuleFileName() failure: rc="s + std::to_string( k );
-      execName.clear();
-      rc = 4;
-   }
-   else
-   {
-      rc = 0;
-      execName.assign( execBuf.data() );
-   }
-#else
-   execName.clear();
-   msg = "not implemented for this platform"s;
-#endif
-
-   return !rc && execName.length() > 255 ? 1 : rc;
-}
-
-// return:0 on success, 1 if truncated result, 2 if not lib, >2 o/w
-int p3GetExecName( std::string &execName, std::string &msg )
-{
-   execName.clear();
-#if defined( _WIN32 )
-   std::array<char, 256> buf {};
-   auto rc = GetModuleFileNameA( nullptr, buf.data(), (int) buf.size() );
-   if( !rc )
-   {
-      msg = "GetModuleFileNameA call failed";
-      return 3;
-   }
-   else if( rc >= 256 )
-   {
-      buf.back() = '\0';
-      execName.assign( buf.data() );
-      msg = "result truncated to 255 chars";
-      return 1;
-   }
-   else
-   {
-      execName.assign( buf.data() );
-      msg.clear();
-      return 0;
-   }
-#else
-   msg = "P3: not yet implemented";
-   int res = 9;
-   res = xGetExecName( execName, msg );
-   return res;
-#endif
-}
-
-// FIXME: Do not always return false!
-static bool isLibrary()
-{
-   return false;
-}
-
-static int xGetLibName( std::string &libName, std::string &msg )
-{
-   char libBuf[4096];
-   msg.clear();
-   int rc;
-
-#if defined( __linux ) || defined( __APPLE__ )
-   {
-      char tmpBuf[2048];
-      static_assert( sizeof( tmpBuf ) == 2048 );
-      Dl_info dlInfo;
-      const int k = dladdr( reinterpret_cast<void *>( &xGetLibName ), &dlInfo );
-      if( k > 0 )
-      {
-         strncpy( tmpBuf, dlInfo.dli_fname, sizeof( tmpBuf ) );
-         tmpBuf[sizeof( tmpBuf ) - 1] = '\0';
-         if( realpath( tmpBuf, libBuf ) )
-            rc = 0;
-         else
-         {
-            myStrError( errno, tmpBuf, sizeof( tmpBuf ) );
-            msg = "realpath() failure: "s + tmpBuf;
-            *libBuf = '\0';
-            rc = 5;
-         }
-      }
-      else
-      {
-         msg = "dladdr() failure"s;
-         *libBuf = '\0';
-         rc = 4;
-      }
-   }
-#elif defined( _WIN32 )
-   {
-      HMODULE h;
-      int k = GetModuleHandleEx( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-                                     GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                             reinterpret_cast<LPCTSTR>( &xGetLibName ), &h );
-      if( k )
-      { /* OK: got a handle */
-         k = static_cast<int>( GetModuleFileNameA( h, libBuf, sizeof( libBuf ) ) );
-         if( 0 == k )
-         {
-            msg = "GetModuleFileName() failure: rc="s + std::to_string(k);
-            *libBuf = '\0';
-            rc = 5;
-         }
-         else
-            rc = 0;
-      }
-      else
-      {
-         msg = "GetModuleHandleEx() failure: rc="s + std::to_string(k);
-         *libBuf = '\0';
-         rc = 4;
-      }
-   }
-#else
-   *libBuf = '\0';
-   msg = "not implemented for this platform"s;
-   rc = 8;
-#endif
-   libName.assign( libBuf );
-   return 0 == rc && strlen( libBuf ) > 255 ? 1 : rc;
-} /* xGetLibName */
-
-int p3GetLibName( std::string &libName, std::string &msg )
-{
-   return xGetLibName( libName, msg );
-
-#if defined( _WIN32 )
-   int res { 9 };
-   libName.clear();
-   if( !isLibrary() )
-   {
-      msg = "Not called from a library"s;
-      return 2;
-   }
-   std::array<char, 256> buf;
-   HMODULE hinstance;
-   auto rc { GetModuleFileNameA( hinstance, buf.data(), static_cast<DWORD>(buf.size()) ) };
-   if( !rc )
-   {
-      msg = "GetModuleFileNameA call failed"s;
-      return 3;
-   }
-   else if( rc >= 256 )
-   {
-      libName.assign( buf.data() );
-      msg = "Result truncated to 255 characters"s;
-      return 1;
-   }
-   else
-   {
-      libName.assign( buf.data() );
-      msg.clear();
-      return 0;
-   }
-#else
-   if( !isLibrary() )
-   {
-      libName.clear();
-      msg = "Not called from a library"s;
-      return 2;
-   }
-   libName.clear();
-   msg = "P3: not yet implemented"s;
-   return 9;
 #endif
 }
 
@@ -1254,7 +1547,7 @@ bool p3SockSendEx(T_P3SOCKET s, const char *buf, int count, int &res, bool pollF
       if (! (fds->revents & POLLOUT))
          return false;
    }
-   int rc = send((SOCKET) s.wsocket, (const char *) buf, count, 0);
+   int rc = send(s.wsocket, buf, count, 0);
    if (SOCKET_ERROR == rc) { // should never happen
       res = WSAGetLastError();
       if (WSAEWOULDBLOCK == res) {
@@ -1282,7 +1575,7 @@ bool p3SockSendEx(T_P3SOCKET s, const char *buf, int count, int &res, bool pollF
       if (! (fds->revents & POLLOUT))
          return false;
    }
-   const ssize_t ssz = send (s.socketfd, (const void *) buf, count, 0);
+   const ssize_t ssz = send (s.socketfd, reinterpret_cast<const void *>(buf), count, 0);
    if (ssz < 0) { // should never happen
       if ((EAGAIN == errno) || (EWOULDBLOCK == errno)) {
          res = -1; // no space or availability to write
@@ -1372,7 +1665,7 @@ static bool p3SockRecvEx( const T_P3SOCKET s, char *buf, int count, int &res, bo
       if( !( fds->revents & POLLIN ) )
          return false;
    }
-   const ssize_t ssz = recv( s.socketfd, (void *) buf, count, 0 );
+   const ssize_t ssz = recv( s.socketfd, reinterpret_cast<void *>( buf ), count, 0 );
    if( ssz < 0 )
    {
       if( EAGAIN == errno || EWOULDBLOCK == errno )
@@ -1488,5 +1781,7 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse )
 #endif
    return res;
 }
+
+#endif // __IN_CPPMEX__
 
 }// namespace rtl::p3utils
