@@ -1721,11 +1721,12 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse )
 {
    T_P3SOCKET res {};
    mkInvalidSock( res );
-#if defined(_WIN32)
-   const auto acceptSocket { socket(AF_INET, SOCK_STREAM, 0) };
+#if defined( _WIN32 )
+   const auto acceptSocket { socket( AF_INET, SOCK_STREAM, 0 ) };
    if( INVALID_SOCKET == acceptSocket ) return res;
-   if (reuse) {
-      int enable{1};
+   if( reuse )
+   {
+      int enable { 1 };
       // without this magic Windows will bar connections to this port for a small time window
       // after the socket is closed to avoid delayed packets from a previous connection going to
       // any new connections
@@ -1733,48 +1734,50 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse )
          return res;
    }
    SOCKADDR_IN addr;
-   (void)std::memset( &addr, 0, sizeof( addr ) );
+   (void) std::memset( &addr, 0, sizeof( addr ) );
    addr.sin_family = AF_INET;
    addr.sin_port = htons( port );
    addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
-   int rc {bind( acceptSocket, (SOCKADDR *) &addr, sizeof(addr)) };
-   if (rc == SOCKET_ERROR) {
+   int rc { bind( acceptSocket, (SOCKADDR *) &addr, sizeof( addr ) ) };
+   if( rc == SOCKET_ERROR )
+   {
       closesocket( acceptSocket );
       return res;
    }
    rc = listen( acceptSocket, 5 );
-   if (rc == SOCKET_ERROR) {
+   if( rc == SOCKET_ERROR )
+   {
       closesocket( acceptSocket );
       return res;
    }
    res.wsocket = acceptSocket;
 #else
    sockaddr_in servaddr {};
-   const int sockfd {socket(AF_INET, SOCK_STREAM, 0)};
-   if(sockfd == -1) return res;
-   if(reuse)
+   const int sockfd { socket( AF_INET, SOCK_STREAM, 0 ) };
+   if( sockfd == -1 ) return res;
+   if( reuse )
    {
-      int enable{1};
+      int enable { 1 };
       // without this magic Linux/Mac will bar connections to this port for a small time window
       // after the socket is closed to avoid delayed packets from a previous connection going to
       // any new connections
-      if(setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable) ))
+      if( setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof( enable ) ) )
          return res;
    }
-   (void)std::memset(&servaddr, 0, sizeof(servaddr));
+   (void) std::memset( &servaddr, 0, sizeof( servaddr ) );
    // assign IP, PORT
    servaddr.sin_family = AF_INET;
-   servaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-   servaddr.sin_port = htons(port);
+   servaddr.sin_addr.s_addr = htonl( INADDR_LOOPBACK );
+   servaddr.sin_port = htons( port );
 
-   if(bind(sockfd, reinterpret_cast<sockaddr *>( &servaddr ), sizeof(servaddr)))
+   if( bind( sockfd, reinterpret_cast<sockaddr *>( &servaddr ), sizeof( servaddr ) ) )
    {
-      (void)close(sockfd);
+      (void) close( sockfd );
       return res;
    }
    if( listen( sockfd, 5 ) )
    {
-      (void)close(sockfd);
+      (void) close( sockfd );
       return res;
    }
    res.socketfd = sockfd;
@@ -1782,6 +1785,39 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse )
    return res;
 }
 
+// determine port assigned to socket from OS
+// useful in case bind was called with port=0
+// RETURNS
+//   port number on success.
+//   -1 on failure: e.g. incorrect inputs or networking subsystem not initialized.
+// if the function returns a port number >=0 res is not set.
+// if the function returns -1:
+//   *res: errno or WSAGetLastError value
+int p3SockGetPort( T_P3SOCKET s, int &res )
+{
+   int result{-1};
+   sockaddr_in addr {};
+   int rc;
+#if defined(_WIN32)
+   int addrLen = sizeof(sockaddr_in);
+   rc = getsockname(s.wsocket, (SOCKADDR*)&addr, &addrLen);
+   if(rc)
+   {
+      res = WSAGetLastError();
+      return -1;
+   }
+#else
+   socklen_t addrLen = sizeof(sockaddr_in);
+   rc = getsockname(s.socketfd, (sockaddr*)&addr, &addrLen);
+   if(rc)
+   {
+      res = errno;
+      return -1;
+   }
+#endif
+   result = ntohs(addr.sin_port);
+   return result;
+}
 #endif // __IN_CPPMEX__
 
 }// namespace rtl::p3utils
