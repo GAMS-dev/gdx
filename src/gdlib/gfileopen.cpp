@@ -64,7 +64,7 @@ static void ReportRetry( std::string_view Func, std::string_view fn, TfoAction A
 // TODO: Reduce usage of std::fstream for performance reasons!
 static int TextFileOpenRetry( const std::string &fn, bool ReTry, TfoAction Action, std::fstream &FileHandle, int &IORes )
 {
-   uint32_t Delay {};
+   uint32_t Delay {10};
    int res {};
    IORes = 0;
    int IORes1;

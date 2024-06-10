@@ -24,11 +24,26 @@
  */
 
 #include "modhead.h"
+#include "rtl/sysutils_p3.h"
+
+using namespace std::literals::string_literals;
 
 namespace global::modhead
 {
 #if defined(__IN_CPPMEX__)
-std::ofstream stubofs { "stubwarnings.txt" };
+SWStream::SWStream() : std::ofstream { fn }, start { tellp() }
+{
+}
+
+SWStream::~SWStream()
+{
+   const bool nothingWritten { tellp() == start };
+   close();
+   if( nothingWritten )
+      rtl::sysutils_p3::DeleteFileFromDisk( fn );
+}
+
+SWStream stubofs;
 #else
 std::ofstream stubofs;
 #endif

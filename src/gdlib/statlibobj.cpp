@@ -100,7 +100,11 @@ void TGMSLogStream::LogClose()
          if( FSaveAstat == 4 )
             std::fflush( stdout );
 #endif
-         //Ffcon->close();
+         if( FStatus == sl_file || FSaveAstat == 1 )
+         {
+            std::fclose( Ffcon );
+            Ffcon = nullptr;
+         }
       }
       FStatus = sl_closed;
    }
