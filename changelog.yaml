@@ -1,4 +1,6 @@
 ---
+- 7.11.4:
+    - Multiple small fixes to infrastructure code and shared modules.
 - 7.11.3:
     - Reworked internally used file IO streams to utilize low-level WinAPI/POSIX functions instead of the more heavyweight std::fstream.
     - Use more efficient integer to string conversion procedure for tracing outputs.

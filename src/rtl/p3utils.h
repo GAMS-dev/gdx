@@ -154,6 +154,8 @@ bool p3SockRecvTimeout(T_P3SOCKET s, char *buf, int count, int &res, int timeOut
 
 T_P3SOCKET p3SockAcceptClientConn(T_P3SOCKET srvSock);
 T_P3SOCKET p3SockCreateServerSocket(int port, bool reuse);
+
+int p3SockGetPort(T_P3SOCKET s, int &res);
 #endif // __IN_CPPMEX__
 
 // ...

@@ -10,6 +10,8 @@ set(base-units
         src/rtl/p3utils.h
         src/rtl/sysutils_p3.cpp
         src/rtl/sysutils_p3.h
+        src/rtl/system_p3.cpp
+        src/rtl/system_p3.h
         src/rtl/p3platform.cpp
         src/rtl/p3platform.h
         src/rtl/math_p3.cpp

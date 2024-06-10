@@ -797,6 +797,11 @@ void TGmsList::WrPChar( const char *P, int L )
 
 void TGmsList::WrPCharLn( const int LineNr, const bool ShowLineNr, const char *Ps, const int L, const std::string &DsErrors )
 {
+   auto maybeCaseAction = [this](char ch) {
+      if( CaseAction == casNone ) return ch;
+      return CaseAction == casToUpper ? (char) utils::toupper( ch ) : (char) utils::tolower( ch );
+   };
+
    auto WritePartialLine = [&]( const char *Str, const int Start, const int Length, int &NextPos ) {
       int p { Start };
       const auto Corr { PageControl == pcFortran ? 1 : 0 };
@@ -809,7 +814,7 @@ void TGmsList::WrPCharLn( const int LineNr, const bool ShowLineNr, const char *P
          if( k == 1 )
          {
             //SysChWrite( Str[p] );
-            buf[i++] = Str[p];
+            buf[i++] = maybeCaseAction(Str[p]);
          }
          else
          {
@@ -820,7 +825,7 @@ void TGmsList::WrPCharLn( const int LineNr, const bool ShowLineNr, const char *P
             }
 
             //SysChWrite( Str[p] );
-            buf[i++] = Str[p];
+            buf[i++] = maybeCaseAction(Str[p]);
 
             if( p == FUserRightMargin )
             {

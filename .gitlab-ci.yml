@@ -177,7 +177,7 @@ build-dac:
 
 build-wei:
   stage: build
-  tags: [windows]
+  tags: [pond]
   image:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
   script:
@@ -252,7 +252,7 @@ test-dac:
 
 test-wei:
   stage: test
-  tags: [windows]
+  tags: [pond]
   image:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
   needs: [build-wei,install-gamsdist-wei]
