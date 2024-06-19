@@ -759,27 +759,25 @@ TEST_CASE( "Test setting and resetting special values" )
 void writeMappedRecordsOutOfOrder( TGXFileObj &pgx )
 {
    // very irregular user uel nr -> uel name mapping
-   const std::map<int, std::string> userUelMapping {
-           { 3, "z" },
-           { 8, "a" },
-           { 1, "y" },
-           { 10, "b" } };
+   const std::array<std::pair<int, std::string>, 4> userUelMapping {
+      std::pair { 3, "z"s },
+      { 8, "a"s },
+      { 1, "y"s },
+      { 10, "b"s }
+   };
    // also weird record write ordering
-   const std::array<int, 4> randomOrder { 8, 10, 1, 3 };
+   constexpr std::array<int, 4> randomOrder { 8, 10, 1, 3 };
 
    REQUIRE( pgx.gdxUELRegisterMapStart() );
-   for( const auto &pair: userUelMapping )
-   {
+   for( const auto &pair : userUelMapping )
       REQUIRE( pgx.gdxUELRegisterMap( pair.first, pair.second.c_str() ) );
-   }
    REQUIRE( pgx.gdxUELRegisterDone() );
 
    REQUIRE( pgx.gdxDataWriteMapStart( "irregularSym", "So out of order!", 1, dt_par, 0 ) );
-   int key;
    TgdxValues values {};
    for( const auto ix: randomOrder )
    {
-      key = ix;
+      const int key = ix;
       values[GMS_VAL_LEVEL] = 3.141 * ix;
       REQUIRE( pgx.gdxDataWriteMap( &key, values.data() ) );
    }
@@ -2644,6 +2642,45 @@ TEST_CASE( "Test writing in raw mode with known UEL index bounds" )
       REQUIRE(pgx.gdxDataWriteDone());
    });
    std::filesystem::remove(fn);
+}
+
+TEST_CASE("Test having UEL numbers without labels")
+{
+   const std::string fn { "uelnolabels.gdx" };
+   testWrite( fn, [&]( TGXFileObj &pgx ) {
+      REQUIRE(pgx.gdxDataWriteRawStart( "mysymbol", "explanatory text", 1, dt_par, 0 ));
+      std::array<int, GMS_MAX_INDEX_DIM> keys {};
+      std::array<double, GMS_VAL_MAX> values {};
+      keys[0] = 23;
+      values[0] = 42.0;
+      REQUIRE(pgx.gdxDataWriteRaw( keys.data(), values.data() ));
+      keys[0] = 24;
+      values[0] = -1.0;
+      REQUIRE(pgx.gdxDataWriteRaw( keys.data(), values.data() ));
+      REQUIRE(pgx.gdxDataWriteDone());
+   } );
+   testRead( fn, [&]( TGXFileObj &pgx ) {
+      int nrRecs;
+      REQUIRE(pgx.gdxDataReadMapStart( 1, nrRecs ));
+      int dimFrst;
+      std::array<int, GMS_MAX_INDEX_DIM> keys {};
+      std::array<double, GMS_VAL_MAX> values {};
+      REQUIRE_FALSE(pgx.gdxDataReadMap( 1, keys.data(), values.data(), dimFrst ));
+      REQUIRE_EQ(pgx.gdxErrorCount(), 1);
+      int lastErr { pgx.gdxGetLastError() };
+      REQUIRE_EQ(-100004 /*ERR_BADELEMENTINDEX*/, lastErr);
+      std::array<char, 256> errMsg {};
+      REQUIRE(pgx.gdxErrorStr( lastErr, errMsg.data() ));
+      REQUIRE_EQ("Bad UEL Nr"s, std::string{errMsg.data()});
+      REQUIRE_FALSE(pgx.gdxDataReadMap( 2, keys.data(), values.data(), dimFrst ));
+      REQUIRE_EQ(pgx.gdxErrorCount(), 2);
+      lastErr = pgx.gdxGetLastError();
+      REQUIRE_EQ(-100004 /*ERR_BADELEMENTINDEX*/, lastErr);
+      REQUIRE(pgx.gdxErrorStr( lastErr, errMsg.data() ));
+      REQUIRE_EQ("Bad UEL Nr"s, std::string{errMsg.data()});
+      REQUIRE(pgx.gdxDataReadDone());
+   } );
+   std::filesystem::remove( fn );
 }
 
 }// namespace gdx::tests::gdxtests

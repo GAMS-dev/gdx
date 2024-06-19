@@ -1837,7 +1837,7 @@ void AddToErrorList( const int *AElements, const double *AVals );
 void GetDefaultRecord( double *Avals ) const;
 double AcronymRemap( double V );
 bool IsGoodNewSymbol( const char *s );
-bool ResultWillBeSorted( const int *ADomainNrs );
+bool ResultWillBeSorted( const int *ADomainNrs ) const;
 
 int gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int &ErrNr );
 
