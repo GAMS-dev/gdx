@@ -160,4 +160,6 @@ int p3SockGetPort(T_P3SOCKET s, int &res);
 
 // ...
 
+int xGetExecName( std::string &execName, std::string &msg );
+
 }// namespace rtl::p3utils
