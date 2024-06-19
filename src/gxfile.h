@@ -241,7 +241,7 @@ using TXStrHashListImpl = gdlib::strhash::TXStrHashList<T>;
 template<typename T>
 using TXCSStrHashListImpl = gdlib::strhash::TXCSStrHashList<T>;
 
-class TUELTable : public TXStrHashListImpl<int>
+class TUELTable final : public TXStrHashListImpl<int>
 {
    TUELUserMapStatus FMapToUserStatus { TUELUserMapStatus::map_unknown };
 
@@ -251,7 +251,7 @@ public:
    ~TUELTable() override = default;
    [[nodiscard]] int size() const;
    [[nodiscard]] bool empty() const;
-   int GetUserMap( int i );
+   [[nodiscard]] int GetUserMap( int i ) const;
    void SetUserMap( int EN, int N );
    int NewUsrUel( int EN );
    int AddUsrNew( const char *s, size_t slen );
