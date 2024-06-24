@@ -2402,7 +2402,7 @@ TEST_CASE( "Open append should report error for old GDX file versions" )
       std::string errMsg;
       TGXFileObj pgx { errMsg };
       int errNr;
-      REQUIRE( pgx.gdxOpenAppend( "f.gdx", "gdxtests", errNr ) );
+      REQUIRE_FALSE( pgx.gdxOpenAppend( "f.gdx", "gdxtests", errNr ) );
       REQUIRE_GT( pgx.gdxErrorCount(), 0 );
       REQUIRE_EQ( -100060, pgx.gdxGetLastError() );
    }

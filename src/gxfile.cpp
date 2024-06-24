@@ -3426,7 +3426,7 @@ int TGXFileObj::gdxOpenAppend( const char *FileName, const char *Producer, int &
    {
       ReportError( ERR_FILETOOLDFORAPPEND );
       gdxClose();
-      return res;
+      return 0;
    }
    fmode = fw_init;
    fstatus = stat_write;
