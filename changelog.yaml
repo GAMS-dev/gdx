@@ -1,3 +1,4 @@
+---
 - 7.11.5:
     - Fixed gdxOpenAppend not indicating a problem (in the return code) when trying to append to a GDX file with format version before 7 (incompatible for appending).
 - 7.11.4:
