@@ -32,11 +32,11 @@
 #include <cstring>
 
 #include "gdxdump.h"
-#include "../common/short_string.h"
-#include "../common/library.h"
+#include "../library/short_string.h"
+#include "../library/library.h"
 // TGXFileObj class
 #include "../../gdx.h"
-#include "../../utils.h"
+#include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
 // Global constants
 #include "../../../generated/gclgms.h"

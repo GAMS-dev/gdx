@@ -5,7 +5,7 @@
 
 #include "cmdpar.h"
 #include "library.h"
-#include "../../utils.h"
+#include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
 
 namespace library::cmdpar
@@ -71,8 +71,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
    int xr, maxr;
 
    auto SkipBl = [&]() {
-      for( ; xr <= maxr && FParams[xr] <= ' '; xr++ )
-         ;
+      for( ; xr <= maxr && FParams[xr] <= ' '; xr++ );
    };
 
    auto NextToken = [&]() -> std::string {
