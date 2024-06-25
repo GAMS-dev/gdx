@@ -312,7 +312,7 @@ void WrVal( const double V )
          switch( dblFormat )
          {
             case TDblFormat::dbl_normal:
-               fo << gdlib::strutilx::DblToStrSepClassic( V, DecimalSep );
+               fo << gdlib::strutilx::DblToStrSep( V, DecimalSep );
                break;
             case TDblFormat::dbl_hexBytes:
                fo << DblToStrHex( V );
