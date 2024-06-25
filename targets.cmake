@@ -87,12 +87,12 @@ endif ()
 
 # Library for gdxdump, gdxdiff and gdxmerge
 add_library(gdxtools_library
-	src/tools/common/short_string.h
-	src/tools/common/short_string.cpp
-	src/tools/common/library.h
-	src/tools/common/library.cpp
-	src/tools/common/cmdpar.h
-	src/tools/common/cmdpar.cpp
+	src/tools/library/short_string.h
+	src/tools/library/short_string.cpp
+	src/tools/library/library.h
+	src/tools/library/library.cpp
+	src/tools/library/cmdpar.h
+	src/tools/library/cmdpar.cpp
 )
 
 # gdxdump
