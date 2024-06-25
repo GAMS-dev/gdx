@@ -84,3 +84,40 @@ if (DEFINED ENV{GAMSDIR})
         endif ()
     endif ()
 endif ()
+
+# Library for gdxdump, gdxdiff and gdxmerge
+add_library(gdxtools_library
+	src/tools/common/short_string.h
+	src/tools/common/short_string.cpp
+	src/tools/common/library.h
+	src/tools/common/library.cpp
+	src/tools/common/cmdpar.h
+	src/tools/common/cmdpar.cpp
+)
+
+# gdxdump
+add_executable(gdxdump ${common}
+	src/tools/gdxdump/gdxdump.h
+	src/tools/gdxdump/gdxdump.cpp
+	src/tools/gdxdump/main.cpp
+)
+target_include_directories(gdxdump PRIVATE ${inc-dirs})
+target_link_libraries(gdxdump ${mylibs} gams-base gdxtools_library)
+
+# gdxdiff
+add_executable(gdxdiff ${common}
+	src/tools/gdxdiff/gdxdiff.h
+	src/tools/gdxdiff/gdxdiff.cpp
+	src/tools/gdxdiff/main.cpp
+)
+target_include_directories(gdxdiff PRIVATE ${inc-dirs})
+target_link_libraries(gdxdiff ${mylibs} gams-base gdxtools_library)
+
+# gdxmerge
+add_executable(gdxmerge ${common}
+	src/tools/gdxmerge/gdxmerge.h
+	src/tools/gdxmerge/gdxmerge.cpp
+	src/tools/gdxmerge/main.cpp
+)
+target_include_directories(gdxmerge PRIVATE ${inc-dirs})
+target_link_libraries(gdxmerge ${mylibs} gams-base gdxtools_library)
