@@ -87,37 +87,37 @@ endif ()
 
 # Library for gdxdump, gdxdiff and gdxmerge
 add_library(gdxtools_library
-	src/tools/library/short_string.h
-	src/tools/library/short_string.cpp
-	src/tools/library/library.h
-	src/tools/library/library.cpp
-	src/tools/library/cmdpar.h
-	src/tools/library/cmdpar.cpp
+    src/tools/library/short_string.h
+    src/tools/library/short_string.cpp
+    src/tools/library/library.h
+    src/tools/library/library.cpp
+    src/tools/library/cmdpar.h
+    src/tools/library/cmdpar.cpp
 )
 
 # gdxdump
 add_executable(gdxdump ${common}
-	src/tools/gdxdump/gdxdump.h
-	src/tools/gdxdump/gdxdump.cpp
-	src/tools/gdxdump/main.cpp
+    src/tools/gdxdump/gdxdump.h
+    src/tools/gdxdump/gdxdump.cpp
+    src/tools/gdxdump/main.cpp
 )
 target_include_directories(gdxdump PRIVATE ${inc-dirs})
 target_link_libraries(gdxdump ${mylibs} gams-base gdxtools_library)
 
 # gdxdiff
 add_executable(gdxdiff ${common}
-	src/tools/gdxdiff/gdxdiff.h
-	src/tools/gdxdiff/gdxdiff.cpp
-	src/tools/gdxdiff/main.cpp
+    src/tools/gdxdiff/gdxdiff.h
+    src/tools/gdxdiff/gdxdiff.cpp
+    src/tools/gdxdiff/main.cpp
 )
 target_include_directories(gdxdiff PRIVATE ${inc-dirs})
 target_link_libraries(gdxdiff ${mylibs} gams-base gdxtools_library)
 
 # gdxmerge
 add_executable(gdxmerge ${common}
-	src/tools/gdxmerge/gdxmerge.h
-	src/tools/gdxmerge/gdxmerge.cpp
-	src/tools/gdxmerge/main.cpp
+    src/tools/gdxmerge/gdxmerge.h
+    src/tools/gdxmerge/gdxmerge.cpp
+    src/tools/gdxmerge/main.cpp
 )
 target_include_directories(gdxmerge PRIVATE ${inc-dirs})
 target_link_libraries(gdxmerge ${mylibs} gams-base gdxtools_library)
