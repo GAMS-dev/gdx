@@ -89,8 +89,8 @@ endif ()
 add_library(gdxtools-library
     src/tools/library/short_string.h
     src/tools/library/short_string.cpp
-    src/tools/library/library.h
-    src/tools/library/library.cpp
+    src/tools/library/common.h
+    src/tools/library/common.cpp
     src/tools/library/cmdpar.h
     src/tools/library/cmdpar.cpp
 )

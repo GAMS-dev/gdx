@@ -2,7 +2,7 @@
 #include <cassert>
 #include <sstream>
 
-#include "library.h"
+#include "common.h"
 // Global constants
 #include "../../../generated/gclgms.h"
 
