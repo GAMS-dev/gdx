@@ -1043,14 +1043,14 @@ static gdxValues_t       Values;
 void ReportGDXError(gdxHandle_t PGX) {
 	char S[GMS_SSSIZE];
 
-	std::cout << "**** Fatal GDX Error" << endl;
+	cout << "**** Fatal GDX Error" << endl;
 	gdxErrorStr(PGX, gdxGetLastError(PGX), S);
-	std::cout << "**** " << S << endl;
+	cout << "**** " << S << endl;
 	exit(1);
 }
 
-void ReportIOError(int N, const std::string &msg) {
-	std::cout << "**** Fatal I/O Error = " << N << " when calling " << msg << endl;
+void ReportIOError(int N, const string &msg) {
+	cout << "**** Fatal I/O Error = " << N << " when calling " << msg << endl;
 	exit(1);
 }
 
