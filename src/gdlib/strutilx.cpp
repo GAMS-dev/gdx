@@ -188,6 +188,25 @@ static int LChPos( const char Ch, const char *S )
 }
 
 // Brief:
+//  Search for a set of characters from the left
+// Arguments:
+//  Cs: Character set to search
+//  S: String to be searched
+// Returns:
+//  Location of the character when found; -1 otherwise
+int LChSetPos( const char *Cs, const char *S, const int slen )
+{
+   const char *c { Cs };
+   for( int k { 0 }; k <= slen - 1; k++ )
+   {
+      while( *c )
+         if( *c++ == S[k] ) return k;
+      c = Cs;
+   }
+   return -1;
+}
+
+// Brief:
 //  Search for a set of characters from the right
 // Arguments:
 //  Cs: Character set to search
