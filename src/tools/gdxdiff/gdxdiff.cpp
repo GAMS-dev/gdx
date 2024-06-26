@@ -32,9 +32,9 @@
 #include <limits>
 
 #include "gdxdiff.h"
-#include "../common/short_string.h"
-#include "../common/library.h"
-#include "../common/cmdpar.h"
+#include "../library/short_string.h"
+#include "../library/library.h"
+#include "../library/cmdpar.h"
 #include "../../gdlib/strutilx.h"
 #include "../../gdlib/strhash.h"
 #include "../../gdlib/gmsobj.h"
