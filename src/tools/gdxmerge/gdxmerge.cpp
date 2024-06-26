@@ -34,3 +34,8 @@ int main( const int argc, const char *argv[] )
 }
 
 }// namespace gdxmerge
+
+int main( const int argc, const char *argv[] )
+{
+   return gdxmerge::main( argc, argv );
+}

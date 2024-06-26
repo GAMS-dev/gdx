@@ -1167,3 +1167,8 @@ int main( const int argc, const char *argv[] )
 }
 
 }// namespace gdxdiff
+
+int main( const int argc, const char *argv[] )
+{
+   return gdxdiff::main( argc, argv );
+}
