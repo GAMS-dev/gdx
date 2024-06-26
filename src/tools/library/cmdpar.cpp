@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "cmdpar.h"
-#include "library.h"
+#include "common.h"
 #include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
 

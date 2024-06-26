@@ -33,7 +33,7 @@
 
 #include "gdxdump.h"
 #include "../library/short_string.h"
-#include "../library/library.h"
+#include "../library/common.h"
 // TGXFileObj class
 #include "../../gdx.h"
 #include "../../gdlib/utils.h"

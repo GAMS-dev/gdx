@@ -33,7 +33,7 @@
 
 #include "gdxdiff.h"
 #include "../library/short_string.h"
-#include "../library/library.h"
+#include "../library/common.h"
 #include "../library/cmdpar.h"
 #include "../../gdlib/strutilx.h"
 #include "../../gdlib/strhash.h"
