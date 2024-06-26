@@ -20,13 +20,13 @@ match platform.system():
         current_platform = Platform.WINDOWS
         gams_system_directory = 'C:\\GAMS\\47'
         executable_filename = f'{executable_name}.exe'
-        executable_paths['test'] = os.path.join('..\\..\\..\\..\\build\\Debug', executable_filename)
+        executable_paths['test'] = os.path.join('..\\..\\..\\build\\Debug', executable_filename)
         executable_paths['powershell'] = 'C:\\Program Files\\PowerShell\\7\\pwsh.exe'
     case 'Darwin':
         current_platform = Platform.MACOS
         gams_system_directory = '/Library/Frameworks/GAMS.framework/Resources'
         executable_filename = executable_name
-        executable_paths['test'] = os.path.join('../../../../build', executable_filename)
+        executable_paths['test'] = os.path.join('../../../build', executable_filename)
     case other:
         current_platform = Platform.LINUX
         raise Exception('Current operating system is not yet supported')
