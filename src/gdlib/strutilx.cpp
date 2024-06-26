@@ -174,7 +174,7 @@ std::string PadRightMod( std::string_view s, const int M )
 //  Sp: Starting position
 // Returns:
 //  Location of the character when found; -1 otherwise
-static int LChPosSp( const char Ch, const char *S, int Sp )
+int LChPosSp( const char Ch, const char *S, int Sp )
 {
    if( Sp < 0 ) Sp = 0;
    for( int K { Sp }; S[K]; K++ )
@@ -182,7 +182,7 @@ static int LChPosSp( const char Ch, const char *S, int Sp )
    return -1;
 }
 
-static int LChPos( const char Ch, const char *S )
+int LChPos( const char Ch, const char *S )
 {
    return LChPosSp( Ch, S, 0 );
 }
@@ -213,7 +213,7 @@ int LChSetPos( const char *Cs, const char *S, const int slen )
 //  S: String to be searched
 // Returns:
 //  Location of the character when found; -1 otherwise
-static int RChSetPos( const char *Cs, const char *S, const int slen )
+int RChSetPos( const char *Cs, const char *S, const int slen )
 {
    const char *c {Cs};
    for( int k {slen-1}; k >= 0; k-- )
