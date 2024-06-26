@@ -18,7 +18,7 @@ executable_paths: dict[str, str] = {}
 match platform.system():
     case 'Windows':
         current_platform = Platform.WINDOWS
-        gams_system_directory = 'C:\\GAMS\\46'
+        gams_system_directory = 'C:\\GAMS\\47'
         executable_filename = f'{executable_name}.exe'
         executable_paths['test'] = os.path.join('..\\..\\..\\..\\build\\Debug', executable_filename)
         executable_paths['powershell'] = 'C:\\Program Files\\PowerShell\\7\\pwsh.exe'

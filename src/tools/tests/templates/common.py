@@ -8,7 +8,7 @@ import pandas as pd
 
 
 match platform.system():
-    case 'Windows': gams_system_directory = 'C:\\GAMS\\46'
+    case 'Windows': gams_system_directory = 'C:\\GAMS\\47'
     case 'Darwin': gams_system_directory = '/Library/Frameworks/GAMS.framework/Resources'
     case other: raise Exception('Current operating system is not yet supported')
 
