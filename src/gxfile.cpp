@@ -886,7 +886,6 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
    if( utils::in( fmode, fr_str_data, fr_map_data, fr_mapr_data, fr_raw_data ) )
       gdxDataReadDone();// NOTE: Not covered by unit tests yet.
    NrMappedAdded = 0;
-   TIntegerMapping ExpndList;
    ErrorList = nullptr;
    CurSyPtr = nullptr;
    SortList = nullptr;
@@ -1014,6 +1013,7 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
       {
          try
          {
+            TIntegerMapping ExpndList;
             SortList = std::make_unique<LinkedDataType>( FCurrentDim, static_cast<int>( DataSize * sizeof( double ) ) );
             int FIDim = FCurrentDim;// First invalid dimension
             TgdxValues Avals;
@@ -1558,7 +1558,7 @@ void TGXFileObj::AddToErrorList( const int *AElements, const double *AVals )
    ErrorList->AddRecord( AElements, AVals );
 }
 
-bool TGXFileObj::ResultWillBeSorted( const int *ADomainNrs )
+bool TGXFileObj::ResultWillBeSorted( const int *ADomainNrs ) const
 {
    for( int D {}; D < FCurrentDim; D++ )
    {
@@ -2138,7 +2138,7 @@ int TGXFileObj::gdxDataErrorCount() const
 
 int TGXFileObj::gdxDataErrorRecord( int RecNr, int *KeyInt, double *Values )
 {
-   int res { gdxDataErrorRecordX( RecNr, KeyInt, Values ) };
+   const int res { gdxDataErrorRecordX( RecNr, KeyInt, Values ) };
    if( res )
    {
       for( int D {}; D < ErrorList->GetDimension(); D++ )
@@ -2730,7 +2730,7 @@ int TGXFileObj::gdxDataWriteMap( const int *KeyInt, const double *Values )
    }
    for( int D {}; D < FCurrentDim; D++ )
    {
-      int KD = UELTable->UsrUel2Ent->GetMapping( KeyInt[D] );
+      const int KD = UELTable->UsrUel2Ent->GetMapping( KeyInt[D] );
       if( KD < 0 )
       {
          // NOTE: Not covered by unit tests yet.
@@ -2772,7 +2772,7 @@ int TGXFileObj::gdxUELRegisterMap( int UMap, const char *Uel )
 
 int TGXFileObj::gdxDataReadMapStart( int SyNr, int &NrRecs )
 {
-   auto XDomains = utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_STRICT );
+   const auto XDomains = utils::arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_STRICT );
    NrRecs = PrepareSymbolRead( "DataReadMapStart"s, SyNr, XDomains.data(), fr_map_data );
    return NrRecs >= 0;
 }
@@ -2821,9 +2821,9 @@ again:
       {
          assert( D >= 0 && D < GLOBAL_MAX_INDEX_DIM );
          const auto &obj = DomainList[D];
-         if( LastElem[D] < 0 )
+         // AS: Should this also be appended to the data error list???
+         if( LastElem[D] < 0 || LastElem[D] >= UELTable->size() + (UELTable->OneBased?1:0) )
          {
-            // NOTE: Not covered by unit tests yet.
             ReportError( ERR_BADELEMENTINDEX );
             BadError = true;
             break;
@@ -2834,9 +2834,8 @@ again:
                KeyInt[D] = LastElem[D];
                break;
             case TgdxDAction::dm_filter:
-            {
-               int V { UELTable->GetUserMap( LastElem[D] ) };
-               if( obj.DFilter->InFilter( V ) ) KeyInt[D] = V;
+               if( const int V { UELTable->GetUserMap( LastElem[D] ) }; obj.DFilter->InFilter( V ) )
+                  KeyInt[D] = V;
                else
                {
                   AddError = true;
@@ -2844,11 +2843,9 @@ again:
                   loopDone = true;
                }
                break;
-            }
             case TgdxDAction::dm_strict:
-            {
-               int V { UELTable->GetUserMap( LastElem[D] ) };
-               if( V >= 0 ) KeyInt[D] = V;
+               if( const int V { UELTable->GetUserMap( LastElem[D] ) }; V >= 0 )
+                  KeyInt[D] = V;
                else
                {
                   AddError = true;// NOTE: Not covered by unit tests yet.
@@ -2856,13 +2853,12 @@ again:
                   loopDone = true;
                }
                break;
-            }
             case TgdxDAction::dm_expand:// no filter, allow growth of domain
-               // NOTE: Not covered by unit tests yet.
                {
-                  int EN = LastElem[D];
-                  int V { UELTable->GetUserMap( EN ) };
-                  if( V >= 0 ) KeyInt[D] = V;
+                  // NOTE: Not covered by unit tests yet.
+                  const int EN = LastElem[D];
+                  if( const int V { UELTable->GetUserMap( EN ) }; V >= 0 )
+                     KeyInt[D] = V;
                   else
                   {
                      KeyInt[D] = -EN;
@@ -2877,7 +2873,7 @@ again:
    }
 
    if( BadError ) return false;
-   else if( AddError )
+   if( AddError )
    {
       for( int D {}; D < FCurrentDim; D++ )
       {
@@ -2919,10 +2915,9 @@ again:
       // NOTE: Not covered by unit tests yet.
       for( int D {}; D < FCurrentDim; D++ )
       {
-         int EN = KeyInt[D];
-         if( EN < 0 )
+         if( const int EN = KeyInt[D]; EN < 0 )
          {
-            int V = UELTable->NewUsrUel( -EN );
+            const int V = UELTable->NewUsrUel( -EN );
             KeyInt[D] = V;
             NrMappedAdded++;
             // look for same mapping to be issued
@@ -3129,11 +3124,10 @@ int TGXFileObj::gdxGetDomainElements( int SyNr, int DimPos, int FilterNr, TDomai
    while( DoRead( AVals.data(), AFDim ) )
    {
       assert( DimPos >= 1 && DimPos <= GLOBAL_MAX_INDEX_DIM );
-      int RawNr { LastElem[DimPos - 1] };
+      const int RawNr { LastElem[DimPos - 1] };
       if( DFilter )
       {
-         int MapNr { UELTable->GetUserMap( RawNr ) };
-         if( !DFilter->InFilter( MapNr ) )
+         if( const int MapNr { UELTable->GetUserMap( RawNr ) }; !DFilter->InFilter( MapNr ) )
          {
             // NOTE: Not covered by unit tests yet.
             //Register this record as a domain error (negative value indicates domain violation)
@@ -3432,7 +3426,7 @@ int TGXFileObj::gdxOpenAppend( const char *FileName, const char *Producer, int &
    {
       ReportError( ERR_FILETOOLDFORAPPEND );
       gdxClose();
-      return res;
+      return 0;
    }
    fmode = fw_init;
    fstatus = stat_write;
@@ -3730,7 +3724,7 @@ bool TUELTable::empty() const
    return !FCount;
 }
 
-int TUELTable::GetUserMap( int i )
+int TUELTable::GetUserMap( int i ) const
 {
    return *GetObject( i );
 }
@@ -3827,7 +3821,7 @@ void TUELTable::RenameEntry( int N, const char *s )
 
 int TUELTable::MemoryUsed() const
 {
-   return (int) TXStrHashListImpl<int>::MemoryUsed() + UsrUel2Ent->MemoryUsed();
+   return static_cast<int>( TXStrHashListImpl<int>::MemoryUsed() ) + UsrUel2Ent->MemoryUsed();
 }
 
 void TUELTable::SaveToStream( TXStream &S )

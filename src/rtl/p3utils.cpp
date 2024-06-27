@@ -1047,7 +1047,20 @@ void initParamStr( const int argc, const char **argv )
 {
    paramstr.resize( argc );
    for( int i {}; i < argc; i++ )
+   {
       paramstr[i] = argv[i];
+      if( !i ) // absolute executable path
+      {
+#if defined(_WIN32)
+         std::array<char, 261> buf {}; // length taken from Delphi's System.pas unit
+         const auto slen { GetModuleFileNameA( nullptr, buf.data(), 256 ) };
+         paramstr.front() = std::string { buf.data(), slen};
+#else
+         if( std::string buf, msg; !xGetExecName( buf, msg ) )
+            paramstr.front() = buf;
+#endif
+      }
+   }
 }
 
 #ifndef _WIN32
@@ -1063,7 +1076,7 @@ static void myStrError( int n, char *buf, const size_t bufSiz )
 #endif
 }
 
-static int xGetExecName( std::string &execName, std::string &msg )
+int xGetExecName( std::string &execName, std::string &msg )
 {
    int rc { 8 };
    std::array<char, 4096> execBuf {};
