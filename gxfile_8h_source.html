@@ -338,7 +338,7 @@ $(document).ready(function(){initNavTree('gxfile_8h_source.html',''); initResiza
 <div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span><span class="keyword">using </span>TXCSStrHashListImpl = gdlib::strhash::TXCSStrHashList&lt;T&gt;;</div>
 <div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno"><a class="line" href="classgdx_1_1TUELTable.html">  244</a></span><span class="keyword">class </span><a class="code hl_class" href="classgdx_1_1TUELTable.html">TUELTable</a> : <span class="keyword">public</span> TXStrHashListImpl&lt;int&gt;</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno"><a class="line" href="classgdx_1_1TUELTable.html">  244</a></span><span class="keyword">class </span><a class="code hl_class" href="classgdx_1_1TUELTable.html">TUELTable</a> final : <span class="keyword">public</span> TXStrHashListImpl&lt;int&gt;</div>
 <div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>{</div>
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>   TUELUserMapStatus FMapToUserStatus { TUELUserMapStatus::map_unknown };</div>
 <div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
@@ -348,7 +348,7 @@ $(document).ready(function(){initNavTree('gxfile_8h_source.html',''); initResiza
 <div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>   <a class="code hl_class" href="classgdx_1_1TUELTable.html">~TUELTable</a>() <span class="keyword">override</span> = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>   [[nodiscard]] <span class="keywordtype">int</span> size() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>   [[nodiscard]] <span class="keywordtype">bool</span> empty() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>   <span class="keywordtype">int</span> GetUserMap( <span class="keywordtype">int</span> i );</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>   [[nodiscard]] <span class="keywordtype">int</span> GetUserMap( <span class="keywordtype">int</span> i ) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>   <span class="keywordtype">void</span> SetUserMap( <span class="keywordtype">int</span> EN, <span class="keywordtype">int</span> N );</div>
 <div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>   <span class="keywordtype">int</span> NewUsrUel( <span class="keywordtype">int</span> EN );</div>
 <div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>   <span class="keywordtype">int</span> AddUsrNew( <span class="keyword">const</span> <span class="keywordtype">char</span> *s, <span class="keywordtype">size_t</span> slen );</div>
