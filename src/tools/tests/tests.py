@@ -48,7 +48,7 @@ def create_output_test(static_output_file_path: str, test_output_file_path: str)
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description='gdxdump tests', formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description='gdxdump tests')
     parser.add_argument('-o', '--gdxdump-options', help='print all generated gdxdump options (with example identifier)', action='store_true')
     parser.add_argument('-g', '--gdx-files', help='generate GDX files from the templates', action='store_true')
     parser.add_argument('-d', '--gdx-files-directory', help='optionally specify a directory with GDX files (alternatively to the generated files)')
