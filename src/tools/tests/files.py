@@ -57,9 +57,9 @@ def generate_gdx_files():
     for template_path in template_paths:
         print('Generate file from template:', template_path, sep=' "', end='"\n')
         if globals.current_platform == globals.Platform.WINDOWS:
-            subprocess.run([globals.executable_paths['powershell'], '-Command', 'python3', template_path])
+            subprocess.run([globals.executable_paths['powershell'], '-Command', 'python', template_path])
         else:
-            subprocess.run(['python3', template_path])
+            subprocess.run(['python', template_path])
 
 
 def get_checksum(text: str) -> str:
