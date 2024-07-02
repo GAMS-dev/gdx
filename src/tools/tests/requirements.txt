@@ -1,1 +1,2 @@
+numpy==1.26.4
 gamsapi[transfer]==47.1.0
