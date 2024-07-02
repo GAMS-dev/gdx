@@ -32,7 +32,6 @@
 #include <cstring>
 
 #include "gdxdump.h"
-#include "../library/short_string.h"
 #include "../library/common.h"
 // TGXFileObj class
 #include "../../gdx.h"
