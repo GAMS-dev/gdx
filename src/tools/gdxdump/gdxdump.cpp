@@ -1500,7 +1500,7 @@ int main( const int argc, const char *argv[] )
             bHeader = true;
             continue;
          }
-         printErrorMessage( "Unrecognized option: " + s.string(), false );
+         printErrorMessage( "Unrecognized option: " + s, false );
          ExitCode = 1;
          break;
       }
