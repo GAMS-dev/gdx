@@ -1220,10 +1220,16 @@ int main( const int argc, const char *argv[] )
       ParamNr = 2;
       ParamHold.clear();
 
+      auto to_upper_case = []( std::string &s ) {
+         std::transform( s.begin(), s.end(), s.begin(), []( unsigned char c ) {
+            return std::toupper( c );
+         } );
+      };
+
       while( ParamNr <= ParamCount )
       {
          s = NextParam();
-         s.to_upper_case();
+         to_upper_case( s );
          if( s == "SYMB" || s == "SYMB=" )
          {
             if( Symb[0] != '\0' )
@@ -1267,7 +1273,7 @@ int main( const int argc, const char *argv[] )
                break;
             }
             s = NextParam();
-            s.to_upper_case();
+            to_upper_case( s );
             if( s == "TAB" )
                Delim = '\t';
             else if( s == "COMMA" )
@@ -1295,7 +1301,7 @@ int main( const int argc, const char *argv[] )
                break;
             }
             s = NextParam();
-            s.to_upper_case();
+            to_upper_case( s );
             if( s == "PERIOD" ) DecimalSep = '.';
             else if( s == "COMMA" )
                DecimalSep = ',';
@@ -1361,7 +1367,7 @@ int main( const int argc, const char *argv[] )
                break;
             }
             s = NextParam();
-            s.to_upper_case();
+            to_upper_case( s );
             if( s == "NORMAL" )
                OutFormat = TOutFormat::fmt_normal;
             else if( s == "GAMSBAS" )
@@ -1385,7 +1391,7 @@ int main( const int argc, const char *argv[] )
                break;
             }
             s = NextParam();
-            s.to_upper_case();
+            to_upper_case( s );
             if( s == "NORMAL" )
                dblFormat = TDblFormat::dbl_none;
             else if( s == "HEXBYTES" )
