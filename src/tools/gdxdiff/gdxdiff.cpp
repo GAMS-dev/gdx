@@ -54,7 +54,7 @@ static bool diffUELsRegistered;
 static std::shared_ptr<gdlib::strhash::TXStrHashList<nullptr_t>> UELTable;
 static int staticUELNum;
 static double EpsAbsolute, EpsRelative;
-static std::map<library::short_string, TStatusCode> StatusTable;
+static std::map<std::string, TStatusCode> StatusTable;
 static std::shared_ptr<library::cmdpar::TCmdParams> CmdParams;
 static std::set<gdx::tvarvaltype> ActiveFields;
 // Use FldOnlyVar instead of FldOnly as the variable name
@@ -67,7 +67,7 @@ static bool ShowDefRec, CompDomains;
 std::string ValAsString( const std::shared_ptr<gdx::TGXFileObj> &PGX, const double V )
 {
    const int WIDTH { 14 };
-   library::short_string result;
+   std::string result;
    if( PGX->gdxAcronymName( V, result.data() ) == 0 )
    {
       int iSV;
@@ -79,11 +79,11 @@ std::string ValAsString( const std::shared_ptr<gdx::TGXFileObj> &PGX, const doub
          std::ostringstream oss;
          oss << std::fixed << std::setprecision( 5 ) << V;
          result = oss.str();
-         return gdlib::strutilx::PadLeft( result.string(), WIDTH );
+         return gdlib::strutilx::PadLeft( result, WIDTH );
       }
    }
    // Empty string will be returned
-   return result.string();
+   return result;
 }
 
 void FatalErrorExit( const int ErrNr )
@@ -114,16 +114,16 @@ void CheckGDXError( const std::shared_ptr<gdx::TGXFileObj> &PGX )
    int ErrNr { PGX->gdxGetLastError() };
    if( ErrNr != 0 )
    {
-      library::short_string S;
+      std::string S;
       PGX->gdxErrorStr( ErrNr, S.data() );
       std::cerr << "GDXDIFF GDX Error: " << S << std::endl;
    }
 }
 
-void OpenGDX( const library::short_string &fn, const std::shared_ptr<gdx::TGXFileObj> &PGX )
+void OpenGDX( const std::string &fn, const std::shared_ptr<gdx::TGXFileObj> &PGX )
 {
-   if( !rtl::sysutils_p3::FileExists( fn.string() ) )
-      FatalError( "Input file not found " + fn.string(), static_cast<int>( ErrorCode::ERR_NOFILE ) );
+   if( !rtl::sysutils_p3::FileExists( fn ) )
+      FatalError( "Input file not found " + fn, static_cast<int>( ErrorCode::ERR_NOFILE ) );
 
    // TODO: Remove?
    // if( !PGX->gdxCreateX( S ) )
@@ -133,9 +133,9 @@ void OpenGDX( const library::short_string &fn, const std::shared_ptr<gdx::TGXFil
    PGX->gdxOpenRead( fn.data(), ErrNr );
    if( ErrNr != 0 )
    {
-      library::short_string S;
+      std::string S;
       PGX->gdxErrorStr( ErrNr, S.data() );
-      FatalError2( "Problem reading GDX file + " + fn.string(), S.string(), static_cast<int>( ErrorCode::ERR_READGDX ) );
+      FatalError2( "Problem reading GDX file + " + fn, S, static_cast<int>( ErrorCode::ERR_READGDX ) );
    }
 
    int NrElem, HighV;
@@ -144,7 +144,7 @@ void OpenGDX( const library::short_string &fn, const std::shared_ptr<gdx::TGXFil
    for( int N { 1 }; N <= NrElem; N++ )
    {
       int NN;
-      library::short_string UEL;
+      std::string UEL;
       PGX->gdxUMUelGet( N, UEL.data(), NN );
       NN = UELTable->Add( UEL.data(), UEL.length() );
       PGX->gdxUELRegisterMap( NN, UEL.data() );
@@ -177,7 +177,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 {
    int Dim, VarEquType;
    gdxSyType ST;
-   library::short_string Id;
+   std::string Id;
    bool SymbOpen {};
    TStatusCode Status;
    gdx::TgdxValues DefValues;
@@ -189,7 +189,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       {
          if( FldOnlyVar == FldOnly::fld_yes && ( ST == dt_var || ST == dt_equ ) )
          {
-            library::short_string ExplTxt = library::short_string( "Differences Field = " + GamsFieldNames[FldOnlyFld] );
+            std::string ExplTxt = "Differences Field = " + GamsFieldNames[FldOnlyFld];
             PGXDIF->gdxDataWriteStrStart( Id.data(), ExplTxt.data(), Dim + 1, dt_par, 0 );
          }
          if( DiffOnly && ( ST == dt_var || ST == dt_equ ) )
@@ -463,7 +463,8 @@ void CompareSy( const int Sy1, const int Sy2 )
       {
          std::string stxt;
          int N;
-         if( Act == c_ins1 ) PGX1->gdxGetElemText( static_cast<int>( round( Vals[gdx::vallevel] ) ), stxt.data(), N );
+         if( Act == c_ins1 )
+            PGX1->gdxGetElemText( static_cast<int>( round( Vals[gdx::vallevel] ) ), stxt.data(), N );
          else
             PGX2->gdxGetElemText( static_cast<int>( round( Vals[gdx::vallevel] ) ), stxt.data(), N );
          PGXDIF->gdxAddSetText( stxt.data(), N );
@@ -707,18 +708,17 @@ void Usage()
 // Function is empty in Delphi code
 // void CopyAcronyms( const std::shared_ptr<gdx::TGXFileObj> &PGX ) {}
 
-void CheckFile( library::short_string &fn )
+void CheckFile( std::string &fn )
 {
-   if( !rtl::sysutils_p3::FileExists( fn.string() ) && gdlib::strutilx::ExtractFileExtEx( fn.string() ).empty() )
-      fn = gdlib::strutilx::ChangeFileExtEx( fn.string(), ".gdx" );
+   if( !rtl::sysutils_p3::FileExists( fn ) && gdlib::strutilx::ExtractFileExtEx( fn ).empty() )
+      fn = gdlib::strutilx::ChangeFileExtEx( fn, ".gdx" );
 }
 
 int main( const int argc, const char *argv[] )
 {
    int ErrorCode, ErrNr, Dim, iST, StrNr;
-   std::string S, S2, DiffFileName;
-   library::short_string ID, InFile1, InFile2;
-   std::map<library::short_string, int> IDTable;
+   std::string S, S2, ID, InFile1, InFile2, DiffFileName;
+   std::map<std::string, int> IDTable;
    bool UsingIDE, RenameOK;
    gdxStrIndex_t StrKeys;
    gdxStrIndexPtrs_t StrKeysPtrs;
@@ -941,7 +941,7 @@ int main( const int argc, const char *argv[] )
                   S = S.erase( 0, k );
                   S = utils::trim( S );
                }
-               ID = utils::trim( ID.string() );
+               ID = utils::trim( ID );
                if( !ID.empty() && IDsOnly->IndexOf( ID.data() ) < 0 )
                {
                   // std::cout << "Include Id: " << ID << std::endl;
@@ -1083,7 +1083,7 @@ int main( const int argc, const char *argv[] )
          if( pair.first.length() > NN )
             NN = static_cast<int>( pair.first.length() );
       for( const auto &pair: StatusTable )
-         std::cout << gdlib::strutilx::PadRight( pair.first.string(), NN ) << "   "
+         std::cout << gdlib::strutilx::PadRight( pair.first, NN ) << "   "
                    << StatusText.at( static_cast<int>( pair.second ) ) << std::endl;
    }
 
