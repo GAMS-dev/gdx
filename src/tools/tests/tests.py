@@ -25,14 +25,15 @@ class TestGdxDump(unittest.TestCase):
 
 
 def create_output_test(static_output_file_path: str, test_output_file_path: str):
-    def output_test(self):
+    def output_test(self: TestGdxDump):
         if globals.cli_options['max_diff_enabled']:
             self.maxDiff = None
 
         if globals.cli_options['gdx_files_directory_path']:
+            gdx_files_directory_path = str(globals.cli_options['gdx_files_directory_path'])
             self.assertEqual(
-                static_output_file_path.removeprefix(os.path.join(globals.cli_options['gdx_files_directory_path'], 'output', 'static')),
-                test_output_file_path.removeprefix(os.path.join(globals.cli_options['gdx_files_directory_path'], 'output', 'test'))
+                static_output_file_path.removeprefix(os.path.join(gdx_files_directory_path, 'output', 'static')),
+                test_output_file_path.removeprefix(os.path.join(gdx_files_directory_path, 'output', 'test'))
             )
         else:
             self.assertEqual(
@@ -105,10 +106,10 @@ def main() -> int:
             stop_test_time = timeit.default_timer()
         print()
 
-        if globals.cli_options['overwrite_static_output']:
-            print('Time to generate static output:', str(round(stop_static_time - start_static_time, 2)) + 's')
-        if globals.cli_options['overwrite_test_output']:
-            print('Time to generate test output:', str(round(stop_test_time - start_test_time, 2)) + 's')
+        if globals.cli_options['overwrite_static_output'] and start_static_time and stop_static_time:
+            print(f'Time to generate static output: {round(stop_static_time - start_static_time, 2)}s')
+        if globals.cli_options['overwrite_test_output'] and start_test_time and stop_test_time:
+            print(f'Time to generate test output: {round(stop_test_time - start_test_time, 2)}s')
         if globals.cli_options['run_tests']:
             print('\n')
 
