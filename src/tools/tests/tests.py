@@ -96,17 +96,23 @@ def main() -> int:
             stop_static_time = timeit.default_timer()
             if globals.cli_options['overwrite_test_output']:
                 print()
+        else:
+            start_static_time = None
+            stop_static_time = None
 
         if globals.cli_options['overwrite_test_output']:
             print('Generate test output files:\n')
             start_test_time = timeit.default_timer()
             files.generate_output(globals.Output.TEST)
             stop_test_time = timeit.default_timer()
+        else:
+            start_test_time = None
+            stop_test_time = None
         print()
 
-        if globals.cli_options['overwrite_static_output'] and start_static_time and stop_static_time:
+        if start_static_time and stop_static_time:
             print(f'Time to generate static output: {round(stop_static_time - start_static_time, 2)}s')
-        if globals.cli_options['overwrite_test_output'] and start_test_time and stop_test_time:
+        if start_test_time and stop_test_time:
             print(f'Time to generate test output: {round(stop_test_time - start_test_time, 2)}s')
         if globals.cli_options['run_tests']:
             print('\n')
