@@ -501,13 +501,13 @@ void CompareSy( const int Sy1, const int Sy2 )
 
    SymbOpen = false;
    PGX1->gdxSymbolInfo( Sy1, Id.data(), Dim, iST );
-   ST = gdxSyType( iST );
+   ST = static_cast<gdxSyType>( iST );
    if( ST == dt_alias ) ST = dt_set;
    // We do nothing with type in file2
    PGX1->gdxSymbolInfoX( Sy1, acount, VarEquType, stxt.data() );
 
    PGX2->gdxSymbolInfo( Sy2, Id.data(), Dim2, iST2 );
-   ST2 = gdxSyType( iST2 );
+   ST2 = static_cast<gdxSyType>( iST2 );
    if( ST2 == dt_alias ) ST2 = dt_set;
    Status = TStatusCode::sc_same;
 

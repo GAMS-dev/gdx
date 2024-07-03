@@ -273,7 +273,7 @@ std::string DblToStrHexponential( const double x )
          result += "0x0." + mFormat( mant ) + "p-1022";
    }
    else if( expo < 2047 )
-      result += "0x1." + mFormat( mant ) + 'p' + std::to_string( int( expo ) - 1023 );
+      result += "0x1." + mFormat( mant ) + 'p' + std::to_string( static_cast<int>( expo ) - 1023 );
    else
    {
       if( mant == 0 ) result += "Infinity";
@@ -531,7 +531,7 @@ void WriteSymbol( const int SyNr )
    int A2Dim, iA2Typ, setDim, setType;
 
    PGX->gdxSymbolInfo( SyNr, SyName.data(), ADim, iATyp );
-   ATyp = gdxSyType( iATyp );
+   ATyp = static_cast<gdxSyType>( iATyp );
    if( ( ATyp == dt_set || ATyp == dt_par ) && OutFormat == TOutFormat::fmt_gamsbas ) return;
    if( ShowHdr ) fo << '\n';
    // if( false ) fo << "$onText" << '\n';
@@ -689,9 +689,9 @@ void WriteSymbol( const int SyNr )
 
 int64_t delphiRound( const double x )
 {
-   if( x >= 0 ) return (int64_t) ( x + 0.5 );
+   if( x >= 0 ) return static_cast<int64_t>( x + 0.5 );
    else
-      return (int64_t) ( x - 0.5 );
+      return static_cast<int64_t>( x - 0.5 );
 }
 
 void WriteSymbolCSV( const int SyNr )
@@ -749,7 +749,7 @@ void WriteSymbolCSV( const int SyNr )
    BadUELs = 0;
    PGX->gdxSystemInfo( NrSymb, NrUEL );
    PGX->gdxSymbolInfo( SyNr, SyName.data(), ADim, iATyp );
-   ATyp = gdxSyType( iATyp );
+   ATyp = static_cast<gdxSyType>( iATyp );
    GetDomainNames();
    if( ADim < 2 ) CDim = false;
    if( !CDim )
@@ -946,7 +946,7 @@ void WriteSymbolInfo()
    {
       PGX->gdxSymbolInfo( N, AName.data(), ADim, iATyp );
       PGX->gdxSymbolInfoX( N, ACount, AUserInfo, AExplText.data() );
-      if( AName.length() > w2 ) w2 = AName.length();
+      if( static_cast<int>( AName.length() ) > w2 ) w2 = static_cast<int>( AName.length() );
       if( getIntegerWidth( ACount ) > w3 ) w3 = getIntegerWidth( ACount );
       SL.insert( { AName, N } );
    }
@@ -1041,7 +1041,7 @@ void WriteSetText()
    for( int iSym {}; iSym < nSyms; iSym++ )
    {
       PGX->gdxSymbolInfo( iSym, s.data(), symDim, symTyp );
-      if( gdxSyType( symTyp ) != dt_set ) continue;
+      if( static_cast<gdxSyType>( symTyp ) != dt_set ) continue;
       // fo << "Found set " << s << '\n';
       PGX->gdxDataReadRawStart( iSym, nRecs );
       while( PGX->gdxDataReadRaw( keys, vals, fDim ) != 0 )
