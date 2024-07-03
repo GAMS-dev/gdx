@@ -745,7 +745,6 @@ void WriteSymbolCSV( const int SyNr )
    std::unique_ptr<int[]> CSVUels;
    gdxUelIndex_t Keys {};
    gdxValues_t Vals {};
-   bool EoFData;
 
    BadUELs = 0;
    PGX->gdxSystemInfo( NrSymb, NrUEL );
@@ -885,7 +884,7 @@ void WriteSymbolCSV( const int SyNr )
          fo << '\n';
       }
       PGX->gdxDataReadRawStart( SyNr, NRec );
-      EoFData = PGX->gdxDataReadRaw( Keys, Vals, FDim ) == 0;
+      bool EoFData = PGX->gdxDataReadRaw( Keys, Vals, FDim ) == 0;
       while( !EoFData )
       {
          for( int D {}; D < ADim - 1; D++ )
