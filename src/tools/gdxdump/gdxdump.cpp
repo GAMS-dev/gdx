@@ -147,7 +147,7 @@ void WriteUELTable( const std::string &name )
       int UMap;
       PGX->gdxUMUelGet( N, s.data(), UMap );
       fo << "  ";
-      WriteUEL( s.data() );
+      WriteUEL( s );
       if( OutFormat == TOutFormat::fmt_csv ) fo << '\n';
       else
          fo << ( N < NrUel ? " ," : " /;" ) << '\n';
@@ -336,7 +336,7 @@ std::string GetUELAsString( const int N )
       BadUELs++;
       return "L__" + std::to_string( N );
    }
-   return res.data();
+   return res;
 }
 
 std::string GetUel4CSV( const int N )
@@ -489,7 +489,7 @@ void WriteSymbol( const int SyNr )
             if( Vals[gdx::vallevel] != 0 )
             {
                PGX->gdxGetElemText( static_cast<int>( Vals[gdx::vallevel] ), S.data(), IDum );
-               WriteQUELText( S.data() );
+               WriteQUELText( S );
             }
             break;
          case dt_par:
@@ -599,7 +599,7 @@ void WriteSymbol( const int SyNr )
                   fo << ')';
             }
          }
-         if( S[0] != '\0' ) WriteQText( S.data() );
+         if( S[0] != '\0' ) WriteQText( S );
       }
    }
    if( ACount == 0 && ShowData )
@@ -830,7 +830,7 @@ void WriteSymbolCSV( const int SyNr )
                   if( Vals[gdx::vallevel] != 0 )
                   {
                      PGX->gdxGetElemText( static_cast<int>( delphiRound( Vals[gdx::vallevel] ) ), S.data(), IDum );
-                     fo << Delim << QQCSV( S.data() );
+                     fo << Delim << QQCSV( S );
                   }
                   else
                      fo << Delim;
@@ -963,7 +963,7 @@ void WriteSymbolInfo()
    {
       PGX->gdxSymbolInfo( pair.second, AName.data(), ADim, iATyp );
       PGX->gdxSymbolInfoX( pair.second, ACount, AUserInfo, AExplText.data() );
-      fo << gdlib::strutilx::PadLeft( std::to_string( N + 1 ), w1 ) << ' ' << gdlib::strutilx::PadRight( AName.data(), w2 ) << ' ';
+      fo << gdlib::strutilx::PadLeft( std::to_string( N + 1 ), w1 ) << ' ' << gdlib::strutilx::PadRight( AName, w2 ) << ' ';
       fo << gdlib::strutilx::PadLeft( std::to_string( ADim ), 3 ) << ' ' << gdlib::strutilx::PadLeft( library::gdxDataTypStr( iATyp ), 4 ) << ' ';
       fo << gdlib::strutilx::PadLeft( std::to_string( ACount ), w3 ) << "  " << AExplText.data() << '\n';
       N++;
@@ -1157,7 +1157,7 @@ void WriteAcronyms()
    {
       PGX->gdxAcronymGetInfo( N, sName.data(), sText.data(), Indx );
       fo << "Acronym " << sName.data();
-      if( sText[0] != '\0' ) WriteQText( sText.data() );
+      if( sText[0] != '\0' ) WriteQText( sText );
       fo << ';' << '\n';
    }
 }
