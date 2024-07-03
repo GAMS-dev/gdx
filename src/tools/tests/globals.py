@@ -3,7 +3,7 @@ import platform
 import os
 
 
-cli_options: dict[str, bool | str] = {}
+cli_options: dict = {}
 
 
 class Platform(Enum):
