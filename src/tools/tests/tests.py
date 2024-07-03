@@ -28,10 +28,10 @@ def create_output_test(static_output_file_path: str, test_output_file_path: str)
             self.maxDiff = None
 
         if globals.cli_options['gdx_files_directory_path']:
-            gdx_files_directory_path = str(globals.cli_options['gdx_files_directory_path'])
+            assert type(globals.cli_options['gdx_files_directory_path']) is str
             self.assertEqual(
-                static_output_file_path.removeprefix(os.path.join(gdx_files_directory_path, 'output', 'static')),
-                test_output_file_path.removeprefix(os.path.join(gdx_files_directory_path, 'output', 'test'))
+                static_output_file_path.removeprefix(os.path.join(globals.cli_options['gdx_files_directory_path'], 'output', 'static')),
+                test_output_file_path.removeprefix(os.path.join(globals.cli_options['gdx_files_directory_path'], 'output', 'test'))
             )
         else:
             self.assertEqual(
