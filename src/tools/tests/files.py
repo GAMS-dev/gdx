@@ -110,6 +110,7 @@ def write_output(output_directory: str, gdxdump_path: str, gdx_files_directory_p
 
 def generate_output(output_type: globals.Output):
     if globals.cli_options['gdx_files_directory_path']:
+        assert type(globals.cli_options['gdx_files_directory_path']) is str
         match output_type:
             case globals.Output.STATIC: output_directory_path = os.path.join(globals.cli_options['gdx_files_directory_path'], 'output', 'static')
             case globals.Output.TEST: output_directory_path = os.path.join(globals.cli_options['gdx_files_directory_path'], 'output', 'test')
@@ -125,8 +126,9 @@ def generate_output(output_type: globals.Output):
     shutil.rmtree(output_directory_path, ignore_errors=True)
     os.makedirs(output_directory_path)
 
-    for gdx_file_path in get_gdx_file_paths(globals.cli_options['gdx_files_directory_path'] if globals.cli_options['gdx_files_directory_path'] else globals.output_directory_paths['gdx_files']):
+    gdx_files_directory_path = globals.cli_options['gdx_files_directory_path'] if globals.cli_options['gdx_files_directory_path'] else globals.output_directory_paths['gdx_files']
+    for gdx_file_path in get_gdx_file_paths(gdx_files_directory_path):
         gdxdump_options = gdxdump.get_gdxdump_options(gdx_file_path)
         for count, options in enumerate(gdxdump_options):
-            write_output(output_directory_path, globals.executable_path_current_directory, globals.cli_options['gdx_files_directory_path'], gdx_file_path, options,
+            write_output(output_directory_path, globals.executable_path_current_directory, gdx_files_directory_path, gdx_file_path, options,
                          count + 1, count < len(gdxdump_options) - 1, gdxdump.run_gdxdump(gdxdump_path, gdx_file_path, options), output_type)
