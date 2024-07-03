@@ -382,7 +382,7 @@ bool WriteSymbolAsItem( const int SyNr, const bool DomInfo )
    {
       // TODO: Works like this, but implementation is different than in Delphi code
       // const char qChar = std::string { SyTxt.data() }.find( '\"' ) == 0 ? '\"' : '\'';
-      const char qChar = '\"';
+      constexpr char qChar = '\"';
       fo << ' ' << qChar << SyTxt.data() << qChar;
    }
    return result;
