@@ -118,7 +118,6 @@ TStdThread::~TStdThread()
    {
       if( joinable() )
          detach();
-      std::thread::~thread();
    }
    catch( const std::exception & )
    {

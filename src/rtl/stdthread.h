@@ -56,7 +56,7 @@ class TStdThread : public std::thread
 {
 public:
    explicit TStdThread(const std::function<void()> &execute);
-   virtual ~TStdThread();
+   ~TStdThread();
    [[nodiscard]] uint64_t getThreadHash() const;
 };
 

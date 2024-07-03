@@ -117,7 +117,7 @@ void CompressTextFile( const std::string &fn, const std::string &fo, const std::
       NrRead = Fin.Read( Buffer.data(), (int) Buffer.size() );
       if( !NrRead ) break;
       Fout.Write( Buffer.data(), NrRead );
-   } while( NrRead >= static_cast<int>( Buffer.size() ) );
+   } while( NrRead >= static_cast<decltype(NrRead)>( Buffer.size() ) );
 }
 
 void UnCompressTextFile( const std::string &fn, const std::string &fo, const std::string &PassWord, int &ErrNr, std::string &ErrMsg )
