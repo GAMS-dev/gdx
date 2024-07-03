@@ -842,7 +842,7 @@ void WriteSymbolCSV( const int SyNr )
    else
    {
       CSVCols = std::make_unique<bool[]>( NrUEL );
-      std::fill( CSVCols.get(), CSVCols.get() + NrUEL, false );
+      std::fill_n( CSVCols.get(), NrUEL, false );
       HighIndex = 0;
       ColCnt = 0;
       PGX->gdxDataReadRawStart( SyNr, NRec );
@@ -859,7 +859,7 @@ void WriteSymbolCSV( const int SyNr )
       PGX->gdxDataReadDone();
 
       CSVUels = std::make_unique<int[]>( ColCnt );
-      std::fill( CSVUels.get(), CSVUels.get() + ColCnt, 0 );
+      std::fill_n( CSVUels.get(), ColCnt, 0 );
       Col = 0;
       for( Indx = 0; Indx < HighIndex; Indx++ )
       {
