@@ -26,6 +26,7 @@ def get_gdx_file_paths(directory_path=globals.output_directory_paths['gdx_files'
 
 def get_output_file_paths() -> list[tuple[str, str]]:
     if globals.cli_options['gdx_files_directory_path']:
+        assert type(globals.cli_options['gdx_files_directory_path']) is str
         static_output_directory_path = os.path.join(globals.cli_options['gdx_files_directory_path'], 'output', 'static')
         test_output_directory_path = os.path.join(globals.cli_options['gdx_files_directory_path'], 'output', 'test')
     else:
@@ -39,8 +40,10 @@ def get_output_file_paths() -> list[tuple[str, str]]:
             return []
         else:
             output_file_paths = list(zip(static_output_file_paths, test_output_file_paths))
-            if globals.cli_options['filter_tests']:
-                output_file_paths = list(filter(lambda file_path_tuple: globals.cli_options['filter_tests'] in file_path_tuple[0] or globals.cli_options['filter_tests'] in file_path_tuple[1], output_file_paths))
+            filter_tests = globals.cli_options['filter_tests']
+            if filter_tests:
+                assert type(filter_tests) is str
+                output_file_paths = list(filter(lambda file_path_tuple: filter_tests in file_path_tuple[0] or filter_tests in file_path_tuple[1], output_file_paths))
             output_file_paths.sort()
             return output_file_paths
     else:
