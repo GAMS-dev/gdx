@@ -9,7 +9,7 @@ j = gt.Set(m, 'j', records=['new-york', 'chicago', 'topeka'], description='marke
 
 # add parameters
 a = gt.Parameter(m, 'a', ['*'], description='capacity of plant i in cases')
-b = gt.Parameter(m, 'b', j, description='demand at market j in cases')
+b = gt.Parameter(m, 'b', [j], description='demand at market j in cases')
 d = gt.Parameter(m, 'd', [i, j], description='distance in thousands of miles')
 f = gt.Parameter(
     m, 'f', records=90, description='freight in dollars per case per thousand miles'
@@ -71,8 +71,8 @@ z = gt.Variable(
 
 # add equations
 cost = gt.Equation(m, 'cost', 'eq', description='define objective function')
-supply = gt.Equation(m, 'supply', 'leq', i, description='observe supply limit at plant i')
-demand = gt.Equation(m, 'demand', 'geq', j, description='satisfy demand at market j')
+supply = gt.Equation(m, 'supply', 'leq', [i], description='observe supply limit at plant i')
+demand = gt.Equation(m, 'demand', 'geq', [j], description='satisfy demand at market j')
 
 # set equation records
 cost.setRecords(
