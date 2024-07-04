@@ -30,7 +30,7 @@ char QQ( const std::string &s );
 std::string QQCSV( const std::string &s );
 
 // Function is commented out in the Delphi source code
-// string QUEL(const string &S);
+// std::string QUEL(const std::string &S);
 
 // Auxiliary function for WriteQText and WriteQUELText
 void WriteQuotedCommon( const std::string &S, const std::function<bool( char )> &isSpecialPredicate );
