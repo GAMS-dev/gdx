@@ -611,7 +611,7 @@ void WriteSymbol( const int SyNr )
       {
          fo << " (" << SyName.data();
          if( AUser == 0 )
-            strcpy( A2Name.data(), "*" );
+            A2Name = "*";
          else
             PGX->gdxSymbolInfo( AUser, A2Name.data(), A2Dim, iA2Typ );
          fo << ", " << A2Name.data() << ");" << '\n';
@@ -760,10 +760,10 @@ void WriteSymbolCSV( const int SyNr )
       Nr = 1;
       for( int D {}; D < ADim; D++ )
       {
-         strcpy( s.data(), gdxDomSPtrs[D] );
+         s = gdxDomSPtrs[D];
          if( s == "*" )
          {
-            strcpy( s.data(), ( "Dim" + std::to_string( D + 1 ) ).data() );
+            s = "Dim" + std::to_string( D + 1 );
             strcpy( gdxDomSPtrs[D], s.data() );
          }
          while( true )
@@ -779,7 +779,7 @@ void WriteSymbolCSV( const int SyNr )
             }
             if( Done )
                break;
-            strcpy( s.data(), ( std::string { gdxDomS[D] } + '_' + std::to_string( Nr ) ).data() );
+            s = std::string { gdxDomS[D] } + '_' + std::to_string( Nr );
             Nr++;
          }
          strcpy( DomSPtrs[D], s.data() );
@@ -1290,7 +1290,7 @@ int main( const int argc, const char *argv[] )
 
       while( ParamNr <= ParamCount )
       {
-         strcpy( s.data(), NextParam().data() );
+         s = NextParam();
          s.to_upper_case();
          if( s == "SYMB" || s == "SYMB=" )
          {
@@ -1300,7 +1300,7 @@ int main( const int argc, const char *argv[] )
                ExitCode = 1;
                break;
             }
-            strcpy( Symb.data(), NextParam().data() );
+            Symb = NextParam();
             if( Symb[0] == '\0' )
             {
                printErrorMessage( "Symbol missing" );
@@ -1334,7 +1334,7 @@ int main( const int argc, const char *argv[] )
                ExitCode = 1;
                break;
             }
-            strcpy( s.data(), NextParam().data() );
+            s = NextParam();
             s.to_upper_case();
             if( s == "TAB" )
                Delim = '\t';
@@ -1362,7 +1362,7 @@ int main( const int argc, const char *argv[] )
                ExitCode = 1;
                break;
             }
-            strcpy( s.data(), NextParam().data() );
+            s = NextParam();
             s.to_upper_case();
             if( s == "PERIOD" )
                DecimalSep = '.';
@@ -1429,7 +1429,7 @@ int main( const int argc, const char *argv[] )
                ExitCode = 1;
                break;
             }
-            strcpy( s.data(), NextParam().data() );
+            s = NextParam();
             s.to_upper_case();
             if( s == "NORMAL" )
                OutFormat = TOutFormat::fmt_normal;
@@ -1453,7 +1453,7 @@ int main( const int argc, const char *argv[] )
                ExitCode = 1;
                break;
             }
-            strcpy( s.data(), NextParam().data() );
+            s = NextParam();
             s.to_upper_case();
             if( s == "NORMAL" )
                dblFormat = TDblFormat::dbl_none;
@@ -1488,7 +1488,7 @@ int main( const int argc, const char *argv[] )
          }
          if( s == "IDE" || s == "IDE=" )
          {
-            strcpy( s.data(), NextParam().data() );
+            s = NextParam();
             if( s[0] == '\0' )
             {
                printErrorMessage( "Value missing for IDE parameter" );
@@ -1500,7 +1500,7 @@ int main( const int argc, const char *argv[] )
          }
          if( s == "FILTERDEF" || s == "FILTERDEF=" )
          {
-            strcpy( s.data(), NextParam().data() );
+            s = NextParam();
             if( s[0] == '\0' )
             {
                printErrorMessage( "Value missing for FilterDef parameter" );
@@ -1512,7 +1512,7 @@ int main( const int argc, const char *argv[] )
          }
          if( s == "CDIM" || s == "CDIM=" )
          {
-            strcpy( s.data(), NextParam().data() );
+            s = NextParam();
             if( s[0] == '\0' )
             {
                printErrorMessage( "Value missing for CDim parameter" );
