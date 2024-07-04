@@ -691,7 +691,8 @@ void WriteSymbol( const int SyNr )
 
 int64_t delphiRound( const double x )
 {
-   if( x >= 0 ) return static_cast<int64_t>( x + 0.5 );
+   if( x >= 0 )
+      return static_cast<int64_t>( x + 0.5 );
    else
       return static_cast<int64_t>( x - 0.5 );
 }
