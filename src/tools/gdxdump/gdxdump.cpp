@@ -1577,11 +1577,11 @@ int main( const int argc, const char *argv[] )
    // }
 
    {
-      std::string s;
-      PGX = std::make_unique<gdx::TGXFileObj>( s );
-      if( !s.empty() )
+      std::string ErrMsg;
+      PGX = std::make_unique<gdx::TGXFileObj>( ErrMsg );
+      if( !ErrMsg.empty() )
       {
-         printErrorMessage( "Error using GDX library: " + s, false );
+         printErrorMessage( "Error using GDX library: " + ErrMsg, false );
          ExitCode = 3;
          goto End;
       }
