@@ -12,7 +12,7 @@ short_string::short_string() = default;
 
 short_string::short_string( const char *s )
 {
-   const auto s_length { static_cast<uint8_t>( std::strlen( s ) ) };
+   const size_t s_length { std::strlen( s ) };
    assert( s_length < MAX_LENGTH );
    std::memcpy( buffer.data(), s, s_length );
 }
@@ -82,7 +82,7 @@ void short_string::append( const char c )
 void short_string::append( const char *s )
 {
    const uint8_t length { this->length() };
-   const auto s_length { static_cast<uint8_t>( std::strlen( s ) ) };
+   const size_t s_length { std::strlen( s ) };
    assert( length + s_length < MAX_LENGTH );
    std::memcpy( buffer.data() + length, s, s_length );
    buffer[length + s_length] = '\0';
@@ -130,7 +130,7 @@ void short_string::to_upper_case()
 
 short_string &short_string::operator=( const std::string &s )
 {
-   const auto s_length { static_cast<uint8_t>( s.length() ) };
+   const size_t s_length { s.length() };
    assert( s_length < MAX_LENGTH );
    std::memcpy( buffer.data(), s.data(), s_length );
    buffer[s_length] = '\0';
