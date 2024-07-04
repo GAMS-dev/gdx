@@ -1206,7 +1206,7 @@ std::string NextParam()
       }
    }
    if( result == "\'\'" )
-      return "";
+      return {};
    return result;
 }
 
@@ -1710,7 +1710,7 @@ int main( const int argc, const char *argv[] )
    {
       if( OutFormat == TOutFormat::fmt_csv )
       {
-         WriteUELTable( "" );
+         WriteUELTable( {} );
          goto AllDone;
       }
       fo << '\n';
