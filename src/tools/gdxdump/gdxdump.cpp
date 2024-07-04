@@ -393,7 +393,7 @@ bool WriteSymbolAsItem( const int SyNr, const bool DomInfo )
       }
       fo << ".\"" << Domain << '\"';
    }
-   else if( SyTxt[0] != '\0' )
+   else if( !SyTxt.empty() )
    {
       // TODO: Works like this, but implementation is different than in Delphi code
       // const char qChar = std::string { SyTxt.data() }.find( '\"' ) == 0 ? '\"' : '\'';
@@ -641,7 +641,7 @@ void WriteSymbol( const int SyNr )
                   fo << ')';
             }
          }
-         if( S[0] != '\0' )
+         if( !S.empty() )
             WriteQText( S.data() );
       }
    }
@@ -1223,7 +1223,7 @@ void WriteAcronyms()
    {
       PGX->gdxAcronymGetInfo( N, sName.data(), sText.data(), Indx );
       fo << "Acronym " << sName.data();
-      if( sText[0] != '\0' )
+      if( !sText.empty() )
          WriteQText( sText.data() );
       fo << ';' << '\n';
    }
@@ -1293,14 +1293,14 @@ int main( const int argc, const char *argv[] )
          s.to_upper_case();
          if( s == "SYMB" || s == "SYMB=" )
          {
-            if( Symb[0] != '\0' )
+            if( !Symb.empty() )
             {
                printErrorMessage( "Only one single symbol can be specified" );
                ExitCode = 1;
                break;
             }
             Symb = NextParam();
-            if( Symb[0] == '\0' )
+            if( Symb.empty() )
             {
                printErrorMessage( "Symbol missing" );
                ExitCode = 1;
@@ -1488,7 +1488,7 @@ int main( const int argc, const char *argv[] )
          if( s == "IDE" || s == "IDE=" )
          {
             s = NextParam();
-            if( s[0] == '\0' )
+            if( s.empty() )
             {
                printErrorMessage( "Value missing for IDE parameter" );
                ExitCode = 1;
@@ -1500,7 +1500,7 @@ int main( const int argc, const char *argv[] )
          if( s == "FILTERDEF" || s == "FILTERDEF=" )
          {
             s = NextParam();
-            if( s[0] == '\0' )
+            if( s.empty() )
             {
                printErrorMessage( "Value missing for FilterDef parameter" );
                ExitCode = 1;
@@ -1512,7 +1512,7 @@ int main( const int argc, const char *argv[] )
          if( s == "CDIM" || s == "CDIM=" )
          {
             s = NextParam();
-            if( s[0] == '\0' )
+            if( s.empty() )
             {
                printErrorMessage( "Value missing for CDim parameter" );
                ExitCode = 1;
@@ -1604,7 +1604,7 @@ int main( const int argc, const char *argv[] )
       ExitCode = 1;
       goto End;
    }
-   if( OutFormat == TOutFormat::fmt_csv && Symb[0] == '\0' )
+   if( OutFormat == TOutFormat::fmt_csv && Symb.empty() )
    {
       printErrorMessage( "Symbol not specified when writing a CSV file" );
       ExitCode = 1;
@@ -1623,7 +1623,7 @@ int main( const int argc, const char *argv[] )
       goto End;
    }
 
-   if( Symb[0] == '\0' )
+   if( Symb.empty() )
       ShowHdr = true;
    if( OutFormat == TOutFormat::fmt_gamsbas )
    {
@@ -1742,7 +1742,7 @@ int main( const int argc, const char *argv[] )
    }
 
    LineCount = 0;
-   if( Symb[0] != '\0' )
+   if( !Symb.empty() )
    {
       int N;
       if( PGX->gdxFindSymbol( Symb.data(), N ) != 0 )
