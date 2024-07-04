@@ -103,6 +103,10 @@ void WriteSymbolCSV( int SyNr );
 // Auxiliary function for WriteSymbolInfo and WriteDomainInfo
 int getIntegerWidth( int number );
 
+// Auxiliary function for WriteSymbolInfo
+template<size_t length>
+int getLength( const std::array<char, length> &text );
+
 void WriteSymbolInfo();
 
 void WriteDomainInfo();

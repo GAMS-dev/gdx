@@ -934,6 +934,14 @@ int getIntegerWidth( const int number )
    return static_cast<int>( std::string { std::to_string( number ) }.length() );
 }
 
+template<size_t length>
+int getLength( const std::array<char, length> &text )
+{
+   size_t i {};
+   while( i < length && text[i] != '\0' ) i++;
+   return static_cast<int>( i );
+}
+
 void WriteSymbolInfo()
 {
    int ADim, iATyp, NrSy, NrUel, w1, w2, w3, ACount, AUserInfo;
@@ -948,7 +956,7 @@ void WriteSymbolInfo()
    {
       PGX->gdxSymbolInfo( N, AName.data(), ADim, iATyp );
       PGX->gdxSymbolInfoX( N, ACount, AUserInfo, AExplText.data() );
-      if( static_cast<int>( AName.length() ) > w2 ) w2 = static_cast<int>( AName.length() );
+      if( getLength( AName ) > w2 ) w2 = getLength( AName );
       if( getIntegerWidth( ACount ) > w3 ) w3 = getIntegerWidth( ACount );
       SL.insert( { AName, N } );
    }
