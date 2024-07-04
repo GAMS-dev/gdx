@@ -1223,7 +1223,7 @@ int main( const int argc, const char *argv[] )
       while( ParamNr <= ParamCount )
       {
          strcpy( s.data(), NextParam().data() );
-         toUpperCase( s );
+         s.to_upper_case();
          if( strcmp( s.data(), "SYMB" ) == 0 || strcmp( s.data(), "SYMB=" ) == 0 )
          {
             if( Symb[0] != '\0' )
@@ -1267,7 +1267,7 @@ int main( const int argc, const char *argv[] )
                break;
             }
             strcpy( s.data(), NextParam().data() );
-            toUpperCase( s );
+            s.to_upper_case();
             if( strcmp( s.data(), "TAB" ) == 0 ) Delim = '\t';
             else if( strcmp( s.data(), "COMMA" ) == 0 )
                Delim = ',';
@@ -1294,7 +1294,7 @@ int main( const int argc, const char *argv[] )
                break;
             }
             strcpy( s.data(), NextParam().data() );
-            toUpperCase( s );
+            s.to_upper_case();
             if( strcmp( s.data(), "PERIOD" ) == 0 ) DecimalSep = '.';
             else if( strcmp( s.data(), "COMMA" ) == 0 )
                DecimalSep = ',';
@@ -1360,7 +1360,7 @@ int main( const int argc, const char *argv[] )
                break;
             }
             strcpy( s.data(), NextParam().data() );
-            toUpperCase( s );
+            s.to_upper_case();
             if( strcmp( s.data(), "NORMAL" ) == 0 ) OutFormat = TOutFormat::fmt_normal;
             else if( strcmp( s.data(), "GAMSBAS" ) == 0 )
                OutFormat = TOutFormat::fmt_gamsbas;
@@ -1383,7 +1383,7 @@ int main( const int argc, const char *argv[] )
                break;
             }
             strcpy( s.data(), NextParam().data() );
-            toUpperCase( s );
+            s.to_upper_case();
             if( strcmp( s.data(), "NORMAL" ) == 0 ) dblFormat = TDblFormat::dbl_none;
             else if( strcmp( s.data(), "HEXBYTES" ) == 0 )
                dblFormat = TDblFormat::dbl_hexBytes;
