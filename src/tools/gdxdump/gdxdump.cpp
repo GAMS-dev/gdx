@@ -1171,6 +1171,12 @@ void WriteAcronyms()
    }
 }
 
+template<size_t length>
+void toUpperCase( std::array<char, length> &text )
+{
+   for( char &c: text ) c = static_cast<char>( toupper( c ) );
+}
+
 int main( const int argc, const char *argv[] )
 {
    short_string s {}, Symb {};
@@ -1228,12 +1234,6 @@ int main( const int argc, const char *argv[] )
       InputFile = ParamStr[1];
       ParamNr = 2;
       ParamHold.clear();
-
-      auto to_upper_case = []( std::string &s ) {
-         std::transform( s.begin(), s.end(), s.begin(), []( unsigned char c ) {
-            return std::toupper( c );
-         } );
-      };
 
       while( ParamNr <= ParamCount )
       {

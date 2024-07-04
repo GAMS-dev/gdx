@@ -119,6 +119,10 @@ std::string NextParam();
 
 void WriteAcronyms();
 
+// Auxiliary function for main
+template<size_t length>
+void toUpperCase( std::array<char, length> &text );
+
 int main( int argc, const char *argv[] );
 
 }// namespace gdxdump
