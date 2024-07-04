@@ -948,7 +948,7 @@ void WriteSymbolInfo()
    {
       PGX->gdxSymbolInfo( N, AName.data(), ADim, iATyp );
       PGX->gdxSymbolInfoX( N, ACount, AUserInfo, AExplText.data() );
-      if( getLength( AName ) > w2 ) w2 = getLength( AName );
+      if( static_cast<int>( AName.length() ) > w2 ) w2 = AName.length();
       if( getIntegerWidth( ACount ) > w3 ) w3 = getIntegerWidth( ACount );
       SL.insert( { AName, N } );
    }
