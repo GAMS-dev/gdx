@@ -348,7 +348,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       {
          for( int T { 0 }; T < tvarvaltype_size; T++ )
          {
-            if( ActiveFields.find( gdx::tvarvaltype( T ) ) != ActiveFields.end() && !DoublesEqual( V1[T], V2[T] ) )
+            if( ActiveFields.find( static_cast<gdx::tvarvaltype>( T ) ) != ActiveFields.end() && !DoublesEqual( V1[T], V2[T] ) )
             {
                result = false;
                break;
@@ -376,7 +376,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          {
             for( int T { 0 }; T < tvarvaltype_size; T++ )
             {
-               if( ActiveFields.find( gdx::tvarvaltype( T ) ) == ActiveFields.end() ) continue;
+               if( ActiveFields.find( static_cast<gdx::tvarvaltype>( T ) ) == ActiveFields.end() ) continue;
                if( DoublesEqual( V1[T], V2[T] ) ) continue;
 
                gdx::TgdxValues Vals;
@@ -433,7 +433,7 @@ void CompareSy( const int Sy1, const int Sy2 )
             Eq = true;
             for( int T { 0 }; T < tvarvaltype_size; T++ )
             {
-               if( ActiveFields.find( gdx::tvarvaltype( T ) ) != ActiveFields.end() && !DoublesEqual( Vals[T], DefValues[T] ) )
+               if( ActiveFields.find( static_cast<gdx::tvarvaltype>( T ) ) != ActiveFields.end() && !DoublesEqual( Vals[T], DefValues[T] ) )
                {
                   Eq = false;
                   break;
@@ -478,7 +478,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          gdx::TgdxValues Vals2;
          for( int T { 0 }; T < tvarvaltype_size; T++ )
          {
-            if( ActiveFields.find( gdx::tvarvaltype( T ) ) == ActiveFields.end() )
+            if( ActiveFields.find( static_cast<gdx::tvarvaltype>( T ) ) == ActiveFields.end() )
                continue;
             Vals2[gdx::vallevel] = Vals[T];
             WriteDiff( Act, GamsFieldNames[T], Keys, Vals2 );
