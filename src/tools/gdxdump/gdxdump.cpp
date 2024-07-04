@@ -829,10 +829,10 @@ void WriteSymbolCSV( const int SyNr )
                fo << Delim << QQCSV( "Text" );
             if( ( ATyp == dt_var || ATyp == dt_equ ) && bFullEVRec )
             {
-               fo << Delim << QQCSV( "Marginal" );
-               fo << Delim << QQCSV( "Lower" );
-               fo << Delim << QQCSV( "Upper" );
-               fo << Delim << QQCSV( "Scale" );
+               fo << Delim << QQCSV( "Marginal" )
+                  << Delim << QQCSV( "Lower" )
+                  << Delim << QQCSV( "Upper" )
+                  << Delim << QQCSV( "Scale" );
             }
             fo << '\n';
          }
@@ -930,7 +930,8 @@ void WriteSymbolCSV( const int SyNr )
       }
       else if( ShowHdr )
       {
-         for( int D {}; D < ADim - 1; D++ ) fo << QQCSV( DomS[D] ) << Delim;
+         for( int D {}; D < ADim - 1; D++ )
+            fo << QQCSV( DomS[D] ) << Delim;
          for( Col = 0; Col < ColCnt; Col++ )
          {
             fo << GetUel4CSV( CSVUels[Col] );
@@ -1045,9 +1046,7 @@ void WriteDomainInfo()
    if( w1 < 4 )
       w1 = 4;
    fo << gdlib::strutilx::PadLeft( "SyNr", w1 )
-      << "  Type"
-      << "  DomInf "
-      << "Symbol" << '\n';
+      << "  Type" << "  DomInf " << "Symbol" << '\n';
    for( int N { 1 }; N <= NrSy; N++ )
    {
       PGX->gdxSymbolInfo( N, AName.data(), ADim, iATyp );
@@ -1769,14 +1768,15 @@ int main( const int argc, const char *argv[] )
       fo << "$onEmpty" << '\n';
       if( !ShowData )
       {
-         fo << "$offEolCom" << '\n';
-         fo << "$eolCom !!" << '\n';
+         fo << "$offEolCom" << '\n'
+            << "$eolCom !!" << '\n';
       }
       int NrSy, NrUel;
       PGX->gdxSystemInfo( NrSy, NrUel );
-      for( int N { 1 }; N <= NrSy; N++ ) WriteSymbol( N );
-      fo << '\n';
-      fo << "$offEmpty" << '\n';
+      for( int N { 1 }; N <= NrSy; N++ )
+         WriteSymbol( N );
+      fo << '\n'
+         << "$offEmpty" << '\n';
    }
    if( OutFormat == TOutFormat::fmt_gamsbas && LineCount > 6 )
       fo << "$onListing" << '\n';
