@@ -142,9 +142,9 @@ void WriteUELTable( const std::string &name )
          fo << "Set " << name << " /" << '\n';
       else
       {
-         fo << "$onEmpty" << '\n';
-         fo << "Set " << name << "(*) / /;" << '\n';
-         fo << "$offEmpty" << '\n';
+         fo << "$onEmpty" << '\n'
+            << "Set " << name << "(*) / /;" << '\n'
+            << "$offEmpty" << '\n';
       }
    }
    for( N = 1; N <= NrUel; N++ )
@@ -407,13 +407,13 @@ void WriteSymbolsAsSet( const bool DomInfo )
 {
    if( DomInfo )
    {
-      fo << "alias (Symbol, Dim, Type, Domain, *);" << '\n';
-      fo << "set    gdxitemsDI(Symbol,Dim,Type,Domain)  Items in the GDX file /" << '\n';
+      fo << "alias (Symbol, Dim, Type, Domain, *);" << '\n'
+         << "set    gdxitemsDI(Symbol,Dim,Type,Domain)  Items in the GDX file /" << '\n';
    }
    else
    {
-      fo << "alias (Symbol, Dim, Type, *);" << '\n';
-      fo << "set    gdxitems(Symbol,Dim,Type)  Items in the GDX file /" << '\n';
+      fo << "alias (Symbol, Dim, Type, *);" << '\n'
+         << "set    gdxitems(Symbol,Dim,Type)  Items in the GDX file /" << '\n';
    }
    int NrSy, NrUel;
    PGX->gdxSystemInfo( NrSy, NrUel );
@@ -673,13 +673,13 @@ void WriteSymbol( const int SyNr )
          {
             if( ACount == 0 )
             {
-               fo << " ; !!empty" << '\n';
-               fo << "$loadDC " << SyName.data() << " !!empty" << '\n';
+               fo << " ; !!empty" << '\n'
+                  << "$loadDC " << SyName.data() << " !!empty" << '\n';
             }
             else
             {
-               fo << " ;" << '\n';
-               fo << "$loadDC " << SyName.data() << '\n';
+               fo << " ;" << '\n'
+                  << "$loadDC " << SyName.data() << '\n';
             }
          }
       }
@@ -1013,19 +1013,18 @@ void WriteSymbolInfo()
    }
    fo << gdlib::strutilx::PadLeft( " ", w1 ) << ' '
       << gdlib::strutilx::PadRight( "Symbol", w2 )
-      << " Dim"
-      << " Type ";
-   fo << gdlib::strutilx::PadRight( "Records", w3 ) << "  "
-      << "Explanatory text" << '\n';
+      << " Dim" << " Type "
+      << gdlib::strutilx::PadRight( "Records", w3 )
+      << "  " << "Explanatory text" << '\n';
 
    int N {};
    for( const auto &pair: SL )
    {
       PGX->gdxSymbolInfo( pair.second, AName.data(), ADim, iATyp );
       PGX->gdxSymbolInfoX( pair.second, ACount, AUserInfo, AExplText.data() );
-      fo << gdlib::strutilx::PadLeft( std::to_string( N + 1 ), w1 ) << ' ' << gdlib::strutilx::PadRight( AName.data(), w2 ) << ' ';
-      fo << gdlib::strutilx::PadLeft( std::to_string( ADim ), 3 ) << ' ' << gdlib::strutilx::PadLeft( library::gdxDataTypStr( iATyp ), 4 ) << ' ';
-      fo << gdlib::strutilx::PadLeft( std::to_string( ACount ), w3 ) << "  " << AExplText.data() << '\n';
+      fo << gdlib::strutilx::PadLeft( std::to_string( N + 1 ), w1 ) << ' ' << gdlib::strutilx::PadRight( AName.data(), w2 ) << ' '
+         << gdlib::strutilx::PadLeft( std::to_string( ADim ), 3 ) << ' ' << gdlib::strutilx::PadLeft( library::gdxDataTypStr( iATyp ), 4 ) << ' '
+         << gdlib::strutilx::PadLeft( std::to_string( ACount ), w3 ) << "  " << AExplText.data() << '\n';
       N++;
    }
 }
@@ -1118,9 +1117,9 @@ void WriteSetText()
       PGX->gdxDataReadDone();
    }
    // fo << '\n';
-   fo << "Count of set text strings in GDX: " << nText << '\n';
-   fo << "max 0-based textIdx found in GDX: " << mxTextIdx << '\n';
-   fo << "   idx   text" << '\n';
+   fo << "Count of set text strings in GDX: " << nText << '\n'
+      << "max 0-based textIdx found in GDX: " << mxTextIdx << '\n'
+      << "   idx   text" << '\n';
    for( textIdx = 0; textIdx < nText; textIdx++ )
    {
       if( textIdx == 0 )
@@ -1701,8 +1700,8 @@ int main( const int argc, const char *argv[] )
 
    if( !ShowData )
    {
-      fo << '\n';
-      fo << "$gdxIn " << InputFile << '\n';
+      fo << '\n'
+         << "$gdxIn " << InputFile << '\n';
    }
    if( OutFormat != TOutFormat::fmt_csv )
       WriteAcronyms();
