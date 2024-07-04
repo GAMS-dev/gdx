@@ -683,26 +683,25 @@ bool GetAsDouble( const std::string &S, double &V )
 
 void Usage()
 {
-   std::cout
-           << "gdxdiff: GDX file differ" << '\n'
-           // TODO: Replace blank line with function output
-           // << gdlGetAuditLine() << '\n'
-           << '\n'
-           << "Usage: " << '\n'
-           << "   gdxdiff file1.gdx file2.gdx [diffile.gdx] [options]" << '\n'
-           << "   Options:" << '\n'
-           << "      Eps     = Val       epsilon for comparison" << '\n'
-           << "      RelEps  = Val       epsilon for relative comparison" << '\n'
-           << "      Field   = gamsfield (L, M, Up, Lo, Prior, Scale or All" << '\n'
-           << "      FldOnly             write var or equ as parameter for selected field" << '\n'
-           << "      DiffOnly            write var or equ as parameter with field as an extra dimension" << '\n'
-           << "      CmpDefaults         compare default values" << '\n'
-           << "      CmpDomains          compare domains" << '\n'
-           << "      MatrixFile          compare GAMS matrix files in GDX format" << '\n'
-           << "      IgnoreOrder         ignore UEL order of input files - reduces size of output file" << '\n'
-           << "      SetDesc = Y|N       compare explanatory texts for set elements, activated by default (=Y)" << '\n'
-           << "      Id      = one or more identifiers; only ids listed will be compared" << '\n'
-           << "   The .gdx file extension is the default" << std::endl;
+   std::cout << "gdxdiff: GDX file differ" << '\n'
+             // TODO: Replace blank line with function output
+             // << gdlGetAuditLine() << '\n'
+             << '\n'
+             << "Usage: " << '\n'
+             << "   gdxdiff file1.gdx file2.gdx [diffile.gdx] [options]" << '\n'
+             << "   Options:" << '\n'
+             << "      Eps     = Val       epsilon for comparison" << '\n'
+             << "      RelEps  = Val       epsilon for relative comparison" << '\n'
+             << "      Field   = gamsfield (L, M, Up, Lo, Prior, Scale or All" << '\n'
+             << "      FldOnly             write var or equ as parameter for selected field" << '\n'
+             << "      DiffOnly            write var or equ as parameter with field as an extra dimension" << '\n'
+             << "      CmpDefaults         compare default values" << '\n'
+             << "      CmpDomains          compare domains" << '\n'
+             << "      MatrixFile          compare GAMS matrix files in GDX format" << '\n'
+             << "      IgnoreOrder         ignore UEL order of input files - reduces size of output file" << '\n'
+             << "      SetDesc = Y|N       compare explanatory texts for set elements, activated by default (=Y)" << '\n'
+             << "      Id      = one or more identifiers; only ids listed will be compared" << '\n'
+             << "   The .gdx file extension is the default" << std::endl;
 }
 
 // Function is empty in Delphi code
