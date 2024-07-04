@@ -43,7 +43,7 @@ uint8_t short_string::length() const
 
 char short_string::front() const
 {
-   const char c = buffer.front();
+   const char c { buffer.front() };
    assert( c != '\0' );
    return c;
 }
