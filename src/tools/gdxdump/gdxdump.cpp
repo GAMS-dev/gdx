@@ -467,7 +467,8 @@ std::string varTypStrClassic( const int i )
 
 void WriteSymbol( const int SyNr )
 {
-   library::short_string SyName {}, S {}, SubTypeName {};
+   library::short_string SyName {}, S {};
+   std::string SubTypeName;
    int ADim, iATyp, ACount, AUser, IDum, NRec, FDim;
    gdxSyType ATyp;
    bool IsScalar, FrstWrite;
@@ -574,21 +575,21 @@ void WriteSymbol( const int SyNr )
       case dt_set:
          DefaultValues[gdx::vallevel] = 0;
          if( AUser == GMS_SETTYPE_SINGLETON )
-            strcpy( SubTypeName.data(), "Singleton" );
+            SubTypeName = "Singleton";
          break;
       case dt_var:
          if( AUser < 0 || AUser > GMS_VARTYPE_SEMIINT )
             AUser = GMS_VARTYPE_FREE;
          std::copy( std::begin( gmsDefRecVar[AUser] ), std::end( gmsDefRecVar[AUser] ), std::begin( DefaultValues ) );
          if( AUser != GMS_VARTYPE_UNKNOWN )
-            strcpy( SubTypeName.data(), varTypStrClassic( AUser ).data() );
+            SubTypeName = varTypStrClassic( AUser );
          break;
       case dt_equ:
          if( AUser < GMS_EQUTYPE_E || AUser > GMS_EQUTYPE_B )
             AUser = GMS_EQUTYPE_E;
          std::copy( std::begin( gmsDefRecEqu[AUser] ), std::end( gmsDefRecEqu[AUser] ), std::begin( DefaultValues ) );
          if( AUser == GMS_EQUTYPE_B )
-            strcpy( SubTypeName.data(), "Logic" );
+            SubTypeName = "Logic";
          break;
       default:
          DefaultValues[gdx::vallevel] = 0;
@@ -600,8 +601,8 @@ void WriteSymbol( const int SyNr )
          fo << "Scalar";
       else
       {
-         if( SubTypeName[0] != '\0' )
-            fo << SubTypeName.data() << ' ';
+         if( !SubTypeName.empty() )
+            fo << SubTypeName << ' ';
          fo << library::gdxDataTypStrL( ATyp );
       }
       if( ATyp != dt_alias )
