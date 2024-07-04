@@ -33,14 +33,13 @@
 
 #include "gdxdump.h"
 #include "../library/common.h"
+#include "../library/short_string.h"
 // TGXFileObj class
 #include "../../gdx.h"
 #include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
 // Global constants
 #include "../../../generated/gclgms.h"
-
-using short_string = std::array<char, GMS_SSSIZE>;
 
 namespace gdxdump
 {
@@ -145,7 +144,7 @@ void WriteUELTable( const std::string &name )
    }
    for( N = 1; N <= NrUel; N++ )
    {
-      short_string s {};
+      library::short_string s {};
       int UMap;
       PGX->gdxUMUelGet( N, s.data(), UMap );
       fo << "  ";
@@ -287,7 +286,7 @@ std::string DblToStrHexponential( const double x )
 
 void WrVal( const double V )
 {
-   short_string acrname {};
+   library::short_string acrname {};
    if( PGX->gdxAcronymName( V, acrname.data() ) != 0 ) fo << acrname.data();
    else
    {
@@ -331,7 +330,7 @@ static int BadUELs = 0;
 
 std::string GetUELAsString( const int N )
 {
-   short_string res {};
+   library::short_string res {};
    int IDum;
    if( !PGX->gdxUMUelGet( N, res.data(), IDum ) )
    {
@@ -349,11 +348,11 @@ std::string GetUel4CSV( const int N )
 bool WriteSymbolAsItem( const int SyNr, const bool DomInfo )
 {
    bool result = true;
-   short_string SyId {};
+   library::short_string SyId {};
    int SyDim, SyTyp;
    PGX->gdxSymbolInfo( SyNr, SyId.data(), SyDim, SyTyp );
    int SyCnt, SyUser;
-   short_string SyTxt {};
+   library::short_string SyTxt {};
    PGX->gdxSymbolInfoX( SyNr, SyCnt, SyUser, SyTxt.data() );
    fo << '\"' << SyId.data() << "\"." << SyDim << ".\"" << library::gdxDataTypStr( SyTyp ) << '\"';
    if( DomInfo )
@@ -452,7 +451,7 @@ std::string varTypStrClassic( const int i )
 
 void WriteSymbol( const int SyNr )
 {
-   short_string SyName {}, S {}, SubTypeName {};
+   library::short_string SyName {}, S {}, SubTypeName {};
    int ADim, iATyp, ACount, AUser, IDum, NRec, FDim;
    gdxSyType ATyp;
    bool IsScalar, FrstWrite;
@@ -529,7 +528,7 @@ void WriteSymbol( const int SyNr )
    gdxStrIndex_t DomainIDs;
    gdxStrIndexPtrs_t DomainIDsPtrs;
    GDXSTRINDEXPTRS_INIT( DomainIDs, DomainIDsPtrs );
-   short_string A2Name {}, setName {};
+   library::short_string A2Name {}, setName {};
    int A2Dim, iA2Typ, setDim, setType;
 
    PGX->gdxSymbolInfo( SyNr, SyName.data(), ADim, iATyp );
@@ -708,7 +707,7 @@ void WriteSymbolCSV( const int SyNr )
       gdxStrIndex_t gdxDomS;
       gdxStrIndexPtrs_t gdxDomSPtrs;
       GDXSTRINDEXPTRS_INIT( gdxDomS, gdxDomSPtrs );
-      short_string s {};
+      library::short_string s {};
       bool Done;
       int Nr;
 
@@ -741,7 +740,7 @@ void WriteSymbolCSV( const int SyNr )
       }
    };
 
-   short_string SyName {}, S {};
+   library::short_string SyName {}, S {};
    int iATyp, NRec, FDim, IDum, Col, ColCnt, NrSymb, NrUEL, HighIndex, Indx;
    gdxSyType ATyp;
    std::unique_ptr<bool[]> CSVCols;
@@ -938,8 +937,8 @@ int getIntegerWidth( const int number )
 void WriteSymbolInfo()
 {
    int ADim, iATyp, NrSy, NrUel, w1, w2, w3, ACount, AUserInfo;
-   short_string AName {}, AExplText {};
-   std::map<short_string, int> SL;
+   library::short_string AName {}, AExplText {};
+   std::map<library::short_string, int> SL;
 
    PGX->gdxSystemInfo( NrSy, NrUel );
    w1 = getIntegerWidth( NrSy );
@@ -976,9 +975,9 @@ void WriteDomainInfo()
 {
    const std::array<std::string, 4> StrDInfo { "N/A", "None", "Relaxed", "Regular" };
 
-   short_string AName {};
+   library::short_string AName {};
    int ADim, iATyp, NrSy, NrUel, w1, dinfo;
-   std::map<short_string, int> SL;
+   std::map<library::short_string, int> SL;
    gdxStrIndex_t DomainIDs;
    gdxStrIndexPtrs_t DomainIDsPtrs;
    GDXSTRINDEXPTRS_INIT( DomainIDs, DomainIDsPtrs );
@@ -1018,7 +1017,7 @@ void WriteDomainInfo()
 void WriteSetText()
 {
    int nText, lo, hi, mid, idummy, rc, textIdx, mxTextIdx, nSyms, symDim, symTyp, nRecs, fDim;
-   short_string s {};
+   library::short_string s {};
    gdxUelIndex_t keys {};
    gdxValues_t vals {};
 
@@ -1148,7 +1147,7 @@ std::string NextParam()
 void WriteAcronyms()
 {
    int Cnt, Indx;
-   short_string sName {}, sText {};
+   library::short_string sName {}, sText {};
 
    Cnt = PGX->gdxAcronymCount();
    if( Cnt <= 0 ) return;
@@ -1165,7 +1164,7 @@ void WriteAcronyms()
 
 int main( const int argc, const char *argv[] )
 {
-   short_string s {}, Symb {};
+   library::short_string s {}, Symb {};
    std::string InputFile, DLLStr, UELSetName, OutputName;
    int ErrNr, ExitCode;
    bool ListAllSymbols, ListSymbolsAsSet, ListSymbolsAsSetDI, UsingIDE, VersionOnly, DomainInfo, showSetText;
@@ -1594,7 +1593,7 @@ int main( const int argc, const char *argv[] )
 
    if( VersionOnly )
    {
-      short_string FileStr {}, ProduceStr {};
+      library::short_string FileStr {}, ProduceStr {};
       PGX->gdxFileVersion( FileStr.data(), ProduceStr.data() );
       int NrSy, NrUel, FileVer, ComprLev;
       PGX->gdxSystemInfo( NrSy, NrUel );
