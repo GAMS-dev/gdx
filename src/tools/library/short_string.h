@@ -5,13 +5,15 @@
 #include <cstdint>
 #include <string>
 
+#include "../../../generated/gclgms.h"
+
 namespace library
 {
 
 class short_string
 {
 private:
-   static constexpr int MAX_LENGTH = 255;
+   static constexpr int MAX_LENGTH = GMS_SSSIZE;
    std::array<char, MAX_LENGTH> buffer {};
 
 public:
