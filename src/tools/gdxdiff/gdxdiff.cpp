@@ -66,7 +66,7 @@ static bool ShowDefRec, CompDomains;
 
 std::string ValAsString( const std::shared_ptr<gdx::TGXFileObj> &PGX, const double V )
 {
-   const int WIDTH { 14 };
+   constexpr int WIDTH { 14 };
    std::string result;
    if( PGX->gdxAcronymName( V, result.data() ) == 0 )
    {

@@ -81,7 +81,7 @@ const std::string
         c_dif2 = "dif2";
 
 // Size of gdx::tvarvaltype
-const int tvarvaltype_size { 5 };
+constexpr int tvarvaltype_size { 5 };
 
 // Names of gdx::tvarvaltype(s)
 const std::array<std::string, tvarvaltype_size> GamsFieldNames {

@@ -188,7 +188,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
    };
 
    auto ExpandFiles = []( const std::string &Src, std::string &Dest ) -> bool {
-      const int MAXBUF { 4 };
+      constexpr int MAXBUF { 4 };
       std::array<std::string, MAXBUF> sBuf;
       bool result { true };
       Dest.clear();
