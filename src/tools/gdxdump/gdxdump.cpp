@@ -1494,7 +1494,7 @@ int main( const int argc, const char *argv[] )
                ExitCode = 1;
                break;
             }
-            UsingIDE = s[0] == 'Y' || s[0] == 'y' || s[0] == '1';
+            UsingIDE = s.front() == 'Y' || s.front() == 'y' || s.front() == '1';
             continue;
          }
          if( s == "FILTERDEF" || s == "FILTERDEF=" )
@@ -1506,7 +1506,7 @@ int main( const int argc, const char *argv[] )
                ExitCode = 1;
                break;
             }
-            FilterDef = s[0] == 'Y' || s[0] == 'y' || s[0] == '1';
+            FilterDef = s.front() == 'Y' || s.front() == 'y' || s.front() == '1';
             continue;
          }
          if( s == "CDIM" || s == "CDIM=" )
@@ -1518,7 +1518,7 @@ int main( const int argc, const char *argv[] )
                ExitCode = 1;
                break;
             }
-            CDim = s[0] == 'Y' || s[0] == 'y' || s[0] == '1';
+            CDim = s.front() == 'Y' || s.front() == 'y' || s.front() == '1';
             continue;
          }
          if( s == "-V" || s == "-VERSION" )
