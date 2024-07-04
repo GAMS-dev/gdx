@@ -1,6 +1,7 @@
 ---
 - 7.11.5:
     - Fixed gdxOpenAppend not indicating a problem (in the return code) when trying to append to a GDX file with format version before 7 (incompatible for appending).
+    - Fixed gdxDataReadMap crashing when record (user-mapped) UEL indices are out of bounds (index exceeds number of UELs).
 - 7.11.4:
     - Multiple small fixes to infrastructure code and shared modules.
 - 7.11.3:

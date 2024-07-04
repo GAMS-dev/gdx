@@ -77,7 +77,7 @@ static std::string gamsToolCall( const std::string &toolName )
 
 static bool hasGAMSinstalled()
 {
-   int rc { std::system( ( gamsToolCall( "gamslib"s ) + " trnsport"s ).c_str() ) };
+   const int rc { std::system( ( gamsToolCall( "gamslib"s ) + " -q trnsport"s ).c_str() ) };
    std::cout << "gamslib RC="s << rc << std::endl;
    if( std::filesystem::exists( "trnsport.gms" ) )
    {
@@ -1244,9 +1244,8 @@ std::string acquireGDXforModel( const std::string &model )
    const std::string model_fn = model + ".gms"s,
                      log_fn = model + "Log.txt"s;
    std::string gdxfn = model + ".gdx"s;// non-const so we get automatic move
-   int rc = std::system( ( gamsToolCall( "gamslib"s ) + " "s + model + " > gamslibLog.txt"s ).c_str() );
+   int rc = std::system( ( gamsToolCall( "gamslib"s ) + " -q "s + model ).c_str() );
    REQUIRE_FALSE( rc );
-   std::filesystem::remove( "gamslibLog.txt" );
    REQUIRE( std::filesystem::exists( model_fn ) );
    rc = std::system( ( gamsToolCall( "gams"s ) + " "s + model_fn + " gdx=default lo=0 o=lf > " + log_fn ).c_str() );
    REQUIRE_FALSE( rc );
