@@ -716,7 +716,7 @@ void WriteSymbolCSV( const int SyNr )
       for( int D {}; D < ADim; D++ )
       {
          strcpy( s.data(), gdxDomSPtrs[D] );
-         if( strcmp( s.data(), "*" ) == 0 )
+         if( s == "*" )
          {
             strcpy( s.data(), ( "Dim" + std::to_string( D + 1 ) ).data() );
             strcpy( gdxDomSPtrs[D], s.data() );
@@ -726,7 +726,7 @@ void WriteSymbolCSV( const int SyNr )
             Done = true;
             for( int DD {}; DD < D - 1; DD++ )
             {
-               if( strcmp( DomSPtrs[DD], s.data() ) == 0 )
+               if( s == DomSPtrs[DD] )
                {
                   Done = false;
                   break;
@@ -1224,7 +1224,7 @@ int main( const int argc, const char *argv[] )
       {
          strcpy( s.data(), NextParam().data() );
          s.to_upper_case();
-         if( strcmp( s.data(), "SYMB" ) == 0 || strcmp( s.data(), "SYMB=" ) == 0 )
+         if( s == "SYMB" || s == "SYMB=" )
          {
             if( Symb[0] != '\0' )
             {
@@ -1241,7 +1241,7 @@ int main( const int argc, const char *argv[] )
             }
             continue;
          }
-         if( strcmp( s.data(), "UELTABLE" ) == 0 || strcmp( s.data(), "UELTABLE=" ) == 0 )
+         if( s == "UELTABLE" || s == "UELTABLE=" )
          {
             if( !UELSetName.empty() )
             {
@@ -1258,7 +1258,7 @@ int main( const int argc, const char *argv[] )
             }
             continue;
          }
-         if( strcmp( s.data(), "DELIM" ) == 0 || strcmp( s.data(), "DELIM=" ) == 0 )
+         if( s == "DELIM" || s == "DELIM=" )
          {
             if( Delim != '\0' )
             {
@@ -1268,14 +1268,14 @@ int main( const int argc, const char *argv[] )
             }
             strcpy( s.data(), NextParam().data() );
             s.to_upper_case();
-            if( strcmp( s.data(), "TAB" ) == 0 ) Delim = '\t';
-            else if( strcmp( s.data(), "COMMA" ) == 0 )
+            if( s == "TAB" ) Delim = '\t';
+            else if( s == "COMMA" )
                Delim = ',';
-            else if( strcmp( s.data(), "PERIOD" ) == 0 )
+            else if( s == "PERIOD" )
                Delim = '.';
-            else if( strcmp( s.data(), "BLANK" ) == 0 )
+            else if( s == "BLANK" )
                Delim = ' ';
-            else if( strcmp( s.data(), "SEMICOLON" ) == 0 )
+            else if( s == "SEMICOLON" )
                Delim = ';';
             else
             {
@@ -1285,7 +1285,7 @@ int main( const int argc, const char *argv[] )
             }
             continue;
          }
-         if( strcmp( s.data(), "DECIMALSEP" ) == 0 || strcmp( s.data(), "DECIMALSEP=" ) == 0 )
+         if( s == "DECIMALSEP" || s == "DECIMALSEP=" )
          {
             if( DecimalSep != '\0' )
             {
@@ -1295,8 +1295,9 @@ int main( const int argc, const char *argv[] )
             }
             strcpy( s.data(), NextParam().data() );
             s.to_upper_case();
-            if( strcmp( s.data(), "PERIOD" ) == 0 ) DecimalSep = '.';
-            else if( strcmp( s.data(), "COMMA" ) == 0 )
+            if( s == "PERIOD" )
+               DecimalSep = '.';
+            else if( s == "COMMA" )
                DecimalSep = ',';
             else
             {
@@ -1306,52 +1307,52 @@ int main( const int argc, const char *argv[] )
             }
             continue;
          }
-         if( strcmp( s.data(), "SYMBOLS" ) == 0 )
+         if( s == "SYMBOLS" )
          {
             ListAllSymbols = true;
             continue;
          }
-         if( strcmp( s.data(), "DOMAININFO" ) == 0 )
+         if( s == "DOMAININFO" )
          {
             DomainInfo = true;
             continue;
          }
-         if( strcmp( s.data(), "SETTEXT" ) == 0 )
+         if( s == "SETTEXT" )
          {
             showSetText = true;
             continue;
          }
-         if( strcmp( s.data(), "SYMBOLSASSET" ) == 0 )
+         if( s == "SYMBOLSASSET" )
          {
             ListSymbolsAsSet = true;
             continue;
          }
-         if( strcmp( s.data(), "SYMBOLSASSETDI" ) == 0 )
+         if( s == "SYMBOLSASSETDI" )
          {
             ListSymbolsAsSetDI = true;
             continue;
          }
-         if( strcmp( s.data(), "NOHEADER" ) == 0 )
+         if( s == "NOHEADER" )
          {
             ShowHdr = false;
             continue;
          }
-         if( strcmp( s.data(), "NODATA" ) == 0 )
+         if( s == "NODATA" )
          {
             ShowData = false;
             continue;
          }
-         if( strcmp( s.data(), "CSVALLFIELDS" ) == 0 )
+         if( s == "CSVALLFIELDS" )
          {
             bFullEVRec = true;
             continue;
          }
-         if( strcmp( s.data(), "CSVSETTEXT" ) == 0 )
+         if( s == "CSVSETTEXT" )
          {
             bCSVSetText = true;
             continue;
          }
-         if( strcmp( s.data(), "FORMAT" ) == 0 || strcmp( s.data(), "FORMAT=" ) == 0 )
+         if( s == "FORMAT" || s == "FORMAT=" )
          {
             if( OutFormat != TOutFormat::fmt_none )
             {
@@ -1361,10 +1362,11 @@ int main( const int argc, const char *argv[] )
             }
             strcpy( s.data(), NextParam().data() );
             s.to_upper_case();
-            if( strcmp( s.data(), "NORMAL" ) == 0 ) OutFormat = TOutFormat::fmt_normal;
-            else if( strcmp( s.data(), "GAMSBAS" ) == 0 )
+            if( s == "NORMAL" )
+               OutFormat = TOutFormat::fmt_normal;
+            else if( s == "GAMSBAS" )
                OutFormat = TOutFormat::fmt_gamsbas;
-            else if( strcmp( s.data(), "CSV" ) == 0 )
+            else if( s == "CSV" )
                OutFormat = TOutFormat::fmt_csv;
             else
             {
@@ -1374,7 +1376,7 @@ int main( const int argc, const char *argv[] )
             }
             continue;
          }
-         if( strcmp( s.data(), "DFORMAT" ) == 0 || strcmp( s.data(), "DFORMAT=" ) == 0 )
+         if( s == "DFORMAT" || s == "DFORMAT=" )
          {
             if( dblFormat != TDblFormat::dbl_none )
             {
@@ -1384,10 +1386,11 @@ int main( const int argc, const char *argv[] )
             }
             strcpy( s.data(), NextParam().data() );
             s.to_upper_case();
-            if( strcmp( s.data(), "NORMAL" ) == 0 ) dblFormat = TDblFormat::dbl_none;
-            else if( strcmp( s.data(), "HEXBYTES" ) == 0 )
+            if( s == "NORMAL" )
+               dblFormat = TDblFormat::dbl_none;
+            else if( s == "HEXBYTES" )
                dblFormat = TDblFormat::dbl_hexBytes;
-            else if( strcmp( s.data(), "HEXPONENTIAL" ) == 0 )
+            else if( s == "HEXPONENTIAL" )
                dblFormat = TDblFormat::dbl_hexponential;
             else
             {
@@ -1397,7 +1400,7 @@ int main( const int argc, const char *argv[] )
             }
             continue;
          }
-         if( strcmp( s.data(), "OUTPUT" ) == 0 || strcmp( s.data(), "OUTPUT=" ) == 0 )
+         if( s == "OUTPUT" || s == "OUTPUT=" )
          {
             if( !OutputName.empty() )
             {
@@ -1414,7 +1417,7 @@ int main( const int argc, const char *argv[] )
             }
             continue;
          }
-         if( strcmp( s.data(), "IDE" ) == 0 || strcmp( s.data(), "IDE=" ) == 0 )
+         if( s == "IDE" || s == "IDE=" )
          {
             strcpy( s.data(), NextParam().data() );
             if( s[0] == '\0' )
@@ -1426,7 +1429,7 @@ int main( const int argc, const char *argv[] )
             UsingIDE = s[0] == 'Y' || s[0] == 'y' || s[0] == '1';
             continue;
          }
-         if( strcmp( s.data(), "FILTERDEF" ) == 0 || strcmp( s.data(), "FILTERDEF=" ) == 0 )
+         if( s == "FILTERDEF" || s == "FILTERDEF=" )
          {
             strcpy( s.data(), NextParam().data() );
             if( s[0] == '\0' )
@@ -1438,7 +1441,7 @@ int main( const int argc, const char *argv[] )
             FilterDef = s[0] == 'Y' || s[0] == 'y' || s[0] == '1';
             continue;
          }
-         if( strcmp( s.data(), "CDIM" ) == 0 || strcmp( s.data(), "CDIM=" ) == 0 )
+         if( s == "CDIM" || s == "CDIM=" )
          {
             strcpy( s.data(), NextParam().data() );
             if( s[0] == '\0' )
@@ -1450,48 +1453,48 @@ int main( const int argc, const char *argv[] )
             CDim = s[0] == 'Y' || s[0] == 'y' || s[0] == '1';
             continue;
          }
-         if( strcmp( s.data(), "-V" ) == 0 || strcmp( s.data(), "-VERSION" ) == 0 )
+         if( s == "-V" || s == "-VERSION" )
          {
             VersionOnly = true;
             continue;
          }
-         if( strcmp( s.data(), "EPSOUT" ) == 0 || strcmp( s.data(), "EPSOUT=" ) == 0 )
+         if( s == "EPSOUT" || s == "EPSOUT=" )
          {
             EpsOut = NextParam();
             bEpsOut = true;
             continue;
          }
-         if( strcmp( s.data(), "NAOUT" ) == 0 || strcmp( s.data(), "NAOUT=" ) == 0 )
+         if( s == "NAOUT" || s == "NAOUT=" )
          {
             NaOut = NextParam();
             bNaOut = true;
             continue;
          }
-         if( strcmp( s.data(), "PINFOUT" ) == 0 || strcmp( s.data(), "PINFOUT=" ) == 0 )
+         if( s == "PINFOUT" || s == "PINFOUT=" )
          {
             PinfOut = NextParam();
             bPinfOut = true;
             continue;
          }
-         if( strcmp( s.data(), "MINFOUT" ) == 0 || strcmp( s.data(), "MINFOUT=" ) == 0 )
+         if( s == "MINFOUT" || s == "MINFOUT=" )
          {
             MinfOut = NextParam();
             bMinfOut = true;
             continue;
          }
-         if( strcmp( s.data(), "UNDFOUT" ) == 0 || strcmp( s.data(), "UNDFOUT=" ) == 0 )
+         if( s == "UNDFOUT" || s == "UNDFOUT=" )
          {
             UndfOut = NextParam();
             bUndfOut = true;
             continue;
          }
-         if( strcmp( s.data(), "ZEROOUT" ) == 0 || strcmp( s.data(), "ZEROOUT=" ) == 0 )
+         if( s == "ZEROOUT" || s == "ZEROOUT=" )
          {
             ZeroOut = NextParam();
             bZeroOut = true;
             continue;
          }
-         if( strcmp( s.data(), "HEADER" ) == 0 || strcmp( s.data(), "HEADER=" ) == 0 )
+         if( s == "HEADER" || s == "HEADER=" )
          {
             Header = NextParam();
             bHeader = true;
