@@ -5,6 +5,8 @@
 
 #include "short_string.h"
 
+// #define ENABLE_ASSERTIONS
+
 namespace library
 {
 
@@ -13,7 +15,9 @@ short_string::short_string() = default;
 short_string::short_string( const char *s )
 {
    const size_t s_length { std::strlen( s ) };
+#if defined( ENABLE_ASSERTIONS )
    assert( s_length < MAX_LENGTH );
+#endif
    std::memcpy( buffer.data(), s, s_length );
 }
 
@@ -44,24 +48,30 @@ uint8_t short_string::length() const
 char short_string::front() const
 {
    const char c { buffer.front() };
+#if defined( ENABLE_ASSERTIONS )
    assert( c != '\0' );
+#endif
    return c;
 }
 
 char short_string::back() const
 {
    const uint8_t length { this->length() };
+#if defined( ENABLE_ASSERTIONS )
    assert( length > 0 );
+#endif
    return buffer[length - 1];
 }
 
 char short_string::operator[]( const uint8_t i ) const
 {
+#if defined( ENABLE_ASSERTIONS )
    const uint8_t length { this->length() };
    if( i > 0 )
       assert( i < length );
    else
       assert( i <= length );
+#endif
    return buffer[i];
 }
 
@@ -78,7 +88,9 @@ void short_string::clear()
 void short_string::append( const char c )
 {
    const uint8_t length { this->length() };
+#if defined( ENABLE_ASSERTIONS )
    assert( length + 1 < MAX_LENGTH );
+#endif
    buffer[length] = c;
    buffer[length + 1] = '\0';
 }
@@ -87,7 +99,9 @@ void short_string::append( const char *s )
 {
    const uint8_t length { this->length() };
    const size_t s_length { std::strlen( s ) };
+#if defined( ENABLE_ASSERTIONS )
    assert( length + s_length < MAX_LENGTH );
+#endif
    std::memcpy( buffer.data() + length, s, s_length );
    buffer[length + s_length] = '\0';
 }
@@ -135,7 +149,9 @@ void short_string::to_upper_case()
 short_string &short_string::operator=( const std::string &s )
 {
    const size_t s_length { s.length() };
+#if defined( ENABLE_ASSERTIONS )
    assert( s_length < MAX_LENGTH );
+#endif
    std::memcpy( buffer.data(), s.data(), s_length );
    buffer[s_length] = '\0';
    return *this;
