@@ -1549,12 +1549,12 @@ int main( const int argc, const char *argv[] )
       goto End;
    }
 
-   if( !exists( InputFilePath ) && InputFilePath.extension().string().empty() )
+   if( !std::filesystem::exists( InputFilePath ) && InputFilePath.extension().string().empty() )
    {
       InputFilePath.replace_extension( std::filesystem::path( "gdx" ) );
       InputFile = InputFilePath.string();
    }
-   if( !exists( InputFilePath ) )
+   if( !std::filesystem::exists( InputFilePath ) )
    {
       printErrorMessage( "GDX file not found: " + InputFile, false );
       ExitCode = 2;
