@@ -542,7 +542,7 @@ void WriteSymbol( const int SyNr )
    };
 
    auto WriteComments = [&SyNr]() {
-      std::string S {};
+      library::short_string S {};
       for( int N { 1 }; N <= std::numeric_limits<int>::max(); N++ )
       {
          if( PGX->gdxSymbolGetComment( SyNr, N, S.data() ) == 0 )
