@@ -66,14 +66,17 @@ char QQ( const std::string &s )
 
 std::string QQCSV( const std::string &s )
 {
-   if( Delim == '\t' ) return s;
+   if( Delim == '\t' )
+      return s;
    auto k = s.find( '\"' );
-   if( k == std::string::npos ) return "\"" + s + "\"";
+   if( k == std::string::npos )
+      return "\"" + s + "\"";
    std::string res = s.substr( 0, k + 1 ) + '\"',// two quotes
            ws = s.substr( k + 1, GMS_SSSIZE - 1 );
    do {
       k = ws.find( '\"' );
-      if( k == std::string::npos ) break;
+      if( k == std::string::npos )
+         break;
       res += ws.substr( 0, k + 1 ) + '\"';// two quotes
       ws = ws.substr( k + 1 );
    } while( true );
@@ -98,7 +101,8 @@ void WriteQuotedCommon( const std::string &S, const std::function<bool( char )> 
          break;
       }
    }
-   if( G ) fo << ' ' << S;
+   if( G )
+      fo << ' ' << S;
    else
    {
       const auto QChar = QQ( S );
@@ -134,7 +138,8 @@ void WriteUELTable( const std::string &name )
    PGX->gdxSystemInfo( N, NrUel );
    if( OutFormat != TOutFormat::fmt_csv )
    {
-      if( NrUel > 0 ) fo << "Set " << name << " /" << '\n';
+      if( NrUel > 0 )
+         fo << "Set " << name << " /" << '\n';
       else
       {
          fo << "$onEmpty" << '\n';
@@ -149,7 +154,8 @@ void WriteUELTable( const std::string &name )
       PGX->gdxUMUelGet( N, s.data(), UMap );
       fo << "  ";
       WriteUEL( s.data() );
-      if( OutFormat == TOutFormat::fmt_csv ) fo << '\n';
+      if( OutFormat == TOutFormat::fmt_csv )
+         fo << '\n';
       else
          fo << ( N < NrUel ? " ," : " /;" ) << '\n';
    }
@@ -169,7 +175,8 @@ std::string specialValueStrClassic( const int i )
 
 char hexDigit( const uint8_t b )
 {
-   if( b < 10 ) return static_cast<char>( '0' + b );
+   if( b < 10 )
+      return static_cast<char>( '0' + b );
    else
       return static_cast<char>( 'a' + b - 10 );
 }
@@ -229,7 +236,8 @@ void dblDecomp( const double x, bool &isNeg, uint32_t &expo, int64_t &mant )
 
 std::string mFormat( int64_t m )
 {
-   if( m == 0 ) return "0";
+   if( m == 0 )
+      return "0";
 
    // TI64Rec xi { .i64 = m };
    int64_t mask, m2;
@@ -266,10 +274,12 @@ std::string DblToStrHexponential( const double x )
    std::string result;
 
    dblDecomp( x, isNeg, expo, mant );
-   if( isNeg ) result += '-';
+   if( isNeg )
+      result += '-';
    if( expo == 0 )
    {
-      if( mant == 0 ) result += "0x0.0p0";
+      if( mant == 0 )
+         result += "0x0.0p0";
       else
          result += "0x0." + mFormat( mant ) + "p-1022";
    }
@@ -277,7 +287,8 @@ std::string DblToStrHexponential( const double x )
       result += "0x1." + mFormat( mant ) + 'p' + std::to_string( static_cast<int>( expo ) - 1023 );
    else
    {
-      if( mant == 0 ) result += "Infinity";
+      if( mant == 0 )
+         result += "Infinity";
       else
          result += "NaN";
    }
@@ -287,14 +298,16 @@ std::string DblToStrHexponential( const double x )
 void WrVal( const double V )
 {
    library::short_string acrname {};
-   if( PGX->gdxAcronymName( V, acrname.data() ) != 0 ) fo << acrname.data();
+   if( PGX->gdxAcronymName( V, acrname.data() ) != 0 )
+      fo << acrname.data();
    else
    {
       int iSV;
       PGX->gdxMapValue( V, iSV );
       if( iSV != sv_normal )
       {
-         if( bEpsOut && iSV == sv_valeps ) fo << EpsOut;
+         if( bEpsOut && iSV == sv_valeps )
+            fo << EpsOut;
          else if( bNaOut && iSV == sv_valna )
             fo << NaOut;
          else if( bPinfOut && iSV == sv_valpin )
@@ -366,7 +379,8 @@ bool WriteSymbolAsItem( const int SyNr, const bool DomInfo )
          PGX->gdxSymbolGetDomainX( SyNr, DomainArrayPtrs );
          for( int D {}; D < SyDim; D++ )
          {
-            if( D > 0 ) Domain += ", ";
+            if( D > 0 )
+               Domain += ", ";
             Domain += DomainArray[D];
             constexpr int MaxNameLen = 63;
             if( static_cast<int>( Domain.length() ) > MaxNameLen )
@@ -406,7 +420,8 @@ void WriteSymbolsAsSet( const bool DomInfo )
    for( int N { 1 }; N <= NrSy; N++ )
    {
       WriteSymbolAsItem( N, DomInfo );
-      if( N < NrSy ) fo << ',';
+      if( N < NrSy )
+         fo << ',';
       fo << '\n';
    }
    fo << "/;" << '\n';
@@ -421,7 +436,8 @@ void printErrorMessage( const std::string &message, const bool printError )
 
 void assertWithMessage( const bool expression, const std::string &message )
 {
-   if( !expression ) printErrorMessage( message );
+   if( !expression )
+      printErrorMessage( message );
    assert( expression );
 }
 
@@ -460,29 +476,36 @@ void WriteSymbol( const int SyNr )
    std::array<double, GMS_VAL_MAX> DefaultValues {};
 
    auto WriteItem = [&IsScalar, &ATyp, &Vals, &DefaultValues, &FrstWrite, &ADim, &SyName, &Keys, &S, &IDum, &ACount]( const gdx::tvarvaltype &ValNr ) {
-      if( !IsScalar && ATyp != dt_set && ( FilterDef && Vals[ValNr] == DefaultValues[ValNr] ) && !( ATyp == dt_equ && ( ValNr == gdx::vallower || ValNr == gdx::valupper ) ) ) return;
-      if( FrstWrite ) FrstWrite = false;
+      if( !IsScalar && ATyp != dt_set && ( FilterDef && Vals[ValNr] == DefaultValues[ValNr] ) && !( ATyp == dt_equ && ( ValNr == gdx::vallower || ValNr == gdx::valupper ) ) )
+         return;
+      if( FrstWrite )
+         FrstWrite = false;
       else if( OutFormat == TOutFormat::fmt_gamsbas )
          fo << " ;" << '\n';
       else
       {
          fo << ", ";
-         if( !( ( ATyp == dt_var || ATyp == dt_equ ) && ADim == 0 ) ) fo << '\n';
+         if( !( ( ATyp == dt_var || ATyp == dt_equ ) && ADim == 0 ) )
+            fo << '\n';
       }
       if( OutFormat == TOutFormat::fmt_gamsbas )
       {
-         if( LineCount == 6 ) fo << "$offListing" << '\n';
+         if( LineCount == 6 )
+            fo << "$offListing" << '\n';
          fo << ' ' << SyName.data() << '.' << valTypStrClassic( ValNr ) << ' ';
       }
       if( ADim > 0 )
       {
-         if( OutFormat == TOutFormat::fmt_gamsbas ) fo << '(';
+         if( OutFormat == TOutFormat::fmt_gamsbas )
+            fo << '(';
          for( int D {}; D < ADim; D++ )
          {
             WriteUEL( GetUELAsString( Keys[D] ) );
-            if( D < ADim - 1 ) fo << Delim;
+            if( D < ADim - 1 )
+               fo << Delim;
          }
-         if( OutFormat == TOutFormat::fmt_gamsbas ) fo << ')';
+         if( OutFormat == TOutFormat::fmt_gamsbas )
+            fo << ')';
       }
       switch( ATyp )
       {
@@ -499,10 +522,12 @@ void WriteSymbol( const int SyNr )
             break;
          case dt_equ:
          case dt_var:
-            if( OutFormat == TOutFormat::fmt_gamsbas ) fo << " = ";
+            if( OutFormat == TOutFormat::fmt_gamsbas )
+               fo << " = ";
             else
             {
-               if( ADim > 0 ) fo << Delim;
+               if( ADim > 0 )
+                  fo << Delim;
                fo << valTypStrClassic( ValNr ) << ' ';
             }
             WrVal( Vals[ValNr] );
@@ -519,7 +544,8 @@ void WriteSymbol( const int SyNr )
       std::string S {};
       for( int N { 1 }; N <= std::numeric_limits<int>::max(); N++ )
       {
-         if( PGX->gdxSymbolGetComment( SyNr, N, S.data() ) == 0 ) break;
+         if( PGX->gdxSymbolGetComment( SyNr, N, S.data() ) == 0 )
+            break;
          fo << "* " << S.data() << '\n';
       }
    };
@@ -533,9 +559,12 @@ void WriteSymbol( const int SyNr )
 
    PGX->gdxSymbolInfo( SyNr, SyName.data(), ADim, iATyp );
    ATyp = static_cast<gdxSyType>( iATyp );
-   if( ( ATyp == dt_set || ATyp == dt_par ) && OutFormat == TOutFormat::fmt_gamsbas ) return;
-   if( ShowHdr ) fo << '\n';
-   // if( false ) fo << "$onText" << '\n';
+   if( ( ATyp == dt_set || ATyp == dt_par ) && OutFormat == TOutFormat::fmt_gamsbas )
+      return;
+   if( ShowHdr )
+      fo << '\n';
+   // if( false )
+   //    fo << "$onText" << '\n';
    BadUELs = 0;
    IsScalar = ADim == 0 && ATyp == dt_par;
    PGX->gdxSymbolInfoX( SyNr, ACount, AUser, S.data() );
@@ -544,17 +573,22 @@ void WriteSymbol( const int SyNr )
    {
       case dt_set:
          DefaultValues[gdx::vallevel] = 0;
-         if( AUser == GMS_SETTYPE_SINGLETON ) strcpy( SubTypeName.data(), "Singleton" );
+         if( AUser == GMS_SETTYPE_SINGLETON )
+            strcpy( SubTypeName.data(), "Singleton" );
          break;
       case dt_var:
-         if( AUser < 0 || AUser > GMS_VARTYPE_SEMIINT ) AUser = GMS_VARTYPE_FREE;
+         if( AUser < 0 || AUser > GMS_VARTYPE_SEMIINT )
+            AUser = GMS_VARTYPE_FREE;
          std::copy( std::begin( gmsDefRecVar[AUser] ), std::end( gmsDefRecVar[AUser] ), std::begin( DefaultValues ) );
-         if( AUser != GMS_VARTYPE_UNKNOWN ) strcpy( SubTypeName.data(), varTypStrClassic( AUser ).data() );
+         if( AUser != GMS_VARTYPE_UNKNOWN )
+            strcpy( SubTypeName.data(), varTypStrClassic( AUser ).data() );
          break;
       case dt_equ:
-         if( AUser < GMS_EQUTYPE_E || AUser > GMS_EQUTYPE_B ) AUser = GMS_EQUTYPE_E;
+         if( AUser < GMS_EQUTYPE_E || AUser > GMS_EQUTYPE_B )
+            AUser = GMS_EQUTYPE_E;
          std::copy( std::begin( gmsDefRecEqu[AUser] ), std::end( gmsDefRecEqu[AUser] ), std::begin( DefaultValues ) );
-         if( AUser == GMS_EQUTYPE_B ) strcpy( SubTypeName.data(), "Logic" );
+         if( AUser == GMS_EQUTYPE_B )
+            strcpy( SubTypeName.data(), "Logic" );
          break;
       default:
          DefaultValues[gdx::vallevel] = 0;
@@ -562,17 +596,21 @@ void WriteSymbol( const int SyNr )
    }
    if( ShowHdr )
    {
-      if( IsScalar ) fo << "Scalar";
+      if( IsScalar )
+         fo << "Scalar";
       else
       {
-         if( SubTypeName[0] != '\0' ) fo << SubTypeName.data() << ' ';
+         if( SubTypeName[0] != '\0' )
+            fo << SubTypeName.data() << ' ';
          fo << library::gdxDataTypStrL( ATyp );
       }
-      if( ATyp != dt_alias ) fo << ' ' << SyName.data();
+      if( ATyp != dt_alias )
+         fo << ' ' << SyName.data();
       else
       {
          fo << " (" << SyName.data();
-         if( AUser == 0 ) strcpy( A2Name.data(), "*" );
+         if( AUser == 0 )
+            strcpy( A2Name.data(), "*" );
          else
             PGX->gdxSymbolInfo( AUser, A2Name.data(), A2Dim, iA2Typ );
          fo << ", " << A2Name.data() << ");" << '\n';
@@ -584,7 +622,8 @@ void WriteSymbol( const int SyNr )
             PGX->gdxSymbolGetDomain( SyNr, DomainNrs );
             for( int D {}; D < ADim; D++ )
             {
-               if( DomainNrs[D] <= 0 ) strcpy( DomainIDsPtrs[D], "*" );
+               if( DomainNrs[D] <= 0 )
+                  strcpy( DomainIDsPtrs[D], "*" );
                else
                {
                   PGX->gdxSymbolInfo( DomainNrs[D], setName.data(), setDim, setType );
@@ -595,12 +634,14 @@ void WriteSymbol( const int SyNr )
             for( int D {}; D < ADim; D++ )
             {
                fo << DomainIDs[D];
-               if( D < ADim - 1 ) fo << ',';
+               if( D < ADim - 1 )
+                  fo << ',';
                else
                   fo << ')';
             }
          }
-         if( S[0] != '\0' ) WriteQText( S.data() );
+         if( S[0] != '\0' )
+            WriteQText( S.data() );
       }
    }
    if( ACount == 0 && ShowData )
@@ -621,7 +662,8 @@ void WriteSymbol( const int SyNr )
       if( ShowHdr && ShowData )
       {
          fo << " /";
-         if( ADim > 0 ) fo << '\n';
+         if( ADim > 0 )
+            fo << '\n';
       }
       WriteComments();
       if( !ShowData )
@@ -678,12 +720,14 @@ void WriteSymbol( const int SyNr )
             }
          }
          PGX->gdxDataReadDone();
-         if( OutFormat == TOutFormat::fmt_gamsbas ) fo << " ;" << '\n';
+         if( OutFormat == TOutFormat::fmt_gamsbas )
+            fo << " ;" << '\n';
          else if( ShowHdr )
             fo << " /;" << '\n';
       }
    }
-   // if( false ) fo << "$offText" << '\n';
+   // if( false )
+   //    fo << "$offText" << '\n';
    if( BadUELs > 0 )
       fo << "**** " << BadUELs << " reference(s) to unique elements without a string representation";
 }
@@ -732,7 +776,8 @@ void WriteSymbolCSV( const int SyNr )
                   break;
                }
             }
-            if( Done ) break;
+            if( Done )
+               break;
             strcpy( s.data(), ( std::string { gdxDomS[D] } + '_' + std::to_string( Nr ) ).data() );
             Nr++;
          }
@@ -753,12 +798,14 @@ void WriteSymbolCSV( const int SyNr )
    PGX->gdxSymbolInfo( SyNr, SyName.data(), ADim, iATyp );
    ATyp = static_cast<gdxSyType>( iATyp );
    GetDomainNames();
-   if( ADim < 2 ) CDim = false;
+   if( ADim < 2 )
+      CDim = false;
    if( !CDim )
    {
       if( bHeader )
       {
-         if( !Header.empty() ) fo << Header << '\n';
+         if( !Header.empty() )
+            fo << Header << '\n';
       }
       else
       {
@@ -767,11 +814,13 @@ void WriteSymbolCSV( const int SyNr )
             for( int D {}; D < ADim; D++ )
             {
                fo << QQCSV( DomS[D] );
-               if( D < ADim - 1 ) fo << Delim;
+               if( D < ADim - 1 )
+                  fo << Delim;
             }
             if( !( ATyp == dt_set || ATyp == dt_alias ) )
             {
-               if( ADim == 0 ) fo << QQCSV( "Val" );
+               if( ADim == 0 )
+                  fo << QQCSV( "Val" );
                else
                   fo << Delim << QQCSV( "Val" );
             }
@@ -809,7 +858,8 @@ void WriteSymbolCSV( const int SyNr )
             for( int D {}; D < ADim; D++ )
             {
                fo << GetUel4CSV( Keys[D] );
-               if( D < ADim - 1 ) fo << Delim;
+               if( D < ADim - 1 )
+                  fo << Delim;
                else if( !( ATyp == dt_set || ATyp == dt_alias ) )
                {
                   fo << Delim;
@@ -854,7 +904,8 @@ void WriteSymbolCSV( const int SyNr )
          {
             CSVCols[Indx - 1] = true;
             ColCnt++;
-            if( Indx > HighIndex ) HighIndex = Indx;
+            if( Indx > HighIndex )
+               HighIndex = Indx;
          }
       }
       PGX->gdxDataReadDone();
@@ -873,7 +924,8 @@ void WriteSymbolCSV( const int SyNr )
       assertWithMessage( Col == ColCnt, "Col != ColCnt" );
       if( bHeader )
       {
-         if( !Header.empty() ) fo << Header << '\n';
+         if( !Header.empty() )
+            fo << Header << '\n';
       }
       else if( ShowHdr )
       {
@@ -881,7 +933,8 @@ void WriteSymbolCSV( const int SyNr )
          for( Col = 0; Col < ColCnt; Col++ )
          {
             fo << GetUel4CSV( CSVUels[Col] );
-            if( Col < ColCnt - 1 ) fo << Delim;
+            if( Col < ColCnt - 1 )
+               fo << Delim;
          }
          fo << '\n';
       }
@@ -892,7 +945,8 @@ void WriteSymbolCSV( const int SyNr )
          for( int D {}; D < ADim - 1; D++ )
          {
             fo << GetUel4CSV( Keys[D] );
-            if( D < ADim - 2 ) fo << Delim;
+            if( D < ADim - 2 )
+               fo << Delim;
          }
          Col = -1;
          do {
@@ -900,13 +954,15 @@ void WriteSymbolCSV( const int SyNr )
             while( Col < ColCnt )
             {
                Col++;
-               if( CSVUels[Col] >= Indx ) break;
+               if( CSVUels[Col] >= Indx )
+                  break;
                fo << Delim;
             }
             if( CSVUels[Col] == Indx )
             {
                fo << Delim;
-               if( ATyp == dt_set || ATyp == dt_alias ) fo << 'Y';
+               if( ATyp == dt_set || ATyp == dt_alias )
+                  fo << 'Y';
                else
                   WrVal( Vals[gdx::vallevel] );
                EoFData = PGX->gdxDataReadRaw( Keys, Vals, FDim ) == 0;
@@ -948,8 +1004,10 @@ void WriteSymbolInfo()
    {
       PGX->gdxSymbolInfo( N, AName.data(), ADim, iATyp );
       PGX->gdxSymbolInfoX( N, ACount, AUserInfo, AExplText.data() );
-      if( static_cast<int>( AName.length() ) > w2 ) w2 = AName.length();
-      if( getIntegerWidth( ACount ) > w3 ) w3 = getIntegerWidth( ACount );
+      if( static_cast<int>( AName.length() ) > w2 )
+         w2 = AName.length();
+      if( getIntegerWidth( ACount ) > w3 )
+         w3 = getIntegerWidth( ACount );
       SL.insert( { AName, N } );
    }
    fo << gdlib::strutilx::PadLeft( " ", w1 ) << ' '
@@ -984,7 +1042,8 @@ void WriteDomainInfo()
 
    PGX->gdxSystemInfo( NrSy, NrUel );
    w1 = getIntegerWidth( NrSy );
-   if( w1 < 4 ) w1 = 4;
+   if( w1 < 4 )
+      w1 = 4;
    fo << gdlib::strutilx::PadLeft( "SyNr", w1 )
       << "  Type"
       << "  DomInf "
@@ -1005,7 +1064,8 @@ void WriteDomainInfo()
          fo << '(';
          for( int D {}; D < ADim; D++ )
          {
-            if( D > 0 ) fo << ", ";
+            if( D > 0 )
+               fo << ", ";
             fo << DomainIDs[D];
          }
          fo << ')';
@@ -1031,7 +1091,8 @@ void WriteSetText()
    {
       mid = lo + ( hi - lo ) / 2;
       rc = PGX->gdxGetElemText( mid, s.data(), idummy );
-      if( 1 == rc ) lo = mid;
+      if( 1 == rc )
+         lo = mid;
       else
          hi = mid;
    }
@@ -1043,13 +1104,15 @@ void WriteSetText()
    for( int iSym {}; iSym < nSyms; iSym++ )
    {
       PGX->gdxSymbolInfo( iSym, s.data(), symDim, symTyp );
-      if( static_cast<gdxSyType>( symTyp ) != dt_set ) continue;
+      if( static_cast<gdxSyType>( symTyp ) != dt_set )
+         continue;
       // fo << "Found set " << s << '\n';
       PGX->gdxDataReadRawStart( iSym, nRecs );
       while( PGX->gdxDataReadRaw( keys, vals, fDim ) != 0 )
       {
          textIdx = static_cast<int>( delphiRound( vals[gdx::vallevel] ) );
-         if( mxTextIdx < textIdx ) mxTextIdx = textIdx;
+         if( mxTextIdx < textIdx )
+            mxTextIdx = textIdx;
       }
       PGX->gdxDataReadDone();
    }
@@ -1059,7 +1122,8 @@ void WriteSetText()
    fo << "   idx   text" << '\n';
    for( textIdx = 0; textIdx < nText; textIdx++ )
    {
-      if( textIdx == 0 ) strcpy( s.data(), "" );
+      if( textIdx == 0 )
+         strcpy( s.data(), "" );
       else
          PGX->gdxGetElemText( textIdx, s.data(), idummy );
       fo << gdlib::strutilx::PadLeft( std::to_string( textIdx ), 6 ) << "   \"" << s.data() << '\"' << '\n';
@@ -1140,7 +1204,8 @@ std::string NextParam()
          }
       }
    }
-   if( result == "\'\'" ) return "";
+   if( result == "\'\'" )
+      return "";
    return result;
 }
 
@@ -1150,14 +1215,16 @@ void WriteAcronyms()
    library::short_string sName {}, sText {};
 
    Cnt = PGX->gdxAcronymCount();
-   if( Cnt <= 0 ) return;
+   if( Cnt <= 0 )
+      return;
 
    fo << '\n';
    for( int N {}; N < Cnt; N++ )
    {
       PGX->gdxAcronymGetInfo( N, sName.data(), sText.data(), Indx );
       fo << "Acronym " << sName.data();
-      if( sText[0] != '\0' ) WriteQText( sText.data() );
+      if( sText[0] != '\0' )
+         WriteQText( sText.data() );
       fo << ';' << '\n';
    }
 }
@@ -1268,7 +1335,8 @@ int main( const int argc, const char *argv[] )
             }
             strcpy( s.data(), NextParam().data() );
             s.to_upper_case();
-            if( s == "TAB" ) Delim = '\t';
+            if( s == "TAB" )
+               Delim = '\t';
             else if( s == "COMMA" )
                Delim = ',';
             else if( s == "PERIOD" )
@@ -1515,16 +1583,21 @@ int main( const int argc, const char *argv[] )
       goto End;
    }
 
-   if( OutFormat == TOutFormat::fmt_none ) OutFormat = TOutFormat::fmt_normal;
-   if( dblFormat == TDblFormat::dbl_none ) dblFormat = TDblFormat::dbl_normal;
+   if( OutFormat == TOutFormat::fmt_none )
+      OutFormat = TOutFormat::fmt_normal;
+   if( dblFormat == TDblFormat::dbl_none )
+      dblFormat = TDblFormat::dbl_normal;
    if( Delim == '\0' )
    {
-      if( OutFormat == TOutFormat::fmt_csv ) Delim = ',';
+      if( OutFormat == TOutFormat::fmt_csv )
+         Delim = ',';
       else
          Delim = '.';
    }
-   if( DecimalSep == '\0' ) DecimalSep = '.';
-   if( OutFormat == TOutFormat::fmt_csv ) ShowData = true;
+   if( DecimalSep == '\0' )
+      DecimalSep = '.';
+   if( OutFormat == TOutFormat::fmt_csv )
+      ShowData = true;
    if( Delim == DecimalSep && Delim != '.' )
    {
       printErrorMessage( "Delimiter and Decimal separator characters should be different" );
@@ -1550,7 +1623,8 @@ int main( const int argc, const char *argv[] )
       goto End;
    }
 
-   if( Symb[0] == '\0' ) ShowHdr = true;
+   if( Symb[0] == '\0' )
+      ShowHdr = true;
    if( OutFormat == TOutFormat::fmt_gamsbas )
    {
       ShowHdr = false;
@@ -1629,7 +1703,8 @@ int main( const int argc, const char *argv[] )
       fo << '\n';
       fo << "$gdxIn " << InputFile << '\n';
    }
-   if( OutFormat != TOutFormat::fmt_csv ) WriteAcronyms();
+   if( OutFormat != TOutFormat::fmt_csv )
+      WriteAcronyms();
    if( !UELSetName.empty() )
    {
       if( OutFormat == TOutFormat::fmt_csv )
@@ -1672,11 +1747,13 @@ int main( const int argc, const char *argv[] )
       int N;
       if( PGX->gdxFindSymbol( Symb.data(), N ) != 0 )
       {
-         if( OutFormat == TOutFormat::fmt_csv ) WriteSymbolCSV( N );
+         if( OutFormat == TOutFormat::fmt_csv )
+            WriteSymbolCSV( N );
          else
          {
             WriteSymbol( N );
-            if( !ShowHdr ) fo << '\n';
+            if( !ShowHdr )
+               fo << '\n';
          }
       }
       else
@@ -1687,7 +1764,8 @@ int main( const int argc, const char *argv[] )
    }
    else
    {
-      if( OutFormat == TOutFormat::fmt_normal ) ShowHdr = true;
+      if( OutFormat == TOutFormat::fmt_normal )
+         ShowHdr = true;
       fo << "$onEmpty" << '\n';
       if( !ShowData )
       {
@@ -1710,7 +1788,8 @@ AllDone:
       std::cout << "GDXDump file written: " << OutputName << "[FIL:\"" << OutputName << "\",0,0]" << std::endl;
 
 End:
-   if( OutputFile.is_open() ) OutputFile.close();
+   if( OutputFile.is_open() )
+      OutputFile.close();
 
    return ExitCode;
 }
