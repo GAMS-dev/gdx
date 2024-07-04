@@ -103,10 +103,6 @@ void WriteSymbolCSV( int SyNr );
 // Auxiliary function for WriteSymbolInfo and WriteDomainInfo
 int getIntegerWidth( int number );
 
-// Auxiliary function for WriteSymbolInfo
-template<size_t length>
-int getLength( const std::array<char, length> &text );
-
 void WriteSymbolInfo();
 
 void WriteDomainInfo();
@@ -118,10 +114,6 @@ void Usage();
 std::string NextParam();
 
 void WriteAcronyms();
-
-// Auxiliary function for main
-template<size_t length>
-void toUpperCase( std::array<char, length> &text );
 
 int main( int argc, const char *argv[] );
 

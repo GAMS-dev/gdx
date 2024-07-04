@@ -935,14 +935,6 @@ int getIntegerWidth( const int number )
    return static_cast<int>( std::string { std::to_string( number ) }.length() );
 }
 
-template<size_t length>
-int getLength( const std::array<char, length> &text )
-{
-   size_t i {};
-   while( i < length && text[i] != '\0' ) i++;
-   return static_cast<int>( i );
-}
-
 void WriteSymbolInfo()
 {
    int ADim, iATyp, NrSy, NrUel, w1, w2, w3, ACount, AUserInfo;
@@ -1169,12 +1161,6 @@ void WriteAcronyms()
       if( sText[0] != '\0' ) WriteQText( sText.data() );
       fo << ';' << '\n';
    }
-}
-
-template<size_t length>
-void toUpperCase( std::array<char, length> &text )
-{
-   for( char &c: text ) c = static_cast<char>( toupper( c ) );
 }
 
 int main( const int argc, const char *argv[] )
