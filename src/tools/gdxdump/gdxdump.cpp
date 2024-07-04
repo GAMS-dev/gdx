@@ -1124,7 +1124,7 @@ void WriteSetText()
    for( textIdx = 0; textIdx < nText; textIdx++ )
    {
       if( textIdx == 0 )
-         strcpy( s.data(), "" );
+         s.clear();
       else
          PGX->gdxGetElemText( textIdx, s.data(), idummy );
       fo << gdlib::strutilx::PadLeft( std::to_string( textIdx ), 6 ) << "   \"" << s.data() << '\"' << '\n';
