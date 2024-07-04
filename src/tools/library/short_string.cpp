@@ -57,7 +57,11 @@ char short_string::back() const
 
 char short_string::operator[]( const uint8_t i ) const
 {
-   assert( i < length() );
+   const uint8_t length { this->length() };
+   if( i > 0 )
+      assert( i < length );
+   else
+      assert( i <= length );
    return buffer[i];
 }
 
