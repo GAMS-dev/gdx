@@ -1782,7 +1782,7 @@ int main( const int argc, const char *argv[] )
 AllDone:
    if( PGX )
    {
-      if( gdxClose( PGX ) )
+      if( gdxClose( PGX ) != 0 )
          printErrorMessage( "Problem closing GDX file", false );
       gdxFree( &PGX );
    }
