@@ -34,12 +34,13 @@
 #include "gdxdump.h"
 #include "../library/common.h"
 #include "../library/short_string.h"
-// TGXFileObj class
-#include "../../gdx.h"
 #include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
+
 // Global constants
 #include "../../../generated/gclgms.h"
+// TGXFileObj class
+#include "../../gdx.h"
 
 namespace gdxdump
 {
