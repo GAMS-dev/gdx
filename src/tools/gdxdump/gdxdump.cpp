@@ -399,7 +399,7 @@ bool WriteSymbolAsItem( const int SyNr, const bool DomInfo )
    else if( !SyTxt.empty() )
    {
       // TODO: Works like this, but implementation is different than in Delphi code
-      // const char qChar = std::string { SyTxt.data() }.find( '\"' ) == 0 ? '\"' : '\'';
+      // const char qChar = SyTxt.string().find( '\"' ) == 0 ? '\"' : '\'';
       constexpr char qChar = '\"';
       fo << ' ' << qChar << SyTxt.data() << qChar;
    }
@@ -1570,7 +1570,7 @@ int main( const int argc, const char *argv[] )
             bHeader = true;
             continue;
          }
-         printErrorMessage( "Unrecognized option: " + std::string { s.data() }, false );
+         printErrorMessage( "Unrecognized option: " + s.string(), false );
          ExitCode = 1;
          break;
       }
