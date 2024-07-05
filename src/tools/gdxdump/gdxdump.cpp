@@ -479,7 +479,7 @@ void WriteSymbol( const int SyNr )
    gdxValues_t Vals {};
    std::array<double, GMS_VAL_MAX> DefaultValues {};
 
-   auto WriteItem = [&IsScalar, &ATyp, &Vals, &DefaultValues, &FrstWrite, &ADim, &SyName, &Keys, &S, &IDum, &ACount]( const gdx::tvarvaltype &ValNr ) {
+   auto WriteItem = [&IsScalar, &ATyp, &Vals, &DefaultValues, &FrstWrite, &ADim, &SyName, &Keys, &S, &IDum, &ACount]( const uint8_t &ValNr ) {
       if( !IsScalar && ATyp != dt_set && ( FilterDef && Vals[ValNr] == DefaultValues[ValNr] ) && !( ATyp == dt_equ && ( ValNr == gdx::vallower || ValNr == gdx::valupper ) ) )
          return;
       if( FrstWrite )
