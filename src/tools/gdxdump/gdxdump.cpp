@@ -40,7 +40,7 @@
 // Global constants
 #include "../../../generated/gclgms.h"
 // TGXFileObj class
-#include "../../gdx.h"
+// #include "../../gdx.h"
 // GDX library interface
 #include "../../../generated/gdxcc.h"
 
