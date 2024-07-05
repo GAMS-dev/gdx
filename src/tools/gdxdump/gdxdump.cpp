@@ -1633,30 +1633,25 @@ int main( const int argc, const char *argv[] )
       ShowData = true;
    }
 
-   // TODO: Remove?
-   // if( !PGX->gdxGetReadyX( s.data() ) )
-   // {
-   //    printErrorMessage( "Error loading GDX library: " + std::string { s.data() }, false );
-   //    ExitCode = 3;
-   //    goto End;
-   // }
-
+   if( !gdxGetReady( s.data(), s.length() ) )
    {
-      std::string ErrMsg;
-      PGX = std::make_unique<gdx::TGXFileObj>( ErrMsg );
-      if( !ErrMsg.empty() )
-      {
-         printErrorMessage( "Error using GDX library: " + ErrMsg, false );
-         ExitCode = 3;
-         goto End;
-      }
+      printErrorMessage( "Error loading GDX library: " + s.string(), false );
+      ExitCode = 3;
+      goto End;
+   }
+
+   if( !gdxCreate( &PGX, s.data(), s.length() ) )
+   {
+      printErrorMessage( "Error using GDX library: " + s.string(), false );
+      ExitCode = 3;
+      goto End;
    }
 
    gdxOpenRead( PGX, InputFile.data(), &ErrNr );
    if( ErrNr != 0 )
    {
-      PGX->gdxErrorStr( ErrNr, s.data() );
-      printErrorMessage( "Problem reading GDX file: " + std::string { s.data() }, false );
+      gdxErrorStr( PGX, ErrNr, s.data() );
+      printErrorMessage( "Problem reading GDX file: " + s.string(), false );
       ExitCode = 4;
       goto End;
    }
@@ -1664,8 +1659,8 @@ int main( const int argc, const char *argv[] )
    ErrNr = gdxGetLastError( PGX );
    if( ErrNr != 0 )
    {
-      PGX->gdxErrorStr( ErrNr, s.data() );
-      printErrorMessage( "Problem reading GDX file: " + std::string { s.data() }, false );
+      gdxErrorStr( PGX, ErrNr, s.data() );
+      printErrorMessage( "Problem reading GDX file: " + s.string(), false );
       ExitCode = 5;
       goto End;
    }
