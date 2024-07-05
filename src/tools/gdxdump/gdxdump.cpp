@@ -480,7 +480,7 @@ void WriteSymbol( const int SyNr )
    std::array<double, GMS_VAL_MAX> DefaultValues {};
 
    auto WriteItem = [&IsScalar, &ATyp, &Vals, &DefaultValues, &FrstWrite, &ADim, &SyName, &Keys, &S, &IDum, &ACount]( const uint8_t &ValNr ) {
-      if( !IsScalar && ATyp != dt_set && ( FilterDef && Vals[ValNr] == DefaultValues[ValNr] ) && !( ATyp == dt_equ && ( ValNr == gdx::vallower || ValNr == gdx::valupper ) ) )
+      if( !IsScalar && ATyp != dt_set && ( FilterDef && Vals[ValNr] == DefaultValues[ValNr] ) && !( ATyp == dt_equ && ( ValNr == GMS_VAL_LOWER || ValNr == GMS_VAL_UPPER ) ) )
          return;
       if( FrstWrite )
          FrstWrite = false;
@@ -514,7 +514,7 @@ void WriteSymbol( const int SyNr )
       switch( ATyp )
       {
          case dt_set:
-            if( Vals[gdx::vallevel] != 0 )
+            if( Vals[GMS_VAL_LEVEL] != 0 )
             {
                gdxGetElemText( PGX, static_cast<int>( Vals[GMS_VAL_LEVEL] ), S.data(), &IDum );
                WriteQUELText( S.data() );
@@ -576,7 +576,7 @@ void WriteSymbol( const int SyNr )
    switch( ATyp )
    {
       case dt_set:
-         DefaultValues[gdx::vallevel] = 0;
+         DefaultValues[GMS_VAL_LEVEL] = 0;
          if( AUser == GMS_SETTYPE_SINGLETON )
             SubTypeName = "Singleton";
          break;
@@ -595,7 +595,7 @@ void WriteSymbol( const int SyNr )
             SubTypeName = "Logic";
          break;
       default:
-         DefaultValues[gdx::vallevel] = 0;
+         DefaultValues[GMS_VAL_LEVEL] = 0;
          break;
    }
    if( ShowHdr )
@@ -696,27 +696,27 @@ void WriteSymbol( const int SyNr )
             {
                case TOutFormat::fmt_gamsbas:
                   if( ATyp == dt_equ )
-                     WriteItem( gdx::valmarginal );
+                     WriteItem( GMS_VAL_MARGINAL );
                   else
                   {
-                     WriteItem( gdx::vallevel );
-                     WriteItem( gdx::valmarginal );
+                     WriteItem( GMS_VAL_LEVEL );
+                     WriteItem( GMS_VAL_MARGINAL );
                   }
                   break;
                case TOutFormat::fmt_csv:
                   assertWithMessage( false, "No CSV processing" );
                   break;
                case TOutFormat::fmt_normal:
-                  WriteItem( gdx::vallevel );
+                  WriteItem( GMS_VAL_LEVEL );
                   if( ATyp == dt_var || ATyp == dt_equ )
                   {
-                     WriteItem( gdx::valmarginal );
+                     WriteItem( GMS_VAL_MARGINAL );
                      // if( true )
                      // {
-                     WriteItem( gdx::vallower );
-                     WriteItem( gdx::valupper );
+                     WriteItem( GMS_VAL_LOWER );
+                     WriteItem( GMS_VAL_UPPER );
                      // }
-                     WriteItem( gdx::valscale );
+                     WriteItem( GMS_VAL_SCALE );
                   }
                   break;
                default:
@@ -845,17 +845,17 @@ void WriteSymbolCSV( const int SyNr )
       {
          if( ADim == 0 )
          {
-            WrVal( Vals[gdx::vallevel] );
+            WrVal( Vals[GMS_VAL_LEVEL] );
             if( ( ATyp == dt_var || ATyp == dt_equ ) && bFullEVRec )
             {
                fo << Delim;
-               WrVal( Vals[gdx::valmarginal] );
+               WrVal( Vals[GMS_VAL_MARGINAL] );
                fo << Delim;
-               WrVal( Vals[gdx::vallower] );
+               WrVal( Vals[GMS_VAL_LOWER] );
                fo << Delim;
-               WrVal( Vals[gdx::valupper] );
+               WrVal( Vals[GMS_VAL_UPPER] );
                fo << Delim;
-               WrVal( Vals[gdx::valscale] );
+               WrVal( Vals[GMS_VAL_SCALE] );
             }
          }
          else
@@ -867,22 +867,22 @@ void WriteSymbolCSV( const int SyNr )
                else if( !( ATyp == dt_set || ATyp == dt_alias ) )
                {
                   fo << Delim;
-                  WrVal( Vals[gdx::vallevel] );
+                  WrVal( Vals[GMS_VAL_LEVEL] );
                   if( ( ATyp == dt_var || ATyp == dt_equ ) && bFullEVRec )
                   {
                      fo << Delim;
-                     WrVal( Vals[gdx::valmarginal] );
+                     WrVal( Vals[GMS_VAL_MARGINAL] );
                      fo << Delim;
-                     WrVal( Vals[gdx::vallower] );
+                     WrVal( Vals[GMS_VAL_LOWER] );
                      fo << Delim;
-                     WrVal( Vals[gdx::valupper] );
+                     WrVal( Vals[GMS_VAL_UPPER] );
                      fo << Delim;
-                     WrVal( Vals[gdx::valscale] );
+                     WrVal( Vals[GMS_VAL_SCALE] );
                   }
                }
                else if( bCSVSetText )
                {
-                  if( Vals[gdx::vallevel] != 0 )
+                  if( Vals[GMS_VAL_LEVEL] != 0 )
                   {
                      gdxGetElemText( PGX, static_cast<int>( delphiRound( Vals[GMS_VAL_LEVEL] ) ), S.data(), &IDum );
                      fo << Delim << QQCSV( S.data() );
@@ -969,7 +969,7 @@ void WriteSymbolCSV( const int SyNr )
                if( ATyp == dt_set || ATyp == dt_alias )
                   fo << 'Y';
                else
-                  WrVal( Vals[gdx::vallevel] );
+                  WrVal( Vals[GMS_VAL_LEVEL] );
                EoFData = gdxDataReadRaw( PGX, Keys, Vals, &FDim ) == 0;
                if( FDim < ADim || EoFData )
                {
@@ -1112,7 +1112,7 @@ void WriteSetText()
       gdxDataReadRawStart( PGX, iSym, &nRecs );
       while( gdxDataReadRaw( PGX, keys, vals, &fDim ) != 0 )
       {
-         textIdx = static_cast<int>( delphiRound( vals[gdx::vallevel] ) );
+         textIdx = static_cast<int>( delphiRound( vals[GMS_VAL_LEVEL] ) );
          if( mxTextIdx < textIdx )
             mxTextIdx = textIdx;
       }
