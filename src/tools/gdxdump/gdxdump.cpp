@@ -90,10 +90,9 @@ std::string QQCSV( const std::string &s )
 //    return {};
 // }
 
-void WriteQuotedCommon( const std::string &S, const std::function<bool( char )> &isSpecialPredicate )
+void WriteQuotedCommon( const std::string &S, const std::function<bool( char )> &isSpecialPredicate, const int i, bool G )
 {
-   bool G { true };
-   for( int k {}; k < static_cast<int>( S.length() ); k++ )
+   for( int k { i }; k < static_cast<int>( S.length() ); k++ )
    {
       const char c = S[k];
       if( isSpecialPredicate( c ) || ( c == '.' && k + 1 < static_cast<int>( S.length() ) && S[k + 1] == '.' ) )
