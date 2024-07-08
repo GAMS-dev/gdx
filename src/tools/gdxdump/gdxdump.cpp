@@ -654,7 +654,7 @@ void WriteSymbol( const int SyNr )
             }
          }
          if( !S.empty() )
-            WriteQText( S.data() );
+            WriteQText( S.data(), ADim == 0 );
       }
    }
    if( ACount == 0 && ShowData )
@@ -1235,7 +1235,7 @@ void WriteAcronyms()
       gdxAcronymGetInfo( PGX, N, sName.data(), sText.data(), &Indx );
       fo << "Acronym " << sName.data();
       if( !sText.empty() )
-         WriteQText( sText.data() );
+         WriteQText( sText.data(), true );
       fo << ';' << '\n';
    }
 }
