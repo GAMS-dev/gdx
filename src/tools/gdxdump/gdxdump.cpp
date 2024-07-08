@@ -1633,18 +1633,22 @@ int main( const int argc, const char *argv[] )
       ShowData = true;
    }
 
-   if( !gdxGetReady( s.data(), s.length() ) )
    {
-      printErrorMessage( "Error loading GDX library: " + s.string(), false );
-      ExitCode = 3;
-      goto End;
-   }
+      library::short_string error_message {};
 
-   if( !gdxCreate( &PGX, s.data(), s.length() ) )
-   {
-      printErrorMessage( "Error using GDX library: " + s.string(), false );
-      ExitCode = 3;
-      goto End;
+      if( !gdxGetReady( error_message.data(), error_message.length() ) )
+      {
+         printErrorMessage( "Error loading GDX library: " + error_message.string(), false );
+         ExitCode = 3;
+         goto End;
+      }
+
+      if( !gdxCreate( &PGX, error_message.data(), error_message.length() ) )
+      {
+         printErrorMessage( "Error using GDX library: " + error_message.string(), false );
+         ExitCode = 3;
+         goto End;
+      }
    }
 
    gdxOpenRead( PGX, InputFile.data(), &ErrNr );
