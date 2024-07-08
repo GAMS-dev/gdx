@@ -87,6 +87,8 @@ endif ()
 
 # Library for gdxdump, gdxdiff and gdxmerge
 add_library(gdxtools-library
+    generated/gdxcc.h
+    generated/gdxcc.c
     src/tools/library/common.h
     src/tools/library/common.cpp
     src/tools/library/short_string.h
