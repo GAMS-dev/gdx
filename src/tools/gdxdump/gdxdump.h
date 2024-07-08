@@ -35,7 +35,7 @@ std::string QQCSV( const std::string &s );
 // Auxiliary function for WriteQText and WriteQUELText
 void WriteQuotedCommon( const std::string &S, const std::function<bool( char )> &isSpecialPredicate, int i = {}, bool G = true );
 
-void WriteQText( const std::string &S );
+void WriteQText( const std::string &S, bool checkParenthesis );
 
 void WriteQUELText( const std::string &S );
 

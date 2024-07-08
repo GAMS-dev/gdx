@@ -111,11 +111,23 @@ void WriteQuotedCommon( const std::string &S, const std::function<bool( char )> 
 }
 
 // Write explanatory text with quotes if needed
-void WriteQText( const std::string &S )
+void WriteQText( const std::string &S, const bool checkParenthesis )
 {
+   size_t i {};
+   bool G { true };
+
+   if( checkParenthesis )
+      for( ; i < S.length(); i++ )
+         if( S.at( i ) != ' ' )
+         {
+            // open parenthesis at the start of the symbol text throws off the GAMS compiler
+            G = S[i] != '(';
+            break;
+         }
+
    WriteQuotedCommon( S, []( const char c ) {
       return utils::in( c, ',', ';', '/', '$', '=', '\'', '\"' );
-   } );
+   }, static_cast<int>( i ), G );
 }
 
 // Check if UEL associated text needs to be quoted
