@@ -72,7 +72,7 @@ static bool ShowDefRec, CompDomains;
 std::string ValAsString( const gdxHandle_t &PGX, const double V )
 {
    constexpr int WIDTH { 14 };
-   std::string result;
+   library::short_string result;
    if( gdxAcronymName( PGX, V, result.data() ) == 0 )
    {
       int iSV;
@@ -119,7 +119,7 @@ void CheckGDXError( const gdxHandle_t &PGX )
    int ErrNr { gdxGetLastError( PGX ) };
    if( ErrNr != 0 )
    {
-      std::string S;
+      library::short_string S;
       gdxErrorStr( PGX, ErrNr, S.data() );
       std::cerr << "GDXDIFF GDX Error: " << S << std::endl;
    }
@@ -130,7 +130,7 @@ void OpenGDX( const std::string &fn, gdxHandle_t &PGX )
    if( !rtl::sysutils_p3::FileExists( fn ) )
       FatalError( "Input file not found " + fn, static_cast<int>( ErrorCode::ERR_NOFILE ) );
 
-   library::short_string S {};
+   library::short_string S;
    if( !gdxCreate( &PGX, S.data(), S.length() ) )
       FatalError( "Cannot load GDX library " + S.string(), static_cast<int>( ErrorCode::ERR_LOADDLL ) );
 
@@ -991,7 +991,7 @@ int main( const int argc, const char *argv[] )
       std::cout << std::endl;
    }
 
-   library::short_string S2 {};
+   library::short_string S2;
    if( !gdxCreate( &PGXDIF, S2.data(), S2.length() ) )
       FatalError( "Unable to load GDX library: " + S2.string(), static_cast<int>( ErrorCode::ERR_LOADDLL ) );
 
