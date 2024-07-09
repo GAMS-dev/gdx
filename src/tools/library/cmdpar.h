@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 
+#include "../library/short_string.h"
+
 // Description:
 //   Object that handles command line parameters
 
