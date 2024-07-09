@@ -244,7 +244,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 
       if( FldOnlyVar == FldOnly::fld_yes && ( ST == dt_var || ST == dt_equ ) )
       {
-         Vals2[gdx::vallevel] = Vals[FldOnlyFld];
+         Vals2[GMS_VAL_LEVEL] = Vals[FldOnlyFld];
          gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals2.data() );
       }
       else
@@ -263,7 +263,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          strcpy( StrKeys[D], UELTable->GetString( Keys[D] ) );
       strcpy( StrKeys[Dim + 1], Act.data() );
       gdxAddSetText( PGXDIF, S.data(), &iNode );
-      Vals[gdx::vallevel] = iNode;
+      Vals[GMS_VAL_LEVEL] = iNode;
       gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals.data() );
    };
 
@@ -275,7 +275,7 @@ void CompareSy( const int Sy1, const int Sy2 )
             break;
 
          case dt_par:
-            std::cout << ValAsString( PGX, Vals[gdx::vallevel] ) << std::endl;
+            std::cout << ValAsString( PGX, Vals[GMS_VAL_LEVEL] ) << std::endl;
             break;
 
          default:
@@ -346,7 +346,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    auto CheckParDifference = [&]( const TgdxUELIndex &Keys, const TgdxValues &V1, const TgdxValues &V2 ) -> bool {
       bool result { true };
       if( ST == dt_par )
-         result = DoublesEqual( V1[gdx::vallevel], V2[gdx::vallevel] );
+         result = DoublesEqual( V1[GMS_VAL_LEVEL], V2[GMS_VAL_LEVEL] );
       else if( FldOnlyVar == FldOnly::fld_yes )
          result = DoublesEqual( V1[FldOnlyFld], V2[FldOnlyFld] );
       else
@@ -385,9 +385,9 @@ void CompareSy( const int Sy1, const int Sy2 )
                if( DoublesEqual( V1[T], V2[T] ) ) continue;
 
                TgdxValues Vals;
-               Vals[gdx::vallevel] = V1[T];
+               Vals[GMS_VAL_LEVEL] = V1[T];
                WriteDiff( c_dif1, GamsFieldNames[T], Keys, Vals );
-               Vals[gdx::vallevel] = V2[T];
+               Vals[GMS_VAL_LEVEL] = V2[T];
                WriteDiff( c_dif2, GamsFieldNames[T], Keys, Vals );
             }
          }
@@ -430,7 +430,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       switch( ST )
       {
          case dt_par:
-            Eq = DoublesEqual( Vals[gdx::vallevel], 0 );
+            Eq = DoublesEqual( Vals[GMS_VAL_LEVEL], 0 );
             break;
 
          case dt_var:
@@ -464,7 +464,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       std::cout << "Insert: " << Act << ' ';
 #endif
 
-      if( ST == dt_set && Vals[gdx::vallevel] != 0 )
+      if( ST == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
       {
          std::string stxt;
          int N;
@@ -473,7 +473,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          else
             gdxGetElemText( PGX2, static_cast<int>( round( Vals[GMS_VAL_LEVEL] ) ), stxt.data(), &N );
          gdxAddSetText( PGXDIF, stxt.data(), &N );
-         Vals[gdx::vallevel] = N;
+         Vals[GMS_VAL_LEVEL] = N;
       }
 
       if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
@@ -485,7 +485,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          {
             if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() )
                continue;
-            Vals2[gdx::vallevel] = Vals[T];
+            Vals2[GMS_VAL_LEVEL] = Vals[T];
             WriteDiff( Act, GamsFieldNames[T], Keys, Vals2 );
          }
       }
@@ -612,7 +612,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          if( ST == dt_set )
          {
             if( CompSetText )
-               Eq = CheckSetDifference( Keys1, static_cast<int>( round( Vals1[gdx::vallevel] ) ), static_cast<int>( round( Vals2[gdx::vallevel] ) ) );
+               Eq = CheckSetDifference( Keys1, static_cast<int>( round( Vals1[GMS_VAL_LEVEL] ) ), static_cast<int>( round( Vals2[GMS_VAL_LEVEL] ) ) );
             else
                Eq = true;
          }
@@ -840,34 +840,34 @@ int main( const int argc, const char *argv[] )
    ignoreOrder = CmdParams->HasKey( static_cast<int>( KP::kp_ignoreOrd ) );
 
    if( !CmdParams->HasParam( static_cast<int>( KP::kp_cmpfld ), S ) )
-      ActiveFields = { gdx::vallevel, gdx::valmarginal, gdx::vallower, gdx::valupper, gdx::valscale };
+      ActiveFields = { GMS_VAL_LEVEL, GMS_VAL_MARGINAL, GMS_VAL_LOWER, GMS_VAL_UPPER, GMS_VAL_SCALE };
    else
    {
       if( gdlib::strutilx::StrUEqual( S, "All" ) )
-         ActiveFields = { gdx::vallevel, gdx::valmarginal, gdx::vallower, gdx::valupper, gdx::valscale };
+         ActiveFields = { GMS_VAL_LEVEL, GMS_VAL_MARGINAL, GMS_VAL_LOWER, GMS_VAL_UPPER, GMS_VAL_SCALE };
       else if( gdlib::strutilx::StrUEqual( S, "L" ) )
       {
-         FldOnlyFld = gdx::vallevel;
+         FldOnlyFld = GMS_VAL_LEVEL;
          FldOnlyVar = FldOnly::fld_maybe;
       }
       else if( gdlib::strutilx::StrUEqual( S, "M" ) )
       {
-         FldOnlyFld = gdx::valmarginal;
+         FldOnlyFld = GMS_VAL_MARGINAL;
          FldOnlyVar = FldOnly::fld_maybe;
       }
       else if( gdlib::strutilx::StrUEqual( S, "Up" ) )
       {
-         FldOnlyFld = gdx::valupper;
+         FldOnlyFld = GMS_VAL_UPPER;
          FldOnlyVar = FldOnly::fld_maybe;
       }
       else if( gdlib::strutilx::StrUEqual( S, "Lo" ) )
       {
-         FldOnlyFld = gdx::vallower;
+         FldOnlyFld = GMS_VAL_LOWER;
          FldOnlyVar = FldOnly::fld_maybe;
       }
       else if( gdlib::strutilx::StrUEqual( S, "Prior" ) || gdlib::strutilx::StrUEqual( S, "Scale" ) )
       {
-         FldOnlyFld = gdx::valscale;
+         FldOnlyFld = GMS_VAL_SCALE;
          FldOnlyVar = FldOnly::fld_maybe;
       }
       else
@@ -1113,11 +1113,11 @@ int main( const int argc, const char *argv[] )
    gdxDataWriteStrStart( PGXDIF, ID.data(), "", 1, dt_set, 0 );
    strcpy( StrKeys[1], "File1" );
    gdxAddSetText( PGXDIF, InFile1.data(), &StrNr );
-   StrVals[gdx::vallevel] = StrNr;
+   StrVals[GMS_VAL_LEVEL] = StrNr;
    gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), StrVals.data() );
    strcpy( StrKeys[1], "File2" );
    gdxAddSetText( PGXDIF, InFile2.data(), &StrNr );
-   StrVals[gdx::vallevel] = StrNr;
+   StrVals[GMS_VAL_LEVEL] = StrNr;
    gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), StrVals.data() );
    gdxDataWriteDone( PGXDIF );
 
