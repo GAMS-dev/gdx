@@ -83,11 +83,11 @@ std::string ValAsString( const gdxHandle_t &PGX, const double V )
          std::ostringstream oss;
          oss << std::fixed << std::setprecision( 5 ) << V;
          result = oss.str();
-         return gdlib::strutilx::PadLeft( result, WIDTH );
+         return gdlib::strutilx::PadLeft( result.string(), WIDTH );
       }
    }
    // Empty string will be returned
-   return result;
+   return {};
 }
 
 void FatalErrorExit( const int ErrNr )
