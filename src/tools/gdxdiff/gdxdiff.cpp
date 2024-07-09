@@ -130,17 +130,16 @@ void OpenGDX( const std::string &fn, gdxHandle_t &PGX )
    if( !rtl::sysutils_p3::FileExists( fn ) )
       FatalError( "Input file not found " + fn, static_cast<int>( ErrorCode::ERR_NOFILE ) );
 
-   // TODO: Remove?
-   // if( !PGX->gdxCreateX( S ) )
-   //    FatalError( "Cannot load GDX library " + S, static_cast<int>( ErrorCode::ERR_LOADDLL ) );
+   library::short_string S {};
+   if( !gdxCreate( &PGX, S.data(), S.length() ) )
+      FatalError( "Cannot load GDX library " + S.string(), static_cast<int>( ErrorCode::ERR_LOADDLL ) );
 
    int ErrNr;
    gdxOpenRead( PGX, fn.data(), &ErrNr );
    if( ErrNr != 0 )
    {
-      std::string S;
       gdxErrorStr( PGX, ErrNr, S.data() );
-      FatalError2( "Problem reading GDX file + " + fn, S, static_cast<int>( ErrorCode::ERR_READGDX ) );
+      FatalError2( "Problem reading GDX file + " + fn, S.string(), static_cast<int>( ErrorCode::ERR_READGDX ) );
    }
 
    int NrElem, HighV;
