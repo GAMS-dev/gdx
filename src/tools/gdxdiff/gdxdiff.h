@@ -101,7 +101,7 @@ void FatalError2( const std::string &Msg1, const std::string &Msg2, int ErrNr );
 
 void CheckGDXError( const gdxHandle_t &PGX );
 
-void OpenGDX( const std::string &fn, gdxHandle_t &PGX );
+void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX );
 
 void registerDiffUELs();
 

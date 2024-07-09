@@ -125,10 +125,10 @@ void CheckGDXError( const gdxHandle_t &PGX )
    }
 }
 
-void OpenGDX( const std::string &fn, gdxHandle_t &PGX )
+void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
 {
-   if( !rtl::sysutils_p3::FileExists( fn ) )
-      FatalError( "Input file not found " + fn, static_cast<int>( ErrorCode::ERR_NOFILE ) );
+   if( !rtl::sysutils_p3::FileExists( fn.string() ) )
+      FatalError( "Input file not found " + fn.string(), static_cast<int>( ErrorCode::ERR_NOFILE ) );
 
    library::short_string S;
    if( !gdxCreate( &PGX, S.data(), S.length() ) )
@@ -139,7 +139,7 @@ void OpenGDX( const std::string &fn, gdxHandle_t &PGX )
    if( ErrNr != 0 )
    {
       gdxErrorStr( PGX, ErrNr, S.data() );
-      FatalError2( "Problem reading GDX file + " + fn, S.string(), static_cast<int>( ErrorCode::ERR_READGDX ) );
+      FatalError2( "Problem reading GDX file + " + fn.string(), S.string(), static_cast<int>( ErrorCode::ERR_READGDX ) );
    }
 
    int NrElem, HighV;
