@@ -50,9 +50,9 @@ const static std::array<std::string, 5> valsTypTxt { "L", "M", "LO", "UP", "SCAL
 const static std::array<std::string, 10> varsTypTxt { "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };
 const static std::array<std::string, 7> svTxt = { "Undf", "NA", "+Inf", "-Inf", "Eps", "0", "AcroN" };
 
-static std::ostream &fo = std::cout;
+static std::ostream &fo { std::cout };
 static std::ofstream OutputFile;
-static gdxHandle_t PGX = nullptr;
+static gdxHandle_t PGX { nullptr };
 static char Delim, DecimalSep;
 static bool ShowHdr, ShowData, CDim, FilterDef, bEpsOut, bNaOut, bPinfOut, bMinfOut, bUndfOut, bZeroOut, bHeader, bFullEVRec, bCSVSetText;
 static TOutFormat OutFormat;

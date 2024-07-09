@@ -50,7 +50,7 @@ namespace gdxdiff
 {
 
 static std::string DiffTmpName {};
-static std::shared_ptr<gdx::TGXFileObj> PGX1, PGX2, PGXDIF;
+static gdxHandle_t PGX1 { nullptr }, PGX2 { nullptr }, PGXDIF { nullptr };
 static bool diffUELsRegistered;
 static std::shared_ptr<gdlib::strhash::TXStrHashList<nullptr_t>> UELTable;
 static int staticUELNum;
