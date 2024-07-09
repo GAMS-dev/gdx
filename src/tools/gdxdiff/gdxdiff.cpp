@@ -52,13 +52,13 @@ using tvarvaltype = unsigned int;
 using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
 using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
 
-static std::string DiffTmpName;
+static library::short_string DiffTmpName;
 static gdxHandle_t PGX1 { nullptr }, PGX2 { nullptr }, PGXDIF { nullptr };
 static bool diffUELsRegistered;
 static std::shared_ptr<gdlib::strhash::TXStrHashList<nullptr_t>> UELTable;
 static int staticUELNum;
 static double EpsAbsolute, EpsRelative;
-static std::map<std::string, TStatusCode> StatusTable;
+static std::map<library::short_string, TStatusCode> StatusTable;
 static std::shared_ptr<library::cmdpar::TCmdParams> CmdParams;
 static std::set<tvarvaltype> ActiveFields;
 // Use FldOnlyVar instead of FldOnly as the variable name
@@ -92,10 +92,10 @@ std::string ValAsString( const gdxHandle_t &PGX, const double V )
 
 void FatalErrorExit( const int ErrNr )
 {
-   if( !DiffTmpName.empty() && rtl::sysutils_p3::FileExists( DiffTmpName ) )
+   if( !DiffTmpName.empty() && rtl::sysutils_p3::FileExists( DiffTmpName.string() ) )
    {
       gdxClose( PGXDIF );
-      rtl::sysutils_p3::DeleteFileFromDisk( DiffTmpName );
+      rtl::sysutils_p3::DeleteFileFromDisk( DiffTmpName.string() );
    }
    exit( ErrNr );
 }
@@ -147,7 +147,7 @@ void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
    for( int N { 1 }; N <= NrElem; N++ )
    {
       int NN;
-      std::string UEL;
+      library::short_string UEL;
       gdxUMUelGet( PGX, N, UEL.data(), &NN );
       NN = UELTable->Add( UEL.data(), UEL.length() );
       gdxUELRegisterMap( PGX, NN, UEL.data() );
@@ -180,7 +180,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 {
    int Dim, VarEquType;
    gdxSyType ST;
-   std::string Id;
+   library::short_string Id;
    bool SymbOpen {};
    TStatusCode Status;
    TgdxValues DefValues;
@@ -192,7 +192,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       {
          if( FldOnlyVar == FldOnly::fld_yes && ( ST == dt_var || ST == dt_equ ) )
          {
-            std::string ExplTxt = "Differences Field = " + GamsFieldNames[FldOnlyFld];
+            library::short_string ExplTxt { "Differences Field = " + GamsFieldNames[FldOnlyFld] };
             gdxDataWriteStrStart( PGXDIF, Id.data(), ExplTxt.data(), Dim + 1, dt_par, 0 );
          }
          if( DiffOnly && ( ST == dt_var || ST == dt_equ ) )
@@ -249,7 +249,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals.data() );
    };
 
-   auto WriteSetDiff = [&]( const std::string &Act, const TgdxUELIndex &Keys, const std::string &S ) {
+   auto WriteSetDiff = [&]( const std::string &Act, const TgdxUELIndex &Keys, const library::short_string &S ) {
       gdxStrIndex_t StrKeys;
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
@@ -313,14 +313,14 @@ void CompareSy( const int Sy1, const int Sy2 )
       gdxMapValue( PGX2, V2, &iSV2 );
 
       bool result;
-      std::string S1, S2;
+      library::short_string S1, S2;
       double AbsDiff;
       if( iSV1 == sv_normal )
       {
          if( iSV2 == sv_normal )
          {
             if( gdxAcronymName( PGX1, V1, S1.data() ) != 0 && gdxAcronymName( PGX2, V2, S2.data() ) != 0 )
-               result = gdlib::strutilx::StrUEqual( S1, S2 );
+               result = gdlib::strutilx::StrUEqual( S1.string(), S2.string() );
             else
             {
                AbsDiff = abs( V1 - V2 );
@@ -396,7 +396,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    };
 
    auto CheckSetDifference = [&]( const TgdxUELIndex &Keys, const int txt1, const int txt2 ) -> bool {
-      std::string S1, S2;
+      library::short_string S1, S2;
       int iNode;
       if( txt1 == 0 ) S1.clear();
       else
@@ -466,7 +466,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 
       if( ST == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
       {
-         std::string stxt;
+         library::short_string stxt;
          int N;
          if( Act == c_ins1 )
             gdxGetElemText( PGX1, static_cast<int>( round( Vals[GMS_VAL_LEVEL] ) ), stxt.data(), &N );
@@ -496,7 +496,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    bool Flg1, Flg2, Eq, DomFlg;
    TgdxUELIndex Keys1, Keys2;
    TgdxValues Vals1, Vals2;
-   std::string stxt;
+   library::short_string stxt;
    gdxStrIndex_t DomSy1;
    gdxStrIndexPtrs_t DomSy1Ptrs;
    GDXSTRINDEXPTRS_INIT( DomSy1, DomSy1Ptrs );
@@ -721,9 +721,8 @@ void CheckFile( library::short_string &fn )
 int main( const int argc, const char *argv[] )
 {
    int ErrorCode, ErrNr, Dim, iST, StrNr;
-   std::string S, ID, DiffFileName;
-   library::short_string InFile1, InFile2;
-   std::map<std::string, int> IDTable;
+   library::short_string S, ID, InFile1, InFile2, DiffFileName;
+   std::map<library::short_string, int> IDTable;
    bool UsingIDE, RenameOK;
    gdxStrIndex_t StrKeys;
    gdxStrIndexPtrs_t StrKeysPtrs;
@@ -800,8 +799,8 @@ int main( const int argc, const char *argv[] )
    if( DiffFileName.empty() )
       DiffFileName = "diffile";
 
-   if( gdlib::strutilx::ExtractFileExtEx( DiffFileName ).empty() )
-      DiffFileName = gdlib::strutilx::ChangeFileExtEx( DiffFileName, ".gdx" );
+   if( gdlib::strutilx::ExtractFileExtEx( DiffFileName.string() ).empty() )
+      DiffFileName = gdlib::strutilx::ChangeFileExtEx( DiffFileName.string(), ".gdx" );
 
    if( !CmdParams->HasParam( static_cast<int>( KP::kp_eps ), S ) )
       EpsAbsolute = 0;
@@ -844,29 +843,29 @@ int main( const int argc, const char *argv[] )
       ActiveFields = { GMS_VAL_LEVEL, GMS_VAL_MARGINAL, GMS_VAL_LOWER, GMS_VAL_UPPER, GMS_VAL_SCALE };
    else
    {
-      if( gdlib::strutilx::StrUEqual( S, "All" ) )
+      if( gdlib::strutilx::StrUEqual( S.string(), "All" ) )
          ActiveFields = { GMS_VAL_LEVEL, GMS_VAL_MARGINAL, GMS_VAL_LOWER, GMS_VAL_UPPER, GMS_VAL_SCALE };
-      else if( gdlib::strutilx::StrUEqual( S, "L" ) )
+      else if( gdlib::strutilx::StrUEqual( S.string(), "L" ) )
       {
          FldOnlyFld = GMS_VAL_LEVEL;
          FldOnlyVar = FldOnly::fld_maybe;
       }
-      else if( gdlib::strutilx::StrUEqual( S, "M" ) )
+      else if( gdlib::strutilx::StrUEqual( S.string(), "M" ) )
       {
          FldOnlyFld = GMS_VAL_MARGINAL;
          FldOnlyVar = FldOnly::fld_maybe;
       }
-      else if( gdlib::strutilx::StrUEqual( S, "Up" ) )
+      else if( gdlib::strutilx::StrUEqual( S.string(), "Up" ) )
       {
          FldOnlyFld = GMS_VAL_UPPER;
          FldOnlyVar = FldOnly::fld_maybe;
       }
-      else if( gdlib::strutilx::StrUEqual( S, "Lo" ) )
+      else if( gdlib::strutilx::StrUEqual( S.string(), "Lo" ) )
       {
          FldOnlyFld = GMS_VAL_LOWER;
          FldOnlyVar = FldOnly::fld_maybe;
       }
-      else if( gdlib::strutilx::StrUEqual( S, "Prior" ) || gdlib::strutilx::StrUEqual( S, "Scale" ) )
+      else if( gdlib::strutilx::StrUEqual( S.string(), "Prior" ) || gdlib::strutilx::StrUEqual( S.string(), "Scale" ) )
       {
          FldOnlyFld = GMS_VAL_SCALE;
          FldOnlyVar = FldOnly::fld_maybe;
@@ -908,7 +907,7 @@ int main( const int argc, const char *argv[] )
    // This is a mistake; should be HasKey but leave it
    if( CmdParams->HasParam( static_cast<int>( KP::kp_settext ), S ) )
    {
-      S = gdlib::strutilx::UpperCase( S );
+      S = gdlib::strutilx::UpperCase( S.string() );
       if( S == "0" || S == "N" || S == "F" )
          CompSetText = false;
       else if( S.empty() || S == "1" || S == "Y" || S == "T" )
@@ -942,11 +941,11 @@ int main( const int argc, const char *argv[] )
                }
                else
                {
-                  ID = S.substr( 0, k - 1 );
-                  S = S.erase( 0, k );
-                  S = utils::trim( S );
+                  ID = S.string().substr( 0, k - 1 );
+                  S = S.string().erase( 0, k );
+                  S = utils::trim( S.string() );
                }
-               ID = utils::trim( ID );
+               ID = utils::trim( ID.string() );
                if( !ID.empty() && IDsOnly->IndexOf( ID.data() ) < 0 )
                {
                   // std::cout << "Include Id: " << ID << std::endl;
@@ -999,7 +998,7 @@ int main( const int argc, const char *argv[] )
    for( int N { 1 }; N <= std::numeric_limits<int>::max(); N++ )
    {
       DiffTmpName = "tmpdifffile" + std::to_string( N ) + ".gdx";
-      if( !rtl::sysutils_p3::FileExists( DiffTmpName ) )
+      if( !rtl::sysutils_p3::FileExists( DiffTmpName.string() ) )
          break;
    }
 
@@ -1009,7 +1008,7 @@ int main( const int argc, const char *argv[] )
       int N { gdxGetLastError( PGXDIF ) };
       // Nil is used instead of PGXDIF in Delphi code
       gdxErrorStr( PGXDIF, N, S.data() );
-      FatalError2( "Cannot create file: " + DiffTmpName, S, static_cast<int>( ErrorCode::ERR_WRITEGDX ) );
+      FatalError2( "Cannot create file: " + DiffTmpName.string(), S.string(), static_cast<int>( ErrorCode::ERR_WRITEGDX ) );
    }
 
    UELTable = std::make_unique<gdlib::strhash::TXStrHashList<nullptr_t>>();
@@ -1081,7 +1080,7 @@ int main( const int argc, const char *argv[] )
          if( pair.first.length() > NN )
             NN = static_cast<int>( pair.first.length() );
       for( const auto &pair: StatusTable )
-         std::cout << gdlib::strutilx::PadRight( pair.first, NN ) << "   "
+         std::cout << gdlib::strutilx::PadRight( pair.first.string(), NN ) << "   "
                    << StatusText.at( static_cast<int>( pair.second ) ) << std::endl;
    }
 
@@ -1121,25 +1120,25 @@ int main( const int argc, const char *argv[] )
    gdxClose( PGX2 );
    gdxClose( PGXDIF );
 
-   if( !rtl::sysutils_p3::FileExists( DiffFileName ) )
+   if( !rtl::sysutils_p3::FileExists( DiffFileName.string() ) )
       RenameOK = true;
    else
    {
-      RenameOK = rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName );
+      RenameOK = rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName.string() );
 #if defined( _WIN32 )
       if( !RenameOK )
       {
          int ShellCode;
-         if( rtl::p3process::P3ExecP( "IDECmds.exe ViewClose \"" + DiffFileName + "\"", ShellCode ) == 0 )
-            RenameOK = rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName );
+         if( rtl::p3process::P3ExecP( "IDECmds.exe ViewClose \"" + DiffFileName.string() + "\"", ShellCode ) == 0 )
+            RenameOK = rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName.string() );
       }
 #endif
    }
 
    if( RenameOK )
    {
-      rtl::sysutils_p3::RenameFile( DiffTmpName, DiffFileName );
-      RenameOK = rtl::sysutils_p3::FileExists( DiffFileName );
+      rtl::sysutils_p3::RenameFile( DiffTmpName.string(), DiffFileName.string() );
+      RenameOK = rtl::sysutils_p3::FileExists( DiffFileName.string() );
    }
 
    int ExitCode {};
