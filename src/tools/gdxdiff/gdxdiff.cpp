@@ -266,6 +266,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals.data() );
    };
 
+#if VERBOSE >= 2
    auto WriteValues = [&]( const gdxHandle_t &PGX, const TgdxValues &Vals ) {
       switch( ST )
       {
@@ -293,6 +294,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          if( D < Dim ) std::cout << " .";
       }
    };
+#endif
 
    auto DoublesEqual = []( const double V1, const double V2 ) -> bool {
       auto DMin = []( const double a, const double b ) -> double {
