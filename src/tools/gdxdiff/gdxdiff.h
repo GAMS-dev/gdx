@@ -113,7 +113,7 @@ void Usage();
 
 // void CopyAcronyms( const gdxHandle_t &PGX );
 
-void CheckFile( std::string &fn );
+void CheckFile( library::short_string &fn );
 
 int main( int argc, const char *argv[] );
 

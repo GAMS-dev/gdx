@@ -713,10 +713,10 @@ void Usage()
 // Function is empty in Delphi code
 // void CopyAcronyms( const gdxHandle_t &PGX ) {}
 
-void CheckFile( std::string &fn )
+void CheckFile( library::short_string &fn )
 {
-   if( !rtl::sysutils_p3::FileExists( fn ) && gdlib::strutilx::ExtractFileExtEx( fn ).empty() )
-      fn = gdlib::strutilx::ChangeFileExtEx( fn, ".gdx" );
+   if( !rtl::sysutils_p3::FileExists( fn.string() ) && gdlib::strutilx::ExtractFileExtEx( fn.string() ).empty() )
+      fn = gdlib::strutilx::ChangeFileExtEx( fn.string(), ".gdx" );
 }
 
 int main( const int argc, const char *argv[] )
