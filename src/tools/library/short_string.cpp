@@ -157,7 +157,7 @@ short_string &short_string::operator=( const std::string &s )
    return *this;
 }
 
-bool short_string::operator==( const std::string &s ) const
+bool short_string::operator==( const char *s ) const
 {
    uint8_t i {};
    while( buffer[i] != '\0' && s[i] != '\0' )
@@ -166,6 +166,16 @@ bool short_string::operator==( const std::string &s ) const
       i++;
    }
    return buffer[i] == s[i];
+}
+
+bool short_string::operator==( const short_string &s ) const
+{
+   return *this == s.data();
+}
+
+bool short_string::operator==( const std::string &s ) const
+{
+   return *this == s.data();
 }
 
 bool short_string::operator<( const short_string &s ) const

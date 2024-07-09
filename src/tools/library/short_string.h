@@ -50,6 +50,8 @@ public:
 
    short_string &operator=( const std::string &s );
 
+   bool operator==( const char *s ) const;
+   bool operator==( const short_string &s ) const;
    bool operator==( const std::string &s ) const;
 
    bool operator<( const short_string &s ) const;
