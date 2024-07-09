@@ -185,7 +185,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    std::string Id;
    bool SymbOpen {};
    TStatusCode Status;
-   gdx::TgdxValues DefValues;
+   TgdxValues DefValues;
 
    auto CheckSymbOpen = [&]() -> bool {
       registerDiffUELs();
@@ -216,11 +216,11 @@ void CompareSy( const int Sy1, const int Sy2 )
       }
    };
 
-   auto WriteDiff = [&]( const std::string &Act, const std::string &FldName, const gdx::TgdxUELIndex &Keys, const gdx::TgdxValues &Vals ) {
+   auto WriteDiff = [&]( const std::string &Act, const std::string &FldName, const TgdxUELIndex &Keys, const TgdxValues &Vals ) {
       gdxStrIndex_t StrKeys;
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
-      gdx::TgdxValues Vals2;
+      TgdxValues Vals2;
 
       registerDiffUELs();
       for( int D { 1 }; D <= Dim; D++ )
@@ -251,11 +251,11 @@ void CompareSy( const int Sy1, const int Sy2 )
          gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals.data() );
    };
 
-   auto WriteSetDiff = [&]( const std::string &Act, const gdx::TgdxUELIndex &Keys, const std::string &S ) {
+   auto WriteSetDiff = [&]( const std::string &Act, const TgdxUELIndex &Keys, const std::string &S ) {
       gdxStrIndex_t StrKeys;
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
-      gdx::TgdxValues Vals;
+      TgdxValues Vals;
       int iNode;
 
       registerDiffUELs();
@@ -286,7 +286,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       }
    };
 
-   auto WriteKeys = [&]( const gdx::TgdxUELIndex &Keys ) {
+   auto WriteKeys = [&]( const TgdxUELIndex &Keys ) {
       registerDiffUELs();
       for( int D { 1 }; D <= Dim; D++ )
       {
@@ -343,7 +343,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       return result;
    };
 
-   auto CheckParDifference = [&]( const gdx::TgdxUELIndex &Keys, const gdx::TgdxValues &V1, const gdx::TgdxValues &V2 ) -> bool {
+   auto CheckParDifference = [&]( const TgdxUELIndex &Keys, const TgdxValues &V1, const TgdxValues &V2 ) -> bool {
       bool result { true };
       if( ST == dt_par )
          result = DoublesEqual( V1[gdx::vallevel], V2[gdx::vallevel] );
@@ -384,7 +384,7 @@ void CompareSy( const int Sy1, const int Sy2 )
                if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() ) continue;
                if( DoublesEqual( V1[T], V2[T] ) ) continue;
 
-               gdx::TgdxValues Vals;
+               TgdxValues Vals;
                Vals[gdx::vallevel] = V1[T];
                WriteDiff( c_dif1, GamsFieldNames[T], Keys, Vals );
                Vals[gdx::vallevel] = V2[T];
@@ -395,7 +395,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       return result;
    };
 
-   auto CheckSetDifference = [&]( const gdx::TgdxUELIndex &Keys, const int txt1, const int txt2 ) -> bool {
+   auto CheckSetDifference = [&]( const TgdxUELIndex &Keys, const int txt1, const int txt2 ) -> bool {
       std::string S1, S2;
       int iNode;
       if( txt1 == 0 ) S1.clear();
@@ -424,7 +424,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       return result;
    };
 
-   auto ShowInsert = [&]( const std::string &Act, const gdx::TgdxUELIndex &Keys, gdx::TgdxValues &Vals ) {
+   auto ShowInsert = [&]( const std::string &Act, const TgdxUELIndex &Keys, TgdxValues &Vals ) {
       // We check if this insert has values we want to ignore
       bool Eq {};
       switch( ST )
@@ -480,7 +480,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          WriteDiff( Act, "", Keys, Vals );
       else
       {
-         gdx::TgdxValues Vals2;
+         TgdxValues Vals2;
          for( int T { 0 }; T < tvarvaltype_size; T++ )
          {
             if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() )
@@ -494,8 +494,8 @@ void CompareSy( const int Sy1, const int Sy2 )
    int Dim2, AFDim, iST, iST2, R1Last, R2Last, C, acount;
    gdxSyType ST2;
    bool Flg1, Flg2, Eq, DomFlg;
-   gdx::TgdxUELIndex Keys1, Keys2;
-   gdx::TgdxValues Vals1, Vals2;
+   TgdxUELIndex Keys1, Keys2;
+   TgdxValues Vals1, Vals2;
    std::string stxt;
    gdxStrIndex_t DomSy1;
    gdxStrIndexPtrs_t DomSy1Ptrs;
@@ -727,7 +727,7 @@ int main( const int argc, const char *argv[] )
    gdxStrIndex_t StrKeys;
    gdxStrIndexPtrs_t StrKeysPtrs;
    GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
-   gdx::TgdxValues StrVals;
+   TgdxValues StrVals;
 
    // TODO: Remove?
    // gdlSetSystemName( 'GDXDIFF' );
