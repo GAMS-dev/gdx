@@ -4,6 +4,8 @@
 #include <array>
 #include <string>
 
+#include "../library/short_string.h"
+
 // GDX library interface
 #include "../../../generated/gdxcc.h"
 
