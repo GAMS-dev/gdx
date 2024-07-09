@@ -49,6 +49,10 @@
 namespace gdxdiff
 {
 
+using tvarvaltype = unsigned int;
+using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
+using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
+
 static std::string DiffTmpName {};
 static gdxHandle_t PGX1 { nullptr }, PGX2 { nullptr }, PGXDIF { nullptr };
 static bool diffUELsRegistered;
