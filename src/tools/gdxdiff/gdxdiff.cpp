@@ -989,13 +989,6 @@ int main( const int argc, const char *argv[] )
       std::cout << std::endl;
    }
 
-   {
-      std::string ErrMsg;
-      PGX1 = std::make_shared<gdx::TGXFileObj>( ErrMsg );
-      PGX2 = std::make_shared<gdx::TGXFileObj>( ErrMsg );
-      PGXDIF = std::make_shared<gdx::TGXFileObj>( ErrMsg );
-   }
-
    // TODO: Remove?
    // if( !PGXDIF->gdxCreateX( S2 ) )
    //    FatalError( "Unable to load GDX library: " + S2, static_cast<int>( ErrorCode::ERR_LOADDLL ) );
