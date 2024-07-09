@@ -38,13 +38,13 @@ public:
 
    void append( char c );
    void append( const char *s );
-   void append( const std::string &s );
    void append( const short_string &s );
+   void append( const std::string &s );
 
    void operator+=( char c );
    void operator+=( const char *s );
-   void operator+=( const std::string &s );
    void operator+=( const short_string &s );
+   void operator+=( const std::string &s );
 
    void to_upper_case();
 

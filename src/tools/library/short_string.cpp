@@ -106,12 +106,12 @@ void short_string::append( const char *s )
    buffer[length + s_length] = '\0';
 }
 
-void short_string::append( const std::string &s )
+void short_string::append( const short_string &s )
 {
    append( s.data() );
 }
 
-void short_string::append( const short_string &s )
+void short_string::append( const std::string &s )
 {
    append( s.data() );
 }
@@ -126,12 +126,12 @@ void short_string::operator+=( const char *s )
    append( s );
 }
 
-void short_string::operator+=( const std::string &s )
+void short_string::operator+=( const short_string &s )
 {
    append( s );
 }
 
-void short_string::operator+=( const short_string &s )
+void short_string::operator+=( const std::string &s )
 {
    append( s );
 }
