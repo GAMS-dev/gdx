@@ -328,7 +328,7 @@ void TCmdParams::AddParam( int v, const std::string &s )
    AddVS( v + static_cast<int>( CmdParamStatus::kk_big ), utils::trim( s ) );
 }
 
-bool TCmdParams::HasParam( int v, std::string &s )
+bool TCmdParams::HasParam( int v, library::short_string &s )
 {
    int N = FindKeyV( v );
    bool result = N >= 0;
