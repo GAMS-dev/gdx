@@ -720,7 +720,7 @@ void CheckFile( std::string &fn )
 int main( const int argc, const char *argv[] )
 {
    int ErrorCode, ErrNr, Dim, iST, StrNr;
-   std::string S, S2, ID, InFile1, InFile2, DiffFileName;
+   std::string S, ID, InFile1, InFile2, DiffFileName;
    std::map<std::string, int> IDTable;
    bool UsingIDE, RenameOK;
    gdxStrIndex_t StrKeys;
@@ -989,9 +989,9 @@ int main( const int argc, const char *argv[] )
       std::cout << std::endl;
    }
 
-   // TODO: Remove?
-   // if( !PGXDIF->gdxCreateX( S2 ) )
-   //    FatalError( "Unable to load GDX library: " + S2, static_cast<int>( ErrorCode::ERR_LOADDLL ) );
+   library::short_string S2 {};
+   if( !gdxCreate( &PGXDIF, S2.data(), S2.length() ) )
+      FatalError( "Unable to load GDX library: " + S2.string(), static_cast<int>( ErrorCode::ERR_LOADDLL ) );
 
    // Temporary file name
    for( int N { 1 }; N <= std::numeric_limits<int>::max(); N++ )
