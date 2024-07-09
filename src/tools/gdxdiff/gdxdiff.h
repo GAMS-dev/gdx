@@ -4,8 +4,8 @@
 #include <array>
 #include <string>
 
-// TGXFileObj class
-#include "../../gdx.h"
+// GDX library interface
+#include "../../../generated/gdxcc.h"
 
 namespace gdxdiff
 {
@@ -91,7 +91,7 @@ const std::array<std::string, tvarvaltype_size> GamsFieldNames {
         "Upper",
         "Scale" };
 
-std::string ValAsString( const std::shared_ptr<gdx::TGXFileObj> &PGX, double V );
+std::string ValAsString( const gdxHandle_t &PGX, double V );
 
 void FatalErrorExit( int ErrNr );
 
@@ -99,9 +99,9 @@ void FatalError( const std::string &Msg, int ErrNr );
 
 void FatalError2( const std::string &Msg1, const std::string &Msg2, int ErrNr );
 
-void CheckGDXError( const std::shared_ptr<gdx::TGXFileObj> &PGX );
+void CheckGDXError( const gdxHandle_t &PGX );
 
-void OpenGDX( const std::string &fn, const std::shared_ptr<gdx::TGXFileObj> &PGX );
+void OpenGDX( const std::string &fn, gdxHandle_t &PGX );
 
 void registerDiffUELs();
 
@@ -111,7 +111,7 @@ bool GetAsDouble( const std::string &S, double &V );
 
 void Usage();
 
-// void CopyAcronyms( const std::shared_ptr<gdx::TGXFileObj> &PGX );
+// void CopyAcronyms( const gdxHandle_t &PGX );
 
 void CheckFile( std::string &fn );
 

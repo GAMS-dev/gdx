@@ -64,7 +64,7 @@ static bool DiffOnly, CompSetText, matrixFile, ignoreOrder;
 static std::shared_ptr<gdlib::gmsobj::TXStrings> IDsOnly;
 static bool ShowDefRec, CompDomains;
 
-std::string ValAsString( const std::shared_ptr<gdx::TGXFileObj> &PGX, const double V )
+std::string ValAsString( const gdxHandle_t &PGX, const double V )
 {
    constexpr int WIDTH { 14 };
    std::string result;
@@ -109,7 +109,7 @@ void FatalError2( const std::string &Msg1, const std::string &Msg2, const int Er
    FatalErrorExit( ErrNr );
 }
 
-void CheckGDXError( const std::shared_ptr<gdx::TGXFileObj> &PGX )
+void CheckGDXError( const gdxHandle_t &PGX )
 {
    int ErrNr { PGX->gdxGetLastError() };
    if( ErrNr != 0 )
@@ -120,7 +120,7 @@ void CheckGDXError( const std::shared_ptr<gdx::TGXFileObj> &PGX )
    }
 }
 
-void OpenGDX( const std::string &fn, const std::shared_ptr<gdx::TGXFileObj> &PGX )
+void OpenGDX( const std::string &fn, gdxHandle_t &PGX )
 {
    if( !rtl::sysutils_p3::FileExists( fn ) )
       FatalError( "Input file not found " + fn, static_cast<int>( ErrorCode::ERR_NOFILE ) );
@@ -262,7 +262,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       PGXDIF->gdxDataWriteStr( const_cast<const char **>( StrKeysPtrs ), Vals.data() );
    };
 
-   auto WriteValues = [&]( const std::shared_ptr<gdx::TGXFileObj> &PGX, const gdx::TgdxValues &Vals ) {
+   auto WriteValues = [&]( const gdxHandle_t &PGX, const TgdxValues &Vals ) {
       switch( ST )
       {
          case dt_set:
@@ -705,7 +705,7 @@ void Usage()
 }
 
 // Function is empty in Delphi code
-// void CopyAcronyms( const std::shared_ptr<gdx::TGXFileObj> &PGX ) {}
+// void CopyAcronyms( const gdxHandle_t &PGX ) {}
 
 void CheckFile( std::string &fn )
 {
