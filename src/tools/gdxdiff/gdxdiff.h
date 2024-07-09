@@ -109,7 +109,7 @@ void registerDiffUELs();
 
 void CompareSy( int Sy1, int Sy2 );
 
-bool GetAsDouble( const std::string &S, double &V );
+bool GetAsDouble( const library::short_string &S, double &V );
 
 void Usage();
 

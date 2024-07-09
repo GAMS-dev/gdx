@@ -677,10 +677,10 @@ label999:
       StatusTable[Id] = Status;
 }
 
-bool GetAsDouble( const std::string &S, double &V )
+bool GetAsDouble( const library::short_string &S, double &V )
 {
    int k;
-   utils::val( S, V, k );
+   utils::val( S.string(), V, k );
    bool result { k == 0 && V >= 0 };
    if( !result ) V = 0;
    return result;
