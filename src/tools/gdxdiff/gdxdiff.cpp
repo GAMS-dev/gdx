@@ -721,7 +721,8 @@ void CheckFile( library::short_string &fn )
 int main( const int argc, const char *argv[] )
 {
    int ErrorCode, ErrNr, Dim, iST, StrNr;
-   std::string S, ID, InFile1, InFile2, DiffFileName;
+   std::string S, ID, DiffFileName;
+   library::short_string InFile1, InFile2;
    std::map<std::string, int> IDTable;
    bool UsingIDE, RenameOK;
    gdxStrIndex_t StrKeys;
