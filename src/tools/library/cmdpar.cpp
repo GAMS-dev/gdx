@@ -28,7 +28,8 @@ void TCmdParams::ClearParams()
 void TCmdParams::AddVS( int v, const std::string &s )
 {
    for( const auto &pair: FKeyList )
-      if( pair.first == s ) assert( false && "Duplicate keyword!" );
+      if( pair.first == s )
+         assert( false && "Duplicate keyword!" );
    FKeyList.emplace_back( s, v );
 }
 
@@ -80,7 +81,8 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       if( xr <= maxr )
       {
          std::set<char> StopSet;
-         if( FParams[xr] != '"' ) StopSet = { ' ', '\t' };
+         if( FParams[xr] != '"' )
+            StopSet = { ' ', '\t' };
          else
          {
             StopSet = { '"' };
@@ -112,7 +114,8 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
    auto NextKey = [&]( std::string &s ) -> int {
       s.clear();
       std::string T { NextToken() };
-      if( T.empty() ) return static_cast<int>( CmdParamStatus::ke_empty );
+      if( T.empty() )
+         return static_cast<int>( CmdParamStatus::ke_empty );
       else
       {
          int result { -1 };
@@ -146,13 +149,16 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             {
                result -= static_cast<int>( CmdParamStatus::kk_big );
                SkipBl();
-               if( xr <= maxr && FParams.at( xr ) == '=' ) xr++;
+               if( xr <= maxr && FParams.at( xr ) == '=' )
+                  xr++;
                s = NextToken();
-               if( s.empty() ) return static_cast<int>( CmdParamStatus::ke_noparam );
+               if( s.empty() )
+                  return static_cast<int>( CmdParamStatus::ke_noparam );
                else
                {
                   int k { static_cast<int>( s.length() ) };
-                  if( k >= 3 && s.front() == '\'' && s.back() == '\'' ) s = s.substr( 1, k - 3 );
+                  if( k >= 3 && s.front() == '\'' && s.back() == '\'' )
+                     s = s.substr( 1, k - 3 );
                }
             }
          }
@@ -165,8 +171,10 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       for( int N { 1 }; N < ParamCount; N++ )
       {
          std::string S { ParamStr[N] };
-         if( S.empty() ) continue;
-         if( S.find( ' ' ) == std::string::npos ) result.append( ' ' + S );
+         if( S.empty() )
+            continue;
+         if( S.find( ' ' ) == std::string::npos )
+            result.append( ' ' + S );
          else
          {
             size_t k { S.find( '=' ) };
@@ -215,7 +223,8 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             break;
          }
          char Brk;
-         if( Src[sp] != '"' ) Brk = ' ';
+         if( Src[sp] != '"' )
+            Brk = ' ';
          else
          {
             sp++;
@@ -233,8 +242,10 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             fname = Src.substr( sp, k - sp );
             sp = k;
          }
-         if( sp < static_cast<int>( Src.length() ) && Src[sp] == '"' ) sp++;
-         if( gdlib::strutilx::ExtractFileExtEx( fname ).empty() ) fname = gdlib::strutilx::ChangeFileExtEx( fname, ".txt" );
+         if( sp < static_cast<int>( Src.length() ) && Src[sp] == '"' )
+            sp++;
+         if( gdlib::strutilx::ExtractFileExtEx( fname ).empty() )
+            fname = gdlib::strutilx::ChangeFileExtEx( fname, ".txt" );
          std::ifstream fi( fname );
          if( !fi.is_open() )
          {
@@ -248,11 +259,13 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             {
                std::vector<std::string> strings = library::splitString( line, ' ' );
                for( int i = 0; i < MAXBUF; i++ ) sBuf[i] = strings[i];
-               if( sBuf.at( 1 ).empty() || sBuf.at( 1 ).at( 1 ) == '*' ) continue;
+               if( sBuf.at( 1 ).empty() || sBuf.at( 1 ).at( 1 ) == '*' )
+                  continue;
                Dest.append( " " );
                for( int k {}; k < MAXBUF; k++ )
                {
-                  if( sBuf.at( k ).empty() ) break;
+                  if( sBuf.at( k ).empty() )
+                     break;
                   Dest.append( sBuf.at( k ) );
                }
                if( sBuf.at( MAXBUF - 1 ).length() == 255 )
@@ -319,7 +332,8 @@ bool TCmdParams::HasParam( int v, std::string &s )
 {
    int N = FindKeyV( v );
    bool result = N >= 0;
-   if( !result ) s.clear();
+   if( !result )
+      s.clear();
    else
       s = GetParams( N ).KeyS;
    return result;
@@ -349,7 +363,8 @@ int TCmdParams::GetParamCount() const
 std::string TCmdParams::GetParamText( int key ) const
 {
    for( const auto &pair: FKeyList )
-      if( pair.second == key ) return pair.first;
+      if( pair.second == key )
+         return pair.first;
    return "?" + std::to_string( key ) + "?";
 }
 
