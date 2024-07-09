@@ -52,7 +52,7 @@ using tvarvaltype = unsigned int;
 using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
 using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
 
-static std::string DiffTmpName {};
+static std::string DiffTmpName;
 static gdxHandle_t PGX1 { nullptr }, PGX2 { nullptr }, PGXDIF { nullptr };
 static bool diffUELsRegistered;
 static std::shared_ptr<gdlib::strhash::TXStrHashList<nullptr_t>> UELTable;
@@ -739,7 +739,7 @@ int main( const int argc, const char *argv[] )
    // }
 
    // So we can check later
-   // DiffTmpName.clear();
+   DiffTmpName.clear();
 
    CmdParams = std::make_unique<library::cmdpar::TCmdParams>();
 
