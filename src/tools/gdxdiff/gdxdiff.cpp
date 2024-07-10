@@ -162,8 +162,7 @@ void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
 
 void registerDiffUELs()
 {
-   // TODO: Check exit value or use return?
-   if( diffUELsRegistered ) exit( 0 );
+   if( diffUELsRegistered ) return;
 
    int maxUEL;
    if( ignoreOrder ) maxUEL = staticUELNum;
@@ -455,14 +454,14 @@ void CompareSy( const int Sy1, const int Sy2 )
             break;
       }
 
-      // TODO: Check exit value or use return?
-      if( Eq && !ShowDefRec ) exit( 0 );
+      if( Eq && !ShowDefRec )
+         return;
 
       if( Status == TStatusCode::sc_same ) Status = TStatusCode::sc_key;
       if( Status == TStatusCode::sc_dim10 ) Status = TStatusCode::sc_dim10_diff;
 
-      // TODO: Check exit value or use return?
-      if( Status == TStatusCode::sc_dim10_diff || !CheckSymbOpen() ) exit( 0 );
+      if( Status == TStatusCode::sc_dim10_diff || !CheckSymbOpen() )
+         return;
 
 #if VERBOSE >= 2
       std::cout << "Insert: " << Act << ' ';
@@ -738,8 +737,7 @@ int main( const int argc, const char *argv[] )
    // if( argv[1] == "AUDIT" )
    // {
    //    std::cout << gdlGetAuditLine() << std::endl;
-   //    // TODO: Check exit value or use return?
-   //    exit( 0 );
+   //    return 0;
    // }
 
    // So we can check later
@@ -768,7 +766,7 @@ int main( const int argc, const char *argv[] )
    if( !CmdParams->CrackCommandLine( argc, argv ) )
    {
       Usage();
-      exit( static_cast<int>( ErrorCode::ERR_USAGE ) );
+      return static_cast<int>( ErrorCode::ERR_USAGE );
    }
 
    ErrorCode = 0;
@@ -973,7 +971,7 @@ int main( const int argc, const char *argv[] )
    {
       std::cout << std::endl;
       Usage();
-      exit( static_cast<int>( ErrorCode::ERR_USAGE ) );
+      return static_cast<int>( ErrorCode::ERR_USAGE );
    }
 
    // TODO: Remove?
@@ -1165,7 +1163,7 @@ int main( const int argc, const char *argv[] )
    // FreeAndNil( UELTable );
 
    if( ExitCode == 0 && !StatusTable.empty() )
-      exit( static_cast<int>( ErrorCode::ERR_DIFFERENT ) );
+      return static_cast<int>( ErrorCode::ERR_DIFFERENT );
 
    return ExitCode;
 }
