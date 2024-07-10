@@ -162,10 +162,12 @@ void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
 
 void registerDiffUELs()
 {
-   if( diffUELsRegistered ) return;
+   if( diffUELsRegistered )
+      return;
 
    int maxUEL;
-   if( ignoreOrder ) maxUEL = staticUELNum;
+   if( ignoreOrder )
+      maxUEL = staticUELNum;
    else
       maxUEL = UELTable->Count();
 
@@ -190,7 +192,8 @@ void CompareSy( const int Sy1, const int Sy2 )
 
    auto CheckSymbOpen = [&]() -> bool {
       registerDiffUELs();
-      if( Status == TStatusCode::sc_dim10 ) Status = TStatusCode::sc_dim10_diff;
+      if( Status == TStatusCode::sc_dim10 )
+         Status = TStatusCode::sc_dim10_diff;
       if( !SymbOpen && Status != TStatusCode::sc_dim10_diff )
       {
          if( FldOnlyVar == FldOnly::fld_yes && ( ST == dt_var || ST == dt_equ ) )
@@ -238,7 +241,8 @@ void CompareSy( const int Sy1, const int Sy2 )
       for( int D { 1 }; D <= Dim + 1; D++ )
       {
          std::cout << StrKeys[D];
-         if( D < Dim + 1 ) std::cout << ", ";
+         if( D < Dim + 1 )
+            std::cout << ", ";
       }
       std::cout << std::endl;
 #endif
@@ -293,20 +297,23 @@ void CompareSy( const int Sy1, const int Sy2 )
       for( int D { 1 }; D <= Dim; D++ )
       {
          std::cout << ' ' << UELTable->GetString( Keys[D] );
-         if( D < Dim ) std::cout << " .";
+         if( D < Dim )
+            std::cout << " .";
       }
    };
 #endif
 
    auto DoublesEqual = []( const double V1, const double V2 ) -> bool {
       auto DMin = []( const double a, const double b ) -> double {
-         if( a <= b ) return a;
+         if( a <= b )
+            return a;
          else
             return b;
       };
 
       // auto DMax = []( const double a, const double b ) -> double {
-      //    if( a >= b ) return a;
+      //    if( a >= b )
+      //       return a;
       //    else
       //       return b;
       // };
@@ -327,7 +334,8 @@ void CompareSy( const int Sy1, const int Sy2 )
             else
             {
                AbsDiff = abs( V1 - V2 );
-               if( AbsDiff <= EpsAbsolute ) result = true;
+               if( AbsDiff <= EpsAbsolute )
+                  result = true;
                else if( EpsRelative > 0 )
                   result = AbsDiff / ( 1 + DMin( abs( V1 ), abs( V2 ) ) ) <= EpsRelative;
                else
@@ -339,7 +347,8 @@ void CompareSy( const int Sy1, const int Sy2 )
       }
       else
       {
-         if( iSV2 == sv_normal ) result = iSV1 == sv_valeps && EpsAbsolute > 0 && abs( V2 ) <= EpsAbsolute;
+         if( iSV2 == sv_normal )
+            result = iSV1 == sv_valeps && EpsAbsolute > 0 && abs( V2 ) <= EpsAbsolute;
          else
             result = iSV1 == iSV2;
       }
@@ -384,8 +393,10 @@ void CompareSy( const int Sy1, const int Sy2 )
          {
             for( int T { 0 }; T < tvarvaltype_size; T++ )
             {
-               if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() ) continue;
-               if( DoublesEqual( V1[T], V2[T] ) ) continue;
+               if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() )
+                  continue;
+               if( DoublesEqual( V1[T], V2[T] ) )
+                  continue;
 
                TgdxValues Vals;
                Vals[GMS_VAL_LEVEL] = V1[T];
@@ -401,10 +412,12 @@ void CompareSy( const int Sy1, const int Sy2 )
    auto CheckSetDifference = [&]( const TgdxUELIndex &Keys, const int txt1, const int txt2 ) -> bool {
       library::short_string S1, S2;
       int iNode;
-      if( txt1 == 0 ) S1.clear();
+      if( txt1 == 0 )
+         S1.clear();
       else
          gdxGetElemText( PGX1, txt1, S1.data(), &iNode );
-      if( txt2 == 0 ) S2.clear();
+      if( txt2 == 0 )
+         S2.clear();
       else
          gdxGetElemText( PGX2, txt2, S2.data(), &iNode );
 
@@ -457,8 +470,10 @@ void CompareSy( const int Sy1, const int Sy2 )
       if( Eq && !ShowDefRec )
          return;
 
-      if( Status == TStatusCode::sc_same ) Status = TStatusCode::sc_key;
-      if( Status == TStatusCode::sc_dim10 ) Status = TStatusCode::sc_dim10_diff;
+      if( Status == TStatusCode::sc_same )
+         Status = TStatusCode::sc_key;
+      if( Status == TStatusCode::sc_dim10 )
+         Status = TStatusCode::sc_dim10_diff;
 
       if( Status == TStatusCode::sc_dim10_diff || !CheckSymbOpen() )
          return;
@@ -510,13 +525,15 @@ void CompareSy( const int Sy1, const int Sy2 )
    SymbOpen = false;
    gdxSymbolInfo( PGX1, Sy1, Id.data(), &Dim, &iST );
    ST = static_cast<gdxSyType>( iST );
-   if( ST == dt_alias ) ST = dt_set;
+   if( ST == dt_alias )
+      ST = dt_set;
    // We do nothing with type in file2
    gdxSymbolInfoX( PGX1, Sy1, &acount, &VarEquType, stxt.data() );
 
    gdxSymbolInfo( PGX2, Sy2, Id.data(), &Dim2, &iST2 );
    ST2 = static_cast<gdxSyType>( iST2 );
-   if( ST2 == dt_alias ) ST2 = dt_set;
+   if( ST2 == dt_alias )
+      ST2 = dt_set;
    Status = TStatusCode::sc_same;
 
    if( Dim != Dim2 || ST != ST2 )
@@ -530,7 +547,8 @@ void CompareSy( const int Sy1, const int Sy2 )
       if( Dim != Dim2 )
       {
          std::cout << "Dim1 = " << Dim << ", Dim2 = " << Dim2 << std::endl;
-         if( Status == TStatusCode::sc_same ) Status = TStatusCode::sc_dim;
+         if( Status == TStatusCode::sc_same )
+            Status = TStatusCode::sc_dim;
       }
       goto label999;
    }
@@ -585,18 +603,22 @@ void CompareSy( const int Sy1, const int Sy2 )
    if( matrixFile )
    {
       Flg1 = gdxDataReadRawStart( PGX1, Sy1, &R1Last ) != 0;
-      if( Flg1 ) Flg1 = gdxDataReadRaw( PGX1, Keys1.data(), Vals1.data(), &AFDim ) != 0;
+      if( Flg1 )
+         Flg1 = gdxDataReadRaw( PGX1, Keys1.data(), Vals1.data(), &AFDim ) != 0;
 
       Flg2 = gdxDataReadRawStart( PGX2, Sy2, &R2Last ) != 0;
-      if( Flg2 ) Flg2 = gdxDataReadRaw( PGX2, Keys2.data(), Vals2.data(), &AFDim ) != 0;
+      if( Flg2 )
+         Flg2 = gdxDataReadRaw( PGX2, Keys2.data(), Vals2.data(), &AFDim ) != 0;
    }
    else
    {
       Flg1 = gdxDataReadMapStart( PGX1, Sy1, &R1Last ) != 0;
-      if( Flg1 ) Flg1 = gdxDataReadMap( PGX1, 0, Keys1.data(), Vals1.data(), &AFDim ) != 0;
+      if( Flg1 )
+         Flg1 = gdxDataReadMap( PGX1, 0, Keys1.data(), Vals1.data(), &AFDim ) != 0;
 
       Flg2 = gdxDataReadMapStart( PGX2, Sy2, &R2Last ) != 0;
-      if( Flg2 ) Flg2 = gdxDataReadMap( PGX2, 0, Keys2.data(), Vals2.data(), &AFDim ) != 0;
+      if( Flg2 )
+         Flg2 = gdxDataReadMap( PGX2, 0, Keys2.data(), Vals2.data(), &AFDim ) != 0;
    }
 
    while( Flg1 && Flg2 )
@@ -607,7 +629,8 @@ void CompareSy( const int Sy1, const int Sy2 )
          for( int D { 1 }; D <= Dim; D++ )
          {
             C = Keys1[D] - Keys2[D];
-            if( C != 0 ) break;
+            if( C != 0 )
+               break;
          }
       }
       if( C == 0 )
@@ -685,7 +708,8 @@ bool GetAsDouble( const library::short_string &S, double &V )
    int k;
    utils::val( S.string(), V, k );
    bool result { k == 0 && V >= 0 };
-   if( !result ) V = 0;
+   if( !result )
+      V = 0;
    return result;
 }
 
