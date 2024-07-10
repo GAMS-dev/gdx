@@ -149,7 +149,7 @@ void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
    int NrElem, HighV;
    gdxUMUelInfo( PGX, &NrElem, &HighV );
    gdxUELRegisterMapStart( PGX );
-   for( int N { 1 }; N <= NrElem; N++ )
+   for( int N {}; N < NrElem; N++ )
    {
       int NN;
       library::short_string UEL;
@@ -174,7 +174,7 @@ void registerDiffUELs()
 
    gdxUELRegisterStrStart( PGXDIF );
    int d;
-   for( int N { 1 }; N <= maxUEL; N++ )
+   for( int N {}; N < maxUEL; N++ )
       gdxUELRegisterStr( PGXDIF, UELTable->GetString( N ), &d );
    gdxUELRegisterDone( PGXDIF );
    CheckGDXError( PGXDIF );
@@ -228,7 +228,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       TgdxValues Vals2;
 
       registerDiffUELs();
-      for( int D { 1 }; D <= Dim; D++ )
+      for( int D {}; D < Dim; D++ )
          strcpy( StrKeys[D], UELTable->GetString( Keys[D] ) );
       if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
          strcpy( StrKeys[Dim + 1], Act.data() );
@@ -239,7 +239,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       }
 
 #if VERBOSE >= 3
-      for( int D { 1 }; D <= Dim + 1; D++ )
+      for( int D {}; D < Dim + 1; D++ )
       {
          std::cout << StrKeys[D];
          if( D < Dim + 1 )
@@ -265,7 +265,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       int iNode;
 
       registerDiffUELs();
-      for( int D { 1 }; D <= Dim; D++ )
+      for( int D {}; D < Dim; D++ )
          strcpy( StrKeys[D], UELTable->GetString( Keys[D] ) );
       strcpy( StrKeys[Dim + 1], Act.data() );
       gdxAddSetText( PGXDIF, S.data(), &iNode );
@@ -295,7 +295,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 
    auto WriteKeys = [&]( const TgdxUELIndex &Keys ) -> void {
       registerDiffUELs();
-      for( int D { 1 }; D <= Dim; D++ )
+      for( int D {}; D < Dim; D++ )
       {
          std::cout << ' ' << UELTable->GetString( Keys[D] );
          if( D < Dim )
@@ -560,7 +560,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       gdxSymbolGetDomainX( PGX1, Sy1, DomSy1Ptrs );
       gdxSymbolGetDomainX( PGX2, Sy2, DomSy2Ptrs );
       DomFlg = false;
-      for( int D { 1 }; D <= Dim; D++ )
+      for( int D {}; D < Dim; D++ )
          if( gdlib::strutilx::StrUEqual( DomSy1[D], DomSy2[D] ) )
          {
             DomFlg = true;
@@ -572,7 +572,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 
 #if VERBOSE >= 1
          std::cout << "Domain differences for symbol = " << Id << std::endl;
-         for( int D { 1 }; D <= Dim; D++ )
+         for( int D {}; D < Dim; D++ )
          {
             if( gdlib::strutilx::StrUEqual( DomSy1[D], DomSy2[D] ) )
                continue;
@@ -627,7 +627,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       C = 0;
       if( Dim > 0 )
       {
-         for( int D { 1 }; D <= Dim; D++ )
+         for( int D {}; D < Dim; D++ )
          {
             C = Keys1[D] - Keys2[D];
             if( C != 0 )
@@ -1039,7 +1039,7 @@ int main( const int argc, const char *argv[] )
    }
 
    UELTable = std::make_unique<gdlib::strhash::TXStrHashList<nullptr_t>>();
-   UELTable->OneBased = true;
+   // UELTable->OneBased = true;
    gdxStoreDomainSetsSet( PGXDIF, false );
 
    UELTable->Add( c_ins1.data(), c_ins1.length() );
@@ -1058,7 +1058,7 @@ int main( const int argc, const char *argv[] )
    OpenGDX( InFile2, PGX2 );
 
    {
-      int N { 1 };
+      int N {};
       while( gdxSymbolInfo( PGX1, N, ID.data(), &Dim, &iST ) != 0 )
       {
          if( IDsOnly == nullptr || IDsOnly->IndexOf( ID.data() ) >= 0 )
@@ -1080,7 +1080,7 @@ int main( const int argc, const char *argv[] )
    IDTable.clear();
 
    {
-      int N { 1 };
+      int N {};
       while( gdxSymbolInfo( PGX2, N, ID.data(), &Dim, &iST ) != 0 )
       {
          if( IDsOnly == nullptr || IDsOnly->IndexOf( ID.data() ) >= 0 )
