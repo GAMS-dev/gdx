@@ -94,7 +94,11 @@ void FatalErrorExit( const int ErrNr )
 {
    if( !DiffTmpName.empty() && rtl::sysutils_p3::FileExists( DiffTmpName.string() ) )
    {
-      gdxClose( PGXDIF );
+      if( PGXDIF != nullptr )
+      {
+         gdxClose( PGXDIF );
+         gdxFree( &PGXDIF );
+      }
       rtl::sysutils_p3::DeleteFileFromDisk( DiffTmpName.string() );
    }
    exit( ErrNr );
