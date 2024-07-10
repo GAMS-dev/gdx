@@ -226,7 +226,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       registerDiffUELs();
       for( int D { 1 }; D <= Dim; D++ )
          strcpy( StrKeys[D], UELTable->GetString( Keys[D] ) );
-      if( !DiffOnly && ( ST == dt_var || ST == dt_equ ) )
+      if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
          strcpy( StrKeys[Dim + 1], Act.data() );
       else
       {
