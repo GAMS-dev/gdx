@@ -1120,9 +1120,8 @@ int main( const int argc, const char *argv[] )
 
    // Note that input files are not closed at this point; so if we wrote
    // to an input file, the delete will fail and we keep the original input file alive
-   gdxClose( PGX1 );
-   gdxClose( PGX2 );
    gdxClose( PGXDIF );
+   gdxFree( &PGXDIF );
 
    if( !rtl::sysutils_p3::FileExists( DiffFileName.string() ) )
       RenameOK = true;
@@ -1144,6 +1143,11 @@ int main( const int argc, const char *argv[] )
       rtl::sysutils_p3::RenameFile( DiffTmpName.string(), DiffFileName.string() );
       RenameOK = rtl::sysutils_p3::FileExists( DiffFileName.string() );
    }
+
+   gdxClose( PGX1 );
+   gdxFree( &PGX1 );
+   gdxClose( PGX2 );
+   gdxFree( &PGX2 );
 
    int ExitCode {};
    if( !RenameOK )
