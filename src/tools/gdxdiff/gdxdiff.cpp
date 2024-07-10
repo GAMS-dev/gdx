@@ -55,17 +55,17 @@ using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
 static library::short_string DiffTmpName;
 static gdxHandle_t PGX1 { nullptr }, PGX2 { nullptr }, PGXDIF { nullptr };
 static bool diffUELsRegistered;
-static std::shared_ptr<gdlib::strhash::TXStrHashList<nullptr_t>> UELTable;
+static std::unique_ptr<gdlib::strhash::TXStrHashList<nullptr_t>> UELTable;
 static int staticUELNum;
 static double EpsAbsolute, EpsRelative;
 static std::map<library::short_string, TStatusCode> StatusTable;
-static std::shared_ptr<library::cmdpar::TCmdParams> CmdParams;
+static std::unique_ptr<library::cmdpar::TCmdParams> CmdParams;
 static std::set<tvarvaltype> ActiveFields;
 // Use FldOnlyVar instead of FldOnly as the variable name
 static FldOnly FldOnlyVar;
 static tvarvaltype FldOnlyFld;
 static bool DiffOnly, CompSetText, matrixFile, ignoreOrder;
-static std::shared_ptr<gdlib::gmsobj::TXStrings> IDsOnly;
+static std::unique_ptr<gdlib::gmsobj::TXStrings> IDsOnly;
 static bool ShowDefRec, CompDomains;
 
 std::string ValAsString( const gdxHandle_t &PGX, const double V )
