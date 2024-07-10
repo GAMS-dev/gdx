@@ -286,7 +286,7 @@ void CompareSy( const int Sy1, const int Sy2 )
             break;
 
          default:
-            for( int T { 0 }; T < tvarvaltype_size; T++ )
+            for( int T {}; T < tvarvaltype_size; T++ )
                std::cout << ValAsString( PGX, Vals[T] ) << ' ';
             std::cout << std::endl;
             break;
@@ -364,7 +364,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          result = DoublesEqual( V1[FldOnlyFld], V2[FldOnlyFld] );
       else
       {
-         for( int T { 0 }; T < tvarvaltype_size; T++ )
+         for( int T {}; T < tvarvaltype_size; T++ )
          {
             if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) != ActiveFields.end() && !DoublesEqual( V1[T], V2[T] ) )
             {
@@ -392,7 +392,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          }
          else
          {
-            for( int T { 0 }; T < tvarvaltype_size; T++ )
+            for( int T {}; T < tvarvaltype_size; T++ )
             {
                if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() )
                   continue;
@@ -453,7 +453,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          case dt_var:
          case dt_equ:
             Eq = true;
-            for( int T { 0 }; T < tvarvaltype_size; T++ )
+            for( int T {}; T < tvarvaltype_size; T++ )
             {
                if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) != ActiveFields.end() && !DoublesEqual( Vals[T], DefValues[T] ) )
                {
@@ -500,7 +500,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       else
       {
          TgdxValues Vals2;
-         for( int T { 0 }; T < tvarvaltype_size; T++ )
+         for( int T {}; T < tvarvaltype_size; T++ )
          {
             if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() )
                continue;
@@ -952,7 +952,7 @@ int main( const int argc, const char *argv[] )
    if( CmdParams->HasParam( static_cast<int>( KP::kp_id ), S ) )
    {
       IDsOnly = std::make_unique<gdlib::gmsobj::TXStrings>();
-      for( int N { 0 }; N < CmdParams->GetParamCount(); N++ )
+      for( int N {}; N < CmdParams->GetParamCount(); N++ )
       {
          if( CmdParams->GetParams( N ).Key == static_cast<int>( KP::kp_id ) )
          {
@@ -1012,7 +1012,7 @@ int main( const int argc, const char *argv[] )
    if( IDsOnly != nullptr )
    {
       std::cout << "Id    :";
-      for( int N { 0 }; N < IDsOnly->GetCount(); N++ )
+      for( int N {}; N < IDsOnly->GetCount(); N++ )
          std::cout << ' ' << IDsOnly->GetConst( N );
       std::cout << std::endl;
    }
@@ -1048,7 +1048,7 @@ int main( const int argc, const char *argv[] )
    UELTable->Add( c_dif2.data(), c_dif2.length() );
 
    if( DiffOnly )
-      for( int T { 0 }; T < tvarvaltype_size; T++ )
+      for( int T {}; T < tvarvaltype_size; T++ )
          UELTable->Add( GamsFieldNames[T].data(), GamsFieldNames[T].length() );
 
    staticUELNum = UELTable->Count();
