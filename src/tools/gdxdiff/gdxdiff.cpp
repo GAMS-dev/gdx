@@ -39,6 +39,7 @@
 #include "../../gdlib/gmsobj.h"
 #include "../../rtl/sysutils_p3.h"
 // #include "../../rtl/p3process.h"
+
 // Global constants
 #include "../../../generated/gclgms.h"
 
@@ -386,8 +387,8 @@ void CompareSy( const int Sy1, const int Sy2 )
             return {};
          if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
          {
-            WriteDiff( c_dif1, "", Keys, V1 );
-            WriteDiff( c_dif2, "", Keys, V2 );
+            WriteDiff( c_dif1, {}, Keys, V1 );
+            WriteDiff( c_dif2, {}, Keys, V2 );
          }
          else
          {
@@ -495,7 +496,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       }
 
       if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
-         WriteDiff( Act, "", Keys, Vals );
+         WriteDiff( Act, {}, Keys, Vals );
       else
       {
          TgdxValues Vals2;
@@ -983,7 +984,7 @@ int main( const int argc, const char *argv[] )
    }
 
    // if( IDsOnly != nullptr && IDsOnly->GetCount() == 0 )
-   //    // Like ID = ""
+   //    // Like ID = "" (or ID.empty())
    //    FreeAndNil( IDsOnly );
 
    // We removed this but not sure why
