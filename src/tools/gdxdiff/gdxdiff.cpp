@@ -208,7 +208,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       return SymbOpen;
    };
 
-   auto SymbClose = [&]() {
+   auto SymbClose = [&]() -> void {
       if( SymbOpen )
       {
          SymbOpen = false;
@@ -218,7 +218,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       }
    };
 
-   auto WriteDiff = [&]( const std::string &Act, const std::string &FldName, const TgdxUELIndex &Keys, const TgdxValues &Vals ) {
+   auto WriteDiff = [&]( const std::string &Act, const std::string &FldName, const TgdxUELIndex &Keys, const TgdxValues &Vals ) -> void {
       gdxStrIndex_t StrKeys;
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
@@ -253,7 +253,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals.data() );
    };
 
-   auto WriteSetDiff = [&]( const std::string &Act, const TgdxUELIndex &Keys, const library::short_string &S ) {
+   auto WriteSetDiff = [&]( const std::string &Act, const TgdxUELIndex &Keys, const library::short_string &S ) -> void {
       gdxStrIndex_t StrKeys;
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
@@ -270,7 +270,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    };
 
 #if VERBOSE >= 2
-   auto WriteValues = [&]( const gdxHandle_t &PGX, const TgdxValues &Vals ) {
+   auto WriteValues = [&]( const gdxHandle_t &PGX, const TgdxValues &Vals ) -> void {
       switch( ST )
       {
          case dt_set:
@@ -289,7 +289,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       }
    };
 
-   auto WriteKeys = [&]( const TgdxUELIndex &Keys ) {
+   auto WriteKeys = [&]( const TgdxUELIndex &Keys ) -> void {
       registerDiffUELs();
       for( int D { 1 }; D <= Dim; D++ )
       {
@@ -428,7 +428,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       return result;
    };
 
-   auto ShowInsert = [&]( const std::string &Act, const TgdxUELIndex &Keys, TgdxValues &Vals ) {
+   auto ShowInsert = [&]( const std::string &Act, const TgdxUELIndex &Keys, TgdxValues &Vals ) -> void {
       // We check if this insert has values we want to ignore
       bool Eq {};
       switch( ST )
