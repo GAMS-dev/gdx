@@ -382,8 +382,8 @@ void CompareSy( const int Sy1, const int Sy2 )
          WriteValues( PGX2, V2 );
 #endif
 
-         // TODO: Check exit value or use return?
-         if( !CheckSymbOpen() ) exit( 0 );
+         if( !CheckSymbOpen() )
+            return {};
          if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
          {
             WriteDiff( c_dif1, "", Keys, V1 );
@@ -432,8 +432,8 @@ void CompareSy( const int Sy1, const int Sy2 )
          std::cout << S2 << std::endl;
 #endif
 
-         // TODO: Check exit value or use return?
-         if( !CheckSymbOpen() ) exit( 0 );
+         if( !CheckSymbOpen() )
+            return {};
          WriteSetDiff( c_dif1, Keys, S1 );
          WriteSetDiff( c_dif2, Keys, S2 );
       }
