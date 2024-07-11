@@ -42,7 +42,7 @@ std::string short_string::string() const
 uint8_t short_string::length() const
 {
    uint8_t i {};
-   while( buffer[i] != '\0' ) i++;
+   while( buffer.at( i ) != '\0' ) i++;
    return i;
 }
 
@@ -61,7 +61,7 @@ char short_string::back() const
 #if defined( ENABLE_ASSERTIONS )
    assert( length > 0 );
 #endif
-   return buffer[length - 1];
+   return buffer.at( length - 1 );
 }
 
 char short_string::operator[]( const uint8_t i ) const
@@ -73,7 +73,7 @@ char short_string::operator[]( const uint8_t i ) const
    else
       assert( i <= length );
 #endif
-   return buffer[i];
+   return buffer.at( i );
 }
 
 bool short_string::empty() const
@@ -92,8 +92,8 @@ void short_string::append( const char c )
 #if defined( ENABLE_ASSERTIONS )
    assert( length + 1 < MAX_LENGTH );
 #endif
-   buffer[length] = c;
-   buffer[length + 1] = '\0';
+   buffer.at( length ) = c;
+   buffer.at( length + 1 ) = '\0';
 }
 
 void short_string::append( const char *s )
@@ -104,7 +104,7 @@ void short_string::append( const char *s )
    assert( length + s_length < MAX_LENGTH );
 #endif
    std::memcpy( buffer.data() + length, s, s_length );
-   buffer[length + s_length] = '\0';
+   buffer.at( length + s_length ) = '\0';
 }
 
 void short_string::append( const short_string &s )
@@ -140,9 +140,9 @@ void short_string::operator+=( const std::string &s )
 void short_string::to_upper_case()
 {
    uint8_t i {};
-   while( buffer[i] != '\0' )
+   while( buffer.at( i ) != '\0' )
    {
-      buffer[i] = static_cast<char>( std::toupper( buffer[i] ) );
+      buffer.at( i ) = static_cast<char>( std::toupper( buffer.at( i ) ) );
       i++;
    }
 }
@@ -154,7 +154,7 @@ short_string &short_string::operator=( const std::string &s )
    assert( s_length < MAX_LENGTH );
 #endif
    std::memcpy( buffer.data(), s.data(), s_length );
-   buffer[s_length] = '\0';
+   buffer.at( s_length ) = '\0';
    return *this;
 }
 
