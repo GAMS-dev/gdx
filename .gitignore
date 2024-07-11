@@ -1,5 +1,6 @@
 /stubwarnings.txt
 /gdx.vcxproj.user
+/out/
 /build/
 /x64/
 /cmake-build-*/
