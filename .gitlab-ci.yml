@@ -195,12 +195,12 @@ build-wei:
 
 #=======================================================================================================================
 
-codechecker-leg:
-  extends: .codechecker-leg
+codechecker-leg-debug:
+  extends: .codechecker-leg-debug
   needs: [fetch-ci-scripts,apigenerator]
   script:
     - cp apifiles/* src/
-    - !reference [.default-codecheck-script, script]
+    - !reference [.default-codecheck-script-debug, script]
 
 #=======================================================================================================================
 
