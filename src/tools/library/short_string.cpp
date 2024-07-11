@@ -42,7 +42,8 @@ std::string short_string::string() const
 uint8_t short_string::length() const
 {
    uint8_t i {};
-   while( buffer.at( i ) != '\0' ) i++;
+   while( buffer.at( i ) != '\0' )
+      i++;
    return i;
 }
 
@@ -139,12 +140,8 @@ void short_string::operator+=( const std::string &s )
 
 void short_string::to_upper_case()
 {
-   uint8_t i {};
-   while( buffer.at( i ) != '\0' )
-   {
+   for( uint8_t i {}; buffer.at( i ) != '\0'; i++ )
       buffer.at( i ) = static_cast<char>( std::toupper( buffer.at( i ) ) );
-      i++;
-   }
 }
 
 short_string &short_string::operator=( const std::string &s )
