@@ -97,9 +97,6 @@ add_library(gdxtools-library
     src/tools/library/cmdpar.cpp
 )
 target_link_libraries(gdxtools-library base-units gdx-static)
-if (UNIX)
-    target_compile_options(gdxtools-library PRIVATE -ldl)
-endif ()
 
 # gdxdump
 add_executable(gdxdump
@@ -108,6 +105,9 @@ add_executable(gdxdump
 )
 target_include_directories(gdxdump PRIVATE ${inc-dirs})
 target_link_libraries(gdxdump gdxtools-library)
+if (UNIX)
+    target_compile_options(gdxdump PRIVATE -ldl)
+endif ()
 
 # gdxdiff
 add_executable(gdxdiff
