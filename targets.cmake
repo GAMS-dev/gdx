@@ -108,6 +108,8 @@ target_link_libraries(gdxdump gdxtools-library)
 
 # gdxdiff
 add_executable(gdxdiff
+    src/rtl/p3process.h
+    src/rtl/p3process.cpp
     src/tools/gdxdiff/gdxdiff.h
     src/tools/gdxdiff/gdxdiff.cpp
 )
