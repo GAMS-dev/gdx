@@ -38,7 +38,7 @@
 #include "../../gdlib/strhash.h"
 #include "../../gdlib/gmsobj.h"
 #include "../../rtl/sysutils_p3.h"
-// #include "../../rtl/p3process.h"
+#include "../../rtl/p3process.h"
 
 // Global constants
 #include "../../../generated/gclgms.h"
