@@ -158,12 +158,13 @@ short_string &short_string::operator=( const std::string &s )
 bool short_string::operator==( const char *s ) const
 {
    uint8_t i {};
-   while( buffer[i] != '\0' && s[i] != '\0' )
+   while( buffer.at( i ) != '\0' )
    {
-      if( buffer[i] != s[i] ) return false;
+      if( buffer.at( i ) != s[i] )
+         return false;
       i++;
    }
-   return buffer[i] == s[i];
+   return s[i] == '\0';
 }
 
 bool short_string::operator==( const short_string &s ) const
