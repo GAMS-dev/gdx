@@ -56,8 +56,8 @@ using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
 static library::short_string DiffTmpName;
 static gdxHandle_t PGX1 { nullptr }, PGX2 { nullptr }, PGXDIF { nullptr };
 static bool diffUELsRegistered;
-// TODO: Use the correct type instead of unsigned int
-static std::unique_ptr<gdlib::strhash::TXStrHashList<unsigned int>> UELTable;
+// TODO: Use the correct type instead of nullptr type
+static std::unique_ptr<gdlib::strhash::TXStrHashList<std::nullptr_t>> UELTable;
 static int staticUELNum;
 static double EpsAbsolute, EpsRelative;
 static std::map<library::short_string, TStatusCode> StatusTable;
@@ -1039,7 +1039,7 @@ int main( const int argc, const char *argv[] )
       FatalError2( "Cannot create file: " + DiffTmpName.string(), S.string(), static_cast<int>( ErrorCode::ERR_WRITEGDX ) );
    }
 
-   UELTable = std::make_unique<gdlib::strhash::TXStrHashList<unsigned int>>();
+   UELTable = std::make_unique<gdlib::strhash::TXStrHashList<std::nullptr_t>>();
    // UELTable->OneBased = true;
    gdxStoreDomainSetsSet( PGXDIF, false );
 
