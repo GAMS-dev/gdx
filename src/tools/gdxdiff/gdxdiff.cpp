@@ -56,7 +56,8 @@ using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
 static library::short_string DiffTmpName;
 static gdxHandle_t PGX1 { nullptr }, PGX2 { nullptr }, PGXDIF { nullptr };
 static bool diffUELsRegistered;
-static std::unique_ptr<gdlib::strhash::TXStrHashList<nullptr_t>> UELTable;
+// TODO: Use the correct type instead of nullptr type
+static std::unique_ptr<gdlib::strhash::TXStrHashList<std::nullptr_t>> UELTable;
 static int staticUELNum;
 static double EpsAbsolute, EpsRelative;
 static std::map<library::short_string, TStatusCode> StatusTable;
@@ -334,22 +335,22 @@ void CompareSy( const int Sy1, const int Sy2 )
                result = gdlib::strutilx::StrUEqual( S1.string(), S2.string() );
             else
             {
-               AbsDiff = abs( V1 - V2 );
+               AbsDiff = std::abs( V1 - V2 );
                if( AbsDiff <= EpsAbsolute )
                   result = true;
                else if( EpsRelative > 0 )
-                  result = AbsDiff / ( 1 + DMin( abs( V1 ), abs( V2 ) ) ) <= EpsRelative;
+                  result = AbsDiff / ( 1 + DMin( std::abs( V1 ), std::abs( V2 ) ) ) <= EpsRelative;
                else
                   result = false;
             }
          }
          else
-            result = iSV2 == sv_valeps && EpsAbsolute > 0 && abs( V1 ) <= EpsAbsolute;
+            result = iSV2 == sv_valeps && EpsAbsolute > 0 && std::abs( V1 ) <= EpsAbsolute;
       }
       else
       {
          if( iSV2 == sv_normal )
-            result = iSV1 == sv_valeps && EpsAbsolute > 0 && abs( V2 ) <= EpsAbsolute;
+            result = iSV1 == sv_valeps && EpsAbsolute > 0 && std::abs( V2 ) <= EpsAbsolute;
          else
             result = iSV1 == iSV2;
       }
@@ -1038,7 +1039,7 @@ int main( const int argc, const char *argv[] )
       FatalError2( "Cannot create file: " + DiffTmpName.string(), S.string(), static_cast<int>( ErrorCode::ERR_WRITEGDX ) );
    }
 
-   UELTable = std::make_unique<gdlib::strhash::TXStrHashList<nullptr_t>>();
+   UELTable = std::make_unique<gdlib::strhash::TXStrHashList<std::nullptr_t>>();
    // UELTable->OneBased = true;
    gdxStoreDomainSetsSet( PGXDIF, false );
 
