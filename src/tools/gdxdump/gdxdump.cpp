@@ -263,7 +263,7 @@ std::string mFormat( int64_t m )
    while( m != 0 )
    {
       m2 = ( m & mask ) >> shiftCount;
-      b = m2;
+      b = static_cast<uint8_t>( m2 );
       result += hexDigit( b );
       m = m & ~mask;
       mask = mask >> 4;
