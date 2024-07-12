@@ -334,22 +334,22 @@ void CompareSy( const int Sy1, const int Sy2 )
                result = gdlib::strutilx::StrUEqual( S1.string(), S2.string() );
             else
             {
-               AbsDiff = abs( V1 - V2 );
+               AbsDiff = std::abs( V1 - V2 );
                if( AbsDiff <= EpsAbsolute )
                   result = true;
                else if( EpsRelative > 0 )
-                  result = AbsDiff / ( 1 + DMin( abs( V1 ), abs( V2 ) ) ) <= EpsRelative;
+                  result = AbsDiff / ( 1 + DMin( std::abs( V1 ), std::abs( V2 ) ) ) <= EpsRelative;
                else
                   result = false;
             }
          }
          else
-            result = iSV2 == sv_valeps && EpsAbsolute > 0 && abs( V1 ) <= EpsAbsolute;
+            result = iSV2 == sv_valeps && EpsAbsolute > 0 && std::abs( V1 ) <= EpsAbsolute;
       }
       else
       {
          if( iSV2 == sv_normal )
-            result = iSV1 == sv_valeps && EpsAbsolute > 0 && abs( V2 ) <= EpsAbsolute;
+            result = iSV1 == sv_valeps && EpsAbsolute > 0 && std::abs( V2 ) <= EpsAbsolute;
          else
             result = iSV1 == iSV2;
       }
