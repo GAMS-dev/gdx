@@ -1131,7 +1131,7 @@ int main( const int argc, const char *argv[] )
       } while( true );
    }
 
-   gdxDataWriteStrStart( PGXDIF, ID.data(), "", 1, dt_set, 0 );
+   gdxDataWriteStrStart( PGXDIF, ID.data(), {}, 1, dt_set, 0 );
    strcpy( StrKeys[1], "File1" );
    gdxAddSetText( PGXDIF, InFile1.data(), &StrNr );
    StrVals[GMS_VAL_LEVEL] = StrNr;
