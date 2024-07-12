@@ -230,13 +230,13 @@ void CompareSy( const int Sy1, const int Sy2 )
 
       registerDiffUELs();
       for( int D {}; D < Dim; D++ )
-         strcpy( StrKeys[D], UELTable->GetString( Keys[D] ) );
+         strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
       if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
-         strcpy( StrKeys[Dim + 1], Act.data() );
+         strcpy( StrKeysPtrs[Dim + 1], Act.data() );
       else
       {
-         strcpy( StrKeys[Dim + 1], FldName.data() );
-         strcpy( StrKeys[Dim + 2], Act.data() );
+         strcpy( StrKeysPtrs[Dim + 1], FldName.data() );
+         strcpy( StrKeysPtrs[Dim + 2], Act.data() );
       }
 
 #if VERBOSE >= 3
@@ -267,8 +267,8 @@ void CompareSy( const int Sy1, const int Sy2 )
 
       registerDiffUELs();
       for( int D {}; D < Dim; D++ )
-         strcpy( StrKeys[D], UELTable->GetString( Keys[D] ) );
-      strcpy( StrKeys[Dim + 1], Act.data() );
+         strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
+      strcpy( StrKeysPtrs[Dim + 1], Act.data() );
       gdxAddSetText( PGXDIF, S.data(), &iNode );
       Vals[GMS_VAL_LEVEL] = iNode;
       gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals.data() );
@@ -1132,11 +1132,11 @@ int main( const int argc, const char *argv[] )
    }
 
    gdxDataWriteStrStart( PGXDIF, ID.data(), {}, 1, dt_set, 0 );
-   strcpy( StrKeys[1], "File1" );
+   strcpy( StrKeysPtrs[1], "File1" );
    gdxAddSetText( PGXDIF, InFile1.data(), &StrNr );
    StrVals[GMS_VAL_LEVEL] = StrNr;
    gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), StrVals.data() );
-   strcpy( StrKeys[1], "File2" );
+   strcpy( StrKeysPtrs[1], "File2" );
    gdxAddSetText( PGXDIF, InFile2.data(), &StrNr );
    StrVals[GMS_VAL_LEVEL] = StrNr;
    gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), StrVals.data() );
