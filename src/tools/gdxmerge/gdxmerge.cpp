@@ -23,10 +23,32 @@
  * SOFTWARE.
  */
 
+#include <sstream>
+#include <iomanip>
+
 #include "gdxmerge.h"
 
 namespace gdxmerge
 {
+
+std::string formatDateTime( const std::tm &dt )
+{
+   auto int2 = []( const int n ) -> std::string {
+      std::ostringstream oss;
+      oss << std::setw( 2 ) << std::setfill( '0' ) << n;
+      return oss.str();
+   };
+
+   const int year { dt.tm_year + 1900 },
+           month { dt.tm_mon + 1 },
+           day { dt.tm_mday },
+           hour { dt.tm_hour },
+           min { dt.tm_min },
+           sec { dt.tm_sec };
+
+   return int2( year ) + '/' + int2( month ) + '/' + int2( day ) + ' ' +
+          int2( hour ) + ':' + int2( min ) + ':' + int2( sec );
+}
 
 int main( const int argc, const char *argv[] )
 {
