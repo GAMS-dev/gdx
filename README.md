@@ -119,6 +119,12 @@ Even more abstraction is offered by the GAMS Transfer libraries for
 
 The GDX library is written in C++17 and built via [CMake](https://cmake.org/).
 
+The fastest way to build the GDX library (static and dynamic) locally is calling
+```
+cmake -DNO_TESTS=ON -DNO_EXAMPLES=ON CMakeLists.txt
+cmake --build .
+```
+
 This repository contains a GitLab CI YAML that describes a pipeline which
 
 - builds GDX for all supported platforms (Windows, macOS, Linux) with Doxygen documentation, libraries, and examples,
