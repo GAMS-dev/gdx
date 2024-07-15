@@ -25,11 +25,22 @@
 
 #include <sstream>
 #include <iomanip>
+#include <string>
+#include <vector>
 
 #include "gdxmerge.h"
 
+// GDX library interface
+#include "../../../generated/gdxcc.h"
+
 namespace gdxmerge
 {
+
+static gdxHandle_t pgx_merge { nullptr };
+static bool do_big_symbols, strict_mode;
+static int64_t size_cut_off;
+static std::string outfile;
+static std::vector<std::string> file_patterns;
 
 std::string format_date_time( const std::tm &dt )
 {
