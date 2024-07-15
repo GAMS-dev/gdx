@@ -6,6 +6,15 @@
 namespace gdxmerge
 {
 
+enum class TProcessPass
+{
+   rpDoAll,
+   rpScan,
+   rpSmall,
+   rpBig,
+   rpTooBig
+};
+
 std::string formatDateTime( const std::tm &dt );
 
 int main( int argc, const char *argv[] );
