@@ -1,4 +1,5 @@
-set(base-units
+# also includes unused sources (modules and headers)
+set(base-units-all
         # runtime library
         src/rtl/p3library.cpp
         src/rtl/p3library.h
