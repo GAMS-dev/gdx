@@ -15,7 +15,7 @@ enum class TProcessPass
    rpTooBig
 };
 
-std::string formatDateTime( const std::tm &dt );
+std::string format_date_time( const std::tm &dt );
 
 int main( int argc, const char *argv[] );
 

@@ -31,7 +31,7 @@
 namespace gdxmerge
 {
 
-std::string formatDateTime( const std::tm &dt )
+std::string format_date_time( const std::tm &dt )
 {
    auto int2 = []( const int n ) -> std::string {
       std::ostringstream oss;
