@@ -12,6 +12,16 @@
 namespace gdxmerge
 {
 
+class TGDXFileEntry
+{
+private:
+   std::string FFileName, FFileId, FFileInfo;
+
+public:
+   TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
+   ~TGDXFileEntry();
+};
+
 template<typename T>
 class TFileList : public TXList<T>
 {
