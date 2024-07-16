@@ -65,7 +65,7 @@ TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const int AType, const int ASubTyp 
 {
    syData = new gdlib::gmsdata::TTblGamsData<T>( ADim, sizeof( T ) );
    sySkip = false;
-};
+}
 
 template<typename T>
 TGAMSSymbol<T>::~TGAMSSymbol()
@@ -81,7 +81,7 @@ TSymbolList<T>::TSymbolList() : gdlib::gmsobj::TXHashedStringList<T>()
    FileList = new TFileList<T>;
    library::short_string Msg;
    gdxCreate( &PGXMerge, Msg.data(), Msg.length() );
-};
+}
 
 template<typename T>
 TSymbolList<T>::~TSymbolList()
