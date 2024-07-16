@@ -3,6 +3,7 @@
 namespace gdxmerge
 {
 
-symbol_list::symbol_list() = default;
+template<typename T>
+TSymbolList<T>::TSymbolList() = default;
 
 }// namespace gdxmerge
