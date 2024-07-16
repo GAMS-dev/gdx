@@ -3,8 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 #include "../../gdlib/gmsobj.h"
+#include "../../gdlib/gmsdata.h"
 
 // GDX library interface
 #include "../../../generated/gdxcc.h"
@@ -19,6 +21,23 @@ enum class TProcessPass
    rpSmall,
    rpBig,
    rpTooBig
+};
+
+template<typename T>
+class TGAMSSymbol
+{
+private:
+   int syDim, syTyp, sySubTyp;
+   gdlib::gmsdata::TTblGamsData<T> syData;
+   std::string syExplTxt;
+   int64_t sySize, syMemory;
+   bool sySkip;
+
+public:
+   TGAMSSymbol( int ADim, int AType, int ASubTyp );
+   ~TGAMSSymbol();
+
+   // void SetCurrentFile( const &std::string s );
 };
 
 class TGDXFileEntry
