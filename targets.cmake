@@ -119,6 +119,10 @@ target_link_libraries(gdxdiff gdxtools-library)
 
 # gdxmerge
 add_executable(gdxmerge
+    src/tools/gdxmerge/symbol_list.h
+    src/tools/gdxmerge/symbol_list.cpp
+    src/tools/gdxmerge/gams_symbol.h
+    src/tools/gdxmerge/gams_symbol.cpp
     src/tools/gdxmerge/gdxmerge.h
     src/tools/gdxmerge/gdxmerge.cpp
 )
