@@ -31,7 +31,7 @@ class TGAMSSymbol
 {
 private:
    int syDim, syTyp, sySubTyp;
-   gdlib::gmsdata::TTblGamsData<T> syData;
+   gdlib::gmsdata::TTblGamsData<T> *syData;
    std::string syExplTxt;
    int64_t sySize {}, syMemory {};
    bool sySkip;
@@ -71,9 +71,9 @@ template<typename T>
 class TSymbolList : public gdlib::gmsobj::TXHashedStringList<T>
 {
 private:
-   gdlib::gmsobj::TXStrPool<T> StrPool;
+   gdlib::gmsobj::TXStrPool<T> *StrPool;
    int FErrorCount {}, NextAcroNr {};
-   TFileList<T> FileList;
+   TFileList<T> *FileList;
    std::vector<std::string> IncludeList, ExcludeList;
 
 public:
