@@ -97,6 +97,14 @@ void TSymbolList<T>::OpenOutput( const std::string &AFileName, int &ErrNr )
    gdxStoreDomainSetsSet( PGXMerge, false );
 }
 
+template<typename T>
+int TSymbolList<T>::AddUEL( const std::string &S )
+{
+   int result;
+   gdxUELRegisterStr( PGXMerge, S.data(), &result );
+   return result;
+}
+
 int main( const int argc, const char *argv[] )
 {
    return 0;
