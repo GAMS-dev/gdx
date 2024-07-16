@@ -90,6 +90,13 @@ TSymbolList<T>::~TSymbolList()
    delete FileList;
 }
 
+template<typename T>
+void TSymbolList<T>::OpenOutput( const std::string &AFileName, int &ErrNr )
+{
+   gdxOpenWrite( PGXMerge, AFileName.data(), "gdxmerge", &ErrNr );
+   gdxStoreDomainSetsSet( PGXMerge, false );
+}
+
 int main( const int argc, const char *argv[] )
 {
    return 0;

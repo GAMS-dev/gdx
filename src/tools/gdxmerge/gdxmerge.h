@@ -80,7 +80,7 @@ public:
    TSymbolList();
    ~TSymbolList();
 
-   void OpenOutput( const std::string &AFileName, int ErrNr );
+   void OpenOutput( const std::string &AFileName, int &ErrNr );
    int AddUEL( const std::string &s );
    int AddSymbol( const std::string &AName, int ADim, int AType, int ASubTyp );
    void AddPGXFile( int FNr, TProcessPass Pass );
