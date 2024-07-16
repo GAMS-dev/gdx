@@ -32,7 +32,7 @@ public:
 };
 
 template<typename T>
-class TFileList : public TXList<T>
+class TFileList : public gdlib::gmsobj::TXList<T>
 {
 public:
    TFileList();
@@ -46,10 +46,10 @@ public:
 };
 
 template<typename T>
-class TSymbolList : public TXHashedStringList<T>
+class TSymbolList : public gdlib::gmsobj::TXHashedStringList<T>
 {
 private:
-   TXStrPool StrPool;
+   gdlib::gmsobj::TXStrPool<T> StrPool;
    int FErrorCount {}, NextAcroNr {};
    TFileList<T> FileList;
    std::vector<std::string> IncludeList, ExcludeList;
@@ -60,7 +60,7 @@ public:
 
    void OpenOutput( const std::string &AFileName, int ErrNr );
    int AddUEL( const std::string &s );
-   int AddSymbol( const std::string &AName, int ADim, TgdxDataType AType, int ASubTyp );
+   int AddSymbol( const std::string &AName, int ADim, int AType, int ASubTyp );
    void AddPGXFile( int FNr, TProcessPass Pass );
    void WriteNameList();
    void KeepNewAcronyms( const gdxHandle_t &PGX );
