@@ -14,11 +14,11 @@ namespace gdxmerge
 
 enum class TProcessPass
 {
-   rp_do_all,
-   rp_scan,
-   rp_small,
-   rp_big,
-   rp_tooBig
+   rpDoAll,
+   rpScan,
+   rpSmall,
+   rpBig,
+   rpTooBig
 };
 
 class TGDXFileEntry
