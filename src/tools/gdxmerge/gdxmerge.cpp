@@ -25,10 +25,9 @@
 
 #include <sstream>
 #include <iomanip>
-#include <string>
-#include <vector>
 
 #include "gdxmerge.h"
+#include "../library/short_string.h"
 
 // GDX library interface
 #include "../../../generated/gdxcc.h"
@@ -36,11 +35,11 @@
 namespace gdxmerge
 {
 
-static gdxHandle_t PGXMerge { nullptr };
 static bool DoBigSymbols, StrictMode;
 static int64_t SizeCutOff;
 static std::string OutFile;
 static std::vector<std::string> FilePatterns;
+static gdxHandle_t PGXMerge { nullptr };
 
 std::string FormatDateTime( const std::tm &dt )
 {
@@ -59,6 +58,36 @@ std::string FormatDateTime( const std::tm &dt )
 
    return int2( year ) + '/' + int2( month ) + '/' + int2( day ) + ' ' +
           int2( hour ) + ':' + int2( min ) + ':' + int2( sec );
+}
+
+template<typename T>
+TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const int AType, const int ASubTyp ) : syDim( ADim ), syTyp( AType ), sySubTyp( ASubTyp )
+{
+   syData = new gdlib::gmsdata::TTblGamsData<T>( ADim, sizeof( T ) );
+   sySkip = false;
+};
+
+template<typename T>
+TGAMSSymbol<T>::~TGAMSSymbol()
+{
+   delete syData;
+}
+
+template<typename T>
+TSymbolList<T>::TSymbolList( gdxHandle_t &PGXMerge ) : gdlib::gmsobj::TXHashedStringList<T>()
+{
+   StrPool = new gdlib::gmsobj::TXStrPool<T>();
+   StrPool.Add( "" );
+   FileList = new TFileList<T>;
+   library::short_string Msg;
+   gdxCreate( &PGXMerge, Msg.data(), Msg.length() );
+};
+
+template<typename T>
+TSymbolList<T>::~TSymbolList()
+{
+   delete StrPool;
+   delete FileList;
 }
 
 int main( const int argc, const char *argv[] )
