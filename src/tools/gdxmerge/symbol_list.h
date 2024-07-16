@@ -30,7 +30,7 @@ private:
    int syDim, syTyp, sySubTyp;
    gdlib::gmsdata::TTblGamsData<T> syData;
    std::string syExplTxt;
-   int64_t sySize, syMemory;
+   int64_t sySize {}, syMemory {};
    bool sySkip;
 
 public:
