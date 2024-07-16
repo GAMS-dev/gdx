@@ -28,4 +28,12 @@ TSymbolList<T>::TSymbolList( gdxHandle_t &PGXMerge )
    gdxCreate( &PGXMerge, Msg.data(), Msg.length() );
 };
 
+template<typename T>
+TSymbolList<T>::~TSymbolList()
+{
+   delete StrPool;
+   delete FileList;
+   gdlib::gmsobj::~TXHashedStringList<T>();
+};
+
 }// namespace gdxmerge
