@@ -13,6 +13,20 @@ namespace gdxmerge
 {
 
 template<typename T>
+class TFileList : public TXList<T>
+{
+public:
+   TFileList();
+   ~TFileList();
+
+   void AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
+   void FreeItem( int Index );// No-op?
+   std::string FileId( int Index );
+   std::string FileInfo( int Index );
+   std::string FileName( int Index );
+};
+
+template<typename T>
 class TSymbolList : public TXHashedStringList<T>
 {
 private:
