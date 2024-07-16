@@ -74,7 +74,7 @@ TGAMSSymbol<T>::~TGAMSSymbol()
 }
 
 template<typename T>
-TSymbolList<T>::TSymbolList( gdxHandle_t &PGXMerge ) : gdlib::gmsobj::TXHashedStringList<T>()
+TSymbolList<T>::TSymbolList() : gdlib::gmsobj::TXHashedStringList<T>()
 {
    StrPool = new gdlib::gmsobj::TXStrPool<T>();
    StrPool.Add( "" );

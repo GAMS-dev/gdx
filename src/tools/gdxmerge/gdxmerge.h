@@ -77,7 +77,7 @@ private:
    std::vector<std::string> IncludeList, ExcludeList;
 
 public:
-   TSymbolList( gdxHandle_t &PGXMerge );
+   TSymbolList();
    ~TSymbolList();
 
    void OpenOutput( const std::string &AFileName, int ErrNr );
