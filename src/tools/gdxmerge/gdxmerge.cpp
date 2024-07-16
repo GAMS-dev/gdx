@@ -105,6 +105,21 @@ int TSymbolList<T>::AddUEL( const std::string &S )
    return result;
 }
 
+template<typename T>
+int TSymbolList<T>::AddSymbol( const std::string &AName, const int ADim, const int AType, const int ASubTyp )
+{
+   auto is_in_list = []( const std::vector<std::string> &list, const std::string &value ) {
+      return std::find( list.begin(), list.end(), value ) != list.end();
+   };
+
+   if( ( !IncludeList.empty() && !is_in_list( IncludeList, AName ) ) ||
+       ( !ExcludeList.empty() && is_in_list( ExcludeList, AName ) ) )
+      return -1;
+
+   auto *S = new TGAMSSymbol<T>( ADim, AType, ASubTyp );
+   return StrPool->AddObject( AName.data(), AName.length(), S->syData );
+}
+
 int main( const int argc, const char *argv[] )
 {
    return 0;
