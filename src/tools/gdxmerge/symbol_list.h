@@ -41,10 +41,9 @@ class TSymbolList : public TXHashedStringList<T>
 {
 private:
    TXStrPool StrPool;
-   int FErrorCount {};
+   int FErrorCount {}, NextAcroNr {};
    TFileList<T> FileList;
    std::vector<std::string> IncludeList, ExcludeList;
-   int NextAcroNr {};
 
 public:
    TSymbolList();
