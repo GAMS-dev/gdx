@@ -13,4 +13,10 @@ TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const int AType, const int ASubTyp 
    sySkip = false;
 };
 
+template<typename T>
+TGAMSSymbol<T>::~TGAMSSymbol()
+{
+   delete syData;
+}
+
 }// namespace gdxmerge
