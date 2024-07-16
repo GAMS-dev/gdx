@@ -1,4 +1,5 @@
 #include "symbol_list.h"
+#include "../library/short_string.h"
 
 namespace gdxmerge
 {
@@ -15,5 +16,16 @@ TGAMSSymbol<T>::~TGAMSSymbol()
 {
    delete syData;
 }
+
+template<typename T>
+TSymbolList<T>::TSymbolList( gdxHandle_t &PGXMerge )
+{
+   gdlib::gmsobj::TXHashedStringList<T>();
+   StrPool = new gdlib::gmsobj::TXStrPool<T>();
+   StrPool.Add( "" );
+   FileList = new TFileList<T>;
+   library::short_string Msg;
+   gdxCreate( &PGXMerge, Msg.data(), Msg.length() );
+};
 
 }// namespace gdxmerge
