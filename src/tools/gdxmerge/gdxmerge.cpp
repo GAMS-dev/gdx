@@ -36,13 +36,13 @@
 namespace gdxmerge
 {
 
-static gdxHandle_t pgx_merge { nullptr };
-static bool do_big_symbols, strict_mode;
-static int64_t size_cut_off;
-static std::string outfile;
-static std::vector<std::string> file_patterns;
+static gdxHandle_t PGXMerge { nullptr };
+static bool DoBigSymbols, StrictMode;
+static int64_t SizeCutOff;
+static std::string OutFile;
+static std::vector<std::string> FilePatterns;
 
-std::string format_date_time( const std::tm &dt )
+std::string FormatDateTime( const std::tm &dt )
 {
    auto int2 = []( const int n ) -> std::string {
       std::ostringstream oss;

@@ -6,7 +6,7 @@
 namespace gdxmerge
 {
 
-std::string format_date_time( const std::tm &dt );
+std::string FormatDateTime( const std::tm &dt );
 
 int main( int argc, const char *argv[] );
 
