@@ -120,9 +120,35 @@ int TSymbolList<T>::AddSymbol( const std::string &AName, const int ADim, const i
    return StrPool->AddObject( AName.data(), AName.length(), S->syData );
 }
 
+template<typename T>
+void TSymbolList<T>::AddPGXFile( int FNr, TProcessPass Pass )
+{
+}
+
+template<typename T>
+void TSymbolList<T>::WriteNameList()
+{
+}
+
+template<typename T>
+void TSymbolList<T>::KeepNewAcronyms( const gdxHandle_t &PGX )
+{
+}
+
+template<typename T>
+void TSymbolList<T>::ShareAcronyms( const gdxHandle_t &PGX )
+{
+}
+
+template<typename T>
+int TSymbolList<T>::FindAcronym( const std::string &Id )
+{
+   return {};
+}
+
 int main( const int argc, const char *argv[] )
 {
-   return 0;
+   return {};
 }
 
 }// namespace gdxmerge
