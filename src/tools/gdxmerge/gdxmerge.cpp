@@ -25,6 +25,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <cassert>
 
 #include "gdxmerge.h"
 #include "../../gdlib/strutilx.h"
@@ -135,6 +136,34 @@ void TSymbolList<T>::KeepNewAcronyms( const gdxHandle_t &PGX )
 template<typename T>
 void TSymbolList<T>::ShareAcronyms( const gdxHandle_t &PGX )
 {
+   if( gdxAcronymCount( PGX ) == 0 )
+   {
+      gdxAcronymNextNr( PGX, 0 );
+      return;
+   }
+
+   library::short_string AName, AText;
+   int AIndx;
+   if( NextAcroNr == 0 )
+   {
+      gdxAcronymGetInfo( PGX, 1, AName.data(), AText.data(), &AIndx );
+      NextAcroNr = AIndx;
+   }
+
+   gdxAcronymNextNr( PGX, NextAcroNr );
+
+   library::short_string ANameM, ATextM;
+   int NM, AIndxM;
+   for( int N {}; N < gdxAcronymCount( PGX ); N++ )
+   {
+      gdxAcronymGetInfo( PGX, N, AName.data(), AText.data(), &AIndx );
+      NM = FindAcronym( AName );
+      if( NM <= 0 )
+         continue;
+      gdxAcronymGetInfo( PGXMerge, NM, ANameM.data(), ATextM.data(), &AIndxM );
+      assert( AIndxM > 0 && "ShareAcronyms-1" );
+      gdxAcronymSetInfo( PGX, N, AName.data(), AText.data(), AIndxM );
+   }
 }
 
 template<typename T>
