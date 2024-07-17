@@ -27,10 +27,7 @@
 #include <iomanip>
 
 #include "gdxmerge.h"
-#include "../library/short_string.h"
-
-// GDX library interface
-#include "../../../generated/gdxcc.h"
+#include "../../gdlib/strutilx.h"
 
 namespace gdxmerge
 {
@@ -141,14 +138,14 @@ void TSymbolList<T>::ShareAcronyms( const gdxHandle_t &PGX )
 }
 
 template<typename T>
-int TSymbolList<T>::FindAcronym( const std::string &Id )
+int TSymbolList<T>::FindAcronym( const library::short_string &Id )
 {
    library::short_string AName, AText;
    int AIndx;
    for( int N {}; N < gdxAcronymCount( PGXMerge ); N++ )
    {
       gdxAcronymGetInfo( PGXMerge, N, AName.data(), AText.data(), &AIndx );
-      if( gdlib::strutilx::StrUEqual( Id, AName.string() ) )
+      if( gdlib::strutilx::StrUEqual( Id.string(), AName.string() ) )
          return N;
    }
    return {};

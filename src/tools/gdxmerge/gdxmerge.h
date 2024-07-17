@@ -6,6 +6,7 @@
 #include <vector>
 #include <cstdint>
 
+#include "../library/short_string.h"
 #include "../../gdlib/gmsdata.h"
 #include "../../gdlib/gmsobj.h"
 
@@ -87,7 +88,7 @@ public:
    void WriteNameList();
    void KeepNewAcronyms( const gdxHandle_t &PGX );
    void ShareAcronyms( const gdxHandle_t &PGX );
-   int FindAcronym( const std::string &Id );
+   int FindAcronym( const library::short_string &Id );
 };
 
 int main( int argc, const char *argv[] );
