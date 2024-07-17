@@ -147,7 +147,7 @@ void TSymbolList<T>::KeepNewAcronyms( const gdxHandle_t &PGX )
          if( AName.empty() )
          {
             // Should not happen
-            for( int K { 1 }; K <= INT_MAX; K++ )
+            for( int K { 1 }; K <= std::numeric_limits<int>::max(); K++ )
             {
                AName = "Acronym_Auto_" + std::to_string( K );
                if( FindAcronym( AName ) < 0 )
