@@ -117,9 +117,7 @@ std::vector<std::string> splitString( const std::string &s, const char delimiter
    std::istringstream iss( s );
    std::string token;
    while( getline( iss, token, delimiter ) )
-   {
       tokens.push_back( token );
-   }
    return tokens;
 }
 
