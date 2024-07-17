@@ -12,6 +12,8 @@
 
 // GDX library interface
 #include "../../../generated/gdxcc.h"
+// Global constants
+#include "../../../generated/gclgms.h"
 
 namespace gdxmerge
 {
