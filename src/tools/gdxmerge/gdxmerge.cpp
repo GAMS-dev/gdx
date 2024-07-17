@@ -154,7 +154,7 @@ void TSymbolList<T>::ShareAcronyms( const gdxHandle_t &PGX )
 
    library::short_string ANameM, ATextM;
    int NM, AIndxM;
-   for( int N {}; N < gdxAcronymCount( PGX ); N++ )
+   for( int N { 1 }; N <= gdxAcronymCount( PGX ); N++ )
    {
       gdxAcronymGetInfo( PGX, N, AName.data(), AText.data(), &AIndx );
       NM = FindAcronym( AName );
@@ -171,7 +171,7 @@ int TSymbolList<T>::FindAcronym( const library::short_string &Id )
 {
    library::short_string AName, AText;
    int AIndx;
-   for( int N {}; N < gdxAcronymCount( PGXMerge ); N++ )
+   for( int N { 1 }; N <= gdxAcronymCount( PGXMerge ); N++ )
    {
       gdxAcronymGetInfo( PGXMerge, N, AName.data(), AText.data(), &AIndx );
       if( gdlib::strutilx::StrUEqual( Id.string(), AName.string() ) )
