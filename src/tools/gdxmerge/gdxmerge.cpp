@@ -26,6 +26,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cassert>
+#include <limits>
 
 #include "gdxmerge.h"
 #include "../../gdlib/strutilx.h"
@@ -131,6 +132,34 @@ void TSymbolList<T>::WriteNameList()
 template<typename T>
 void TSymbolList<T>::KeepNewAcronyms( const gdxHandle_t &PGX )
 {
+   int NN = gdxAcronymNextNr( PGX, -1 );
+   if( NN <= NextAcroNr )
+      return;
+
+   int OrgIndx, NewIndx, AutoIndx, AIndx;
+   library::short_string AName, AText;
+   for( int N { 1 }; N <= gdxAcronymCount( PGX ); N++ )
+   {
+      gdxAcronymGetMapping( PGX, N, &OrgIndx, &NewIndx, &AutoIndx );
+      if( NewIndx >= NextAcroNr )
+      {
+         gdxAcronymGetInfo( PGX, N, AName.data(), AText.data(), &AIndx );
+         if( AName.empty() )
+         {
+            // Should not happen
+            for( int K { 1 }; K <= INT_MAX; K++ )
+            {
+               AName = "Acronym_Auto_" + std::to_string( K );
+               if( FindAcronym( AName ) < 0 )
+                  break;
+            }
+            AText = "GDX file did not have a name for acronym";
+         }
+         gdxAcronymAdd( PGXMerge, AName.data(), AText.data(), NewIndx );
+      }
+   }
+
+   NextAcroNr = NN;
 }
 
 template<typename T>
