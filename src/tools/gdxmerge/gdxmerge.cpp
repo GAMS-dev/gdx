@@ -143,6 +143,14 @@ void TSymbolList<T>::ShareAcronyms( const gdxHandle_t &PGX )
 template<typename T>
 int TSymbolList<T>::FindAcronym( const std::string &Id )
 {
+   library::short_string AName, AText;
+   int AIndx;
+   for( int N {}; N < gdxAcronymCount( PGXMerge ); N++ )
+   {
+      gdxAcronymGetInfo( PGXMerge, N, AName.data(), AText.data(), &AIndx );
+      if( gdlib::strutilx::StrUEqual( Id, AName.string() ) )
+         return N;
+   }
    return {};
 }
 
