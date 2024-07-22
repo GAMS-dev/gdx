@@ -123,6 +123,23 @@ int TSymbolList<T>::AddSymbol( const std::string &AName, const int ADim, const i
 template<typename T>
 void TSymbolList<T>::AddPGXFile( int FNr, TProcessPass Pass )
 {
+   bool FrstError;
+   std::string SyName, FileName;
+
+   auto CheckError = [&]( const bool Cnd, const std::string &Msg ) -> bool {
+      bool Result { !Cnd };
+      if( Result )
+      {
+         FErrorCount++;
+         if( FrstError )
+         {
+            std::cout << "\n**** Error in file " << FileName << std::endl;
+            FrstError = false;
+         }
+         std::cout << "     " << Msg << ": " << SyName << std::endl;
+      }
+      return Result;
+   };
 }
 
 template<typename T>
