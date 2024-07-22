@@ -62,7 +62,7 @@ std::string FormatDateTime( const std::tm &dt )
 }
 
 template<typename T>
-TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const int AType, const int ASubTyp ) : SyDim( ADim ), SyTyp( AType ), SySubTyp( ASubTyp )
+TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp ) : SyDim( ADim ), SyTyp( AType ), SySubTyp( ASubTyp )
 {
    SyData = new gdlib::gmsdata::TTblGamsData<T>( ADim, sizeof( T ) );
    SySkip = false;
@@ -107,7 +107,7 @@ int TSymbolList<T>::AddUEL( const std::string &S )
 }
 
 template<typename T>
-int TSymbolList<T>::AddSymbol( const std::string &AName, const int ADim, const int AType, const int ASubTyp )
+int TSymbolList<T>::AddSymbol( const std::string &AName, const int ADim, const gdxSyType AType, const int ASubTyp )
 {
    auto is_in_list = []( const std::vector<std::string> &list, const std::string &value ) {
       return std::find( list.begin(), list.end(), value ) != list.end();

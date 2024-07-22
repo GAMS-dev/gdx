@@ -33,14 +33,15 @@ template<typename T>
 class TGAMSSymbol
 {
 private:
-   int SyDim, SyTyp, SySubTyp;
+   int SyDim, SySubTyp;
+   gdxSyType SyTyp;
    gdlib::gmsdata::TTblGamsData<T> *SyData;
    std::string SyExplTxt;
    int64_t SySize {}, SyMemory {};
    bool SySkip;
 
 public:
-   TGAMSSymbol( int ADim, int AType, int ASubTyp );
+   TGAMSSymbol( int ADim, gdxSyType AType, int ASubTyp );
    ~TGAMSSymbol();
 
    // void SetCurrentFile( const std::string &S );
@@ -85,7 +86,7 @@ public:
 
    static void OpenOutput( const std::string &AFileName, int &ErrNr );
    static int AddUEL( const std::string &S );
-   int AddSymbol( const std::string &AName, int ADim, int AType, int ASubTyp );
+   int AddSymbol( const std::string &AName, int ADim, gdxSyType AType, int ASubTyp );
    void AddPGXFile( int FNr, TProcessPass Pass );
    void WriteNameList();
    void KeepNewAcronyms( const gdxHandle_t &PGX );
