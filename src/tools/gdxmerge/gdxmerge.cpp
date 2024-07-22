@@ -28,6 +28,7 @@
 #include <cassert>
 #include <limits>
 #include <cstring>
+#include <iostream>
 
 #include "gdxmerge.h"
 #include "../../gdlib/strutilx.h"
