@@ -22,22 +22,22 @@ std::string FormatDateTime( const std::tm &dt );
 
 enum class TProcessPass
 {
-   rpDoAll,
-   rpScan,
-   rpSmall,
-   rpBig,
-   rpTooBig
+   RpDoAll,
+   RpScan,
+   RpSmall,
+   RpBig,
+   RpTooBig
 };
 
 template<typename T>
 class TGAMSSymbol
 {
 private:
-   int syDim, syTyp, sySubTyp;
-   gdlib::gmsdata::TTblGamsData<T> *syData;
-   std::string syExplTxt;
-   int64_t sySize {}, syMemory {};
-   bool sySkip;
+   int SyDim, SyTyp, SySubTyp;
+   gdlib::gmsdata::TTblGamsData<T> *SyData;
+   std::string SyExplTxt;
+   int64_t SySize {}, SyMemory {};
+   bool SySkip;
 
 public:
    TGAMSSymbol( int ADim, int AType, int ASubTyp );

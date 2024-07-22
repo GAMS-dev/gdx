@@ -62,16 +62,16 @@ std::string FormatDateTime( const std::tm &dt )
 }
 
 template<typename T>
-TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const int AType, const int ASubTyp ) : syDim( ADim ), syTyp( AType ), sySubTyp( ASubTyp )
+TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const int AType, const int ASubTyp ) : SyDim( ADim ), SyTyp( AType ), SySubTyp( ASubTyp )
 {
-   syData = new gdlib::gmsdata::TTblGamsData<T>( ADim, sizeof( T ) );
-   sySkip = false;
+   SyData = new gdlib::gmsdata::TTblGamsData<T>( ADim, sizeof( T ) );
+   SySkip = false;
 }
 
 template<typename T>
 TGAMSSymbol<T>::~TGAMSSymbol()
 {
-   delete syData;
+   delete SyData;
 }
 
 template<typename T>
