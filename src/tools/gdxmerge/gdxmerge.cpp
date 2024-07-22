@@ -27,6 +27,7 @@
 #include <iomanip>
 #include <cassert>
 #include <limits>
+#include <cstring>
 
 #include "gdxmerge.h"
 #include "../../gdlib/strutilx.h"
@@ -127,6 +128,36 @@ void TSymbolList<T>::AddPGXFile( int FNr, TProcessPass Pass )
 template<typename T>
 void TSymbolList<T>::WriteNameList()
 {
+   const std::string BASE_NAME { "Merged_set_" };
+   library::short_string SetName;
+   int N, SyNr, TextNr;
+   gdxStrIndex_t AIndex;
+   gdxStrIndexPtrs_t AIndexPtrs;
+   GDXSTRINDEXPTRS_INIT( AIndex, AIndexPtrs );
+   gdxValues_t AVals {};
+
+   // find unique name for the merged set
+   N = 1;
+   while( true )
+   {
+      SetName = BASE_NAME + std::to_string( N );
+      gdxFindSymbol( PGXMerge, SetName.data(), &SyNr );
+      if( SyNr < 0 )
+         break;
+      N++;
+   }
+
+   gdxDataWriteStrStart( PGXMerge, SetName.data(), "Merge set", 1, 0, 0 );
+   for( N = 0; N < FileList->size(); N++ )
+   {
+      gdxAddSetText( PGXMerge, FileList->FileInfo( N ), TextNr );
+      AVals[GMS_VAL_LEVEL] = TextNr;
+      // AIndex[1] = FileList->FileId( N );
+      strcpy( AIndexPtrs[1], FileList->FileId( N ) );
+      // TODO: Check this const cast
+      gdxDataWriteStr( PGXMerge, const_cast<const char **>( AIndexPtrs ), AVals );
+   }
+   gdxDataWriteDone( PGXMerge );
 }
 
 template<typename T>
