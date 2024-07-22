@@ -125,7 +125,7 @@ template<typename T>
 void TSymbolList<T>::AddPGXFile( int FNr, TProcessPass Pass )
 {
    bool FrstError;
-   std::string SyName, FileName;
+   library::short_string SyName, FileName;
 
    auto CheckError = [&]( const bool Cnd, const std::string &Msg ) -> bool {
       bool Result { !Cnd };
