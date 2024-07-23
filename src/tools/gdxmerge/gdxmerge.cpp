@@ -253,7 +253,7 @@ void TSymbolList<T>::AddPGXFile( int FNr, TProcessPass Pass )
          continue;
       if( CheckError( SyTyp == SyObj.SyTyp, "Types do not match" ) )
          continue;
-      if( CheckError( SySubTyp == SyObj.SySubTyp, "Var/Equ subtypes do not match" ) )
+      if( ( SyTyp == dt_var || SyTyp == dt_equ ) && CheckError( SySubTyp == SyObj.SySubTyp, "Var/Equ subtypes do not match" ) )
          continue;
       if( SyObj.SyExplTxt.empty() )
          SyObj.SyExplTxt = SyText;
