@@ -46,7 +46,6 @@ static std::string OutFile;
 static std::vector<std::string> FilePatterns;
 static gdxHandle_t PGXMerge { nullptr };
 static unsigned int InputFilesRead;
-static TSymbolList SyList;
 
 std::string FormatDateTime( const std::tm &dt )
 {
