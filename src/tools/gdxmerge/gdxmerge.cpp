@@ -29,9 +29,13 @@
 #include <limits>
 #include <cstring>
 #include <iostream>
+#include <cmath>
 
 #include "gdxmerge.h"
 #include "../../gdlib/strutilx.h"
+
+// TODO: Disable at some point?
+#define OLD_MEMORY_CHECK
 
 namespace gdxmerge
 {
@@ -143,6 +147,141 @@ void TSymbolList<T>::AddPGXFile( int FNr, TProcessPass Pass )
       }
       return Result;
    };
+
+   gdxHandle_t PGX { nullptr };
+   int NrSy, NrUel, N, Dim, SyITyp, SyIndx, NrRecs, FDim, D, INode, SySubTyp, DummyCount, ErrNr, RecLen;
+   gdxSyType SyTyp;
+   TGAMSSymbol<T> SyObj;
+   gdxStrIndex_t IndxS;
+   gdxStrIndexPtrs_t IndxSPtrs;
+   GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
+   gdxUelIndex_t IndxI;
+   gdxValues_t Vals;
+   library::short_string Txt, SyText, ErrMsg;
+   std::string FileId;
+   int64_t XCount, Size;
+
+   FileName = FileList->FileName( FNr );
+   FileId = FileList->FileId( FNr );
+
+   std::cout << "Reading file: " << FileName << std::endl;
+   gdxCreate( &PGX, ErrMsg.data(), ErrMsg.length() );
+   gdxOpenRead( PGX, FileName.data(), &ErrNr );
+   if( ErrNr != 0 )
+   {
+      gdxErrorStr( nullptr, ErrNr, ErrMsg.data() );
+      std::cout << "\nError reading file, message: " << ErrMsg << std::endl;
+      return;
+   }
+   InputFilesRead++;
+
+   ShareAcronyms( PGX );
+
+   gdxUELRegisterStrStart( PGXMerge );
+   gdxSystemInfo( PGX, &NrSy, &NrUel );
+   FrstError = true;
+
+   for( N = 1; N <= NrSy; N++ )
+   {
+      gdxSymbolInfo( PGX, N, SyName.data(), &Dim, &SyITyp );
+      gdxSymbolInfoX( PGX, N, &DummyCount, &SySubTyp, SyText.data() );
+      if( CheckError( Dim < GMS_MAX_INDEX_DIM, "Dimension too large" ) )
+         continue;
+      SyTyp = gdxSyType( SyITyp );
+      if( SyITyp == GMS_DT_ALIAS )
+      {
+         // We cannot create two dimensional aliased sets!
+         SyTyp = dt_set;
+         SySubTyp = 0;
+      }
+      // TODO: Check if FindAcronym is correct (replaces IndexOf(syName))
+      SyIndx = FindAcronym( SyName );
+      if( SyIndx < 0 )
+      {
+         SyIndx = AddSymbol( SyName, Dim + 1, SyTyp, SySubTyp );
+         if( SyIndx < 0 )
+            continue;
+      }
+      // TODO: Fix this (replaces TGAMSSymbol(Objects[syIndx]))
+      SyObj = new TGAMSSymbol<T>();
+
+      if( SyObj.SyData == nullptr )
+         continue;
+
+      if( SyObj.SySkip )
+         continue;
+
+      // 64 bit
+      XCount = static_cast<int64_t>( DummyCount );
+      Size = XCount * SyObj.SyDim;
+      if( SyTyp == dt_var || SyTyp == dt_equ )
+         RecLen = 4;
+      else
+         RecLen = 1;
+
+      Size = Size * RecLen;
+
+      if( Pass == TProcessPass::RpScan || Pass == TProcessPass::RpDoAll )
+      {
+         SyObj.SySize = SyObj.SySize + Size;
+         SyObj.SyMemory = SyObj.SyMemory + XCount * ( SyObj.SyDim * sizeof( int ) + RecLen * sizeof( double ) );
+         if( CheckError( SyObj.SyData->GetCount + XCount <= std::numeric_limits<int>::max(), "Element count for symbol > maxint" ) )
+         {
+            SyObj.SySkip = true;
+            delete SyObj.SyData;
+            continue;
+         }
+#if defined( OLD_MEMORY_CHECK )
+         if( CheckError( SyObj.SyMemory <= std::numeric_limits<int>::max(), "Symbol is too large" ) )
+         {
+            SyObj.SySkip = true;
+            delete SyObj.SyData;
+            continue;
+         }
+#endif
+      }
+
+      if( Pass == TProcessPass::RpScan )
+         continue;
+
+      if( Pass == TProcessPass::RpSmall && SyObj.SySize >= SizeCutOff )
+         continue;
+      if( Pass == TProcessPass::RpBig && SyObj.SySize < SizeCutOff )
+         continue;
+
+      if( CheckError( Dim + 1 == SyObj.SyDim, "Dimensions do not match" ) )
+         continue;
+      if( CheckError( SyTyp == SyObj.SyTyp, "Types do not match" ) )
+         continue;
+      if( CheckError( SySubTyp == SyObj.SySubTyp, "Var/Equ subtypes do not match" ) )
+         continue;
+      if( SyObj.SyExplTxt.empty() )
+         SyObj.SyExplTxt = SyText;
+      else if( !SyText.empty() )
+         CheckError( SyObj.syExplTxt == SyText, "Explanatory text is different" );
+      IndxI[1] = AddUEL( FileId );
+      gdxDataReadStrStart( PGX, N, &NrRecs );
+
+      while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
+      {
+         if( Dim > 0 )
+            for( D = FDim; D <= Dim; D++ )
+               IndxI[D + 1] = AddUEL( IndxS[D] );
+         if( SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
+         {
+            gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
+            Vals[GMS_VAL_LEVEL] = StrPool->Add( Txt );
+         }
+         SyObj.SyData->AddRecord( IndxI, Vals );
+      }
+      gdxDataReadDone( PGX );
+   }
+
+   KeepNewAcronyms( PGX );
+
+   gdxClose( PGX );
+   gdxFree( &PGX );
+   gdxUELRegisterDone( PGXMerge );
 }
 
 template<typename T>
