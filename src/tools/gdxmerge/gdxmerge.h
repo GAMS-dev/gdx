@@ -36,7 +36,7 @@ private:
    int SyDim, SySubTyp;
    gdxSyType SyTyp;
    gdlib::gmsdata::TTblGamsData<T> *SyData;
-   std::string SyExplTxt;
+   library::short_string SyExplTxt;
    int64_t SySize {}, SyMemory {};
    bool SySkip;
 
