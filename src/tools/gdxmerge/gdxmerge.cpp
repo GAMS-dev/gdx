@@ -295,7 +295,7 @@ void TSymbolList<T>::WriteNameList()
    GDXSTRINDEXPTRS_INIT( AIndex, AIndexPtrs );
    gdxValues_t AVals {};
 
-   // find unique name for the merged set
+   // Find unique name for the merged set
    N = 1;
    while( true )
    {
