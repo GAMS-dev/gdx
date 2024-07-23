@@ -84,7 +84,8 @@ template<typename T>
 TSymbolList<T>::TSymbolList() : gdlib::gmsobj::TXHashedStringList<T>()
 {
    StrPool = new gdlib::gmsobj::TXStrPool<T>();
-   StrPool->Add( "" );
+   const std::string empty_string;
+   StrPool->Add( empty_string.data(), empty_string.length() );
    FileList = new TFileList<T>;
    library::short_string Msg;
    gdxCreate( &PGXMerge, Msg.data(), Msg.length() );
