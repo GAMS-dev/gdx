@@ -231,7 +231,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
          SyTyp = dt_set;
          SySubTyp = 0;
       }
-      // TODO: Check if FindAcronym is correct (replaces IndexOf(syName))
+      // TODO: Check if this is correct (replaces IndexOf(syName))
       SyIndx = FindAcronym( SyName );
       if( SyIndx < 0 )
       {
@@ -239,8 +239,8 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
          if( SyIndx < 0 )
             continue;
       }
-      // TODO: Fix this (replaces TGAMSSymbol(Objects[syIndx]))
-      SyObj = new TGAMSSymbol<T>();
+      // TODO: Check if this is correct (replaces TGAMSSymbol(Objects[syIndx]))
+      SyObj = new TGAMSSymbol<T>( gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyIndx ) );
 
       if( SyObj.SyData == nullptr )
          continue;
