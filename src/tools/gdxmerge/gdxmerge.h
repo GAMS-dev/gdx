@@ -54,7 +54,6 @@ private:
 
 public:
    TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
-   ~TGDXFileEntry();
 };
 
 template<typename T>

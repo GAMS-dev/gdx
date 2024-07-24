@@ -86,12 +86,6 @@ TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &A
    // inherited Create;
 }
 
-// TODO: Remove?
-TGDXFileEntry::~TGDXFileEntry()
-{
-   // inherited Destroy;
-}
-
 template<typename T>
 void gdxmerge::TFileList<T>::AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
 {
