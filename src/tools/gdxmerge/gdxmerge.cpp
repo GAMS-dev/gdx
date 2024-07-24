@@ -100,6 +100,37 @@ gdxmerge::TFileList<T>::~TFileList()
 {}
 
 template<typename T>
+void gdxmerge::TFileList<T>::AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
+{
+   auto *GDXFileEntry = new TGDXFileEntry( AFileName, AFileId, AFileInfo );
+   *this->Insert( GDXFileEntry );
+}
+
+template<typename T>
+void gdxmerge::TFileList<T>::FreeItem( int Index )
+{
+   *this->Delete( Index );
+}
+
+template<typename T>
+std::string gdxmerge::TFileList<T>::FileId( int Index )
+{
+   return *this->FileId( Index );
+}
+
+template<typename T>
+std::string gdxmerge::TFileList<T>::FileInfo( int Index )
+{
+   return *this->FileInfo( Index );
+}
+
+template<typename T>
+std::string gdxmerge::TFileList<T>::FileName( int Index )
+{
+   return *this->FileName( Index );
+}
+
+template<typename T>
 TSymbolList<T>::TSymbolList()
     : gdlib::gmsobj::TXHashedStringList<T>()
 {
