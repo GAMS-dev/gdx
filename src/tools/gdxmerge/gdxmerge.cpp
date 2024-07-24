@@ -88,31 +88,31 @@ template<typename T>
 void gdxmerge::TFileList<T>::AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
 {
    auto *GDXFileEntry = new TGDXFileEntry( AFileName, AFileId, AFileInfo );
-   *this->Insert( GDXFileEntry );
+   TFileList<T>::Insert( GDXFileEntry );
 }
 
 template<typename T>
 void gdxmerge::TFileList<T>::FreeItem( const int Index )
 {
-   *this->Delete( Index );
+   TFileList<T>::Delete( Index );
 }
 
 template<typename T>
 std::string gdxmerge::TFileList<T>::FileId( const int Index )
 {
-   return *this->FileId( Index );
+   return TFileList<T>::FileId( Index );
 }
 
 template<typename T>
 std::string gdxmerge::TFileList<T>::FileInfo( const int Index )
 {
-   return *this->FileInfo( Index );
+   return TFileList<T>::FileInfo( Index );
 }
 
 template<typename T>
 std::string gdxmerge::TFileList<T>::FileName( const int Index )
 {
-   return *this->FileName( Index );
+   return TFileList<T>::FileName( Index );
 }
 
 template<typename T>
