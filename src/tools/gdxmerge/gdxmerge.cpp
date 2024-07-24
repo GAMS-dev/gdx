@@ -92,25 +92,25 @@ void gdxmerge::TFileList<T>::AddFile( const std::string &AFileName, const std::s
 }
 
 template<typename T>
-void gdxmerge::TFileList<T>::FreeItem( int Index )
+void gdxmerge::TFileList<T>::FreeItem( const int Index )
 {
    *this->Delete( Index );
 }
 
 template<typename T>
-std::string gdxmerge::TFileList<T>::FileId( int Index )
+std::string gdxmerge::TFileList<T>::FileId( const int Index )
 {
    return *this->FileId( Index );
 }
 
 template<typename T>
-std::string gdxmerge::TFileList<T>::FileInfo( int Index )
+std::string gdxmerge::TFileList<T>::FileInfo( const int Index )
 {
    return *this->FileInfo( Index );
 }
 
 template<typename T>
-std::string gdxmerge::TFileList<T>::FileName( int Index )
+std::string gdxmerge::TFileList<T>::FileName( const int Index )
 {
    return *this->FileName( Index );
 }
@@ -165,7 +165,7 @@ int TSymbolList<T>::AddSymbol( const std::string &AName, const int ADim, const g
 }
 
 template<typename T>
-void TSymbolList<T>::AddPGXFile( int FNr, TProcessPass Pass )
+void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
 {
    bool FrstError;
    library::short_string SyName, FileName;
