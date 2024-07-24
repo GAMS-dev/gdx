@@ -399,6 +399,24 @@ int TSymbolList<T>::FindAcronym( const library::short_string &Id )
    return {};
 }
 
+void Usage()
+{
+   std::cout << "gdxmerge: Merge GDX files" << '\n'
+             // TODO: Fix this function call
+             //  << gdlGetAuditLine() << '\n'
+             << '\n'
+             << "Usage:" << '\n'
+             << "   gdxmerge filepat1 filepat2 ... filepatn" << '\n'
+             << "     Optional parameters:" << '\n'
+             << "          id=ident1, ident2: Merge specified IDs only" << '\n'
+             << "          exclude=ident1, ident2: Do not merge specified IDs" << '\n'
+             << "          big=<integer>    : Size indicator for a large symbol" << '\n'
+             << "          output=filename  : Output file; merged.gdx by default" << '\n'
+             << "          strict=true/false: Terminate on failure, e.g. missing input files" << '\n'
+             << "Filepat represents a filename or a file pattern." << '\n'
+             << "The form: @filename will process parameters from that file" << std::endl;
+}
+
 int main( const int argc, const char *argv[] )
 {
    return {};

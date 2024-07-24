@@ -94,6 +94,8 @@ public:
    int FindAcronym( const library::short_string &Id );
 };
 
+void Usage();
+
 int main( int argc, const char *argv[] );
 
 }// namespace gdxmerge
