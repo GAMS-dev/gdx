@@ -82,9 +82,7 @@ TGAMSSymbol<T>::~TGAMSSymbol()
 
 TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
     : FFileName( AFileName ), FFileId( AFileId ), FFileInfo( AFileInfo )
-{
-   // inherited Create;
-}
+{}
 
 template<typename T>
 void gdxmerge::TFileList<T>::AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
