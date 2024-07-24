@@ -456,6 +456,25 @@ void Usage()
 
 int main( const int argc, const char *argv[] )
 {
+   std::string Msg;
+   int N, ErrNr;
+
+   // TODO: Remove?
+   // gdlSetSystemName( "GDXMERGE" );
+   // if( std::strcmp( argv[1], "AUDIT" ) == 0 )
+   // {
+   //    std::cout << gdlGetAuditLine() << std::endl;
+   //    return 0;
+   // }
+
+   if( argc == 0 || ( argc == 1 && std::strcmp( argv[1], "/?" ) == 0 ) )
+   {
+      Usage();
+      return 0;
+   }
+
+   // TODO
+
    return {};
 }
 
