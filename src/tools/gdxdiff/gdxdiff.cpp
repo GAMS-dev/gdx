@@ -30,6 +30,7 @@
 #include <iostream>
 #include <cmath>
 #include <limits>
+#include <cstring>
 
 #include "gdxdiff.h"
 #include "../library/common.h"
@@ -758,7 +759,7 @@ int main( const int argc, const char *argv[] )
 
    // TODO: Remove?
    // gdlSetSystemName( 'GDXDIFF' );
-   // if( argv[1] == "AUDIT" )
+   // if( std::strcmp( argv[1], "AUDIT" ) == 0 )
    // {
    //    std::cout << gdlGetAuditLine() << std::endl;
    //    return 0;
