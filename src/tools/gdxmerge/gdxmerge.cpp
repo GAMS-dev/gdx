@@ -67,7 +67,8 @@ std::string FormatDateTime( const std::tm &dt )
 }
 
 template<typename T>
-TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp ) : SyDim( ADim ), SyTyp( AType ), SySubTyp( ASubTyp )
+TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
+    : SyDim( ADim ), SyTyp( AType ), SySubTyp( ASubTyp )
 {
    SyData = new gdlib::gmsdata::TTblGamsData<T>( ADim, sizeof( T ) );
    SySkip = false;
@@ -80,7 +81,8 @@ TGAMSSymbol<T>::~TGAMSSymbol()
 }
 
 template<typename T>
-TSymbolList<T>::TSymbolList() : gdlib::gmsobj::TXHashedStringList<T>()
+TSymbolList<T>::TSymbolList()
+    : gdlib::gmsobj::TXHashedStringList<T>()
 {
    StrPool = new gdlib::gmsobj::TXStrPool<T>();
    const std::string empty_string;
