@@ -1144,7 +1144,7 @@ void WriteSetText()
 void Usage()
 {
    std::cout << "gdxdump: Write GDX file in ASCII" << '\n'
-             // TODO: Replace blank line with function output
+             // TODO: Fix this function call
              // << gdlGetAuditLine() << '\n'
              << '\n'
              << "Usage:" << '\n'

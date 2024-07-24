@@ -716,7 +716,7 @@ bool GetAsDouble( const library::short_string &S, double &V )
 void Usage()
 {
    std::cout << "gdxdiff: GDX file differ" << '\n'
-             // TODO: Replace blank line with function output
+             // TODO: Fix this function call
              // << gdlGetAuditLine() << '\n'
              << '\n'
              << "Usage: " << '\n'
