@@ -80,6 +80,25 @@ TGAMSSymbol<T>::~TGAMSSymbol()
    delete SyData;
 }
 
+TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
+    : FFileName( AFileName ), FFileId( AFileId ), FFileInfo( AFileInfo )
+{
+   // inherited Create;
+}
+
+TGDXFileEntry::~TGDXFileEntry()
+{
+   // inherited Destroy;
+}
+
+template<typename T>
+inline gdxmerge::TFileList<T>::TFileList()
+{}
+
+template<typename T>
+gdxmerge::TFileList<T>::~TFileList()
+{}
+
 template<typename T>
 TSymbolList<T>::TSymbolList()
     : gdlib::gmsobj::TXHashedStringList<T>()
