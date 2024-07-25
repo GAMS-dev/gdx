@@ -521,7 +521,7 @@ int main( const int argc, const char *argv[] )
    }
 
    // TODO: Fix list item type
-   using SyListItemType = TGAMSSymbol<nullptr_t>;
+   using SyListItemType = TGAMSSymbol<std::nullptr_t>;
    SyList<SyListItemType> = new TSymbolList<SyListItemType>();
 
    if( !GetParameters() )
