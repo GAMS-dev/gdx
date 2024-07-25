@@ -47,25 +47,6 @@ static std::vector<std::string> FilePatterns;
 static gdxHandle_t PGXMerge { nullptr };
 static unsigned int InputFilesRead;
 
-std::string FormatDateTime( const std::tm &dt )
-{
-   auto int2 = []( const int n ) -> std::string {
-      std::ostringstream oss;
-      oss << std::setw( 2 ) << std::setfill( '0' ) << n;
-      return oss.str();
-   };
-
-   const int year { dt.tm_year + 1900 },
-           month { dt.tm_mon + 1 },
-           day { dt.tm_mday },
-           hour { dt.tm_hour },
-           min { dt.tm_min },
-           sec { dt.tm_sec };
-
-   return int2( year ) + '/' + int2( month ) + '/' + int2( day ) + ' ' +
-          int2( hour ) + ':' + int2( min ) + ':' + int2( sec );
-}
-
 template<typename T>
 TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
     : SyDim( ADim ), SyTyp( AType ), SySubTyp( ASubTyp )
@@ -434,6 +415,25 @@ int TSymbolList<T>::FindAcronym( const library::short_string &Id )
          return N;
    }
    return {};
+}
+
+std::string FormatDateTime( const std::tm &dt )
+{
+   auto int2 = []( const int n ) -> std::string {
+      std::ostringstream oss;
+      oss << std::setw( 2 ) << std::setfill( '0' ) << n;
+      return oss.str();
+   };
+
+   const int year { dt.tm_year + 1900 },
+           month { dt.tm_mon + 1 },
+           day { dt.tm_mday },
+           hour { dt.tm_hour },
+           min { dt.tm_min },
+           sec { dt.tm_sec };
+
+   return int2( year ) + '/' + int2( month ) + '/' + int2( day ) + ' ' +
+          int2( hour ) + ':' + int2( min ) + ':' + int2( sec );
 }
 
 void Usage()

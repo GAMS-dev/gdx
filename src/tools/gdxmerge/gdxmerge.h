@@ -18,8 +18,6 @@
 namespace gdxmerge
 {
 
-std::string FormatDateTime( const std::tm &dt );
-
 enum class TProcessPass
 {
    RpDoAll,
@@ -89,6 +87,8 @@ public:
    void ShareAcronyms( const gdxHandle_t &PGX );
    int FindAcronym( const library::short_string &Id );
 };
+
+std::string FormatDateTime( const std::tm &dt );
 
 void Usage();
 
