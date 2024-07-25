@@ -610,8 +610,21 @@ int main( const int argc, const char *argv[] )
       std::cout << "Number of errors reported = " << SyList->GetFErrorCount() << std::endl;
 
    SyList->Clear();
+   // UnloadGDXLibrary();
 
-   // TODO
+   if( InputFilesRead == 0 )
+   {
+      if( StrictMode )
+      {
+         std::cerr << "*** Error  : No valid input files specified (strict mode)" << std::endl;
+         return 1;
+      }
+      else
+         std::cout << "No valid input files specified" << std::endl;
+   }
+   else
+      std::cout << "Merge complete, " << InputFilesRead << " input files merged" << std::endl;
+
    return {};
 }
 
