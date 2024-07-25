@@ -517,7 +517,7 @@ int main( const int argc, const char *argv[] )
    //    return 0;
    // }
 
-   if( argc == 0 || ( argc == 1 && std::strcmp( argv[1], "/?" ) == 0 ) )
+   if( argc == 1 || ( argc == 2 && std::strcmp( argv[1], "/?" ) == 0 ) )
    {
       Usage();
       return 0;
