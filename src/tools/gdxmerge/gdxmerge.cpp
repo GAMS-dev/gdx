@@ -539,6 +539,13 @@ int main( const int argc, const char *argv[] )
          rtl::sysutils_p3::DeleteFileFromDisk( OutFile );
    }
 
+   if( !SyList<TGAMSSymbol<std::string>>->IsIncludeListEmpty() &&
+       !SyList<TGAMSSymbol<std::string>>->IsExcludeListEmpty() )
+   {
+      std::cerr << "**** The options \"ID\" and \"Exclude\" are mutual exclusive" << std::endl;
+      return 1;
+   }
+
    // TODO
    return {};
 }
