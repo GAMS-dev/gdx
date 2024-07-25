@@ -79,6 +79,12 @@ void gdxmerge::TFileList<T>::FreeItem( const int Index )
 }
 
 template<typename T>
+std::string gdxmerge::TFileList<T>::FileName( const int Index )
+{
+   return TFileList<T>::FileName( Index );
+}
+
+template<typename T>
 std::string gdxmerge::TFileList<T>::FileId( const int Index )
 {
    return TFileList<T>::FileId( Index );
@@ -88,12 +94,6 @@ template<typename T>
 std::string gdxmerge::TFileList<T>::FileInfo( const int Index )
 {
    return TFileList<T>::FileInfo( Index );
-}
-
-template<typename T>
-std::string gdxmerge::TFileList<T>::FileName( const int Index )
-{
-   return TFileList<T>::FileName( Index );
 }
 
 template<typename T>

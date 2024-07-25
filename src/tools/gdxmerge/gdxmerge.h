@@ -60,9 +60,9 @@ class TFileList : public gdlib::gmsobj::TXList<T>
 public:
    void AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
    void FreeItem( int Index );// No-op?
+   std::string FileName( int Index );
    std::string FileId( int Index );
    std::string FileInfo( int Index );
-   std::string FileName( int Index );
 };
 
 template<typename T>
