@@ -301,6 +301,23 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
 }
 
 template<typename T>
+bool TSymbolList<T>::CollectBigOne( const int SyNr )
+{
+   return {};
+}
+
+template<typename T>
+bool TSymbolList<T>::FindGDXFiles( const std::string &Path )
+{
+   return {};
+}
+
+template<typename T>
+void TSymbolList<T>::WritePGXFile( const int SyNr, const TProcessPass Pass )
+{
+}
+
+template<typename T>
 void TSymbolList<T>::WriteNameList()
 {
    const std::string BASE_NAME { "Merged_set_" };

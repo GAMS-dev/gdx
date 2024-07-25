@@ -82,6 +82,9 @@ public:
    static int AddUEL( const std::string &S );
    int AddSymbol( const std::string &AName, int ADim, gdxSyType AType, int ASubTyp );
    void AddPGXFile( int FNr, TProcessPass Pass );
+   bool CollectBigOne( int SyNr );
+   bool FindGDXFiles( const std::string &Path );
+   void WritePGXFile( int SyNr, TProcessPass Pass );
    void WriteNameList();
    void KeepNewAcronyms( const gdxHandle_t &PGX );
    void ShareAcronyms( const gdxHandle_t &PGX );
