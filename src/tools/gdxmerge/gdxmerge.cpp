@@ -118,7 +118,7 @@ TSymbolList<T>::~TSymbolList()
 }
 
 template<typename T>
-void TSymbolList<T>::OpenOutput( const std::string &AFileName, int &ErrNr )
+void TSymbolList<T>::OpenOutput( const library::short_string &AFileName, int &ErrNr )
 {
    gdxOpenWrite( PGXMerge, AFileName.data(), "gdxmerge", &ErrNr );
    gdxStoreDomainSetsSet( PGXMerge, false );

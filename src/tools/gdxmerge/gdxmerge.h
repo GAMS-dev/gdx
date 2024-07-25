@@ -78,7 +78,7 @@ public:
    TSymbolList();
    ~TSymbolList();
 
-   static void OpenOutput( const std::string &AFileName, int &ErrNr );
+   static void OpenOutput( const library::short_string &AFileName, int &ErrNr );
    static int AddUEL( const std::string &S );
    int AddSymbol( const std::string &AName, int ADim, gdxSyType AType, int ASubTyp );
    void AddPGXFile( int FNr, TProcessPass Pass );
