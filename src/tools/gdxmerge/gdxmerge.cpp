@@ -68,7 +68,7 @@ TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &A
 template<typename T>
 void TFileList<T>::AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
 {
-   TFileList<T>::Insert( new TGDXFileEntry( AFileName, AFileId, AFileInfo ) );
+   TFileList<T>::Add( new TGDXFileEntry( AFileName, AFileId, AFileInfo ) );
 }
 
 template<typename T>
