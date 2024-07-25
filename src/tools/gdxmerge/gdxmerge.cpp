@@ -113,6 +113,7 @@ TSymbolList<T>::TSymbolList()
 template<typename T>
 TSymbolList<T>::~TSymbolList()
 {
+   gdlib::gmsobj::TXHashedStringList<T>::ClearHashList();
    delete StrPool;
    delete FileList;
 }
