@@ -156,10 +156,10 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
          FErrorCount++;
          if( FrstError )
          {
-            std::cout << "\n**** Error in file " << FileName << std::endl;
+            std::cerr << "\n**** Error in file " << FileName << std::endl;
             FrstError = false;
          }
-         std::cout << "     " << Msg << ": " << SyName << std::endl;
+         std::cerr << "     " << Msg << ": " << SyName << std::endl;
       }
       return Result;
    };
@@ -186,7 +186,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
    if( ErrNr != 0 )
    {
       gdxErrorStr( nullptr, ErrNr, ErrMsg.data() );
-      std::cout << "\nError reading file, message: " << ErrMsg << std::endl;
+      std::cerr << "\nError reading file, message: " << ErrMsg << std::endl;
       return;
    }
    InputFilesRead++;
