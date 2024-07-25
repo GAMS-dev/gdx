@@ -102,7 +102,7 @@ TSymbolList<T>::TSymbolList()
    StrPool = new gdlib::gmsobj::TXStrPool<T>();
    const std::string empty_string;
    StrPool->Add( empty_string.data(), empty_string.length() );
-   FileList = new TFileList<T>;
+   FileList = new TFileList<T>();
    library::short_string Msg;
    gdxCreate( &PGXMerge, Msg.data(), Msg.length() );
 }
