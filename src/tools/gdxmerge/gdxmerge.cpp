@@ -144,7 +144,7 @@ int TSymbolList<T>::AddSymbol( const std::string &AName, const int ADim, const g
        ( !ExcludeList.empty() && is_in_list( ExcludeList, AName ) ) )
       return -1;
 
-   return StrPool->AddObject( AName.data(), AName.length(), new TGAMSSymbol<T>( ADim, AType, ASubTyp ) );
+   return gdlib::gmsobj::TXHashedStringList<T>::AddObject( AName.data(), AName.length(), new TGAMSSymbol<double>( ADim, AType, ASubTyp ) );
 }
 
 template<typename T>
