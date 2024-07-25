@@ -33,6 +33,7 @@
 
 #include "gdxmerge.h"
 #include "../../gdlib/strutilx.h"
+#include "../../rtl/sysutils_p3.h"
 
 // TODO: Disable at some point?
 #define OLD_MEMORY_CHECK
@@ -46,6 +47,8 @@ static std::string OutFile;
 static std::vector<std::string> FilePatterns;
 static gdxHandle_t PGXMerge { nullptr };
 static unsigned int InputFilesRead;
+template<typename T>
+static TSymbolList<T> *SyList { nullptr };
 
 template<typename T>
 TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
@@ -480,7 +483,7 @@ void Usage()
 
 int main( const int argc, const char *argv[] )
 {
-   std::string Msg;
+   library::short_string Msg;
    int N, ErrNr;
 
    // TODO: Remove?
@@ -497,8 +500,34 @@ int main( const int argc, const char *argv[] )
       return 0;
    }
 
-   // TODO
+   if( !gdxGetReady( Msg.data(), Msg.length() ) )
+   {
+      std::cerr << "*** Error: Unable to load gdx library, message:\n"
+                << Msg << std::endl;
+      return 1;
+   }
 
+   // TODO: Fix type
+   SyList<TGAMSSymbol<std::string>> = new TSymbolList<TGAMSSymbol<std::string>>();
+
+   if( !GetParameters() )
+   {
+      std::cerr << "*** Error: Parameter error" << std::endl;
+      return 1;
+   }
+
+   if( rtl::sysutils_p3::FileExists( OutFile ) )
+   {
+      if( StrictMode )
+      {
+         std::cerr << "*** Error  : Output file \"" << OutFile << "\" already exists (strict mode)" << std::endl;
+         return 1;
+      }
+      else
+         rtl::sysutils_p3::DeleteFileFromDisk( OutFile );
+   }
+
+   // TODO
    return {};
 }
 
