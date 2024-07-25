@@ -439,6 +439,12 @@ int TSymbolList<T>::FindAcronym( const library::short_string &Id )
 }
 
 template<typename T>
+int TSymbolList<T>::GetFileListSize() const
+{
+   return FileList->size();
+}
+
+template<typename T>
 bool TSymbolList<T>::IsIncludeListEmpty() const
 {
    return IncludeList.empty();
