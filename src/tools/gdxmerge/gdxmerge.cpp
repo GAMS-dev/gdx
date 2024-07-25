@@ -303,18 +303,21 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
 template<typename T>
 bool TSymbolList<T>::CollectBigOne( const int SyNr )
 {
+   // TODO
    return {};
 }
 
 template<typename T>
 bool TSymbolList<T>::FindGDXFiles( const std::string &Path )
 {
+   // TODO
    return {};
 }
 
 template<typename T>
 void TSymbolList<T>::WritePGXFile( const int SyNr, const TProcessPass Pass )
 {
+   // TODO
 }
 
 template<typename T>
@@ -453,6 +456,7 @@ std::string FormatDateTime( const std::tm &dt )
 
 bool GetParameters()
 {
+   // TODO
    return {};
 }
 
