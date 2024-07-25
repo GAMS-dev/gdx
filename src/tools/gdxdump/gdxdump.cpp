@@ -46,19 +46,19 @@ namespace gdxdump
 {
 
 // TODO: Remove these three arrays when they are no longer used
-const static std::array<std::string, 5> valsTypTxt { "L", "M", "LO", "UP", "SCALE" };
-const static std::array<std::string, 10> varsTypTxt { "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };
-const static std::array<std::string, 7> svTxt { "Undf", "NA", "+Inf", "-Inf", "Eps", "0", "AcroN" };
+const std::array<std::string, 5> valsTypTxt { "L", "M", "LO", "UP", "SCALE" };
+const std::array<std::string, 10> varsTypTxt { "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };
+const std::array<std::string, 7> svTxt { "Undf", "NA", "+Inf", "-Inf", "Eps", "0", "AcroN" };
 
-static std::ostream &fo { std::cout };
-static std::ofstream OutputFile;
-static gdxHandle_t PGX { nullptr };
-static char Delim, DecimalSep;
-static bool ShowHdr, ShowData, CDim, FilterDef, bEpsOut, bNaOut, bPinfOut, bMinfOut, bUndfOut, bZeroOut, bHeader, bFullEVRec, bCSVSetText;
-static TOutFormat OutFormat;
-static TDblFormat dblFormat;
-static int LineCount;
-static std::string EpsOut, NaOut, PinfOut, MinfOut, UndfOut, ZeroOut, Header;
+std::ostream &fo { std::cout };
+std::ofstream OutputFile;
+gdxHandle_t PGX { nullptr };
+char Delim, DecimalSep;
+bool ShowHdr, ShowData, CDim, FilterDef, bEpsOut, bNaOut, bPinfOut, bMinfOut, bUndfOut, bZeroOut, bHeader, bFullEVRec, bCSVSetText;
+TOutFormat OutFormat;
+TDblFormat dblFormat;
+int LineCount;
+std::string EpsOut, NaOut, PinfOut, MinfOut, UndfOut, ZeroOut, Header;
 
 char QQ( const std::string &s )
 {
@@ -193,11 +193,11 @@ char hexDigit( const uint8_t b )
       return static_cast<char>( 'a' + b - 10 );
 }
 
-static int64_t signMask;
-static int64_t expoMask;
-static int64_t mantMask;
-static TI64Rec t64 {};
-static bool bigEndian;
+int64_t signMask;
+int64_t expoMask;
+int64_t mantMask;
+TI64Rec t64 {};
+bool bigEndian;
 
 void initDblUtilValues()
 {
@@ -351,7 +351,7 @@ void WrVal( const double V )
    }
 }
 
-static int BadUELs = 0;
+int BadUELs {};
 
 std::string GetUELAsString( const int N )
 {
@@ -1181,9 +1181,9 @@ void Usage()
              << "   Header=<string>       New header for CSV output format" << std::endl;
 }
 
-static int ParamCount, ParamNr;
-static const char **ParamStr;
-static std::string ParamHold;
+int ParamCount, ParamNr;
+const char **ParamStr;
+std::string ParamHold;
 
 std::string NextParam()
 {

@@ -41,14 +41,14 @@
 namespace gdxmerge
 {
 
-static bool DoBigSymbols, StrictMode;
-static int64_t SizeCutOff;
-static library::short_string OutFile;
-static std::vector<std::string> FilePatterns;
-static gdxHandle_t PGXMerge { nullptr };
-static unsigned int InputFilesRead;
+bool DoBigSymbols, StrictMode;
+int64_t SizeCutOff;
+library::short_string OutFile;
+std::vector<std::string> FilePatterns;
+gdxHandle_t PGXMerge { nullptr };
+unsigned int InputFilesRead;
 template<typename T>
-static TSymbolList<T> *SyList { nullptr };
+TSymbolList<T> *SyList { nullptr };
 
 template<typename T>
 TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
