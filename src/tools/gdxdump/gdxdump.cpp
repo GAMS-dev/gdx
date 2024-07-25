@@ -1144,7 +1144,7 @@ void WriteSetText()
 void Usage()
 {
    std::cout << "gdxdump: Write GDX file in ASCII" << '\n'
-             // TODO: Replace blank line with function output
+             // TODO: Fix this function call
              // << gdlGetAuditLine() << '\n'
              << '\n'
              << "Usage:" << '\n'
@@ -1255,7 +1255,7 @@ int main( const int argc, const char *argv[] )
 
    // TODO: Remove?
    // gdlSetSystemName( 'GDXDUMP' );
-   // if( ParamStr[1] == "AUDIT" )
+   // if( std::strcmp( ParamStr[1], "AUDIT" ) == 0 )
    // {
    //    std::cout << gdlGetAuditLine() << std::endl;
    //    return 0;

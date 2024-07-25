@@ -30,6 +30,7 @@
 #include <iostream>
 #include <cmath>
 #include <limits>
+#include <cstring>
 
 #include "gdxdiff.h"
 #include "../library/common.h"
@@ -50,8 +51,6 @@ namespace gdxdiff
 {
 
 using tvarvaltype = unsigned int;
-using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
-using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
 
 static library::short_string DiffTmpName;
 static gdxHandle_t PGX1 { nullptr }, PGX2 { nullptr }, PGXDIF { nullptr };
@@ -190,7 +189,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    library::short_string Id;
    bool SymbOpen {};
    TStatusCode Status;
-   TgdxValues DefValues;
+   gdxValues_t DefValues;
 
    auto CheckSymbOpen = [&]() -> bool {
       registerDiffUELs();
@@ -222,21 +221,21 @@ void CompareSy( const int Sy1, const int Sy2 )
       }
    };
 
-   auto WriteDiff = [&]( const std::string &Act, const std::string &FldName, const TgdxUELIndex &Keys, const TgdxValues &Vals ) -> void {
+   auto WriteDiff = [&]( const std::string &Act, const std::string &FldName, const gdxUelIndex_t &Keys, const gdxValues_t &Vals ) -> void {
       gdxStrIndex_t StrKeys;
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
-      TgdxValues Vals2;
+      gdxValues_t Vals2;
 
       registerDiffUELs();
       for( int D {}; D < Dim; D++ )
-         strcpy( StrKeys[D], UELTable->GetString( Keys[D] ) );
+         strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
       if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
-         strcpy( StrKeys[Dim + 1], Act.data() );
+         strcpy( StrKeysPtrs[Dim + 1], Act.data() );
       else
       {
-         strcpy( StrKeys[Dim + 1], FldName.data() );
-         strcpy( StrKeys[Dim + 2], Act.data() );
+         strcpy( StrKeysPtrs[Dim + 1], FldName.data() );
+         strcpy( StrKeysPtrs[Dim + 2], Act.data() );
       }
 
 #if VERBOSE >= 3
@@ -252,30 +251,30 @@ void CompareSy( const int Sy1, const int Sy2 )
       if( FldOnlyVar == FldOnly::fld_yes && ( ST == dt_var || ST == dt_equ ) )
       {
          Vals2[GMS_VAL_LEVEL] = Vals[FldOnlyFld];
-         gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals2.data() );
+         gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals2 );
       }
       else
-         gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals.data() );
+         gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals );
    };
 
-   auto WriteSetDiff = [&]( const std::string &Act, const TgdxUELIndex &Keys, const library::short_string &S ) -> void {
+   auto WriteSetDiff = [&]( const std::string &Act, const gdxUelIndex_t &Keys, const library::short_string &S ) -> void {
       gdxStrIndex_t StrKeys;
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
-      TgdxValues Vals;
+      gdxValues_t Vals;
       int iNode;
 
       registerDiffUELs();
       for( int D {}; D < Dim; D++ )
-         strcpy( StrKeys[D], UELTable->GetString( Keys[D] ) );
-      strcpy( StrKeys[Dim + 1], Act.data() );
+         strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
+      strcpy( StrKeysPtrs[Dim + 1], Act.data() );
       gdxAddSetText( PGXDIF, S.data(), &iNode );
       Vals[GMS_VAL_LEVEL] = iNode;
-      gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals.data() );
+      gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals );
    };
 
 #if VERBOSE >= 2
-   auto WriteValues = [&]( const gdxHandle_t &PGX, const TgdxValues &Vals ) -> void {
+   auto WriteValues = [&]( const gdxHandle_t &PGX, const gdxValues_t &Vals ) -> void {
       switch( ST )
       {
          case dt_set:
@@ -294,7 +293,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       }
    };
 
-   auto WriteKeys = [&]( const TgdxUELIndex &Keys ) -> void {
+   auto WriteKeys = [&]( const gdxUelIndex_t &Keys ) -> void {
       registerDiffUELs();
       for( int D {}; D < Dim; D++ )
       {
@@ -357,7 +356,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       return result;
    };
 
-   auto CheckParDifference = [&]( const TgdxUELIndex &Keys, const TgdxValues &V1, const TgdxValues &V2 ) -> bool {
+   auto CheckParDifference = [&]( const gdxUelIndex_t &Keys, const gdxValues_t &V1, const gdxValues_t &V2 ) -> bool {
       bool result { true };
       if( ST == dt_par )
          result = DoublesEqual( V1[GMS_VAL_LEVEL], V2[GMS_VAL_LEVEL] );
@@ -400,7 +399,7 @@ void CompareSy( const int Sy1, const int Sy2 )
                if( DoublesEqual( V1[T], V2[T] ) )
                   continue;
 
-               TgdxValues Vals;
+               gdxValues_t Vals;
                Vals[GMS_VAL_LEVEL] = V1[T];
                WriteDiff( c_dif1, GamsFieldNames[T], Keys, Vals );
                Vals[GMS_VAL_LEVEL] = V2[T];
@@ -411,7 +410,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       return result;
    };
 
-   auto CheckSetDifference = [&]( const TgdxUELIndex &Keys, const int txt1, const int txt2 ) -> bool {
+   auto CheckSetDifference = [&]( const gdxUelIndex_t &Keys, const int txt1, const int txt2 ) -> bool {
       library::short_string S1, S2;
       int iNode;
       if( txt1 == 0 )
@@ -442,7 +441,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       return result;
    };
 
-   auto ShowInsert = [&]( const std::string &Act, const TgdxUELIndex &Keys, TgdxValues &Vals ) -> void {
+   auto ShowInsert = [&]( const std::string &Act, const gdxUelIndex_t &Keys, gdxValues_t &Vals ) -> void {
       // We check if this insert has values we want to ignore
       bool Eq {};
       switch( ST )
@@ -500,7 +499,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          WriteDiff( Act, {}, Keys, Vals );
       else
       {
-         TgdxValues Vals2;
+         gdxValues_t Vals2;
          for( int T {}; T < tvarvaltype_size; T++ )
          {
             if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() )
@@ -514,8 +513,8 @@ void CompareSy( const int Sy1, const int Sy2 )
    int Dim2, AFDim, iST, iST2, R1Last, R2Last, C, acount;
    gdxSyType ST2;
    bool Flg1, Flg2, Eq, DomFlg;
-   TgdxUELIndex Keys1, Keys2;
-   TgdxValues Vals1, Vals2;
+   gdxUelIndex_t Keys1, Keys2;
+   gdxValues_t Vals1, Vals2;
    library::short_string stxt;
    gdxStrIndex_t DomSy1;
    gdxStrIndexPtrs_t DomSy1Ptrs;
@@ -606,21 +605,21 @@ void CompareSy( const int Sy1, const int Sy2 )
    {
       Flg1 = gdxDataReadRawStart( PGX1, Sy1, &R1Last ) != 0;
       if( Flg1 )
-         Flg1 = gdxDataReadRaw( PGX1, Keys1.data(), Vals1.data(), &AFDim ) != 0;
+         Flg1 = gdxDataReadRaw( PGX1, Keys1, Vals1, &AFDim ) != 0;
 
       Flg2 = gdxDataReadRawStart( PGX2, Sy2, &R2Last ) != 0;
       if( Flg2 )
-         Flg2 = gdxDataReadRaw( PGX2, Keys2.data(), Vals2.data(), &AFDim ) != 0;
+         Flg2 = gdxDataReadRaw( PGX2, Keys2, Vals2, &AFDim ) != 0;
    }
    else
    {
       Flg1 = gdxDataReadMapStart( PGX1, Sy1, &R1Last ) != 0;
       if( Flg1 )
-         Flg1 = gdxDataReadMap( PGX1, 0, Keys1.data(), Vals1.data(), &AFDim ) != 0;
+         Flg1 = gdxDataReadMap( PGX1, 0, Keys1, Vals1, &AFDim ) != 0;
 
       Flg2 = gdxDataReadMapStart( PGX2, Sy2, &R2Last ) != 0;
       if( Flg2 )
-         Flg2 = gdxDataReadMap( PGX2, 0, Keys2.data(), Vals2.data(), &AFDim ) != 0;
+         Flg2 = gdxDataReadMap( PGX2, 0, Keys2, Vals2, &AFDim ) != 0;
    }
 
    while( Flg1 && Flg2 )
@@ -652,30 +651,30 @@ void CompareSy( const int Sy1, const int Sy2 )
 
          if( matrixFile )
          {
-            Flg1 = gdxDataReadRaw( PGX1, Keys1.data(), Vals1.data(), &AFDim ) != 0;
-            Flg2 = gdxDataReadRaw( PGX2, Keys2.data(), Vals2.data(), &AFDim ) != 0;
+            Flg1 = gdxDataReadRaw( PGX1, Keys1, Vals1, &AFDim ) != 0;
+            Flg2 = gdxDataReadRaw( PGX2, Keys2, Vals2, &AFDim ) != 0;
          }
          else
          {
-            Flg1 = gdxDataReadMap( PGX1, 0, Keys1.data(), Vals1.data(), &AFDim ) != 0;
-            Flg2 = gdxDataReadMap( PGX2, 0, Keys2.data(), Vals2.data(), &AFDim ) != 0;
+            Flg1 = gdxDataReadMap( PGX1, 0, Keys1, Vals1, &AFDim ) != 0;
+            Flg2 = gdxDataReadMap( PGX2, 0, Keys2, Vals2, &AFDim ) != 0;
          }
       }
       if( C < 0 )
       {
          ShowInsert( c_ins1, Keys1, Vals1 );
          if( matrixFile )
-            Flg1 = gdxDataReadRaw( PGX1, Keys1.data(), Vals1.data(), &AFDim ) != 0;
+            Flg1 = gdxDataReadRaw( PGX1, Keys1, Vals1, &AFDim ) != 0;
          else
-            Flg1 = gdxDataReadMap( PGX1, 0, Keys1.data(), Vals1.data(), &AFDim ) != 0;
+            Flg1 = gdxDataReadMap( PGX1, 0, Keys1, Vals1, &AFDim ) != 0;
       }
       else
       {
          ShowInsert( c_ins2, Keys2, Vals2 );
          if( matrixFile )
-            Flg2 = gdxDataReadRaw( PGX2, Keys2.data(), Vals2.data(), &AFDim ) != 0;
+            Flg2 = gdxDataReadRaw( PGX2, Keys2, Vals2, &AFDim ) != 0;
          else
-            Flg2 = gdxDataReadMap( PGX2, 0, Keys2.data(), Vals2.data(), &AFDim ) != 0;
+            Flg2 = gdxDataReadMap( PGX2, 0, Keys2, Vals2, &AFDim ) != 0;
       }
       // Change in status happens inside ShowInsert
    }
@@ -684,18 +683,18 @@ void CompareSy( const int Sy1, const int Sy2 )
    {
       ShowInsert( c_ins1, Keys1, Vals1 );
       if( matrixFile )
-         Flg1 = gdxDataReadRaw( PGX1, Keys1.data(), Vals1.data(), &AFDim ) != 0;
+         Flg1 = gdxDataReadRaw( PGX1, Keys1, Vals1, &AFDim ) != 0;
       else
-         Flg1 = gdxDataReadMap( PGX1, 0, Keys1.data(), Vals1.data(), &AFDim ) != 0;
+         Flg1 = gdxDataReadMap( PGX1, 0, Keys1, Vals1, &AFDim ) != 0;
    }
 
    while( Flg2 )
    {
       ShowInsert( c_ins2, Keys2, Vals2 );
       if( matrixFile )
-         Flg2 = gdxDataReadRaw( PGX2, Keys2.data(), Vals2.data(), &AFDim ) != 0;
+         Flg2 = gdxDataReadRaw( PGX2, Keys2, Vals2, &AFDim ) != 0;
       else
-         Flg2 = gdxDataReadMap( PGX2, 0, Keys2.data(), Vals2.data(), &AFDim ) != 0;
+         Flg2 = gdxDataReadMap( PGX2, 0, Keys2, Vals2, &AFDim ) != 0;
    }
 
    SymbClose();
@@ -718,7 +717,7 @@ bool GetAsDouble( const library::short_string &S, double &V )
 void Usage()
 {
    std::cout << "gdxdiff: GDX file differ" << '\n'
-             // TODO: Replace blank line with function output
+             // TODO: Fix this function call
              // << gdlGetAuditLine() << '\n'
              << '\n'
              << "Usage: " << '\n'
@@ -756,11 +755,11 @@ int main( const int argc, const char *argv[] )
    gdxStrIndex_t StrKeys;
    gdxStrIndexPtrs_t StrKeysPtrs;
    GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
-   TgdxValues StrVals;
+   gdxValues_t StrVals;
 
    // TODO: Remove?
    // gdlSetSystemName( 'GDXDIFF' );
-   // if( argv[1] == "AUDIT" )
+   // if( std::strcmp( argv[1], "AUDIT" ) == 0 )
    // {
    //    std::cout << gdlGetAuditLine() << std::endl;
    //    return 0;
@@ -1131,15 +1130,15 @@ int main( const int argc, const char *argv[] )
       } while( true );
    }
 
-   gdxDataWriteStrStart( PGXDIF, ID.data(), "", 1, dt_set, 0 );
-   strcpy( StrKeys[1], "File1" );
+   gdxDataWriteStrStart( PGXDIF, ID.data(), {}, 1, dt_set, 0 );
+   strcpy( StrKeysPtrs[1], "File1" );
    gdxAddSetText( PGXDIF, InFile1.data(), &StrNr );
    StrVals[GMS_VAL_LEVEL] = StrNr;
-   gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), StrVals.data() );
-   strcpy( StrKeys[1], "File2" );
+   gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), StrVals );
+   strcpy( StrKeysPtrs[1], "File2" );
    gdxAddSetText( PGXDIF, InFile2.data(), &StrNr );
    StrVals[GMS_VAL_LEVEL] = StrNr;
-   gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), StrVals.data() );
+   gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), StrVals );
    gdxDataWriteDone( PGXDIF );
 
    // Note that input files are not closed at this point; so if we wrote
