@@ -93,6 +93,8 @@ public:
 
 std::string FormatDateTime( const std::tm &dt );
 
+bool GetParameters();
+
 void Usage();
 
 int main( int argc, const char *argv[] );

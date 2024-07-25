@@ -451,6 +451,11 @@ std::string FormatDateTime( const std::tm &dt )
           int2( hour ) + ':' + int2( min ) + ':' + int2( sec );
 }
 
+bool GetParameters()
+{
+   return {};
+}
+
 void Usage()
 {
    std::cout << "gdxmerge: Merge GDX files" << '\n'
