@@ -43,7 +43,7 @@ namespace gdxmerge
 
 static bool DoBigSymbols, StrictMode;
 static int64_t SizeCutOff;
-static std::string OutFile;
+static library::short_string OutFile;
 static std::vector<std::string> FilePatterns;
 static gdxHandle_t PGXMerge { nullptr };
 static unsigned int InputFilesRead;
@@ -530,7 +530,7 @@ int main( const int argc, const char *argv[] )
       return 1;
    }
 
-   if( rtl::sysutils_p3::FileExists( OutFile ) )
+   if( rtl::sysutils_p3::FileExists( OutFile.string() ) )
    {
       if( StrictMode )
       {
@@ -538,7 +538,7 @@ int main( const int argc, const char *argv[] )
          return 1;
       }
       else
-         rtl::sysutils_p3::DeleteFileFromDisk( OutFile );
+         rtl::sysutils_p3::DeleteFileFromDisk( OutFile.string() );
    }
 
    if( !SyList<SyListItemType>->IsIncludeListEmpty() && !SyList<SyListItemType>->IsExcludeListEmpty() )
@@ -547,6 +547,9 @@ int main( const int argc, const char *argv[] )
       std::cerr << "**** The options \"ID\" and \"Exclude\" are mutual exclusive" << std::endl;
       return 1;
    }
+
+   SyList<SyListItemType>->OpenOutput( OutFile, ErrNr );
+   std::cout << "Output file: " << OutFile << std::endl;
 
    // TODO
    return {};
