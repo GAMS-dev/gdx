@@ -90,6 +90,7 @@ public:
    void ShareAcronyms( const gdxHandle_t &PGX );
    int FindAcronym( const library::short_string &Id );
 
+   int GetFErrorCount() const;
    int GetFileListSize() const;
    bool IsIncludeListEmpty() const;
    bool IsExcludeListEmpty() const;
