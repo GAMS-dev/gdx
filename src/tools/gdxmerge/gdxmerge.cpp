@@ -519,8 +519,9 @@ int main( const int argc, const char *argv[] )
       return 1;
    }
 
-   // TODO: Fix type
-   SyList<TGAMSSymbol<std::string>> = new TSymbolList<TGAMSSymbol<std::string>>();
+   // TODO: Fix list item type
+   using SyListItemType = TGAMSSymbol<nullptr_t>;
+   SyList<SyListItemType> = new TSymbolList<SyListItemType>();
 
    if( !GetParameters() )
    {
@@ -539,8 +540,7 @@ int main( const int argc, const char *argv[] )
          rtl::sysutils_p3::DeleteFileFromDisk( OutFile );
    }
 
-   if( !SyList<TGAMSSymbol<std::string>>->IsIncludeListEmpty() &&
-       !SyList<TGAMSSymbol<std::string>>->IsExcludeListEmpty() )
+   if( !SyList<SyListItemType>->IsIncludeListEmpty() && !SyList<SyListItemType>->IsExcludeListEmpty() )
    {
       std::cerr << "**** The options \"ID\" and \"Exclude\" are mutual exclusive" << std::endl;
       return 1;
