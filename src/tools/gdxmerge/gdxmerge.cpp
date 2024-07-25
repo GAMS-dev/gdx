@@ -438,6 +438,18 @@ int TSymbolList<T>::FindAcronym( const library::short_string &Id )
    return {};
 }
 
+template<typename T>
+bool TSymbolList<T>::IsIncludeListEmpty() const
+{
+   return IncludeList.empty();
+}
+
+template<typename T>
+bool TSymbolList<T>::IsExcludeListEmpty() const
+{
+   return ExcludeList.empty();
+}
+
 std::string FormatDateTime( const std::tm &dt )
 {
    auto int2 = []( const int n ) -> std::string {

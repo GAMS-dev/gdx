@@ -89,6 +89,9 @@ public:
    void KeepNewAcronyms( const gdxHandle_t &PGX );
    void ShareAcronyms( const gdxHandle_t &PGX );
    int FindAcronym( const library::short_string &Id );
+
+   bool IsIncludeListEmpty() const;
+   bool IsExcludeListEmpty() const;
 };
 
 std::string FormatDateTime( const std::tm &dt );
