@@ -215,15 +215,13 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
          SyTyp = dt_set;
          SySubTyp = 0;
       }
-      // TODO: Check if this is correct (replaces IndexOf(syName))
-      SyIndx = FindAcronym( SyName );
+      SyIndx = gdlib::gmsobj::TXHashedStringList<T>::IndexOf( SyName );
       if( SyIndx < 0 )
       {
          SyIndx = AddSymbol( SyName, Dim + 1, SyTyp, SySubTyp );
          if( SyIndx < 0 )
             continue;
       }
-      // TODO: Check if this is correct (replaces TGAMSSymbol(Objects[syIndx]))
       SyObj = new TGAMSSymbol<T>( gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyIndx ) );
 
       if( SyObj.SyData == nullptr )
