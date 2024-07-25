@@ -558,6 +558,58 @@ int main( const int argc, const char *argv[] )
 
    SyList->OpenOutput( OutFile, ErrNr );
    std::cout << "Output file: " << OutFile << std::endl;
+   if( ErrNr != 0 )
+   {
+      std::cerr << "*** Error  : Cannot write to output file, Error Nr = " << ErrNr << std::endl;
+      gdxErrorStr( nullptr, ErrNr, Msg.data() );
+      std::cerr << "*** Message: " << Msg << std::endl;
+      return 1;
+   }
+
+   for( const std::string &FilePattern: FilePatterns )
+   {
+      std::cout << FilePattern << std::endl;
+      if( StrictMode && !SyList->FindGDXFiles( FilePattern ) )
+      {
+         std::cerr << "*** Error  : Issue with file name \"" << FilePattern << "\" (strict mode)" << std::endl;
+         return 1;
+      }
+   }
+   InputFilesRead = 0;
+   if( !DoBigSymbols )
+   {
+      for( N = 0; N < SyList->GetFileListSize(); N++ )
+         SyList->AddPGXFile( N, TProcessPass::RpDoAll );
+
+      for( N = 0; N < SyList->size(); N++ )
+         SyList->WritePGXFile( N, TProcessPass::RpDoAll );
+   }
+   else
+   {
+      for( N = 0; N < SyList->GetFileListSize(); N++ )
+         SyList->AddPGXFile( N, TProcessPass::RpScan );
+
+      for( N = 0; N < SyList->GetFileListSize(); N++ )
+         SyList->AddPGXFile( N, TProcessPass::RpSmall );
+
+      for( N = 0; N < SyList->size(); N++ )
+         SyList->WritePGXFile( N, TProcessPass::RpSmall );
+
+      for( N = 0; N < SyList->size(); N++ )
+         if( SyList->CollectBigOne( N ) )
+            SyList->WritePGXFile( N, TProcessPass::RpBig );
+   }
+
+   SyList->WriteNameList();
+   gdxClose( PGXMerge );
+   gdxFree( &PGXMerge );
+
+   std::cout << std::endl;
+
+   if( SyList->GetFErrorCount() > 0 )
+      std::cout << "Number of errors reported = " << SyList->GetFErrorCount() << std::endl;
+
+   SyList->Clear();
 
    // TODO
    return {};
