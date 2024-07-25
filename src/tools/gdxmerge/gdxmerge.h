@@ -30,7 +30,7 @@ enum class TProcessPass
 template<typename T>
 class TGAMSSymbol
 {
-private:
+public:
    int SyDim, SySubTyp;
    gdxSyType SyTyp;
    gdlib::gmsdata::TTblGamsData<T> *SyData;
@@ -38,7 +38,6 @@ private:
    int64_t SySize {}, SyMemory {};
    bool SySkip;
 
-public:
    TGAMSSymbol( int ADim, gdxSyType AType, int ASubTyp );
    ~TGAMSSymbol();
 
