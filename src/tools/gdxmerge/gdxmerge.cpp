@@ -47,8 +47,7 @@ library::short_string OutFile;
 std::vector<std::string> FilePatterns;
 gdxHandle_t PGXMerge { nullptr };
 unsigned int InputFilesRead;
-template<typename T>
-TSymbolList<T> *SyList { nullptr };
+TSymbolList<TGAMSSymbol<double>> *SyList { nullptr };
 
 template<typename T>
 TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
@@ -531,9 +530,7 @@ int main( const int argc, const char *argv[] )
       return 1;
    }
 
-   // TODO: Fix list item type
-   using SyListItemType = TGAMSSymbol<std::nullptr_t>;
-   SyList<SyListItemType> = new TSymbolList<SyListItemType>();
+   SyList = new TSymbolList<TGAMSSymbol<double>>();
 
    if( !GetParameters() )
    {
@@ -552,14 +549,14 @@ int main( const int argc, const char *argv[] )
          rtl::sysutils_p3::DeleteFileFromDisk( OutFile.string() );
    }
 
-   if( !SyList<SyListItemType>->IsIncludeListEmpty() && !SyList<SyListItemType>->IsExcludeListEmpty() )
+   if( !SyList->IsIncludeListEmpty() && !SyList->IsExcludeListEmpty() )
    {
       // TODO: Use four stars here instead of the usual three?
       std::cerr << "**** The options \"ID\" and \"Exclude\" are mutual exclusive" << std::endl;
       return 1;
    }
 
-   SyList<SyListItemType>->OpenOutput( OutFile, ErrNr );
+   SyList->OpenOutput( OutFile, ErrNr );
    std::cout << "Output file: " << OutFile << std::endl;
 
    // TODO
