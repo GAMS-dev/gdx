@@ -172,7 +172,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
    gdxHandle_t PGX { nullptr };
    int NrSy, NrUel, N, Dim, SyITyp, SyIndx, NrRecs, FDim, D, INode, SySubTyp, DummyCount, ErrNr, RecLen;
    gdxSyType SyTyp;
-   TGAMSSymbol<T> SyObj;
+   TGAMSSymbol<double> *SyObj;
    gdxStrIndex_t IndxS;
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
@@ -215,24 +215,24 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
          SyTyp = dt_set;
          SySubTyp = 0;
       }
-      SyIndx = gdlib::gmsobj::TXHashedStringList<T>::IndexOf( SyName );
+      SyIndx = gdlib::gmsobj::TXHashedStringList<T>::IndexOf( SyName.data() );
       if( SyIndx < 0 )
       {
-         SyIndx = AddSymbol( SyName, Dim + 1, SyTyp, SySubTyp );
+         SyIndx = AddSymbol( SyName.data(), Dim + 1, SyTyp, SySubTyp );
          if( SyIndx < 0 )
             continue;
       }
-      SyObj = new TGAMSSymbol<T>( gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyIndx ) );
+      SyObj = gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyIndx );
 
-      if( SyObj.SyData == nullptr )
+      if( SyObj->SyData == nullptr )
          continue;
 
-      if( SyObj.SySkip )
+      if( SyObj->SySkip )
          continue;
 
       // 64 bit
       XCount = static_cast<int64_t>( DummyCount );
-      Size = XCount * SyObj.SyDim;
+      Size = XCount * SyObj->SyDim;
       if( SyTyp == dt_var || SyTyp == dt_equ )
          RecLen = 4;
       else
@@ -242,19 +242,19 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
 
       if( Pass == TProcessPass::RpScan || Pass == TProcessPass::RpDoAll )
       {
-         SyObj.SySize = SyObj.SySize + Size;
-         SyObj.SyMemory = SyObj.SyMemory + XCount * ( SyObj.SyDim * sizeof( int ) + RecLen * sizeof( double ) );
-         if( CheckError( SyObj.SyData->GetCount() + XCount <= std::numeric_limits<int>::max(), "Element count for symbol > maxint" ) )
+         SyObj->SySize = SyObj->SySize + Size;
+         SyObj->SyMemory = SyObj->SyMemory + XCount * ( SyObj->SyDim * sizeof( int ) + RecLen * sizeof( double ) );
+         if( CheckError( SyObj->SyData->GetCount() + XCount <= std::numeric_limits<int>::max(), "Element count for symbol > maxint" ) )
          {
-            SyObj.SySkip = true;
-            delete SyObj.SyData;
+            SyObj->SySkip = true;
+            delete SyObj->SyData;
             continue;
          }
 #if defined( OLD_MEMORY_CHECK )
-         if( CheckError( SyObj.SyMemory <= std::numeric_limits<int>::max(), "Symbol is too large" ) )
+         if( CheckError( SyObj->SyMemory <= std::numeric_limits<int>::max(), "Symbol is too large" ) )
          {
-            SyObj.SySkip = true;
-            delete SyObj.SyData;
+            SyObj->SySkip = true;
+            delete SyObj->SyData;
             continue;
          }
 #endif
@@ -263,21 +263,21 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
       if( Pass == TProcessPass::RpScan )
          continue;
 
-      if( Pass == TProcessPass::RpSmall && SyObj.SySize >= SizeCutOff )
+      if( Pass == TProcessPass::RpSmall && SyObj->SySize >= SizeCutOff )
          continue;
-      if( Pass == TProcessPass::RpBig && SyObj.SySize < SizeCutOff )
+      if( Pass == TProcessPass::RpBig && SyObj->SySize < SizeCutOff )
          continue;
 
-      if( CheckError( Dim + 1 == SyObj.SyDim, "Dimensions do not match" ) )
+      if( CheckError( Dim + 1 == SyObj->SyDim, "Dimensions do not match" ) )
          continue;
-      if( CheckError( SyTyp == SyObj.SyTyp, "Types do not match" ) )
+      if( CheckError( SyTyp == SyObj->SyTyp, "Types do not match" ) )
          continue;
-      if( ( SyTyp == dt_var || SyTyp == dt_equ ) && CheckError( SySubTyp == SyObj.SySubTyp, "Var/Equ subtypes do not match" ) )
+      if( ( SyTyp == dt_var || SyTyp == dt_equ ) && CheckError( SySubTyp == SyObj->SySubTyp, "Var/Equ subtypes do not match" ) )
          continue;
-      if( SyObj.SyExplTxt.empty() )
-         SyObj.SyExplTxt = SyText;
+      if( SyObj->SyExplTxt.empty() )
+         SyObj->SyExplTxt = SyText;
       else if( !SyText.empty() )
-         CheckError( SyObj.syExplTxt == SyText, "Explanatory text is different" );
+         CheckError( SyObj->SyExplTxt == SyText, "Explanatory text is different" );
       IndxI[1] = AddUEL( FileId );
       gdxDataReadStrStart( PGX, N, &NrRecs );
 
@@ -289,9 +289,9 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
          if( SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
          {
             gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
-            Vals[GMS_VAL_LEVEL] = StrPool->Add( Txt );
+            Vals[GMS_VAL_LEVEL] = StrPool->Add( Txt.data(), Txt.length() );
          }
-         SyObj.SyData->AddRecord( IndxI, Vals );
+         SyObj->SyData->AddRecord( IndxI, Vals );
       }
       gdxDataReadDone( PGX );
    }
