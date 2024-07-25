@@ -159,6 +159,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
          FErrorCount++;
          if( FrstError )
          {
+            // TODO: Use four stars here instead of the usual three?
             std::cerr << "\n**** Error in file " << FileName << std::endl;
             FrstError = false;
          }
@@ -542,6 +543,7 @@ int main( const int argc, const char *argv[] )
 
    if( !SyList<SyListItemType>->IsIncludeListEmpty() && !SyList<SyListItemType>->IsExcludeListEmpty() )
    {
+      // TODO: Use four stars here instead of the usual three?
       std::cerr << "**** The options \"ID\" and \"Exclude\" are mutual exclusive" << std::endl;
       return 1;
    }
