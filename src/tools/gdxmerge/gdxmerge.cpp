@@ -68,8 +68,7 @@ TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &A
 template<typename T>
 void gdxmerge::TFileList<T>::AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
 {
-   auto *GDXFileEntry = new TGDXFileEntry( AFileName, AFileId, AFileInfo );
-   TFileList<T>::Insert( GDXFileEntry );
+   TFileList<T>::Insert( new TGDXFileEntry( AFileName, AFileId, AFileInfo ) );
 }
 
 template<typename T>
