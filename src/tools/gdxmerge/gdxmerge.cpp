@@ -304,8 +304,67 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
 template<typename T>
 bool TSymbolList<T>::CollectBigOne( const int SyNr )
 {
-   // TODO
-   return {};
+   gdxHandle_t PGX { nullptr };
+   int N, NrRecs, FDim, D, INode, ErrNr, FNr;
+   TGAMSSymbol<double> *SyObj;
+   gdxStrIndex_t IndxS;
+   gdxStrIndexPtrs_t IndxSPtrs;
+   GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
+   gdxUelIndex_t IndxI {};
+   gdxValues_t Vals {};
+   library::short_string Txt, ErrMsg, FileName;
+   std::string FileId;
+
+   SyObj = gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyNr );
+   if( SyObj->SyData == nullptr )
+      return false;
+
+   std::cout << '\r' << "looking for symbol "
+             << gdlib::gmsobj::TXHashedStringList<T>::GetString( SyNr )
+             << "     ";
+
+   gdxUELRegisterStrStart( PGXMerge );
+
+   for( FNr = 0; FNr < FileList->size(); FNr++ )
+   {
+      FileName = FileList->FileName( FNr );
+      FileId = FileList->FileId( FNr );
+      gdxCreate( &PGX, ErrMsg.data(), ErrMsg.length() );
+      gdxOpenRead( PGX, FileName.data(), &ErrNr );
+      if( ErrNr != 0 )
+      {
+         gdxErrorStr( nullptr, ErrNr, ErrMsg.data() );
+         std::cerr << "Error reading file, message: " << ErrMsg << std::endl;
+         return false;
+      }
+
+      if( gdxFindSymbol( PGX, gdlib::gmsobj::TXHashedStringList<T>::GetString( SyNr ), &N ) > 0 )
+      {
+         // We did this already in AddPGXFile:
+         // ShareAcronyms(PGX);
+         IndxI[1] = AddUEL( FileId );
+         gdxDataReadStrStart( PGX, N, &NrRecs );
+         while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
+         {
+            for( D = FDim; D <= SyObj->SyDim; D++ )
+               IndxI[D + 1] = AddUEL( IndxS[D] );
+            if( SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
+            {
+               gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
+               Vals[GMS_VAL_LEVEL] = StrPool->Add( Txt.data(), Txt.length() );
+            }
+            SyObj->SyData->AddRecord( IndxI, Vals );
+         }
+         gdxDataReadDone( PGX );
+      }
+
+      KeepNewAcronyms( PGX );
+      gdxClose( PGX );
+      gdxFree( &PGX );
+   }
+
+   gdxUELRegisterDone( PGXMerge );
+   return true;
 }
 
 template<typename T>
