@@ -32,6 +32,8 @@
 #include <cmath>
 
 #include "gdxmerge.h"
+#include "../../gxfile.h"
+#include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
 #include "../../rtl/sysutils_p3.h"
 
@@ -370,8 +372,52 @@ bool TSymbolList<T>::CollectBigOne( const int SyNr )
 template<typename T>
 bool TSymbolList<T>::FindGDXFiles( const std::string &Path )
 {
-   // TODO
-   return {};
+   rtl::sysutils_p3::TSearchRec Rec {};
+   std::string WPath, BPath, ShortName, NewName, DTS;
+   std::tm DT;
+
+   // Normal file or file pattern
+   bool Result { true };
+
+   WPath = Path;
+   BPath = gdlib::strutilx::ExtractFilePathEx( WPath );
+   // TODO: Use faAnyFile instead of {}?
+   if( FindFirst( WPath, {}, Rec ) == 0 )
+   {
+      while( FindNext( Rec ) == 0 )
+      {
+         if( Rec.Name == "." || Rec.Name == ".." )
+            continue;
+         if( OutFile == BPath + Rec.Name )
+         {
+            std::cout << "Cannot use " << OutFile << " as input file and output file, skipped it as input" << std::endl;
+            Result = false;
+            continue;
+         }
+
+         ShortName = gdlib::strutilx::ChangeFileExtEx( Rec.Name, "" );
+         if( !gdx::GoodUELString( ShortName.data(), ShortName.length() ) || utils::trim( ShortName ).empty() )
+         {
+            NewName = "File_" + std::to_string( FileList->size() + 1 );
+            std::cout << "*** Filename cannot be used as a valid UEL\n"
+                      << "    Existing name: " << ShortName << '\n'
+                      << "    Replaced with: " << NewName << std::endl;
+            ShortName = NewName;
+         }
+         // TODO: Fix this
+         // DT = Rec.Time;
+         DTS = FormatDateTime( DT );
+         FileList->AddFile( BPath + Rec.Name, ShortName, DTS + "  " + BPath + Rec.Name );
+      }
+      FindClose( Rec );
+   }
+   else
+   {
+      std::cout << '"' << Path << "\" is no valid pattern for an existing input file name, skipped it as input" << std::endl;
+      Result = false;
+   }
+
+   return Result;
 }
 
 template<typename T>
