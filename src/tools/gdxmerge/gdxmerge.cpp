@@ -377,7 +377,34 @@ bool TSymbolList<T>::FindGDXFiles( const std::string &Path )
 template<typename T>
 void TSymbolList<T>::WritePGXFile( const int SyNr, const TProcessPass Pass )
 {
-   // TODO
+   TGAMSSymbol<double> *SyObj;
+   int R, INode;
+   gdxUelIndex_t IndxI;
+   gdxValues_t Vals;
+   library::short_string Txt;
+
+   SyObj = gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyNr );
+   if( SyObj->SyData == nullptr )
+      return;
+   if( Pass == TProcessPass::RpSmall && SyObj->SySize >= SizeCutOff )
+      return;
+
+   SyObj->SyData->Sort();
+   gdxDataWriteRawStart( PGXMerge, gdlib::gmsobj::TXHashedStringList<T>::GetString( SyNr ), SyObj->SyExplTxt.data(), SyObj->SyDim, static_cast<int>( SyObj->SyTyp ), SyObj->SySubTyp );
+   for( R = 0; R < SyObj->SyData->GetCount(); R++ )
+   {
+      SyObj->SyData->GetRecord( R, IndxI, Vals );
+      if( SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
+      {
+         // Txt = StrPool->GetObject( std::round( Vals[GMS_VAL_LEVEL] ) )->data();
+         strcpy( Txt.data(), StrPool->GetObject( std::round( Vals[GMS_VAL_LEVEL] ) )->data() );
+         gdxAddSetText( PGXMerge, Txt.data(), &INode );
+         Vals[GMS_VAL_LEVEL] = INode;
+      }
+      gdxDataWriteRaw( PGXMerge, IndxI, Vals );
+   }
+   gdxDataWriteDone( PGXMerge );
+   SyObj->SyData->Clear();
 }
 
 template<typename T>
