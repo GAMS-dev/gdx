@@ -32,6 +32,7 @@
 #include <cmath>
 
 #include "gdxmerge.h"
+#include "../library/cmdpar.h"
 #include "../../gxfile.h"
 #include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
@@ -622,10 +623,44 @@ std::string FormatDateTime( const std::tm &dt )
           int2( hour ) + ':' + int2( min ) + ':' + int2( sec );
 }
 
-bool GetParameters()
+bool GetParameters( const int argc, const char *argv[] )
 {
-   // TODO
-   return {};
+   enum class KP
+   {
+      Id = 1,
+      Exclude,
+      Big,
+      Strict,
+      Output
+   };
+
+   library::cmdpar::TCmdParams *CmdParams;
+   int ParNr, Kw, X, K;
+   std::string Ks, Id;
+
+   // TODO: Merge declarations and initializations?
+   DoBigSymbols = false;
+   SizeCutOff = 10000000;
+   // Probably unnecessary:
+   OutFile.clear();
+   StrictMode = false;
+   CmdParams = new library::cmdpar::TCmdParams();
+
+   CmdParams->AddParam( static_cast<int>( KP::Id ), "ID" );
+   CmdParams->AddParam( static_cast<int>( KP::Exclude ), "EXCLUDE" );
+   CmdParams->AddParam( static_cast<int>( KP::Big ), "BIG" );
+   CmdParams->AddParam( static_cast<int>( KP::Strict ), "STRICT" );
+   // TODO: Output also in capital letters?
+   CmdParams->AddParam( static_cast<int>( KP::Output ), "Output" );
+   CmdParams->AddParam( static_cast<int>( KP::Output ), "O" );
+
+   bool Result { CmdParams->CrackCommandLine( argc, argv ) };
+   if( Result )
+   {
+      // TODO: Implement
+   }
+
+   return Result;
 }
 
 void Usage()
@@ -674,7 +709,7 @@ int main( const int argc, const char *argv[] )
 
    SyList = new TSymbolList<TGAMSSymbol<double>>();
 
-   if( !GetParameters() )
+   if( !GetParameters( argc, argv ) )
    {
       std::cerr << "*** Error: Parameter error" << std::endl;
       return 1;
