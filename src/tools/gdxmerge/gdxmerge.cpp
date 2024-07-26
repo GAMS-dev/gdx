@@ -374,7 +374,7 @@ bool TSymbolList<T>::FindGDXFiles( const std::string &Path )
 {
    rtl::sysutils_p3::TSearchRec Rec {};
    std::string WPath, BPath, ShortName, NewName, DTS;
-   std::tm DT;
+   std::tm DT {};
 
    // Normal file or file pattern
    bool Result { true };
@@ -404,8 +404,19 @@ bool TSymbolList<T>::FindGDXFiles( const std::string &Path )
                       << "    Replaced with: " << NewName << std::endl;
             ShortName = NewName;
          }
-         // TODO: Fix this
-         // DT = Rec.Time;
+
+         // TODO: Check whether this works
+         uint16_t Year, Month, Day, Hour, Min, Sec, MSec;
+         rtl::sysutils_p3::DecodeDate( Rec.Time, Year, Month, Day );
+         rtl::sysutils_p3::DecodeTime( Rec.Time, Hour, Min, Sec, MSec );
+
+         DT.tm_year = Year - 1900;
+         DT.tm_mon = Month - 1;
+         DT.tm_mday = Day;
+         DT.tm_hour = Hour;
+         DT.tm_min = Min;
+         DT.tm_sec = Sec;
+
          DTS = FormatDateTime( DT );
          FileList->AddFile( BPath + Rec.Name, ShortName, DTS + "  " + BPath + Rec.Name );
       }
