@@ -67,7 +67,7 @@ template<typename T>
 class TSymbolList : public gdlib::gmsobj::TXHashedStringList<T>
 {
 private:
-   gdlib::gmsobj::TXStrPool<T> *StrPool;
+   gdlib::gmsobj::TXStrPool<library::short_string> *StrPool;
    int FErrorCount {}, NextAcroNr {};
    TFileList<TGDXFileEntry> *FileList;
    std::vector<std::string> IncludeList, ExcludeList;

@@ -100,8 +100,8 @@ template<typename T>
 TSymbolList<T>::TSymbolList()
     : gdlib::gmsobj::TXHashedStringList<T>()
 {
-   StrPool = new gdlib::gmsobj::TXStrPool<T>();
-   const std::string empty_string;
+   StrPool = new gdlib::gmsobj::TXStrPool<library::short_string>();
+   const library::short_string empty_string;
    StrPool->Add( empty_string.data(), empty_string.length() );
    FileList = new TFileList<TGDXFileEntry>();
    library::short_string Msg;
