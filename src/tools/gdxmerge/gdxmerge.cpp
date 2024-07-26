@@ -69,31 +69,31 @@ TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &A
 template<typename T>
 void TFileList<T>::AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
 {
-   TFileList<T>::Add( new TGDXFileEntry( AFileName, AFileId, AFileInfo ) );
+   gdlib::gmsobj::TXList<T>::Add( new TGDXFileEntry( AFileName, AFileId, AFileInfo ) );
 }
 
 template<typename T>
 void TFileList<T>::FreeItem( const int Index )
 {
-   TFileList<T>::Delete( Index );
+   gdlib::gmsobj::TXList<T>::Delete( Index );
 }
 
 template<typename T>
 std::string TFileList<T>::FileName( const int Index )
 {
-   return TFileList<T>::FileName( Index );
+   return gdlib::gmsobj::TXList<T>::GetConst( Index )->FFileName;
 }
 
 template<typename T>
 std::string TFileList<T>::FileId( const int Index )
 {
-   return TFileList<T>::FileId( Index );
+   return gdlib::gmsobj::TXList<T>::GetConst( Index )->FFileId;
 }
 
 template<typename T>
 std::string TFileList<T>::FileInfo( const int Index )
 {
-   return TFileList<T>::FileInfo( Index );
+   return gdlib::gmsobj::TXList<T>::GetConst( Index )->FFileInfo;
 }
 
 template<typename T>
