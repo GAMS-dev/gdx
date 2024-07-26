@@ -69,7 +69,7 @@ class TSymbolList : public gdlib::gmsobj::TXHashedStringList<T>
 private:
    gdlib::gmsobj::TXStrPool<T> *StrPool;
    int FErrorCount {}, NextAcroNr {};
-   TFileList<T> *FileList;
+   TFileList<TGDXFileEntry> *FileList;
    std::vector<std::string> IncludeList, ExcludeList;
 
 public:
