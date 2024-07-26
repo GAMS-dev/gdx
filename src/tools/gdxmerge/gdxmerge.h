@@ -46,10 +46,9 @@ public:
 
 class TGDXFileEntry
 {
-private:
+public:
    std::string FFileName, FFileId, FFileInfo;
 
-public:
    TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
 };
 
