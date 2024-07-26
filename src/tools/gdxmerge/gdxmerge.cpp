@@ -174,8 +174,8 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
    gdxStrIndex_t IndxS;
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
-   gdxUelIndex_t IndxI;
-   gdxValues_t Vals;
+   gdxUelIndex_t IndxI {};
+   gdxValues_t Vals {};
    library::short_string Txt, SyText, ErrMsg;
    std::string FileId;
    int64_t XCount, Size;
