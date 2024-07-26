@@ -51,10 +51,9 @@ TSymbolList<TGAMSSymbol<double>> *SyList { nullptr };
 
 template<typename T>
 TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
-    : SyDim( ADim ), SyTyp( AType ), SySubTyp( ASubTyp )
+    : SyDim( ADim ), SySubTyp( ASubTyp ), SyTyp( AType )
 {
    SyData = new gdlib::gmsdata::TTblGamsData<T>( ADim, sizeof( T ) );
-   SySkip = false;
 }
 
 template<typename T>

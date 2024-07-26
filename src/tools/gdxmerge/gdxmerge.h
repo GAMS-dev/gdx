@@ -36,7 +36,7 @@ public:
    gdlib::gmsdata::TTblGamsData<T> *SyData;
    library::short_string SyExplTxt;
    int64_t SySize {}, SyMemory {};
-   bool SySkip;
+   bool SySkip {};
 
    TGAMSSymbol( int ADim, gdxSyType AType, int ASubTyp );
    ~TGAMSSymbol();
