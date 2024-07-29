@@ -635,8 +635,8 @@ bool GetParameters( const int argc, const char *argv[] )
    };
 
    library::cmdpar::TCmdParams *CmdParams;
-   int ParNr, Kw, X, K;
-   std::string Ks, Id;
+   int ParNr, KW, X, K;
+   std::string KS, Id;
 
    // TODO: Merge declarations and initializations?
    DoBigSymbols = false;
@@ -657,8 +657,46 @@ bool GetParameters( const int argc, const char *argv[] )
    bool Result { CmdParams->CrackCommandLine( argc, argv ) };
    if( Result )
    {
-      // TODO: Implement
+      ParNr = 0;
+      while( ParNr < CmdParams->GetParamCount() )
+      {
+         library::cmdpar::TParamRec ParamRec { CmdParams->GetParams( ParNr ) };
+         KW = ParamRec.Key;
+         KS = ParamRec.KeyS;
+
+         ParNr++;
+
+         switch( static_cast<KP>( KW ) )
+         {
+            case KP::Id:
+            case KP::Exclude:
+               /* code */
+               break;
+
+            case KP::Big:
+               /* code */
+               break;
+
+            case KP::Strict:
+               /* code */
+               break;
+
+            case KP::Output:
+               /* code */
+               break;
+
+            default:
+               break;
+         }
+      }
    }
+
+   delete CmdParams;
+
+   if( OutFile.empty() )
+      OutFile = "merged.gdx";
+   else if( gdlib::strutilx::ExtractFileExtEx( OutFile.string() ).empty() )
+      OutFile = gdlib::strutilx::ChangeFileExtEx( OutFile.string(), ".gdx" );
 
    return Result;
 }
