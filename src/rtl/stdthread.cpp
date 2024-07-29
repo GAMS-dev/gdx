@@ -65,7 +65,7 @@ static int64_t nicksPerMin { 60 * NICKS_PER_SEC },
         nicksPerHour { nicksPerMin * 60 },
         nicksPerDay { nicksPerHour * 24 };
 
-/*static int64_t nowCV()
+int64_t nowCV()
 {
 #if defined( _WIN32 )
    cvTime_t cvt {};
@@ -79,16 +79,16 @@ static int64_t nicksPerMin { 60 * NICKS_PER_SEC },
 #endif
 }
 
-static void incCVTimeMillis( int64_t &cvt, const uint32_t ticks )
+void incCVTimeMillis( int64_t &cvt, const uint32_t ticks )
 {
    cvt += ticks * NICKS_PER_MSEC;
 }
 
-static void decCVTimeMillis( int64_t &cvt, const uint32_t ticks )
+void decCVTimeMillis( int64_t &cvt, const uint32_t ticks )
 {
    cvt -= ticks * NICKS_PER_MSEC;
    if( cvt < 0 ) cvt = 0;
-}*/
+}
 
 static std::chrono::time_point<std::chrono::steady_clock> absTimeTP( const int64_t aTimeCV )
 {

@@ -72,4 +72,8 @@ public:
    bool timedWaitAbs(std::mutex &mx, int64_t absTime ) const;
 };
 
+int64_t nowCV();
+void incCVTimeMillis( int64_t &cvt, uint32_t ticks );
+void decCVTimeMillis( int64_t &cvt, uint32_t ticks );
+
 }
