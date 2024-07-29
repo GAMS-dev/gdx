@@ -30,6 +30,7 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
+#include <array>
 
 #include "gdxmerge.h"
 #include "../library/cmdpar.h"
@@ -682,22 +683,65 @@ bool GetParameters( const int argc, const char *argv[] )
          {
             case KP::Id:
             case KP::Exclude:
-               /* code */
+               while( !KS.empty() )
+               {
+                  K = gdlib::strutilx::LChSetPos( std::array<char, 2> { ',', ' ' }.data(), KS.data(), static_cast<int>( KS.length() ) );
+                  if( K == 0 )
+                  {
+                     Id = KS;
+                     KS.clear();
+                  }
+                  else
+                  {
+                     Id = KS.substr( 0, K - 1 );
+                     KS.erase( 0, K );
+                     KS = utils::trim( KS );
+                  }
+                  Id = utils::trim( Id );
+                  if( !Id.empty() )
+                  {
+                     if( KW == static_cast<int>( KP::Id ) )
+                     {
+                        std::cout << "Include Id: " << Id << std::endl;
+                        SyList->AddToIncludeList( utils::trim( Id ) );
+                     }
+                     else
+                     {
+                        std::cout << "Exclude Id: " << Id << std::endl;
+                        SyList->AddToExcludeList( utils::trim( Id ) );
+                     }
+                  }
+               }
                break;
 
             case KP::Big:
-               /* code */
+               DoBigSymbols = true;
+               if( !KS.empty() )
+               {
+                  utils::val( KS, X, K );
+                  if( K == 0 )
+                     SizeCutOff = X;
+               }
                break;
 
             case KP::Strict:
-               /* code */
+               if( KS == "true" )
+                  StrictMode = true;
                break;
 
             case KP::Output:
-               /* code */
+               if( OutFile.empty() )
+                  OutFile = KS;
+               else
+               {
+                  std::cerr << "*** Error: Only one output file can be specified" << std::endl;
+                  Result = false;
+               }
                break;
 
             default:
+               FilePatterns.emplace_back( KS );
+               // SyList->FindGDXFiles( KS );
                break;
          }
       }
