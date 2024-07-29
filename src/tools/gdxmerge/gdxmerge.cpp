@@ -839,7 +839,7 @@ int main( const int argc, const char *argv[] )
    for( const std::string &FilePattern: FilePatterns )
    {
       std::cout << FilePattern << std::endl;
-      if( StrictMode && !SyList->FindGDXFiles( FilePattern ) )
+      if( !SyList->FindGDXFiles( FilePattern ) && StrictMode )
       {
          std::cerr << "*** Error  : Issue with file name \"" << FilePattern << "\" (strict mode)" << std::endl;
          return 1;
