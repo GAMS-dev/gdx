@@ -48,7 +48,7 @@ bool DoBigSymbols, StrictMode;
 int64_t SizeCutOff;
 library::short_string OutFile;
 std::vector<std::string> FilePatterns;
-gdxHandle_t PGXMerge { nullptr };
+gdxHandle_t PGXMerge;
 unsigned int InputFilesRead;
 std::unique_ptr<TSymbolList<TGAMSSymbol<double>>> SyList;
 
@@ -161,7 +161,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
       return Result;
    };
 
-   gdxHandle_t PGX { nullptr };
+   gdxHandle_t PGX;
    int NrSy, NrUel, N, Dim, SyITyp, SyIndx, NrRecs, FDim, D, INode, SySubTyp, DummyCount, ErrNr, RecLen;
    gdxSyType SyTyp;
    std::unique_ptr<TGAMSSymbol<double>> SyObj;
@@ -296,7 +296,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
 template<typename T>
 bool TSymbolList<T>::CollectBigOne( const int SyNr )
 {
-   gdxHandle_t PGX { nullptr };
+   gdxHandle_t PGX;
    int N, NrRecs, FDim, D, INode, ErrNr, FNr;
    std::unique_ptr<TGAMSSymbol<double>> SyObj;
    gdxStrIndex_t IndxS;

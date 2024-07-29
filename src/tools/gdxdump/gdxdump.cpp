@@ -52,7 +52,7 @@ const std::array<std::string, 7> svTxt { "Undf", "NA", "+Inf", "-Inf", "Eps", "0
 
 std::ostream &fo { std::cout };
 std::ofstream OutputFile;
-gdxHandle_t PGX { nullptr };
+gdxHandle_t PGX;
 char Delim, DecimalSep;
 bool ShowHdr, ShowData, CDim, FilterDef, bEpsOut, bNaOut, bPinfOut, bMinfOut, bUndfOut, bZeroOut, bHeader, bFullEVRec, bCSVSetText;
 TOutFormat OutFormat;
