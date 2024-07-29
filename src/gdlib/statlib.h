@@ -115,9 +115,17 @@ bool statusErrorNextJac( int &row, int &col );
 bool statusErrorDetail( int &cnt, std::string &msg );
 void statusErrorFree();
 
+void statusSetRowCol(int rowmax, int colmax);
+
+bool statusFileOpen(gmsgen::tfileaction AAction, std::string &msg);
+void statusClose();
+
+void gcstat(const std::string &s);
+void gcstatPChar(const char *p);
+
 // ...
 
-void statusClose();
+// you need to adjust gmoxxx\gmodoorg.pas
 
 void registerWriteCallback( gdlib::stattypes::tgwrite fptr, void *usermem );
 
