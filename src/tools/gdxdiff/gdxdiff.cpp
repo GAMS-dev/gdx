@@ -52,22 +52,22 @@ namespace gdxdiff
 
 using tvarvaltype = unsigned int;
 
-static library::short_string DiffTmpName;
-static gdxHandle_t PGX1 { nullptr }, PGX2 { nullptr }, PGXDIF { nullptr };
-static bool diffUELsRegistered;
+library::short_string DiffTmpName;
+gdxHandle_t PGX1 { nullptr }, PGX2 { nullptr }, PGXDIF { nullptr };
+bool diffUELsRegistered;
 // TODO: Use the correct type instead of nullptr type
-static std::unique_ptr<gdlib::strhash::TXStrHashList<std::nullptr_t>> UELTable;
-static int staticUELNum;
-static double EpsAbsolute, EpsRelative;
-static std::map<library::short_string, TStatusCode> StatusTable;
-static std::unique_ptr<library::cmdpar::TCmdParams> CmdParams;
-static std::set<tvarvaltype> ActiveFields;
+std::unique_ptr<gdlib::strhash::TXStrHashList<std::nullptr_t>> UELTable;
+int staticUELNum;
+double EpsAbsolute, EpsRelative;
+std::map<library::short_string, TStatusCode> StatusTable;
+std::unique_ptr<library::cmdpar::TCmdParams> CmdParams;
+std::set<tvarvaltype> ActiveFields;
 // Use FldOnlyVar instead of FldOnly as the variable name
-static FldOnly FldOnlyVar;
-static tvarvaltype FldOnlyFld;
-static bool DiffOnly, CompSetText, matrixFile, ignoreOrder;
-static std::unique_ptr<gdlib::gmsobj::TXStrings> IDsOnly;
-static bool ShowDefRec, CompDomains;
+FldOnly FldOnlyVar;
+tvarvaltype FldOnlyFld;
+bool DiffOnly, CompSetText, matrixFile, ignoreOrder;
+std::unique_ptr<gdlib::gmsobj::TXStrings> IDsOnly;
+bool ShowDefRec, CompDomains;
 
 std::string ValAsString( const gdxHandle_t &PGX, const double V )
 {
@@ -960,7 +960,7 @@ int main( const int argc, const char *argv[] )
             // std::cout << S << std::endl;
             while( !S.empty() )
             {
-               int k { gdlib::strutilx::LChSetPos( std::array<char, 2> { ',', ' ' }.data(), S.data(), static_cast<int>( S.length() ) ) };
+               int k { gdlib::strutilx::LChSetPos( std::vector<char> { ',', ' ' }.data(), S.data(), static_cast<int>( S.length() ) ) };
                if( k == 0 )
                {
                   ID = S;

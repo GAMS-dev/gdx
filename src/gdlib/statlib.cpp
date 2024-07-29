@@ -182,6 +182,16 @@ void gstatErrorCnt( int N )
    return GMSLogObj->LogErrrorCnt( N );
 }
 
+void gstatFreshen()
+{
+   GMSLogObj->freshen();
+}
+
+void gstatFreshenEx()
+{
+   GMSLogObj->freshenEx();
+}
+
 bool gstatLogEnabled()
 {
    return GMSLogObj->getLogEnabled();

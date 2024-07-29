@@ -118,6 +118,9 @@ constexpr std::array<TDayTable, 2> MonthDays {{
 int LastDelimiter( const char *Delimiters, const std::string &S );
 int LastDelimiter( const std::string &Delimiters, const std::string &S );
 
+bool CreateDir(const std::string &Dir);
+bool RemoveDir(const std::string &Dir);
+
 using TFileName = std::string;
 
 struct TSearchRec {

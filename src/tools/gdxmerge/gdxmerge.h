@@ -30,15 +30,14 @@ enum class TProcessPass
 template<typename T>
 class TGAMSSymbol
 {
-private:
+public:
    int SyDim, SySubTyp;
    gdxSyType SyTyp;
    gdlib::gmsdata::TTblGamsData<T> *SyData;
    library::short_string SyExplTxt;
    int64_t SySize {}, SyMemory {};
-   bool SySkip;
+   bool SySkip {};
 
-public:
    TGAMSSymbol( int ADim, gdxSyType AType, int ASubTyp );
    ~TGAMSSymbol();
 
@@ -47,10 +46,9 @@ public:
 
 class TGDXFileEntry
 {
-private:
+public:
    std::string FFileName, FFileId, FFileInfo;
 
-public:
    TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
 };
 
@@ -69,16 +67,16 @@ template<typename T>
 class TSymbolList : public gdlib::gmsobj::TXHashedStringList<T>
 {
 private:
-   gdlib::gmsobj::TXStrPool<T> *StrPool;
+   gdlib::gmsobj::TXStrPool<library::short_string> *StrPool;
    int FErrorCount {}, NextAcroNr {};
-   TFileList<T> *FileList;
+   TFileList<TGDXFileEntry> *FileList;
    std::vector<std::string> IncludeList, ExcludeList;
 
 public:
    TSymbolList();
    ~TSymbolList();
 
-   static void OpenOutput( const std::string &AFileName, int &ErrNr );
+   static void OpenOutput( const library::short_string &AFileName, int &ErrNr );
    static int AddUEL( const std::string &S );
    int AddSymbol( const std::string &AName, int ADim, gdxSyType AType, int ASubTyp );
    void AddPGXFile( int FNr, TProcessPass Pass );
@@ -90,13 +88,17 @@ public:
    void ShareAcronyms( const gdxHandle_t &PGX );
    int FindAcronym( const library::short_string &Id );
 
+   int GetFErrorCount() const;
+   int GetFileListSize() const;
    bool IsIncludeListEmpty() const;
    bool IsExcludeListEmpty() const;
+   void AddToIncludeList( const std::string &item );
+   void AddToExcludeList( const std::string &item );
 };
 
 std::string FormatDateTime( const std::tm &dt );
 
-bool GetParameters();
+bool GetParameters( int argc, const char *argv[] );
 
 void Usage();
 

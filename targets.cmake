@@ -15,16 +15,21 @@ target_link_libraries(gdxcclib64 ${mylibs} ${cclib-link-options})
 set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Check compilation of unused infrastructure units
-add_library(base-units STATIC ${base-units})
-target_include_directories(base-units PRIVATE ${inc-dirs})
+set(BASE_ALL OFF CACHE BOOL "Check compilation of unused infrastructure units")
+if(BASE_ALL)
+    add_library(base-units-all STATIC ${base-units-all})
+    target_include_directories(base-units-all PRIVATE ${inc-dirs})
+endif()
 
 # Static library
 add_library(gdx-static STATIC ${gdx-core})
 target_include_directories(gdx-static PRIVATE ${inc-dirs})
 set_property(TARGET gdx-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 
+set(NO_TESTS OFF CACHE BOOL "Skip building unit tests")
+if(NOT NO_TESTS)
 # Unit test suite (against statically compiled GDX)
-add_executable(gdxtest ${base-units} ${tests})
+add_executable(gdxtest ${test-deps} ${tests})
 target_include_directories(gdxtest PRIVATE ${inc-dirs})
 target_link_libraries(gdxtest gdx-static ${mylibs})
 
@@ -33,12 +38,15 @@ add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp gene
 target_link_libraries(gdxwraptest ${mylibs})
 target_include_directories(gdxwraptest PRIVATE src generated)
 target_compile_options(gdxwraptest PRIVATE -DGXFILE_CPPWRAP -DGC_NO_MUTEX)
+endif()
 
 # Quickly run "include what you use" (https://include-what-you-use.org/) over project
 #[[find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
 set_property(TARGET gdxcclib64 PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
 set_property(TARGET gdxtest PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})]]
 
+set(NO_EXAMPLES OFF CACHE BOOL "Skip building example programs/executables")
+if(NOT NO_EXAMPLES)
 # Standalone GDX example program 1
 add_executable(xp_example1 ${gdx-core} src/examples/xp_example1.cpp)
 target_include_directories(xp_example1 PRIVATE ${inc-dirs})
@@ -96,7 +104,7 @@ add_library(gdxtools-library
     src/tools/library/cmdpar.h
     src/tools/library/cmdpar.cpp
 )
-target_link_libraries(gdxtools-library base-units gdx-static)
+target_link_libraries(gdxtools-library base-units-all gdx-static)
 if (UNIX)
     target_link_libraries(gdxtools-library dl)
 endif ()
@@ -124,3 +132,5 @@ add_executable(gdxmerge
 )
 target_include_directories(gdxmerge PRIVATE ${inc-dirs})
 target_link_libraries(gdxmerge gdxtools-library)
+
+endif()

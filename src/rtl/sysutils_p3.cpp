@@ -315,6 +315,24 @@ int LastDelimiter( const std::string &Delimiters, const std::string &S )
    return -1;
 }
 
+bool CreateDir( const std::string &Dir )
+{
+#if defined(_WIN32)
+   return CreateDirectoryA( Dir.c_str(), nullptr );
+#else
+   return !mkdir( Dir.c_str(), 0777 );
+#endif
+}
+
+bool RemoveDir( const std::string &Dir )
+{
+#if defined(_WIN32)
+   return RemoveDirectoryA(Dir.c_str());
+#else
+   return !rmdir(Dir.c_str());
+#endif
+}
+
 std::string ChangeFileExt( const std::string &filename, const std::string &extension )
 {
    auto I {LastDelimiter( ExtStopper, filename )};

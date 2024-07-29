@@ -138,6 +138,14 @@ void gstatReOpen();
 void gstatMemory(double M);
 void gstatErrorCnt( int N );
 
+// check if the log is "fresh enough", update if not
+void gstatFreshen();
+/*
+*check if the log is "fresh enough", update if not:
+called at regular time intervals, e.g. 200 ticks
+*/
+void gstatFreshenEx();
+
 void dumpfilename( const std::string &prfx, bool enabled, const std::string &what, const std::string &gs, gmsgen::tfileaction fa, int ioResOrNeg );
 
 bool gstatLogEnabled();
