@@ -105,7 +105,7 @@ TSymbolList::TSymbolList()
 
 TSymbolList::~TSymbolList()
 {
-   gdlib::gmsobj::TXHashedStringList<T>::Clear();
+   gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::Clear();
 }
 
 void TSymbolList::OpenOutput( const library::short_string &AFileName, int &ErrNr )
@@ -131,7 +131,7 @@ int TSymbolList::AddSymbol( const std::string &AName, const int ADim, const gdxS
        ( !ExcludeList.empty() && is_in_list( ExcludeList, AName ) ) )
       return -1;
 
-   return gdlib::gmsobj::TXHashedStringList<T>::AddObject( AName.data(), AName.length(), new TGAMSSymbol<double>( ADim, AType, ASubTyp ) );
+   return gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::AddObject( AName.data(), AName.length(), new TGAMSSymbol( ADim, AType, ASubTyp ) );
 }
 
 void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
@@ -201,7 +201,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
          SyTyp = dt_set;
          SySubTyp = 0;
       }
-      SyIndx = gdlib::gmsobj::TXHashedStringList<T>::IndexOf( SyName.data() );
+      SyIndx = gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::IndexOf( SyName.data() );
       if( SyIndx < 0 )
       {
          SyIndx = AddSymbol( SyName.data(), Dim + 1, SyTyp, SySubTyp );
@@ -300,12 +300,12 @@ bool TSymbolList::CollectBigOne( const int SyNr )
    library::short_string Txt, ErrMsg, FileName;
    std::string FileId;
 
-   SyObj = gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyNr );
+   SyObj = std::make_unique<TGAMSSymbol>( gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyNr ) );
    if( SyObj->SyData == nullptr )
       return false;
 
    std::cout << '\r' << "looking for symbol "
-             << gdlib::gmsobj::TXHashedStringList<T>::GetString( SyNr )
+             << gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetString( SyNr )
              << "     ";
 
    gdxUELRegisterStrStart( PGXMerge );
@@ -323,7 +323,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
          return false;
       }
 
-      if( gdxFindSymbol( PGX, gdlib::gmsobj::TXHashedStringList<T>::GetString( SyNr ), &N ) > 0 )
+      if( gdxFindSymbol( PGX, gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetString( SyNr ), &N ) > 0 )
       {
          // We did this already in AddPGXFile:
          // ShareAcronyms(PGX);
@@ -421,14 +421,14 @@ void TSymbolList::WritePGXFile( const int SyNr, const TProcessPass Pass )
    gdxValues_t Vals;
    library::short_string Txt;
 
-   SyObj = gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyNr );
+   SyObj = std::make_unique<TGAMSSymbol>( gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyNr ) );
    if( SyObj->SyData == nullptr )
       return;
    if( Pass == TProcessPass::RpSmall && SyObj->SySize >= SizeCutOff )
       return;
 
    SyObj->SyData->Sort();
-   gdxDataWriteRawStart( PGXMerge, gdlib::gmsobj::TXHashedStringList<T>::GetString( SyNr ), SyObj->SyExplTxt.data(), SyObj->SyDim, static_cast<int>( SyObj->SyTyp ), SyObj->SySubTyp );
+   gdxDataWriteRawStart( PGXMerge, gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetString( SyNr ), SyObj->SyExplTxt.data(), SyObj->SyDim, static_cast<int>( SyObj->SyTyp ), SyObj->SySubTyp );
    for( R = 0; R < SyObj->SyData->GetCount(); R++ )
    {
       SyObj->SyData->GetRecord( R, IndxI, Vals );
