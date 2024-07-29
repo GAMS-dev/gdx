@@ -92,6 +92,8 @@ public:
    int GetFileListSize() const;
    bool IsIncludeListEmpty() const;
    bool IsExcludeListEmpty() const;
+   void AddToIncludeList( const std::string &item );
+   void AddToExcludeList( const std::string &item );
 };
 
 std::string FormatDateTime( const std::tm &dt );

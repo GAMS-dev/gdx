@@ -604,6 +604,18 @@ bool TSymbolList<T>::IsExcludeListEmpty() const
    return ExcludeList.empty();
 }
 
+template<typename T>
+void TSymbolList<T>::AddToIncludeList( const std::string &item )
+{
+   IncludeList.emplace_back( item );
+}
+
+template<typename T>
+void TSymbolList<T>::AddToExcludeList( const std::string &item )
+{
+   ExcludeList.emplace_back( item );
+}
+
 std::string FormatDateTime( const std::tm &dt )
 {
    auto int2 = []( const int n ) -> std::string {
