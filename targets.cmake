@@ -104,7 +104,7 @@ add_library(gdxtools-library
     src/tools/library/cmdpar.h
     src/tools/library/cmdpar.cpp
 )
-target_link_libraries(gdxtools-library base-units gdx-static)
+target_link_libraries(gdxtools-library base-units-all gdx-static)
 if (UNIX)
     target_link_libraries(gdxtools-library dl)
 endif ()
