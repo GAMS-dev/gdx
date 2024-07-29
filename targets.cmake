@@ -94,6 +94,8 @@ if (DEFINED ENV{GAMSDIR})
     endif ()
 endif ()
 
+endif()
+
 # Library for gdxdump, gdxdiff and gdxmerge
 add_library(gdxtools-library
     generated/gdxcc.h
@@ -133,5 +135,3 @@ add_executable(gdxmerge
 )
 target_include_directories(gdxmerge PRIVATE ${inc-dirs})
 target_link_libraries(gdxmerge gdxtools-library)
-
-endif()
