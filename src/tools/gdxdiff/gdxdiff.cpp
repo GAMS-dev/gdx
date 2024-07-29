@@ -960,7 +960,7 @@ int main( const int argc, const char *argv[] )
             // std::cout << S << std::endl;
             while( !S.empty() )
             {
-               int k { gdlib::strutilx::LChSetPos( std::array<char, 2> { ',', ' ' }.data(), S.data(), static_cast<int>( S.length() ) ) };
+               int k { gdlib::strutilx::LChSetPos( std::vector<char> { ',', ' ' }.data(), S.data(), static_cast<int>( S.length() ) ) };
                if( k == 0 )
                {
                   ID = S;

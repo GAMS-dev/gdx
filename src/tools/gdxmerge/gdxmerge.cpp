@@ -30,7 +30,6 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
-#include <array>
 
 #include "gdxmerge.h"
 #include "../library/cmdpar.h"
@@ -685,7 +684,7 @@ bool GetParameters( const int argc, const char *argv[] )
             case KP::Exclude:
                while( !KS.empty() )
                {
-                  K = gdlib::strutilx::LChSetPos( std::array<char, 2> { ',', ' ' }.data(), KS.data(), static_cast<int>( KS.length() ) );
+                  K = gdlib::strutilx::LChSetPos( std::vector<char> { ',', ' ' }.data(), KS.data(), static_cast<int>( KS.length() ) );
                   if( K == 0 )
                   {
                      Id = KS;
