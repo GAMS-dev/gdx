@@ -16,10 +16,11 @@ set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Check compilation of unused infrastructure units
 set(BASE_ALL OFF CACHE BOOL "Check compilation of unused infrastructure units")
-if(BASE_ALL)
+# TODO: Fix commented out if
+# if(BASE_ALL)
     add_library(base-units-all STATIC ${base-units-all})
     target_include_directories(base-units-all PRIVATE ${inc-dirs})
-endif()
+# endif()
 
 # Static library
 add_library(gdx-static STATIC ${gdx-core})
