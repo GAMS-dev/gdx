@@ -50,7 +50,7 @@ library::short_string OutFile;
 std::vector<std::string> FilePatterns;
 gdxHandle_t PGXMerge;
 unsigned int InputFilesRead;
-std::unique_ptr<TSymbolList<TGAMSSymbol<double>>> SyList;
+std::unique_ptr<TSymbolList> SyList;
 
 TGAMSSymbol::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
     : SyDim( ADim ), SySubTyp( ASubTyp ), SyTyp( AType ),
@@ -92,8 +92,7 @@ std::string TFileList<T>::FileInfo( const int Index )
    return gdlib::gmsobj::TXList<T>::GetConst( Index )->FFileInfo;
 }
 
-template<typename T>
-TSymbolList<T>::TSymbolList()
+TSymbolList::TSymbolList()
     : gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>()
 {
    StrPool = std::make_unique<gdlib::gmsobj::TXStrPool<library::short_string>>();
@@ -104,29 +103,25 @@ TSymbolList<T>::TSymbolList()
    gdxCreate( &PGXMerge, Msg.data(), Msg.length() );
 }
 
-template<typename T>
-TSymbolList<T>::~TSymbolList()
+TSymbolList::~TSymbolList()
 {
    gdlib::gmsobj::TXHashedStringList<T>::Clear();
 }
 
-template<typename T>
-void TSymbolList<T>::OpenOutput( const library::short_string &AFileName, int &ErrNr )
+void TSymbolList::OpenOutput( const library::short_string &AFileName, int &ErrNr )
 {
    gdxOpenWrite( PGXMerge, AFileName.data(), "gdxmerge", &ErrNr );
    gdxStoreDomainSetsSet( PGXMerge, false );
 }
 
-template<typename T>
-int TSymbolList<T>::AddUEL( const std::string &S )
+int TSymbolList::AddUEL( const std::string &S )
 {
    int result;
    gdxUELRegisterStr( PGXMerge, S.data(), &result );
    return result;
 }
 
-template<typename T>
-int TSymbolList<T>::AddSymbol( const std::string &AName, const int ADim, const gdxSyType AType, const int ASubTyp )
+int TSymbolList::AddSymbol( const std::string &AName, const int ADim, const gdxSyType AType, const int ASubTyp )
 {
    auto is_in_list = []( const std::vector<std::string> &list, const std::string &value ) {
       return std::find( list.begin(), list.end(), value ) != list.end();
@@ -139,8 +134,7 @@ int TSymbolList<T>::AddSymbol( const std::string &AName, const int ADim, const g
    return gdlib::gmsobj::TXHashedStringList<T>::AddObject( AName.data(), AName.length(), new TGAMSSymbol<double>( ADim, AType, ASubTyp ) );
 }
 
-template<typename T>
-void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
+void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
 {
    bool FrstError;
    library::short_string SyName, FileName;
@@ -293,8 +287,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
    gdxUELRegisterDone( PGXMerge );
 }
 
-template<typename T>
-bool TSymbolList<T>::CollectBigOne( const int SyNr )
+bool TSymbolList::CollectBigOne( const int SyNr )
 {
    gdxHandle_t PGX;
    int N, NrRecs, FDim, D, INode, ErrNr, FNr;
@@ -359,8 +352,7 @@ bool TSymbolList<T>::CollectBigOne( const int SyNr )
    return true;
 }
 
-template<typename T>
-bool TSymbolList<T>::FindGDXFiles( const std::string &Path )
+bool TSymbolList::FindGDXFiles( const std::string &Path )
 {
    rtl::sysutils_p3::TSearchRec Rec {};
    std::string WPath, BPath, ShortName, NewName, DTS;
@@ -421,8 +413,7 @@ bool TSymbolList<T>::FindGDXFiles( const std::string &Path )
    return Result;
 }
 
-template<typename T>
-void TSymbolList<T>::WritePGXFile( const int SyNr, const TProcessPass Pass )
+void TSymbolList::WritePGXFile( const int SyNr, const TProcessPass Pass )
 {
    std::unique_ptr<TGAMSSymbol> SyObj;
    int R, INode;
@@ -454,8 +445,7 @@ void TSymbolList<T>::WritePGXFile( const int SyNr, const TProcessPass Pass )
    SyObj->SyData->Clear();
 }
 
-template<typename T>
-void TSymbolList<T>::WriteNameList()
+void TSymbolList::WriteNameList()
 {
    const std::string BASE_NAME { "Merged_set_" };
    library::short_string SetName;
@@ -489,8 +479,7 @@ void TSymbolList<T>::WriteNameList()
    gdxDataWriteDone( PGXMerge );
 }
 
-template<typename T>
-void TSymbolList<T>::KeepNewAcronyms( const gdxHandle_t &PGX )
+void TSymbolList::KeepNewAcronyms( const gdxHandle_t &PGX )
 {
    int NN = gdxAcronymNextNr( PGX, -1 );
    if( NN <= NextAcroNr )
@@ -522,8 +511,7 @@ void TSymbolList<T>::KeepNewAcronyms( const gdxHandle_t &PGX )
    NextAcroNr = NN;
 }
 
-template<typename T>
-void TSymbolList<T>::ShareAcronyms( const gdxHandle_t &PGX )
+void TSymbolList::ShareAcronyms( const gdxHandle_t &PGX )
 {
    if( gdxAcronymCount( PGX ) == 0 )
    {
@@ -555,8 +543,7 @@ void TSymbolList<T>::ShareAcronyms( const gdxHandle_t &PGX )
    }
 }
 
-template<typename T>
-int TSymbolList<T>::FindAcronym( const library::short_string &Id )
+int TSymbolList::FindAcronym( const library::short_string &Id )
 {
    library::short_string AName, AText;
    int AIndx;
@@ -569,38 +556,32 @@ int TSymbolList<T>::FindAcronym( const library::short_string &Id )
    return {};
 }
 
-template<typename T>
-int TSymbolList<T>::GetFErrorCount() const
+int TSymbolList::GetFErrorCount() const
 {
    return FErrorCount;
 }
 
-template<typename T>
-int TSymbolList<T>::GetFileListSize() const
+int TSymbolList::GetFileListSize() const
 {
    return FileList->size();
 }
 
-template<typename T>
-bool TSymbolList<T>::IsIncludeListEmpty() const
+bool TSymbolList::IsIncludeListEmpty() const
 {
    return IncludeList.empty();
 }
 
-template<typename T>
-bool TSymbolList<T>::IsExcludeListEmpty() const
+bool TSymbolList::IsExcludeListEmpty() const
 {
    return ExcludeList.empty();
 }
 
-template<typename T>
-void TSymbolList<T>::AddToIncludeList( const std::string &item )
+void TSymbolList::AddToIncludeList( const std::string &item )
 {
    IncludeList.emplace_back( item );
 }
 
-template<typename T>
-void TSymbolList<T>::AddToExcludeList( const std::string &item )
+void TSymbolList::AddToExcludeList( const std::string &item )
 {
    ExcludeList.emplace_back( item );
 }
@@ -787,7 +768,7 @@ int main( const int argc, const char *argv[] )
       return 1;
    }
 
-   SyList = std::make_unique<TSymbolList<TGAMSSymbol<double>>>();
+   SyList = std::make_unique<TSymbolList>();
 
    if( !GetParameters( argc, argv ) )
    {

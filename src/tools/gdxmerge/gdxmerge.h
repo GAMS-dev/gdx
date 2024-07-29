@@ -62,8 +62,7 @@ public:
    std::string FileInfo( int Index );
 };
 
-template<typename T>
-class TSymbolList : public gdlib::gmsobj::TXHashedStringList<T>
+class TSymbolList : public gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>
 {
 private:
    std::unique_ptr<gdlib::gmsobj::TXStrPool<library::short_string>> StrPool;
