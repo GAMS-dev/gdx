@@ -158,7 +158,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
    gdxHandle_t PGX;
    int NrSy, NrUel, N, Dim, SyITyp, SyIndx, NrRecs, FDim, D, INode, SySubTyp, DummyCount, ErrNr, RecLen;
    gdxSyType SyTyp;
-   std::unique_ptr<TGAMSSymbol> SyObj;
+   TGAMSSymbol *SyObj;
    gdxStrIndex_t IndxS;
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
@@ -208,7 +208,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
          if( SyIndx < 0 )
             continue;
       }
-      SyObj = std::make_unique<TGAMSSymbol>( gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyIndx ) );
+      SyObj = gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyIndx );
 
       if( SyObj->SyData == nullptr )
          continue;
@@ -291,7 +291,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
 {
    gdxHandle_t PGX;
    int N, NrRecs, FDim, D, INode, ErrNr, FNr;
-   std::unique_ptr<TGAMSSymbol> SyObj;
+   TGAMSSymbol *SyObj;
    gdxStrIndex_t IndxS;
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
@@ -300,7 +300,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
    library::short_string Txt, ErrMsg, FileName;
    std::string FileId;
 
-   SyObj = std::make_unique<TGAMSSymbol>( gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyNr ) );
+   SyObj = gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyNr );
    if( SyObj->SyData == nullptr )
       return false;
 
@@ -415,13 +415,13 @@ bool TSymbolList::FindGDXFiles( const std::string &Path )
 
 void TSymbolList::WritePGXFile( const int SyNr, const TProcessPass Pass )
 {
-   std::unique_ptr<TGAMSSymbol> SyObj;
+   TGAMSSymbol *SyObj;
    int R, INode;
    gdxUelIndex_t IndxI;
    gdxValues_t Vals;
    library::short_string Txt;
 
-   SyObj = std::make_unique<TGAMSSymbol>( gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyNr ) );
+   SyObj = gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyNr );
    if( SyObj->SyData == nullptr )
       return;
    if( Pass == TProcessPass::RpSmall && SyObj->SySize >= SizeCutOff )
