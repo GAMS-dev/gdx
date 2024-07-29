@@ -50,20 +50,13 @@ library::short_string OutFile;
 std::vector<std::string> FilePatterns;
 gdxHandle_t PGXMerge { nullptr };
 unsigned int InputFilesRead;
-TSymbolList<TGAMSSymbol<double>> *SyList { nullptr };
+std::unique_ptr<TSymbolList<TGAMSSymbol<double>>> SyList;
 
 template<typename T>
 TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
-    : SyDim( ADim ), SySubTyp( ASubTyp ), SyTyp( AType )
-{
-   SyData = new gdlib::gmsdata::TTblGamsData<T>( ADim, sizeof( T ) );
-}
-
-template<typename T>
-TGAMSSymbol<T>::~TGAMSSymbol()
-{
-   delete SyData;
-}
+    : SyDim( ADim ), SySubTyp( ASubTyp ), SyTyp( AType ),
+      SyData( std::make_unique<gdlib::gmsdata::TTblGamsData<T>>( ADim, sizeof( T ) ) )
+{}
 
 TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
     : FFileName( AFileName ), FFileId( AFileId ), FFileInfo( AFileInfo )
@@ -103,10 +96,10 @@ template<typename T>
 TSymbolList<T>::TSymbolList()
     : gdlib::gmsobj::TXHashedStringList<T>()
 {
-   StrPool = new gdlib::gmsobj::TXStrPool<library::short_string>();
+   StrPool = std::make_unique<gdlib::gmsobj::TXStrPool<library::short_string>>();
    const library::short_string empty_string;
    StrPool->Add( empty_string.data(), empty_string.length() );
-   FileList = new TFileList<TGDXFileEntry>();
+   FileList = std::make_unique<TFileList<TGDXFileEntry>>();
    library::short_string Msg;
    gdxCreate( &PGXMerge, Msg.data(), Msg.length() );
 }
@@ -115,8 +108,6 @@ template<typename T>
 TSymbolList<T>::~TSymbolList()
 {
    gdlib::gmsobj::TXHashedStringList<T>::Clear();
-   delete StrPool;
-   delete FileList;
 }
 
 template<typename T>
@@ -173,7 +164,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
    gdxHandle_t PGX { nullptr };
    int NrSy, NrUel, N, Dim, SyITyp, SyIndx, NrRecs, FDim, D, INode, SySubTyp, DummyCount, ErrNr, RecLen;
    gdxSyType SyTyp;
-   TGAMSSymbol<double> *SyObj;
+   std::unique_ptr<TGAMSSymbol<double>> SyObj;
    gdxStrIndex_t IndxS;
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
@@ -223,7 +214,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
          if( SyIndx < 0 )
             continue;
       }
-      SyObj = gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyIndx );
+      SyObj = std::make_unique<TGAMSSymbol<double>>( gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyIndx ) );
 
       if( SyObj->SyData == nullptr )
          continue;
@@ -248,14 +239,12 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
          if( CheckError( SyObj->SyData->GetCount() + XCount <= std::numeric_limits<int>::max(), "Element count for symbol > maxint" ) )
          {
             SyObj->SySkip = true;
-            delete SyObj->SyData;
             continue;
          }
 #if defined( OLD_MEMORY_CHECK )
          if( CheckError( SyObj->SyMemory <= std::numeric_limits<int>::max(), "Symbol is too large" ) )
          {
             SyObj->SySkip = true;
-            delete SyObj->SyData;
             continue;
          }
 #endif
@@ -309,7 +298,7 @@ bool TSymbolList<T>::CollectBigOne( const int SyNr )
 {
    gdxHandle_t PGX { nullptr };
    int N, NrRecs, FDim, D, INode, ErrNr, FNr;
-   TGAMSSymbol<double> *SyObj;
+   std::unique_ptr<TGAMSSymbol<double>> SyObj;
    gdxStrIndex_t IndxS;
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
@@ -435,7 +424,7 @@ bool TSymbolList<T>::FindGDXFiles( const std::string &Path )
 template<typename T>
 void TSymbolList<T>::WritePGXFile( const int SyNr, const TProcessPass Pass )
 {
-   TGAMSSymbol<double> *SyObj;
+   std::unique_ptr<TGAMSSymbol<double>> SyObj;
    int R, INode;
    gdxUelIndex_t IndxI;
    gdxValues_t Vals;
@@ -646,7 +635,7 @@ bool GetParameters( const int argc, const char *argv[] )
       Output
    };
 
-   library::cmdpar::TCmdParams *CmdParams;
+   std::unique_ptr<library::cmdpar::TCmdParams> CmdParams;
    int ParNr, KW, X, K;
    std::string KS, Id;
 
@@ -656,7 +645,7 @@ bool GetParameters( const int argc, const char *argv[] )
    // Probably unnecessary:
    OutFile.clear();
    StrictMode = false;
-   CmdParams = new library::cmdpar::TCmdParams();
+   CmdParams = std::make_unique<library::cmdpar::TCmdParams>();
 
    CmdParams->AddParam( static_cast<int>( KP::Id ), "ID" );
    CmdParams->AddParam( static_cast<int>( KP::Exclude ), "EXCLUDE" );
@@ -746,8 +735,6 @@ bool GetParameters( const int argc, const char *argv[] )
       }
    }
 
-   delete CmdParams;
-
    if( OutFile.empty() )
       OutFile = "merged.gdx";
    else if( gdlib::strutilx::ExtractFileExtEx( OutFile.string() ).empty() )
@@ -800,7 +787,7 @@ int main( const int argc, const char *argv[] )
       return 1;
    }
 
-   SyList = new TSymbolList<TGAMSSymbol<double>>();
+   SyList = std::make_unique<TSymbolList<TGAMSSymbol<double>>>();
 
    if( !GetParameters( argc, argv ) )
    {

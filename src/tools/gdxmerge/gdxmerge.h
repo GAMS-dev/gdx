@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <memory>
 
 #include "../library/short_string.h"
 #include "../../gdlib/gmsdata.h"
@@ -33,13 +34,12 @@ class TGAMSSymbol
 public:
    int SyDim, SySubTyp;
    gdxSyType SyTyp;
-   gdlib::gmsdata::TTblGamsData<T> *SyData;
+   std::unique_ptr<gdlib::gmsdata::TTblGamsData<T>> SyData;
    library::short_string SyExplTxt;
    int64_t SySize {}, SyMemory {};
    bool SySkip {};
 
    TGAMSSymbol( int ADim, gdxSyType AType, int ASubTyp );
-   ~TGAMSSymbol();
 
    // void SetCurrentFile( const std::string &S );
 };
@@ -67,9 +67,9 @@ template<typename T>
 class TSymbolList : public gdlib::gmsobj::TXHashedStringList<T>
 {
 private:
-   gdlib::gmsobj::TXStrPool<library::short_string> *StrPool;
+   std::unique_ptr<gdlib::gmsobj::TXStrPool<library::short_string>> StrPool;
    int FErrorCount {}, NextAcroNr {};
-   TFileList<TGDXFileEntry> *FileList;
+   std::unique_ptr<TFileList<TGDXFileEntry>> FileList;
    std::vector<std::string> IncludeList, ExcludeList;
 
 public:
