@@ -52,10 +52,10 @@ gdxHandle_t PGXMerge;
 unsigned int InputFilesRead;
 std::unique_ptr<TSymbolList<TGAMSSymbol<double>>> SyList;
 
-template<typename T>
-TGAMSSymbol<T>::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
+TGAMSSymbol::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
     : SyDim( ADim ), SySubTyp( ASubTyp ), SyTyp( AType ),
-      SyData( std::make_unique<gdlib::gmsdata::TTblGamsData<T>>( ADim, sizeof( T ) ) )
+      // TODO: Check whether sizeof(AType) makes sense
+      SyData( std::make_unique<gdlib::gmsdata::TTblGamsData<double>>( ADim, sizeof( AType ) * sizeof( double ) ) )
 {}
 
 TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
@@ -94,7 +94,7 @@ std::string TFileList<T>::FileInfo( const int Index )
 
 template<typename T>
 TSymbolList<T>::TSymbolList()
-    : gdlib::gmsobj::TXHashedStringList<T>()
+    : gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>()
 {
    StrPool = std::make_unique<gdlib::gmsobj::TXStrPool<library::short_string>>();
    const library::short_string empty_string;
@@ -164,7 +164,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
    gdxHandle_t PGX;
    int NrSy, NrUel, N, Dim, SyITyp, SyIndx, NrRecs, FDim, D, INode, SySubTyp, DummyCount, ErrNr, RecLen;
    gdxSyType SyTyp;
-   std::unique_ptr<TGAMSSymbol<double>> SyObj;
+   std::unique_ptr<TGAMSSymbol> SyObj;
    gdxStrIndex_t IndxS;
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
@@ -214,7 +214,7 @@ void TSymbolList<T>::AddPGXFile( const int FNr, const TProcessPass Pass )
          if( SyIndx < 0 )
             continue;
       }
-      SyObj = std::make_unique<TGAMSSymbol<double>>( gdlib::gmsobj::TXHashedStringList<T>::GetObject( SyIndx ) );
+      SyObj = std::make_unique<TGAMSSymbol>( gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyIndx ) );
 
       if( SyObj->SyData == nullptr )
          continue;
@@ -298,7 +298,7 @@ bool TSymbolList<T>::CollectBigOne( const int SyNr )
 {
    gdxHandle_t PGX;
    int N, NrRecs, FDim, D, INode, ErrNr, FNr;
-   std::unique_ptr<TGAMSSymbol<double>> SyObj;
+   std::unique_ptr<TGAMSSymbol> SyObj;
    gdxStrIndex_t IndxS;
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
@@ -424,7 +424,7 @@ bool TSymbolList<T>::FindGDXFiles( const std::string &Path )
 template<typename T>
 void TSymbolList<T>::WritePGXFile( const int SyNr, const TProcessPass Pass )
 {
-   std::unique_ptr<TGAMSSymbol<double>> SyObj;
+   std::unique_ptr<TGAMSSymbol> SyObj;
    int R, INode;
    gdxUelIndex_t IndxI;
    gdxValues_t Vals;

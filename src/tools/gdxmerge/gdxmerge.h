@@ -28,13 +28,12 @@ enum class TProcessPass
    RpTooBig
 };
 
-template<typename T>
 class TGAMSSymbol
 {
 public:
    int SyDim, SySubTyp;
    gdxSyType SyTyp;
-   std::unique_ptr<gdlib::gmsdata::TTblGamsData<T>> SyData;
+   std::unique_ptr<gdlib::gmsdata::TTblGamsData<double>> SyData;
    library::short_string SyExplTxt;
    int64_t SySize {}, SyMemory {};
    bool SySkip {};
