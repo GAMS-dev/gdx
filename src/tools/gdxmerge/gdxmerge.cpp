@@ -363,8 +363,7 @@ bool TSymbolList::FindGDXFiles( const std::string &Path )
 
    WPath = Path;
    BPath = gdlib::strutilx::ExtractFilePathEx( WPath );
-   // TODO: Use faAnyFile instead of {}?
-   if( FindFirst( WPath, {}, Rec ) == 0 )
+   if( FindFirst( WPath, rtl::sysutils_p3::faAnyFile, Rec ) == 0 )
    {
       while( FindNext( Rec ) == 0 )
       {
