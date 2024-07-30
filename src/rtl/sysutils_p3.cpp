@@ -58,7 +58,7 @@ std::string ExtractShortPathName( const std::string &FileName )
 {
 #if defined( _WIN32 )
    std::array<char, 260> buf;
-   auto rc = GetShortPathNameA( FileName.c_str(), buf.data(), static_cast<DWORD>( sizeof( char ) * buf.size() ) );
+   const auto rc = GetShortPathNameA( FileName.c_str(), buf.data(), static_cast<DWORD>( sizeof( char ) * buf.size() ) );
    assert(rc);
    return buf.data();
 #else
@@ -137,7 +137,7 @@ static char * winErrMsg( int errNum, char *buf, int bufSiz )
    *buf = '\0';
    if( 0 == errNum )
       return buf;
-   BOOL brc = FormatMessageA(
+   const auto brc = FormatMessageA(
            FORMAT_MESSAGE_FROM_SYSTEM,
            nullptr,
            errNum,
@@ -168,7 +168,7 @@ std::string GetCurrentDir()
    std::array<char, 256> buf;
    buf.front() = '\0';
 #if defined(_WIN32)
-   const int rc = GetCurrentDirectoryA(static_cast<DWORD>(sizeof(char)*buf.size()),buf.data());
+   const auto rc = GetCurrentDirectoryA(static_cast<DWORD>(sizeof(char)*buf.size()),buf.data());
    if (!rc) {
       winErrMsg( GetLastError(), buf.data(), sizeof( buf ) );
       throw std::runtime_error( "GetCurrentDir failed"s + buf.data() );
@@ -209,8 +209,8 @@ std::string GetCurrentDir()
 
 bool DirectoryExists( const std::string &Directory )
 {
-#if defined(_WIN32)
-   int attribs = GetFileAttributesA(Directory.c_str());
+#if defined( _WIN32 )
+   const int attribs = GetFileAttributesA(Directory.c_str());
    return -1 != attribs && (attribs & FILE_ATTRIBUTE_DIRECTORY);
 #else
    struct stat statBuf;
@@ -238,8 +238,7 @@ bool DeleteFileFromDisk( const std::string &FileName )
 std::string QueryEnvironmentVariable( const std::string &Name )
 {
 #if defined( _WIN32 )
-   uint32_t len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 );
-   if( !len ) return ""s;
+   if( const uint32_t len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 ); !len ) return ""s;
    else
    {
       std::vector<char> buf( len );
@@ -355,7 +354,7 @@ std::string ReplaceFileExt( const std::string &filename, const std::string &exte
 
 static int FindMatchingFile(TSearchRec &f)
 {
-   int result;
+
 #if defined(_WIN32)
    while( f.FindData->dwFileAttributes & f.ExcludeAttr )
       if( !FindNextFile( f.FindHandle, reinterpret_cast<PWIN32_FIND_DATA>( &( f.FindData ) ) ) )
@@ -371,6 +370,7 @@ static int FindMatchingFile(TSearchRec &f)
    f.Name = f.FindData->cFileName;
    return 0;
 #else
+   int result;
    struct stat statbuf {};
    struct stat linkstatbuf {};
    result = -1;
@@ -420,8 +420,8 @@ static int FindMatchingFile(TSearchRec &f)
       dirEntry = readdir( dp );
       result = -1;
    }// readdir loop
+   return result;
 #endif // defined(_WIN32)
-  return result;
 }
 
 int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
@@ -434,7 +434,6 @@ int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
 #if defined(_WIN32)
    {
       HANDLE fHandle;
-      auto len { Path.length() };
       F.FindHandle = fHandle = FindFirstFile(Path.c_str(), reinterpret_cast<PWIN32_FIND_DATA>( &F.FindData ) );
       if (INVALID_HANDLE_VALUE != fHandle) {
          auto res = FindMatchingFile(F);
@@ -442,7 +441,7 @@ int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
             FindClose(F);
          return res;
       }
-      return GetLastError();
+      return static_cast<int>(GetLastError());
    }
 #else
 {
@@ -462,31 +461,33 @@ int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
 
 int FindNext( TSearchRec &F )
 {
-   // ...
-   STUBWARN();
-   return 0;
+#if defined(_WIN32)
+   return FindNextFile(F.FindHandle, reinterpret_cast<PWIN32_FIND_DATA>( &F.FindData ) ) ? FindMatchingFile(F) : GetLastError();
+#else
+   return FindMatchingFile(F);
+#endif
 }
 
-void FindClose( TSearchRec &f )
+void FindClose( TSearchRec &F )
 {
 #if defined(_WIN32)
-   if (INVALID_HANDLE_VALUE != f.FindHandle) {
-      ::FindClose(f.FindHandle);
-      f.FindHandle = INVALID_HANDLE_VALUE;
+   if (INVALID_HANDLE_VALUE != F.FindHandle) {
+      ::FindClose(F.FindHandle);
+      F.FindHandle = INVALID_HANDLE_VALUE;
    }
 #else
-   if (f.FindHandle) {
-      closedir(f.FindHandle);
-      f.FindHandle = nullptr;
+   if (F.FindHandle) {
+      closedir(F.FindHandle);
+      F.FindHandle = nullptr;
    }
 #endif
 }
 
-bool tryEncodeDate( uint16_t year, uint16_t month, uint16_t day, double &date )
+bool tryEncodeDate( const uint16_t year, const uint16_t month, uint16_t day, double &date )
 {
-   const std::array<int, 12> &daysPerMonth = isLeapYear( year ) ? daysPerMonthLeapYear : daysPerMonthRegularYear;
 
-   if( year >= 1 && year <= 9999 && month >= 1 && month <= 12 && day >= 1 && day <= daysPerMonth[month - 1] )
+   if( const std::array<int, 12> &daysPerMonth = isLeapYear( year ) ? daysPerMonthLeapYear : daysPerMonthRegularYear;
+      year >= 1 && year <= 9999 && month >= 1 && month <= 12 && day >= 1 && day <= daysPerMonth[month - 1] )
    {
       const int stop = month - 1;
       int i { 1 };
@@ -504,7 +505,7 @@ bool tryEncodeDate( uint16_t year, uint16_t month, uint16_t day, double &date )
    return false;
 }
 
-static bool tryEncodeTime( uint16_t hour, uint16_t minute, uint16_t sec, uint16_t msec, double &curt )
+static bool tryEncodeTime( const uint16_t hour, const uint16_t minute, const uint16_t sec, const uint16_t msec, double &curt )
 {
    if( hour < HoursPerDay && minute < MinsPerHour && /*sec < SecsPerDay &&*/ msec < MSecsPerSec )
    {
@@ -643,12 +644,12 @@ std::string IntToStr( int64_t n )
    else n *= -1;
    int64_t w {255};
    do {
-      res[w-- - 1] = '0' - (char)(n % 10);
+      res[w-- - 1] = '0' - static_cast<char>( n % 10 );
       n /= 10;
    } while(n);
    while(w < 255)
       res[w2++] = res[w++];
-   return {res.data(), (size_t)w2};
+   return {res.data(), static_cast<size_t>( w2 ) };
 }
 
 // Buffer res must be at least 256 bytes wide!
@@ -669,12 +670,12 @@ void IntToStr( int64_t n, char *res, size_t &len )
       n *= -1;
    int64_t w { 255 };
    do {
-      res[w-- - 1] = '0' - (char) ( n % 10 );
+      res[w-- - 1] = '0' - static_cast<char>( n % 10 );
       n /= 10;
    } while( n );
    while( w < 255 )
       res[w2++] = res[w++];
-   len = (size_t) w2;
+   len = static_cast<size_t>( w2 );
    res[len] = '\0';
 }
 
