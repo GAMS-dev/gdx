@@ -37,6 +37,8 @@
    #include <unistd.h> // for access, getcwd, unlink, F_OK
    #include <sys/stat.h> // for stat, S_ISDIR
    #include <sys/time.h> // for timeval, gettimeofday
+   #include <dirent.h>
+   #include <fnmatch.h>
 #endif
 
 using namespace global::delphitypes;
@@ -369,80 +371,59 @@ static int FindMatchingFile(TSearchRec &f)
    f.Name = f.FindData->cFileName;
    return 0;
 #else
-{
-  int attr;
-  struct dirent *dirEntry;
-  DIR *dp;
-  struct stat statbuf;
-  struct stat linkstatbuf;
-  int len, rc;
-  char pattern[256];
-  char fname[256];
-  mode_t mode;
-  /* */
-  result = -1;
-  dirEntry = NULL;
-  dp = (DIR *) f->findhandle;
-  /*  readdir_r(F.FindHandle, @Scratch, PtrDirEnt); */
-  /* readdir_r is deprecated in GNU libc.  readdir is preferred,
-   * and is thread-safe if the threads do not share the DIR stream dp
-   * the case is similar for Solaris */
-  dirEntry = readdir (dp);
-  if (dirEntry != NULL) {
-    len = f->pattern[0];
-    memcpy(pattern, f->pattern + 1, len);
-    pattern[len] = '\0';
-  }
-  while (dirEntry != NULL) {
-    rc = fnmatch(pattern, dirEntry->d_name, 0);
-    if (0 == rc) {
-      /* F.PathOnly must include trailing backslash */
-      /* FName := F.PathOnly + ShortString(PtrDirEnt.d_name) + #0; */
-      len = f->pathonly[0];
-      memcpy(fname, f->pathonly + 1, len);
-      strcpy(fname + len, dirEntry->d_name);
-      rc = lstat(fname, &statbuf);
-      if (0 == rc) {
-        attr = 0;
-        mode = statbuf.st_mode;
-        if (S_ISDIR(mode))
-          attr |= SYSUTILS_P3_fadirectory;
-        else if (! S_ISREG(mode)) {
-          /* directories should not be treated as system files */
-          if (S_ISLNK(mode)) {
-            attr |= SYSUTILS_P3_fasymlink;
-            if (0 == lstat(fname, &linkstatbuf)
-                && S_ISDIR(linkstatbuf.st_mode))
-              attr |= SYSUTILS_P3_fadirectory;
-          }
-          attr |= SYSUTILS_P3_fasysfile;
-        }
-        if (dirEntry->d_name[0] == '.' && dirEntry->d_name[1] != '\0')
-          if (!  (dirEntry->d_name[1] == '.' && dirEntry->d_name[2] == '\0'))
-            attr |= SYSUTILS_P3_fahidden;
-        /* if (euidaccess(fname, W_OK) != 0) */
-        if (access(fname, W_OK) != 0)
-          attr |= SYSUTILS_P3_fareadonly;
-        if (0 == (attr & f->excludeattr)) {
-          f->size = statbuf.st_size;
-          f->attr = attr;
-          f->mode = statbuf.st_mode;
-          /* f->name = dirEntry->d_name; */
-          len = strlen(dirEntry->d_name);
-          if (len > 255) len = 255;
-          strncpy((char*) f->name + 1, dirEntry->d_name, len);
-          f->name[0] = len;
-          f->time = statbuf.st_mtime;
-          result = 0;
-          break;
-        } /* matching file found */
-      } /* lstat returns OK */
-    } /* matches desired pattern */
-    dirEntry = readdir (dp);
-    result = -1;
-  } /* readdir loop */
-} /* end C#### block */
-#endif /* defined(_WIN32) */
+   struct stat statbuf {};
+   struct stat linkstatbuf {};
+   std::string pattern;
+   result = -1;
+   auto *dp = f.FindHandle;
+   const dirent *dirEntry = readdir( dp );
+   if( dirEntry )
+      pattern = f.Pattern;
+   while( dirEntry )
+   {
+      if( int rc = fnmatch( pattern.c_str(), dirEntry->d_name, 0 ); 0 == rc )
+      {
+         // F.PathOnly must include trailing backslash
+         std::string fname = f.PathOnly + dirEntry->d_name;
+         rc = lstat( fname.c_str(), &statbuf );
+         if( !rc )
+         {
+            int attr = 0;
+            if( const mode_t mode = statbuf.st_mode; S_ISDIR( mode ) )
+               attr |= faDirectory;
+            else if( !S_ISREG( mode ) )
+            {
+               // directories should not be treated as system files
+               if( S_ISLNK( mode ) )
+               {
+                  attr |= faSymLink;
+                  if( 0 == lstat( fname.c_str(), &linkstatbuf ) && S_ISDIR( linkstatbuf.st_mode ) )
+                     attr |= faDirectory;
+               }
+               attr |= faSysFile;
+            }
+            if( dirEntry->d_name[0] == '.' && dirEntry->d_name[1] != '\0' )
+               if( !( dirEntry->d_name[1] == '.' && dirEntry->d_name[2] == '\0' ) )
+                  attr |= faHidden;
+            // if (euidaccess(fname, W_OK) != 0)
+            if( access( fname.c_str(), W_OK ) != 0 )
+               attr |= faReadOnly;
+            if( 0 == ( attr & f.ExcludeAttr ) )
+            {
+               f.Size = static_cast<int>(statbuf.st_size);
+               f.Attr = attr;
+               f.mode = statbuf.st_mode;
+               f.Name = dirEntry->d_name;
+               f.Time = static_cast<int>(statbuf.st_mtime);
+               result = 0;
+               break;
+            }// matching file found
+         }   // lstat returns OK
+      }      // matches desired pattern
+      dirEntry = readdir( dp );
+      result = -1;
+   }// readdir loop
+#endif // defined(_WIN32)
   return result;
 }
 
@@ -469,20 +450,15 @@ int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
 #else
 {
    DIR *dp;
-   char pathonly[256];
-   int len;
-   len = f->pathonly[0];
-   memcpy(pathonly, f->pathonly + 1, len);
-   pathonly[len] = '\0';
-   f->findhandle = (SYSTEM_pointer) (dp = opendir(pathonly));
-   if (NULL != dp) {
-      result = SYSUTILS_P3_findmatchingfile (f);
-      if (result != 0)
-         SYSUTILS_P3_findclose (f);
+   F.FindHandle = dp = opendir(F.PathOnly.c_str());
+   if( dp )
+   {
+      auto res = FindMatchingFile( F );
+      if( res )
+         FindClose( F );
+      return res;
    }
-   else {
-      result = errno; /* what should this be?? */
-   }
+   return errno; // what should this be??
 }
 #endif
 }

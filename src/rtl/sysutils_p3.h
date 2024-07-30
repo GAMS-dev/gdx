@@ -30,6 +30,9 @@
 typedef void *HANDLE;
 struct _WIN32_FIND_DATAA;
 using LPWIN32_FIND_DATAA = _WIN32_FIND_DATAA*;
+#else
+struct __dirstream;
+using DIR = __dirstream;
 #endif
 
 #include <cstdint>                 // for uint16_t, int64_t, uint32_t
@@ -138,7 +141,7 @@ struct TSearchRec {
    HANDLE FindHandle;
    LPWIN32_FIND_DATAA FindData;
 #else
-   // ???
+   DIR *FindHandle;
 #endif
    std::string PathOnly, Pattern;
    uint32_t mode;
