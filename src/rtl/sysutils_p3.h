@@ -30,7 +30,7 @@
 typedef void *HANDLE;
 struct _WIN32_FIND_DATAA;
 #elif defined(__APPLE__) && defined(__MACH__) && (defined(__x86_64__) || defined(__amd64__))
-struct DIR; // special case for deg
+typedef void *	DIR; // special case for deg
 #else
 struct __dirstream;
 using DIR = __dirstream;
