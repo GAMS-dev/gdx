@@ -373,15 +373,12 @@ static int FindMatchingFile(TSearchRec &f)
 #else
    struct stat statbuf {};
    struct stat linkstatbuf {};
-   std::string pattern;
    result = -1;
    auto *dp = f.FindHandle;
    const dirent *dirEntry = readdir( dp );
-   if( dirEntry )
-      pattern = f.Pattern;
    while( dirEntry )
    {
-      if( int rc = fnmatch( pattern.c_str(), dirEntry->d_name, 0 ); 0 == rc )
+      if( int rc = fnmatch( f.Pattern.c_str(), dirEntry->d_name, 0 ); 0 == rc )
       {
          // F.PathOnly must include trailing backslash
          std::string fname = f.PathOnly + dirEntry->d_name;
@@ -470,10 +467,19 @@ int FindNext( TSearchRec &F )
    return 0;
 }
 
-void FindClose( TSearchRec &F )
+void FindClose( TSearchRec &f )
 {
-   // ...
-   STUBWARN();
+#if defined(_WIN32)
+   if (INVALID_HANDLE_VALUE != f.FindHandle) {
+      ::FindClose(f.FindHandle);
+      f.FindHandle = INVALID_HANDLE_VALUE;
+   }
+#else
+   if (f.FindHandle) {
+      closedir(f.FindHandle);
+      f.FindHandle = nullptr;
+   }
+#endif
 }
 
 bool tryEncodeDate( uint16_t year, uint16_t month, uint16_t day, double &date )
