@@ -29,7 +29,8 @@
 // Forward declarations of Windows header stuff
 typedef void *HANDLE;
 struct _WIN32_FIND_DATAA;
-using LPWIN32_FIND_DATAA = _WIN32_FIND_DATAA*;
+#elif defined(__APPLE__) && defined(__MACH__) && (defined(__x86_64__) || defined(__amd64__))
+struct DIR; // special case for deg
 #else
 struct __dirstream;
 using DIR = __dirstream;
@@ -138,13 +139,15 @@ struct TSearchRec {
    TFileName Name;
    int ExcludeAttr;
 #if defined(_WIN32)
-   HANDLE FindHandle;
-   LPWIN32_FIND_DATAA FindData;
+   HANDLE FindHandle {};
+   _WIN32_FIND_DATAA * FindData {};
 #else
-   DIR *FindHandle;
+   DIR *FindHandle {};
 #endif
    std::string PathOnly, Pattern;
    uint32_t mode;
+
+   ~TSearchRec();
 };
 
 int FindFirst( const std::string &Path, int Attr, TSearchRec &F );

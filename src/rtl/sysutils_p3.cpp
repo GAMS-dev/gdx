@@ -352,27 +352,28 @@ std::string ReplaceFileExt( const std::string &filename, const std::string &exte
    return ChangeFileExt( filename, extension );
 }
 
-static int FindMatchingFile(TSearchRec &f)
+static int FindMatchingFile( TSearchRec &f )
 {
-
-#if defined(_WIN32)
+#if defined( _WIN32 )
    while( f.FindData->dwFileAttributes & f.ExcludeAttr )
-      if( !FindNextFile( f.FindHandle, reinterpret_cast<PWIN32_FIND_DATA>( &( f.FindData ) ) ) )
-         return static_cast<int>(GetLastError());
+      if( !FindNextFile( f.FindHandle, reinterpret_cast<PWIN32_FIND_DATA>( &f.FindData ) ) )
+         return static_cast<int>( GetLastError() );
    FILETIME lastWriteTime;
    FILETIME localFileTime;
    std::memcpy( &lastWriteTime, &( f.FindData->ftLastWriteTime ), sizeof( FILETIME ) );
    FileTimeToLocalFileTime( &lastWriteTime, &localFileTime );
    auto *wPtr = reinterpret_cast<WORD *>( &f.Time );
    FileTimeToDosDateTime( &localFileTime, wPtr + 1, wPtr );
-   f.Size = static_cast<int>(f.FindData->nFileSizeLow);
-   f.Attr = static_cast<int>(f.FindData->dwFileAttributes);
+   f.Size = static_cast<int>( f.FindData->nFileSizeLow );
+   f.Attr = static_cast<int>( f.FindData->dwFileAttributes );
    f.Name = f.FindData->cFileName;
    return 0;
 #else
    int result;
-   struct stat statbuf {};
-   struct stat linkstatbuf {};
+   struct stat statbuf {
+   };
+   struct stat linkstatbuf {
+   };
    result = -1;
    auto *dp = f.FindHandle;
    const dirent *dirEntry = readdir( dp );
@@ -407,11 +408,11 @@ static int FindMatchingFile(TSearchRec &f)
                attr |= faReadOnly;
             if( 0 == ( attr & f.ExcludeAttr ) )
             {
-               f.Size = static_cast<int>(statbuf.st_size);
+               f.Size = static_cast<int>( statbuf.st_size );
                f.Attr = attr;
                f.mode = statbuf.st_mode;
                f.Name = dirEntry->d_name;
-               f.Time = static_cast<int>(statbuf.st_mtime);
+               f.Time = static_cast<int>( statbuf.st_mtime );
                result = 0;
                break;
             }// matching file found
@@ -421,7 +422,14 @@ static int FindMatchingFile(TSearchRec &f)
       result = -1;
    }// readdir loop
    return result;
-#endif // defined(_WIN32)
+#endif// defined(_WIN32)
+}
+
+TSearchRec::~TSearchRec()
+{
+#if defined(_WIN32)
+   delete FindData;
+#endif
 }
 
 int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
@@ -432,19 +440,17 @@ int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
       F.PathOnly = IncludeTrailingPathDelimiter( GetCurrentDir() );
    F.Pattern = ExtractFileName( Path );
 #if defined(_WIN32)
-   {
-      HANDLE fHandle;
-      F.FindHandle = fHandle = FindFirstFile(Path.c_str(), reinterpret_cast<PWIN32_FIND_DATA>( &F.FindData ) );
-      if (INVALID_HANDLE_VALUE != fHandle) {
-         auto res = FindMatchingFile(F);
-         if (res != 0)
-            FindClose(F);
-         return res;
-      }
-      return static_cast<int>(GetLastError());
+   HANDLE fHandle;
+   F.FindData = new _WIN32_FIND_DATAA{}; // will be freed in F destructor
+   F.FindHandle = fHandle = FindFirstFile(Path.c_str(), F.FindData );
+   if (INVALID_HANDLE_VALUE != fHandle) {
+      auto res = FindMatchingFile(F);
+      if (res != 0)
+         FindClose(F);
+      return res;
    }
+   return static_cast<int>(GetLastError());
 #else
-{
    DIR *dp;
    F.FindHandle = dp = opendir(F.PathOnly.c_str());
    if( dp )
@@ -455,14 +461,13 @@ int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
       return res;
    }
    return errno; // what should this be??
-}
 #endif
 }
 
 int FindNext( TSearchRec &F )
 {
 #if defined(_WIN32)
-   return FindNextFile(F.FindHandle, reinterpret_cast<PWIN32_FIND_DATA>( &F.FindData ) ) ? FindMatchingFile(F) : GetLastError();
+   return FindNextFile(F.FindHandle, F.FindData ) ? FindMatchingFile(F) : GetLastError();
 #else
    return FindMatchingFile(F);
 #endif
@@ -485,7 +490,6 @@ void FindClose( TSearchRec &F )
 
 bool tryEncodeDate( const uint16_t year, const uint16_t month, uint16_t day, double &date )
 {
-
    if( const std::array<int, 12> &daysPerMonth = isLeapYear( year ) ? daysPerMonthLeapYear : daysPerMonthRegularYear;
       year >= 1 && year <= 9999 && month >= 1 && month <= 12 && day >= 1 && day <= daysPerMonth[month - 1] )
    {
