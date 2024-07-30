@@ -29,11 +29,8 @@
 // Forward declarations of Windows header stuff
 typedef void *HANDLE;
 struct _WIN32_FIND_DATAA;
-#elif defined(__APPLE__) && defined(__MACH__) && (defined(__x86_64__) || defined(__amd64__))
-typedef void *	DIR; // special case for deg
 #else
-struct __dirstream;
-using DIR = __dirstream;
+#include <dirent.h>
 #endif
 
 #include <cstdint>                 // for uint16_t, int64_t, uint32_t

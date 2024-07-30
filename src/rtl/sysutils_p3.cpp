@@ -37,7 +37,6 @@
    #include <unistd.h> // for access, getcwd, unlink, F_OK
    #include <sys/stat.h> // for stat, S_ISDIR
    #include <sys/time.h> // for timeval, gettimeofday
-   #include <dirent.h>
    #include <fnmatch.h>
 #endif
 
