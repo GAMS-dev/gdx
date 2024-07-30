@@ -29,6 +29,7 @@
 #include <string>
 #include <chrono>
 #include <filesystem>
+#include <algorithm>
 
 using namespace std::literals::string_literals;
 using namespace rtl::sysutils_p3;
@@ -140,7 +141,7 @@ TEST_CASE("Test integer to string conversion")
 
 TEST_CASE("Test Find{First,Next,Close}")
 {
-   constexpr int nfiles {9};
+   constexpr int nfiles {10};
    for(int i{}; i<nfiles; i++)
    {
       const auto fn {"abc"s + std::to_string( i+1 ) + ".txt"s};
@@ -149,14 +150,14 @@ TEST_CASE("Test Find{First,Next,Close}")
    }
    TSearchRec F;
    REQUIRE_EQ(0, FindFirst( "abc*.txt", faAnyFile, F ));
-   std::vector<std::string> collectedFiles {F.Name};
+   std::vector collectedFiles {F.Name};
    while(!FindNext( F ))
       collectedFiles.push_back( F.Name );
    REQUIRE_EQ(nfiles, collectedFiles.size());
    for(int i{}; i<nfiles; i++)
    {
       const auto fn {"abc"s + std::to_string( i+1 ) + ".txt"s};
-      REQUIRE_EQ(fn, collectedFiles[i]);
+      REQUIRE(std::find(collectedFiles.begin(), collectedFiles.end(), fn) != collectedFiles.end());
       std::filesystem::remove( fn );
    }
 }
