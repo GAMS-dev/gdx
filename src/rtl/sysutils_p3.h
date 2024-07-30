@@ -25,6 +25,13 @@
 
 #pragma once
 
+#if defined(_WIN32)
+// Forward declarations of Windows header stuff
+typedef void *HANDLE;
+struct _WIN32_FIND_DATAA;
+using LPWIN32_FIND_DATAA = _WIN32_FIND_DATAA*;
+#endif
+
 #include <cstdint>                 // for uint16_t, int64_t, uint32_t
 #include <array>                    // for array
 #include <string>                   // for string, basic_string
@@ -127,7 +134,14 @@ struct TSearchRec {
    int Time, Size, Attr;
    TFileName Name;
    int ExcludeAttr;
-   // ...
+#if defined(_WIN32)
+   HANDLE FindHandle;
+   LPWIN32_FIND_DATAA FindData;
+#else
+   // ???
+#endif
+   std::string PathOnly, Pattern;
+   uint32_t mode;
 };
 
 int FindFirst( const std::string &Path, int Attr, TSearchRec &F );
