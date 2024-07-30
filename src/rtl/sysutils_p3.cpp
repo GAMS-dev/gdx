@@ -426,6 +426,7 @@ static int FindMatchingFile( TSearchRec &f )
 
 TSearchRec::~TSearchRec()
 {
+   FindClose(*this);
 #if defined(_WIN32)
    delete FindData;
 #endif
