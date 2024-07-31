@@ -466,7 +466,6 @@ void TSymbolList::WriteNameList()
    {
       gdxAddSetText( PGXMerge, FileList->FileInfo( N ).data(), &TextNr );
       AVals[GMS_VAL_LEVEL] = TextNr;
-      // AIndex[1] = FileList->FileId( N );
       strcpy( AIndexPtrs[1], FileList->FileId( N ).data() );
       // TODO: Check this const cast
       gdxDataWriteStr( PGXMerge, const_cast<const char **>( AIndexPtrs ), AVals );
