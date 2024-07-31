@@ -261,7 +261,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
          SyObj->SyExplTxt = SyText;
       else if( !SyText.empty() )
          CheckError( SyObj->SyExplTxt == SyText, "Explanatory text is different" );
-      IndxI[1] = AddUEL( FileId );
+      IndxI[0] = AddUEL( FileId );
       gdxDataReadStrStart( PGX, N, &NrRecs );
 
       while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
@@ -325,7 +325,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
       {
          // We did this already in AddPGXFile:
          // ShareAcronyms(PGX);
-         IndxI[1] = AddUEL( FileId );
+         IndxI[0] = AddUEL( FileId );
          gdxDataReadStrStart( PGX, N, &NrRecs );
          while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
          {
