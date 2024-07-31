@@ -114,7 +114,7 @@ void TSymbolList::OpenOutput( const library::short_string &AFileName, int &ErrNr
    gdxStoreDomainSetsSet( PGXMerge, false );
 }
 
-int TSymbolList::AddUEL( const std::string &S )
+int TSymbolList::AddUEL( const library::short_string &S )
 {
    int result;
    gdxUELRegisterStr( PGXMerge, S.data(), &result );
@@ -164,8 +164,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
    gdxUelIndex_t IndxI {};
    gdxValues_t Vals {};
-   library::short_string Txt, SyText, ErrMsg;
-   std::string FileId;
+   library::short_string Txt, SyText, ErrMsg, FileId;
    int64_t XCount, Size;
 
    FileName = FileList->FileName( FNr );
@@ -269,7 +268,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
       {
          if( Dim > 0 )
             for( D = FDim; D <= Dim; D++ )
-               IndxI[D + 1] = AddUEL( IndxS[D] );
+               IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
          if( SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
          {
             gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
@@ -297,8 +296,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
    gdxUelIndex_t IndxI {};
    gdxValues_t Vals {};
-   library::short_string Txt, ErrMsg, FileName;
-   std::string FileId;
+   library::short_string Txt, ErrMsg, FileName, FileId;
 
    SyObj = gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyNr );
    if( SyObj->SyData == nullptr )
@@ -332,7 +330,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
          while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
          {
             for( D = FDim; D <= SyObj->SyDim; D++ )
-               IndxI[D + 1] = AddUEL( IndxS[D] );
+               IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
             if( SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
             {
                gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
