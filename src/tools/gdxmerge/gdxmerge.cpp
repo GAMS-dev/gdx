@@ -365,8 +365,7 @@ bool TSymbolList::FindGDXFiles( const std::string &Path )
    BPath = gdlib::strutilx::ExtractFilePathEx( WPath );
    if( FindFirst( WPath, rtl::sysutils_p3::faAnyFile, Rec ) == 0 )
    {
-      while( FindNext( Rec ) == 0 )
-      {
+      do {
          if( Rec.Name == "." || Rec.Name == ".." )
             continue;
          if( OutFile == BPath + Rec.Name )
@@ -400,7 +399,7 @@ bool TSymbolList::FindGDXFiles( const std::string &Path )
 
          DTS = FormatDateTime( DT );
          FileList->AddFile( BPath + Rec.Name, ShortName, DTS + "  " + BPath + Rec.Name );
-      }
+      } while( FindNext( Rec ) == 0 );
       FindClose( Rec );
    }
    else
@@ -456,14 +455,13 @@ void TSymbolList::WriteNameList()
 
    // Find unique name for the merged set
    N = 1;
-   while( true )
-   {
+   do {
       SetName = BASE_NAME + std::to_string( N );
       gdxFindSymbol( PGXMerge, SetName.data(), &SyNr );
       if( SyNr < 0 )
          break;
       N++;
-   }
+   } while( true );
 
    gdxDataWriteStrStart( PGXMerge, SetName.data(), "Merge set", 1, 0, 0 );
    for( N = 0; N < FileList->size(); N++ )
@@ -639,8 +637,7 @@ bool GetParameters( const int argc, const char *argv[] )
    if( Result )
    {
       ParNr = 0;
-      while( ParNr < CmdParams->GetParamCount() )
-      {
+      do {
          library::cmdpar::TParamRec ParamRec { CmdParams->GetParams( ParNr ) };
          KW = ParamRec.Key;
          KS = ParamRec.KeyS;
@@ -712,7 +709,7 @@ bool GetParameters( const int argc, const char *argv[] )
                // SyList->FindGDXFiles( KS );
                break;
          }
-      }
+      } while( ParNr < CmdParams->GetParamCount() );
    }
 
    if( OutFile.empty() )

@@ -1119,8 +1119,7 @@ int main( const int argc, const char *argv[] )
 
       int N {};
       int NN;
-      do
-      {
+      do {
          ID = "FilesCompared";
          if( N > 0 )
             ID += std::to_string( '_' ) + std::to_string( N );
