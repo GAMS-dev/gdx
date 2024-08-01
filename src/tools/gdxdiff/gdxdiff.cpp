@@ -31,6 +31,7 @@
 #include <cmath>
 #include <limits>
 #include <cstring>
+#include <memory>
 
 #include "gdxdiff.h"
 #include "../library/common.h"
