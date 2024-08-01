@@ -413,8 +413,8 @@ void TSymbolList::WritePGXFile( const int SyNr, const TProcessPass Pass )
 {
    TGAMSSymbol *SyObj;
    int R, INode;
-   gdxUelIndex_t IndxI;
-   gdxValues_t Vals;
+   gdxUelIndex_t IndxI {};
+   gdxValues_t Vals {};
    library::short_string Txt;
 
    SyObj = gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyNr );
