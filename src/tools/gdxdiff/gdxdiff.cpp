@@ -223,7 +223,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    };
 
    auto WriteDiff = [&]( const std::string &Act, const std::string &FldName, const gdxUelIndex_t &Keys, const gdxValues_t &Vals ) -> void {
-      gdxStrIndex_t StrKeys;
+      gdxStrIndex_t StrKeys {};
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
       gdxValues_t Vals2;
@@ -259,7 +259,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    };
 
    auto WriteSetDiff = [&]( const std::string &Act, const gdxUelIndex_t &Keys, const library::short_string &S ) -> void {
-      gdxStrIndex_t StrKeys;
+      gdxStrIndex_t StrKeys {};
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
       gdxValues_t Vals;
@@ -517,10 +517,10 @@ void CompareSy( const int Sy1, const int Sy2 )
    gdxUelIndex_t Keys1, Keys2;
    gdxValues_t Vals1, Vals2;
    library::short_string stxt;
-   gdxStrIndex_t DomSy1;
+   gdxStrIndex_t DomSy1 {};
    gdxStrIndexPtrs_t DomSy1Ptrs;
    GDXSTRINDEXPTRS_INIT( DomSy1, DomSy1Ptrs );
-   gdxStrIndex_t DomSy2;
+   gdxStrIndex_t DomSy2 {};
    gdxStrIndexPtrs_t DomSy2Ptrs;
    GDXSTRINDEXPTRS_INIT( DomSy2, DomSy2Ptrs );
 
@@ -753,7 +753,7 @@ int main( const int argc, const char *argv[] )
    library::short_string S, ID, InFile1, InFile2, DiffFileName;
    std::map<library::short_string, int> IDTable;
    bool UsingIDE, RenameOK;
-   gdxStrIndex_t StrKeys;
+   gdxStrIndex_t StrKeys {};
    gdxStrIndexPtrs_t StrKeysPtrs;
    GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
    gdxValues_t StrVals;

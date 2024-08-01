@@ -159,7 +159,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
    int NrSy, NrUel, N, Dim, SyITyp, SyIndx, NrRecs, FDim, D, INode, SySubTyp, DummyCount, ErrNr, RecLen;
    gdxSyType SyTyp;
    TGAMSSymbol *SyObj;
-   gdxStrIndex_t IndxS;
+   gdxStrIndex_t IndxS {};
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
    gdxUelIndex_t IndxI {};
@@ -291,7 +291,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
    gdxHandle_t PGX;
    int N, NrRecs, FDim, D, INode, ErrNr, FNr;
    TGAMSSymbol *SyObj;
-   gdxStrIndex_t IndxS;
+   gdxStrIndex_t IndxS {};
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
    gdxUelIndex_t IndxI {};
@@ -446,7 +446,7 @@ void TSymbolList::WriteNameList()
    const std::string BASE_NAME { "Merged_set_" };
    library::short_string SetName;
    int N, SyNr, TextNr;
-   gdxStrIndex_t AIndex;
+   gdxStrIndex_t AIndex {};
    gdxStrIndexPtrs_t AIndexPtrs;
    GDXSTRINDEXPTRS_INIT( AIndex, AIndexPtrs );
    gdxValues_t AVals {};

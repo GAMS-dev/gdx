@@ -385,7 +385,7 @@ bool WriteSymbolAsItem( const int SyNr, const bool DomInfo )
       std::string Domain;
       if( SyDim > 0 )
       {
-         gdxStrIndex_t DomainArray;
+         gdxStrIndex_t DomainArray {};
          gdxStrIndexPtrs_t DomainArrayPtrs;
          GDXSTRINDEXPTRS_INIT( DomainArray, DomainArrayPtrs );
          gdxSymbolGetDomainX( PGX, SyNr, DomainArrayPtrs );
@@ -564,7 +564,7 @@ void WriteSymbol( const int SyNr )
    };
 
    gdxUelIndex_t DomainNrs {};
-   gdxStrIndex_t DomainIDs;
+   gdxStrIndex_t DomainIDs {};
    gdxStrIndexPtrs_t DomainIDsPtrs;
    GDXSTRINDEXPTRS_INIT( DomainIDs, DomainIDsPtrs );
    library::short_string A2Name, setName;
@@ -756,12 +756,12 @@ int64_t delphiRound( const double x )
 void WriteSymbolCSV( const int SyNr )
 {
    int ADim;
-   gdxStrIndex_t DomS;
+   gdxStrIndex_t DomS {};
    gdxStrIndexPtrs_t DomSPtrs;
    GDXSTRINDEXPTRS_INIT( DomS, DomSPtrs );
 
    auto GetDomainNames = [&ADim, &DomSPtrs, &SyNr]() {
-      gdxStrIndex_t gdxDomS;
+      gdxStrIndex_t gdxDomS {};
       gdxStrIndexPtrs_t gdxDomSPtrs;
       GDXSTRINDEXPTRS_INIT( gdxDomS, gdxDomSPtrs );
       library::short_string s;
@@ -1049,7 +1049,7 @@ void WriteDomainInfo()
    library::short_string AName;
    int ADim, iATyp, NrSy, NrUel, w1, dinfo;
    std::map<library::short_string, int> SL;
-   gdxStrIndex_t DomainIDs;
+   gdxStrIndex_t DomainIDs {};
    gdxStrIndexPtrs_t DomainIDsPtrs;
    GDXSTRINDEXPTRS_INIT( DomainIDs, DomainIDsPtrs );
 
