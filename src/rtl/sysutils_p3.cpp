@@ -116,10 +116,10 @@ void DivMod( const int Dividend, const uint16_t Divisor, uint16_t &Result, uint1
    Remainder = res.rem;
 }
 
-/*static global::delphitypes::tDateTime EncodeDate( uint16_t Year, uint16_t Month, uint16_t Day )
+double EncodeDate( uint16_t Year, uint16_t Month, const uint16_t Day )
 {
-   if( Year == 1600 && Month < 3 )
-      return Day + ( Month == 1 ? 1 : 30 );
+   if( Year == 1600.0 && Month < 3.0 )
+      return Day + ( Month == 1 ? 1.0 : 30.0 );
    if( Month > 2 ) Month -= 3;
    else
    {
@@ -128,7 +128,7 @@ void DivMod( const int Dividend, const uint16_t Divisor, uint16_t &Result, uint1
    }
    const int Yr { Year - 1600 };
    return Yr / 100 * 146097 / 4 + Yr % 100 * 1461 / 4 + (153 * Month + 2) / 5 + Day + 59 - 109572 + 1;
-}*/
+}
 
 #if defined(_WIN32)
 static char * winErrMsg( int errNum, char *buf, int bufSiz )
@@ -442,7 +442,7 @@ int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
 #if defined(_WIN32)
    HANDLE fHandle;
    F.FindData = new _WIN32_FIND_DATAA{}; // will be freed in F destructor
-   F.FindHandle = fHandle = FindFirstFile(Path.c_str(), F.FindData );
+   F.FindHandle = fHandle = FindFirstFileA(Path.c_str(), F.FindData );
    if (INVALID_HANDLE_VALUE != fHandle) {
       auto res = FindMatchingFile(F);
       if (res != 0)
@@ -467,7 +467,7 @@ int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
 int FindNext( TSearchRec &F )
 {
 #if defined(_WIN32)
-   return FindNextFile(F.FindHandle, F.FindData ) ? FindMatchingFile(F) : GetLastError();
+   return FindNextFileA(F.FindHandle, F.FindData ) ? FindMatchingFile(F) : GetLastError();
 #else
    return FindMatchingFile(F);
 #endif
@@ -541,12 +541,12 @@ double Now()
 #endif
 }
 
-/*static double EncodeDateTime( uint16_t Year, uint16_t Month, uint16_t Day, uint16_t Hour, uint16_t Minute, uint16_t Second, uint16_t Millisecond )
+double EncodeDateTime( const uint16_t Year, const uint16_t Month, const uint16_t Day, const uint16_t Hour, const uint16_t Minute, const uint16_t Second, const uint16_t Millisecond )
 {
    const double integerPart = EncodeDate( Year, Month, Day );
    const double fractionalHoursInDay = static_cast<double>( Millisecond ) / 36e5 + static_cast<double>( Second ) / 3600.0 + static_cast<double>( Minute ) / 60.0 + Hour;
    return integerPart + fractionalHoursInDay / 24.0;
-}*/
+}
 
 static bool DecodeDateFully(const double DateTime, uint16_t &Year, uint16_t &Month, uint16_t &Day, uint16_t &DOW)
 {
@@ -681,6 +681,59 @@ void IntToStr( int64_t n, char *res, size_t &len )
       res[w2++] = res[w++];
    len = static_cast<size_t>( w2 );
    res[len] = '\0';
+}
+
+double EncodeTime( const uint16_t hour, const uint16_t min, const uint16_t sec, const uint16_t msec) {
+   return ( hour * 3600000.0 + min * 60000 + sec * 1000 + msec ) / ( 24 * 3600000 );
+}
+
+double FileDateToDateTime( int fd )
+{
+#if defined(_WIN32)
+   LongRec rec;
+   static_assert( sizeof( int ) == sizeof( LongRec ) );
+   std::memcpy( &rec, &fd, sizeof( int ) );
+   return EncodeDate( ( rec.hi >> 9 ) + 1980, ( rec.hi >> 5 ) & 15, rec.hi & 31 ) +
+      EncodeTime(rec.lo >> 11, (rec.lo >> 5) & 63, (rec.lo & 31) << 1, 0);
+#else
+   tm ut {};
+   time_t tim;
+   tim = fd;
+   localtime_r( &tim, &ut );
+   return EncodeDate( ut.tm_year + 1900, ut.tm_mon + 1, ut.tm_mday ) +
+      EncodeTime( ut.tm_hour, ut.tm_min, ut.tm_sec, 0 );
+#endif
+}
+
+int DateTimeToFileDate( double dt )
+{
+   uint16_t year, month, day;
+   DecodeDate( dt, year, month, day );
+   if( year < 1980 || year > 2107 ) return 0;// out of range
+   uint16_t hour, min, sec, msec;
+   DecodeTime( dt, hour, min, sec, msec );
+#if defined(_WIN32)
+   LongRec lr {
+      ( sec >> 1 ) | ( min << 5 ) | ( hour << 11 ),
+      day | ( month << 5 ) | ( (year - 1980) << 9 )
+   };
+   static_assert( sizeof( LongRec ) == sizeof( int ) );
+   int res;
+   std::memcpy( &res, &lr, sizeof( int ) );
+   return res;
+#else
+   tm tm;
+   tm.tm_sec = sec;
+   tm.tm_min = min;
+   tm.tm_hour = hour;
+   tm.tm_mday = day;
+   tm.tm_mon = month - 1;
+   tm.tm_year = year - 1900;
+   tm.tm_wday = 0; /* ignored anyway */
+   tm.tm_yday = 0; /* ignored anyway */
+   tm.tm_isdst = -1;
+   return static_cast<int>(mktime( &tm ));
+#endif
 }
 
 static void initialization()

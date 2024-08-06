@@ -35,19 +35,19 @@ struct P3File;
 
 namespace gdlib::gmsgen
 {
-using TAnsiCharArray = std::array<char, global::gmsspecs::BigIndex>;
+using TAnsiCharArray = char[global::gmsspecs::BigIndex+1]; //std::array<char, global::gmsspecs::BigIndex>;
 using PAnsiCharArray = TAnsiCharArray *;
-using DoubleArray = std::array<double, global::gmsspecs::BigIndex>;
+using DoubleArray = double[global::gmsspecs::BigIndex+1]; //std::array<double, global::gmsspecs::BigIndex>;
 using PDoubleArray = DoubleArray *;
 using PTextFile = rtl::p3io::P3File *;
 
-using LongIntArray = std::array<int, global::gmsspecs::BigIndex>;
+using LongIntArray = int[global::gmsspecs::BigIndex+1]; //std::array<int, global::gmsspecs::BigIndex>;
 using PLongIntArray = LongIntArray *;
 
-using TBooleanArray = std::array<bool, global::gmsspecs::BigIndex>;
+using TBooleanArray = bool[global::gmsspecs::BigIndex+1]; // std::array<bool, global::gmsspecs::BigIndex>;
 using PBooleanArray = TBooleanArray *;
 
-using TByteDataArray = std::array<uint8_t, global::gmsspecs::BigIndex>;
+using TByteDataArray = uint8_t[global::gmsspecs::BigIndex]; // std::array<uint8_t, global::gmsspecs::BigIndex>;
 using PByteDataArray = TByteDataArray *;
 
 enum tfileaction : uint8_t
