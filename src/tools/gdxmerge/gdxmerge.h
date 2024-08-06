@@ -1,7 +1,6 @@
 #ifndef GDX_GDXMERGE_H
 #define GDX_GDXMERGE_H
 
-#include <ctime>
 #include <string>
 #include <vector>
 #include <cstdint>
@@ -94,7 +93,8 @@ public:
    void AddToExcludeList( const std::string &item );
 };
 
-std::string FormatDateTime( const std::tm &dt );
+std::string FormatDateTime( uint16_t Year, uint16_t Month, uint16_t Day,
+                            uint16_t Hour, uint16_t Min, uint16_t Sec );
 
 bool GetParameters( int argc, const char *argv[] );
 

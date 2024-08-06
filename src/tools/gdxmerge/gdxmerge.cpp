@@ -579,23 +579,17 @@ void TSymbolList::AddToExcludeList( const std::string &item )
    ExcludeList.emplace_back( item );
 }
 
-std::string FormatDateTime( const std::tm &dt )
+std::string FormatDateTime( const uint16_t Year, const uint16_t Month, const uint16_t Day,
+                            const uint16_t Hour, const uint16_t Min, const uint16_t Sec )
 {
-   auto int2 = []( const int n ) -> std::string {
+   auto Int2 = []( const int n ) -> std::string {
       std::ostringstream oss;
       oss << std::setw( 2 ) << std::setfill( '0' ) << n;
       return oss.str();
    };
 
-   const int year { dt.tm_year + 1900 },
-           month { dt.tm_mon + 1 },
-           day { dt.tm_mday },
-           hour { dt.tm_hour },
-           min { dt.tm_min },
-           sec { dt.tm_sec };
-
-   return int2( year ) + '/' + int2( month ) + '/' + int2( day ) + ' ' +
-          int2( hour ) + ':' + int2( min ) + ':' + int2( sec );
+   return Int2( Year ) + '/' + Int2( Month ) + '/' + Int2( Day ) + ' ' +
+          Int2( Hour ) + ':' + Int2( Min ) + ':' + Int2( Sec );
 }
 
 bool GetParameters( const int argc, const char *argv[] )
