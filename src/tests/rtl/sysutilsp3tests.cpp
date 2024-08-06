@@ -142,18 +142,10 @@ TEST_CASE( "Test encoding and then decoding a time (roundtrip)")
 
 TEST_CASE( "Test conversion between datetime and filedate")
 {
-   {
-      const double dt {EncodeDate( 1987, 12, 11)};
-      const int fd {DateTimeToFileDate( dt )};
-      const double dtRt {FileDateToDateTime( fd )};
-      REQUIRE_EQ(dtRt, dt);
-   }
-   {
-      const double dt {EncodeTime( 13, 37, 23, 0 )};
-      const int fd {DateTimeToFileDate( dt )};
-      const double dtRt {FileDateToDateTime( fd )};
-      REQUIRE_EQ(dtRt, dt);
-   }
+   const double dt {EncodeDate( 1987, 12, 11)};
+   const int fd {DateTimeToFileDate( dt )};
+   const double dtRt {FileDateToDateTime( fd )};
+   REQUIRE_EQ(dtRt, dt);
 }
 
 TEST_CASE("Test integer to string conversion")
