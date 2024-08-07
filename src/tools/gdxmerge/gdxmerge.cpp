@@ -732,13 +732,13 @@ int main( const int argc, const char *argv[] )
    // if( std::strcmp( argv[1], "AUDIT" ) == 0 )
    // {
    //    std::cout << gdlGetAuditLine() << std::endl;
-   //    return 0;
+   //    return {};
    // }
 
    if( argc == 1 || ( argc == 2 && std::strcmp( argv[1], "/?" ) == 0 ) )
    {
       Usage();
-      return 0;
+      return {};
    }
 
    if( !gdxGetReady( Msg.data(), Msg.length() ) )
