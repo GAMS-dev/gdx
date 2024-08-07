@@ -267,7 +267,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
       while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
       {
          if( Dim > 0 )
-            for( D = FDim; D <= Dim; D++ )
+            for( D = FDim - 1; D < Dim; D++ )
                IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
          if( SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
          {
@@ -329,7 +329,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
          gdxDataReadStrStart( PGX, N, &NrRecs );
          while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
          {
-            for( D = FDim; D <= SyObj->SyDim; D++ )
+            for( D = FDim - 1; D < SyObj->SyDim; D++ )
                IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
             if( SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
             {
