@@ -468,7 +468,7 @@ void TSymbolList::WriteNameList()
 
 void TSymbolList::KeepNewAcronyms( const gdxHandle_t &PGX )
 {
-   int NN = gdxAcronymNextNr( PGX, -1 );
+   int NN { gdxAcronymNextNr( PGX, -1 ) };
    if( NN <= NextAcroNr )
       return;
 
