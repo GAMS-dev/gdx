@@ -17,7 +17,10 @@ TCmdParams::TCmdParams() = default;
 
 // Brief:
 //   Release allocated memory and destroy the object
-TCmdParams::~TCmdParams() = default;
+TCmdParams::~TCmdParams()
+{
+   ClearParams();
+}
 
 void TCmdParams::ClearParams()
 {
@@ -54,7 +57,7 @@ int TCmdParams::FindKeyV( int V )
 //   a file with additional parameters.
 bool TCmdParams::CrackCommandLine( const int ParamCount, const char *ParamStr[] )
 {
-   return AddParameters( 0, "", ParamCount, ParamStr );
+   return AddParameters( 0, {}, ParamCount, ParamStr );
 }
 
 // Brief:
@@ -352,7 +355,10 @@ bool TCmdParams::HasKey( int v )
 
 TParamRec TCmdParams::GetParams( int n )
 {
-   return n >= 0 && n < static_cast<int>( FParList.size() ) ? FParList[n] : TParamRec { static_cast<int>( CmdParamStatus::ke_empty ), "" };
+   if( n >= 0 && n < static_cast<int>( FParList.size() ) )
+      return FParList[n];
+   else
+      return TParamRec { static_cast<int>( CmdParamStatus::ke_empty ), {} };
 }
 
 int TCmdParams::GetParamCount() const
