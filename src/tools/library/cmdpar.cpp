@@ -311,7 +311,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       const int kw = NextKey( ks );
       if( kw == static_cast<int>( CmdParamStatus::ke_empty ) )
          break;
-      FParList.at( Insp ) = TParamRec { kw, ks };
+      FParList.insert( { Insp, TParamRec { kw, ks } } );
       Insp++;
    } while( true );
 
