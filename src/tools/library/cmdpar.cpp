@@ -234,6 +234,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             sp++;
             Brk = '"';
          }
+
          std::string fname;
          {
             int k { sp };
@@ -247,6 +248,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             fname = Src.substr( sp, k - sp );
             sp = k;
          }
+
          if( sp < static_cast<int>( Src.length() ) && Src.at( sp ) == '"' )
             sp++;
          if( gdlib::strutilx::ExtractFileExtEx( fname ).empty() )
