@@ -85,7 +85,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       if( xr <= maxr )
       {
          std::set<char> StopSet;
-         if( FParams[xr] != '"' )
+         if( FParams.at( xr ) != '"' )
             StopSet = { ' ', '\t' };
          else
          {
@@ -95,7 +95,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
          StopSet.insert( '=' );
          int xk {};
          for( int k { 1 }; k <= maxr - xr + 1; k++ )
-            if( utils::in( FParams[xr + k - 1], StopSet ) )
+            if( utils::in( FParams.at( xr + k - 1 ), StopSet ) )
             {
                xk = k;
                break;
@@ -210,7 +210,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       {
          int fnd { -1 };
          for( int k { sp }; k < static_cast<int>( Src.length() ); k++ )
-            if( Src[k] == '@' )
+            if( Src.at( k ) == '@' )
             {
                fnd = k;
                break;
@@ -228,7 +228,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             break;
          }
          char Brk;
-         if( Src[sp] != '"' )
+         if( Src.at( sp ) != '"' )
             Brk = ' ';
          else
          {
@@ -238,7 +238,8 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
          std::string fname;
          {
             int k { sp };
-            while( k < static_cast<int>( Src.length() ) && Src[k] != Brk ) k++;
+            while( k < static_cast<int>( Src.length() ) && Src.at( k ) != Brk )
+               k++;
             if( k > static_cast<int>( Src.length() ) )
             {
                result = false;
@@ -247,7 +248,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             fname = Src.substr( sp, k - sp );
             sp = k;
          }
-         if( sp < static_cast<int>( Src.length() ) && Src[sp] == '"' )
+         if( sp < static_cast<int>( Src.length() ) && Src.at( sp ) == '"' )
             sp++;
          if( gdlib::strutilx::ExtractFileExtEx( fname ).empty() )
             fname = gdlib::strutilx::ChangeFileExtEx( fname, ".txt" );
@@ -263,7 +264,8 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             while( getline( fi, line ) )
             {
                std::vector<std::string> strings = library::splitString( line, ' ' );
-               for( int i = 0; i < MAXBUF; i++ ) sBuf[i] = strings[i];
+               for( int i = 0; i < MAXBUF; i++ )
+                  sBuf.at( i ) = strings.at( i );
                if( sBuf.at( 1 ).empty() || sBuf.at( 1 ).at( 1 ) == '*' )
                   continue;
                Dest.append( " " );
@@ -309,12 +311,12 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       const int kw = NextKey( ks );
       if( kw == static_cast<int>( CmdParamStatus::ke_empty ) )
          break;
-      FParList[Insp] = TParamRec { kw, ks };
+      FParList.at( Insp ) = TParamRec { kw, ks };
       Insp++;
    } while( true );
 
    if( !HasKey( static_cast<int>( CmdParamStatus::kp_input ) ) && GetParams( 0 ).Key == static_cast<int>( CmdParamStatus::ke_unknown ) )
-      FParList[0].Key = static_cast<int>( CmdParamStatus::kp_input );
+      FParList.at( 0 ).Key = static_cast<int>( CmdParamStatus::kp_input );
 
    return result;
 }
@@ -358,7 +360,7 @@ bool TCmdParams::HasKey( int v )
 TParamRec TCmdParams::GetParams( int n )
 {
    if( n >= 0 && n < static_cast<int>( FParList.size() ) )
-      return FParList[n];
+      return FParList.at( n );
    else
       return TParamRec { static_cast<int>( CmdParamStatus::ke_empty ), {} };
 }
