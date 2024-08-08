@@ -206,8 +206,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       bool result { true };
       Dest.clear();
       int sp {};
-      do
-      {
+      do {
          int fnd { -1 };
          for( int k { sp }; k < static_cast<int>( Src.length() ); k++ )
             if( Src.at( k ) == '@' )
