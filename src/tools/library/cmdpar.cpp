@@ -142,25 +142,20 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
                return static_cast<int>( CmdParamStatus::ke_unknown );
             }
          }
-         else
+         else if( result >= static_cast<int>( CmdParamStatus::kk_big ) )
          {
-            // TODO: Remove?
-            // result = FKeyList.at( result ).second;
-            if( result >= static_cast<int>( CmdParamStatus::kk_big ) )
+            result -= static_cast<int>( CmdParamStatus::kk_big );
+            SkipBl();
+            if( xr <= maxr && FParams.at( xr ) == '=' )
+               xr++;
+            s = NextToken();
+            if( s.empty() )
+               return static_cast<int>( CmdParamStatus::ke_noparam );
+            else
             {
-               result -= static_cast<int>( CmdParamStatus::kk_big );
-               SkipBl();
-               if( xr <= maxr && FParams.at( xr ) == '=' )
-                  xr++;
-               s = NextToken();
-               if( s.empty() )
-                  return static_cast<int>( CmdParamStatus::ke_noparam );
-               else
-               {
-                  int k { static_cast<int>( s.length() ) };
-                  if( k >= 2 && s.front() == '\'' && s.back() == '\'' )
-                     s = s.substr( 1, k - 2 );
-               }
+               int k { static_cast<int>( s.length() ) };
+               if( k >= 2 && s.front() == '\'' && s.back() == '\'' )
+                  s = s.substr( 1, k - 2 );
             }
          }
          return result;
