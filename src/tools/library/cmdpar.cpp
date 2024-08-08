@@ -305,8 +305,8 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       result = ExpandFiles( wrk, FParams );
    }
 
-   xr = 1;
-   maxr = static_cast<int>( FParams.length() );
+   xr = 0;
+   maxr = static_cast<int>( FParams.length() ) - 1;
    do {
       std::string ks;
       const int kw = NextKey( ks );
