@@ -148,7 +148,8 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
          }
          else
          {
-            result = FKeyList.at( result ).second;
+            // TODO: Remove?
+            // result = FKeyList.at( result ).second;
             if( result >= static_cast<int>( CmdParamStatus::kk_big ) )
             {
                result -= static_cast<int>( CmdParamStatus::kk_big );
