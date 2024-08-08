@@ -161,8 +161,8 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
                else
                {
                   int k { static_cast<int>( s.length() ) };
-                  if( k >= 3 && s.front() == '\'' && s.back() == '\'' )
-                     s = s.substr( 1, k - 3 );
+                  if( k >= 2 && s.front() == '\'' && s.back() == '\'' )
+                     s = s.substr( 1, k - 2 );
                }
             }
          }
