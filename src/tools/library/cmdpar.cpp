@@ -123,16 +123,12 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       else
       {
          int result { -1 };
-         int counter {};
          for( const auto &pair: FKeyList )
-         {
-            if( pair.first == T )
+            if( gdlib::strutilx::LowerCase( pair.first ) == gdlib::strutilx::LowerCase( T ) )
             {
-               result = counter;
+               result = pair.second;
                break;
             }
-            counter++;
-         }
          if( result < 0 )
          {
             if( T.front() == '@' )
