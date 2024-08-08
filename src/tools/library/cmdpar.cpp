@@ -186,12 +186,13 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
                if( S.front() != '@' )
                   result.append( " \"" + S + '"' );
                else
+                  // Keep double-quote after @ sign
                   result.append( " @\"" + S.substr( 1 ) + '"' );
             }
             else
             {
                result.append( ' ' + S.substr( 0, k ) );
-               result.append( " \"" + S.substr( k + 1 ) + '"' );
+               result.append( " \"" + S.substr( k ) + '"' );
             }
          }
       }
