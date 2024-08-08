@@ -75,7 +75,8 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
    int xr, maxr;
 
    auto SkipBl = [&]() {
-      for( ; xr <= maxr && FParams[xr] <= ' '; xr++ );
+      while( xr <= maxr && FParams.at( xr ) <= ' ' )
+         xr++;
    };
 
    auto NextToken = [&]() -> std::string {
