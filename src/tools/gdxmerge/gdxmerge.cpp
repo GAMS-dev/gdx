@@ -193,6 +193,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
       gdxSymbolInfoX( PGX, N, &DummyCount, &SySubTyp, SyText.data() );
       if( CheckError( Dim < GMS_MAX_INDEX_DIM, "Dimension too large" ) )
          continue;
+
       SyTyp = gdxSyType( SyITyp );
       if( SyITyp == GMS_DT_ALIAS )
       {
@@ -200,6 +201,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
          SyTyp = dt_set;
          SySubTyp = 0;
       }
+
       SyIndx = gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::IndexOf( SyName.data() );
       if( SyIndx < 0 )
       {
@@ -207,11 +209,10 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
          if( SyIndx < 0 )
             continue;
       }
-      SyObj = gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyIndx );
 
+      SyObj = gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetObject( SyIndx );
       if( SyObj->SyData == nullptr )
          continue;
-
       if( SyObj->SySkip )
          continue;
 
