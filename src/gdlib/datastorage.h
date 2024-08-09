@@ -151,6 +151,24 @@ public:
       return FCount * FTotalSize;
    }
 
+   int* AllocIndex()
+   {
+#ifdef USE_GMSHEAP
+      return static_cast<int*>(MyHeap.XGetMem( FKeySize ));
+#else
+      return new int[FDimension];
+#endif
+   }
+
+   void FreeIndex(int* p)
+   {
+#ifdef USE_GMSHEAP
+      MyHeap.XFreeMem( p, FKeySize );
+#else
+      delete[] p;
+#endif
+   }
+
    RecType *AddItem( const KeyType *AKey, const ValueType *AData )
    {
 #if defined( USE_GMSHEAP )

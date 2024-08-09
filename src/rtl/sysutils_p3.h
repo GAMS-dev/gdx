@@ -25,6 +25,14 @@
 
 #pragma once
 
+#if defined(_WIN32)
+// Forward declarations of Windows header stuff
+typedef void *HANDLE;
+struct _WIN32_FIND_DATAA;
+#else
+#include <dirent.h>
+#endif
+
 #include <cstdint>                 // for uint16_t, int64_t, uint32_t
 #include <array>                    // for array
 #include <string>                   // for string, basic_string
@@ -100,6 +108,9 @@ std::string ExcludeTrailingPathDelimiter( const std::string &S );
 std::string IncludeTrailingPathDelimiter( const std::string &S );
 
 bool tryEncodeDate( uint16_t year, uint16_t month, uint16_t day, double &date );
+double EncodeTime( uint16_t hour, uint16_t min, uint16_t sec, uint16_t msec);
+double EncodeDate( uint16_t Year, uint16_t Month, uint16_t Day );
+double EncodeDateTime( uint16_t Year, uint16_t Month, uint16_t Day, uint16_t Hour, uint16_t Minute, uint16_t Second, uint16_t Millisecond );
 double Now();
 
 void DecodeTime( global::delphitypes::tDateTime DateTime, uint16_t &Hour, uint16_t &Min, uint16_t &Sec, uint16_t &Msec );
@@ -118,13 +129,25 @@ constexpr std::array<TDayTable, 2> MonthDays {{
 int LastDelimiter( const char *Delimiters, const std::string &S );
 int LastDelimiter( const std::string &Delimiters, const std::string &S );
 
+bool CreateDir(const std::string &Dir);
+bool RemoveDir(const std::string &Dir);
+
 using TFileName = std::string;
 
 struct TSearchRec {
    int Time, Size, Attr;
    TFileName Name;
    int ExcludeAttr;
-   // ...
+#if defined(_WIN32)
+   HANDLE FindHandle {};
+   _WIN32_FIND_DATAA * FindData {};
+#else
+   DIR *FindHandle {};
+#endif
+   std::string PathOnly, Pattern;
+   uint32_t mode;
+
+   ~TSearchRec();
 };
 
 int FindFirst( const std::string &Path, int Attr, TSearchRec &F );
@@ -135,5 +158,15 @@ void Sleep( uint32_t milliseconds );
 
 std::string IntToStr(int64_t N);
 void IntToStr(int64_t N, char *res, size_t &len );
+
+double FileDateToDateTime( int fd );
+int DateTimeToFileDate( double dt );
+
+union LongRec {
+   struct {
+      uint16_t lo, hi;
+   };
+   uint8_t bytes[4];
+};
 
 }// namespace rtl::sysutils_p3

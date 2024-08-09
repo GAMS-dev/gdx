@@ -138,7 +138,7 @@ build-debug-leg:
 
 build-deg:
   stage: build
-  tags: [macos]
+  tags: [carla] # macOS x64
   script:
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
@@ -224,7 +224,7 @@ test-leg:
 
 test-deg:
   stage: test
-  tags: [macos]
+  tags: [carla] # macOS x64
   needs: [build-deg,install-gamsdist-deg]
   script:
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`

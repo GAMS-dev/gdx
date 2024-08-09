@@ -28,6 +28,8 @@
 #include "../doctest.h"
 #include <string>
 #include <chrono>
+#include <filesystem>
+#include <algorithm>
 
 using namespace std::literals::string_literals;
 using namespace rtl::sysutils_p3;
@@ -119,22 +121,72 @@ TEST_CASE( "Test decoding a date" )
    REQUIRE_EQ(31, day);
 }
 
+TEST_CASE( "Test encoding and then decoding a date (roundtrip)")
+{
+   uint16_t year, month, day;
+   DecodeDate( EncodeDate(2024, 8, 6), year, month, day );
+   REQUIRE_EQ(2024, year);
+   REQUIRE_EQ(8, month);
+   REQUIRE_EQ(6, day);
+}
+
+TEST_CASE( "Test encoding and then decoding a time (roundtrip)")
+{
+   uint16_t h, m, s, ms;
+   DecodeTime( EncodeTime( 10, 52, 23, 42), h, m, s, ms);
+   REQUIRE_EQ(10, h);
+   REQUIRE_EQ(52, m);
+   REQUIRE_EQ(23, s);
+   REQUIRE_EQ(42, ms);
+}
+
+TEST_CASE( "Test conversion between datetime and filedate")
+{
+   const double dt {EncodeDate( 1987, 12, 11)};
+   const int fd {DateTimeToFileDate( dt )};
+   const double dtRt {FileDateToDateTime( fd )};
+   REQUIRE_EQ(dtRt, dt);
+}
+
 TEST_CASE("Test integer to string conversion")
 {
-   REQUIRE_EQ("23"s, rtl::sysutils_p3::IntToStr( 23 ));
-   REQUIRE_EQ("1024"s, rtl::sysutils_p3::IntToStr( 1024 ));
-   REQUIRE_EQ(std::to_string(std::numeric_limits<int>::max()), rtl::sysutils_p3::IntToStr( std::numeric_limits<int>::max() ));
-   REQUIRE_EQ("-23"s, rtl::sysutils_p3::IntToStr( -23 ));
-   REQUIRE_EQ("0"s, rtl::sysutils_p3::IntToStr( 0 ));
+   REQUIRE_EQ("23"s, IntToStr( 23 ));
+   REQUIRE_EQ("1024"s, IntToStr( 1024 ));
+   REQUIRE_EQ(std::to_string(std::numeric_limits<int>::max()), IntToStr( std::numeric_limits<int>::max() ));
+   REQUIRE_EQ("-23"s, IntToStr( -23 ));
+   REQUIRE_EQ("0"s, IntToStr( 0 ));
    std::array<char, 256> buf {};
    size_t len {};
-   rtl::sysutils_p3::IntToStr( 23, buf.data(), len );
+   IntToStr( 23, buf.data(), len );
    REQUIRE_EQ(2, len);
    REQUIRE_EQ(buf.front(), '2');
    REQUIRE_EQ(buf[1], '3');
    REQUIRE_EQ(buf[2], '\0');
    for(int i{}; i<123; i++)
-      REQUIRE_EQ(std::to_string(i), rtl::sysutils_p3::IntToStr(i));
+      REQUIRE_EQ(std::to_string(i), IntToStr(i));
+}
+
+TEST_CASE("Test Find{First,Next,Close}")
+{
+   constexpr int nfiles {10};
+   for(int i{}; i<nfiles; i++)
+   {
+      const auto fn {"abc"s + std::to_string( i+1 ) + ".txt"s};
+      std::ofstream ofs{fn};
+      REQUIRE(std::filesystem::is_regular_file( fn ));
+   }
+   TSearchRec F;
+   REQUIRE_EQ(0, FindFirst( "abc*.txt", faAnyFile, F ));
+   std::vector collectedFiles {F.Name};
+   while(!FindNext( F ))
+      collectedFiles.push_back( F.Name );
+   REQUIRE_EQ(nfiles, collectedFiles.size());
+   for(int i{}; i<nfiles; i++)
+   {
+      const auto fn {"abc"s + std::to_string( i+1 ) + ".txt"s};
+      REQUIRE(std::find(collectedFiles.begin(), collectedFiles.end(), fn) != collectedFiles.end());
+      std::filesystem::remove( fn );
+   }
 }
 
 TEST_SUITE_END();

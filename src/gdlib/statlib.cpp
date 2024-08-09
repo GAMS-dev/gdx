@@ -45,13 +45,28 @@ static gdlib::statlibobj::TGMSLogStream *GMSLogObj {};
 static gdlib::statlibobj::TGMSStatusStream *GMSStatusObj {};
 static std::string msg;
 
-void registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem );
+void registerWriteCallback( stattypes::tgwrite *fptr, void *usermem );
 void initialization();
 void finalization();
+
+bool statusFileOpen( const tfileaction AAction, std::string &msg )
+{
+   return GMSStatusObj->StatusFileOpen( AAction, msg );
+}
 
 void statusClose()
 {
    GMSStatusObj->StatusClose();
+}
+
+void gcstat( const std::string &s )
+{
+   GMSStatusObj->StatusWriteLn( s );
+}
+
+void gcstatPChar( const char *p )
+{
+   GMSStatusObj->StatusWrite( p );
 }
 
 void registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem )
@@ -66,7 +81,7 @@ void gstatMessage( const std::string &s )
       GMSLogObj->LogMessage( s );
 }
 
-void dumpfilename( const std::string &prfx, bool enabled, const std::string &what, const std::string &gs, tfileaction fa, int ioResOrNeg )
+void dumpfilename( const std::string &prfx, const bool enabled, const std::string &what, const std::string &gs, const tfileaction fa, const int ioResOrNeg )
 {
    GMSLogObj->LogDumpFilename( prfx, enabled, what, gs, fa, ioResOrNeg );
 }
@@ -91,12 +106,12 @@ void GcLog( const std::string &s )
    GMSLogObj->LogWriteLn( s );
 }
 
-void gstatSetLogEnabled( bool enablelog )
+void gstatSetLogEnabled( const bool enablelog )
 {
    GMSLogObj->setLogEnabled( enablelog );
 }
 
-void gstatSetShowOSMem( int showOSMemory )
+void gstatSetShowOSMem( const int showOSMemory )
 {
    GMSLogObj->SetOSMemory( showOSMemory );
 }
@@ -116,32 +131,32 @@ void GcStatWritePlain( const std::string &s )
    GMSStatusObj->StatusWritePlain( s );
 }
 
-bool gstatOpen( int Astat, tfileaction AAction, const std::string &Afn )
+bool gstatOpen( const int Astat, const tfileaction AAction, const std::string &Afn )
 {
    return GMSLogObj->LogOpen( Astat, AAction, Afn );
 }
 
-void gstatLineNr( int N )
+void gstatLineNr( const int N )
 {
    GMSLogObj->LogLineNr( N );
 }
 
-void gstatTraceLevel( int N )
+void gstatTraceLevel( const int N )
 {
    GMSLogObj->setTraceLevel( N );
 }
 
-void gstatFileAnchor( bool err, const std::string &fn, int line, int col )
+void gstatFileAnchor( const bool err, const std::string &fn, const int line, const int col )
 {
    GMSLogObj->LogFileAnchor( err, fn, line, col );
 }
 
-void gstatAnchor( int N )
+void gstatAnchor( const int N )
 {
    GMSLogObj->LogAnchor( N );
 }
 
-void gstatFileName( const std::string &fn, int Lev )
+void gstatFileName( const std::string &fn, const int Lev )
 {
    GMSLogObj->LogFileName( fn, Lev );
 }
@@ -151,7 +166,7 @@ int gstatGetTraceLevel()
    return GMSLogObj->getTraceLevel();
 }
 
-void gstatSetIDErun( bool IDErun )
+void gstatSetIDErun( const bool IDErun )
 {
    GMSLogObj->setIDErun( IDErun );
 }
@@ -171,15 +186,25 @@ void gstatReOpen()
    return GMSLogObj->LogReOpen();
 }
 
-void gstatMemory( double M )
+void gstatMemory( const double M )
 {
    if(GMSLogObj)
       GMSLogObj->LogMemory( M );
 }
 
-void gstatErrorCnt( int N )
+void gstatErrorCnt( const int N )
 {
    return GMSLogObj->LogErrrorCnt( N );
+}
+
+void gstatFreshen()
+{
+   GMSLogObj->freshen();
+}
+
+void gstatFreshenEx()
+{
+   GMSLogObj->freshenEx();
 }
 
 bool gstatLogEnabled()

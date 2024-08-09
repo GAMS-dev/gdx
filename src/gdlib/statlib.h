@@ -115,9 +115,17 @@ bool statusErrorNextJac( int &row, int &col );
 bool statusErrorDetail( int &cnt, std::string &msg );
 void statusErrorFree();
 
+void statusSetRowCol(int rowmax, int colmax);
+
+bool statusFileOpen(gmsgen::tfileaction AAction, std::string &msg);
+void statusClose();
+
+void gcstat(const std::string &s);
+void gcstatPChar(const char *p);
+
 // ...
 
-void statusClose();
+// you need to adjust gmoxxx\gmodoorg.pas
 
 void registerWriteCallback( gdlib::stattypes::tgwrite fptr, void *usermem );
 
@@ -137,6 +145,14 @@ void gstatReOpen();
 
 void gstatMemory(double M);
 void gstatErrorCnt( int N );
+
+// check if the log is "fresh enough", update if not
+void gstatFreshen();
+/*
+*check if the log is "fresh enough", update if not:
+called at regular time intervals, e.g. 200 ticks
+*/
+void gstatFreshenEx();
 
 void dumpfilename( const std::string &prfx, bool enabled, const std::string &what, const std::string &gs, gmsgen::tfileaction fa, int ioResOrNeg );
 
