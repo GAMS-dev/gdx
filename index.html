@@ -153,6 +153,12 @@ Accessing GDX from a custom application</h2>
 <h2><a class="anchor" id="autotoc_md6"></a>
 Building GDX from source</h2>
 <p >The GDX library is written in C++17 and built via <a href="https://cmake.org/">CMake</a>.</p>
+<p >The fastest way to build the GDX library (static and dynamic) locally is by running the following spells: </p><div class="fragment"><div class="line">git clone https://github.com/GAMS-dev/gdx.git</div>
+<div class="line">cd gdx</div>
+<div class="line">git clone https://github.com/madler/zlib zlib</div>
+<div class="line">cmake -DNO_TESTS=ON -DNO_EXAMPLES=ON .</div>
+<div class="line">cmake --build .</div>
+</div><!-- fragment --><p> Running this on Linux creates the dynamic library <code>libgdxcclib64.so</code> and the static library <code>libgdx-static.a</code>.</p>
 <p >This repository contains a GitLab CI YAML that describes a pipeline which</p>
 <ul>
 <li>builds GDX for all supported platforms (Windows, macOS, Linux) with Doxygen documentation, libraries, and examples,</li>
