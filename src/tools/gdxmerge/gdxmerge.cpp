@@ -258,13 +258,14 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
          continue;
       if( ( SyTyp == dt_var || SyTyp == dt_equ ) && CheckError( SySubTyp == SyObj->SySubTyp, "Var/Equ subtypes do not match" ) )
          continue;
+
       if( SyObj->SyExplTxt.empty() )
          SyObj->SyExplTxt = SyText;
       else if( !SyText.empty() )
          CheckError( SyObj->SyExplTxt == SyText, "Explanatory text is different" );
+
       IndxI[0] = AddUEL( FileId );
       gdxDataReadStrStart( PGX, N, &NrRecs );
-
       while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
       {
          if( Dim > 0 )
