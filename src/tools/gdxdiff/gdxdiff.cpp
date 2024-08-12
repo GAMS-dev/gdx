@@ -1131,11 +1131,11 @@ int main( const int argc, const char *argv[] )
    }
 
    gdxDataWriteStrStart( PGXDIF, ID.data(), {}, 1, dt_set, 0 );
-   strcpy( StrKeysPtrs[1], "File1" );
+   strcpy( StrKeysPtrs[0], "File1" );
    gdxAddSetText( PGXDIF, InFile1.data(), &StrNr );
    StrVals[GMS_VAL_LEVEL] = StrNr;
    gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), StrVals );
-   strcpy( StrKeysPtrs[1], "File2" );
+   strcpy( StrKeysPtrs[0], "File2" );
    gdxAddSetText( PGXDIF, InFile2.data(), &StrNr );
    StrVals[GMS_VAL_LEVEL] = StrNr;
    gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), StrVals );
