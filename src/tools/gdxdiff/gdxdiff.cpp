@@ -661,7 +661,8 @@ void CompareSy( const int Sy1, const int Sy2 )
             Flg2 = gdxDataReadMap( PGX2, 0, Keys2, Vals2, &AFDim ) != 0;
          }
       }
-      if( C < 0 )
+      // Change in status happens inside ShowInsert
+      else if( C < 0 )
       {
          ShowInsert( c_ins1, Keys1, Vals1 );
          if( matrixFile )
@@ -677,7 +678,6 @@ void CompareSy( const int Sy1, const int Sy2 )
          else
             Flg2 = gdxDataReadMap( PGX2, 0, Keys2, Vals2, &AFDim ) != 0;
       }
-      // Change in status happens inside ShowInsert
    }
 
    while( Flg1 )
