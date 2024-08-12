@@ -702,7 +702,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 
 label999:
    if( !( Status == TStatusCode::sc_same || Status == TStatusCode::sc_dim10 ) )
-      StatusTable[Id] = Status;
+      StatusTable.insert( { Id, Status } );
 }
 
 bool GetAsDouble( const library::short_string &S, double &V )
@@ -1063,7 +1063,7 @@ int main( const int argc, const char *argv[] )
       while( gdxSymbolInfo( PGX1, N, ID.data(), &Dim, &iST ) != 0 )
       {
          if( IDsOnly == nullptr || IDsOnly->IndexOf( ID.data() ) >= 0 )
-            IDTable[ID] = N;
+            IDTable.insert( { ID, N } );
          N++;
       }
    }
@@ -1074,7 +1074,7 @@ int main( const int argc, const char *argv[] )
       if( gdxFindSymbol( PGX2, pair.first.data(), &NN ) != 0 )
          CompareSy( pair.second, NN );
       else
-         StatusTable[pair.first] = TStatusCode::sc_notf2;
+         StatusTable.insert( { pair.first, TStatusCode::sc_notf2 } );
    }
 
    // Find symbols in file 2 that are not in file 1
@@ -1085,7 +1085,7 @@ int main( const int argc, const char *argv[] )
       while( gdxSymbolInfo( PGX2, N, ID.data(), &Dim, &iST ) != 0 )
       {
          if( IDsOnly == nullptr || IDsOnly->IndexOf( ID.data() ) >= 0 )
-            IDTable[ID] = N;
+            IDTable.insert( { ID, N } );
          N++;
       }
    }
@@ -1094,7 +1094,7 @@ int main( const int argc, const char *argv[] )
    {
       int NN;
       if( gdxFindSymbol( PGX1, pair.first.data(), &NN ) == 0 )
-         StatusTable[pair.first] = TStatusCode::sc_notf1;
+         StatusTable.insert( { pair.first, TStatusCode::sc_notf1 } );
    }
 
    if( StatusTable.empty() )
