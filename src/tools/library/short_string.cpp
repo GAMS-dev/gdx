@@ -68,7 +68,7 @@ char short_string::back() const
 char short_string::operator[]( const uint8_t i ) const
 {
 #if defined( ENABLE_ASSERTIONS )
-   const uint8_t length { this->length() };
+   [[maybe_unused]] const uint8_t length { this->length() };
    if( i > 0 )
       assert( i < length );
    else
