@@ -121,4 +121,32 @@ std::vector<std::string> splitString( const std::string &s, const char delimiter
    return tokens;
 }
 
+bool CanBeQuoted( const char *s, const size_t slen )
+{
+   if( !s ) return false;
+   bool saw_single {}, saw_double {};
+   for( int i {}; i < (int) slen; i++ )
+   {
+      char Ch { s[i] };
+      if( Ch == '\'' )
+      {
+         if( saw_double ) return false;
+         saw_single = true;
+      }
+      else if( Ch == '\"' )
+      {
+         if( saw_single ) return false;
+         saw_double = true;
+      }
+      else if( static_cast<unsigned char>( Ch ) < ' ' )
+         return false;
+   }
+   return true;
+}
+
+bool GoodUELString( const char *s, const size_t slen )
+{
+   return slen < GLOBAL_UEL_IDENT_SIZE && CanBeQuoted( s, slen );
+}
+
 }// namespace library

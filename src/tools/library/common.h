@@ -29,6 +29,10 @@ std::string specialValueStr( int i );
 
 std::vector<std::string> splitString( const std::string &s, char delimiter );
 
+bool CanBeQuoted( const char *s, size_t slen );
+
+bool GoodUELString( const char *s, size_t slen );
+
 }// namespace library
 
 #endif//GDX_LIBRARY_H
