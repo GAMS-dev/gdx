@@ -32,6 +32,7 @@
 #include <cmath>
 
 #include "gdxmerge.h"
+#include "../library/common.h"
 #include "../library/cmdpar.h"
 #include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
@@ -375,8 +376,7 @@ bool TSymbolList::FindGDXFiles( const std::string &Path )
          }
 
          ShortName = gdlib::strutilx::ChangeFileExtEx( Rec.Name, "" );
-         // TODO if( !gdx::GoodUELString( ShortName.data(), ShortName.length() ) || utils::trim( ShortName ).empty() )
-         if( utils::trim( ShortName ).empty() )
+         if( !library::GoodUELString( ShortName.data(), ShortName.length() ) || utils::trim( ShortName ).empty() )
          {
             NewName = "File_" + std::to_string( FileList->size() + 1 );
             std::cout << "*** Filename cannot be used as a valid UEL\n"
