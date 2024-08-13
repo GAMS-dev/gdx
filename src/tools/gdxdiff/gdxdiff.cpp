@@ -928,7 +928,7 @@ int main( const int argc, const char *argv[] )
    }
 
    if( CmdParams->HasParam( static_cast<int>( KP::kp_ide ), S ) )
-      UsingIDE = !S.empty() && ( S[0] == 'Y' || S[0] == 'y' || S[0] == '1' );
+      UsingIDE = !S.empty() && ( S.front() == 'Y' || S.front() == 'y' || S.front() == '1' );
 
    CompSetText = true;
 
