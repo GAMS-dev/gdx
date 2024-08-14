@@ -2,7 +2,6 @@ stages:
   - image-build
   - apiwrap
   - fetch-scripts
-  - install-gams
   - build
   - analyze
   - test
@@ -15,13 +14,20 @@ stages:
 
 include:
   - project: 'devel/ciscripts'
-    file: .install-jobs.yml
+    ref: distributed-caching
+    file: '.shared-vars.yml'
   - project: 'devel/ciscripts'
-    file: .shared-vars.yml
+    ref: distributed-caching
+    file: '.codechecker.yml'
   - project: 'devel/ciscripts'
-    file: .image-build.yml
+    ref: distributed-caching
+    file: '.shared-snippets.yml'
   - project: 'devel/ciscripts'
-    file: .codechecker.yml
+    ref: distributed-caching
+    file: '.fetch-job.yml'
+  - project: 'devel/ciscripts'
+    ref: distributed-caching
+    file: '.image-build.yml'
 
 variables:
   extends: .shared-variables
@@ -74,7 +80,7 @@ apigenerator:
     - |
       for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h" "gdx.h" "gdxcwrap.hpp" "gdxcppwrap.h"; do
         echo "Diffing 'apifiles/$f' with 'generated/$f'"
-        if ! diff apifiles/$f generated/$f; then
+        if ! diff -w --strip-trailing-cr apifiles/$f generated/$f; then
           echo "Warning: $f stored in repo and freshly generated differ!"
         fi
       done
@@ -85,20 +91,6 @@ apigenerator:
 
 #=======================================================================================================================
 
-install-gamsdist-leg:
-  extends: .install-gams-leg
-
-install-gamsdist-deg:
-  extends: .install-gams-deg
-
-install-gamsdist-dac:
-  extends: .install-gams-dac
-
-install-gamsdist-wei:
-  extends: .install-gams-wei
-
-#=======================================================================================================================
-
 build-leg:
   stage: build
   tags: [linux]
@@ -106,10 +98,12 @@ build-leg:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
   script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-leg]
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
-    - python3 ci/report_for_log.py gcc build_log.txt warnings.xml
+    - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
@@ -126,6 +120,8 @@ build-debug-leg:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
   script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-leg]
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build . 2>&1
@@ -138,12 +134,14 @@ build-debug-leg:
 
 build-deg:
   stage: build
-  tags: [carla] # macOS x64
+  tags: [macos]
   script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-deg]
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
-    - python3 ci/report_for_log.py clang build_log.txt warnings.xml
+    - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-macos.a
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
@@ -157,12 +155,14 @@ build-dac:
   stage: build
   tags: [macos-arm64]
   script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-dac]
     - mv libgdxcclib64.dylib libgdxcclib64_deg.dylib
     - mv libgdx-macos.a libgdx-macos-deg.a
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
-    - python3 ci/report_for_log.py clang build_log.txt warnings.xml
+    - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdxcclib64.dylib libgdxcclib64_dac.dylib
     - mv libgdx-static.a libgdx-macos-dac.a
     - lipo -create libgdxcclib64_deg.dylib libgdxcclib64_dac.dylib -output libgdxcclib64.dylib
@@ -177,14 +177,16 @@ build-dac:
 
 build-wei:
   stage: build
-  tags: [pond]
+  tags: [windows]
   image:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
   script:
+    - !reference [.get-gams-wei]
+    - !reference [.gams-folder-wei]
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON CMakeLists.txt
     - cmake --build  . --config Release -- -m | Tee-Object -FilePath 'build_log.txt'
-    - python ci/report_for_log.py msvc build_log.txt warnings.xml
+    - python ciscripts/report_for_log.py msvc build_log.txt warnings.xml
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-wei
@@ -199,6 +201,8 @@ codechecker-leg:
   extends: .codechecker-leg
   needs: [fetch-ci-scripts,apigenerator]
   script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-leg]
     - cp apifiles/* src/
     - !reference [.default-codecheck-script, script]
 
@@ -206,12 +210,14 @@ codechecker-leg:
 
 test-leg:
   stage: test
-  tags: [puma]
+  tags: [linux]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
-  needs: [build-leg,install-gamsdist-leg]
+  needs: [fetch-ci-scripts,build-leg]
   script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
     - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_linux.xml
     - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_linux.xml
@@ -224,9 +230,11 @@ test-leg:
 
 test-deg:
   stage: test
-  tags: [carla] # macOS x64
-  needs: [build-deg,install-gamsdist-deg]
+  tags: [macos]
+  needs: [fetch-ci-scripts,build-deg]
   script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-deg ]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
     - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.12.dylib ./gdxtest --reporters=junit --out=doctest_results_deg.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_deg.xml
@@ -239,8 +247,10 @@ test-deg:
 test-dac:
   stage: test
   tags: [macos-arm64]
-  needs: [build-dac,install-gamsdist-dac]
+  needs: [fetch-ci-scripts,build-dac]
   script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-dac ]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
     - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.12.dylib ./gdxtest --reporters=junit --out=doctest_results_dac.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_dac.xml
@@ -252,11 +262,13 @@ test-dac:
 
 test-wei:
   stage: test
-  tags: [pond]
+  tags: [windows]
   image:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
-  needs: [build-wei,install-gamsdist-wei]
+  needs: [fetch-ci-scripts,build-wei]
   script:
+    - !reference [ .get-gams-wei ]
+    - !reference [ .gams-folder-wei ]
     - $gmsdirname = Get-Content mygmsdir.tmp -Raw
     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
     - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
@@ -273,17 +285,20 @@ test-wei:
 
 leak-check-leg:
   stage: leak-check
-  tags: [puma]
+  tags: [linux]
   image:
     name: registry.gams.com/devel/ciscripts/leg/builder-valgrind-codequality:latest
     entrypoint: [""]
-  needs: [fetch-ci-scripts,build-debug-leg,install-gamsdist-leg]
+  needs: [fetch-ci-scripts,build-debug-leg]
   script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
+    - ulimit -n 1024
     - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" valgrind --leak-check=yes ./gdxtest_dbg
     - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" valgrind --leak-check=yes --xml=yes --xml-file=valgrind_out.xml ./gdxtest_dbg
     - PYTHONPATH=$PYTHONPATH:valgrind-codequality python3 -m valgrind_codequality --input-file valgrind_out.xml --output-file valgrind_out.json
-    - python3 ci/codechecker_to_xml.py valgrind_out.json valgrind_junit.xml
+    - python3 ciscripts/codechecker_to_xml.py valgrind_out.json valgrind_junit.xml
   artifacts:
     name: leak-check-results-leg
     expire_in: 2 hours
@@ -296,13 +311,15 @@ leak-check-leg:
 
 perf-check-leg:
   stage: perf-check
-  tags: [puma]
+  tags: [linux]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
-  needs: [fetch-ci-scripts,build-leg,install-gamsdist-leg]
+  needs: [fetch-ci-scripts,build-leg]
   when: manual
   script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-leg ]
     - SUITE_NAME=gdxfiles
     - PERF_CALL="gams gdxperf procTreeMemMonitor=1 --RUN=suite --SUITE=${SUITE_NAME} --RUNDEFAULT=0 --RUNCAPI=1"
     - ARCHIVE_NAME="gdxfiles.zip"
@@ -314,8 +331,8 @@ perf-check-leg:
     - GAMS_PATH=`pwd`/mygamsdist/
     - ${GAMS_PATH}apilib gdxperf
     - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ${PERF_CALL} | tee cppgdx.log
-#    - python3 ci/fetch_gams.py fetch_and_install dist43 $SSH_KEY_PORTING
-#    - python3 ci/fetch_gams.py version $PF_CUSTOM_BRANCH $SSH_KEY_PORTING > gams43_folder_leg.txt
+#    - python3 ciscripts/fetch_gams.py fetch_and_install dist43 $SSH_KEY_PORTING
+#    - python3 ciscripts/fetch_gams.py version $PF_CUSTOM_BRANCH $SSH_KEY_PORTING > gams43_folder_leg.txt
 #    - GAMS_PATH=/cache/gams-installs/`cat gams43_folder_leg.txt`/
     - G43_ARCHIVE="gamsdist43.tar.bz2"
     - G43_CLOUD_URL="$GAMS43_CLOUD_URL"
