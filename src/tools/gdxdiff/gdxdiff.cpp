@@ -190,7 +190,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    library::short_string Id;
    bool SymbOpen {};
    TStatusCode Status;
-   gdxValues_t DefValues;
+   gdxValues_t DefValues {};
 
    auto CheckSymbOpen = [&]() -> bool {
       registerDiffUELs();
@@ -226,7 +226,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       gdxStrIndex_t StrKeys {};
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
-      gdxValues_t Vals2;
+      gdxValues_t Vals2 {};
 
       registerDiffUELs();
       for( int D {}; D < Dim; D++ )
@@ -262,7 +262,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       gdxStrIndex_t StrKeys {};
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
-      gdxValues_t Vals;
+      gdxValues_t Vals {};
       int iNode;
 
       registerDiffUELs();
@@ -400,7 +400,7 @@ void CompareSy( const int Sy1, const int Sy2 )
                if( DoublesEqual( V1[T], V2[T] ) )
                   continue;
 
-               gdxValues_t Vals;
+               gdxValues_t Vals {};
                Vals[GMS_VAL_LEVEL] = V1[T];
                WriteDiff( c_dif1, GamsFieldNames[T], Keys, Vals );
                Vals[GMS_VAL_LEVEL] = V2[T];
@@ -500,7 +500,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          WriteDiff( Act, {}, Keys, Vals );
       else
       {
-         gdxValues_t Vals2;
+         gdxValues_t Vals2 {};
          for( int T {}; T < tvarvaltype_size; T++ )
          {
             if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() )
@@ -514,8 +514,8 @@ void CompareSy( const int Sy1, const int Sy2 )
    int Dim2, AFDim, iST, iST2, R1Last, R2Last, C, acount;
    gdxSyType ST2;
    bool Flg1, Flg2, Eq, DomFlg;
-   gdxUelIndex_t Keys1, Keys2;
-   gdxValues_t Vals1, Vals2;
+   gdxUelIndex_t Keys1 {}, Keys2 {};
+   gdxValues_t Vals1 {}, Vals2 {};
    library::short_string stxt;
    gdxStrIndex_t DomSy1 {};
    gdxStrIndexPtrs_t DomSy1Ptrs;
@@ -756,7 +756,7 @@ int main( const int argc, const char *argv[] )
    gdxStrIndex_t StrKeys {};
    gdxStrIndexPtrs_t StrKeysPtrs;
    GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
-   gdxValues_t StrVals;
+   gdxValues_t StrVals {};
 
    // TODO: Remove?
    // gdlSetSystemName( 'GDXDIFF' );
