@@ -150,7 +150,7 @@ void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
    int NrElem, HighV;
    gdxUMUelInfo( PGX, &NrElem, &HighV );
    gdxUELRegisterMapStart( PGX );
-   for( int N {}; N < NrElem; N++ )
+   for( int N { 1 }; N <= NrElem; N++ )
    {
       int NN;
       library::short_string UEL;
