@@ -1059,7 +1059,7 @@ int main( const int argc, const char *argv[] )
    OpenGDX( InFile2, PGX2 );
 
    {
-      int N {};
+      int N { 1 };
       while( gdxSymbolInfo( PGX1, N, ID.data(), &Dim, &iST ) != 0 )
       {
          if( IDsOnly == nullptr || IDsOnly->IndexOf( ID.data() ) >= 0 )
@@ -1081,7 +1081,7 @@ int main( const int argc, const char *argv[] )
    IDTable.clear();
 
    {
-      int N {};
+      int N { 1 };
       while( gdxSymbolInfo( PGX2, N, ID.data(), &Dim, &iST ) != 0 )
       {
          if( IDsOnly == nullptr || IDsOnly->IndexOf( ID.data() ) >= 0 )
