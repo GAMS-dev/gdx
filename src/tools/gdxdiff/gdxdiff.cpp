@@ -201,12 +201,12 @@ void CompareSy( const int Sy1, const int Sy2 )
          if( FldOnlyVar == FldOnly::fld_yes && ( ST == dt_var || ST == dt_equ ) )
          {
             library::short_string ExplTxt { "Differences Field = " + GamsFieldNames[FldOnlyFld] };
-            gdxDataWriteStrStart( PGXDIF, Id.data(), ExplTxt.data(), Dim + 1, dt_par, 0 );
+            gdxDataWriteStrStart( PGXDIF, Id.data(), ExplTxt.data(), Dim + 1, static_cast<int>( dt_par ), 0 );
          }
          if( DiffOnly && ( ST == dt_var || ST == dt_equ ) )
-            gdxDataWriteStrStart( PGXDIF, Id.data(), "Differences Only", Dim + 2, dt_par, 0 );
+            gdxDataWriteStrStart( PGXDIF, Id.data(), "Differences Only", Dim + 2, static_cast<int>( dt_par ), 0 );
          else
-            gdxDataWriteStrStart( PGXDIF, Id.data(), "Differences", Dim + 1, ST, VarEquType );
+            gdxDataWriteStrStart( PGXDIF, Id.data(), "Differences", Dim + 1, static_cast<int>( ST ), VarEquType );
          SymbOpen = true;
       }
       return SymbOpen;
@@ -1130,7 +1130,7 @@ int main( const int argc, const char *argv[] )
       } while( true );
    }
 
-   gdxDataWriteStrStart( PGXDIF, ID.data(), {}, 1, dt_set, 0 );
+   gdxDataWriteStrStart( PGXDIF, ID.data(), {}, 1, static_cast<int>( dt_set ), 0 );
    strcpy( StrKeysPtrs[0], "File1" );
    gdxAddSetText( PGXDIF, InFile1.data(), &StrNr );
    StrVals[GMS_VAL_LEVEL] = StrNr;
