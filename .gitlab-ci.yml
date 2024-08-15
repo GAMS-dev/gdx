@@ -14,19 +14,14 @@ stages:
 
 include:
   - project: 'devel/ciscripts'
-    ref: distributed-caching
     file: '.shared-vars.yml'
   - project: 'devel/ciscripts'
-    ref: distributed-caching
     file: '.codechecker.yml'
   - project: 'devel/ciscripts'
-    ref: distributed-caching
     file: '.shared-snippets.yml'
   - project: 'devel/ciscripts'
-    ref: distributed-caching
     file: '.fetch-job.yml'
   - project: 'devel/ciscripts'
-    ref: distributed-caching
     file: '.image-build.yml'
 
 variables:
