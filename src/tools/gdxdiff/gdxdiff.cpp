@@ -232,11 +232,11 @@ void CompareSy( const int Sy1, const int Sy2 )
       for( int D {}; D < Dim; D++ )
          strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
       if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
-         strcpy( StrKeysPtrs[Dim + 1], Act.data() );
+         strcpy( StrKeysPtrs[Dim], Act.data() );
       else
       {
-         strcpy( StrKeysPtrs[Dim + 1], FldName.data() );
-         strcpy( StrKeysPtrs[Dim + 2], Act.data() );
+         strcpy( StrKeysPtrs[Dim], FldName.data() );
+         strcpy( StrKeysPtrs[Dim + 1], Act.data() );
       }
 
 #if VERBOSE >= 3
@@ -268,7 +268,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       registerDiffUELs();
       for( int D {}; D < Dim; D++ )
          strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
-      strcpy( StrKeysPtrs[Dim + 1], Act.data() );
+      strcpy( StrKeysPtrs[Dim], Act.data() );
       gdxAddSetText( PGXDIF, S.data(), &iNode );
       Vals[GMS_VAL_LEVEL] = iNode;
       gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals );
