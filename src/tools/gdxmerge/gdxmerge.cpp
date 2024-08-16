@@ -233,12 +233,14 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
          if( CheckError( SyObj->SyData->GetCount() + XCount <= std::numeric_limits<int>::max(), "Element count for symbol > maxint" ) )
          {
             SyObj->SySkip = true;
+            SyObj->SyData.reset();
             continue;
          }
 #if defined( OLD_MEMORY_CHECK )
          if( CheckError( SyObj->SyMemory <= std::numeric_limits<int>::max(), "Symbol is too large" ) )
          {
             SyObj->SySkip = true;
+            SyObj->SyData.reset();
             continue;
          }
 #endif
@@ -435,6 +437,7 @@ void TSymbolList::WritePGXFile( const int SyNr, const TProcessPass Pass )
    }
    gdxDataWriteDone( PGXMerge );
    SyObj->SyData->Clear();
+   SyObj->SyData.reset();
 }
 
 void TSymbolList::WriteNameList()
