@@ -58,6 +58,11 @@ TGAMSSymbol::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubT
       SyData( std::make_unique<gdlib::gmsdata::TTblGamsData<double>>( ADim, sizeof( AType ) * sizeof( double ) ) )
 {}
 
+TGAMSSymbol::~TGAMSSymbol()
+{
+   SyData->Clear();
+}
+
 TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
     : FFileName( AFileName ), FFileId( AFileId ), FFileInfo( AFileInfo )
 {}
