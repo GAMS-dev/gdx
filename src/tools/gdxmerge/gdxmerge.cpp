@@ -54,8 +54,7 @@ std::unique_ptr<TSymbolList> SyList;
 
 TGAMSSymbol::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubTyp )
     : SyDim( ADim ), SySubTyp( ASubTyp ), SyTyp( AType ),
-      // TODO: Check whether sizeof(AType) makes sense
-      SyData( std::make_unique<gdlib::gmsdata::TTblGamsData<double>>( ADim, sizeof( AType ) * sizeof( double ) ) )
+      SyData( std::make_unique<gdlib::gmsdata::TTblGamsData<double>>( ADim, DataTypSize.at( AType ) * sizeof( double ) ) )
 {}
 
 TGAMSSymbol::~TGAMSSymbol()
