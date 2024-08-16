@@ -275,8 +275,8 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
       while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
       {
          if( Dim > 0 )
-            for( D = FDim - 1; D < Dim; D++ )
-               IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
+            for( D = FDim; D <= Dim; D++ )
+               IndxI[D] = AddUEL( library::short_string { IndxSPtrs[D - 1] } );
          if( SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
          {
             gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
@@ -337,8 +337,8 @@ bool TSymbolList::CollectBigOne( const int SyNr )
          gdxDataReadStrStart( PGX, N, &NrRecs );
          while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
          {
-            for( D = FDim - 1; D < SyObj->SyDim; D++ )
-               IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
+            for( D = FDim; D <= SyObj->SyDim; D++ )
+               IndxI[D] = AddUEL( library::short_string { IndxSPtrs[D - 1] } );
             if( SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
             {
                gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
