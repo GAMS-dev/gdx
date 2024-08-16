@@ -108,9 +108,12 @@ public:
    void Sort()
    {
       std::sort( keyValues.begin(), keyValues.end(), [this]( const auto &pair1, const auto &pair2 ) {
-         for( int i = 0; i < FDim; i++ )
-            if( pair1.first[i] >= pair2.first[i] ) return false;
-         return true;
+         for( int i {}; i < FDim; i++ )
+         {
+            if( pair1.first[i] < pair2.first[i] ) return true;
+            if( pair1.first[i] > pair2.first[i] ) break;
+         }
+         return false;
       } );
    }
 

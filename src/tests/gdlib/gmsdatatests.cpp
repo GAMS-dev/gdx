@@ -93,6 +93,48 @@ TEST_CASE( "Test basic usage of TTblGamsData" )
    }
 }
 
+TEST_CASE( "Test sorting more elaborately" )
+{
+   std::array<int, GLOBAL_MAX_INDEX_DIM> keys {};
+   std::array<double, 2> vals {};
+   TTblGamsData<double> gdl { 3, sizeof( double ) * 2 };
+
+   // A more elaborate test of the sorting
+   gdl.Clear();
+   std::fill( vals.begin(), vals.end(), 0 );
+   vals.front() = 23.0;
+
+   using triple = std::array<int, 3>;
+   constexpr std::array unsortedKeys {
+      triple {1, 2, 3},
+      triple {1, 1, 3},
+      triple {2, 0, 0},
+      triple {0, 9, 9}
+   };
+
+   constexpr std::array sortedKeys {
+      triple { 0, 9, 9 },
+      triple { 1, 1, 3 },
+      triple { 1, 2, 3 },
+      triple { 2, 0, 0 }
+   };
+
+   for (const auto& kt : unsortedKeys) {
+      std::copy_n( kt.begin(), 3, keys.begin() );
+      std::fill( keys.begin() + 3, keys.end(), 0 );
+      gdl.AddRecord( keys.data(), vals.data() );
+   }
+
+   gdl.Sort();
+
+   for (int i{}; i < gdl.GetCount(); i++) {
+      gdl.GetRecord( i, keys.data(), vals.data() );
+      for( int j {}; j<3; j++ )
+         REQUIRE_EQ( sortedKeys[i][j], keys[j] );
+      REQUIRE_EQ( 23.0, vals.front() );
+   }
+}
+
 TEST_SUITE_END();
 
 }
