@@ -22,13 +22,17 @@ class TestGdxMerge(unittest.TestCase):
     def tearDown(self):
         os.remove(os.path.join('examples', 'small_example.gdx'))
         os.remove(os.path.join('examples', 'full_example.gdx'))
+        os.remove(os.path.join('examples', 'merged.gdx'))
 
     def test_small_and_full_example(self):
         output = run_gdxmerge([
             os.path.join('examples', 'small_example.gdx'),
-            os.path.join('examples', 'full_example.gdx')
+            os.path.join('examples', 'full_example.gdx'),
+            f'output={os.path.join('examples', 'merged.gdx')}'
         ])
         self.assertEqual(output.returncode, 0)
         with open(os.path.join('output', 'gdxmerge', 'small_and_full_example.txt'), 'r') as file:
-            self.assertEqual(output.stdout.split('\n')[3:], file.read().split('\n')[3:])
+            first = output.stdout.split('\n')[3:]
+            second = file.read().split('\n')[3:]
+            self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
