@@ -121,7 +121,7 @@ int gdxFilterRegisterStart( TGXFileRec_t *pgdx, int FilterNr );
 int gdxFindSymbol( TGXFileRec_t *pgdx, const char *SyId, int *SyNr );
 int gdxGetElemText( TGXFileRec_t *pgdx, int TxtNr, char *Txt, int *Node );
 int gdxGetLastError( TGXFileRec_t *pgdx);
-int gdxGetMemoryUsed( TGXFileRec_t *pgdx);
+INT64 gdxGetMemoryUsed( TGXFileRec_t *pgdx);
 int gdxGetSpecialValues( TGXFileRec_t *pgdx, double *AVals );
 int gdxGetUEL( TGXFileRec_t *pgdx, int UelNr, char *Uel );
 int gdxMapValue( TGXFileRec_t *pgdx, double D, int *sv );
@@ -461,7 +461,7 @@ GDX_INLINE int gdxGetLastError( TGXFileRec_t *pgx)
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxGetLastError();
 }
 
-GDX_INLINE int gdxGetMemoryUsed( TGXFileRec_t *pgx)
+GDX_INLINE INT64 gdxGetMemoryUsed( TGXFileRec_t *pgx)
 {
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxGetMemoryUsed();
 }
