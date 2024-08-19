@@ -185,7 +185,6 @@ class TestGdxMerge(unittest.TestCase):
         self.assertEqual(len(first), 2)
         for item in first:
             self.assertEqual(len(item), 2)
-        self.assertEqual(first[0][0], second[0][0])
-        self.assertRegex(first[0][1], second[0][1])
-        self.assertEqual(first[1][0], second[1][0])
-        self.assertRegex(first[1][1], second[1][1])
+        for i in range(2):
+            self.assertEqual(first[i][0], second[i][0])
+            self.assertRegex(first[i][1], second[i][1])
