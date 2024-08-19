@@ -1108,7 +1108,7 @@ int main( const int argc, const char *argv[] )
          if( pair.first.length() > NN )
             NN = static_cast<int>( pair.first.length() );
       for( const auto &pair: StatusTable )
-         std::cout << gdlib::strutilx::PadRight( pair.first.string(), NN ) << "   "
+         std::cout << gdlib::strutilx::PadLeft( pair.first.string(), NN ) << "   "
                    << StatusText.at( static_cast<int>( pair.second ) ) << std::endl;
    }
 
