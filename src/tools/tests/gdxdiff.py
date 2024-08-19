@@ -1,9 +1,9 @@
 import unittest
 import os
 import subprocess
+import gams.transfer as gt
 from examples.small_example import create_small_example
 from examples.full_example import create_full_example
-import gams.transfer as gt
 
 
 def run_gdxdiff(command: list[str]) -> subprocess.CompletedProcess[str]:
