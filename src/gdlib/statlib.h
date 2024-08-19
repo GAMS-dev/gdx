@@ -124,6 +124,7 @@ void gcstat(const std::string &s);
 void gcstatPChar(const char *p);
 
 // ...
+// TODO: FIXME: Add missing functions!
 
 // you need to adjust gmoxxx\gmodoorg.pas
 
@@ -159,6 +160,7 @@ void dumpfilename( const std::string &prfx, bool enabled, const std::string &wha
 bool gstatLogEnabled();
 
 // ...
+// TODO: Add missing functions!
 
 std::string GetRedirFileName();
 std::string GetRedirLogStr();
