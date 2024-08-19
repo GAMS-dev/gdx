@@ -15,7 +15,7 @@ class TestGdxTools(unittest.TestCase):
     def test_gams_api(self) -> None:
         self.assertRegex(
             f'API OK -- Version {gams.__version__}',
-            r'API OK -- Version [0-9]+\.[0-9]+\.[0-9]+'
+            r'API OK -- Version \d+\.\d+\.\d+'
         )
 
 
