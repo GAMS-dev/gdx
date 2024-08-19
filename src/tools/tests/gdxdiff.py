@@ -3,6 +3,7 @@ import os
 import subprocess
 from examples.small_example import create_small_example
 from examples.full_example import create_full_example
+import gams.transfer as gt
 
 
 def run_gdxdiff(command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -38,3 +39,14 @@ class TestGdxDiff(unittest.TestCase):
             del second[-3]
             self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
+
+    def test_small_and_full_example_gdx_file(self):
+        container = gt.Container(load_from=os.path.join('examples', 'diffile.gdx'))
+        self.assertIn('FilesCompared', container)
+        symbol: gt.Parameter = container['FilesCompared']  # type: ignore
+        first = symbol.records.values.tolist()
+        second = [
+            ['File1', 'examples/small_example.gdx'],
+            ['File2', 'examples/full_example.gdx']
+        ]
+        self.assertEqual(first, second)
