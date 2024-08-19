@@ -45,6 +45,7 @@ class TestGdxDiff(unittest.TestCase):
     def test_small_and_full_example_gdx_file(self):
         container = gt.Container(load_from=os.path.join('examples', 'diffile.gdx'))
         self.assertIn('FilesCompared', container)
+
         symbol: gt.Parameter = container['FilesCompared']  # type: ignore
         first = symbol.records.values.tolist()
         second = [
