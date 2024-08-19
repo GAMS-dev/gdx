@@ -15,11 +15,13 @@ def run_gdxdump(command: list[str]) -> subprocess.CompletedProcess[str]:
 
 class TestGdxDump(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         create_small_example(os.path.join('examples', 'small_example.gdx'))
         create_full_example(os.path.join('examples', 'full_example.gdx'))
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         os.remove(os.path.join('examples', 'small_example.gdx'))
         os.remove(os.path.join('examples', 'full_example.gdx'))
 
