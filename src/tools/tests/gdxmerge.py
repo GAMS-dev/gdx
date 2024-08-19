@@ -18,30 +18,30 @@ class TestGdxMerge(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        create_small_example(os.path.join('examples', 'small_example.gdx'))
-        create_full_example(os.path.join('examples', 'full_example.gdx'))
+        create_small_example(os.path.join('.', 'examples', 'small_example.gdx'))
+        create_full_example(os.path.join('.', 'examples', 'full_example.gdx'))
 
     @classmethod
     def tearDownClass(cls):
-        os.remove(os.path.join('examples', 'small_example.gdx'))
-        os.remove(os.path.join('examples', 'full_example.gdx'))
-        os.remove(os.path.join('examples', 'merged.gdx'))
+        os.remove(os.path.join('.', 'examples', 'small_example.gdx'))
+        os.remove(os.path.join('.', 'examples', 'full_example.gdx'))
+        os.remove(os.path.join('.', 'examples', 'merged.gdx'))
 
     def test_small_and_full_example(self):
         output = run_gdxmerge([
-            os.path.join('examples', 'small_example.gdx'),
-            os.path.join('examples', 'full_example.gdx'),
-            f'output={os.path.join('examples', 'merged.gdx')}'
+            os.path.join('.', 'examples', 'small_example.gdx'),
+            os.path.join('.', 'examples', 'full_example.gdx'),
+            f'output={os.path.join('.', 'examples', 'merged.gdx')}'
         ])
         self.assertEqual(output.returncode, 0)
-        with open(os.path.join('output', 'gdxmerge', 'small_and_full_example.txt'), 'r') as file:
+        with open(os.path.join('.', 'output', 'gdxmerge', 'small_and_full_example.txt'), 'r') as file:
             first = output.stdout.split('\n')[3:]
             second = file.read().split('\n')[3:]
             self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
     def test_small_and_full_example_gdx_file(self):
-        container = gt.Container(load_from=os.path.join('examples', 'merged.gdx'))
+        container = gt.Container(load_from=os.path.join('.', 'examples', 'merged.gdx'))
         self.assertIn('i', container)
         self.assertIn('j', container)
         self.assertIn('d', container)

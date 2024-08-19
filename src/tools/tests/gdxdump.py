@@ -17,24 +17,24 @@ class TestGdxDump(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        create_small_example(os.path.join('examples', 'small_example.gdx'))
-        create_full_example(os.path.join('examples', 'full_example.gdx'))
+        create_small_example(os.path.join('.', 'examples', 'small_example.gdx'))
+        create_full_example(os.path.join('.', 'examples', 'full_example.gdx'))
 
     @classmethod
     def tearDownClass(cls):
-        os.remove(os.path.join('examples', 'small_example.gdx'))
-        os.remove(os.path.join('examples', 'full_example.gdx'))
+        os.remove(os.path.join('.', 'examples', 'small_example.gdx'))
+        os.remove(os.path.join('.', 'examples', 'full_example.gdx'))
 
     def test_small_example(self):
-        output = run_gdxdump([os.path.join('examples', 'small_example.gdx')])
+        output = run_gdxdump([os.path.join('.', 'examples', 'small_example.gdx')])
         self.assertEqual(output.returncode, 0)
-        with open(os.path.join('output', 'gdxdump', 'small_example.txt'), 'r') as file:
+        with open(os.path.join('.', 'output', 'gdxdump', 'small_example.txt'), 'r') as file:
             self.assertEqual(output.stdout, file.read())
         self.assertEqual(output.stderr, '')
 
     def test_full_example(self):
-        output = run_gdxdump([os.path.join('examples', 'full_example.gdx')])
+        output = run_gdxdump([os.path.join('.', 'examples', 'full_example.gdx')])
         self.assertEqual(output.returncode, 0)
-        with open(os.path.join('output', 'gdxdump', 'full_example.txt'), 'r') as file:
+        with open(os.path.join('.', 'output', 'gdxdump', 'full_example.txt'), 'r') as file:
             self.assertEqual(output.stdout, file.read())
         self.assertEqual(output.stderr, '')
