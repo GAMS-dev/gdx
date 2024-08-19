@@ -17,17 +17,17 @@ def run_gdxmerge(command: list[str]) -> subprocess.CompletedProcess[str]:
 class TestGdxMerge(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         create_small_example(os.path.join('.', 'examples', 'small_example.gdx'))
         create_full_example(os.path.join('.', 'examples', 'full_example.gdx'))
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         os.remove(os.path.join('.', 'examples', 'small_example.gdx'))
         os.remove(os.path.join('.', 'examples', 'full_example.gdx'))
         os.remove(os.path.join('.', 'examples', 'merged.gdx'))
 
-    def test_small_and_full_example(self):
+    def test_small_and_full_example(self) -> None:
         output = run_gdxmerge([
             os.path.join('.', 'examples', 'small_example.gdx'),
             os.path.join('.', 'examples', 'full_example.gdx'),
@@ -40,7 +40,7 @@ class TestGdxMerge(unittest.TestCase):
             self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_small_and_full_example_gdx_file(self):
+    def test_small_and_full_example_gdx_file(self) -> None:
         container = gt.Container(load_from=os.path.join('.', 'examples', 'merged.gdx'))
         self.assertIn('i', container)
         self.assertIn('j', container)
