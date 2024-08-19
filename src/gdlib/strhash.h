@@ -220,10 +220,10 @@ protected:
       {
          if( FCount >= 2 )
          {
-            char *PSN = Buckets[0]->StrP;
+            const char *PSN = Buckets[0]->StrP;
             for( int N {}; N < FCount - 1; N++ )
             {
-               char *PSN1 = Buckets[N + 1]->StrP;
+               const char *PSN1 = Buckets[N + 1]->StrP;
                if( Compare( PSN, PSN1 ) > 0 )
                {
                   QuickSort( 0, FCount - 1 );
