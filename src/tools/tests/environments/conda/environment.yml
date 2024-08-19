@@ -1,0 +1,8 @@
+name: gdxtools
+
+dependencies:
+  - python=3.12.4
+  - pip
+
+  - pip:
+    - gamsapi[transfer]==47.4.1
