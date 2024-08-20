@@ -95,3 +95,27 @@ class TestGdxDump(unittest.TestCase):
             second = file.read().split('\n')[1:]
             self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
+
+    def test_full_example_symbol(self) -> None:
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            'Symb=i'
+        ])
+        self.assertEqual(output.returncode, 0)
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_symbol.txt'), 'r') as file:
+            first = output.stdout.split('\n')
+            second = file.read().split('\n')
+            self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
+    def test_full_example_symbol_not_found(self) -> None:
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            'Symb=e'
+        ])
+        self.assertEqual(output.returncode, 6)
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_symbol_not_found.txt'), 'r') as file:
+            first = output.stdout.split('\n')
+            second = file.read().split('\n')
+            self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
