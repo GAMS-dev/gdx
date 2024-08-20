@@ -284,6 +284,8 @@ test-gdxtools:
     entrypoint: [""]
   needs: [fetch-ci-scripts,build-leg]
   script:
+    - ./src/tools/tests/environments/conda/install.sh
+    - conda activate gdxtools
     - python3 ./src/tools/tests/main.py
 
 #=======================================================================================================================
