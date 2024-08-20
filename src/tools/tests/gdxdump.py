@@ -108,7 +108,7 @@ class TestGdxDump(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_example_lowercase_symbol(self) -> None:
+    def test_full_example_symbol_lowercase(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
             'symb=i'
@@ -120,7 +120,7 @@ class TestGdxDump(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_example_symbol_with_space_separator(self) -> None:
+    def test_full_example_symbol_space_separator(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
             'Symb', 'i'
@@ -132,14 +132,14 @@ class TestGdxDump(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_example_missing_symbol(self) -> None:
+    def test_full_example_symbol_missing_identifier(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
             'Symb'
         ])
         self.assertEqual(output.returncode, 1)
         first = output.stdout.split('\n')
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_missing_symbol.txt'), 'r') as file:
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_symbol_missing_identifier.txt'), 'r') as file:
             second = file.read().split('\n')
         del second[2]
         self.assertEqual(first, second)
