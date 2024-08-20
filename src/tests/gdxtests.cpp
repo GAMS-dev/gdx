@@ -50,9 +50,11 @@
 #include <fstream>
 
 #include "gdxtests.h"
+#include "gdlib/strindexbuf.h"
 
 using namespace std::literals::string_literals;
 using namespace gdx;
+using namespace strindexbuf;
 
 namespace gdx::tests::gdxtests
 {
@@ -664,7 +666,7 @@ TEST_CASE( "Test write and read record in string mode" )
       REQUIRE( pgx.gdxDataWriteStrStart( "mysym", stillOk.c_str(), 1, dt_par, 0 ) );
       values[GMS_VAL_LEVEL] = 3.141;
 
-      char empty = '\0';
+      constexpr char empty = '\0';
       const char *emptyPtr = &empty;
       REQUIRE( pgx.gdxDataWriteStr( &emptyPtr, values.data() ) );
 
@@ -2010,20 +2012,20 @@ TEST_CASE("Test filter example from README")
       REQUIRE( gdx.gdxFilterRegister(1000) );
       REQUIRE( gdx.gdxFilterRegister(2000) );
       REQUIRE( gdx.gdxFilterRegisterDone() );
-      std::array<int, 2> filterAction {123, gdx::DOMC_EXPAND};
+      const std::array<int, 2> filterAction {123, gdx::DOMC_EXPAND};
       int NrUnMapped, LastMapped;
       REQUIRE( gdx.gdxUMUelInfo( NrUnMapped, LastMapped ) );
       int SyNr;
       REQUIRE( gdx.gdxFindSymbol( "A", SyNr ) );
-      std::array<char, GMS_SSSIZE> SyName;
+      std::array<char, GMS_SSSIZE> SyName {};
       int SyDim, SyTyp;
       REQUIRE( gdx.gdxSymbolInfo( SyNr, SyName.data(), SyDim, SyTyp ) );
       REQUIRE_EQ( SyDim, 2 );
       REQUIRE_EQ( SyTyp, dt_par );
       int NrRecs;
       REQUIRE( gdx.gdxDataReadFilteredStart( SyNr, filterAction.data(), NrRecs ) );
-      std::array<int, 2> IndxI;
-      std::array<double, GMS_VAL_MAX> Values;
+      std::array<int, 2> IndxI {};
+      std::array<double, GMS_VAL_MAX> Values {};
       int DimFrst;
       for( int N { 1 }; N <= NrRecs; N++ )
       {
@@ -2297,7 +2299,7 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
    {
 
       const auto outDir { "out"s + versSuff }, cmd { gamsToolCall( "gdxcopy"s ) + " -"s + versSuff + " "s + modelName + ".gdx "s + outDir };
-      int rc { std::system( cmd.c_str() ) };
+      const int rc { std::system( cmd.c_str() ) };
       if( !rc )
       {
          const auto convertedGDXfn { modelName + "_"s + versSuff + ".gdx"s };
@@ -2320,10 +2322,10 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
 
 TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
 {
-   auto fn { "twosets.gdx"s };
+   const auto fn { "twosets.gdx"s };
    testWrite( fn, []( TGXFileObj &pgx ) {
       StrIndexBuffers sib, sib2;
-      TgdxValues values {};
+      const TgdxValues values {};
 
       REQUIRE( pgx.gdxDataWriteStrStart( "k", "", 1, dt_set, 0 ) );
       for( int i {}; i < 6; i++ )

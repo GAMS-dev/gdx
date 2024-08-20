@@ -82,6 +82,7 @@ set(gdx-core
         src/gdlib/utils.cpp
         src/gdlib/strutilx.h
         src/gdlib/strutilx.cpp
+        src/gdlib/strindexbuf.h
 
         # GDX specific units
         src/gxfile.h
