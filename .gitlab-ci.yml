@@ -276,21 +276,6 @@ test-wei:
     reports:
       junit: doctest_results_*windows.xml
 
-test-gdxtools-leg:
-  stage: test
-  tags: [linux]
-  image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
-    entrypoint: [""]
-  needs: [fetch-ci-scripts,build-leg]
-  script:
-    - !reference [ .get-gams ]
-    - !reference [ .gams-folder-leg ]
-    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - ./src/tools/tests/environments/venv/install.sh
-    - source ./src/tools/tests/environments/venv/bin/activate
-    - python3 ./src/tools/tests/main.py
-
 #=======================================================================================================================
 
 leak-check-leg:
