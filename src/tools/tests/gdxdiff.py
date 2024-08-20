@@ -15,26 +15,30 @@ def run_gdxdiff(command: list[str]) -> subprocess.CompletedProcess[str]:
 
 
 class TestGdxDiff(unittest.TestCase):
+    SMALL_EXAMPLE_FILE_PATH = os.path.join('.', 'examples', 'small_example.gdx')
+    FULL_EXAMPLE_FILE_PATH = os.path.join('.', 'examples', 'full_example.gdx')
+    DIFF_FILE_PATH = os.path.join('.', 'examples', 'diffile.gdx')
+    OUTPUT_DIRECTORY_PATH = os.path.join('.', 'output', 'gdxdiff')
 
     @classmethod
     def setUpClass(cls) -> None:
-        create_small_example(os.path.join('.', 'examples', 'small_example.gdx'))
-        create_full_example(os.path.join('.', 'examples', 'full_example.gdx'))
+        create_small_example(cls.SMALL_EXAMPLE_FILE_PATH)
+        create_full_example(cls.FULL_EXAMPLE_FILE_PATH)
 
     @classmethod
     def tearDownClass(cls) -> None:
-        os.remove(os.path.join('.', 'examples', 'small_example.gdx'))
-        os.remove(os.path.join('.', 'examples', 'full_example.gdx'))
-        os.remove(os.path.join('.', 'examples', 'diffile.gdx'))
+        os.remove(cls.SMALL_EXAMPLE_FILE_PATH)
+        os.remove(cls.FULL_EXAMPLE_FILE_PATH)
+        os.remove(cls.DIFF_FILE_PATH)
 
     def test_small_and_full_example(self) -> None:
         output = run_gdxdiff([
-            os.path.join('.', 'examples', 'small_example.gdx'),
-            os.path.join('.', 'examples', 'full_example.gdx'),
-            os.path.join('.', 'examples', 'diffile.gdx')
+            self.SMALL_EXAMPLE_FILE_PATH,
+            self.FULL_EXAMPLE_FILE_PATH,
+            self.DIFF_FILE_PATH
         ])
         self.assertEqual(output.returncode, 1)
-        with open(os.path.join('.', 'output', 'gdxdiff', 'small_and_full_example.txt'), 'r') as file:
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'small_and_full_example.txt'), 'r') as file:
             first = output.stdout.split('\n')[2:]
             del first[-3]
             second = file.read().split('\n')[3:]
@@ -43,13 +47,13 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(output.stderr, '')
 
     def test_small_and_full_example_gdx_file(self) -> None:
-        container = gt.Container(load_from=os.path.join('.', 'examples', 'diffile.gdx'))
+        container = gt.Container(load_from=self.DIFF_FILE_PATH)
         self.assertIn('FilesCompared', container)
 
         symbol: gt.Parameter = container['FilesCompared']  # type: ignore
         first = symbol.records.values.tolist()
         second = [
-            ['File1', os.path.join('.', 'examples', 'small_example.gdx')],
-            ['File2', os.path.join('.', 'examples', 'full_example.gdx')]
+            ['File1', self.SMALL_EXAMPLE_FILE_PATH],
+            ['File2', self.FULL_EXAMPLE_FILE_PATH]
         ]
         self.assertEqual(first, second)
