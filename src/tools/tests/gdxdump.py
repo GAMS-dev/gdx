@@ -254,3 +254,27 @@ class TestGdxDump(unittest.TestCase):
         del second[2]
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
+
+    def test_full_example_decimal_separator_period(self) -> None:
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            'DecimalSep=period'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_decimal_separator_period.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
+    def test_full_example_decimal_separator_comma(self) -> None:
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            'DecimalSep=comma'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_decimal_separator_comma.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
