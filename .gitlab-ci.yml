@@ -276,6 +276,16 @@ test-wei:
     reports:
       junit: doctest_results_*windows.xml
 
+test-gdxtools:
+  stage: test
+  tags: [linux]
+  image:
+    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-leg]
+  script:
+    - python3 ./src/tools/tests/main.py
+
 #=======================================================================================================================
 
 leak-check-leg:
