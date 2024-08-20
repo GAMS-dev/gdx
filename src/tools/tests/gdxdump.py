@@ -108,6 +108,18 @@ class TestGdxDump(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
+    def test_full_example_symbol_with_space_separator(self) -> None:
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            'Symb', 'i'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_symbol.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
     def test_full_example_symbol_not_found(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
