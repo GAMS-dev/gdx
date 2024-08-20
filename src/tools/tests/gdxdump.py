@@ -1,6 +1,7 @@
 import unittest
 import os
 import subprocess
+import tempfile
 from examples.small_example import create_small_example
 from examples.full_example import create_full_example
 
@@ -55,6 +56,21 @@ class TestGdxDump(unittest.TestCase):
             second = file.read().split('\n')
             self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
+
+    def test_full_example_output(self) -> None:
+        with tempfile.NamedTemporaryFile() as temporary_file:
+            output = run_gdxdump([
+                self.FULL_EXAMPLE_FILE_PATH,
+                f'Output={temporary_file.name}'
+            ])
+            self.assertEqual(output.returncode, 0)
+            with open(temporary_file.name, 'r') as file:
+                first = file.read().split('\n')
+            with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example.txt'), 'r') as file:
+                second = file.read().split('\n')
+            self.assertEqual(first, second)
+            self.assertEqual(output.stdout, '')
+            self.assertEqual(output.stderr, '')
 
     def test_full_example_version(self) -> None:
         output = run_gdxdump([
