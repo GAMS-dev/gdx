@@ -31,6 +31,16 @@ class TestGdxDiff(unittest.TestCase):
         os.remove(cls.FULL_EXAMPLE_FILE_PATH)
         os.remove(cls.DIFF_FILE_PATH)
 
+    def test_empty_command(self) -> None:
+        output = run_gdxdiff([])
+        self.assertEqual(output.returncode, 2)
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'usage.txt'), 'r') as file:
+            first = output.stdout.split('\n')
+            second = file.read().split('\n')
+            del second[2]
+            self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
     def test_small_and_full_example(self) -> None:
         output = run_gdxdiff([
             self.SMALL_EXAMPLE_FILE_PATH,

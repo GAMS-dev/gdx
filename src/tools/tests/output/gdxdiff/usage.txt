@@ -1,0 +1,19 @@
+
+gdxdiff: GDX file differ
+GDXDIFF          47.4.1 4b675771 Aug 13, 2024          DAC arm 64bit/macOS    
+
+Usage: 
+   gdxdiff file1.gdx file2.gdx [diffile.gdx] [options]
+   Options:
+      Eps     = Val       epsilon for comparison
+      RelEps  = Val       epsilon for relative comparison
+      Field   = gamsfield (L, M, Up, Lo, Prior, Scale or All
+      FldOnly             write var or equ as parameter for selected field
+      DiffOnly            write var or equ as parameter with field as an extra dimension
+      CmpDefaults         compare default values
+      CmpDomains          compare domains
+      MatrixFile          compare GAMS matrix files in GDX format
+      IgnoreOrder         ignore UEL order of input files - reduces size of output file
+      SetDesc = Y|N       compare explanatory texts for set elements, activated by default (=Y)
+      Id      = one or more identifiers; only ids listed will be compared
+   The .gdx file extension is the default
