@@ -1,3 +1,3 @@
 #!/bin/zsh
 
-conda env create --file environment.yml
+conda env create --file "$(dirname $0)/environment.yml"

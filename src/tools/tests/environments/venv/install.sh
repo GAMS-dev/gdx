@@ -1,5 +1,7 @@
 #!/bin/zsh
 
-python3 -m venv ../../venv
-source ../../venv/bin/activate
-python3 -m pip install -r requirements.txt
+DIRECTORY_PATH="$(dirname $0)"
+
+python3 -m venv "$DIRECTORY_PATH/../../venv"
+source "$DIRECTORY_PATH/../../venv/bin/activate"
+python3 -m pip install -r "$DIRECTORY_PATH/requirements.txt"
