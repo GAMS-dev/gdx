@@ -57,7 +57,10 @@ class TestGdxDump(unittest.TestCase):
         self.assertEqual(output.stderr, '')
 
     def test_full_example_version(self) -> None:
-        output = run_gdxdump([self.FULL_EXAMPLE_FILE_PATH, '-Version'])
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            '-Version'
+        ])
         self.assertEqual(output.returncode, 0)
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_version.txt'), 'r') as file:
             first = output.stdout.split('\n')[1:]
@@ -66,7 +69,10 @@ class TestGdxDump(unittest.TestCase):
         self.assertEqual(output.stderr, '')
 
     def test_full_example_short_version(self) -> None:
-        output = run_gdxdump([self.FULL_EXAMPLE_FILE_PATH, '-V'])
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            '-V'
+        ])
         self.assertEqual(output.returncode, 0)
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_version.txt'), 'r') as file:
             first = output.stdout.split('\n')[1:]
