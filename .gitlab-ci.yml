@@ -276,7 +276,7 @@ test-wei:
     reports:
       junit: doctest_results_*windows.xml
 
-test-gdxtools:
+test-gdxtools-leg:
   stage: test
   tags: [linux]
   image:
