@@ -28,6 +28,16 @@ class TestGdxDump(unittest.TestCase):
         os.remove(cls.SMALL_EXAMPLE_FILE_PATH)
         os.remove(cls.FULL_EXAMPLE_FILE_PATH)
 
+    def test_empty_command(self) -> None:
+        output = run_gdxdump([])
+        self.assertEqual(output.returncode, 1)
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'usage.txt'), 'r') as file:
+            first = output.stdout.split('\n')
+            second = file.read().split('\n')
+            del second[1]
+            self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
     def test_small_example(self) -> None:
         output = run_gdxdump([self.SMALL_EXAMPLE_FILE_PATH])
         self.assertEqual(output.returncode, 0)
