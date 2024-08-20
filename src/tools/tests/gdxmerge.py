@@ -34,11 +34,11 @@ class TestGdxMerge(unittest.TestCase):
     def test_empty_command(self) -> None:
         output = run_gdxmerge([])
         self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'usage.txt'), 'r') as file:
-            first = output.stdout.split('\n')
             second = file.read().split('\n')
-            del second[1]
-            self.assertEqual(first, second)
+        del second[1]
+        self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
     def test_small_and_full_example(self) -> None:
@@ -48,10 +48,10 @@ class TestGdxMerge(unittest.TestCase):
             f'output={self.MERGE_FILE_PATH}'
         ])
         self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')[3:]
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'small_and_full_example.txt'), 'r') as file:
-            first = output.stdout.split('\n')[3:]
             second = file.read().split('\n')[3:]
-            self.assertEqual(first, second)
+        self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
     def test_small_and_full_example_gdx_file(self) -> None:

@@ -32,29 +32,29 @@ class TestGdxDump(unittest.TestCase):
     def test_empty_command(self) -> None:
         output = run_gdxdump([])
         self.assertEqual(output.returncode, 1)
+        first = output.stdout.split('\n')
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'usage.txt'), 'r') as file:
-            first = output.stdout.split('\n')
             second = file.read().split('\n')
-            del second[1]
-            self.assertEqual(first, second)
+        del second[1]
+        self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
     def test_small_example(self) -> None:
         output = run_gdxdump([self.SMALL_EXAMPLE_FILE_PATH])
         self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'small_example.txt'), 'r') as file:
-            first = output.stdout.split('\n')
             second = file.read().split('\n')
-            self.assertEqual(first, second)
+        self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
     def test_full_example(self) -> None:
         output = run_gdxdump([self.FULL_EXAMPLE_FILE_PATH])
         self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example.txt'), 'r') as file:
-            first = output.stdout.split('\n')
             second = file.read().split('\n')
-            self.assertEqual(first, second)
+        self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
     def test_full_example_output(self) -> None:
@@ -78,10 +78,10 @@ class TestGdxDump(unittest.TestCase):
             '-Version'
         ])
         self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')[1:]
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_version.txt'), 'r') as file:
-            first = output.stdout.split('\n')[1:]
             second = file.read().split('\n')[1:]
-            self.assertEqual(first, second)
+        self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
     def test_full_example_short_version(self) -> None:
@@ -90,10 +90,10 @@ class TestGdxDump(unittest.TestCase):
             '-V'
         ])
         self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')[1:]
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_version.txt'), 'r') as file:
-            first = output.stdout.split('\n')[1:]
             second = file.read().split('\n')[1:]
-            self.assertEqual(first, second)
+        self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
     def test_full_example_symbol(self) -> None:
@@ -102,10 +102,10 @@ class TestGdxDump(unittest.TestCase):
             'Symb=i'
         ])
         self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_symbol.txt'), 'r') as file:
-            first = output.stdout.split('\n')
             second = file.read().split('\n')
-            self.assertEqual(first, second)
+        self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
     def test_full_example_symbol_not_found(self) -> None:
@@ -114,8 +114,8 @@ class TestGdxDump(unittest.TestCase):
             'Symb=e'
         ])
         self.assertEqual(output.returncode, 6)
+        first = output.stdout.split('\n')
         with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_symbol_not_found.txt'), 'r') as file:
-            first = output.stdout.split('\n')
             second = file.read().split('\n')
-            self.assertEqual(first, second)
+        self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
