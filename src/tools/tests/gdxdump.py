@@ -84,7 +84,7 @@ class TestGdxDump(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_example_short_version(self) -> None:
+    def test_full_example_version_short(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
             '-V'
@@ -182,74 +182,74 @@ class TestGdxDump(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_example_period_delimiter(self) -> None:
+    def test_full_example_delimiter_period(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
             'Delim=period'
         ])
         self.assertEqual(output.returncode, 0)
         first = output.stdout.split('\n')
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_period_delimiter.txt'), 'r') as file:
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_delimiter_period.txt'), 'r') as file:
             second = file.read().split('\n')
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_example_comma_delimiter(self) -> None:
+    def test_full_example_delimiter_comma(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
             'Delim=comma'
         ])
         self.assertEqual(output.returncode, 0)
         first = output.stdout.split('\n')
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_comma_delimiter.txt'), 'r') as file:
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_delimiter_comma.txt'), 'r') as file:
             second = file.read().split('\n')
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_example_tab_delimiter(self) -> None:
+    def test_full_example_delimiter_tab(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
             'Delim=tab'
         ])
         self.assertEqual(output.returncode, 0)
         first = output.stdout.split('\n')
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_tab_delimiter.txt'), 'r') as file:
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_delimiter_tab.txt'), 'r') as file:
             second = file.read().split('\n')
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_example_blank_delimiter(self) -> None:
+    def test_full_example_delimiter_blank(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
             'Delim=blank'
         ])
         self.assertEqual(output.returncode, 0)
         first = output.stdout.split('\n')
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_blank_delimiter.txt'), 'r') as file:
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_delimiter_blank.txt'), 'r') as file:
             second = file.read().split('\n')
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_example_semicolon_delimiter(self) -> None:
+    def test_full_example_delimiter_semicolon(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
             'Delim=semicolon'
         ])
         self.assertEqual(output.returncode, 0)
         first = output.stdout.split('\n')
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_semicolon_delimiter.txt'), 'r') as file:
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_delimiter_semicolon.txt'), 'r') as file:
             second = file.read().split('\n')
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_example_missing_delimiter(self) -> None:
+    def test_full_example_delimiter_missing(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
             'Delim'
         ])
         self.assertEqual(output.returncode, 1)
         first = output.stdout.split('\n')
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_missing_delimiter.txt'), 'r') as file:
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_delimiter_missing.txt'), 'r') as file:
             second = file.read().split('\n')
         del second[2]
         self.assertEqual(first, second)
