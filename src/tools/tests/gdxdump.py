@@ -181,3 +181,15 @@ class TestGdxDump(unittest.TestCase):
         del second[2]
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
+
+    def test_full_example_period_delimiter(self) -> None:
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            'Delim=period'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_period_delimiter.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
