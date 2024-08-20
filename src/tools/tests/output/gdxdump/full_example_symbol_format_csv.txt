@@ -1,0 +1,3 @@
+"Dim1","Val"
+"seattle",350
+"san-diego",600
