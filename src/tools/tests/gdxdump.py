@@ -156,3 +156,15 @@ class TestGdxDump(unittest.TestCase):
             second = file.read().split('\n')
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
+
+    def test_full_example_uel_table(self) -> None:
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            'UelTable=e'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_uel_table.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
