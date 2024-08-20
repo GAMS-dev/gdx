@@ -328,6 +328,20 @@ class TestGdxDump(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
+    def test_full_example_symbol_format_csv_header(self) -> None:
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            'Symb=a',
+            'Format=csv',
+            'Header=Test'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_symbol_format_csv_header.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
     def test_full_example_symbol_format_csv_no_header(self) -> None:
         output = run_gdxdump([
             self.FULL_EXAMPLE_FILE_PATH,
