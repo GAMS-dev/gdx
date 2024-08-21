@@ -213,7 +213,7 @@ bool hasCharLt( const std::string_view s, int n )
    return anychar( [&n]( char c ) { return (int) c < n; }, s );
 }
 
-double round( double n, int ndigits )
+double round( const double n, const int ndigits )
 {
    return std::round( n * std::pow( 10, ndigits ) ) * pow( 10, -ndigits );
 }

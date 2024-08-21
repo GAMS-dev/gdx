@@ -1360,7 +1360,7 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
          {
             FFile->WriteDouble( X );
             if( X >= Zvalacr )
-               AcronymList->CheckEntry( static_cast<int>( std::round( X / Zvalacr ) ) );
+               AcronymList->CheckEntry( utils::round<int>( X / Zvalacr ) );
          }
       }
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
@@ -1454,9 +1454,9 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
       if( MapSetText && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set )
       {// remap settext number
          // NOTE: Not covered by unit tests yet.
-         double X { AVals[GMS_VAL_LEVEL] };
-         int D { static_cast<int>( std::round( X ) ) };
-         if( std::abs( X - D ) < 1e-12 && D >= 0 && D <= SetTextList->GetCapacity() )
+         const double X { AVals[GMS_VAL_LEVEL] };
+         if( const int D { ( utils::round<int>( X ) ) };
+            std::abs( X - D ) < 1e-12 && D >= 0 && D <= SetTextList->GetCapacity() )
             AVals[GMS_VAL_LEVEL] = MapSetText[D];
       }
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
@@ -1471,10 +1471,9 @@ double TGXFileObj::AcronymRemap( double V )
       if(MapAcrToNaN)
          return intlValueMapDbl[GMS_SVIDX_NA];
 
-      int orgIndx { static_cast<int>( std::round( v / Zvalacr ) ) },
-              N { AcronymList->FindEntry( orgIndx ) },
-              newIndx {};
-      if( N < 0 )
+      const int orgIndx { ( utils::round<int>( v / Zvalacr ) ) };
+      int newIndx {};
+      if( int N { AcronymList->FindEntry( orgIndx ) }; N < 0 )
       {// not found
          // NOTE: Not covered by unit tests yet.
          if( NextAutoAcronym <= 0 ) newIndx = orgIndx;
@@ -1505,14 +1504,11 @@ double TGXFileObj::AcronymRemap( double V )
 
    if( V < Zvalacr )
       return V;// NOTE: Not covered by unit tests yet.
-   else
-   {
-      if( V == 0.0 ) return 0.0;
-      if( std::isnan( V ) ) return intlValueMapDbl[vm_valna];
-      if( std::isinf( V ) ) return V < 0.0 ? intlValueMapDbl[vm_valmin] : intlValueMapDbl[vm_valpin];
-      if( std::isnormal( V ) ) return V < 0.0 ? V : GetAsAcronym( V );
-      return intlValueMapDbl[vm_valna];// NOTE: Not covered by unit tests yet.
-   }
+   if( V == 0.0 ) return 0.0;
+   if( std::isnan( V ) ) return intlValueMapDbl[vm_valna];
+   if( std::isinf( V ) ) return V < 0.0 ? intlValueMapDbl[vm_valmin] : intlValueMapDbl[vm_valpin];
+   if( std::isnormal( V ) ) return V < 0.0 ? V : GetAsAcronym( V );
+   return intlValueMapDbl[vm_valna];// NOTE: Not covered by unit tests yet.
 }
 
 void TGXFileObj::AddToErrorListDomErrs( const std::array<int, GLOBAL_MAX_INDEX_DIM> &AElements, const double *AVals )
@@ -1526,8 +1522,7 @@ void TGXFileObj::AddToErrorListDomErrs( const std::array<int, GLOBAL_MAX_INDEX_D
 
    for( int D {}; D < FCurrentDim; D++ )
    {
-      int EN { AElements[D] };
-      if( EN < 0 )
+      if( const int EN { AElements[D] }; EN < 0 )
       {
          bool Found {};
          for( int i {}; i < ErrorList->GetCount(); i++ )
@@ -1584,8 +1579,9 @@ bool TGXFileObj::ResultWillBeSorted( const int *ADomainNrs ) const
             break;
          default:
             if( UELTable->GetMapToUserStatus() >= TUELUserMapStatus::map_sorted ) continue;
-            const TDFilter *PFilter = FilterList->FindFilter( ADomainNrs[D] );
-            if( !PFilter->FiltSorted ) return false;
+            if(  const TDFilter *PFilter = FilterList->FindFilter( ADomainNrs[D] );
+               !PFilter->FiltSorted )
+               return false;
             break;
       }
    }
@@ -3221,7 +3217,7 @@ int TGXFileObj::gdxAcronymAdd( const char *AName, const char *Txt, int AIndx )
 
 int TGXFileObj::gdxAcronymIndex( double V ) const
 {
-   return V < Zvalacr ? 0 : static_cast<int>( std::round( V / Zvalacr ) );
+   return V < Zvalacr ? 0 : utils::round<int>( V / Zvalacr );
 }
 
 int TGXFileObj::gdxAcronymName( double V, char *AName )
