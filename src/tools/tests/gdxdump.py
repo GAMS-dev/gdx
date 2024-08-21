@@ -391,3 +391,15 @@ class TestGdxDump(unittest.TestCase):
             second = file.read().split('\n')
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
+
+    def test_full_example_numerical_format_hexbytes_lowercase(self) -> None:
+        output = run_gdxdump([
+            self.FULL_EXAMPLE_FILE_PATH,
+            'dformat=hexbytes'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'full_example_numerical_format_hexbytes.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
