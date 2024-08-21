@@ -29,4 +29,4 @@ def create_special_values_example(file_path: str) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path)
+    m.write(file_path, eps_to_zero=False)
