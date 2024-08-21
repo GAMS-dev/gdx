@@ -15,8 +15,9 @@ def run_gdxdump(command: list[str]) -> subprocess.CompletedProcess[str]:
 
 
 class TestGdxDump(unittest.TestCase):
-    SMALL_EXAMPLE_FILE_PATH = os.path.join('.', 'examples', 'small_example.gdx')
-    FULL_EXAMPLE_FILE_PATH = os.path.join('.', 'examples', 'full_example.gdx')
+    EXAMPLES_DIRECTORY_PATH = os.path.join('.', 'examples')
+    SMALL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'small_example.gdx')
+    FULL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'full_example.gdx')
     OUTPUT_DIRECTORY_PATH = os.path.join('.', 'output', 'gdxdump')
 
     @classmethod
