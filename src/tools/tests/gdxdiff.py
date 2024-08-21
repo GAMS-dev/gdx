@@ -89,3 +89,15 @@ class TestGdxDiff(unittest.TestCase):
         del second[-3]
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
+
+    def test_small_and_changed_small_example_gdx_file(self) -> None:
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+        self.assertIn('FilesCompared', container)
+
+        symbol: gt.Parameter = container['FilesCompared']  # type: ignore
+        first = symbol.records.values.tolist()
+        second = [
+            ['File1', self.FILE_PATHS['small_example']],
+            ['File2', self.FILE_PATHS['changed_small_example']]
+        ]
+        self.assertEqual(first, second)
