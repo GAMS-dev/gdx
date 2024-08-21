@@ -32,9 +32,8 @@ class TestGdxMerge(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        os.remove(cls.FILE_PATHS['small_example'])
-        os.remove(cls.FILE_PATHS['full_example'])
-        os.remove(cls.FILE_PATHS['merged'])
+        for file_path in cls.FILE_PATHS.values():
+            os.remove(file_path)
 
     def test_empty_command(self) -> None:
         output = run_gdxmerge([])
