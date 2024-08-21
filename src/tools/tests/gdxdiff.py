@@ -16,31 +16,35 @@ def run_gdxdiff(command: list[str]) -> subprocess.CompletedProcess[str]:
 
 
 class TestGdxDiff(unittest.TestCase):
-    EXAMPLES_DIRECTORY_PATH = os.path.join('.', 'examples')
-    SMALL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'small_example.gdx')
-    FULL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'full_example.gdx')
-    CHANGED_SMALL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'changed_small_example.gdx')
-    DIFF_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'diffile.gdx')
-    OUTPUT_DIRECTORY_PATH = os.path.join('.', 'output', 'gdxdiff')
+    DIRECTORY_PATHS = {
+        'examples': os.path.join('.', 'examples'),
+        'output': os.path.join('.', 'output', 'gdxdiff')
+    }
+    FILE_PATHS = {
+        'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
+        'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
+        'changed_small_example': os.path.join(DIRECTORY_PATHS['examples'], 'changed_small_example.gdx'),
+        'diff_file': os.path.join(DIRECTORY_PATHS['examples'], 'diffile.gdx')
+    }
 
     @classmethod
     def setUpClass(cls) -> None:
-        create_small_example(cls.SMALL_EXAMPLE_FILE_PATH)
-        create_full_example(cls.FULL_EXAMPLE_FILE_PATH)
-        create_changed_small_example(cls.CHANGED_SMALL_EXAMPLE_FILE_PATH)
+        create_small_example(cls.FILE_PATHS['small_example'])
+        create_full_example(cls.FILE_PATHS['full_example'])
+        create_changed_small_example(cls.FILE_PATHS['changed_small_example'])
 
     @classmethod
     def tearDownClass(cls) -> None:
-        os.remove(cls.SMALL_EXAMPLE_FILE_PATH)
-        os.remove(cls.FULL_EXAMPLE_FILE_PATH)
-        os.remove(cls.CHANGED_SMALL_EXAMPLE_FILE_PATH)
-        os.remove(cls.DIFF_FILE_PATH)
+        os.remove(cls.FILE_PATHS['small_example'])
+        os.remove(cls.FILE_PATHS['full_example'])
+        os.remove(cls.FILE_PATHS['changed_small_example'])
+        os.remove(cls.FILE_PATHS['diff_file'])
 
     def test_empty_command(self) -> None:
         output = run_gdxdiff([])
         self.assertEqual(output.returncode, 2)
         first = output.stdout.split('\n')
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'usage.txt'), 'r') as file:
+        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'usage.txt'), 'r') as file:
             second = file.read().split('\n')
         del second[2]
         self.assertEqual(first, second)
@@ -48,13 +52,13 @@ class TestGdxDiff(unittest.TestCase):
 
     def test_small_and_full_example(self) -> None:
         output = run_gdxdiff([
-            self.SMALL_EXAMPLE_FILE_PATH,
-            self.FULL_EXAMPLE_FILE_PATH,
-            self.DIFF_FILE_PATH
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['full_example'],
+            self.FILE_PATHS['diff_file']
         ])
         self.assertEqual(output.returncode, 1)
         first = output.stdout.split('\n')[2:]
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'small_and_full_example.txt'), 'r') as file:
+        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'small_and_full_example.txt'), 'r') as file:
             second = file.read().split('\n')[3:]
         del first[-3]
         del second[-3]
@@ -62,13 +66,13 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(output.stderr, '')
 
     def test_small_and_full_example_gdx_file(self) -> None:
-        container = gt.Container(load_from=self.DIFF_FILE_PATH)
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn('FilesCompared', container)
 
         symbol: gt.Parameter = container['FilesCompared']  # type: ignore
         first = symbol.records.values.tolist()
         second = [
-            ['File1', self.SMALL_EXAMPLE_FILE_PATH],
-            ['File2', self.FULL_EXAMPLE_FILE_PATH]
+            ['File1', self.FILE_PATHS['small_example']],
+            ['File2', self.FILE_PATHS['full_example']]
         ]
         self.assertEqual(first, second)

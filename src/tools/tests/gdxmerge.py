@@ -15,28 +15,32 @@ def run_gdxmerge(command: list[str]) -> subprocess.CompletedProcess[str]:
 
 
 class TestGdxMerge(unittest.TestCase):
-    EXAMPLES_DIRECTORY_PATH = os.path.join('.', 'examples')
-    SMALL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'small_example.gdx')
-    FULL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'full_example.gdx')
-    MERGE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'merged.gdx')
-    OUTPUT_DIRECTORY_PATH = os.path.join('.', 'output', 'gdxmerge')
+    DIRECTORY_PATHS = {
+        'examples': os.path.join('.', 'examples'),
+        'output': os.path.join('.', 'output', 'gdxmerge')
+    }
+    FILE_PATHS = {
+        'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
+        'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
+        'merged': os.path.join(DIRECTORY_PATHS['examples'], 'merged.gdx')
+    }
 
     @classmethod
     def setUpClass(cls) -> None:
-        create_small_example(cls.SMALL_EXAMPLE_FILE_PATH)
-        create_full_example(cls.FULL_EXAMPLE_FILE_PATH)
+        create_small_example(cls.FILE_PATHS['small_example'])
+        create_full_example(cls.FILE_PATHS['full_example'])
 
     @classmethod
     def tearDownClass(cls) -> None:
-        os.remove(cls.SMALL_EXAMPLE_FILE_PATH)
-        os.remove(cls.FULL_EXAMPLE_FILE_PATH)
-        os.remove(cls.MERGE_FILE_PATH)
+        os.remove(cls.FILE_PATHS['small_example'])
+        os.remove(cls.FILE_PATHS['full_example'])
+        os.remove(cls.FILE_PATHS['merged'])
 
     def test_empty_command(self) -> None:
         output = run_gdxmerge([])
         self.assertEqual(output.returncode, 0)
         first = output.stdout.split('\n')
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'usage.txt'), 'r') as file:
+        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'usage.txt'), 'r') as file:
             second = file.read().split('\n')
         del second[1]
         self.assertEqual(first, second)
@@ -44,19 +48,19 @@ class TestGdxMerge(unittest.TestCase):
 
     def test_small_and_full_example(self) -> None:
         output = run_gdxmerge([
-            self.SMALL_EXAMPLE_FILE_PATH,
-            self.FULL_EXAMPLE_FILE_PATH,
-            f'output={self.MERGE_FILE_PATH}'
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['full_example'],
+            f'output={self.FILE_PATHS['merged']}'
         ])
         self.assertEqual(output.returncode, 0)
         first = output.stdout.split('\n')[3:]
-        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'small_and_full_example.txt'), 'r') as file:
+        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'small_and_full_example.txt'), 'r') as file:
             second = file.read().split('\n')[3:]
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
     def test_small_and_full_example_gdx_file(self) -> None:
-        container = gt.Container(load_from=self.MERGE_FILE_PATH)
+        container = gt.Container(load_from=self.FILE_PATHS['merged'])
         self.assertIn('i', container)
         self.assertIn('j', container)
         self.assertIn('d', container)
