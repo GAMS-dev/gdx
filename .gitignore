@@ -3,6 +3,7 @@
 /out/
 /build/
 /x64/
+/gdx/x64/
 /cmake-build-*/
 .idea/
 .vs/
@@ -16,6 +17,6 @@
 /src/gclgms.h
 /src/gdxcc.c
 /src/gdxcc.h
+/src/__pycache__
 /venv/
 /docs/html/
-/gdx/x64/

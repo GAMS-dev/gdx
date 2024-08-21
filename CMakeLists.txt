@@ -82,6 +82,7 @@ set(gdx-core
     src/gdlib/utils.cpp
     src/gdlib/strutilx.h
     src/gdlib/strutilx.cpp
+    src/gdlib/strindexbuf.h
 
     # GDX specific units
     src/gxfile.h
@@ -92,31 +93,31 @@ set(gdx-core
 )
 
 set(test-deps
-        # runtime library
-        src/rtl/p3library.cpp
-        src/rtl/p3library.h
-        src/rtl/stdthread.cpp
-        src/rtl/stdthread.h
+    # runtime library
+    src/rtl/p3library.cpp
+    src/rtl/p3library.h
+    src/rtl/stdthread.cpp
+    src/rtl/stdthread.h
 
-        # global
-        src/global/gmslibname.cpp
-        src/global/gmslibname.h
+    # global
+    src/global/gmslibname.cpp
+    src/global/gmslibname.h
 
-        # gdlib
-        src/gdlib/charmaps.cpp
-        src/gdlib/charmaps.h
-        src/gdlib/gmacro.cpp
-        src/gdlib/gmacro.h
-        src/gdlib/gmsheapnew.cpp
-        src/gdlib/gmsheapnew.h
-        src/gdlib/gmsonly.h
-        src/gdlib/gmsonly.cpp
-        src/gdlib/obfuscatestr.cpp
-        src/gdlib/obfuscatestr.h
-        src/gdlib/strhash.h
-        src/gdlib/strhash.cpp
-        src/gdlib/xcompress.cpp
-        src/gdlib/xcompress.h
+    # gdlib
+    src/gdlib/charmaps.cpp
+    src/gdlib/charmaps.h
+    src/gdlib/gmacro.cpp
+    src/gdlib/gmacro.h
+    src/gdlib/gmsheapnew.cpp
+    src/gdlib/gmsheapnew.h
+    src/gdlib/gmsonly.h
+    src/gdlib/gmsonly.cpp
+    src/gdlib/obfuscatestr.cpp
+    src/gdlib/obfuscatestr.h
+    src/gdlib/strhash.h
+    src/gdlib/strhash.cpp
+    src/gdlib/xcompress.cpp
+    src/gdlib/xcompress.h
 )
 
 set(tests

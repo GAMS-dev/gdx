@@ -1334,6 +1334,7 @@ bool TGMSStatusStream::StatusFileOpen( gdlib::gmsgen::tfileaction AAction, std::
 
    // ...
    STUBWARN();
+   // TODO: Implement me!
 }
 
 void TGMSStatusStream::StatusWriteLn( const std::string &s )

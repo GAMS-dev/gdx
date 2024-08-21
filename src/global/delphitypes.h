@@ -285,6 +285,12 @@ public:
       return upperBoundIncl;
    }
 
+   // Number of elements from lower bound to upper bound (both inclusive)
+   constexpr static T getCount()
+   {
+      return upperBoundIncl - lowerBoundIncl + 1;
+   }
+
    T *getStorage()
    {
       return &value;

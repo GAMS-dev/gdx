@@ -714,8 +714,8 @@ int DateTimeToFileDate( double dt )
    DecodeTime( dt, hour, min, sec, msec );
 #if defined(_WIN32)
    LongRec lr {
-      ( sec >> 1 ) | ( min << 5 ) | ( hour << 11 ),
-      day | ( month << 5 ) | ( (year - 1980) << 9 )
+      static_cast<uint16_t>( ( sec >> 1 ) | ( min << 5 ) | ( hour << 11 ) ),
+      static_cast<uint16_t>(day | ( month << 5 ) | ( (year - 1980) << 9 ))
    };
    static_assert( sizeof( LongRec ) == sizeof( int ) );
    int res;

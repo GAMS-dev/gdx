@@ -74,7 +74,7 @@ def map_type_gen(func_ptrs, for_cpp=True):
                     cSVA='const double *',
                     ptr='void *',
                     D='double',
-                    int64='int64_t' if for_cpp else 'int')
+                    int64='int64_t' if for_cpp else 'INT64')
 
     func_ptr_types = {
         func_name: func_attrs['function'] + '_t'
