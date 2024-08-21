@@ -54,7 +54,7 @@ bool isMuxed()
 
 static std::string termString;
 
-static bool tmElapsed( uint64_t &thenT, uint64_t minDiffT )
+static bool tmElapsed( uint32_t &thenT, uint32_t minDiffT )
 {
    auto nowT = rtl::idglobal_p3::GetTickCount();
    auto diffT = rtl::idglobal_p3::GetTickDiff( thenT, nowT );

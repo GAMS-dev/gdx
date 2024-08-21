@@ -181,7 +181,7 @@ using Byte = uint8_t; // unsigned char
 using Word = uint16_t;// unsigned short
 using LongWord = uint32_t; // unsigned
 using Cardinal = uint32_t;// unsigned int
-using Longint = int;
+using Longint = int32_t;
 using Int32 = int32_t;// int
 using Int64 = int64_t;// long long
 using Shortint = signed char;
@@ -297,7 +297,7 @@ public:
    }
 };
 
-inline double frac( double v )
+inline double frac( const double v )
 {
    return v - trunc( v );
 }

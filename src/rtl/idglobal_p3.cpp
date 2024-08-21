@@ -38,12 +38,12 @@
 // ==============================================================================================================
 namespace rtl::idglobal_p3
 {
-cardinal GetTickDiff( const cardinal AOldTickCount, const cardinal ANewTickCount )
+uint32_t GetTickDiff( const uint32_t AOldTickCount, const uint32_t ANewTickCount )
 {
    return ANewTickCount >= AOldTickCount ? ANewTickCount - AOldTickCount : std::numeric_limits<unsigned int>::max() - AOldTickCount + ANewTickCount;
 }
 
-uint64_t GetTickCount() {
+uint32_t GetTickCount() {
 #if defined( _WIN32 )
    return ::GetTickCount();
 #else
