@@ -553,6 +553,19 @@ class TestGdxDump(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
+    def test_special_values_example_filter_default_values_out_epsilon(self) -> None:
+        output = run_gdxdump([
+            self.SPECIAL_VALUES_EXAMPLE_FILE_PATH,
+            'FilterDef=N',
+            'EpsOut=Test'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'special_values_example_filter_default_values_out_epsilon.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
     def test_special_values_example_filter_default_values_out_not_available(self) -> None:
         output = run_gdxdump([
             self.SPECIAL_VALUES_EXAMPLE_FILE_PATH,
