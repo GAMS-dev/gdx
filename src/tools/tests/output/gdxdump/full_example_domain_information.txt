@@ -1,0 +1,13 @@
+SyNr  Type  DomInf Symbol
+   3   Par    None a(*)
+   4   Par Regular b(j)
+   7   Par Regular c(i, j)
+  10   Equ    None cost
+   5   Par Regular d(i, j)
+  12   Equ Regular demand(j)
+   6   Par    None f
+   1   Set    None i(*)
+   2   Set    None j(*)
+  11   Equ Regular supply(i)
+   8   Var Regular x(i, j)
+   9   Var    None z
