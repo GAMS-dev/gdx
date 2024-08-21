@@ -552,3 +552,68 @@ class TestGdxDump(unittest.TestCase):
             second = file.read().split('\n')
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
+
+    def test_special_values_example_filter_default_values_out_not_available(self) -> None:
+        output = run_gdxdump([
+            self.SPECIAL_VALUES_EXAMPLE_FILE_PATH,
+            'FilterDef=N',
+            'NaOut=Test'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'special_values_example_filter_default_values_out_not_available.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
+    def test_special_values_example_filter_default_values_out_positive_infinity(self) -> None:
+        output = run_gdxdump([
+            self.SPECIAL_VALUES_EXAMPLE_FILE_PATH,
+            'FilterDef=N',
+            'PinfOut=Test'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'special_values_example_filter_default_values_out_positive_infinity.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
+    def test_special_values_example_filter_default_values_out_negative_infinity(self) -> None:
+        output = run_gdxdump([
+            self.SPECIAL_VALUES_EXAMPLE_FILE_PATH,
+            'FilterDef=N',
+            'MinfOut=Test'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'special_values_example_filter_default_values_out_negative_infinity.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
+    def test_special_values_example_filter_default_values_out_undefined(self) -> None:
+        output = run_gdxdump([
+            self.SPECIAL_VALUES_EXAMPLE_FILE_PATH,
+            'FilterDef=N',
+            'UndfOut=Test'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'special_values_example_filter_default_values_out_undefined.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
+    def test_special_values_example_filter_default_values_out_zero(self) -> None:
+        output = run_gdxdump([
+            self.SPECIAL_VALUES_EXAMPLE_FILE_PATH,
+            'FilterDef=N',
+            'ZeroOut=Test'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'special_values_example_filter_default_values_out_zero.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')

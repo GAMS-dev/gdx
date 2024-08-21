@@ -1,0 +1,20 @@
+$onEmpty
+
+Set i(*) supply /
+'seattle', 
+'san-diego' /;
+
+Set j(*) markets /
+'new-york', 
+'chicago', 
+'topeka' /;
+
+Parameter d(i,j) distance in thousands of miles /
+'seattle'.'new-york' 0, 
+'seattle'.'chicago' NA, 
+'seattle'.'topeka' +Inf, 
+'san-diego'.'new-york' -Inf, 
+'san-diego'.'chicago' Test, 
+'san-diego'.'topeka' 0 /;
+
+$offEmpty
