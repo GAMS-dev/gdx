@@ -510,3 +510,15 @@ class TestGdxDump(unittest.TestCase):
             second = file.read().split('\n')
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
+
+    def test_element_text_example_set_text(self) -> None:
+        output = run_gdxdump([
+            self.ELEMENT_TEXT_EXAMPLE_FILE_PATH,
+            'SetText'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')
+        with open(os.path.join(self.OUTPUT_DIRECTORY_PATH, 'element_text_example_set_text.txt'), 'r') as file:
+            second = file.read().split('\n')
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
