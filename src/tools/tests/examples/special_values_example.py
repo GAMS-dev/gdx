@@ -6,8 +6,8 @@ def create_special_values_example(file_path: str) -> None:
     m = gt.Container()
 
     # create the sets i, j
-    i = gt.Set(m, 'i', records=[('seattle', 'text 1'), ('san-diego', 'text 2')], description='supply')
-    j = gt.Set(m, 'j', records=[('new-york', 'text 3'), ('chicago', 'text 4'), ('topeka', 'text 5')], description='markets')
+    i = gt.Set(m, 'i', records=['seattle', 'san-diego'], description='supply')
+    j = gt.Set(m, 'j', records=['new-york', 'chicago', 'topeka'], description='markets')
 
     # add 'd' parameter -- domain linked to set objects i and j
     d = gt.Parameter(m, 'd', [i, j], description='distance in thousands of miles')
