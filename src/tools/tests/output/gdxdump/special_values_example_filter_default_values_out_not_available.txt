@@ -10,7 +10,7 @@ Set j(*) markets /
 'topeka' /;
 
 Parameter d(i,j) distance in thousands of miles /
-'seattle'.'new-york' 0, 
+'seattle'.'new-york' Eps, 
 'seattle'.'chicago' Test, 
 'seattle'.'topeka' +Inf, 
 'san-diego'.'new-york' -Inf, 
