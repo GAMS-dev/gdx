@@ -5,6 +5,7 @@ import tempfile
 from examples.small_example import create_small_example
 from examples.full_example import create_full_example
 from examples.element_text_example import create_element_text_example
+from examples.special_values_example import create_special_values_example
 
 
 def run_gdxdump(command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -20,6 +21,7 @@ class TestGdxDump(unittest.TestCase):
     SMALL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'small_example.gdx')
     FULL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'full_example.gdx')
     ELEMENT_TEXT_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'element_text_example.gdx')
+    SPECIAL_VALUES_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'special_values_example.gdx')
     OUTPUT_DIRECTORY_PATH = os.path.join('.', 'output', 'gdxdump')
 
     @classmethod
@@ -27,12 +29,14 @@ class TestGdxDump(unittest.TestCase):
         create_small_example(cls.SMALL_EXAMPLE_FILE_PATH)
         create_full_example(cls.FULL_EXAMPLE_FILE_PATH)
         create_element_text_example(cls.ELEMENT_TEXT_EXAMPLE_FILE_PATH)
+        create_special_values_example(cls.SPECIAL_VALUES_EXAMPLE_FILE_PATH)
 
     @classmethod
     def tearDownClass(cls) -> None:
         os.remove(cls.SMALL_EXAMPLE_FILE_PATH)
         os.remove(cls.FULL_EXAMPLE_FILE_PATH)
         os.remove(cls.ELEMENT_TEXT_EXAMPLE_FILE_PATH)
+        os.remove(cls.SPECIAL_VALUES_EXAMPLE_FILE_PATH)
 
     def test_empty_command(self) -> None:
         output = run_gdxdump([])
