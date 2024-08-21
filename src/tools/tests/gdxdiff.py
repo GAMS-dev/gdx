@@ -101,3 +101,59 @@ class TestGdxDiff(unittest.TestCase):
             ['File2', self.FILE_PATHS['changed_small_example']]
         ]
         self.assertEqual(first, second)
+
+    def test_small_and_changed_small_example_epsilon_absolute(self) -> None:
+        output = run_gdxdiff([
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['changed_small_example'],
+            self.FILE_PATHS['diff_file'],
+            'Eps=2'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')[2:]
+        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'small_and_changed_small_example_epsilon.txt'), 'r') as file:
+            second = file.read().split('\n')[3:]
+        del first[-3]
+        del second[-3]
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
+    def test_small_and_changed_small_example_epsilon_absolute_gdx_file(self) -> None:
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+        self.assertIn('FilesCompared', container)
+
+        symbol: gt.Parameter = container['FilesCompared']  # type: ignore
+        first = symbol.records.values.tolist()
+        second = [
+            ['File1', self.FILE_PATHS['small_example']],
+            ['File2', self.FILE_PATHS['changed_small_example']]
+        ]
+        self.assertEqual(first, second)
+
+    def test_small_and_changed_small_example_epsilon_relative(self) -> None:
+        output = run_gdxdiff([
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['changed_small_example'],
+            self.FILE_PATHS['diff_file'],
+            'RelEps=2'
+        ])
+        self.assertEqual(output.returncode, 0)
+        first = output.stdout.split('\n')[2:]
+        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'small_and_changed_small_example_epsilon.txt'), 'r') as file:
+            second = file.read().split('\n')[3:]
+        del first[-3]
+        del second[-3]
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
+    def test_small_and_changed_small_example_epsilon_relative_gdx_file(self) -> None:
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+        self.assertIn('FilesCompared', container)
+
+        symbol: gt.Parameter = container['FilesCompared']  # type: ignore
+        first = symbol.records.values.tolist()
+        second = [
+            ['File1', self.FILE_PATHS['small_example']],
+            ['File2', self.FILE_PATHS['changed_small_example']]
+        ]
+        self.assertEqual(first, second)
