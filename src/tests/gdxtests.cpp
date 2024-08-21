@@ -48,6 +48,7 @@
 #include <tuple>     // for tuple
 #include <utility>   // for pair
 #include <fstream>
+#include <cassert>
 
 #include "gdxtests.h"
 #include "gdlib/strindexbuf.h"
