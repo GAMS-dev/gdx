@@ -1,0 +1,73 @@
+$onEmpty
+
+Set i(*) supply /
+'seattle', 
+'san-diego' /;
+
+Set j(*) markets /
+'new-york', 
+'chicago', 
+'topeka' /;
+
+Parameter a(*) capacity of plant i in cases /
+'seattle' 0x4075e00000000000, 
+'san-diego' 0x4082c00000000000 /;
+
+Parameter b(j) demand at market j in cases /
+'new-york' 0x4074500000000000, 
+'chicago' 0x4072c00000000000, 
+'topeka' 0x4071300000000000 /;
+
+Parameter d(i,j) distance in thousands of miles /
+'seattle'.'new-york' 0x4004000000000000, 
+'seattle'.'chicago' 0x3ffb333333333333, 
+'seattle'.'topeka' 0x3ffccccccccccccd, 
+'san-diego'.'new-york' 0x4004000000000000, 
+'san-diego'.'chicago' 0x3ffccccccccccccd, 
+'san-diego'.'topeka' 0x3ff6666666666666 /;
+
+Scalar f freight in dollars per case per thousand miles / 0x4056800000000000 /;
+
+Parameter c(i,j) transport cost in thousands of dollars per case /
+'seattle'.'new-york' 0x3fcccccccccccccd, 
+'seattle'.'chicago' 0x3fc395810624dd2f, 
+'seattle'.'topeka' 0x3fc4bc6a7ef9db23, 
+'san-diego'.'new-york' 0x3fcccccccccccccd, 
+'san-diego'.'chicago' 0x3fc4bc6a7ef9db23, 
+'san-diego'.'topeka' 0x3fc020c49ba5e353 /;
+
+positive Variable x(i,j) shipment quantities in cases /
+'seattle'.'new-york'.L 0x4049000000000000, 
+'seattle'.'chicago'.L 0x4072c00000000000, 
+'seattle'.'topeka'.M 0x3fa26e978d4fdf3b, 
+'san-diego'.'new-york'.L 0x4071300000000000, 
+'san-diego'.'chicago'.M 0x3f826e978d4fdf3b, 
+'san-diego'.'topeka'.L 0x4071300000000000 /;
+
+free     Variable z total transportation costs in thousands of dollars /L 0x406335999999999a /;
+
+Equation cost define objective function /M 0x3ff0000000000000, LO 0x0000000000000000, UP 0x0000000000000000 /;
+
+Equation supply(i) observe supply limit at plant i /
+'seattle'.L 0x4075e00000000000, 
+'seattle'.LO -Inf, 
+'seattle'.UP 0x4075e00000000000, 
+'san-diego'.L 0x4081300000000000, 
+'san-diego'.LO -Inf, 
+'san-diego'.UP 0x4082c00000000000 /;
+
+Equation demand(j) satisfy demand at market j /
+'new-york'.L 0x4074500000000000, 
+'new-york'.M 0x3fcccccccccccccd, 
+'new-york'.LO 0x4074500000000000, 
+'new-york'.UP +Inf, 
+'chicago'.L 0x4072c00000000000, 
+'chicago'.M 0x3fc395810624dd2f, 
+'chicago'.LO 0x4072c00000000000, 
+'chicago'.UP +Inf, 
+'topeka'.L 0x4071300000000000, 
+'topeka'.M 0x3fc020c49ba5e354, 
+'topeka'.LO 0x4071300000000000, 
+'topeka'.UP +Inf /;
+
+$offEmpty

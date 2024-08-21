@@ -1,0 +1,73 @@
+$onEmpty
+
+Set i(*) supply /
+'seattle', 
+'san-diego' /;
+
+Set j(*) markets /
+'new-york', 
+'chicago', 
+'topeka' /;
+
+Parameter a(*) capacity of plant i in cases /
+'seattle' 0x1.5ep8, 
+'san-diego' 0x1.2cp9 /;
+
+Parameter b(j) demand at market j in cases /
+'new-york' 0x1.45p8, 
+'chicago' 0x1.2cp8, 
+'topeka' 0x1.13p8 /;
+
+Parameter d(i,j) distance in thousands of miles /
+'seattle'.'new-york' 0x1.4p1, 
+'seattle'.'chicago' 0x1.b333333333333p0, 
+'seattle'.'topeka' 0x1.ccccccccccccdp0, 
+'san-diego'.'new-york' 0x1.4p1, 
+'san-diego'.'chicago' 0x1.ccccccccccccdp0, 
+'san-diego'.'topeka' 0x1.6666666666666p0 /;
+
+Scalar f freight in dollars per case per thousand miles / 0x1.68p6 /;
+
+Parameter c(i,j) transport cost in thousands of dollars per case /
+'seattle'.'new-york' 0x1.ccccccccccccdp-3, 
+'seattle'.'chicago' 0x1.395810624dd2fp-3, 
+'seattle'.'topeka' 0x1.4bc6a7ef9db23p-3, 
+'san-diego'.'new-york' 0x1.ccccccccccccdp-3, 
+'san-diego'.'chicago' 0x1.4bc6a7ef9db23p-3, 
+'san-diego'.'topeka' 0x1.020c49ba5e353p-3 /;
+
+positive Variable x(i,j) shipment quantities in cases /
+'seattle'.'new-york'.L 0x1.9p5, 
+'seattle'.'chicago'.L 0x1.2cp8, 
+'seattle'.'topeka'.M 0x1.26e978d4fdf3bp-5, 
+'san-diego'.'new-york'.L 0x1.13p8, 
+'san-diego'.'chicago'.M 0x1.26e978d4fdf3bp-7, 
+'san-diego'.'topeka'.L 0x1.13p8 /;
+
+free     Variable z total transportation costs in thousands of dollars /L 0x1.335999999999ap7 /;
+
+Equation cost define objective function /M 0x1.0p0, LO 0x0.0p0, UP 0x0.0p0 /;
+
+Equation supply(i) observe supply limit at plant i /
+'seattle'.L 0x1.5ep8, 
+'seattle'.LO -Inf, 
+'seattle'.UP 0x1.5ep8, 
+'san-diego'.L 0x1.13p9, 
+'san-diego'.LO -Inf, 
+'san-diego'.UP 0x1.2cp9 /;
+
+Equation demand(j) satisfy demand at market j /
+'new-york'.L 0x1.45p8, 
+'new-york'.M 0x1.ccccccccccccdp-3, 
+'new-york'.LO 0x1.45p8, 
+'new-york'.UP +Inf, 
+'chicago'.L 0x1.2cp8, 
+'chicago'.M 0x1.395810624dd2fp-3, 
+'chicago'.LO 0x1.2cp8, 
+'chicago'.UP +Inf, 
+'topeka'.L 0x1.13p8, 
+'topeka'.M 0x1.020c49ba5e354p-3, 
+'topeka'.LO 0x1.13p8, 
+'topeka'.UP +Inf /;
+
+$offEmpty
