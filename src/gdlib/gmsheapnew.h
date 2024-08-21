@@ -170,6 +170,20 @@ public:
       return (T *) XGetMem64(sizeof(T));
    }
 
+   template<typename T>
+   T *XGetMem64Vec( const int Count )
+   {
+      return (T *)XGetMem64(sizeof(T)*Count);
+   }
+
+   template<typename T>
+   T *XGetMem64VecZero( const int Count )
+   {
+      T *res { XGetMem64Vec<T>(sizeof(T)*Count) };
+      std::memset(res, 0, sizeof(T) * Count);
+      return res;
+   }
+
    void *XAllocMem64( int64_t Size );
    void XFreeMem( void *P, int Size );
 
@@ -179,7 +193,7 @@ public:
    }
 
    template<typename T>
-   void XFreeMemVec(T *vec, int count)
+   void XFreeMemVec(T *vec, const int count)
    {
       XFreeMem( vec, count * sizeof( T ) );
    }
@@ -209,11 +223,16 @@ public:
       XFreeMem64<T>(P);
    }
 
+   template<typename T>
+   void XFreeMem64Vec( T *P, int Count ) {
+      XFreeMem64(P, sizeof(T)*Count);
+   }
+
    void XFreeMem64andNil( void **P, int64_t Size );
    void XReAllocMem( void **P, int OldSize, int NewSize );
 
    template<typename T>
-   void XReAllocMemVec(T** vec, int OldCount, int NewCount)
+   void XReAllocMemVec(T** vec, const int OldCount, const int NewCount)
    {
       XReAllocMem( reinterpret_cast<void **>(vec), OldCount * sizeof( T ), NewCount * sizeof( T ) );
    }
