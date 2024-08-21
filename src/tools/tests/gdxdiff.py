@@ -4,6 +4,7 @@ import subprocess
 import gams.transfer as gt
 from examples.small_example import create_small_example
 from examples.full_example import create_full_example
+from examples.changed_small_example import create_changed_small_example
 
 
 def run_gdxdiff(command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -18,6 +19,7 @@ class TestGdxDiff(unittest.TestCase):
     EXAMPLES_DIRECTORY_PATH = os.path.join('.', 'examples')
     SMALL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'small_example.gdx')
     FULL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'full_example.gdx')
+    CHANGED_SMALL_EXAMPLE_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'changed_small_example.gdx')
     DIFF_FILE_PATH = os.path.join(EXAMPLES_DIRECTORY_PATH, 'diffile.gdx')
     OUTPUT_DIRECTORY_PATH = os.path.join('.', 'output', 'gdxdiff')
 
@@ -25,11 +27,13 @@ class TestGdxDiff(unittest.TestCase):
     def setUpClass(cls) -> None:
         create_small_example(cls.SMALL_EXAMPLE_FILE_PATH)
         create_full_example(cls.FULL_EXAMPLE_FILE_PATH)
+        create_changed_small_example(cls.CHANGED_SMALL_EXAMPLE_FILE_PATH)
 
     @classmethod
     def tearDownClass(cls) -> None:
         os.remove(cls.SMALL_EXAMPLE_FILE_PATH)
         os.remove(cls.FULL_EXAMPLE_FILE_PATH)
+        os.remove(cls.CHANGED_SMALL_EXAMPLE_FILE_PATH)
         os.remove(cls.DIFF_FILE_PATH)
 
     def test_empty_command(self) -> None:
