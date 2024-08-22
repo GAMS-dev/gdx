@@ -101,7 +101,6 @@ build-leg:
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
-
     - mkdir ./build
     - mv {gdxdump,gdxdiff,gdxmerge} ./build
   needs: [fetch-ci-scripts,apigenerator]
@@ -142,10 +141,12 @@ build-deg:
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-macos.a
+    - mkdir ./build
+    - mv {gdxdump,gdxdiff,gdxmerge} ./build
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-deg
-    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib,libgdx-macos.a]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib,libgdx-macos.a,build]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -166,10 +167,12 @@ build-dac:
     - mv libgdx-static.a libgdx-macos-dac.a
     - lipo -create libgdxcclib64_deg.dylib libgdxcclib64_dac.dylib -output libgdxcclib64.dylib
     - lipo -create libgdx-macos-deg.a libgdx-macos-dac.a -output libgdx-macos.a
+    - mkdir ./build
+    - mv {gdxdump,gdxdiff,gdxmerge} ./build
   needs: [fetch-ci-scripts,apigenerator,build-deg]
   artifacts:
     name: gdx-dac
-    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib,libgdx-macos.a]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib,libgdx-macos.a,build]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
