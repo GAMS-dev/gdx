@@ -41,10 +41,10 @@ class TestGdxDump(unittest.TestCase):
         create_element_text_example(cls.FILE_PATHS['element_text_example'])
         create_special_values_example(cls.FILE_PATHS['special_values_example'])
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for file_path in cls.FILE_PATHS.values():
-            os.remove(file_path)
+    # @classmethod
+    # def tearDownClass(cls) -> None:
+    #     for file_path in cls.FILE_PATHS.values():
+    #         os.remove(file_path)
 
     def test_empty_command(self) -> None:
         output = self.run_gdxdump([])
