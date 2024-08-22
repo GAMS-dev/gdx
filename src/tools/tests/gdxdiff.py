@@ -8,14 +8,6 @@ from examples.changed_small_example import create_changed_small_example
 from examples.changed_full_example import create_changed_full_example
 
 
-def run_gdxdiff(command: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        [os.path.join('..', '..', '..', 'build', 'gdxdiff'), *command],
-        capture_output=True,
-        text=True
-    )
-
-
 class TestGdxDiff(unittest.TestCase):
     TEST_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
     DIRECTORY_PATHS = {
@@ -31,6 +23,14 @@ class TestGdxDiff(unittest.TestCase):
     }
 
     @classmethod
+    def run_gdxdiff(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', 'build', 'gdxdiff'), *command],
+            capture_output=True,
+            text=True
+        )
+
+    @classmethod
     def setUpClass(cls) -> None:
         create_small_example(cls.FILE_PATHS['small_example'])
         create_full_example(cls.FILE_PATHS['full_example'])
@@ -43,7 +43,7 @@ class TestGdxDiff(unittest.TestCase):
             os.remove(file_path)
 
     def test_empty_command(self) -> None:
-        output = run_gdxdiff([])
+        output = self.run_gdxdiff([])
         self.assertEqual(output.returncode, 2)
         first = output.stdout.split('\n')
         with open(os.path.join(self.DIRECTORY_PATHS['output'], 'usage.txt'), 'r') as file:
@@ -53,7 +53,7 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(output.stderr, '')
 
     def test_small_and_full_example(self) -> None:
-        output = run_gdxdiff([
+        output = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['diff_file']
@@ -80,7 +80,7 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
 
     def test_small_and_changed_small_example(self) -> None:
-        output = run_gdxdiff([
+        output = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['changed_small_example'],
             self.FILE_PATHS['diff_file']
@@ -107,7 +107,7 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
 
     def test_small_and_changed_small_example_epsilon_absolute_1(self) -> None:
-        output = run_gdxdiff([
+        output = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['changed_small_example'],
             self.FILE_PATHS['diff_file'],
@@ -123,7 +123,7 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(output.stderr, '')
 
     def test_small_and_changed_small_example_epsilon_absolute_2(self) -> None:
-        output = run_gdxdiff([
+        output = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['changed_small_example'],
             self.FILE_PATHS['diff_file'],
@@ -151,7 +151,7 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
 
     def test_small_and_changed_small_example_epsilon_relative_1(self) -> None:
-        output = run_gdxdiff([
+        output = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['changed_small_example'],
             self.FILE_PATHS['diff_file'],
@@ -167,7 +167,7 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(output.stderr, '')
 
     def test_small_and_changed_small_example_epsilon_relative_2(self) -> None:
-        output = run_gdxdiff([
+        output = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['changed_small_example'],
             self.FILE_PATHS['diff_file'],
@@ -195,7 +195,7 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
 
     def test_full_and_changed_full_example(self) -> None:
-        output = run_gdxdiff([
+        output = self.run_gdxdiff([
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['changed_full_example'],
             self.FILE_PATHS['diff_file']
@@ -222,7 +222,7 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
 
     def test_full_and_changed_full_example_field_all(self) -> None:
-        output = run_gdxdiff([
+        output = self.run_gdxdiff([
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['changed_full_example'],
             self.FILE_PATHS['diff_file'],
@@ -250,7 +250,7 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
 
     def test_full_and_changed_full_example_field_l(self) -> None:
-        output = run_gdxdiff([
+        output = self.run_gdxdiff([
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['changed_full_example'],
             self.FILE_PATHS['diff_file'],
@@ -278,7 +278,7 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
 
     def test_full_and_changed_full_example_field_m(self) -> None:
-        output = run_gdxdiff([
+        output = self.run_gdxdiff([
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['changed_full_example'],
             self.FILE_PATHS['diff_file'],
