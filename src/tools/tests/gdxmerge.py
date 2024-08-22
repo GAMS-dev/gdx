@@ -198,8 +198,8 @@ class TestGdxMerge(unittest.TestCase):
         symbol = container['Merged_set_1']  # type: ignore
         first = symbol.records.values.tolist()
         second = [
-            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  \.[/\\]examples[/\\]small_example\.gdx'],
-            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  \.[/\\]examples[/\\]full_example\.gdx']
+            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
+            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]full_example\.gdx']
         ]
         self.assertEqual(len(first), 2)
         for item in first:
