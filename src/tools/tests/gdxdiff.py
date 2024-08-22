@@ -25,7 +25,7 @@ class TestGdxDiff(unittest.TestCase):
     @classmethod
     def run_gdxdiff(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
-            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', 'build', 'gdxdiff'), *command],
+            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', 'gdxdiff'), *command],
             capture_output=True,
             text=True
         )

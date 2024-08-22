@@ -24,7 +24,7 @@ class TestGdxDump(unittest.TestCase):
     @classmethod
     def run_gdxdump(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
-            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', 'build', 'gdxdump'), *command],
+            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', 'gdxdump'), *command],
             capture_output=True,
             text=True
         )
