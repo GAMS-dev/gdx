@@ -72,7 +72,6 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_small_and_full_example_gdx_file(self) -> None:
         container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn('FilesCompared', container)
 
@@ -99,7 +98,6 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_small_and_changed_small_example_gdx_file(self) -> None:
         container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn('FilesCompared', container)
 
@@ -111,39 +109,37 @@ class TestGdxDiff(unittest.TestCase):
         ]
         self.assertEqual(first, second)
 
-    def test_small_and_changed_small_example_epsilon_absolute_1(self) -> None:
-        output = self.run_gdxdiff([
+    def test_small_and_changed_small_example_epsilon_absolute(self) -> None:
+        output_1 = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['changed_small_example'],
             self.FILE_PATHS['diff_file'],
             'Eps=1'
         ])
-        self.assertEqual(output.returncode, 1)
-        first = output.stdout.split('\n')[2:]
+        self.assertEqual(output_1.returncode, 1)
+        first = output_1.stdout.split('\n')[2:]
         with open(os.path.join(self.DIRECTORY_PATHS['output'], 'small_and_changed_small_example.txt'), 'r') as file:
             second = file.read().split('\n')[3:]
         del first[-3]
         del second[-3]
         self.assertEqual(first, second)
-        self.assertEqual(output.stderr, '')
+        self.assertEqual(output_1.stderr, '')
 
-    def test_small_and_changed_small_example_epsilon_absolute_2(self) -> None:
-        output = self.run_gdxdiff([
+        output_2 = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['changed_small_example'],
             self.FILE_PATHS['diff_file'],
             'Eps=2'
         ])
-        self.assertEqual(output.returncode, 0)
-        first = output.stdout.split('\n')[2:]
+        self.assertEqual(output_2.returncode, 0)
+        first = output_2.stdout.split('\n')[2:]
         with open(os.path.join(self.DIRECTORY_PATHS['output'], 'small_and_changed_small_example_epsilon.txt'), 'r') as file:
             second = file.read().split('\n')[3:]
         del first[-3]
         del second[-3]
         self.assertEqual(first, second)
-        self.assertEqual(output.stderr, '')
+        self.assertEqual(output_2.stderr, '')
 
-    def test_small_and_changed_small_example_epsilon_absolute_gdx_file(self) -> None:
         container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn('FilesCompared', container)
 
@@ -155,39 +151,32 @@ class TestGdxDiff(unittest.TestCase):
         ]
         self.assertEqual(first, second)
 
-    def test_small_and_changed_small_example_epsilon_relative_1(self) -> None:
-        output = self.run_gdxdiff([
+    def test_small_and_changed_small_example_epsilon_relative(self) -> None:
+        output_1 = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['changed_small_example'],
             self.FILE_PATHS['diff_file'],
             'RelEps=1'
         ])
-        self.assertEqual(output.returncode, 0)
-        first = output.stdout.split('\n')[2:]
+        self.assertEqual(output_1.returncode, 0)
+        first = output_1.stdout.split('\n')[2:]
         with open(os.path.join(self.DIRECTORY_PATHS['output'], 'small_and_changed_small_example_epsilon.txt'), 'r') as file:
             second = file.read().split('\n')[3:]
         del first[-3]
         del second[-3]
         self.assertEqual(first, second)
-        self.assertEqual(output.stderr, '')
+        self.assertEqual(output_1.stderr, '')
 
-    def test_small_and_changed_small_example_epsilon_relative_2(self) -> None:
-        output = self.run_gdxdiff([
+        output_2 = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['changed_small_example'],
             self.FILE_PATHS['diff_file'],
             'RelEps=2'
         ])
-        self.assertEqual(output.returncode, 0)
-        first = output.stdout.split('\n')[2:]
-        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'small_and_changed_small_example_epsilon.txt'), 'r') as file:
-            second = file.read().split('\n')[3:]
-        del first[-3]
-        del second[-3]
-        self.assertEqual(first, second)
-        self.assertEqual(output.stderr, '')
+        self.assertEqual(output_1.returncode, output_2.returncode)
+        self.assertEqual(output_1.stdout, output_2.stdout)
+        self.assertEqual(output_1.stderr, output_2.stderr)
 
-    def test_small_and_changed_small_example_epsilon_relative_gdx_file(self) -> None:
         container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn('FilesCompared', container)
 
@@ -214,7 +203,6 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_and_changed_full_example_gdx_file(self) -> None:
         container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn('FilesCompared', container)
 
@@ -242,7 +230,6 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_and_changed_full_example_field_all_gdx_file(self) -> None:
         container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn('FilesCompared', container)
 
@@ -270,7 +257,6 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_and_changed_full_example_field_l_gdx_file(self) -> None:
         container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn('FilesCompared', container)
 
@@ -298,7 +284,6 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_full_and_changed_full_example_field_m_gdx_file(self) -> None:
         container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn('FilesCompared', container)
 

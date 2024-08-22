@@ -64,7 +64,6 @@ class TestGdxMerge(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def test_small_and_full_example_gdx_file(self) -> None:
         container = gt.Container(load_from=self.FILE_PATHS['merged'])
         self.assertIn('i', container)
         self.assertIn('j', container)
