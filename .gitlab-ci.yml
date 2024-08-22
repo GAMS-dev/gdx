@@ -101,10 +101,13 @@ build-leg:
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
+
+    - mkdir ./build
+    - mv {gdxdump,gdxdiff,gdxmerge} ./build
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-leg
-    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a,build]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
