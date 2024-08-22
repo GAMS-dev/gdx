@@ -101,6 +101,8 @@ build-leg:
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
+    - pwd
+    - ls -la
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-leg
