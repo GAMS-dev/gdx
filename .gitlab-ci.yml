@@ -345,6 +345,27 @@ test-gdxtools-dac:
     - conda activate gdxtools
     - python3 ./src/tools/tests/main.py
 
+test-gdxtools-wei:
+  stage: test
+  tags: [windows]
+  image:
+    name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
+  needs: [fetch-ci-scripts,build-wei]
+  script:
+    - !reference [ .get-gams-wei ]
+    - !reference [ .gams-folder-wei ]
+    - $gmsdirname = Get-Content mygmsdir.tmp -Raw
+    - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
+    - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
+    # - $env:GAMSDIR = "$GAMS_PATH;$GAMS_PATH\gbin"
+    - curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe -o miniconda.exe
+    - start /wait "" miniconda.exe /S
+    - del miniconda.exe
+    # - Update-SessionEnvironment
+    - .\src\tools\tests\environments\conda\install.sh
+    - conda activate gdxtools
+    - python3 .\src\tools\tests\main.py
+
 #=======================================================================================================================
 
 leak-check-leg:
