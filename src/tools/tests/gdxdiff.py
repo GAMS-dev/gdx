@@ -220,6 +220,34 @@ class TestGdxDiff(unittest.TestCase):
         ]
         self.assertEqual(first, second)
 
+    def test_full_and_changed_full_example_field_all(self) -> None:
+        output = run_gdxdiff([
+            self.FILE_PATHS['full_example'],
+            self.FILE_PATHS['changed_full_example'],
+            self.FILE_PATHS['diff_file'],
+            'Field=All'
+        ])
+        self.assertEqual(output.returncode, 1)
+        first = output.stdout.split('\n')[2:]
+        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'full_and_changed_full_example.txt'), 'r') as file:
+            second = file.read().split('\n')[3:]
+        del first[-3]
+        del second[-3]
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
+    def test_full_and_changed_full_example_field_all_gdx_file(self) -> None:
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+        self.assertIn('FilesCompared', container)
+
+        symbol: gt.Parameter = container['FilesCompared']  # type: ignore
+        first = symbol.records.values.tolist()
+        second = [
+            ['File1', self.FILE_PATHS['full_example']],
+            ['File2', self.FILE_PATHS['changed_full_example']]
+        ]
+        self.assertEqual(first, second)
+
     def test_full_and_changed_full_example_field_l(self) -> None:
         output = run_gdxdiff([
             self.FILE_PATHS['full_example'],
