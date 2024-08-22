@@ -1,0 +1,7 @@
+GDXDIFF          47.4.1 4b675771 Aug 13, 2024          DAC arm 64bit/macOS
+File1 : full_example.gdx
+File2 : changed_full_example.gdx
+Summary of differences:
+x   Data are different
+Output: diffile.gdx
+GDXDiff finished
