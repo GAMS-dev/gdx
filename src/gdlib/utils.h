@@ -492,6 +492,13 @@ bool hasCharLt( std::string_view s, int n );
 
 double round( double n, int ndigits );
 
+// since std::round behaves differently from Delphi's System.Round
+template<class T>
+T round( const double n)
+{
+   return static_cast<T>(n >= 0 ? n+0.5 : n-0.5);
+}
+
 void replaceChar( char a, char b, std::string &s );
 
 std::vector<size_t> substrPositions( std::string_view s, std::string_view substr );

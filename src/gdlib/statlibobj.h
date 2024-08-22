@@ -58,7 +58,7 @@ class TGMSLogStream
    FILE *Ffcon {};
    int FLenLast {};
    bool FhasNewData {};
-   uint64_t FLastShowTicks {}, FLineStartTicks {}, FPrevSecs {};
+   uint32_t FLastShowTicks {}, FLineStartTicks {}, FPrevSecs {};
    char FSpinChar {};
    bool FLastIsMsg {};
    int FTraceLevel{2};

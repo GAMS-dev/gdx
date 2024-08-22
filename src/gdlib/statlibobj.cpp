@@ -54,7 +54,7 @@ bool isMuxed()
 
 static std::string termString;
 
-static bool tmElapsed( uint64_t &thenT, uint64_t minDiffT )
+static bool tmElapsed( uint32_t &thenT, uint32_t minDiffT )
 {
    auto nowT = rtl::idglobal_p3::GetTickCount();
    auto diffT = rtl::idglobal_p3::GetTickDiff( thenT, nowT );
@@ -544,19 +544,19 @@ void TGMSLogStream::ShowStatLine()
       s = "--- "s;
       if( FNestLevel > 0 )
          s += std::string( FNestLevel, '.' ) + " "s;
-      s += FFileName + "("s + rtl::sysutils_p3::IntToStr( FLineNr ) + ")"s;
+      s += FFileName + "("s + IntToStr( FLineNr ) + ")"s;
       uint64_t rss, vss;
       if( FShowOSMem == 1 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) ) FMemory = (double) rss / 1e6;
       else if( FShowOSMem == 2 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) )
          FMemory = (double) vss / 1e6;
-      s += " "s + rtl::sysutils_p3::IntToStr( (int) std::round( FMemory ) ) + " Mb"s;
+      s += " "s + IntToStr( utils::round<int>( FMemory ) ) + " Mb"s;
       if( FErrorCnt > 0 )
       {
-         s += " "s + rtl::sysutils_p3::IntToStr( FErrorCnt ) + " "s;
+         s += " "s + IntToStr( FErrorCnt ) + " "s;
          s += "Error"s + ( FErrorCnt > 1 ? "s"s : ""s );
       }
       if( FSpinChar != ' ' ) s += " "s + FSpinChar;
-      if( FPrevSecs > 0 ) s += " " + rtl::sysutils_p3::IntToStr( FPrevSecs ) + " secs";
+      if( FPrevSecs > 0 ) s += " " + IntToStr( FPrevSecs ) + " secs";
       if( FLenLast > 0 ) write_gf( "\r" );
       if( (int) s.length() < FLenLast )
       {

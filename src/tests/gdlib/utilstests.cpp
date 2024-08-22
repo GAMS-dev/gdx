@@ -426,6 +426,17 @@ TEST_CASE( "Test rounding to n-digits" )
    REQUIRE_LT( 23.0 - utils::round( 23.4242, 0 ), eps );
 }
 
+TEST_CASE( "Test double to integral type rounding function that should mimic System.Round Delphi behavior" )
+{
+   REQUIRE_EQ(0, utils::round<int>(0.45));
+   REQUIRE_EQ(0, utils::round<int>(-0.45));
+   // round tie away from 0
+   REQUIRE_EQ(-1, utils::round<int>(-0.5));
+   REQUIRE_EQ(1, utils::round<int>(0.5));
+   REQUIRE_EQ(-3, utils::round<int>(-2.5));
+   REQUIRE_EQ(3, utils::round<int>(2.5));
+}
+
 TEST_CASE( "Test replacing specific char with another one in a string (in place)" )
 {
    std::string s { "Letter X"s };
