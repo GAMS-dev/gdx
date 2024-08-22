@@ -1,5 +1,6 @@
 import unittest
 import os
+import platform
 import subprocess
 import gams.transfer as gt
 from examples.small_example import create_small_example
@@ -20,8 +21,12 @@ class TestGdxMerge(unittest.TestCase):
 
     @classmethod
     def run_gdxmerge(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
+        if platform.system() == 'Windows':
+            executable = ['Release', 'gdxmerge.exe']
+        else:
+            executable = ['build', 'gdxmerge']
         return subprocess.run(
-            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', 'build', 'gdxmerge'), *command],
+            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
             capture_output=True,
             text=True
         )

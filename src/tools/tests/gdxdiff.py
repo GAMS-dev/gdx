@@ -1,5 +1,6 @@
 import unittest
 import os
+import platform
 import subprocess
 import gams.transfer as gt
 from examples.small_example import create_small_example
@@ -24,8 +25,12 @@ class TestGdxDiff(unittest.TestCase):
 
     @classmethod
     def run_gdxdiff(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
+        if platform.system() == 'Windows':
+            executable = ['Release', 'gdxdiff.exe']
+        else:
+            executable = ['build', 'gdxdiff']
         return subprocess.run(
-            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', 'build', 'gdxdiff'), *command],
+            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
             capture_output=True,
             text=True
         )

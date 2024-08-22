@@ -1,5 +1,6 @@
 import unittest
 import os
+import platform
 import subprocess
 import tempfile
 from examples.small_example import create_small_example
@@ -23,8 +24,12 @@ class TestGdxDump(unittest.TestCase):
 
     @classmethod
     def run_gdxdump(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
+        if platform.system() == 'Windows':
+            executable = ['Release', 'gdxdump.exe']
+        else:
+            executable = ['build', 'gdxdump']
         return subprocess.run(
-            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', 'build', 'gdxdump'), *command],
+            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
             capture_output=True,
             text=True
         )
