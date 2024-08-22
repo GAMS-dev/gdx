@@ -99,7 +99,6 @@ build-leg:
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
-    - pwd
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
   needs: [fetch-ci-scripts,apigenerator]
@@ -302,8 +301,6 @@ test-gdxtools-leg:
 
     - ./src/tools/tests/environments/conda/install.sh
     - conda activate gdxtools
-    - python3 -v
-    - which python3
     - python3 ./src/tools/tests/main.py
 
 #=======================================================================================================================
