@@ -292,6 +292,9 @@ test-gdxtools-leg:
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
     - PATH="$GAMS_PATH:$PATH"
 
+    - pwd
+    - ls -la
+
     - mkdir ~/miniconda3
     - curl -o ~/miniconda3/miniconda.sh https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
     - bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
