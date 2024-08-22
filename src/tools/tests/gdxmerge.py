@@ -21,7 +21,7 @@ class TestGdxMerge(unittest.TestCase):
     @classmethod
     def run_gdxmerge(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
-            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', 'gdxmerge'), *command],
+            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', 'build', 'gdxmerge'), *command],
             capture_output=True,
             text=True
         )
