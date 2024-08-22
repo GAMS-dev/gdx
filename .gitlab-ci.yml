@@ -101,7 +101,7 @@ build-leg:
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
-    - mkdir ./build
+    - mkdir -p ./build
     - mv {gdxdump,gdxdiff,gdxmerge} ./build
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
@@ -141,7 +141,7 @@ build-deg:
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-macos.a
-    - mkdir ./build
+    - mkdir -p ./build
     - mv {gdxdump,gdxdiff,gdxmerge} ./build
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
@@ -167,7 +167,7 @@ build-dac:
     - mv libgdx-static.a libgdx-macos-dac.a
     - lipo -create libgdxcclib64_deg.dylib libgdxcclib64_dac.dylib -output libgdxcclib64.dylib
     - lipo -create libgdx-macos-deg.a libgdx-macos-dac.a -output libgdx-macos.a
-    - mkdir ./build
+    - mkdir -p ./build
     - mv {gdxdump,gdxdiff,gdxmerge} ./build
   needs: [fetch-ci-scripts,apigenerator,build-deg]
   artifacts:
@@ -297,7 +297,7 @@ test-gdxtools-leg:
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
     - PATH="$GAMS_PATH:$PATH"
-    - mkdir ~/miniconda3
+    - mkdir -p ~/miniconda3
     - curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o ~/miniconda3/miniconda.sh
     - bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
     - rm -rf ~/miniconda3/miniconda.sh
@@ -316,7 +316,7 @@ test-gdxtools-deg:
     - !reference [ .gams-folder-deg ]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
     - PATH="$GAMS_PATH:$PATH"
-    - mkdir ~/miniconda3
+    - mkdir -p ~/miniconda3
     - curl https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -o ~/miniconda3/miniconda.sh
     - bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
     - rm -rf ~/miniconda3/miniconda.sh
@@ -335,7 +335,7 @@ test-gdxtools-dac:
     - !reference [ .gams-folder-dac ]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
     - PATH="$GAMS_PATH:$PATH"
-    - mkdir ~/miniconda3
+    - mkdir -p ~/miniconda3
     - curl https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh -o ~/miniconda3/miniconda.sh
     - bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
     - rm -rf ~/miniconda3/miniconda.sh
