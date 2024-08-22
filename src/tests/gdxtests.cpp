@@ -55,7 +55,7 @@
 
 using namespace std::literals::string_literals;
 using namespace gdx;
-using namespace strindexbuf;
+using namespace gdlib::strindexbuf;
 
 namespace gdx::tests::gdxtests
 {

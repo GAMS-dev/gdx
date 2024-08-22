@@ -4,7 +4,7 @@
 #include <array>
 #include <gclgms.h>
 
-namespace strindexbuf
+namespace gdlib::strindexbuf
 {
 class StrRef
 {
