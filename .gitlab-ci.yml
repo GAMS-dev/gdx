@@ -290,9 +290,9 @@ test-gdxtools-leg:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - python3 -v
-    - which python3
-    - ./src/tools/tests/environments/venv/install.sh
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" python3 -v
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" which python3
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./src/tools/tests/environments/venv/install.sh
     - source ./src/tools/tests/environments/venv/bin/activate
     - python3 ./src/tools/tests/main.py
 
