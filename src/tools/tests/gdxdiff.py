@@ -37,10 +37,10 @@ class TestGdxDiff(unittest.TestCase):
         create_changed_small_example(cls.FILE_PATHS['changed_small_example'])
         create_changed_full_example(cls.FILE_PATHS['changed_full_example'])
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for file_path in cls.FILE_PATHS.values():
-            os.remove(file_path)
+    # @classmethod
+    # def tearDownClass(cls) -> None:
+    #     for file_path in cls.FILE_PATHS.values():
+    #         os.remove(file_path)
 
     def test_empty_command(self) -> None:
         output = self.run_gdxdiff([])
