@@ -15,9 +15,10 @@ def run_gdxmerge(command: list[str]) -> subprocess.CompletedProcess[str]:
 
 
 class TestGdxMerge(unittest.TestCase):
+    TEST_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
     DIRECTORY_PATHS = {
-        'examples': os.path.join('.', 'examples'),
-        'output': os.path.join('.', 'output', 'gdxmerge')
+        'examples': os.path.join(TEST_DIRECTORY_PATH, 'examples'),
+        'output': os.path.join(TEST_DIRECTORY_PATH, 'output', 'gdxmerge')
     }
     FILE_PATHS = {
         'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),

@@ -17,9 +17,10 @@ def run_gdxdiff(command: list[str]) -> subprocess.CompletedProcess[str]:
 
 
 class TestGdxDiff(unittest.TestCase):
+    TEST_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
     DIRECTORY_PATHS = {
-        'examples': os.path.join('.', 'examples'),
-        'output': os.path.join('.', 'output', 'gdxdiff')
+        'examples': os.path.join(TEST_DIRECTORY_PATH, 'examples'),
+        'output': os.path.join(TEST_DIRECTORY_PATH, 'output', 'gdxdiff')
     }
     FILE_PATHS = {
         'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
