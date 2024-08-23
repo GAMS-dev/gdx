@@ -17,7 +17,7 @@ class TestGdxMerge(unittest.TestCase):
     FILE_PATHS = {
         'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
         'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
-        'merged': os.path.join(DIRECTORY_PATHS['examples'], 'merged.gdx')
+        'merge_file': os.path.join(DIRECTORY_PATHS['examples'], 'merge_file.gdx')
     }
 
     @classmethod
@@ -63,7 +63,7 @@ class TestGdxMerge(unittest.TestCase):
         container: gt.Container | None = None
     ) -> None:
         if container is None:
-            container = gt.Container(load_from=self.FILE_PATHS['merged'])
+            container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
         for symbol_name in symbol_names:
             with self.subTest(symbol_name=symbol_name):
                 self.assertIn(symbol_name, container)
@@ -76,7 +76,7 @@ class TestGdxMerge(unittest.TestCase):
         container: gt.Container | None = None
     ) -> None:
         if container is None:
-            container = gt.Container(load_from=self.FILE_PATHS['merged'])
+            container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
         self.assertIn(symbol_name, container)
         symbol: gt.Parameter = container[symbol_name]  # type: ignore
         values = symbol.records.values.tolist()
@@ -105,7 +105,7 @@ class TestGdxMerge(unittest.TestCase):
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merged']}'
+            f'output={self.FILE_PATHS['merge_file']}'
         ])
         self.check_output(
             output,
@@ -114,7 +114,7 @@ class TestGdxMerge(unittest.TestCase):
             second_offset=3
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['merged'])
+        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
 
         symbol_names = ['i', 'j', 'd', 'a', 'b', 'f', 'c', 'x', 'z', 'cost', 'supply', 'demand', 'Merged_set_1']
         self.check_gdx_file_symbols(symbol_names, container)
