@@ -57,6 +57,31 @@ class TestGdxMerge(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
+    def check_gdx_file_symbols(
+        self,
+        symbol_names: list[str],
+        container: gt.Container,
+        symbols_len: int | None
+    ) -> None:
+        for symbol_name in symbol_names:
+            with self.subTest(symbol_name=symbol_name):
+                self.assertIn(symbol_name, container)
+        self.assertEqual(
+            len(container),
+            symbols_len if symbols_len is not None else len(symbol_names)
+        )
+
+    def check_gdx_file_values(
+        self,
+        symbol_name: str,
+        container: gt.Container,
+        expected_values: list[list[str | float]]
+    ) -> None:
+        self.assertIn(symbol_name, container)
+        symbol: gt.Parameter = container[symbol_name]  # type: ignore
+        values = symbol.records.values.tolist()
+        self.assertEqual(values, expected_values)
+
     def check_gdx_file(
         self,
         symbols: dict[str, list[list[str | float]]],
@@ -65,35 +90,9 @@ class TestGdxMerge(unittest.TestCase):
     ) -> None:
         if container is None:
             container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
-
-        def check_gdx_file_symbols(
-            self,
-            symbol_names: list[str],
-            container: gt.Container,
-            symbols_len: int | None
-        ) -> None:
-            for symbol_name in symbol_names:
-                with self.subTest(symbol_name=symbol_name):
-                    self.assertIn(symbol_name, container)
-            self.assertEqual(
-                len(container),
-                symbols_len if symbols_len is not None else len(symbol_names)
-            )
-
-        def check_gdx_file_values(
-            self,
-            symbol_name: str,
-            container: gt.Container,
-            expected_values: list[list[str | float]]
-        ) -> None:
-            self.assertIn(symbol_name, container)
-            symbol: gt.Parameter = container[symbol_name]  # type: ignore
-            values = symbol.records.values.tolist()
-            self.assertEqual(values, expected_values)
-
-        check_gdx_file_symbols(self, list(symbols.keys()), container, symbols_len)
+        self.check_gdx_file_symbols(list(symbols.keys()), container, symbols_len)
         for symbol_name in symbols:
-            check_gdx_file_values(self, symbol_name, container, symbols[symbol_name])
+            self.check_gdx_file_values(symbol_name, container, symbols[symbol_name])
 
     @classmethod
     def setUpClass(cls) -> None:
