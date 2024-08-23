@@ -103,20 +103,11 @@ class TestGdxMerge(unittest.TestCase):
         )
 
         container = gt.Container(load_from=self.FILE_PATHS['merged'])
-        self.assertIn('i', container)
-        self.assertIn('j', container)
-        self.assertIn('d', container)
-        self.assertIn('a', container)
-        self.assertIn('b', container)
-        self.assertIn('f', container)
-        self.assertIn('c', container)
-        self.assertIn('x', container)
-        self.assertIn('z', container)
-        self.assertIn('cost', container)
-        self.assertIn('supply', container)
-        self.assertIn('demand', container)
-        self.assertIn('Merged_set_1', container)
-        self.assertEqual(len(container), 13)
+        symbol_names = ['i', 'j', 'd', 'a', 'b', 'f', 'c', 'x', 'z', 'cost', 'supply', 'demand', 'Merged_set_1']
+        for symbol_name in symbol_names:
+            with self.subTest(symbol_name=symbol_name):
+                self.assertIn(symbol_name, container)
+        self.assertEqual(len(container), len(symbol_names))
 
         self.check_gdx_file('i', [
             ['small_example', 'seattle', ''],
