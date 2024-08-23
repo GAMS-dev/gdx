@@ -64,27 +64,39 @@ class TestGdxDiff(unittest.TestCase):
     def check_gdx_file_symbols(
         self,
         symbol_names: list[str],
-        container: gt.Container | None = None
+        container: gt.Container,
+        symbols_len: int | None
     ) -> None:
-        if container is None:
-            container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         for symbol_name in symbol_names:
             with self.subTest(symbol_name=symbol_name):
                 self.assertIn(symbol_name, container)
-        self.assertEqual(len(container), len(symbol_names))
+        self.assertEqual(
+            len(container),
+            symbols_len if symbols_len is not None else len(symbol_names)
+        )
 
     def check_gdx_file_values(
         self,
         symbol_name: str,
-        expected_values: list[list[str | float]],
-        container: gt.Container | None = None
+        container: gt.Container,
+        expected_values: list[list[str | float]]
     ) -> None:
-        if container is None:
-            container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn(symbol_name, container)
         symbol: gt.Parameter = container[symbol_name]  # type: ignore
         values = symbol.records.values.tolist()
         self.assertEqual(values, expected_values)
+
+    def check_gdx_file(
+        self,
+        symbols: dict[str, list[list[str | float]]],
+        container: gt.Container | None = None,
+        symbols_len: int | None = None
+    ) -> None:
+        if container is None:
+            container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+        self.check_gdx_file_symbols(list(symbols.keys()), container, symbols_len)
+        for symbol_name in symbols:
+            self.check_gdx_file_values(symbol_name, container, symbols[symbol_name])
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -122,15 +134,13 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3]
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-        symbol_names = ['FilesCompared']
-        self.check_gdx_file_symbols(symbol_names, container)
-
-        self.check_gdx_file_values('FilesCompared', [
-            ['File1', self.FILE_PATHS['small_example']],
-            ['File2', self.FILE_PATHS['full_example']]
-        ], container)
+        symbols: dict[str, list[list[str | float]]] = {
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['small_example']],
+                ['File2', self.FILE_PATHS['full_example']]
+            ]
+        }
+        self.check_gdx_file(symbols)
 
     def test_small_example_and_small_example_changed_data(self) -> None:
         output = self.run_gdxdiff([
@@ -147,30 +157,27 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3]
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-        symbol_names = ['d', 'FilesCompared']
-        self.check_gdx_file_symbols(symbol_names, container)
-
-        self.check_gdx_file_values('d', [
-            ['seattle', 'new-york', 'dif1', 2.5],
-            ['seattle', 'new-york', 'dif2', 3.5],
-            ['seattle', 'chicago', 'dif1', 1.7],
-            ['seattle', 'chicago', 'dif2', 2.7],
-            ['seattle', 'topeka', 'dif1', 1.8],
-            ['seattle', 'topeka', 'dif2', 2.8],
-            ['san-diego', 'new-york', 'dif1', 2.5],
-            ['san-diego', 'new-york', 'dif2', 3.5],
-            ['san-diego', 'chicago', 'dif1', 1.8],
-            ['san-diego', 'chicago', 'dif2', 2.8],
-            ['san-diego', 'topeka', 'dif1', 1.4],
-            ['san-diego', 'topeka', 'dif2', 2.4]
-        ], container)
-
-        self.check_gdx_file_values('FilesCompared', [
-            ['File1', self.FILE_PATHS['small_example']],
-            ['File2', self.FILE_PATHS['small_example_changed_data']]
-        ], container)
+        symbols: dict[str, list[list[str | float]]] = {
+            'd': [
+                ['seattle', 'new-york', 'dif1', 2.5],
+                ['seattle', 'new-york', 'dif2', 3.5],
+                ['seattle', 'chicago', 'dif1', 1.7],
+                ['seattle', 'chicago', 'dif2', 2.7],
+                ['seattle', 'topeka', 'dif1', 1.8],
+                ['seattle', 'topeka', 'dif2', 2.8],
+                ['san-diego', 'new-york', 'dif1', 2.5],
+                ['san-diego', 'new-york', 'dif2', 3.5],
+                ['san-diego', 'chicago', 'dif1', 1.8],
+                ['san-diego', 'chicago', 'dif2', 2.8],
+                ['san-diego', 'topeka', 'dif1', 1.4],
+                ['san-diego', 'topeka', 'dif2', 2.4]
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['small_example']],
+                ['File2', self.FILE_PATHS['small_example_changed_data']]
+            ]
+        }
+        self.check_gdx_file(symbols)
 
     def test_small_example_and_small_example_changed_data_epsilon_absolute_1(self) -> None:
         output = self.run_gdxdiff([
@@ -189,20 +196,17 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3]
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-        symbol_names = ['d', 'FilesCompared']
-        self.check_gdx_file_symbols(symbol_names, container)
-
-        self.check_gdx_file_values('d', [
-            ['seattle', 'chicago', 'dif1', 1.7],
-            ['seattle', 'chicago', 'dif2', 2.7]
-        ], container)
-
-        self.check_gdx_file_values('FilesCompared', [
-            ['File1', self.FILE_PATHS['small_example']],
-            ['File2', self.FILE_PATHS['small_example_changed_data']]
-        ], container)
+        symbols: dict[str, list[list[str | float]]] = {
+            'd': [
+                ['seattle', 'chicago', 'dif1', 1.7],
+                ['seattle', 'chicago', 'dif2', 2.7]
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['small_example']],
+                ['File2', self.FILE_PATHS['small_example_changed_data']]
+            ]
+        }
+        self.check_gdx_file(symbols)
 
     def test_small_example_and_small_example_changed_data_epsilon_absolute_2(self) -> None:
         output = self.run_gdxdiff([
@@ -221,15 +225,13 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3]
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-        symbol_names = ['FilesCompared']
-        self.check_gdx_file_symbols(symbol_names, container)
-
-        self.check_gdx_file_values('FilesCompared', [
-            ['File1', self.FILE_PATHS['small_example']],
-            ['File2', self.FILE_PATHS['small_example_changed_data']]
-        ], container)
+        symbols: dict[str, list[list[str | float]]] = {
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['small_example']],
+                ['File2', self.FILE_PATHS['small_example_changed_data']]
+            ]
+        }
+        self.check_gdx_file(symbols)
 
     def test_small_example_and_small_example_changed_data_epsilon_relative(self) -> None:
         for i in [1, 2]:
@@ -250,15 +252,13 @@ class TestGdxDiff(unittest.TestCase):
                     second_delete=[-3]
                 )
 
-                container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-                symbol_names = ['FilesCompared']
-                self.check_gdx_file_symbols(symbol_names, container)
-
-                self.check_gdx_file_values('FilesCompared', [
-                    ['File1', self.FILE_PATHS['small_example']],
-                    ['File2', self.FILE_PATHS['small_example_changed_data']]
-                ], container)
+                symbols: dict[str, list[list[str | float]]] = {
+                    'FilesCompared': [
+                        ['File1', self.FILE_PATHS['small_example']],
+                        ['File2', self.FILE_PATHS['small_example_changed_data']]
+                    ]
+                }
+                self.check_gdx_file(symbols)
 
     def test_full_example_and_full_example_changed_variables(self) -> None:
         output = self.run_gdxdiff([
@@ -275,26 +275,23 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3]
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-        symbol_names = ['x', 'FilesCompared']
-        self.check_gdx_file_symbols(symbol_names, container)
-
-        self.check_gdx_file_values('x', [
-            ['seattle', 'new-york', 'dif1', 50.0, 0.0, 0.0, float('inf'), 1.0],
-            ['seattle', 'new-york', 'dif2', 150.0, 0.0, 0.0, float('inf'), 1.0],
-            ['seattle', 'chicago', 'dif1', 300.0, 0.0, 0.0, float('inf'), 1.0],
-            ['seattle', 'chicago', 'dif2', 400.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'new-york', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'new-york', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'topeka', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'topeka', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0]
-        ], container)
-
-        self.check_gdx_file_values('FilesCompared', [
-            ['File1', self.FILE_PATHS['full_example']],
-            ['File2', self.FILE_PATHS['full_example_changed_variables']]
-        ], container)
+        symbols: dict[str, list[list[str | float]]] = {
+            'x': [
+                ['seattle', 'new-york', 'dif1', 50.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'new-york', 'dif2', 150.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'chicago', 'dif1', 300.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'chicago', 'dif2', 400.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'new-york', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'new-york', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'topeka', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'topeka', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0]
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['full_example']],
+                ['File2', self.FILE_PATHS['full_example_changed_variables']]
+            ]
+        }
+        self.check_gdx_file(symbols)
 
     def test_full_example_and_full_example_changed_variables_field_all(self) -> None:
         output = self.run_gdxdiff([
@@ -313,26 +310,23 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3]
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-        symbol_names = ['x', 'FilesCompared']
-        self.check_gdx_file_symbols(symbol_names, container)
-
-        self.check_gdx_file_values('x', [
-            ['seattle', 'new-york', 'dif1', 50.0, 0.0, 0.0, float('inf'), 1.0],
-            ['seattle', 'new-york', 'dif2', 150.0, 0.0, 0.0, float('inf'), 1.0],
-            ['seattle', 'chicago', 'dif1', 300.0, 0.0, 0.0, float('inf'), 1.0],
-            ['seattle', 'chicago', 'dif2', 400.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'new-york', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'new-york', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'topeka', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'topeka', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0]
-        ], container)
-
-        self.check_gdx_file_values('FilesCompared', [
-            ['File1', self.FILE_PATHS['full_example']],
-            ['File2', self.FILE_PATHS['full_example_changed_variables']]
-        ], container)
+        symbols: dict[str, list[list[str | float]]] = {
+            'x': [
+                ['seattle', 'new-york', 'dif1', 50.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'new-york', 'dif2', 150.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'chicago', 'dif1', 300.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'chicago', 'dif2', 400.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'new-york', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'new-york', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'topeka', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'topeka', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0]
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['full_example']],
+                ['File2', self.FILE_PATHS['full_example_changed_variables']]
+            ]
+        }
+        self.check_gdx_file(symbols)
 
     def test_full_example_and_full_example_changed_variables_field_l(self) -> None:
         output = self.run_gdxdiff([
@@ -351,26 +345,23 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3]
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-        symbol_names = ['x', 'FilesCompared']
-        self.check_gdx_file_symbols(symbol_names, container)
-
-        self.check_gdx_file_values('x', [
-            ['seattle', 'new-york', 'dif1', 50.0, 0.0, 0.0, float('inf'), 1.0],
-            ['seattle', 'new-york', 'dif2', 150.0, 0.0, 0.0, float('inf'), 1.0],
-            ['seattle', 'chicago', 'dif1', 300.0, 0.0, 0.0, float('inf'), 1.0],
-            ['seattle', 'chicago', 'dif2', 400.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'new-york', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'new-york', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'topeka', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
-            ['san-diego', 'topeka', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0]
-        ], container)
-
-        self.check_gdx_file_values('FilesCompared', [
-            ['File1', self.FILE_PATHS['full_example']],
-            ['File2', self.FILE_PATHS['full_example_changed_variables']]
-        ], container)
+        symbols: dict[str, list[list[str | float]]] = {
+            'x': [
+                ['seattle', 'new-york', 'dif1', 50.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'new-york', 'dif2', 150.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'chicago', 'dif1', 300.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'chicago', 'dif2', 400.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'new-york', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'new-york', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'topeka', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'topeka', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0]
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['full_example']],
+                ['File2', self.FILE_PATHS['full_example_changed_variables']]
+            ]
+        }
+        self.check_gdx_file(symbols)
 
     def test_full_example_and_full_example_changed_variables_field_m(self) -> None:
         output = self.run_gdxdiff([
@@ -388,15 +379,13 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3]
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-        symbol_names = ['FilesCompared']
-        self.check_gdx_file_symbols(symbol_names, container)
-
-        self.check_gdx_file_values('FilesCompared', [
-            ['File1', self.FILE_PATHS['full_example']],
-            ['File2', self.FILE_PATHS['full_example_changed_variables']]
-        ], container)
+        symbols: dict[str, list[list[str | float]]] = {
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['full_example']],
+                ['File2', self.FILE_PATHS['full_example_changed_variables']]
+            ]
+        }
+        self.check_gdx_file(symbols)
 
     def test_full_example_and_full_example_changed_variables_field_l_field_only(self) -> None:
         output = self.run_gdxdiff([
@@ -416,26 +405,23 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3]
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-        symbol_names = ['x', 'FilesCompared']
-        self.check_gdx_file_symbols(symbol_names, container)
-
-        self.check_gdx_file_values('x', [
-            ['seattle', 'new-york', 'dif1', 50.0],
-            ['seattle', 'new-york', 'dif2', 150.0],
-            ['seattle', 'chicago', 'dif1', 300.0],
-            ['seattle', 'chicago', 'dif2', 400.0],
-            ['san-diego', 'new-york', 'dif1', 275.0],
-            ['san-diego', 'new-york', 'dif2', 375.0],
-            ['san-diego', 'topeka', 'dif1', 275.0],
-            ['san-diego', 'topeka', 'dif2', 375.0]
-        ], container)
-
-        self.check_gdx_file_values('FilesCompared', [
-            ['File1', self.FILE_PATHS['full_example']],
-            ['File2', self.FILE_PATHS['full_example_changed_variables']]
-        ], container)
+        symbols: dict[str, list[list[str | float]]] = {
+            'x': [
+                ['seattle', 'new-york', 'dif1', 50.0],
+                ['seattle', 'new-york', 'dif2', 150.0],
+                ['seattle', 'chicago', 'dif1', 300.0],
+                ['seattle', 'chicago', 'dif2', 400.0],
+                ['san-diego', 'new-york', 'dif1', 275.0],
+                ['san-diego', 'new-york', 'dif2', 375.0],
+                ['san-diego', 'topeka', 'dif1', 275.0],
+                ['san-diego', 'topeka', 'dif2', 375.0]
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['full_example']],
+                ['File2', self.FILE_PATHS['full_example_changed_variables']]
+            ]
+        }
+        self.check_gdx_file(symbols)
 
     def test_full_example_and_full_example_changed_variables_field_m_field_only(self) -> None:
         output = self.run_gdxdiff([
@@ -455,12 +441,10 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3]
         )
 
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-
-        symbol_names = ['FilesCompared']
-        self.check_gdx_file_symbols(symbol_names, container)
-
-        self.check_gdx_file_values('FilesCompared', [
-            ['File1', self.FILE_PATHS['full_example']],
-            ['File2', self.FILE_PATHS['full_example_changed_variables']]
-        ], container)
+        symbols: dict[str, list[list[str | float]]] = {
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['full_example']],
+                ['File2', self.FILE_PATHS['full_example_changed_variables']]
+            ]
+        }
+        self.check_gdx_file(symbols)
