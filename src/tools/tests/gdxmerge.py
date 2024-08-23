@@ -57,6 +57,13 @@ class TestGdxMerge(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
+    def check_gdx_file(self, symbol_name: str, expected_values: list[list[str | float]]) -> None:
+        container = gt.Container(load_from=self.FILE_PATHS['merged'])
+        self.assertIn(symbol_name, container)
+        symbol: gt.Parameter = container[symbol_name]  # type: ignore
+        values = symbol.records.values.tolist()
+        self.assertEqual(values, expected_values)
+
     @classmethod
     def setUpClass(cls) -> None:
         create_small_example(cls.FILE_PATHS['small_example'])
@@ -82,12 +89,12 @@ class TestGdxMerge(unittest.TestCase):
             self.FILE_PATHS['full_example'],
             f'output={self.FILE_PATHS['merged']}'
         ])
-        self.assertEqual(output.returncode, 0)
-        first = output.stdout.split('\n')[3:]
-        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'small_and_full_example.txt'), 'r') as file:
-            second = file.read().split('\n')[3:]
-        self.assertEqual(first, second)
-        self.assertEqual(output.stderr, '')
+        self.check_output(
+            output,
+            return_code=0,
+            first_offset=3,
+            second_offset=3
+        )
 
         container = gt.Container(load_from=self.FILE_PATHS['merged'])
         self.assertIn('i', container)
@@ -105,31 +112,23 @@ class TestGdxMerge(unittest.TestCase):
         self.assertIn('Merged_set_1', container)
         self.assertEqual(len(container), 13)
 
-        symbol: gt.Parameter = container['i']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('i', [
             ['small_example', 'seattle', ''],
             ['small_example', 'san-diego', ''],
             ['full_example', 'seattle', ''],
             ['full_example', 'san-diego', '']
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['j']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('j', [
             ['small_example', 'new-york', ''],
             ['small_example', 'chicago', ''],
             ['small_example', 'topeka', ''],
             ['full_example', 'new-york', ''],
             ['full_example', 'chicago', ''],
             ['full_example', 'topeka', '']
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['d']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('d', [
             ['small_example', 'seattle', 'new-york', 2.5],
             ['small_example', 'seattle', 'chicago', 1.7],
             ['small_example', 'seattle', 'topeka', 1.8],
@@ -142,89 +141,61 @@ class TestGdxMerge(unittest.TestCase):
             ['full_example', 'san-diego', 'new-york', 2.5],
             ['full_example', 'san-diego', 'chicago', 1.8],
             ['full_example', 'san-diego', 'topeka', 1.4]
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['a']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('a', [
             ['full_example', 'seattle', 350.0],
             ['full_example', 'san-diego', 600.0]
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['b']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('b', [
             ['full_example', 'new-york', 325.0],
             ['full_example', 'chicago', 300.0],
             ['full_example', 'topeka', 275.0]
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['f']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('f', [
             ['full_example', 90.0]
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['c']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('c', [
             ['full_example', 'seattle', 'new-york', 0.225],
             ['full_example', 'seattle', 'chicago', 0.153],
             ['full_example', 'seattle', 'topeka', 0.162],
             ['full_example', 'san-diego', 'new-york', 0.225],
             ['full_example', 'san-diego', 'chicago', 0.162],
             ['full_example', 'san-diego', 'topeka', 0.12599999999999997]
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['x']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('x', [
             ['full_example', 'seattle', 'new-york', 50.0, 0.0, 0.0, float('inf'), 1.0],
             ['full_example', 'seattle', 'chicago', 300.0, 0.0, 0.0, float('inf'), 1.0],
             ['full_example', 'seattle', 'topeka', 0.0, 0.036, 0.0, float('inf'), 1.0],
             ['full_example', 'san-diego', 'new-york', 275.0, 0.0, 0.0, float('inf'), 1.0],
             ['full_example', 'san-diego', 'chicago', 0.0, 0.009, 0.0, float('inf'), 1.0],
             ['full_example', 'san-diego', 'topeka', 275.0, 0.0, 0.0, float('inf'), 1.0]
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['z']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('z', [
             ['full_example', 153.675, 0.0, float('-inf'), float('inf'), 1.0]
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['cost']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('cost', [
             ['full_example', 0.0, 1.0, 0.0, 0.0, 1.0]
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['supply']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('supply', [
             ['full_example', 'seattle', 350.0, 0.0, float('-inf'), 350.0, 1.0],
             ['full_example', 'san-diego', 550.0, 0.0, float('-inf'), 600.0, 1.0]
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['demand']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_gdx_file('demand', [
             ['full_example', 'new-york', 325.0, 0.225, 325.0, float('inf'), 1.0],
             ['full_example', 'chicago', 300.0, 0.153, 300.0, float('inf'), 1.0],
             ['full_example', 'topeka', 275.0, 0.126, 275.0, float('inf'), 1.0]
-        ]
-        self.assertEqual(first, second)
+        ])
 
-        symbol = container['Merged_set_1']  # type: ignore
+        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
         first = symbol.records.values.tolist()
         second = [
             ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
