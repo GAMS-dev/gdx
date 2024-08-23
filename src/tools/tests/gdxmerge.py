@@ -57,7 +57,19 @@ class TestGdxMerge(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def check_gdx_file(
+    def check_gdx_file_symbols(
+        self,
+        symbol_names: list[str],
+        container: gt.Container | None = None
+    ) -> None:
+        if container is None:
+            container = gt.Container(load_from=self.FILE_PATHS['merged'])
+        for symbol_name in symbol_names:
+            with self.subTest(symbol_name=symbol_name):
+                self.assertIn(symbol_name, container)
+        self.assertEqual(len(container), len(symbol_names))
+
+    def check_gdx_file_values(
         self,
         symbol_name: str,
         expected_values: list[list[str | float]],
@@ -103,20 +115,18 @@ class TestGdxMerge(unittest.TestCase):
         )
 
         container = gt.Container(load_from=self.FILE_PATHS['merged'])
-        symbol_names = ['i', 'j', 'd', 'a', 'b', 'f', 'c', 'x', 'z', 'cost', 'supply', 'demand', 'Merged_set_1']
-        for symbol_name in symbol_names:
-            with self.subTest(symbol_name=symbol_name):
-                self.assertIn(symbol_name, container)
-        self.assertEqual(len(container), len(symbol_names))
 
-        self.check_gdx_file('i', [
+        symbol_names = ['i', 'j', 'd', 'a', 'b', 'f', 'c', 'x', 'z', 'cost', 'supply', 'demand', 'Merged_set_1']
+        self.check_gdx_file_symbols(symbol_names, container)
+
+        self.check_gdx_file_values('i', [
             ['small_example', 'seattle', ''],
             ['small_example', 'san-diego', ''],
             ['full_example', 'seattle', ''],
             ['full_example', 'san-diego', '']
         ], container)
 
-        self.check_gdx_file('j', [
+        self.check_gdx_file_values('j', [
             ['small_example', 'new-york', ''],
             ['small_example', 'chicago', ''],
             ['small_example', 'topeka', ''],
@@ -125,7 +135,7 @@ class TestGdxMerge(unittest.TestCase):
             ['full_example', 'topeka', '']
         ], container)
 
-        self.check_gdx_file('d', [
+        self.check_gdx_file_values('d', [
             ['small_example', 'seattle', 'new-york', 2.5],
             ['small_example', 'seattle', 'chicago', 1.7],
             ['small_example', 'seattle', 'topeka', 1.8],
@@ -140,22 +150,22 @@ class TestGdxMerge(unittest.TestCase):
             ['full_example', 'san-diego', 'topeka', 1.4]
         ], container)
 
-        self.check_gdx_file('a', [
+        self.check_gdx_file_values('a', [
             ['full_example', 'seattle', 350.0],
             ['full_example', 'san-diego', 600.0]
         ], container)
 
-        self.check_gdx_file('b', [
+        self.check_gdx_file_values('b', [
             ['full_example', 'new-york', 325.0],
             ['full_example', 'chicago', 300.0],
             ['full_example', 'topeka', 275.0]
         ], container)
 
-        self.check_gdx_file('f', [
+        self.check_gdx_file_values('f', [
             ['full_example', 90.0]
         ], container)
 
-        self.check_gdx_file('c', [
+        self.check_gdx_file_values('c', [
             ['full_example', 'seattle', 'new-york', 0.225],
             ['full_example', 'seattle', 'chicago', 0.153],
             ['full_example', 'seattle', 'topeka', 0.162],
@@ -164,7 +174,7 @@ class TestGdxMerge(unittest.TestCase):
             ['full_example', 'san-diego', 'topeka', 0.12599999999999997]
         ], container)
 
-        self.check_gdx_file('x', [
+        self.check_gdx_file_values('x', [
             ['full_example', 'seattle', 'new-york', 50.0, 0.0, 0.0, float('inf'), 1.0],
             ['full_example', 'seattle', 'chicago', 300.0, 0.0, 0.0, float('inf'), 1.0],
             ['full_example', 'seattle', 'topeka', 0.0, 0.036, 0.0, float('inf'), 1.0],
@@ -173,20 +183,20 @@ class TestGdxMerge(unittest.TestCase):
             ['full_example', 'san-diego', 'topeka', 275.0, 0.0, 0.0, float('inf'), 1.0]
         ], container)
 
-        self.check_gdx_file('z', [
+        self.check_gdx_file_values('z', [
             ['full_example', 153.675, 0.0, float('-inf'), float('inf'), 1.0]
         ], container)
 
-        self.check_gdx_file('cost', [
+        self.check_gdx_file_values('cost', [
             ['full_example', 0.0, 1.0, 0.0, 0.0, 1.0]
         ], container)
 
-        self.check_gdx_file('supply', [
+        self.check_gdx_file_values('supply', [
             ['full_example', 'seattle', 350.0, 0.0, float('-inf'), 350.0, 1.0],
             ['full_example', 'san-diego', 550.0, 0.0, float('-inf'), 600.0, 1.0]
         ], container)
 
-        self.check_gdx_file('demand', [
+        self.check_gdx_file_values('demand', [
             ['full_example', 'new-york', 325.0, 0.225, 325.0, float('inf'), 1.0],
             ['full_example', 'chicago', 300.0, 0.153, 300.0, float('inf'), 1.0],
             ['full_example', 'topeka', 275.0, 0.126, 275.0, float('inf'), 1.0]
