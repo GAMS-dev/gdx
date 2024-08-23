@@ -182,7 +182,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            file_name='small_and_changed_small_example.txt',
+            file_name='small_example_and_small_example_changed_data.txt',
             first_offset=2,
             second_offset=3,
             first_delete=[-3],
@@ -214,7 +214,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=0,
-            file_name='small_and_changed_small_example_epsilon.txt',
+            file_name='small_example_and_small_example_changed_data_epsilon.txt',
             first_offset=2,
             second_offset=3,
             first_delete=[-3],
@@ -243,7 +243,7 @@ class TestGdxDiff(unittest.TestCase):
                 self.check_output(
                     output,
                     return_code=0,
-                    file_name='small_and_changed_small_example_epsilon.txt',
+                    file_name='small_example_and_small_example_changed_data_epsilon.txt',
                     first_offset=2,
                     second_offset=3,
                     first_delete=[-3],
@@ -306,7 +306,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            file_name='full_and_changed_full_example.txt',
+            file_name='full_example_and_full_example_changed_variables.txt',
             first_offset=2,
             second_offset=3,
             first_delete=[-3],
@@ -344,7 +344,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            file_name='full_and_changed_full_example.txt',
+            file_name='full_example_and_full_example_changed_variables.txt',
             first_offset=2,
             second_offset=3,
             first_delete=[-3],
@@ -409,7 +409,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            file_name='full_and_changed_full_example.txt',
+            file_name='full_example_and_full_example_changed_variables.txt',
             first_offset=2,
             second_offset=3,
             first_delete=[-3],
@@ -448,7 +448,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=0,
-            file_name='full_and_changed_full_example_field_m.txt',
+            file_name='full_example_and_full_example_changed_variables_field_m.txt',
             first_offset=2,
             second_offset=3,
             first_delete=[-3],
