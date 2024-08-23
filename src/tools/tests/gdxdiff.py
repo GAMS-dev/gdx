@@ -61,8 +61,26 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
-    def check_gdx_file(self, symbol_name: str, expected_values: list[list[str]]) -> None:
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+    def check_gdx_file_symbols(
+        self,
+        symbol_names: list[str],
+        container: gt.Container | None = None
+    ) -> None:
+        if container is None:
+            container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+        for symbol_name in symbol_names:
+            with self.subTest(symbol_name=symbol_name):
+                self.assertIn(symbol_name, container)
+        self.assertEqual(len(container), len(symbol_names))
+
+    def check_gdx_file_values(
+        self,
+        symbol_name: str,
+        expected_values: list[list[str | float]],
+        container: gt.Container | None = None
+    ) -> None:
+        if container is None:
+            container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
         self.assertIn(symbol_name, container)
         symbol: gt.Parameter = container[symbol_name]  # type: ignore
         values = symbol.records.values.tolist()
@@ -103,7 +121,7 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
-        self.check_gdx_file('FilesCompared', [
+        self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['small_example']],
             ['File2', self.FILE_PATHS['full_example']]
         ])
@@ -122,10 +140,31 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
-        self.check_gdx_file('FilesCompared', [
+
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+
+        symbol_names = ['d', 'FilesCompared']
+        self.check_gdx_file_symbols(symbol_names, container)
+
+        self.check_gdx_file_values('d', [
+            ['seattle', 'new-york', 'dif1', 2.5],
+            ['seattle', 'new-york', 'dif2', 3.5],
+            ['seattle', 'chicago', 'dif1', 1.7],
+            ['seattle', 'chicago', 'dif2', 2.7],
+            ['seattle', 'topeka', 'dif1', 1.8],
+            ['seattle', 'topeka', 'dif2', 2.8],
+            ['san-diego', 'new-york', 'dif1', 2.5],
+            ['san-diego', 'new-york', 'dif2', 3.5],
+            ['san-diego', 'chicago', 'dif1', 1.8],
+            ['san-diego', 'chicago', 'dif2', 2.8],
+            ['san-diego', 'topeka', 'dif1', 1.4],
+            ['san-diego', 'topeka', 'dif2', 2.4]
+        ], container)
+
+        self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['small_example']],
             ['File2', self.FILE_PATHS['changed_small_example']]
-        ])
+        ], container)
 
     def test_small_and_changed_small_example_epsilon_absolute(self) -> None:
         for item in [
@@ -147,7 +186,7 @@ class TestGdxDiff(unittest.TestCase):
                 first_delete=[-3],
                 second_delete=[-3]
             )
-            self.check_gdx_file('FilesCompared', [
+            self.check_gdx_file_values('FilesCompared', [
                 ['File1', self.FILE_PATHS['small_example']],
                 ['File2', self.FILE_PATHS['changed_small_example']]
             ])
@@ -169,7 +208,7 @@ class TestGdxDiff(unittest.TestCase):
                 first_delete=[-3],
                 second_delete=[-3]
             )
-            self.check_gdx_file('FilesCompared', [
+            self.check_gdx_file_values('FilesCompared', [
                 ['File1', self.FILE_PATHS['small_example']],
                 ['File2', self.FILE_PATHS['changed_small_example']]
             ])
@@ -188,7 +227,7 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
-        self.check_gdx_file('FilesCompared', [
+        self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['full_example']],
             ['File2', self.FILE_PATHS['changed_full_example']]
         ])
@@ -209,7 +248,7 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
-        self.check_gdx_file('FilesCompared', [
+        self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['full_example']],
             ['File2', self.FILE_PATHS['changed_full_example']]
         ])
@@ -230,7 +269,7 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
-        self.check_gdx_file('FilesCompared', [
+        self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['full_example']],
             ['File2', self.FILE_PATHS['changed_full_example']]
         ])
@@ -250,7 +289,7 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
-        self.check_gdx_file('FilesCompared', [
+        self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['full_example']],
             ['File2', self.FILE_PATHS['changed_full_example']]
         ])
