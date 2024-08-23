@@ -121,10 +121,16 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
+
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+
+        symbol_names = ['FilesCompared']
+        self.check_gdx_file_symbols(symbol_names, container)
+
         self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['small_example']],
             ['File2', self.FILE_PATHS['full_example']]
-        ])
+        ], container)
 
     def test_small_and_changed_small_example(self) -> None:
         output = self.run_gdxdiff([
@@ -186,10 +192,16 @@ class TestGdxDiff(unittest.TestCase):
                 first_delete=[-3],
                 second_delete=[-3]
             )
+
+            container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+
+            symbol_names = ['FilesCompared']
+            self.check_gdx_file_symbols(symbol_names, container)
+
             self.check_gdx_file_values('FilesCompared', [
                 ['File1', self.FILE_PATHS['small_example']],
                 ['File2', self.FILE_PATHS['changed_small_example']]
-            ])
+            ], container)
 
     def test_small_and_changed_small_example_epsilon_relative(self) -> None:
         for i in [1, 2]:
@@ -208,10 +220,16 @@ class TestGdxDiff(unittest.TestCase):
                 first_delete=[-3],
                 second_delete=[-3]
             )
+
+            container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+
+            symbol_names = ['FilesCompared']
+            self.check_gdx_file_symbols(symbol_names, container)
+
             self.check_gdx_file_values('FilesCompared', [
                 ['File1', self.FILE_PATHS['small_example']],
                 ['File2', self.FILE_PATHS['changed_small_example']]
-            ])
+            ], container)
 
     def test_full_and_changed_full_example(self) -> None:
         output = self.run_gdxdiff([
@@ -227,10 +245,16 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
+
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+
+        symbol_names = ['FilesCompared']
+        self.check_gdx_file_symbols(symbol_names, container)
+
         self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['full_example']],
             ['File2', self.FILE_PATHS['changed_full_example']]
-        ])
+        ], container)
 
     def test_full_and_changed_full_example_field_all(self) -> None:
         output = self.run_gdxdiff([
@@ -248,10 +272,16 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
+
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+
+        symbol_names = ['FilesCompared']
+        self.check_gdx_file_symbols(symbol_names, container)
+
         self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['full_example']],
             ['File2', self.FILE_PATHS['changed_full_example']]
-        ])
+        ], container)
 
     def test_full_and_changed_full_example_field_l(self) -> None:
         output = self.run_gdxdiff([
@@ -269,10 +299,16 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
+
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+
+        symbol_names = ['FilesCompared']
+        self.check_gdx_file_symbols(symbol_names, container)
+
         self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['full_example']],
             ['File2', self.FILE_PATHS['changed_full_example']]
-        ])
+        ], container)
 
     def test_full_and_changed_full_example_field_m(self) -> None:
         output = self.run_gdxdiff([
@@ -289,7 +325,13 @@ class TestGdxDiff(unittest.TestCase):
             first_delete=[-3],
             second_delete=[-3]
         )
+
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+
+        symbol_names = ['FilesCompared']
+        self.check_gdx_file_symbols(symbol_names, container)
+
         self.check_gdx_file_values('FilesCompared', [
             ['File1', self.FILE_PATHS['full_example']],
             ['File2', self.FILE_PATHS['changed_full_example']]
-        ])
+        ], container)
