@@ -21,7 +21,7 @@ class TestGdxDiff(unittest.TestCase):
         'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
         'changed_small_example': os.path.join(DIRECTORY_PATHS['examples'], 'changed_small_example.gdx'),
         'changed_full_example': os.path.join(DIRECTORY_PATHS['examples'], 'changed_full_example.gdx'),
-        'diff_file': os.path.join(DIRECTORY_PATHS['examples'], 'diffile.gdx')
+        'diff_file': os.path.join(DIRECTORY_PATHS['examples'], 'diff_file.gdx')
     }
 
     @classmethod
