@@ -61,6 +61,13 @@ class TestGdxDiff(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
 
+    def check_gdx_file(self, symbol_name: str, expected_values: list[list[str]]) -> None:
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+        self.assertIn(symbol_name, container)
+        symbol: gt.Parameter = container[symbol_name]  # type: ignore
+        values = symbol.records.values.tolist()
+        self.assertEqual(values, expected_values)
+
     @classmethod
     def setUpClass(cls) -> None:
         create_small_example(cls.FILE_PATHS['small_example'])
@@ -88,25 +95,18 @@ class TestGdxDiff(unittest.TestCase):
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['diff_file']
         ])
-        self.assertEqual(output.returncode, 1)
-        first = output.stdout.split('\n')[2:]
-        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'small_and_full_example.txt'), 'r') as file:
-            second = file.read().split('\n')[3:]
-        del first[-3]
-        del second[-3]
-        self.assertEqual(first, second)
-        self.assertEqual(output.stderr, '')
-
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
-        self.assertIn('FilesCompared', container)
-
-        symbol: gt.Parameter = container['FilesCompared']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
+        self.check_output(
+            output,
+            return_code=1,
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+        self.check_gdx_file('FilesCompared', [
             ['File1', self.FILE_PATHS['small_example']],
             ['File2', self.FILE_PATHS['full_example']]
-        ]
-        self.assertEqual(first, second)
+        ])
 
     def test_small_and_changed_small_example(self) -> None:
         output = self.run_gdxdiff([
