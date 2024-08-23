@@ -396,3 +396,70 @@ class TestGdxDiff(unittest.TestCase):
             ['File1', self.FILE_PATHS['full_example']],
             ['File2', self.FILE_PATHS['changed_full_example']]
         ], container)
+
+    def test_full_and_changed_full_example_field_l_field_only(self) -> None:
+        output = self.run_gdxdiff([
+            self.FILE_PATHS['full_example'],
+            self.FILE_PATHS['changed_full_example'],
+            self.FILE_PATHS['diff_file'],
+            'Field=L',
+            'FldOnly'
+        ])
+        self.check_output(
+            output,
+            return_code=1,
+            file_name='full_and_changed_full_example.txt',
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+
+        symbol_names = ['x', 'FilesCompared']
+        self.check_gdx_file_symbols(symbol_names, container)
+
+        self.check_gdx_file_values('x', [
+            ['seattle', 'new-york', 'dif1', 50.0],
+            ['seattle', 'new-york', 'dif2', 150.0],
+            ['seattle', 'chicago', 'dif1', 300.0],
+            ['seattle', 'chicago', 'dif2', 400.0],
+            ['san-diego', 'new-york', 'dif1', 275.0],
+            ['san-diego', 'new-york', 'dif2', 375.0],
+            ['san-diego', 'topeka', 'dif1', 275.0],
+            ['san-diego', 'topeka', 'dif2', 375.0]
+        ], container)
+
+        self.check_gdx_file_values('FilesCompared', [
+            ['File1', self.FILE_PATHS['full_example']],
+            ['File2', self.FILE_PATHS['changed_full_example']]
+        ], container)
+
+    def test_full_and_changed_full_example_field_m_field_only(self) -> None:
+        output = self.run_gdxdiff([
+            self.FILE_PATHS['full_example'],
+            self.FILE_PATHS['changed_full_example'],
+            self.FILE_PATHS['diff_file'],
+            'Field=M',
+            'FldOnly'
+        ])
+        self.check_output(
+            output,
+            return_code=0,
+            file_name='full_and_changed_full_example_field_m.txt',
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+
+        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+
+        symbol_names = ['FilesCompared']
+        self.check_gdx_file_symbols(symbol_names, container)
+
+        self.check_gdx_file_values('FilesCompared', [
+            ['File1', self.FILE_PATHS['full_example']],
+            ['File2', self.FILE_PATHS['changed_full_example']]
+        ], container)
