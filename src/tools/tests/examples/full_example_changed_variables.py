@@ -2,7 +2,7 @@ import gams.transfer as gt
 import pandas as pd
 
 
-def create_changed_full_example(file_path: str) -> None:
+def create_full_example_changed_variables(file_path: str) -> None:
     # create an empty Container object
     m = gt.Container()
 

@@ -2,7 +2,7 @@ import gams.transfer as gt
 import pandas as pd
 
 
-def create_changed_small_example(file_path: str) -> None:
+def create_small_example_changed_data(file_path: str) -> None:
     m = gt.Container()
 
     # create the sets i, j
