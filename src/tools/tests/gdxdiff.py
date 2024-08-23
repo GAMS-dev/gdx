@@ -6,8 +6,8 @@ import inspect
 import gams.transfer as gt
 from examples.small_example import create_small_example
 from examples.full_example import create_full_example
-from examples.changed_small_example import create_changed_small_example
-from examples.changed_full_example import create_changed_full_example
+from examples.small_example_changed_data import create_small_example_changed_data
+from examples.full_example_changed_variables import create_full_example_changed_variables
 
 
 class TestGdxDiff(unittest.TestCase):
@@ -90,8 +90,8 @@ class TestGdxDiff(unittest.TestCase):
     def setUpClass(cls) -> None:
         create_small_example(cls.FILE_PATHS['small_example'])
         create_full_example(cls.FILE_PATHS['full_example'])
-        create_changed_small_example(cls.FILE_PATHS['changed_small_example'])
-        create_changed_full_example(cls.FILE_PATHS['changed_full_example'])
+        create_small_example_changed_data(cls.FILE_PATHS['small_example_changed_data'])
+        create_full_example_changed_variables(cls.FILE_PATHS['full_example_changed_variables'])
 
     @classmethod
     def tearDownClass(cls) -> None:
