@@ -2,6 +2,7 @@ import unittest
 import os
 import platform
 import subprocess
+import inspect
 import gams.transfer as gt
 from examples.small_example import create_small_example
 from examples.full_example import create_full_example
@@ -35,6 +36,31 @@ class TestGdxDiff(unittest.TestCase):
             text=True
         )
 
+    def check_output(
+        self,
+        output: subprocess.CompletedProcess[str],
+        return_code=0,
+        file_name: str | None = None,
+        first_offset: int | None = None,
+        first_negative_offset: int | None = None,
+        second_offset: int | None = None,
+        second_negative_offset: int | None = None,
+        first_delete: list[int] = [],
+        second_delete: list[int] = []
+    ) -> None:
+        self.assertEqual(output.returncode, return_code)
+        first = output.stdout.split('\n')[first_offset:first_negative_offset]
+        for i in first_delete:
+            del first[i]
+        if file_name is None:
+            file_name = f'{inspect.stack()[1].function.removeprefix('test_')}.txt'
+        with open(os.path.join(self.DIRECTORY_PATHS['output'], file_name), 'r') as file:
+            second = file.read().split('\n')[second_offset:second_negative_offset]
+        for i in second_delete:
+            del second[i]
+        self.assertEqual(first, second)
+        self.assertEqual(output.stderr, '')
+
     @classmethod
     def setUpClass(cls) -> None:
         create_small_example(cls.FILE_PATHS['small_example'])
@@ -49,13 +75,12 @@ class TestGdxDiff(unittest.TestCase):
 
     def test_empty_command(self) -> None:
         output = self.run_gdxdiff([])
-        self.assertEqual(output.returncode, 2)
-        first = output.stdout.split('\n')
-        with open(os.path.join(self.DIRECTORY_PATHS['output'], 'usage.txt'), 'r') as file:
-            second = file.read().split('\n')
-        del second[2]
-        self.assertEqual(first, second)
-        self.assertEqual(output.stderr, '')
+        self.check_output(
+            output,
+            return_code=2,
+            file_name='usage.txt',
+            second_delete=[2]
+        )
 
     def test_small_and_full_example(self) -> None:
         output = self.run_gdxdiff([
