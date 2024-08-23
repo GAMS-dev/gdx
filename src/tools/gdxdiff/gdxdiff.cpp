@@ -203,7 +203,7 @@ void CompareSy( const int Sy1, const int Sy2 )
             library::short_string ExplTxt { "Differences Field = " + GamsFieldNames[FldOnlyFld] };
             gdxDataWriteStrStart( PGXDIF, Id.data(), ExplTxt.data(), Dim + 1, static_cast<int>( dt_par ), 0 );
          }
-         if( DiffOnly && ( ST == dt_var || ST == dt_equ ) )
+         else if( DiffOnly && ( ST == dt_var || ST == dt_equ ) )
             gdxDataWriteStrStart( PGXDIF, Id.data(), "Differences Only", Dim + 2, static_cast<int>( dt_par ), 0 );
          else
             gdxDataWriteStrStart( PGXDIF, Id.data(), "Differences", Dim + 1, static_cast<int>( ST ), VarEquType );
