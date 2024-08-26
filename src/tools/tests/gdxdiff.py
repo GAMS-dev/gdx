@@ -615,14 +615,14 @@ class TestGdxDiff(unittest.TestCase):
         }
         self.check_gdx_file(symbols)
 
-        output_space_separator = self.run_gdxdiff([
+        output_quotation_marks = self.run_gdxdiff([
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['full_example_changed_data_and_variables'],
             self.FILE_PATHS['diff_file'],
-            'Id="c d"'
+            'Id=\'c d\''
         ])
         self.check_output(
-            output_space_separator,
+            output_quotation_marks,
             return_code=1,
             first_offset=2,
             second_offset=3,
