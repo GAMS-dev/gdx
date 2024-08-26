@@ -8,6 +8,7 @@ from examples.small_example import create_small_example
 from examples.full_example import create_full_example
 from examples.small_example_changed_data import create_small_example_changed_data
 from examples.full_example_changed_variables import create_full_example_changed_variables
+from examples.full_example_changed_data_and_variables import create_full_example_changed_data_and_variables
 
 
 class TestGdxDiff(unittest.TestCase):
@@ -21,6 +22,7 @@ class TestGdxDiff(unittest.TestCase):
         'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
         'small_example_changed_data': os.path.join(DIRECTORY_PATHS['examples'], 'small_example_changed_data.gdx'),
         'full_example_changed_variables': os.path.join(DIRECTORY_PATHS['examples'], 'full_example_changed_variables.gdx'),
+        'full_example_changed_data_and_variables': os.path.join(DIRECTORY_PATHS['examples'], 'full_example_changed_data_and_variables.gdx'),
         'diff_file': os.path.join(DIRECTORY_PATHS['examples'], 'diff_file.gdx')
     }
 
@@ -104,6 +106,7 @@ class TestGdxDiff(unittest.TestCase):
         create_full_example(cls.FILE_PATHS['full_example'])
         create_small_example_changed_data(cls.FILE_PATHS['small_example_changed_data'])
         create_full_example_changed_variables(cls.FILE_PATHS['full_example_changed_variables'])
+        create_full_example_changed_data_and_variables(cls.FILE_PATHS['full_example_changed_data_and_variables'])
 
     @classmethod
     def tearDownClass(cls) -> None:
