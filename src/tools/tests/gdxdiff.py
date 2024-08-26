@@ -512,3 +512,37 @@ class TestGdxDiff(unittest.TestCase):
             ]
         }
         self.check_gdx_file(symbols)
+
+    def test_full_example_and_full_example_changed_data_and_variables_id_x(self) -> None:
+        output = self.run_gdxdiff([
+            self.FILE_PATHS['full_example'],
+            self.FILE_PATHS['full_example_changed_data_and_variables'],
+            self.FILE_PATHS['diff_file'],
+            'Id=x'
+        ])
+        self.check_output(
+            output,
+            return_code=1,
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            'x': [
+                ['seattle', 'new-york', 'dif1', 50.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'new-york', 'dif2', 150.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'chicago', 'dif1', 300.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'chicago', 'dif2', 400.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'new-york', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'new-york', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'topeka', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'topeka', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0]
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['full_example']],
+                ['File2', self.FILE_PATHS['full_example_changed_data_and_variables']]
+            ]
+        }
+        self.check_gdx_file(symbols)
