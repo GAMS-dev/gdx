@@ -184,8 +184,8 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             }
             else
             {
-               result.append( ' ' + S.substr( 0, k ) );
-               result.append( " \"" + S.substr( k ) + '"' );
+               result.append( ' ' + S.substr( 0, k + 1 ) );
+               result.append( " \"" + S.substr( k + 1 ) + '"' );
             }
          }
       }
