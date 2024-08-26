@@ -451,3 +451,64 @@ class TestGdxDiff(unittest.TestCase):
             ]
         }
         self.check_gdx_file(symbols)
+
+    def test_full_example_and_full_example_changed_data_and_variables(self) -> None:
+        output = self.run_gdxdiff([
+            self.FILE_PATHS['full_example'],
+            self.FILE_PATHS['full_example_changed_data_and_variables'],
+            self.FILE_PATHS['diff_file']
+        ])
+        self.check_output(
+            output,
+            return_code=1,
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            'c': [
+                ['seattle', 'new-york', 'dif1', 0.225],
+                ['seattle', 'new-york', 'dif2', 0.315],
+                ['seattle', 'chicago', 'dif1', 0.153],
+                ['seattle', 'chicago', 'dif2', 0.24300000000000002],
+                ['seattle', 'topeka', 'dif1', 0.162],
+                ['seattle', 'topeka', 'dif2', 0.25199999999999995],
+                ['san-diego', 'new-york', 'dif1', 0.225],
+                ['san-diego', 'new-york', 'dif2', 0.315],
+                ['san-diego', 'chicago', 'dif1', 0.162],
+                ['san-diego', 'chicago', 'dif2', 0.25199999999999995],
+                ['san-diego', 'topeka', 'dif1', 0.12599999999999997],
+                ['san-diego', 'topeka', 'dif2', 0.216]
+            ],
+            'd': [
+                ['seattle', 'new-york', 'dif1', 2.5],
+                ['seattle', 'new-york', 'dif2', 3.5],
+                ['seattle', 'chicago', 'dif1', 1.7],
+                ['seattle', 'chicago', 'dif2', 2.7],
+                ['seattle', 'topeka', 'dif1', 1.8],
+                ['seattle', 'topeka', 'dif2', 2.8],
+                ['san-diego', 'new-york', 'dif1', 2.5],
+                ['san-diego', 'new-york', 'dif2', 3.5],
+                ['san-diego', 'chicago', 'dif1', 1.8],
+                ['san-diego', 'chicago', 'dif2', 2.8],
+                ['san-diego', 'topeka', 'dif1', 1.4],
+                ['san-diego', 'topeka', 'dif2', 2.4]
+            ],
+            'x': [
+                ['seattle', 'new-york', 'dif1', 50.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'new-york', 'dif2', 150.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'chicago', 'dif1', 300.0, 0.0, 0.0, float('inf'), 1.0],
+                ['seattle', 'chicago', 'dif2', 400.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'new-york', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'new-york', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'topeka', 'dif1', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['san-diego', 'topeka', 'dif2', 375.0, 0.0, 0.0, float('inf'), 1.0]
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['full_example']],
+                ['File2', self.FILE_PATHS['full_example_changed_data_and_variables']]
+            ]
+        }
+        self.check_gdx_file(symbols)
