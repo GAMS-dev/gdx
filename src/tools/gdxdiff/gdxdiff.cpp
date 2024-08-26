@@ -963,22 +963,23 @@ int main( const int argc, const char *argv[] )
             while( !S.empty() )
             {
                int k { gdlib::strutilx::LChSetPos( std::vector<char> { ',', ' ' }.data(), S.data(), static_cast<int>( S.length() ) ) };
-               if( k == 0 )
+               if( k == -1 )
                {
                   ID = S;
                   S.clear();
                }
                else
                {
-                  ID = S.string().substr( 0, k - 1 );
-                  S = S.string().erase( 0, k );
+                  ID = S.string().substr( 0, k );
+                  S = S.string().erase( 0, k + 1 );
                   S = utils::trim( S.string() );
                }
                ID = utils::trim( ID.string() );
-               if( !ID.empty() && IDsOnly->IndexOf( ID.data() ) < 0 )
+               if( !ID.empty() )
                {
+                  if( IDsOnly->IndexOf( ID.data() ) < 0 )
+                     IDsOnly->Add( ID.data(), ID.length() );
                   // std::cout << "Include Id: " << ID << std::endl;
-                  IDsOnly->Add( ID.data(), ID.length() );
                }
             }
          }
