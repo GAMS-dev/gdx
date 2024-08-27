@@ -119,7 +119,8 @@ class TestGdxDiff(unittest.TestCase):
             output,
             return_code=2,
             file_name='usage.txt',
-            second_delete=[2]
+            second_offset=1,
+            second_delete=[1]
         )
 
     def test_small_and_full_example(self) -> None:
