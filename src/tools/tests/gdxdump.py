@@ -8,6 +8,7 @@ from examples.small_example import create_small_example
 from examples.full_example import create_full_example
 from examples.element_text_example import create_element_text_example
 from examples.special_values_example import create_special_values_example
+from examples.label_example import create_label_example
 
 
 class TestGdxDump(unittest.TestCase):
@@ -20,7 +21,8 @@ class TestGdxDump(unittest.TestCase):
         'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
         'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
         'element_text_example': os.path.join(DIRECTORY_PATHS['examples'], 'element_text_example.gdx'),
-        'special_values_example': os.path.join(DIRECTORY_PATHS['examples'], 'special_values_example.gdx')
+        'special_values_example': os.path.join(DIRECTORY_PATHS['examples'], 'special_values_example.gdx'),
+        'label_example': os.path.join(DIRECTORY_PATHS['examples'], 'label_example.gdx')
     }
 
     @classmethod
@@ -66,6 +68,7 @@ class TestGdxDump(unittest.TestCase):
         create_full_example(cls.FILE_PATHS['full_example'])
         create_element_text_example(cls.FILE_PATHS['element_text_example'])
         create_special_values_example(cls.FILE_PATHS['special_values_example'])
+        create_label_example(cls.FILE_PATHS['label_example'])
 
     @classmethod
     def tearDownClass(cls) -> None:
