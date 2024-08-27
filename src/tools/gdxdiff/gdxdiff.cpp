@@ -997,7 +997,8 @@ int main( const int argc, const char *argv[] )
    // Parameter errors
    if( ErrorCode > 0 )
    {
-      std::cout << std::endl;
+      // TODO: Remove?
+      // std::cout << std::endl;
       Usage();
       return static_cast<int>( ErrorCode::ERR_USAGE );
    }
