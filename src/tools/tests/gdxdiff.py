@@ -671,3 +671,51 @@ class TestGdxDiff(unittest.TestCase):
             ]
         }
         self.check_gdx_file(symbols)
+
+    def test_domain_example_1_and_domain_example_2(self) -> None:
+        output = self.run_gdxdiff([
+            self.FILE_PATHS['domain_example_1'],
+            self.FILE_PATHS['domain_example_2'],
+            self.FILE_PATHS['diff_file']
+        ])
+        self.check_output(
+            output,
+            return_code=1,
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['domain_example_1']],
+                ['File2', self.FILE_PATHS['domain_example_2']]
+            ]
+        }
+        self.check_gdx_file(symbols)
+
+    def test_domain_example_1_and_domain_example_2_compare_symbol_domains(self) -> None:
+        output = self.run_gdxdiff([
+            self.FILE_PATHS['domain_example_1'],
+            self.FILE_PATHS['domain_example_2'],
+            self.FILE_PATHS['diff_file'],
+            'CmpDomains'
+        ])
+        print(output.stdout)
+        self.check_output(
+            output,
+            return_code=1,
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['domain_example_1']],
+                ['File2', self.FILE_PATHS['domain_example_2']]
+            ]
+        }
+        self.check_gdx_file(symbols)
