@@ -459,3 +459,7 @@ class TestGdxDump(unittest.TestCase):
             'ZeroOut=Test'
         ])
         self.check_output(output)
+
+    def test_label_example(self) -> None:
+        output = self.run_gdxdump([self.FILE_PATHS['label_example']])
+        self.check_output(output)
