@@ -35,6 +35,7 @@ def create_label_example(file_path: str) -> None:
             ('san-diego', 'chicago', 1.8),
             ('san-diego', 'topeka', 1.4),
         ],
+        # Probably unnecessary here:
         columns=[
             get_test_string(),
             get_test_string(),
