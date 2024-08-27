@@ -702,7 +702,6 @@ class TestGdxDiff(unittest.TestCase):
             self.FILE_PATHS['diff_file'],
             'CmpDomains'
         ])
-        print(output.stdout)
         self.check_output(
             output,
             return_code=1,
