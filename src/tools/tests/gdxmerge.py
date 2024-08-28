@@ -215,6 +215,44 @@ class TestGdxMerge(unittest.TestCase):
             self.assertEqual(first[i][0], second[i][0])
             self.assertRegex(first[i][1], second[i][1])
 
+    def test_small_and_full_example_id_i(self) -> None:
+        output = self.run_gdxmerge([
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['full_example'],
+            f'output={self.FILE_PATHS['merge_file']}',
+            'Id=i'
+        ])
+        self.check_output(
+            output,
+            return_code=0,
+            first_delete=[1, 1, 1],
+            second_delete=[1, 1, 1]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            'i': [
+                ['small_example', 'seattle', ''],
+                ['small_example', 'san-diego', ''],
+                ['full_example', 'seattle', ''],
+                ['full_example', 'san-diego', '']
+            ]
+        }
+        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
+        self.check_gdx_file(symbols, container, len(symbols) + 1)
+
+        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
+        first = symbol.records.values.tolist()
+        second = [
+            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
+            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]full_example\.gdx']
+        ]
+        self.assertEqual(len(first), 2)
+        for item in first:
+            self.assertEqual(len(item), 2)
+        for i in range(2):
+            self.assertEqual(first[i][0], second[i][0])
+            self.assertRegex(first[i][1], second[i][1])
+
     def test_small_and_full_example_exclude_i(self) -> None:
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
