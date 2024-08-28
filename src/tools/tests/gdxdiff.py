@@ -929,3 +929,5 @@ class TestGdxDiff(unittest.TestCase):
             ]
         }
         self.check_gdx_file(symbols)
+
+    # TODO: Test the MatrixFile option as well
