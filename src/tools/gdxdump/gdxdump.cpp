@@ -1198,7 +1198,7 @@ std::string NextParam()
    {
       result = ParamStr[ParamNr];
       ParamNr++;
-      auto k = result.find( '=' );
+      size_t k = result.find( '=' );
       if( k != std::string::npos )
       {
          ParamHold = result.substr( k + 1 );
@@ -1207,10 +1207,10 @@ std::string NextParam()
       else if( ParamNr <= ParamCount )
       {
          std::string nextParam = ParamStr[ParamNr];
-         if( nextParam.length() > 1 && nextParam.substr( 1, 1 ) == "=" )
+         if( nextParam.length() > 0 && nextParam.substr( 0, 1 ) == "=" )
          {
             result += '=';
-            ParamHold = nextParam.substr( 2 );
+            ParamHold = nextParam.substr( 1 );
             ParamNr++;
          }
       }
