@@ -5,7 +5,7 @@ import pandas as pd
 def create_default_values_example_1(file_path: str) -> None:
     m = gt.Container()
 
-    v = gt.Variable(
+    gt.Variable(
         m,
         'v',
         'free',

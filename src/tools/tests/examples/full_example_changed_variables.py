@@ -61,10 +61,10 @@ def create_full_example_changed_variables(file_path: str) -> None:
         ],
         columns=['from', 'to', 'level', 'marginal'],
     )
-    x = gt.Variable(
+    gt.Variable(
         m, 'x', 'positive', [i, j], records=q, description='shipment quantities in cases',
     )
-    z = gt.Variable(
+    gt.Variable(
         m,
         'z',
         records=pd.DataFrame(data=[153.675], columns=['level']),
