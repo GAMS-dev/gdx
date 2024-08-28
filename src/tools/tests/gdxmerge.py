@@ -400,3 +400,32 @@ class TestGdxMerge(unittest.TestCase):
         for i in range(2):
             self.assertEqual(first[i][0], second[i][0])
             self.assertRegex(first[i][1], second[i][1])
+
+        output_comma_separator = self.run_gdxmerge([
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['full_example'],
+            f'output={self.FILE_PATHS['merge_file']}',
+            'Exclude=i,j'
+        ])
+        self.check_output(
+            output_comma_separator,
+            return_code=0,
+            first_delete=[2, 2, 2],
+            second_delete=[2, 2, 2]
+        )
+
+        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
+        self.check_gdx_file(symbols, container, len(symbols) + 1)
+
+        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
+        first = symbol.records.values.tolist()
+        second = [
+            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
+            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]full_example\.gdx']
+        ]
+        self.assertEqual(len(first), 2)
+        for item in first:
+            self.assertEqual(len(item), 2)
+        for i in range(2):
+            self.assertEqual(first[i][0], second[i][0])
+            self.assertRegex(first[i][1], second[i][1])
