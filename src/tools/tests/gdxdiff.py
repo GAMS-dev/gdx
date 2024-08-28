@@ -12,6 +12,7 @@ from examples.full_example_changed_data_and_variables import create_full_example
 from examples.default_values_examples import create_default_values_example_1, create_default_values_example_2
 from examples.domain_examples import create_domain_example_1, create_domain_example_2
 from examples.order_examples import create_order_example_1, create_order_example_2
+from examples.description_examples import create_description_example_1, create_description_example_2
 
 
 class TestGdxDiff(unittest.TestCase):
@@ -32,6 +33,8 @@ class TestGdxDiff(unittest.TestCase):
         'domain_example_2': os.path.join(DIRECTORY_PATHS['examples'], 'domain_example_2.gdx'),
         'order_example_1': os.path.join(DIRECTORY_PATHS['examples'], 'order_example_1.gdx'),
         'order_example_2': os.path.join(DIRECTORY_PATHS['examples'], 'order_example_2.gdx'),
+        'description_example_1': os.path.join(DIRECTORY_PATHS['examples'], 'description_example_1.gdx'),
+        'description_example_2': os.path.join(DIRECTORY_PATHS['examples'], 'description_example_2.gdx'),
         'diff_file': os.path.join(DIRECTORY_PATHS['examples'], 'diff_file.gdx')
     }
 
@@ -122,6 +125,8 @@ class TestGdxDiff(unittest.TestCase):
         create_domain_example_2(cls.FILE_PATHS['domain_example_2'])
         create_order_example_1(cls.FILE_PATHS['order_example_1'])
         create_order_example_2(cls.FILE_PATHS['order_example_2'])
+        create_description_example_1(cls.FILE_PATHS['description_example_1'])
+        create_description_example_2(cls.FILE_PATHS['description_example_2'])
 
     @classmethod
     def tearDownClass(cls) -> None:
