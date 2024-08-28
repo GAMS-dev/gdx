@@ -644,15 +644,15 @@ bool GetParameters( const int argc, const char *argv[] )
                while( !KS.empty() )
                {
                   K = gdlib::strutilx::LChSetPos( std::vector<char> { ',', ' ' }.data(), KS.data(), static_cast<int>( KS.length() ) );
-                  if( K == 0 )
+                  if( K == -1 )
                   {
                      Id = KS;
                      KS.clear();
                   }
                   else
                   {
-                     Id = KS.substr( 0, K - 1 );
-                     KS.erase( 0, K );
+                     Id = KS.substr( 0, K );
+                     KS.erase( 0, K + 1 );
                      KS = utils::trim( KS );
                   }
                   Id = utils::trim( Id );
