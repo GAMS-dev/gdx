@@ -778,3 +778,95 @@ class TestGdxDiff(unittest.TestCase):
             ]
         }
         self.check_gdx_file(symbols)
+
+    def test_order_example_1_and_order_example_2(self) -> None:
+        output = self.run_gdxdiff([
+            self.FILE_PATHS['order_example_1'],
+            self.FILE_PATHS['order_example_2'],
+            self.FILE_PATHS['diff_file']
+        ])
+        self.check_output(
+            output,
+            return_code=1,
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            't1': [
+                ['1988', 'ins1', ''],
+                ['1990', 'ins1', ''],
+                ['1983', 'ins2', ''],
+                ['1985', 'ins2', '']
+            ],
+            't2': [
+                ['1988', 'ins2', ''],
+                ['1989', 'ins2', ''],
+                ['1990', 'ins2', ''],
+                ['1991', 'ins2', ''],
+                ['1983', 'ins1', ''],
+                ['1984', 'ins1', ''],
+                ['1985', 'ins1', ''],
+                ['1986', 'ins1', '']
+            ],
+            't3': [
+                ['1989', 'ins1', ''],
+                ['1991', 'ins1', ''],
+                ['1984', 'ins2', ''],
+                ['1986', 'ins2', '']
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['order_example_1']],
+                ['File2', self.FILE_PATHS['order_example_2']]
+            ]
+        }
+        self.check_gdx_file(symbols)
+
+    def test_order_example_1_and_order_example_2_ignore_order(self) -> None:
+        output = self.run_gdxdiff([
+            self.FILE_PATHS['order_example_1'],
+            self.FILE_PATHS['order_example_2'],
+            self.FILE_PATHS['diff_file'],
+            'IgnoreOrder'
+        ])
+        self.check_output(
+            output,
+            return_code=1,
+            file_name='order_example_1_and_order_example_2.txt',
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            't1': [
+                ['1988', 'ins1', ''],
+                ['1990', 'ins1', ''],
+                ['1983', 'ins2', ''],
+                ['1985', 'ins2', '']
+            ],
+            't2': [
+                ['1988', 'ins2', ''],
+                ['1990', 'ins2', ''],
+                ['1983', 'ins1', ''],
+                ['1985', 'ins1', ''],
+                ['1989', 'ins2', ''],
+                ['1991', 'ins2', ''],
+                ['1984', 'ins1', ''],
+                ['1986', 'ins1', '']
+            ],
+            't3': [
+                ['1989', 'ins1', ''],
+                ['1991', 'ins1', ''],
+                ['1984', 'ins2', ''],
+                ['1986', 'ins2', '']
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['order_example_1']],
+                ['File2', self.FILE_PATHS['order_example_2']]
+            ]
+        }
+        self.check_gdx_file(symbols)
