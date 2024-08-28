@@ -1202,12 +1202,13 @@ std::string NextParam()
       if( k != std::string::npos )
       {
          ParamHold = result.substr( k + 1 );
+         // Keep the '=':
          result.erase( k + 1 );
       }
       else if( ParamNr <= ParamCount )
       {
          std::string nextParam = ParamStr[ParamNr];
-         if( nextParam.length() > 0 && nextParam.substr( 0, 1 ) == "=" )
+         if( nextParam.length() > 0 && nextParam.front() == '=' )
          {
             result += '=';
             ParamHold = nextParam.substr( 1 );
