@@ -875,3 +875,57 @@ class TestGdxDiff(unittest.TestCase):
             ]
         }
         self.check_gdx_file(symbols)
+
+    def test_description_example_1_and_description_example_2_compare_associated_texts_y(self) -> None:
+        output = self.run_gdxdiff([
+            self.FILE_PATHS['description_example_1'],
+            self.FILE_PATHS['description_example_2'],
+            self.FILE_PATHS['diff_file'],
+            'SetDesc=Y'
+        ])
+        self.check_output(
+            output,
+            return_code=1,
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            'i': [
+                ['seattle', 'dif1', 'text 1'],
+                ['seattle', 'dif2', 'text 3'],
+                ['san-diego', 'dif1', 'text 2'],
+                ['san-diego', 'dif2', 'text 4']
+            ],
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['description_example_1']],
+                ['File2', self.FILE_PATHS['description_example_2']]
+            ]
+        }
+        self.check_gdx_file(symbols)
+
+    def test_description_example_1_and_description_example_2_compare_associated_texts_n(self) -> None:
+        output = self.run_gdxdiff([
+            self.FILE_PATHS['description_example_1'],
+            self.FILE_PATHS['description_example_2'],
+            self.FILE_PATHS['diff_file'],
+            'SetDesc=N'
+        ])
+        self.check_output(
+            output,
+            return_code=0,
+            first_offset=2,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            'FilesCompared': [
+                ['File1', self.FILE_PATHS['description_example_1']],
+                ['File2', self.FILE_PATHS['description_example_2']]
+            ]
+        }
+        self.check_gdx_file(symbols)
