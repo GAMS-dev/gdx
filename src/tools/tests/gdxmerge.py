@@ -214,3 +214,100 @@ class TestGdxMerge(unittest.TestCase):
         for i in range(2):
             self.assertEqual(first[i][0], second[i][0])
             self.assertRegex(first[i][1], second[i][1])
+
+    def test_small_and_full_example_exclude_i(self) -> None:
+        output = self.run_gdxmerge([
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['full_example'],
+            f'output={self.FILE_PATHS['merge_file']}',
+            'Exclude=i'
+        ])
+        self.check_output(
+            output,
+            return_code=0,
+            first_delete=[1, 1, 1],
+            second_delete=[1, 1, 1]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            'j': [
+                ['small_example', 'new-york', ''],
+                ['small_example', 'chicago', ''],
+                ['small_example', 'topeka', ''],
+                ['full_example', 'new-york', ''],
+                ['full_example', 'chicago', ''],
+                ['full_example', 'topeka', '']
+            ],
+            'd': [
+                ['small_example', 'seattle', 'new-york', 2.5],
+                ['small_example', 'seattle', 'chicago', 1.7],
+                ['small_example', 'seattle', 'topeka', 1.8],
+                ['small_example', 'san-diego', 'new-york', 2.5],
+                ['small_example', 'san-diego', 'chicago', 1.8],
+                ['small_example', 'san-diego', 'topeka', 1.4],
+                ['full_example', 'seattle', 'new-york', 2.5],
+                ['full_example', 'seattle', 'chicago', 1.7],
+                ['full_example', 'seattle', 'topeka', 1.8],
+                ['full_example', 'san-diego', 'new-york', 2.5],
+                ['full_example', 'san-diego', 'chicago', 1.8],
+                ['full_example', 'san-diego', 'topeka', 1.4]
+            ],
+            'a': [
+                ['full_example', 'seattle', 350.0],
+                ['full_example', 'san-diego', 600.0]
+            ],
+            'b': [
+                ['full_example', 'new-york', 325.0],
+                ['full_example', 'chicago', 300.0],
+                ['full_example', 'topeka', 275.0]
+            ],
+            'f': [
+                ['full_example', 90.0]
+            ],
+            'c': [
+                ['full_example', 'seattle', 'new-york', 0.225],
+                ['full_example', 'seattle', 'chicago', 0.153],
+                ['full_example', 'seattle', 'topeka', 0.162],
+                ['full_example', 'san-diego', 'new-york', 0.225],
+                ['full_example', 'san-diego', 'chicago', 0.162],
+                ['full_example', 'san-diego', 'topeka', 0.12599999999999997]
+            ],
+            'x': [
+                ['full_example', 'seattle', 'new-york', 50.0, 0.0, 0.0, float('inf'), 1.0],
+                ['full_example', 'seattle', 'chicago', 300.0, 0.0, 0.0, float('inf'), 1.0],
+                ['full_example', 'seattle', 'topeka', 0.0, 0.036, 0.0, float('inf'), 1.0],
+                ['full_example', 'san-diego', 'new-york', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['full_example', 'san-diego', 'chicago', 0.0, 0.009, 0.0, float('inf'), 1.0],
+                ['full_example', 'san-diego', 'topeka', 275.0, 0.0, 0.0, float('inf'), 1.0]
+            ],
+            'z': [
+                ['full_example', 153.675, 0.0, float('-inf'), float('inf'), 1.0]
+            ],
+            'cost': [
+                ['full_example', 0.0, 1.0, 0.0, 0.0, 1.0]
+            ],
+            'supply': [
+                ['full_example', 'seattle', 350.0, 0.0, float('-inf'), 350.0, 1.0],
+                ['full_example', 'san-diego', 550.0, 0.0, float('-inf'), 600.0, 1.0]
+            ],
+            'demand': [
+                ['full_example', 'new-york', 325.0, 0.225, 325.0, float('inf'), 1.0],
+                ['full_example', 'chicago', 300.0, 0.153, 300.0, float('inf'), 1.0],
+                ['full_example', 'topeka', 275.0, 0.126, 275.0, float('inf'), 1.0]
+            ]
+        }
+        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
+        self.check_gdx_file(symbols, container, len(symbols) + 1)
+
+        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
+        first = symbol.records.values.tolist()
+        second = [
+            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
+            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]full_example\.gdx']
+        ]
+        self.assertEqual(len(first), 2)
+        for item in first:
+            self.assertEqual(len(item), 2)
+        for i in range(2):
+            self.assertEqual(first[i][0], second[i][0])
+            self.assertRegex(first[i][1], second[i][1])
