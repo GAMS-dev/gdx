@@ -232,8 +232,8 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
 
       if( Pass == TProcessPass::RpScan || Pass == TProcessPass::RpDoAll )
       {
-         SyObj->SySize = SyObj->SySize + Size;
-         SyObj->SyMemory = SyObj->SyMemory + XCount * ( SyObj->SyDim * sizeof( int ) + RecLen * sizeof( double ) );
+         SyObj->SySize += Size;
+         SyObj->SyMemory += XCount * ( SyObj->SyDim * sizeof( int ) + RecLen * sizeof( double ) );
          if( CheckError( SyObj->SyData->GetCount() + XCount <= std::numeric_limits<int>::max(), "Element count for symbol > maxint" ) )
          {
             SyObj->SySkip = true;
