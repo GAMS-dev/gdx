@@ -124,7 +124,7 @@ class TestGdxMerge(unittest.TestCase):
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merge_file']}'
+            f'Output={self.FILE_PATHS['merge_file']}'
         ])
         self.check_output(
             output,
@@ -212,7 +212,7 @@ class TestGdxMerge(unittest.TestCase):
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merge_file']}',
+            f'Output={self.FILE_PATHS['merge_file']}',
             'Id=i'
         ])
         self.check_output(
@@ -236,7 +236,7 @@ class TestGdxMerge(unittest.TestCase):
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merge_file']}',
+            f'Output={self.FILE_PATHS['merge_file']}',
             'Id=i', 'Id=j'
         ])
         self.check_output(
@@ -267,7 +267,7 @@ class TestGdxMerge(unittest.TestCase):
         output_quotation_marks = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merge_file']}',
+            f'Output={self.FILE_PATHS['merge_file']}',
             'Id=\'i j\''
         ])
         self.check_output(
@@ -281,7 +281,7 @@ class TestGdxMerge(unittest.TestCase):
         output_comma_separator = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merge_file']}',
+            f'Output={self.FILE_PATHS['merge_file']}',
             'Id=i,j'
         ])
         self.check_output(
@@ -296,7 +296,7 @@ class TestGdxMerge(unittest.TestCase):
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merge_file']}',
+            f'Output={self.FILE_PATHS['merge_file']}',
             'Exclude=i'
         ])
         self.check_output(
@@ -379,7 +379,7 @@ class TestGdxMerge(unittest.TestCase):
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merge_file']}',
+            f'Output={self.FILE_PATHS['merge_file']}',
             'Exclude=i', 'Exclude=j'
         ])
         self.check_output(
@@ -453,7 +453,7 @@ class TestGdxMerge(unittest.TestCase):
         output_quotation_marks = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merge_file']}',
+            f'Output={self.FILE_PATHS['merge_file']}',
             'Exclude=\'i j\''
         ])
         self.check_output(
@@ -467,7 +467,7 @@ class TestGdxMerge(unittest.TestCase):
         output_comma_separator = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merge_file']}',
+            f'Output={self.FILE_PATHS['merge_file']}',
             'Exclude=i,j'
         ])
         self.check_output(
@@ -482,7 +482,7 @@ class TestGdxMerge(unittest.TestCase):
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
-            f'output={self.FILE_PATHS['merge_file']}',
+            f'Output={self.FILE_PATHS['merge_file']}',
             'Big=10'
         ])
         self.check_output(
