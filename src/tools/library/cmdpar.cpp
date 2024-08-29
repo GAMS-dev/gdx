@@ -259,12 +259,12 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             while( getline( fi, line ) )
             {
                std::vector<std::string> strings = library::splitString( line, ' ' );
-               for( int i = 0; i < MAXBUF; i++ )
+               for( int i {}; i < sBuf.size() && i < strings.size(); i++ )
                   sBuf.at( i ) = strings.at( i );
-               if( sBuf.at( 1 ).empty() || sBuf.at( 1 ).at( 1 ) == '*' )
+               if( sBuf.front().empty() || sBuf.front().front() == '*' )
                   continue;
                Dest.append( " " );
-               for( int k {}; k < MAXBUF; k++ )
+               for( int k {}; k < sBuf.size(); k++ )
                {
                   if( sBuf.at( k ).empty() )
                      break;
