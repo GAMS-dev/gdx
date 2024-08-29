@@ -270,7 +270,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
                      break;
                   Dest.append( sBuf.at( k ) );
                }
-               if( sBuf.at( MAXBUF - 1 ).length() == 255 )
+               if( sBuf.back().length() == 255 )
                {
                   std::cerr << "**** Input line longer than " << MAXBUF * 255 << " characters" << std::endl;
                   result = false;
