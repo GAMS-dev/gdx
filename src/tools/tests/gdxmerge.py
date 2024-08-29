@@ -7,6 +7,7 @@ import inspect
 import gams.transfer as gt
 from examples.small_example import create_small_example
 from examples.full_example import create_full_example
+from examples.small_example_changed_data import create_small_example_changed_data
 
 
 class TestGdxMerge(unittest.TestCase):
@@ -18,6 +19,7 @@ class TestGdxMerge(unittest.TestCase):
     FILE_PATHS = {
         'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
         'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
+        'small_example_changed_data': os.path.join(DIRECTORY_PATHS['examples'], 'small_example_changed_data.gdx'),
         'merge_file': os.path.join(DIRECTORY_PATHS['examples'], 'merge_file.gdx')
     }
 
@@ -106,6 +108,7 @@ class TestGdxMerge(unittest.TestCase):
     def setUpClass(cls) -> None:
         create_small_example(cls.FILE_PATHS['small_example'])
         create_full_example(cls.FILE_PATHS['full_example'])
+        create_small_example_changed_data(cls.FILE_PATHS['small_example_changed_data'])
 
     @classmethod
     def tearDownClass(cls) -> None:
