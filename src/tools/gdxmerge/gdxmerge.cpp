@@ -310,7 +310,9 @@ bool TSymbolList::CollectBigOne( const int SyNr )
    if( SyObj->SyData == nullptr )
       return false;
 
-   std::cout << '\r' << "looking for symbol "
+   // Replaced '\r' with '\n' here:
+   std::cout << '\n'
+             << "looking for symbol "
              << gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::GetString( SyNr )
              << "     ";
 
