@@ -136,7 +136,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[1]
         )
 
-    def test_small_and_full_example(self) -> None:
+    def test_small_example_and_full_example(self) -> None:
         output = self.run_gdxdiff([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
