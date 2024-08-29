@@ -685,7 +685,7 @@ bool GetParameters( const int argc, const char *argv[] )
                break;
 
             case KP::Strict:
-               if( KS == "true" )
+               if( gdlib::strutilx::StrUEqual( KS, "true" ) )
                   StrictMode = true;
                break;
 
