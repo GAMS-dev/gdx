@@ -59,22 +59,18 @@ class TestGdxMerge(unittest.TestCase):
 
     def check_gdx_file_symbols(
         self,
-        symbol_names: list[str],
         container: gt.Container,
-        symbols_len: int | None
+        symbol_names: list[str]
     ) -> None:
         for symbol_name in symbol_names:
             with self.subTest(symbol_name=symbol_name):
                 self.assertIn(symbol_name, container)
-        self.assertEqual(
-            len(container),
-            symbols_len if symbols_len is not None else len(symbol_names)
-        )
+        self.assertEqual(len(container), len(symbol_names) + 1)
 
     def check_gdx_file_values(
         self,
-        symbol_name: str,
         container: gt.Container,
+        symbol_name: str,
         expected_values: list[list[str | float]]
     ) -> None:
         self.assertIn(symbol_name, container)
@@ -84,15 +80,12 @@ class TestGdxMerge(unittest.TestCase):
 
     def check_gdx_file(
         self,
-        symbols: dict[str, list[list[str | float]]],
-        container: gt.Container | None = None,
-        symbols_len: int | None = None
+        symbols: dict[str, list[list[str | float]]]
     ) -> None:
-        if container is None:
-            container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
-        self.check_gdx_file_symbols(list(symbols.keys()), container, symbols_len)
+        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
+        self.check_gdx_file_symbols(container, list(symbols.keys()))
         for symbol_name in symbols:
-            self.check_gdx_file_values(symbol_name, container, symbols[symbol_name])
+            self.check_gdx_file_values(container, symbol_name, symbols[symbol_name])
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -199,21 +192,7 @@ class TestGdxMerge(unittest.TestCase):
                 ['full_example', 'topeka', 275.0, 0.126, 275.0, float('inf'), 1.0]
             ]
         }
-        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
-        self.check_gdx_file(symbols, container, len(symbols) + 1)
-
-        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
-            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
-            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]full_example\.gdx']
-        ]
-        self.assertEqual(len(first), 2)
-        for item in first:
-            self.assertEqual(len(item), 2)
-        for i in range(2):
-            self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])
+        self.check_gdx_file(symbols)
 
     def test_small_and_full_example_id_i(self) -> None:
         output = self.run_gdxmerge([
@@ -237,21 +216,7 @@ class TestGdxMerge(unittest.TestCase):
                 ['full_example', 'san-diego', '']
             ]
         }
-        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
-        self.check_gdx_file(symbols, container, len(symbols) + 1)
-
-        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
-            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
-            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]full_example\.gdx']
-        ]
-        self.assertEqual(len(first), 2)
-        for item in first:
-            self.assertEqual(len(item), 2)
-        for i in range(2):
-            self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])
+        self.check_gdx_file(symbols)
 
     def test_small_and_full_example_exclude_i(self) -> None:
         output = self.run_gdxmerge([
@@ -334,21 +299,7 @@ class TestGdxMerge(unittest.TestCase):
                 ['full_example', 'topeka', 275.0, 0.126, 275.0, float('inf'), 1.0]
             ]
         }
-        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
-        self.check_gdx_file(symbols, container, len(symbols) + 1)
-
-        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
-            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
-            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]full_example\.gdx']
-        ]
-        self.assertEqual(len(first), 2)
-        for item in first:
-            self.assertEqual(len(item), 2)
-        for i in range(2):
-            self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])
+        self.check_gdx_file(symbols)
 
     def test_small_and_full_example_exclude_i_j(self) -> None:
         output = self.run_gdxmerge([
@@ -423,21 +374,7 @@ class TestGdxMerge(unittest.TestCase):
                 ['full_example', 'topeka', 275.0, 0.126, 275.0, float('inf'), 1.0]
             ]
         }
-        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
-        self.check_gdx_file(symbols, container, len(symbols) + 1)
-
-        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
-            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
-            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]full_example\.gdx']
-        ]
-        self.assertEqual(len(first), 2)
-        for item in first:
-            self.assertEqual(len(item), 2)
-        for i in range(2):
-            self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])
+        self.check_gdx_file(symbols)
 
         output_quotation_marks = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
@@ -451,22 +388,7 @@ class TestGdxMerge(unittest.TestCase):
             first_delete=[2, 2, 2],
             second_delete=[2, 2, 2]
         )
-
-        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
-        self.check_gdx_file(symbols, container, len(symbols) + 1)
-
-        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
-            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
-            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]full_example\.gdx']
-        ]
-        self.assertEqual(len(first), 2)
-        for item in first:
-            self.assertEqual(len(item), 2)
-        for i in range(2):
-            self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])
+        self.check_gdx_file(symbols)
 
         output_comma_separator = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
@@ -480,19 +402,4 @@ class TestGdxMerge(unittest.TestCase):
             first_delete=[2, 2, 2],
             second_delete=[2, 2, 2]
         )
-
-        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
-        self.check_gdx_file(symbols, container, len(symbols) + 1)
-
-        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
-        first = symbol.records.values.tolist()
-        second = [
-            ['small_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]small_example\.gdx'],
-            ['full_example', r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]full_example\.gdx']
-        ]
-        self.assertEqual(len(first), 2)
-        for item in first:
-            self.assertEqual(len(item), 2)
-        for i in range(2):
-            self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])
+        self.check_gdx_file(symbols)
