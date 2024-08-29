@@ -74,8 +74,8 @@ static char hexDigit( const uint8_t b) {
 static std::string mFormat(int64_t m) {
    if (!m)
       return "0"s;
-   TI64Rec xi {};
-   xi.i64 = m;
+   //TI64Rec xi {};
+   //xi.i64 = m;
    int64_t mask { static_cast<int64_t>( 0x000f0000 ) << 32 };
    int shiftCount = 48;
    std::string res;
