@@ -599,8 +599,6 @@ class TestGdxMerge(unittest.TestCase):
             second_offset=4
         )
 
-        self.maxDiff = None
-
         symbols: dict[str, list[list[str | float]]] = {
             'i': [
                 ['small_example', 'seattle', ''],
