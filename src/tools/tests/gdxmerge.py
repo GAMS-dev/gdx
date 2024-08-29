@@ -2,6 +2,7 @@ import unittest
 import os
 import platform
 import subprocess
+import tempfile
 import inspect
 import gams.transfer as gt
 from examples.small_example import create_small_example
@@ -566,3 +567,18 @@ class TestGdxMerge(unittest.TestCase):
             ]
         }
         self.check_gdx_file(symbols, ['small_example', 'full_example'])
+
+    def test_small_and_full_example_strict_mode(self) -> None:
+        with tempfile.NamedTemporaryFile(suffix='.gdx') as temporary_file:
+            output = self.run_gdxmerge([
+                self.FILE_PATHS['small_example'],
+                self.FILE_PATHS['full_example'],
+                f'Output={temporary_file.name}',
+                'Strict=true'
+            ])
+            self.assertEqual(output.returncode, 1)
+            self.assertEqual(output.stdout, '')
+            self.assertEqual(
+                output.stderr,
+                f'*** Error  : Output file "{temporary_file.name}" already exists (strict mode)\n'
+            )
