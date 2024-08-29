@@ -121,7 +121,7 @@ class TestGdxMerge(unittest.TestCase):
             second_delete=[1]
         )
 
-    def test_small_and_full_example(self) -> None:
+    def test_small_example_and_full_example(self) -> None:
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
@@ -209,7 +209,7 @@ class TestGdxMerge(unittest.TestCase):
         }
         self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
-    def test_small_and_full_example_id_i(self) -> None:
+    def test_small_example_and_full_example_id_i(self) -> None:
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
@@ -233,7 +233,7 @@ class TestGdxMerge(unittest.TestCase):
         }
         self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
-    def test_small_and_full_example_id_i_j(self) -> None:
+    def test_small_example_and_full_example_id_i_j(self) -> None:
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
@@ -293,7 +293,7 @@ class TestGdxMerge(unittest.TestCase):
         )
         self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
-    def test_small_and_full_example_exclude_i(self) -> None:
+    def test_small_example_and_full_example_exclude_i(self) -> None:
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
@@ -376,7 +376,7 @@ class TestGdxMerge(unittest.TestCase):
         }
         self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
-    def test_small_and_full_example_exclude_i_j(self) -> None:
+    def test_small_example_and_full_example_exclude_i_j(self) -> None:
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
@@ -479,7 +479,7 @@ class TestGdxMerge(unittest.TestCase):
         )
         self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
-    def test_small_and_full_example_big_symbols(self) -> None:
+    def test_small_example_and_full_example_big_symbols(self) -> None:
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
@@ -568,7 +568,7 @@ class TestGdxMerge(unittest.TestCase):
         }
         self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
-    def test_small_and_full_example_strict_mode(self) -> None:
+    def test_small_example_and_full_example_strict_mode(self) -> None:
         with tempfile.NamedTemporaryFile(suffix='.gdx') as temporary_file:
             output = self.run_gdxmerge([
                 self.FILE_PATHS['small_example'],
