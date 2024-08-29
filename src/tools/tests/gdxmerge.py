@@ -585,3 +585,105 @@ class TestGdxMerge(unittest.TestCase):
                 output.stderr,
                 f'*** Error  : Output file "{temporary_file.name}" already exists (strict mode)\n'
             )
+
+    def test_small_example_and_small_example_changed_data_and_full_example(self) -> None:
+        output = self.run_gdxmerge([
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['small_example_changed_data'],
+            self.FILE_PATHS['full_example'],
+            f'Output={self.FILE_PATHS['merge_file']}'
+        ])
+        self.check_output(
+            output,
+            return_code=0,
+            first_offset=4,
+            second_offset=4
+        )
+
+        self.maxDiff = None
+
+        symbols: dict[str, list[list[str | float]]] = {
+            'i': [
+                ['small_example', 'seattle', ''],
+                ['small_example', 'san-diego', ''],
+                ['small_example_changed_data', 'seattle', ''],
+                ['small_example_changed_data', 'san-diego', ''],
+                ['full_example', 'seattle', ''],
+                ['full_example', 'san-diego', '']
+            ],
+            'j': [
+                ['small_example', 'new-york', ''],
+                ['small_example', 'chicago', ''],
+                ['small_example', 'topeka', ''],
+                ['small_example_changed_data', 'new-york', ''],
+                ['small_example_changed_data', 'chicago', ''],
+                ['small_example_changed_data', 'topeka', ''],
+                ['full_example', 'new-york', ''],
+                ['full_example', 'chicago', ''],
+                ['full_example', 'topeka', '']
+            ],
+            'd': [
+                ['small_example', 'seattle', 'new-york', 2.5],
+                ['small_example', 'seattle', 'chicago', 1.7],
+                ['small_example', 'seattle', 'topeka', 1.8],
+                ['small_example', 'san-diego', 'new-york', 2.5],
+                ['small_example', 'san-diego', 'chicago', 1.8],
+                ['small_example', 'san-diego', 'topeka', 1.4],
+                ['small_example_changed_data', 'seattle', 'new-york', 3.5],
+                ['small_example_changed_data', 'seattle', 'chicago', 2.7],
+                ['small_example_changed_data', 'seattle', 'topeka', 2.8],
+                ['small_example_changed_data', 'san-diego', 'new-york', 3.5],
+                ['small_example_changed_data', 'san-diego', 'chicago', 2.8],
+                ['small_example_changed_data', 'san-diego', 'topeka', 2.4],
+                ['full_example', 'seattle', 'new-york', 2.5],
+                ['full_example', 'seattle', 'chicago', 1.7],
+                ['full_example', 'seattle', 'topeka', 1.8],
+                ['full_example', 'san-diego', 'new-york', 2.5],
+                ['full_example', 'san-diego', 'chicago', 1.8],
+                ['full_example', 'san-diego', 'topeka', 1.4]
+            ],
+            'a': [
+                ['full_example', 'seattle', 350.0],
+                ['full_example', 'san-diego', 600.0]
+            ],
+            'b': [
+                ['full_example', 'new-york', 325.0],
+                ['full_example', 'chicago', 300.0],
+                ['full_example', 'topeka', 275.0]
+            ],
+            'f': [
+                ['full_example', 90.0]
+            ],
+            'c': [
+                ['full_example', 'seattle', 'new-york', 0.225],
+                ['full_example', 'seattle', 'chicago', 0.153],
+                ['full_example', 'seattle', 'topeka', 0.162],
+                ['full_example', 'san-diego', 'new-york', 0.225],
+                ['full_example', 'san-diego', 'chicago', 0.162],
+                ['full_example', 'san-diego', 'topeka', 0.12599999999999997]
+            ],
+            'x': [
+                ['full_example', 'seattle', 'new-york', 50.0, 0.0, 0.0, float('inf'), 1.0],
+                ['full_example', 'seattle', 'chicago', 300.0, 0.0, 0.0, float('inf'), 1.0],
+                ['full_example', 'seattle', 'topeka', 0.0, 0.036, 0.0, float('inf'), 1.0],
+                ['full_example', 'san-diego', 'new-york', 275.0, 0.0, 0.0, float('inf'), 1.0],
+                ['full_example', 'san-diego', 'chicago', 0.0, 0.009, 0.0, float('inf'), 1.0],
+                ['full_example', 'san-diego', 'topeka', 275.0, 0.0, 0.0, float('inf'), 1.0]
+            ],
+            'z': [
+                ['full_example', 153.675, 0.0, float('-inf'), float('inf'), 1.0]
+            ],
+            'cost': [
+                ['full_example', 0.0, 1.0, 0.0, 0.0, 1.0]
+            ],
+            'supply': [
+                ['full_example', 'seattle', 350.0, 0.0, float('-inf'), 350.0, 1.0],
+                ['full_example', 'san-diego', 550.0, 0.0, float('-inf'), 600.0, 1.0]
+            ],
+            'demand': [
+                ['full_example', 'new-york', 325.0, 0.225, 325.0, float('inf'), 1.0],
+                ['full_example', 'chicago', 300.0, 0.153, 300.0, float('inf'), 1.0],
+                ['full_example', 'topeka', 275.0, 0.126, 275.0, float('inf'), 1.0]
+            ]
+        }
+        self.check_gdx_file(symbols, ['small_example', 'small_example_changed_data', 'full_example'])
