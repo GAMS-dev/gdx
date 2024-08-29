@@ -478,7 +478,7 @@ class TestGdxMerge(unittest.TestCase):
         )
         self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
-    def test_small_and_full_example_big(self) -> None:
+    def test_small_and_full_example_big_symbols(self) -> None:
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
             self.FILE_PATHS['full_example'],
