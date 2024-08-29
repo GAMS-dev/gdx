@@ -93,14 +93,13 @@ class TestGdxMerge(unittest.TestCase):
 
         symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
         first = symbol.records.values.tolist()
-        second = [
-            [file_names[0], f'{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[0]}.gdx'],
-            [file_names[1], f'{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[1]}.gdx']
-        ]
-        self.assertEqual(len(first), 2)
+        second: list[list[str]] = []
+        for i in range(len(file_names)):
+            second.append([file_names[i], f'{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[i]}.gdx'])
+        self.assertEqual(len(first), len(file_names))
         for item in first:
             self.assertEqual(len(item), 2)
-        for i in range(2):
+        for i in range(len(file_names)):
             self.assertEqual(first[i][0], second[i][0])
             self.assertRegex(first[i][1], second[i][1])
 
