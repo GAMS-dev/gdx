@@ -211,7 +211,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             Dest.append( Src.substr( sp, Src.length() - sp + 2 ) );
             break;
          }
-         Dest.append( Src.substr( sp, fnd - sp + 1 ) );
+         Dest.append( Src.substr( sp, fnd - sp ) );
          sp = fnd + 1;
          if( sp >= static_cast<int>( Src.length() ) )
          {
