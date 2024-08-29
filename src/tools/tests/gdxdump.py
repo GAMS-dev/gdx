@@ -96,10 +96,10 @@ class TestGdxDump(unittest.TestCase):
         with tempfile.NamedTemporaryFile() as temporary_file:
             output = self.run_gdxdump([
                 self.FILE_PATHS['full_example'],
-                f'Output={temporary_file.name}'
+                f'Output={temporary_file.name}.txt'
             ])
             self.assertEqual(output.returncode, 0)
-            with open(temporary_file.name, 'r') as file:
+            with open(f'{temporary_file.name}.txt', 'r') as file:
                 first = file.read().split('\n')
             with open(os.path.join(self.DIRECTORY_PATHS['output'], 'full_example.txt'), 'r') as file:
                 second = file.read().split('\n')
