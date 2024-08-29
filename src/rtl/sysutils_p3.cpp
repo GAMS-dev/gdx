@@ -40,7 +40,7 @@
    #include <fnmatch.h>
 #endif
 
-using namespace global::delphitypes;
+
 using namespace rtl::p3platform;
 using namespace std::literals::string_literals;
 
@@ -93,14 +93,14 @@ bool FileExists( const std::string &FileName )
 #endif
 }
 
-static TTimeStamp DateTimeToTimeStamp( tDateTime DateTime )
+static TTimeStamp DateTimeToTimeStamp( global::delphitypes::tDateTime DateTime )
 {
    return {
-           static_cast<int>( round( std::abs( frac( DateTime ) ) * MSecsPerDay ) ),
+           static_cast<int>( round( std::abs( global::delphitypes::frac( DateTime ) ) * MSecsPerDay ) ),
            static_cast<int>( trunc( DateTime ) + DateDelta ) };
 }
 
-void DecodeTime( const tDateTime DateTime, uint16_t &Hour, uint16_t &Min, uint16_t &Sec, uint16_t &Msec )
+void DecodeTime( const global::delphitypes::tDateTime DateTime, uint16_t &Hour, uint16_t &Min, uint16_t &Sec, uint16_t &Msec )
 {
    uint16_t MinCount, MSecCount;
    const auto tmp = DateTimeToTimeStamp( DateTime );
@@ -600,7 +600,7 @@ static bool DecodeDateFully(const double DateTime, uint16_t &Year, uint16_t &Mon
    return res;
 }
 
-void DecodeDate( const tDateTime DateTime, uint16_t &Year, uint16_t &Month, uint16_t &Day )
+void DecodeDate( const global::delphitypes::tDateTime DateTime, uint16_t &Year, uint16_t &Month, uint16_t &Day )
 {
    uint16_t Dummy {};
    DecodeDateFully(DateTime, Year, Month, Day, Dummy);
