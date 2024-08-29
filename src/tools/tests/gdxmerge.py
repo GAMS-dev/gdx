@@ -80,12 +80,26 @@ class TestGdxMerge(unittest.TestCase):
 
     def check_gdx_file(
         self,
-        symbols: dict[str, list[list[str | float]]]
+        symbols: dict[str, list[list[str | float]]],
+        file_names: list[str]
     ) -> None:
         container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
         self.check_gdx_file_symbols(container, list(symbols.keys()))
         for symbol_name in symbols:
             self.check_gdx_file_values(container, symbol_name, symbols[symbol_name])
+
+        symbol: gt.Parameter = container['Merged_set_1']  # type: ignore
+        first = symbol.records.values.tolist()
+        second = [
+            [file_names[0], f'{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[0]}.gdx'],
+            [file_names[1], f'{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[1]}.gdx']
+        ]
+        self.assertEqual(len(first), 2)
+        for item in first:
+            self.assertEqual(len(item), 2)
+        for i in range(2):
+            self.assertEqual(first[i][0], second[i][0])
+            self.assertRegex(first[i][1], second[i][1])
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -192,7 +206,7 @@ class TestGdxMerge(unittest.TestCase):
                 ['full_example', 'topeka', 275.0, 0.126, 275.0, float('inf'), 1.0]
             ]
         }
-        self.check_gdx_file(symbols)
+        self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
     def test_small_and_full_example_id_i(self) -> None:
         output = self.run_gdxmerge([
@@ -216,7 +230,7 @@ class TestGdxMerge(unittest.TestCase):
                 ['full_example', 'san-diego', '']
             ]
         }
-        self.check_gdx_file(symbols)
+        self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
     def test_small_and_full_example_exclude_i(self) -> None:
         output = self.run_gdxmerge([
@@ -299,7 +313,7 @@ class TestGdxMerge(unittest.TestCase):
                 ['full_example', 'topeka', 275.0, 0.126, 275.0, float('inf'), 1.0]
             ]
         }
-        self.check_gdx_file(symbols)
+        self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
     def test_small_and_full_example_exclude_i_j(self) -> None:
         output = self.run_gdxmerge([
@@ -374,7 +388,7 @@ class TestGdxMerge(unittest.TestCase):
                 ['full_example', 'topeka', 275.0, 0.126, 275.0, float('inf'), 1.0]
             ]
         }
-        self.check_gdx_file(symbols)
+        self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
         output_quotation_marks = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
@@ -388,7 +402,7 @@ class TestGdxMerge(unittest.TestCase):
             first_delete=[2, 2, 2],
             second_delete=[2, 2, 2]
         )
-        self.check_gdx_file(symbols)
+        self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
         output_comma_separator = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
@@ -402,4 +416,4 @@ class TestGdxMerge(unittest.TestCase):
             first_delete=[2, 2, 2],
             second_delete=[2, 2, 2]
         )
-        self.check_gdx_file(symbols)
+        self.check_gdx_file(symbols, ['small_example', 'full_example'])
