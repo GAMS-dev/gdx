@@ -62,7 +62,7 @@ int p3ASyncExecP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInf
 int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg );
 
 bool p3KillProcGroupTP( const TProcInfo &procInfo, TKillHow how );
-bool p3IsPIDValid( global::delphitypes::Cardinal pid );
+bool p3IsPIDValid( uint32_t pid );
 
 using tCtrlHandler = void(*)();
 
