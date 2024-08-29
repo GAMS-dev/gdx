@@ -232,6 +232,66 @@ class TestGdxMerge(unittest.TestCase):
         }
         self.check_gdx_file(symbols, ['small_example', 'full_example'])
 
+    def test_small_and_full_example_id_i_j(self) -> None:
+        output = self.run_gdxmerge([
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['full_example'],
+            f'output={self.FILE_PATHS['merge_file']}',
+            'Id=i', 'Id=j'
+        ])
+        self.check_output(
+            output,
+            return_code=0,
+            first_delete=[2, 2, 2],
+            second_delete=[2, 2, 2]
+        )
+
+        symbols: dict[str, list[list[str | float]]] = {
+            'i': [
+                ['small_example', 'seattle', ''],
+                ['small_example', 'san-diego', ''],
+                ['full_example', 'seattle', ''],
+                ['full_example', 'san-diego', '']
+            ],
+            'j': [
+                ['small_example', 'new-york', ''],
+                ['small_example', 'chicago', ''],
+                ['small_example', 'topeka', ''],
+                ['full_example', 'new-york', ''],
+                ['full_example', 'chicago', ''],
+                ['full_example', 'topeka', '']
+            ]
+        }
+        self.check_gdx_file(symbols, ['small_example', 'full_example'])
+
+        output_quotation_marks = self.run_gdxmerge([
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['full_example'],
+            f'output={self.FILE_PATHS['merge_file']}',
+            'Id=\'i j\''
+        ])
+        self.check_output(
+            output_quotation_marks,
+            return_code=0,
+            first_delete=[2, 2, 2],
+            second_delete=[2, 2, 2]
+        )
+        self.check_gdx_file(symbols, ['small_example', 'full_example'])
+
+        output_comma_separator = self.run_gdxmerge([
+            self.FILE_PATHS['small_example'],
+            self.FILE_PATHS['full_example'],
+            f'output={self.FILE_PATHS['merge_file']}',
+            'Id=i,j'
+        ])
+        self.check_output(
+            output_comma_separator,
+            return_code=0,
+            first_delete=[2, 2, 2],
+            second_delete=[2, 2, 2]
+        )
+        self.check_gdx_file(symbols, ['small_example', 'full_example'])
+
     def test_small_and_full_example_exclude_i(self) -> None:
         output = self.run_gdxmerge([
             self.FILE_PATHS['small_example'],
