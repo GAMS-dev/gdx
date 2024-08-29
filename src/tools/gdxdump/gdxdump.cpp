@@ -1256,7 +1256,7 @@ int main( const int argc, const char *argv[] )
 
    // TODO: Remove?
    // gdlSetSystemName( 'GDXDUMP' );
-   // if( std::strcmp( ParamStr[1], "AUDIT" ) == 0 )
+   // if( gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
    // {
    //    std::cout << gdlGetAuditLine() << std::endl;
    //    return 0;

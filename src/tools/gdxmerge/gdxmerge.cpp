@@ -740,7 +740,7 @@ int main( const int argc, const char *argv[] )
 
    // TODO: Remove?
    // gdlSetSystemName( "GDXMERGE" );
-   // if( std::strcmp( argv[1], "AUDIT" ) == 0 )
+   // if( gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
    // {
    //    std::cout << gdlGetAuditLine() << std::endl;
    //    return {};
