@@ -102,8 +102,6 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             }
          if( xk == 0 )
          {
-            // TODO: Check if this works
-            // result.append( FParams.substr( xr, FParams.length() - xr + 1 ) );
             result.append( FParams.substr( xr, FParams.length() - xr ) );
             xr = maxr + 1;
          }
