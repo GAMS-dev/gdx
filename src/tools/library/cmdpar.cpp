@@ -194,7 +194,6 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
 
    auto ExpandFiles = []( const std::string &Src, std::string &Dest ) -> bool {
       constexpr int MAXBUF { 4 };
-      std::array<std::string, MAXBUF> sBuf;
       bool result { true };
       Dest.clear();
       int sp {};
@@ -257,18 +256,15 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             while( getline( fi, line ) )
             {
                std::vector<std::string> strings = library::splitString( line, ' ' );
-               for( int i {}; i < sBuf.size() && i < strings.size(); i++ )
-                  sBuf.at( i ) = strings.at( i );
-               if( sBuf.front().empty() || sBuf.front().front() == '*' )
+               if( strings.front().empty() || strings.front().front() == '*' )
                   continue;
-               Dest.append( " " );
-               for( int k {}; k < sBuf.size(); k++ )
+               for( int k {}; k < strings.size(); k++ )
                {
-                  if( sBuf.at( k ).empty() )
+                  if( strings.at( k ).empty() )
                      break;
-                  Dest.append( sBuf.at( k ) );
+                  Dest.append( " " + strings.at( k ) );
                }
-               if( sBuf.back().length() == 255 )
+               if( strings.back().length() == 255 )
                {
                   std::cerr << "**** Input line longer than " << MAXBUF * 255 << " characters" << std::endl;
                   result = false;
