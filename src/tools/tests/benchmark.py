@@ -13,7 +13,9 @@ DIRECTORY_PATHS = {
 }
 FILE_PATHS = {
     'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
-    'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx')
+    'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
+    'diff_file': os.path.join(DIRECTORY_PATHS['examples'], 'diff_file.gdx'),
+    'merge_file': os.path.join(DIRECTORY_PATHS['examples'], 'merge_file.gdx')
 }
 
 
@@ -57,11 +59,13 @@ def main() -> int:
         ],
         'gdxdiff': [
             FILE_PATHS['small_example'],
-            FILE_PATHS['full_example']
+            FILE_PATHS['full_example'],
+            FILE_PATHS['diff_file']
         ],
         'gdxmerge': [
             FILE_PATHS['small_example'],
-            FILE_PATHS['full_example']
+            FILE_PATHS['full_example'],
+            f'Output={FILE_PATHS['merge_file']}'
         ]
     }
     for i, executable_name in enumerate(executables):
