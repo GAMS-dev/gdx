@@ -17,17 +17,26 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
         EXECUTABLE_PATH = ['Release', f'{executable_name}.exe']
     else:
         EXECUTABLE_PATH = ['build', executable_name]
+    os.makedirs(DIRECTORY_PATHS['results'], exist_ok=True)
     full_command = [
-        'hyperfine', '-i',
+        'hyperfine',
+        '--shell=none',
         '--warmup', '3',
-        f'\'{' '.join([
+        '--ignore-failure',
+        '--export-markdown', os.path.join(
+            DIRECTORY_PATHS['results'],
+            f'{executable_name}.md'
+        ),
+        '--command-name', f'{executable_name} (C++)',
+        ' '.join([
             os.path.join(TESTS_DIRECTORY_PATH, '..', '..', '..', *EXECUTABLE_PATH),
             *command
-        ])}\'',
-        f'\'{' '.join([
+        ]),
+        '--command-name', f'{executable_name} (Delphi)',
+        ' '.join([
             executable_name,
             *command
-        ])}\''
+        ])
     ]
     print(f'{' '.join(full_command)}\n')
     subprocess.run(full_command)
