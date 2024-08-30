@@ -258,7 +258,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
                std::vector<std::string> strings = library::splitString( line, ' ' );
                if( strings.front().empty() || strings.front().front() == '*' )
                   continue;
-               for( int k {}; k < strings.size(); k++ )
+               for( size_t k {}; k < strings.size(); k++ )
                {
                   if( strings.at( k ).empty() )
                      break;
