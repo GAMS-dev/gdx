@@ -5,10 +5,13 @@ import sys
 
 
 TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
-EXAMPLES_DIRECTORY_PATH = os.path.join(TESTS_DIRECTORY_PATH, 'examples')
+DIRECTORY_PATHS = {
+    'examples': os.path.join(TESTS_DIRECTORY_PATH, 'examples'),
+    'results': os.path.join(TESTS_DIRECTORY_PATH, 'results')
+}
 FILE_PATHS = {
-    'small_example': os.path.join(EXAMPLES_DIRECTORY_PATH, 'small_example.gdx'),
-    'full_example': os.path.join(EXAMPLES_DIRECTORY_PATH, 'full_example.gdx')
+    'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
+    'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx')
 }
 
 
