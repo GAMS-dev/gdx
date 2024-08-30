@@ -264,6 +264,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
                      break;
                   Dest.append( " " + strings.at( k ) );
                }
+               // TODO: Check whether this if is still necessary
                if( strings.back().length() == 255 )
                {
                   std::cerr << "**** Input line longer than " << MAXBUF * 255 << " characters" << std::endl;
