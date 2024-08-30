@@ -34,10 +34,14 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
 
 
 def main() -> int:
-    benchmark_executable('gdxdiff', [
-        FILE_PATHS['small_example'],
-        FILE_PATHS['full_example']
-    ])
+    EXECUTABLE_NAMES = ['gdxdump', 'gdxdiff', 'gdxmerge']
+    for i, executable_name in enumerate(EXECUTABLE_NAMES):
+        benchmark_executable(executable_name, [
+            FILE_PATHS['small_example'],
+            FILE_PATHS['full_example']
+        ])
+        if i < len(EXECUTABLE_NAMES) - 1:
+            print('\n')
     return 0
 
 
