@@ -13,26 +13,24 @@ FILE_PATHS = {
 
 
 def benchmark_executable(executable_name: str, command: list[str]) -> None:
-
     if platform.system() == 'Windows':
-        executable_path = ['Release', f'{executable_name}.exe']
+        EXECUTABLE_PATH = ['Release', f'{executable_name}.exe']
     else:
-        executable_path = ['build', executable_name]
-    subprocess.run(
-        [
-            'hyperfine', '-i',
-            '--warmup', '5',
-            f'\'{' '.join([
-                os.path.join(TESTS_DIRECTORY_PATH, '..', '..', '..', *executable_path),
-                *command
-            ])}\'',
-            f'\'{' '.join([
-                executable_name,
-                *command
-            ])}\''
-        ],
-        text=True
-    )
+        EXECUTABLE_PATH = ['build', executable_name]
+    full_command = [
+        'hyperfine', '-i',
+        '--warmup', '3',
+        f'\'{' '.join([
+            os.path.join(TESTS_DIRECTORY_PATH, '..', '..', '..', *EXECUTABLE_PATH),
+            *command
+        ])}\'',
+        f'\'{' '.join([
+            executable_name,
+            *command
+        ])}\''
+    ]
+    print(f'{' '.join(full_command)}\n')
+    subprocess.run(full_command)
 
 
 def main() -> int:
