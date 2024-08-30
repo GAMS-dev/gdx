@@ -686,7 +686,7 @@ class TestGdxMerge(unittest.TestCase):
         self.check_gdx_file(symbols, ['small_example', 'small_example_changed_data', 'full_example'])
 
     def test_commands_from_file(self) -> None:
-        for separator in ['\n', ' ']:
+        for separator in [' ', '\t', '\n']:
             with tempfile.NamedTemporaryFile(suffix='.txt') as temporary_file:
                 temporary_file.write(
                     str.encode(separator.join([
