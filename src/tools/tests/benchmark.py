@@ -2,6 +2,8 @@ import platform
 import subprocess
 import os
 import sys
+from examples.small_example import create_small_example
+from examples.full_example import create_full_example
 
 
 TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -46,14 +48,30 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
 
 
 def main() -> int:
-    EXECUTABLE_NAMES = ['gdxdump', 'gdxdiff', 'gdxmerge']
-    for i, executable_name in enumerate(EXECUTABLE_NAMES):
-        benchmark_executable(executable_name, [
+    create_small_example(FILE_PATHS['small_example'])
+    create_full_example(FILE_PATHS['full_example'])
+
+    executables: dict[str, list[str]] = {
+        'gdxdump': [
+            FILE_PATHS['full_example']
+        ],
+        'gdxdiff': [
             FILE_PATHS['small_example'],
             FILE_PATHS['full_example']
-        ])
-        if i < len(EXECUTABLE_NAMES) - 1:
+        ],
+        'gdxmerge': [
+            FILE_PATHS['small_example'],
+            FILE_PATHS['full_example']
+        ]
+    }
+    for i, executable_name in enumerate(executables):
+        benchmark_executable(executable_name, executables[executable_name])
+        if i < len(executables) - 1:
             print('\n')
+
+    for file_path in FILE_PATHS.values():
+        os.remove(file_path)
+
     return 0
 
 
