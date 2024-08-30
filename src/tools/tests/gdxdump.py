@@ -12,10 +12,10 @@ from examples.label_example import create_label_example
 
 
 class TestGdxDump(unittest.TestCase):
-    TEST_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
+    TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
     DIRECTORY_PATHS = {
-        'examples': os.path.join(TEST_DIRECTORY_PATH, 'examples'),
-        'output': os.path.join(TEST_DIRECTORY_PATH, 'output', 'gdxdump')
+        'examples': os.path.join(TESTS_DIRECTORY_PATH, 'examples'),
+        'output': os.path.join(TESTS_DIRECTORY_PATH, 'output', 'gdxdump')
     }
     FILE_PATHS = {
         'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
@@ -32,7 +32,7 @@ class TestGdxDump(unittest.TestCase):
         else:
             executable = ['build', 'gdxdump']
         return subprocess.run(
-            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
+            [os.path.join(cls.TESTS_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
             capture_output=True,
             text=True
         )

@@ -11,10 +11,10 @@ from examples.small_example_changed_data import create_small_example_changed_dat
 
 
 class TestGdxMerge(unittest.TestCase):
-    TEST_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
+    TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
     DIRECTORY_PATHS = {
-        'examples': os.path.join(TEST_DIRECTORY_PATH, 'examples'),
-        'output': os.path.join(TEST_DIRECTORY_PATH, 'output', 'gdxmerge')
+        'examples': os.path.join(TESTS_DIRECTORY_PATH, 'examples'),
+        'output': os.path.join(TESTS_DIRECTORY_PATH, 'output', 'gdxmerge')
     }
     FILE_PATHS = {
         'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
@@ -30,7 +30,7 @@ class TestGdxMerge(unittest.TestCase):
         else:
             executable = ['build', 'gdxmerge']
         return subprocess.run(
-            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
+            [os.path.join(cls.TESTS_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
             capture_output=True,
             text=True
         )

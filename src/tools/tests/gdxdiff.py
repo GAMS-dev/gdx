@@ -16,10 +16,10 @@ from examples.description_examples import create_description_example_1, create_d
 
 
 class TestGdxDiff(unittest.TestCase):
-    TEST_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
+    TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
     DIRECTORY_PATHS = {
-        'examples': os.path.join(TEST_DIRECTORY_PATH, 'examples'),
-        'output': os.path.join(TEST_DIRECTORY_PATH, 'output', 'gdxdiff')
+        'examples': os.path.join(TESTS_DIRECTORY_PATH, 'examples'),
+        'output': os.path.join(TESTS_DIRECTORY_PATH, 'output', 'gdxdiff')
     }
     FILE_PATHS = {
         'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
@@ -45,7 +45,7 @@ class TestGdxDiff(unittest.TestCase):
         else:
             executable = ['build', 'gdxdiff']
         return subprocess.run(
-            [os.path.join(cls.TEST_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
+            [os.path.join(cls.TESTS_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
             capture_output=True,
             text=True
         )
