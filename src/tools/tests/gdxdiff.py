@@ -40,12 +40,13 @@ class TestGdxDiff(unittest.TestCase):
 
     @classmethod
     def run_gdxdiff(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
+        EXECUTABLE_NAME = 'gdxdiff'
         if platform.system() == 'Windows':
-            executable = ['Release', 'gdxdiff.exe']
+            EXECUTABLE_PATH = ['Release', f'{EXECUTABLE_NAME}.exe']
         else:
-            executable = ['build', 'gdxdiff']
+            EXECUTABLE_PATH = ['build', EXECUTABLE_NAME]
         return subprocess.run(
-            [os.path.join(cls.TESTS_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
+            [os.path.join(cls.TESTS_DIRECTORY_PATH, '..', '..', '..', *EXECUTABLE_PATH), *command],
             capture_output=True,
             text=True
         )

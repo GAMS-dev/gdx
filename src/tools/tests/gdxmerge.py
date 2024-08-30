@@ -25,12 +25,13 @@ class TestGdxMerge(unittest.TestCase):
 
     @classmethod
     def run_gdxmerge(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
+        EXECUTABLE_NAME = 'gdxmerge'
         if platform.system() == 'Windows':
-            executable = ['Release', 'gdxmerge.exe']
+            EXECUTABLE_PATH = ['Release', f'{EXECUTABLE_NAME}.exe']
         else:
-            executable = ['build', 'gdxmerge']
+            EXECUTABLE_PATH = ['build', EXECUTABLE_NAME]
         return subprocess.run(
-            [os.path.join(cls.TESTS_DIRECTORY_PATH, '..', '..', '..', *executable), *command],
+            [os.path.join(cls.TESTS_DIRECTORY_PATH, '..', '..', '..', *EXECUTABLE_PATH), *command],
             capture_output=True,
             text=True
         )
