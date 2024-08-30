@@ -91,7 +91,7 @@ build-leg:
   stage: build
   tags: [linux]
   image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    name: $MACHINES_CONTAINER_REG/leg/builder-devel:latest
     entrypoint: [""]
   script:
     - !reference [.get-gams]
@@ -115,7 +115,7 @@ build-debug-leg:
   stage: build
   tags: [linux]
   image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    name: $MACHINES_CONTAINER_REG/leg/builder-devel:latest
     entrypoint: [""]
   script:
     - !reference [.get-gams]
@@ -214,7 +214,7 @@ test-leg:
   stage: test
   tags: [linux]
   image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    name: $MACHINES_CONTAINER_REG/leg/builder-devel:latest
     entrypoint: [""]
   needs: [fetch-ci-scripts,build-leg]
   script:
@@ -398,7 +398,7 @@ perf-check-leg:
   stage: perf-check
   tags: [linux]
   image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    name: $MACHINES_CONTAINER_REG/leg/builder-devel:latest
     entrypoint: [""]
   needs: [fetch-ci-scripts,build-leg]
   when: manual
@@ -450,7 +450,7 @@ doxygen-html:
   stage: docs
   tags: [linux]
   image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    name: $MACHINES_CONTAINER_REG/leg/builder-devel:latest
     entrypoint: [""]
   script:
     - python3 ci/readme_filter.py
