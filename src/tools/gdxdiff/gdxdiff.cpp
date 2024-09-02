@@ -283,7 +283,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       switch( ST )
       {
          case dt_set:
-            assert( false && "Should not be called" );
+            library::assertWithMessage( false, "Should not be called" );
             break;
 
          case dt_par:
