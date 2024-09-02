@@ -7,10 +7,6 @@
 namespace library
 {
 
-std::string padLeft( const std::string &text, int width, char paddingChar = ' ' );
-
-std::string padRight( const std::string &text, int width, char paddingChar = ' ' );
-
 void printErrorMessage( const std::string &message, bool printError = true );
 
 void assertWithMessage( bool expression, const std::string &message );

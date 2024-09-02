@@ -13,16 +13,6 @@ std::ostream *ErrorStream = &std::cout;
 // TODO: Possible improvement for later, but currently results in problems with the tests
 // std::ostream *ErrorStream = &std::cerr;
 
-std::string padLeft( const std::string &text, const int width, const char paddingChar )
-{
-   return std::string( std::max( width - static_cast<int>( text.length() ), 0 ), paddingChar ) + text;
-}
-
-std::string padRight( const std::string &text, const int width, const char paddingChar )
-{
-   return text + std::string( std::max( width - static_cast<int>( text.length() ), 0 ), paddingChar );
-}
-
 void printErrorMessage( const std::string &message, const bool printError )
 {
    *ErrorStream << ( printError ? "Error: " : "" ) << message << std::endl;
