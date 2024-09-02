@@ -7,7 +7,7 @@
 namespace library
 {
 
-void printErrorMessage( const std::string &message, bool printError = true );
+void printErrorMessage( const std::string &message, bool printError = false );
 
 void assertWithMessage( bool expression, const std::string &message );
 

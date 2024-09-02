@@ -15,7 +15,8 @@ std::ostream *ErrorStream = &std::cout;
 
 void printErrorMessage( const std::string &message, const bool printError )
 {
-   *ErrorStream << ( printError ? "Error: " : "" ) << message << std::endl;
+   if( printError ) *ErrorStream << "Error: ";
+   *ErrorStream << message << std::endl;
 }
 
 void assertWithMessage( const bool expression, const std::string &message )
