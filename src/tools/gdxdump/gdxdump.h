@@ -81,12 +81,6 @@ bool WriteSymbolAsItem( int SyNr, bool DomInfo );
 
 void WriteSymbolsAsSet( bool DomInfo );
 
-// Auxiliary function for assertWithMessage and main
-void printErrorMessage( const std::string &message );
-
-// Auxiliary function for WriteSymbol, WriteSymbolCSV and WriteSetText
-void assertWithMessage( bool expression, const std::string &message );
-
 // Auxiliary function for WriteSymbol
 std::string valTypStrClassic( int i );
 

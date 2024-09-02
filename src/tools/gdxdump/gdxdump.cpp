@@ -443,18 +443,6 @@ void WriteSymbolsAsSet( const bool DomInfo )
    fo << "/;" << '\n';
 }
 
-void printErrorMessage( const std::string &message )
-{
-   *ErrorStream << message << std::endl;
-}
-
-void assertWithMessage( const bool expression, const std::string &message )
-{
-   if( !expression )
-      printErrorMessage( message );
-   assert( expression );
-}
-
 // TODO: Remove and use valTypStr from the library instead
 std::string valTypStrClassic( const int i )
 {
