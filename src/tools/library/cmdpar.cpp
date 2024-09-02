@@ -1,6 +1,6 @@
 #include <set>
 #include <fstream>
-#include <iostream>
+// #include <iostream>
 
 #include "cmdpar.h"
 #include "common.h"
@@ -9,10 +9,6 @@
 
 namespace library::cmdpar
 {
-
-std::ostream *ErrorStream = &std::cout;
-// TODO: Possible improvement for later, but currently results in problems with the tests
-// std::ostream *ErrorStream = &std::cerr;
 
 // Brief:
 //   Create instance of command line object
@@ -250,7 +246,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
          std::ifstream fi( fname );
          if( !fi.is_open() )
          {
-            *ErrorStream << "**** could not open file: " << fname << std::endl;
+            library::printErrorMessage( "**** could not open file: " + fname );
             result = false;
          }
          else
@@ -270,7 +266,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
                // TODO: Check whether this if is still necessary
                if( strings.back().length() == 255 )
                {
-                  *ErrorStream << "**** Input line longer than " << MAXBUF * 255 << " characters" << std::endl;
+                  library::printErrorMessage( "**** Input line longer than " + std::to_string( MAXBUF * 255 ) + " characters" );
                   result = false;
                }
             }
