@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <sstream>
+#include <array>
 
 #include "common.h"
 // Global constants
