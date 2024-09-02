@@ -580,11 +580,11 @@ class TestGdxMerge(unittest.TestCase):
                 'Strict=true'
             ])
             self.assertEqual(output.returncode, 1)
-            self.assertEqual(output.stdout, '')
             self.assertEqual(
-                output.stderr,
+                output.stdout,
                 f'*** Error  : Output file "{temporary_file.name}" already exists (strict mode)\n'
             )
+            self.assertEqual(output.stderr, '')
 
     def test_small_example_and_small_example_changed_data_and_full_example(self) -> None:
         output = self.run_gdxmerge([
