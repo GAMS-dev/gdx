@@ -1,7 +1,7 @@
-#include <cassert>
 #include <cstring>
 #include <cctype>
 #include <ostream>
+#include <cassert>
 
 #include "short_string.h"
 
