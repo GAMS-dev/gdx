@@ -41,6 +41,25 @@
 namespace global::delphitypes
 {
 
+// mimick Pascal "array[lbIncl..ubIncl] of T"
+// internally uses std::array. lbIncl maps to 0, ubIncl maps to size()-1
+template<typename T, int lbIncl, int ubIncl>
+class OffsetArray : public std::array<T, ubIncl-lbIncl+1>
+{
+   // Hide direct buffer access as this could be error-prone
+   T *data() { return nullptr; }
+public:
+   T& operator[]( const int ix) {
+      assert( ix >= lbIncl && ix <= ubIncl && "Index must be in range!" );
+      return std::array<T, ubIncl-lbIncl+1>::operator[](ix - lbIncl);
+   }
+
+   const T& operator[]( const int ix) const {
+      assert( ix >= lbIncl && ix <= ubIncl && "Index must be in range!" );
+      return std::array<T, ubIncl-lbIncl+1>::operator[](ix - lbIncl);
+   }
+};
+
 template<typename T>
 void FreeAndNil( T *&ptr )
 {
