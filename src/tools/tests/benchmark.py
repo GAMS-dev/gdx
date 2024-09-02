@@ -28,7 +28,7 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
     full_command = [
         'hyperfine',
         '--shell=none',
-        '--warmup', '3',
+        '--warmup', '5',
         '--ignore-failure',
         '--export-markdown', os.path.join(
             DIRECTORY_PATHS['results'],
