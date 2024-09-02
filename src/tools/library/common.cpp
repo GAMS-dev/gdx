@@ -9,14 +9,14 @@
 namespace library
 {
 
-std::ostream *ErrorStream = &std::cout;
+std::ostream &errorStream { std::cout };
 // TODO: Possible improvement for later, but currently results in problems with the tests
-// std::ostream *ErrorStream = &std::cerr;
+// std::ostream &errorStream { std::cerr };
 
 void printErrorMessage( const std::string &message, const bool printError )
 {
-   if( printError ) *ErrorStream << "Error: ";
-   *ErrorStream << message << std::endl;
+   if( printError ) errorStream << "Error: ";
+   errorStream << message << std::endl;
 }
 
 void assertWithMessage( const bool expression, const std::string &message )
