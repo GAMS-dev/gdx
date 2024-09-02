@@ -45,11 +45,6 @@
 namespace gdxdump
 {
 
-// TODO: Remove these three arrays when they are no longer used
-const std::array<std::string, 5> valsTypTxt { "L", "M", "LO", "UP", "SCALE" };
-const std::array<std::string, 10> varsTypTxt { "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };
-const std::array<std::string, 7> svTxt { "Undf", "NA", "+Inf", "-Inf", "Eps", "0", "AcroN" };
-
 std::ostream &fo { std::cout };
 std::ofstream OutputFile;
 gdxHandle_t PGX;
@@ -171,18 +166,6 @@ void WriteUELTable( const std::string &name )
       else
          fo << ( N < NrUel ? " ," : " /;" ) << '\n';
    }
-}
-
-// TODO: Remove and use specialValueStr from the library instead
-std::string specialValueStrClassic( const int i )
-{
-   if( i < 0 || i >= GMS_SVIDX_MAX )
-   {
-      library::assertWithMessage( false, "Unknown type" );
-      return "Unknown";
-   }
-   else
-      return svTxt[i];
 }
 
 char hexDigit( const uint8_t b )
@@ -329,7 +312,7 @@ void WrVal( const double V )
          else if( bUndfOut && iSV == sv_valund )
             fo << UndfOut;
          else
-            fo << specialValueStrClassic( iSV );
+            fo << library::specialValueStr( iSV );
       }
       else if( bZeroOut && V == 0 )
          fo << ZeroOut;
@@ -439,30 +422,6 @@ void WriteSymbolsAsSet( const bool DomInfo )
    fo << "/;" << '\n';
 }
 
-// TODO: Remove and use valTypStr from the library instead
-std::string valTypStrClassic( const int i )
-{
-   if( i < 0 || i >= GMS_VAL_MAX )
-   {
-      library::assertWithMessage( false, "Unknown type" );
-      return "Unknown";
-   }
-   else
-      return valsTypTxt[i];
-}
-
-// TODO: Remove and use varTypStr from the library instead
-std::string varTypStrClassic( const int i )
-{
-   if( i < 0 || i >= GMS_VARTYPE_MAX )
-   {
-      library::assertWithMessage( false, "Unknown type" );
-      return "Unknown";
-   }
-   else
-      return varsTypTxt[i];
-}
-
 void WriteSymbol( const int SyNr )
 {
    library::short_string SyName, S;
@@ -491,7 +450,7 @@ void WriteSymbol( const int SyNr )
       {
          if( LineCount == 6 )
             fo << "$offListing" << '\n';
-         fo << ' ' << SyName.data() << '.' << valTypStrClassic( ValNr ) << ' ';
+         fo << ' ' << SyName.data() << '.' << library::valTypStr( ValNr ) << ' ';
       }
       if( ADim > 0 )
       {
@@ -527,7 +486,7 @@ void WriteSymbol( const int SyNr )
             {
                if( ADim > 0 )
                   fo << Delim;
-               fo << valTypStrClassic( ValNr ) << ' ';
+               fo << library::valTypStr( ValNr ) << ' ';
             }
             WrVal( Vals[ValNr] );
             break;
@@ -580,7 +539,7 @@ void WriteSymbol( const int SyNr )
             AUser = GMS_VARTYPE_FREE;
          std::copy( std::begin( gmsDefRecVar[AUser] ), std::end( gmsDefRecVar[AUser] ), std::begin( DefaultValues ) );
          if( AUser != GMS_VARTYPE_UNKNOWN )
-            SubTypeName = varTypStrClassic( AUser );
+            SubTypeName = library::varTypStr( AUser );
          break;
       case dt_equ:
          if( AUser < GMS_EQUTYPE_E || AUser > GMS_EQUTYPE_B )

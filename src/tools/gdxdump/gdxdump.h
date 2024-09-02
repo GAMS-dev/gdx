@@ -43,9 +43,6 @@ void WriteUEL( const std::string &S );
 
 void WriteUELTable( const std::string &name );
 
-// Auxiliary function for WrVal
-std::string specialValueStrClassic( int i );
-
 union TI64Rec
 {
    double x;
@@ -80,12 +77,6 @@ std::string GetUel4CSV( int N );
 bool WriteSymbolAsItem( int SyNr, bool DomInfo );
 
 void WriteSymbolsAsSet( bool DomInfo );
-
-// Auxiliary function for WriteSymbol
-std::string valTypStrClassic( int i );
-
-// Auxiliary function for WriteSymbol
-std::string varTypStrClassic( int i );
 
 void WriteSymbol( int SyNr );
 
