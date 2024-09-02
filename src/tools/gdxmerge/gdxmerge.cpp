@@ -44,6 +44,10 @@
 namespace gdxmerge
 {
 
+std::ostream *ErrorStream = &std::cout;
+// TODO: Possible improvement for later, but currently results in problems with the tests
+// std::ostream *ErrorStream = &std::cerr;
+
 bool DoBigSymbols, StrictMode;
 int64_t SizeCutOff;
 library::short_string OutFile;
@@ -151,10 +155,10 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
          if( FrstError )
          {
             // TODO: Use four stars here instead of the usual three?
-            std::cerr << "\n**** Error in file " << FileName << std::endl;
+            *ErrorStream << "\n**** Error in file " << FileName << std::endl;
             FrstError = false;
          }
-         std::cerr << "     " << Msg << ": " << SyName << std::endl;
+         *ErrorStream << "     " << Msg << ": " << SyName << std::endl;
       }
       return Result;
    };
@@ -180,7 +184,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
    if( ErrNr != 0 )
    {
       gdxErrorStr( nullptr, ErrNr, ErrMsg.data() );
-      std::cerr << "\nError reading file, message: " << ErrMsg << std::endl;
+      *ErrorStream << "\nError reading file, message: " << ErrMsg << std::endl;
       return;
    }
    InputFilesRead++;
@@ -327,7 +331,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
       if( ErrNr != 0 )
       {
          gdxErrorStr( nullptr, ErrNr, ErrMsg.data() );
-         std::cerr << "Error reading file, message: " << ErrMsg << std::endl;
+         *ErrorStream << "Error reading file, message: " << ErrMsg << std::endl;
          return false;
       }
 
@@ -693,7 +697,7 @@ bool GetParameters( const int argc, const char *argv[] )
                   OutFile = KS;
                else
                {
-                  std::cerr << "*** Error: Only one output file can be specified" << std::endl;
+                  *ErrorStream << "*** Error: Only one output file can be specified" << std::endl;
                   Result = false;
                }
                break;
@@ -753,8 +757,8 @@ int main( const int argc, const char *argv[] )
 
    if( !gdxGetReady( Msg.data(), Msg.length() ) )
    {
-      std::cerr << "*** Error: Unable to load gdx library, message:\n"
-                << Msg << std::endl;
+      *ErrorStream << "*** Error: Unable to load gdx library, message:\n"
+                   << Msg << std::endl;
       return 1;
    }
 
@@ -762,7 +766,7 @@ int main( const int argc, const char *argv[] )
 
    if( !GetParameters( argc, argv ) )
    {
-      std::cerr << "*** Error: Parameter error" << std::endl;
+      *ErrorStream << "*** Error: Parameter error" << std::endl;
       return 1;
    }
 
@@ -770,7 +774,7 @@ int main( const int argc, const char *argv[] )
    {
       if( StrictMode )
       {
-         std::cerr << "*** Error  : Output file \"" << OutFile << "\" already exists (strict mode)" << std::endl;
+         *ErrorStream << "*** Error  : Output file \"" << OutFile << "\" already exists (strict mode)" << std::endl;
          return 1;
       }
       else
@@ -780,7 +784,7 @@ int main( const int argc, const char *argv[] )
    if( !SyList->IsIncludeListEmpty() && !SyList->IsExcludeListEmpty() )
    {
       // TODO: Use four stars here instead of the usual three?
-      std::cerr << "**** The options \"ID\" and \"Exclude\" are mutual exclusive" << std::endl;
+      *ErrorStream << "**** The options \"ID\" and \"Exclude\" are mutual exclusive" << std::endl;
       return 1;
    }
 
@@ -788,16 +792,16 @@ int main( const int argc, const char *argv[] )
    std::cout << "Output file: " << OutFile << std::endl;
    if( ErrNr != 0 )
    {
-      std::cerr << "*** Error  : Cannot write to output file, Error Nr = " << ErrNr << std::endl;
+      *ErrorStream << "*** Error  : Cannot write to output file, Error Nr = " << ErrNr << std::endl;
       gdxErrorStr( nullptr, ErrNr, Msg.data() );
-      std::cerr << "*** Message: " << Msg << std::endl;
+      *ErrorStream << "*** Message: " << Msg << std::endl;
       return 1;
    }
 
    for( const std::string &FilePattern: FilePatterns )
       if( !SyList->FindGDXFiles( FilePattern ) && StrictMode )
       {
-         std::cerr << "*** Error  : Issue with file name \"" << FilePattern << "\" (strict mode)" << std::endl;
+         *ErrorStream << "*** Error  : Issue with file name \"" << FilePattern << "\" (strict mode)" << std::endl;
          return 1;
       }
    InputFilesRead = 0;
@@ -842,7 +846,7 @@ int main( const int argc, const char *argv[] )
    {
       if( StrictMode )
       {
-         std::cerr << "*** Error  : No valid input files specified (strict mode)" << std::endl;
+         *ErrorStream << "*** Error  : No valid input files specified (strict mode)" << std::endl;
          return 1;
       }
       else
