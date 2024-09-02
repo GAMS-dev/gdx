@@ -25,7 +25,6 @@
 
 #include <sstream>
 #include <iomanip>
-#include <cassert>
 #include <limits>
 #include <cstring>
 #include <iostream>
@@ -539,7 +538,7 @@ void TSymbolList::ShareAcronyms( const gdxHandle_t &PGX )
       if( NM <= 0 )
          continue;
       gdxAcronymGetInfo( PGXMerge, NM, ANameM.data(), ATextM.data(), &AIndxM );
-      assert( AIndxM > 0 && "ShareAcronyms-1" );
+      library::assertWithMessage( AIndxM > 0, "ShareAcronyms-1" );
       gdxAcronymSetInfo( PGX, N, AName.data(), AText.data(), AIndxM );
    }
 }

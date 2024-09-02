@@ -1,4 +1,3 @@
-#include <cassert>
 #include <set>
 #include <fstream>
 #include <iostream>
@@ -36,7 +35,7 @@ void TCmdParams::AddVS( int v, const std::string &s )
 {
    for( const auto &pair: FKeyList )
       if( pair.first == s )
-         assert( false && "Duplicate keyword!" );
+         library::assertWithMessage( false, "Duplicate keyword!" );
    FKeyList.emplace_back( s, v );
 }
 
