@@ -53,6 +53,10 @@ namespace gdxdiff
 
 using tvarvaltype = unsigned int;
 
+std::ostream *ErrorStream = &std::cout;
+// TODO: Possible improvement for later, but currently results in problems with the tests
+// std::ostream *ErrorStream = &std::cerr;
+
 library::short_string DiffTmpName;
 gdxHandle_t PGX1, PGX2, PGXDIF;
 bool diffUELsRegistered;
@@ -108,19 +112,14 @@ void FatalErrorExit( const int ErrNr )
 
 void FatalError( const std::string &Msg, const int ErrNr )
 {
-   std::cout << "GDXDIFF error: " << Msg << std::endl;
-   // TODO: Possible improvement for later, but currently results in problems with the tests
-   // std::cerr << "GDXDIFF error: " << Msg << std::endl;
+   *ErrorStream << "GDXDIFF error: " << Msg << std::endl;
    FatalErrorExit( ErrNr );
 }
 
 void FatalError2( const std::string &Msg1, const std::string &Msg2, const int ErrNr )
 {
-   std::cout << "GDXDIFF error: " << Msg1 << std::endl
-             << "               " << Msg2 << std::endl;
-   // TODO: Possible improvement for later, but currently results in problems with the tests
-   // std::cerr << "GDXDIFF error: " << Msg1 << std::endl
-   //           << "               " << Msg2 << std::endl;
+   *ErrorStream << "GDXDIFF error: " << Msg1 << std::endl
+                << "               " << Msg2 << std::endl;
    FatalErrorExit( ErrNr );
 }
 
@@ -131,9 +130,7 @@ void CheckGDXError( const gdxHandle_t &PGX )
    {
       library::short_string S;
       gdxErrorStr( PGX, ErrNr, S.data() );
-      std::cout << "GDXDIFF GDX Error: " << S << std::endl;
-      // TODO: Possible improvement for later, but currently results in problems with the tests
-      // std::cerr << "GDXDIFF GDX Error: " << S << std::endl;
+      *ErrorStream << "GDXDIFF GDX Error: " << S << std::endl;
    }
 }
 
