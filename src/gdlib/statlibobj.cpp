@@ -43,7 +43,7 @@
 using namespace gdlib::gmsgen;
 using namespace rtl::sysutils_p3;
 using namespace std::literals::string_literals;
-using namespace global::delphitypes;
+
 
 namespace gdlib::statlibobj
 {

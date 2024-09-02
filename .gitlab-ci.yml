@@ -374,6 +374,7 @@ leak-check-leg:
   image:
     name: registry.gams.com/devel/ciscripts/leg/builder-valgrind-codequality:latest
     entrypoint: [""]
+  when: manual # FIXME: resolve GLIBC_2.* not found!
   needs: [fetch-ci-scripts,build-debug-leg]
   script:
     - !reference [ .get-gams ]

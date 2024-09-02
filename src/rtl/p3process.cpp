@@ -1215,7 +1215,7 @@ bool p3KillProcGroupTP( const TProcInfo &procInfo, TKillHow how )
 #endif
 }
 
-bool p3IsPIDValid( global::delphitypes::Cardinal pid )
+bool p3IsPIDValid( uint32_t pid )
 {
 #ifdef _WIN32
    DWORD p = pid;

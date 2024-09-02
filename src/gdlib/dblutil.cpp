@@ -23,10 +23,15 @@
  * SOFTWARE.
  */
 
+#include "../rtl/math_p3.h"
+#include "../rtl/sysutils_p3.h"
 
 #include "dblutil.h"
-#include "../rtl/math_p3.h"
+#include "utils.h"
+
 #include <cmath>
+
+using namespace std::literals::string_literals;
 
 namespace gdlib::dblutil
 {
@@ -39,6 +44,67 @@ double gdRoundTo( const double x, const int i )
    const double z { rtl::math_p3::IntPower( 10, std::abs( i ) ) };
    const double zReciprocal = i > 0 ? z : 1.0 / z;
    return std::trunc( x * zReciprocal + 0.5 * ( x > 0.0 ? 1.0 : -1.0 ) ) / zReciprocal;
+}
+
+constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
+                  expoMask { static_cast<int64_t>( 0x7ff00000 ) << 32 },
+                  mantMask { ~( signMask | expoMask ) };
+
+union TI64Rec
+{
+   double x;
+   int64_t i64;
+//   uint8_t bytes[8];
+};
+
+static void dblDecomp( const double x, bool& isNeg, uint32_t& expo, int64_t& mant)
+{
+   TI64Rec xi {};
+   xi.x = x;
+   isNeg = ( xi.i64 & signMask ) == signMask;
+   expo = ( xi.i64 & expoMask ) >> 52;
+   mant = xi.i64 & mantMask;
+}
+
+static char hexDigit( const uint8_t b) {
+   return static_cast<char>(b < 10 ? utils::ord('0') + b : utils::ord('a') + b - 10);
+}
+
+// format the bytes in the mantissa
+static std::string mFormat(int64_t m) {
+   if (!m)
+      return "0"s;
+   //TI64Rec xi {};
+   //xi.i64 = m;
+   int64_t mask { static_cast<int64_t>( 0x000f0000 ) << 32 };
+   int shiftCount = 48;
+   std::string res;
+   while (m) {
+      const int64_t m2 { ( m & mask ) >> shiftCount };
+      const auto b { static_cast<uint8_t>(m2) };
+      res += hexDigit( b );
+      m &= ~mask;
+      mask >>= 4;
+      shiftCount -= 4;
+   }
+   return res;
+}
+
+std::string dblToStrHexponential( const double x )
+{
+   bool isNeg;
+   uint32_t expo;
+   int64_t mant;
+   dblDecomp( x, isNeg, expo, mant );
+   // Consider all 10 cases: SNaN, QNaN, and +/-[INF,denormal,zero,normal]
+   std::string res;
+   if( isNeg )
+      res = "-"s;
+   if (!expo)
+      return res + ( !mant ? "0x0.0p0"s : "0x0."s + mFormat( mant ) + "p-1022"s );
+   if (expo < 2047) // not all ones
+      return res + "0x1."s + mFormat( mant ) + 'p' + rtl::sysutils_p3::IntToStr( expo - 1023 );
+   return !mant ? res + "Infinity"s : "NaN"s;
 }
 
 }// namespace gdlib::dblutil

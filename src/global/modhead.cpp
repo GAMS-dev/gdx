@@ -31,8 +31,11 @@ using namespace std::literals::string_literals;
 namespace global::modhead
 {
 #if defined(__IN_CPPMEX__)
-SWStream::SWStream() : std::ofstream { fn }, start { tellp() }
+SWStream::SWStream() /*: std::ofstream { fn }, start { tellp() }*/
 {
+   // somehow valgrind prefers it, when we do it here
+   open( fn );
+   start = tellp();
 }
 
 SWStream::~SWStream()

@@ -54,7 +54,7 @@ namespace global::modhead
 #if defined( __IN_CPPMEX__ )
 class SWStream final : public std::ofstream
 {
-   std::streampos start;
+   std::streampos start {};
    const std::string fn { "stubwarnings.txt" };
 public:
    SWStream();

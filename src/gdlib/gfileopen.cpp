@@ -33,7 +33,7 @@
 #include "../rtl/sysutils_p3.h"
 #include "gfileopen.h"
 
-using namespace global::delphitypes;
+
 using namespace std::literals::string_literals;
 using namespace rtl::p3utils;
 using namespace rtl::sysutils_p3;

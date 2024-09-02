@@ -165,7 +165,7 @@ const std::array ssymboltext = {
 
 // default values for variables and equations
 extern std::array<global::gmsspecs::tvarreca, global::gmsspecs::stypsemiint + 1> defrecvar;
-extern std::array<global::gmsspecs::tvarreca, ssyequb + 1> defrecequ;
+extern global::delphitypes::OffsetArray<global::gmsspecs::tvarreca, ssyeque, ssyequb> defrecequ;
 
 void InitDefaultRecords();
 
