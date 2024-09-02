@@ -25,9 +25,9 @@ std::string specialValueStr( int i );
 
 std::vector<std::string> splitString( const std::string &string, char delimiter );
 
-bool CanBeQuoted( const char *s, size_t slen );
+bool canBeQuoted( const char *s, size_t slen );
 
-bool GoodUELString( const char *s, size_t slen );
+bool goodUELString( const char *s, size_t slen );
 
 }// namespace library
 

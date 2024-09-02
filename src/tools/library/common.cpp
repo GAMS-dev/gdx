@@ -116,7 +116,7 @@ std::vector<std::string> splitString( const std::string &string, const char deli
    return tokens;
 }
 
-bool CanBeQuoted( const char *s, const size_t slen )
+bool canBeQuoted( const char *s, const size_t slen )
 {
    if( !s ) return false;
    bool saw_single {}, saw_double {};
@@ -139,9 +139,9 @@ bool CanBeQuoted( const char *s, const size_t slen )
    return true;
 }
 
-bool GoodUELString( const char *s, const size_t slen )
+bool goodUELString( const char *s, const size_t slen )
 {
-   return slen < GLOBAL_UEL_IDENT_SIZE && CanBeQuoted( s, slen );
+   return slen < GLOBAL_UEL_IDENT_SIZE && canBeQuoted( s, slen );
 }
 
 }// namespace library

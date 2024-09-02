@@ -387,7 +387,7 @@ bool TSymbolList::FindGDXFiles( const std::string &Path )
          }
 
          ShortName = gdlib::strutilx::ChangeFileExtEx( Rec.Name, "" );
-         if( !library::GoodUELString( ShortName.data(), ShortName.length() ) || utils::trim( ShortName ).empty() )
+         if( !library::goodUELString( ShortName.data(), ShortName.length() ) || utils::trim( ShortName ).empty() )
          {
             NewName = "File_" + std::to_string( FileList->size() + 1 );
             std::cout << "*** Filename cannot be used as a valid UEL\n"
