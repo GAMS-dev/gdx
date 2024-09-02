@@ -76,11 +76,13 @@ std::string valTypStr( const int i )
    }
    else
    {
-      // TODO: Test this conversion
-      std::string result { gmsValTypeText[i] };
-      result.erase( 0, 1 );
-      for( char &c: result ) c = static_cast<char>( toupper( c ) );
-      return result;
+      const std::array<std::string, 5> valsTypTxt { "L", "M", "LO", "UP", "SCALE" };
+      return valsTypTxt[i];
+
+      // std::string result { gmsValTypeText[i] };
+      // result.erase( 0, 1 );
+      // for( char &c: result ) c = static_cast<char>( toupper( c ) );
+      // return result;
    }
 }
 
@@ -92,7 +94,12 @@ std::string varTypStr( const int i )
       return "Unknown";
    }
    else
-      return gmsVarTypeText[i];
+   {
+      const std::array<std::string, 10> varsTypTxt { "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };
+      return varsTypTxt[i];
+
+      // return gmsVarTypeText[i];
+   }
 }
 
 std::string specialValueStr( const int i )
@@ -103,7 +110,12 @@ std::string specialValueStr( const int i )
       return "Unknown";
    }
    else
-      return gmsSVText[i];
+   {
+      const std::array<std::string, 7> svTxt { "Undf", "NA", "+Inf", "-Inf", "Eps", "0", "AcroN" };
+      return svTxt[i];
+
+      // return gmsSVText[i];
+   }
 }
 
 std::vector<std::string> splitString( const std::string &string, const char delimiter )
