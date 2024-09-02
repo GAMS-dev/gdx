@@ -45,10 +45,6 @@
 namespace gdxdump
 {
 
-std::ostream *ErrorStream = &std::cout;
-// TODO: Possible improvement for later, but currently results in problems with the tests
-// std::ostream *ErrorStream = &std::cerr;
-
 // TODO: Remove these three arrays when they are no longer used
 const std::array<std::string, 5> valsTypTxt { "L", "M", "LO", "UP", "SCALE" };
 const std::array<std::string, 10> varsTypTxt { "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };
