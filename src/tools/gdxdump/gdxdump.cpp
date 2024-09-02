@@ -182,7 +182,7 @@ std::string specialValueStrClassic( const int i )
 {
    if( i < 0 || i >= GMS_SVIDX_MAX )
    {
-      assertWithMessage( false, "Unknown type" );
+      library::assertWithMessage( false, "Unknown type" );
       return "Unknown";
    }
    else
@@ -448,7 +448,7 @@ std::string valTypStrClassic( const int i )
 {
    if( i < 0 || i >= GMS_VAL_MAX )
    {
-      assertWithMessage( false, "Unknown type" );
+      library::assertWithMessage( false, "Unknown type" );
       return "Unknown";
    }
    else
@@ -460,7 +460,7 @@ std::string varTypStrClassic( const int i )
 {
    if( i < 0 || i >= GMS_VARTYPE_MAX )
    {
-      assertWithMessage( false, "Unknown type" );
+      library::assertWithMessage( false, "Unknown type" );
       return "Unknown";
    }
    else
@@ -703,7 +703,7 @@ void WriteSymbol( const int SyNr )
                   }
                   break;
                case TOutFormat::fmt_csv:
-                  assertWithMessage( false, "No CSV processing" );
+                  library::assertWithMessage( false, "No CSV processing" );
                   break;
                case TOutFormat::fmt_normal:
                   WriteItem( GMS_VAL_LEVEL );
@@ -924,7 +924,7 @@ void WriteSymbolCSV( const int SyNr )
             Col++;
          }
       }
-      assertWithMessage( Col == ColCnt, "Col != ColCnt" );
+      library::assertWithMessage( Col == ColCnt, "Col != ColCnt" );
       if( bHeader )
       {
          if( !Header.empty() )
@@ -1084,10 +1084,10 @@ void WriteSetText()
 
    lo = 0;
    rc = gdxGetElemText( PGX, lo, s.data(), &idummy );
-   assertWithMessage( 1 == rc, "Did not find text in position 0" );
+   library::assertWithMessage( 1 == rc, "Did not find text in position 0" );
    hi = std::numeric_limits<int>::max();
    rc = gdxGetElemText( PGX, hi, s.data(), &idummy );
-   assertWithMessage( 0 == rc, "Found text in position high(integer)" );
+   library::assertWithMessage( 0 == rc, "Found text in position high(integer)" );
    while( lo + 1 < hi )
    {
       mid = lo + ( hi - lo ) / 2;
@@ -1097,7 +1097,7 @@ void WriteSetText()
       else
          hi = mid;
    }
-   assertWithMessage( lo + 1 == hi, "Impossible end to binary search in WriteSetText" );
+   library::assertWithMessage( lo + 1 == hi, "Impossible end to binary search in WriteSetText" );
    nText = lo + 1;
 
    mxTextIdx = 0;
@@ -1297,14 +1297,14 @@ int main( const int argc, const char *argv[] )
          {
             if( !Symb.empty() )
             {
-               printErrorMessage( "Only one single symbol can be specified" );
+               library::printErrorMessage( "Only one single symbol can be specified" );
                ExitCode = 1;
                break;
             }
             Symb = NextParam();
             if( Symb.empty() )
             {
-               printErrorMessage( "Symbol missing" );
+               library::printErrorMessage( "Symbol missing" );
                ExitCode = 1;
                break;
             }
@@ -1314,14 +1314,14 @@ int main( const int argc, const char *argv[] )
          {
             if( !UELSetName.empty() )
             {
-               printErrorMessage( "Only one name for the UEL table can be specified" );
+               library::printErrorMessage( "Only one name for the UEL table can be specified" );
                ExitCode = 1;
                break;
             }
             UELSetName = NextParam();
             if( UELSetName.empty() )
             {
-               printErrorMessage( "UELSetName missing" );
+               library::printErrorMessage( "UELSetName missing" );
                ExitCode = 1;
                break;
             }
@@ -1331,7 +1331,7 @@ int main( const int argc, const char *argv[] )
          {
             if( Delim != '\0' )
             {
-               printErrorMessage( "Only one delimiter can be specified" );
+               library::printErrorMessage( "Only one delimiter can be specified" );
                ExitCode = 1;
                break;
             }
@@ -1349,7 +1349,7 @@ int main( const int argc, const char *argv[] )
                Delim = ';';
             else
             {
-               printErrorMessage( "Unrecognized delimiter" );
+               library::printErrorMessage( "Unrecognized delimiter" );
                ExitCode = 1;
                break;
             }
@@ -1359,7 +1359,7 @@ int main( const int argc, const char *argv[] )
          {
             if( DecimalSep != '\0' )
             {
-               printErrorMessage( "Only one Decimal separator character can be specified" );
+               library::printErrorMessage( "Only one Decimal separator character can be specified" );
                ExitCode = 1;
                break;
             }
@@ -1371,7 +1371,7 @@ int main( const int argc, const char *argv[] )
                DecimalSep = ',';
             else
             {
-               printErrorMessage( "Unrecognized Decimal separator character" );
+               library::printErrorMessage( "Unrecognized Decimal separator character" );
                ExitCode = 1;
                break;
             }
@@ -1426,7 +1426,7 @@ int main( const int argc, const char *argv[] )
          {
             if( OutFormat != TOutFormat::fmt_none )
             {
-               printErrorMessage( "Only one format can be specified" );
+               library::printErrorMessage( "Only one format can be specified" );
                ExitCode = 1;
                break;
             }
@@ -1440,7 +1440,7 @@ int main( const int argc, const char *argv[] )
                OutFormat = TOutFormat::fmt_csv;
             else
             {
-               printErrorMessage( "Unrecognized format" );
+               library::printErrorMessage( "Unrecognized format" );
                ExitCode = 1;
                break;
             }
@@ -1450,7 +1450,7 @@ int main( const int argc, const char *argv[] )
          {
             if( dblFormat != TDblFormat::dbl_none )
             {
-               printErrorMessage( "Only one dformat can be specified" );
+               library::printErrorMessage( "Only one dformat can be specified" );
                ExitCode = 1;
                break;
             }
@@ -1464,7 +1464,7 @@ int main( const int argc, const char *argv[] )
                dblFormat = TDblFormat::dbl_hexponential;
             else
             {
-               printErrorMessage( "Unrecognized dformat" );
+               library::printErrorMessage( "Unrecognized dformat" );
                ExitCode = 1;
                break;
             }
@@ -1474,14 +1474,14 @@ int main( const int argc, const char *argv[] )
          {
             if( !OutputName.empty() )
             {
-               printErrorMessage( "Only one output file can be specified" );
+               library::printErrorMessage( "Only one output file can be specified" );
                ExitCode = 1;
                break;
             }
             OutputName = NextParam();
             if( OutputName.empty() )
             {
-               printErrorMessage( "Output file missing" );
+               library::printErrorMessage( "Output file missing" );
                ExitCode = 1;
                break;
             }
@@ -1492,7 +1492,7 @@ int main( const int argc, const char *argv[] )
             s = NextParam();
             if( s.empty() )
             {
-               printErrorMessage( "Value missing for IDE parameter" );
+               library::printErrorMessage( "Value missing for IDE parameter" );
                ExitCode = 1;
                break;
             }
@@ -1504,7 +1504,7 @@ int main( const int argc, const char *argv[] )
             s = NextParam();
             if( s.empty() )
             {
-               printErrorMessage( "Value missing for FilterDef parameter" );
+               library::printErrorMessage( "Value missing for FilterDef parameter" );
                ExitCode = 1;
                break;
             }
@@ -1516,7 +1516,7 @@ int main( const int argc, const char *argv[] )
             s = NextParam();
             if( s.empty() )
             {
-               printErrorMessage( "Value missing for CDim parameter" );
+               library::printErrorMessage( "Value missing for CDim parameter" );
                ExitCode = 1;
                break;
             }
@@ -1570,7 +1570,7 @@ int main( const int argc, const char *argv[] )
             bHeader = true;
             continue;
          }
-         printErrorMessage( "Unrecognized option: " + s.string() );
+         library::printErrorMessage( "Unrecognized option: " + s.string() );
          ExitCode = 1;
          break;
       }
@@ -1602,13 +1602,13 @@ int main( const int argc, const char *argv[] )
       ShowData = true;
    if( Delim == DecimalSep && Delim != '.' )
    {
-      printErrorMessage( "Delimiter and Decimal separator characters should be different" );
+      library::printErrorMessage( "Delimiter and Decimal separator characters should be different" );
       ExitCode = 1;
       goto End;
    }
    if( OutFormat == TOutFormat::fmt_csv && Symb.empty() )
    {
-      printErrorMessage( "Symbol not specified when writing a CSV file" );
+      library::printErrorMessage( "Symbol not specified when writing a CSV file" );
       ExitCode = 1;
       goto End;
    }
@@ -1620,7 +1620,7 @@ int main( const int argc, const char *argv[] )
    }
    if( !std::filesystem::exists( InputFilePath ) )
    {
-      printErrorMessage( "GDX file not found: " + InputFile );
+      library::printErrorMessage( "GDX file not found: " + InputFile );
       ExitCode = 2;
       goto End;
    }
@@ -1638,14 +1638,14 @@ int main( const int argc, const char *argv[] )
 
       if( !gdxGetReady( error_message.data(), error_message.length() ) )
       {
-         printErrorMessage( "Error loading GDX library: " + error_message.string() );
+         library::printErrorMessage( "Error loading GDX library: " + error_message.string() );
          ExitCode = 3;
          goto End;
       }
 
       if( !gdxCreate( &PGX, error_message.data(), error_message.length() ) )
       {
-         printErrorMessage( "Error using GDX library: " + error_message.string() );
+         library::printErrorMessage( "Error using GDX library: " + error_message.string() );
          ExitCode = 3;
          goto End;
       }
@@ -1655,7 +1655,7 @@ int main( const int argc, const char *argv[] )
    if( ErrNr != 0 )
    {
       gdxErrorStr( PGX, ErrNr, s.data() );
-      printErrorMessage( "Problem reading GDX file: " + s.string() );
+      library::printErrorMessage( "Problem reading GDX file: " + s.string() );
       ExitCode = 4;
       goto End;
    }
@@ -1664,7 +1664,7 @@ int main( const int argc, const char *argv[] )
    if( ErrNr != 0 )
    {
       gdxErrorStr( PGX, ErrNr, s.data() );
-      printErrorMessage( "Problem reading GDX file: " + s.string() );
+      library::printErrorMessage( "Problem reading GDX file: " + s.string() );
       ExitCode = 5;
       goto End;
    }
@@ -1691,8 +1691,8 @@ int main( const int argc, const char *argv[] )
       if( !OutputFile.is_open() )
       {
          ErrNr = errno;
-         printErrorMessage( "Error opening output file: " + OutputName );
-         printErrorMessage( "Error: " + std::to_string( ErrNr ) + " = " + strerror( errno ) );
+         library::printErrorMessage( "Error opening output file: " + OutputName );
+         library::printErrorMessage( "Error: " + std::to_string( ErrNr ) + " = " + strerror( errno ) );
          ExitCode = 6;
          goto End;
       }
