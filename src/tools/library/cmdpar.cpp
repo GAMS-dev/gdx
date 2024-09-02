@@ -11,6 +11,10 @@
 namespace library::cmdpar
 {
 
+std::ostream *ErrorStream = &std::cout;
+// TODO: Possible improvement for later, but currently results in problems with the tests
+// std::ostream *ErrorStream = &std::cerr;
+
 // Brief:
 //   Create instance of command line object
 TCmdParams::TCmdParams() = default;
@@ -247,9 +251,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
          std::ifstream fi( fname );
          if( !fi.is_open() )
          {
-            std::cout << "**** could not open file: " << fname << std::endl;
-            // TODO: Possible improvement for later, but currently results in problems with the tests
-            // std::cerr << "**** could not open file: " << fname << std::endl;
+            *ErrorStream << "**** could not open file: " << fname << std::endl;
             result = false;
          }
          else
@@ -269,9 +271,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
                // TODO: Check whether this if is still necessary
                if( strings.back().length() == 255 )
                {
-                  std::cout << "**** Input line longer than " << MAXBUF * 255 << " characters" << std::endl;
-                  // TODO: Possible improvement for later, but currently results in problems with the tests
-                  // std::cerr << "**** Input line longer than " << MAXBUF * 255 << " characters" << std::endl;
+                  *ErrorStream << "**** Input line longer than " << MAXBUF * 255 << " characters" << std::endl;
                   result = false;
                }
             }
