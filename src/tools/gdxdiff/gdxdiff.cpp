@@ -100,7 +100,7 @@ void FatalErrorExit( const int ErrNr )
 {
    if( !DiffTmpName.empty() && rtl::sysutils_p3::FileExists( DiffTmpName.string() ) )
    {
-      if( PGXDIF != nullptr )
+      if( PGXDIF )
       {
          gdxClose( PGXDIF );
          gdxFree( &PGXDIF );

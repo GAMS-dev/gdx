@@ -1792,11 +1792,8 @@ int main( const int argc, const char *argv[] )
       fo << "$onListing" << '\n';
 
 AllDone:
-   if( PGX )
-   {
-      gdxClose( PGX );
-      gdxFree( &PGX );
-   }
+   gdxClose( PGX );
+   gdxFree( &PGX );
 
    if( UsingIDE && !OutputName.empty() )
       std::cout << "GDXDump file written: " << OutputName << "[FIL:\"" << OutputName << "\",0,0]" << std::endl;

@@ -288,9 +288,9 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
    }
 
    KeepNewAcronyms( PGX );
-
    gdxClose( PGX );
    gdxFree( &PGX );
+
    gdxUELRegisterDone( PGXMerge );
 }
 
@@ -826,6 +826,7 @@ int main( const int argc, const char *argv[] )
    }
 
    SyList->WriteNameList();
+
    gdxClose( PGXMerge );
    gdxFree( &PGXMerge );
 
