@@ -1578,7 +1578,7 @@ int main( const int argc, const char *argv[] )
             bHeader = true;
             continue;
          }
-         printErrorMessage( "Unrecognized option: " + s.string(), false );
+         printErrorMessage( "Unrecognized option: " + s.string() );
          ExitCode = 1;
          break;
       }
@@ -1628,7 +1628,7 @@ int main( const int argc, const char *argv[] )
    }
    if( !std::filesystem::exists( InputFilePath ) )
    {
-      printErrorMessage( "GDX file not found: " + InputFile, false );
+      printErrorMessage( "GDX file not found: " + InputFile );
       ExitCode = 2;
       goto End;
    }
@@ -1646,14 +1646,14 @@ int main( const int argc, const char *argv[] )
 
       if( !gdxGetReady( error_message.data(), error_message.length() ) )
       {
-         printErrorMessage( "Error loading GDX library: " + error_message.string(), false );
+         printErrorMessage( "Error loading GDX library: " + error_message.string() );
          ExitCode = 3;
          goto End;
       }
 
       if( !gdxCreate( &PGX, error_message.data(), error_message.length() ) )
       {
-         printErrorMessage( "Error using GDX library: " + error_message.string(), false );
+         printErrorMessage( "Error using GDX library: " + error_message.string() );
          ExitCode = 3;
          goto End;
       }
@@ -1663,7 +1663,7 @@ int main( const int argc, const char *argv[] )
    if( ErrNr != 0 )
    {
       gdxErrorStr( PGX, ErrNr, s.data() );
-      printErrorMessage( "Problem reading GDX file: " + s.string(), false );
+      printErrorMessage( "Problem reading GDX file: " + s.string() );
       ExitCode = 4;
       goto End;
    }
@@ -1672,7 +1672,7 @@ int main( const int argc, const char *argv[] )
    if( ErrNr != 0 )
    {
       gdxErrorStr( PGX, ErrNr, s.data() );
-      printErrorMessage( "Problem reading GDX file: " + s.string(), false );
+      printErrorMessage( "Problem reading GDX file: " + s.string() );
       ExitCode = 5;
       goto End;
    }
@@ -1699,8 +1699,8 @@ int main( const int argc, const char *argv[] )
       if( !OutputFile.is_open() )
       {
          ErrNr = errno;
-         printErrorMessage( "Error opening output file: " + OutputName, false );
-         printErrorMessage( "Error: " + std::to_string( ErrNr ) + " = " + strerror( errno ), false );
+         printErrorMessage( "Error opening output file: " + OutputName );
+         printErrorMessage( "Error: " + std::to_string( ErrNr ) + " = " + strerror( errno ) );
          ExitCode = 6;
          goto End;
       }
@@ -1794,8 +1794,7 @@ int main( const int argc, const char *argv[] )
 AllDone:
    if( PGX )
    {
-      if( gdxClose( PGX ) != 0 )
-         printErrorMessage( "Problem closing GDX file", false );
+      gdxClose( PGX );
       gdxFree( &PGX );
    }
 
