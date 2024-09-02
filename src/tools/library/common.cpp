@@ -105,10 +105,10 @@ std::string specialValueStr( const int i )
       return gmsSVText[i];
 }
 
-std::vector<std::string> splitString( const std::string &s, const char delimiter )
+std::vector<std::string> splitString( const std::string &string, const char delimiter )
 {
    std::vector<std::string> tokens;
-   std::istringstream iss( s );
+   std::istringstream iss( string );
    std::string token;
    while( getline( iss, token, delimiter ) )
       tokens.push_back( token );

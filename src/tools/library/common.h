@@ -23,7 +23,7 @@ std::string varTypStr( int i );
 
 std::string specialValueStr( int i );
 
-std::vector<std::string> splitString( const std::string &s, char delimiter );
+std::vector<std::string> splitString( const std::string &string, char delimiter );
 
 bool CanBeQuoted( const char *s, size_t slen );
 
