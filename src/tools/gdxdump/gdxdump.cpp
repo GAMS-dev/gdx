@@ -441,9 +441,9 @@ void WriteSymbolsAsSet( const bool DomInfo )
 
 void printErrorMessage( const std::string &message, const bool printError )
 {
+   std::cout << message << std::endl;
    // TODO: Possible improvement for later, but currently results in problems with the tests
    // std::cerr << ( printError ? "Error: " : "" ) << message << std::endl;
-   std::cout << message << std::endl;
 }
 
 void assertWithMessage( const bool expression, const std::string &message )
