@@ -35,7 +35,7 @@
 #include <array>
 #include <cassert>
 #include <cstring>
-
+#include <cstdint>
 
 // Interface
 namespace global::delphitypes
