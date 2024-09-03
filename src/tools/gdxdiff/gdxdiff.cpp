@@ -561,8 +561,8 @@ void CompareSy( const int Sy1, const int Sy2 )
       gdxSymbolGetDomainX( PGX1, Sy1, DomSy1Ptrs );
       gdxSymbolGetDomainX( PGX2, Sy2, DomSy2Ptrs );
       DomFlg = false;
-      for( int D { 1 }; D <= Dim; D++ )
-         if( gdlib::strutilx::StrUEqual( DomSy1[D], DomSy2[D] ) )
+      for( int D {}; D < Dim; D++ )
+         if( !gdlib::strutilx::StrUEqual( DomSy1[D], DomSy2[D] ) )
          {
             DomFlg = true;
             break;
@@ -573,7 +573,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 
 #if VERBOSE >= 1
          std::cout << "Domain differences for symbol = " << Id << std::endl;
-         for( int D { 1 }; D <= Dim; D++ )
+         for( int D {}; D < Dim; D++ )
          {
             if( gdlib::strutilx::StrUEqual( DomSy1[D], DomSy2[D] ) )
                continue;
