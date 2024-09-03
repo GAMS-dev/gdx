@@ -274,8 +274,8 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
       while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
       {
          if( Dim > 0 )
-            for( D = FDim; D <= Dim; D++ )
-               IndxI[D] = AddUEL( library::short_string { IndxSPtrs[D - 1] } );
+            for( D = FDim - 1; D < Dim; D++ )
+               IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
          if( SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
          {
             gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
