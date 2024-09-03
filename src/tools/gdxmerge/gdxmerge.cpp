@@ -338,8 +338,8 @@ bool TSymbolList::CollectBigOne( const int SyNr )
          gdxDataReadStrStart( PGX, N, &NrRecs );
          while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
          {
-            for( D = FDim; D <= SyObj->SyDim; D++ )
-               IndxI[D] = AddUEL( library::short_string { IndxSPtrs[D - 1] } );
+            for( D = FDim - 1; D <= SyObj->SyDim; D++ )
+               IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
             if( SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
             {
                gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
