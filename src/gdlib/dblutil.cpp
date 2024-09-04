@@ -50,12 +50,6 @@ constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
                   expoMask { static_cast<int64_t>( 0x7ff00000 ) << 32 },
                   mantMask { ~( signMask | expoMask ) };
 
-union TI64Rec
-{
-   double x;
-   int64_t i64;
-//   uint8_t bytes[8];
-};
 
 static void dblDecomp( const double x, bool& isNeg, uint32_t& expo, int64_t& mant)
 {

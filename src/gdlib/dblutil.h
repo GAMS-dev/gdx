@@ -31,6 +31,13 @@
 namespace gdlib::dblutil
 {
 
+union TI64Rec
+{
+   double x;
+   int64_t i64;
+   std::array<uint8_t, 8> bytes;
+};
+
 double gdRoundTo( double x, int i );
 std::string dblToStrHexponential( double x );
 
