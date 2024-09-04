@@ -68,6 +68,33 @@ char hexDigit( const uint8_t b )
    return static_cast<char>( b < 10 ? utils::ord( '0' ) + b : utils::ord( 'a' ) + b - 10 );
 }
 
+std::string DblToStrHex( const double x )
+{
+   TI64Rec xi { x };
+   uint8_t c;
+   std::string result = "0x";
+
+   if( bigEndian )
+   {
+      for( int i {}; i < 8; i++ )
+      {
+         c = xi.bytes[i];
+         result += gdlib::dblutil::hexDigit( c / 16 );
+         result += gdlib::dblutil::hexDigit( c & 0x0F );
+      }
+   }
+   else
+   {
+      for( int i { 7 }; i >= 0; i-- )
+      {
+         c = xi.bytes[i];
+         result += gdlib::dblutil::hexDigit( c / 16 );
+         result += gdlib::dblutil::hexDigit( c & 0x0F );
+      }
+   }
+   return result;
+}
+
 // format the bytes in the mantissa
 static std::string mFormat( int64_t m )
 {
