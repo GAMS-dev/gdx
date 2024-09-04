@@ -63,8 +63,9 @@ static void DblDecomp( const double x, bool &isNeg, uint32_t &expo, int64_t &man
    mant = xi.i64 & mantMask;
 }
 
-static char hexDigit( const uint8_t b) {
-   return static_cast<char>(b < 10 ? utils::ord('0') + b : utils::ord('a') + b - 10);
+char hexDigit( const uint8_t b )
+{
+   return static_cast<char>( b < 10 ? utils::ord( '0' ) + b : utils::ord( 'a' ) + b - 10 );
 }
 
 // format the bytes in the mantissa
