@@ -26,7 +26,9 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
+#include <array>
 
 namespace gdlib::dblutil
 {
@@ -39,6 +41,11 @@ union TI64Rec
 };
 
 double gdRoundTo( double x, int i );
-std::string dblToStrHexponential( double x );
 
-}
+char hexDigit( uint8_t b );
+
+std::string DblToStrHex( double x );
+
+std::string DblToStrHexponential( double x );
+
+}// namespace gdlib::dblutil
