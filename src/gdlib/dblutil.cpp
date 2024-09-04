@@ -54,7 +54,7 @@ constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
         mantMask { ~( signMask | expoMask ) };
 
 
-static void dblDecomp( const double x, bool& isNeg, uint32_t& expo, int64_t& mant)
+static void DblDecomp( const double x, bool &isNeg, uint32_t &expo, int64_t &mant )
 {
    TI64Rec xi {};
    xi.x = x;
