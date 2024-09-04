@@ -46,9 +46,12 @@ double gdRoundTo( const double x, const int i )
    return std::trunc( x * zReciprocal + 0.5 * ( x > 0.0 ? 1.0 : -1.0 ) ) / zReciprocal;
 }
 
+constexpr TI64Rec t64 { .i64 = 1 };
+const bool bigEndian { t64.bytes[7] == 1 };
+
 constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
-                  expoMask { static_cast<int64_t>( 0x7ff00000 ) << 32 },
-                  mantMask { ~( signMask | expoMask ) };
+        expoMask { static_cast<int64_t>( 0x7ff00000 ) << 32 },
+        mantMask { ~( signMask | expoMask ) };
 
 
 static void dblDecomp( const double x, bool& isNeg, uint32_t& expo, int64_t& mant)
