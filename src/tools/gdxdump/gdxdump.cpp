@@ -36,6 +36,7 @@
 #include "../library/short_string.h"
 #include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
+#include "../../gdlib/dblutil.h"
 
 // Global constants
 #include "../../../generated/gclgms.h"
@@ -201,10 +202,10 @@ void WrVal( const double V )
                fo << gdlib::strutilx::DblToStrSep( V, DecimalSep );
                break;
             case TDblFormat::dbl_hexBytes:
-               fo << DblToStrHex( V );
+               fo << gdlib::dblutil::DblToStrHex( V );
                break;
             case TDblFormat::dbl_hexponential:
-               fo << DblToStrHexponential( V );
+               fo << gdlib::dblutil::DblToStrHexponential( V );
                break;
             default:
                break;
@@ -1634,6 +1635,5 @@ End:
 
 int main( const int argc, const char *argv[] )
 {
-   gdxdump::initDblUtilValues();
    return gdxdump::main( argc, argv );
 }
