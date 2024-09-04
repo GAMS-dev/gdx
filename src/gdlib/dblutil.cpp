@@ -56,8 +56,7 @@ constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
 
 static void DblDecomp( const double x, bool &isNeg, uint32_t &expo, int64_t &mant )
 {
-   TI64Rec xi {};
-   xi.x = x;
+   TI64Rec xi { x };
    isNeg = ( xi.i64 & signMask ) == signMask;
    expo = ( xi.i64 & expoMask ) >> 52;
    mant = xi.i64 & mantMask;
@@ -100,8 +99,7 @@ static std::string mFormat( int64_t m )
 {
    if( !m )
       return "0";
-   // TI64Rec xi {};
-   // xi.i64 = m;
+   // TI64Rec xi { m };
    int64_t mask { static_cast<int64_t>( 0x000f0000 ) << 32 };
    int shiftCount = 48;
    std::string res;
