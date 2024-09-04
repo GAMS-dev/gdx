@@ -47,7 +47,7 @@ double gdRoundTo( const double x, const int i )
 }
 
 constexpr TI64Rec t64 { .i64 = 1 };
-const bool bigEndian { t64.bytes[7] == 1 };
+const bool bigEndian { t64.bytes.at( 7 ) == 1 };
 
 constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
         expoMask { static_cast<int64_t>( 0x7ff00000 ) << 32 },
@@ -78,7 +78,7 @@ std::string DblToStrHex( const double x )
    {
       for( int i {}; i < 8; i++ )
       {
-         c = xi.bytes[i];
+         c = xi.bytes.at( i );
          result += gdlib::dblutil::hexDigit( c / 16 );
          result += gdlib::dblutil::hexDigit( c & 0x0F );
       }
@@ -87,7 +87,7 @@ std::string DblToStrHex( const double x )
    {
       for( int i { 7 }; i >= 0; i-- )
       {
-         c = xi.bytes[i];
+         c = xi.bytes.at( i );
          result += gdlib::dblutil::hexDigit( c / 16 );
          result += gdlib::dblutil::hexDigit( c & 0x0F );
       }
