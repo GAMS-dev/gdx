@@ -43,31 +43,6 @@ void WriteUEL( const std::string &S );
 
 void WriteUELTable( const std::string &name );
 
-union TI64Rec
-{
-   double x;
-   int64_t i64;
-   std::array<uint8_t, 8> bytes;
-};
-
-// Auxiliary function for DblToStrHex
-char hexDigit( uint8_t b );
-
-// Auxiliary function for DblToStrHex and dblDecomp (called in main)
-void initDblUtilValues();
-
-// Auxiliary function for WrVal
-std::string DblToStrHex( double x );
-
-// Auxiliary function for DblToStrHexponential
-void dblDecomp( double x, bool &isNeg, uint32_t &expo, int64_t &mant );
-
-// Auxiliary function for DblToStrHexponential
-std::string mFormat( int64_t m );
-
-// Auxiliary function for WrVal
-std::string DblToStrHexponential( double x );
-
 void WrVal( double V );
 
 std::string GetUELAsString( int N );
