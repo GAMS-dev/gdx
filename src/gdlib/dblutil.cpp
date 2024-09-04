@@ -65,17 +65,19 @@ static char hexDigit( const uint8_t b) {
 }
 
 // format the bytes in the mantissa
-static std::string mFormat(int64_t m) {
-   if (!m)
-      return "0"s;
-   //TI64Rec xi {};
-   //xi.i64 = m;
+static std::string mFormat( int64_t m )
+{
+   if( !m )
+      return "0";
+   // TI64Rec xi {};
+   // xi.i64 = m;
    int64_t mask { static_cast<int64_t>( 0x000f0000 ) << 32 };
    int shiftCount = 48;
    std::string res;
-   while (m) {
+   while( m )
+   {
       const int64_t m2 { ( m & mask ) >> shiftCount };
-      const auto b { static_cast<uint8_t>(m2) };
+      const auto b { static_cast<uint8_t>( m2 ) };
       res += hexDigit( b );
       m &= ~mask;
       mask >>= 4;
