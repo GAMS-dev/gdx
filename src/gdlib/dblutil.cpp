@@ -90,21 +90,40 @@ static std::string mFormat(int64_t m) {
    return res;
 }
 
-std::string dblToStrHexponential( const double x )
+std::string DblToStrHexponential( const double x )
 {
    bool isNeg;
    uint32_t expo;
    int64_t mant;
-   dblDecomp( x, isNeg, expo, mant );
+   std::string result;
+   DblDecomp( x, isNeg, expo, mant );
    // Consider all 10 cases: SNaN, QNaN, and +/-[INF,denormal,zero,normal]
-   std::string res;
    if( isNeg )
-      res = "-"s;
-   if (!expo)
-      return res + ( !mant ? "0x0.0p0"s : "0x0."s + mFormat( mant ) + "p-1022"s );
-   if (expo < 2047) // not all ones
-      return res + "0x1."s + mFormat( mant ) + 'p' + rtl::sysutils_p3::IntToStr( expo - 1023 );
-   return !mant ? res + "Infinity"s : "NaN"s;
+      result += '-';
+   if( expo == 0 )
+   {
+      if( mant == 0 )
+         // zero
+         result += "0x0.0p0";
+      else
+         // denorm
+         result += "0x0." + mFormat( mant ) + "p-1022";
+   }
+   // not all ones
+   else if( expo < 2047 )
+      // normalized double
+      result += "0x1." + mFormat( mant ) + 'p' + rtl::sysutils_p3::IntToStr( static_cast<int64_t>( expo ) - 1023 );
+   // exponent all ones
+   else
+   {
+      if( mant == 0 )
+         // infinity
+         result += "Infinity";
+      else
+         // NaN
+         result = "NaN";
+   }
+   return result;
 }
 
 }// namespace gdlib::dblutil
