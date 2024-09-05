@@ -26,6 +26,24 @@ class TestGdxMerge(unittest.TestCase):
     FILE_PATHS: dict[str, str]
 
     @classmethod
+    def setUpClass(cls) -> None:
+        cls.FILE_PATHS = {
+            file_name: os.path.join(
+                cls.DIRECTORY_PATHS['examples'],
+                f'{file_name}.gdx'
+            ) for file_name in cls.FILE_NAMES
+        }
+
+        create_small_example(cls.FILE_PATHS['small_example'])
+        create_full_example(cls.FILE_PATHS['full_example'])
+        create_small_example_changed_data(cls.FILE_PATHS['small_example_changed_data'])
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        for file_path in cls.FILE_PATHS.values():
+            os.remove(file_path)
+
+    @classmethod
     def run_gdxmerge(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
         EXECUTABLE_NAME = 'gdxmerge'
         if platform.system() == 'Windows':
@@ -105,24 +123,6 @@ class TestGdxMerge(unittest.TestCase):
         for i in range(len(file_names)):
             self.assertEqual(first[i][0], second[i][0])
             self.assertRegex(first[i][1], second[i][1])
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.FILE_PATHS = {
-            file_name: os.path.join(
-                cls.DIRECTORY_PATHS['examples'],
-                f'{file_name}.gdx'
-            ) for file_name in cls.FILE_NAMES
-        }
-
-        create_small_example(cls.FILE_PATHS['small_example'])
-        create_full_example(cls.FILE_PATHS['full_example'])
-        create_small_example_changed_data(cls.FILE_PATHS['small_example_changed_data'])
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for file_path in cls.FILE_PATHS.values():
-            os.remove(file_path)
 
     def test_empty_command(self) -> None:
         output = self.run_gdxmerge([])

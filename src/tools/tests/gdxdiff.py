@@ -37,6 +37,34 @@ class TestGdxDiff(unittest.TestCase):
     FILE_PATHS: dict[str, str]
 
     @classmethod
+    def setUpClass(cls) -> None:
+        cls.FILE_PATHS = {
+            file_name: os.path.join(
+                cls.DIRECTORY_PATHS['examples'],
+                f'{file_name}.gdx'
+            ) for file_name in cls.FILE_NAMES
+        }
+
+        create_small_example(cls.FILE_PATHS['small_example'])
+        create_full_example(cls.FILE_PATHS['full_example'])
+        create_small_example_changed_data(cls.FILE_PATHS['small_example_changed_data'])
+        create_full_example_changed_variables(cls.FILE_PATHS['full_example_changed_variables'])
+        create_full_example_changed_data_and_variables(cls.FILE_PATHS['full_example_changed_data_and_variables'])
+        create_default_values_example_1(cls.FILE_PATHS['default_values_example_1'])
+        create_default_values_example_2(cls.FILE_PATHS['default_values_example_2'])
+        create_domain_example_1(cls.FILE_PATHS['domain_example_1'])
+        create_domain_example_2(cls.FILE_PATHS['domain_example_2'])
+        create_order_example_1(cls.FILE_PATHS['order_example_1'])
+        create_order_example_2(cls.FILE_PATHS['order_example_2'])
+        create_description_example_1(cls.FILE_PATHS['description_example_1'])
+        create_description_example_2(cls.FILE_PATHS['description_example_2'])
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        for file_path in cls.FILE_PATHS.values():
+            os.remove(file_path)
+
+    @classmethod
     def run_gdxdiff(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
         EXECUTABLE_NAME = 'gdxdiff'
         if platform.system() == 'Windows':
@@ -103,34 +131,6 @@ class TestGdxDiff(unittest.TestCase):
         self.check_gdx_file_symbols(container, list(symbols.keys()))
         for symbol_name in symbols:
             self.check_gdx_file_values(container, symbol_name, symbols[symbol_name])
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.FILE_PATHS = {
-            file_name: os.path.join(
-                cls.DIRECTORY_PATHS['examples'],
-                f'{file_name}.gdx'
-            ) for file_name in cls.FILE_NAMES
-        }
-
-        create_small_example(cls.FILE_PATHS['small_example'])
-        create_full_example(cls.FILE_PATHS['full_example'])
-        create_small_example_changed_data(cls.FILE_PATHS['small_example_changed_data'])
-        create_full_example_changed_variables(cls.FILE_PATHS['full_example_changed_variables'])
-        create_full_example_changed_data_and_variables(cls.FILE_PATHS['full_example_changed_data_and_variables'])
-        create_default_values_example_1(cls.FILE_PATHS['default_values_example_1'])
-        create_default_values_example_2(cls.FILE_PATHS['default_values_example_2'])
-        create_domain_example_1(cls.FILE_PATHS['domain_example_1'])
-        create_domain_example_2(cls.FILE_PATHS['domain_example_2'])
-        create_order_example_1(cls.FILE_PATHS['order_example_1'])
-        create_order_example_2(cls.FILE_PATHS['order_example_2'])
-        create_description_example_1(cls.FILE_PATHS['description_example_1'])
-        create_description_example_2(cls.FILE_PATHS['description_example_2'])
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for file_path in cls.FILE_PATHS.values():
-            os.remove(file_path)
 
     def test_empty_command(self) -> None:
         output = self.run_gdxdiff([])

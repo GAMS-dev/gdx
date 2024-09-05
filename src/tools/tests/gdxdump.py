@@ -28,6 +28,26 @@ class TestGdxDump(unittest.TestCase):
     FILE_PATHS: dict[str, str]
 
     @classmethod
+    def setUpClass(cls) -> None:
+        cls.FILE_PATHS = {
+            file_name: os.path.join(
+                cls.DIRECTORY_PATHS['examples'],
+                f'{file_name}.gdx'
+            ) for file_name in cls.FILE_NAMES
+        }
+
+        create_small_example(cls.FILE_PATHS['small_example'])
+        create_full_example(cls.FILE_PATHS['full_example'])
+        create_element_text_example(cls.FILE_PATHS['element_text_example'])
+        create_special_values_example(cls.FILE_PATHS['special_values_example'])
+        create_label_example(cls.FILE_PATHS['label_example'])
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        for file_path in cls.FILE_PATHS.values():
+            os.remove(file_path)
+
+    @classmethod
     def run_gdxdump(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
         EXECUTABLE_NAME = 'gdxdump'
         if platform.system() == 'Windows':
@@ -64,26 +84,6 @@ class TestGdxDump(unittest.TestCase):
             del second[i]
         self.assertEqual(first, second)
         self.assertEqual(output.stderr, '')
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.FILE_PATHS = {
-            file_name: os.path.join(
-                cls.DIRECTORY_PATHS['examples'],
-                f'{file_name}.gdx'
-            ) for file_name in cls.FILE_NAMES
-        }
-
-        create_small_example(cls.FILE_PATHS['small_example'])
-        create_full_example(cls.FILE_PATHS['full_example'])
-        create_element_text_example(cls.FILE_PATHS['element_text_example'])
-        create_special_values_example(cls.FILE_PATHS['special_values_example'])
-        create_label_example(cls.FILE_PATHS['label_example'])
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for file_path in cls.FILE_PATHS.values():
-            os.remove(file_path)
 
     def test_empty_command(self) -> None:
         output = self.run_gdxdump([])
