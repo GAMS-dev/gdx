@@ -917,7 +917,7 @@ int main( const int argc, const char *argv[] )
          if( DiffOnly )
          {
             // TODO: Change combines to combined?
-            std::cout << "Diff only cannot be combines with FldOnly" << std::endl;
+            std::cout << "Diff only cannot be combined with FldOnly" << std::endl;
             ErrorCode = 4;
          }
       }
