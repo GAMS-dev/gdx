@@ -7,7 +7,7 @@ Usage:
    Options:
       Eps     = Val       epsilon for comparison
       RelEps  = Val       epsilon for relative comparison
-      Field   = gamsfield (L, M, Up, Lo, Prior, Scale or All
+      Field   = gamsfield (L, M, Up, Lo, Prior, Scale or All)
       FldOnly             write var or equ as parameter for selected field
       DiffOnly            write var or equ as parameter with field as an extra dimension
       CmpDefaults         compare default values
