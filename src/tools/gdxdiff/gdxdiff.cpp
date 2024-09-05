@@ -56,7 +56,7 @@ using tvarvaltype = unsigned int;
 library::short_string DiffTmpName;
 gdxHandle_t PGX1, PGX2, PGXDIF;
 bool diffUELsRegistered;
-// TODO: Use the correct type instead of nullptr type
+// TODO: Use the correct type instead of nullptr type?
 std::unique_ptr<gdlib::strhash::TXStrHashList<std::nullptr_t>> UELTable;
 int staticUELNum;
 double EpsAbsolute, EpsRelative;
