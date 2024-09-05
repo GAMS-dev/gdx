@@ -1009,7 +1009,6 @@ int main( const int argc, const char *argv[] )
    CheckFile( InFile1 );
    CheckFile( InFile2 );
 
-   // TODO: Remove spaces before colons?
    std::cout << "File1 : " << InFile1 << std::endl;
    std::cout << "File2 : " << InFile2 << std::endl;
 
