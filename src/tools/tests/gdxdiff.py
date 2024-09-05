@@ -4,6 +4,7 @@ import platform
 import subprocess
 import inspect
 import gams.transfer as gt
+
 from examples.small_example import create_small_example
 from examples.full_example import create_full_example
 from examples.small_example_changed_data import create_small_example_changed_data
