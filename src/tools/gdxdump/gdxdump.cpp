@@ -269,9 +269,7 @@ bool WriteSymbolAsItem( const int SyNr, const bool DomInfo )
    }
    else if( !SyTxt.empty() )
    {
-      // TODO: Works like this, but implementation is different than in Delphi code
-      // const char qChar = SyTxt.string().find( '\"' ) == 0 ? '\"' : '\'';
-      constexpr char qChar = '\"';
+      const char qChar = SyTxt.string().find( '\"' ) == std::string::npos ? '\"' : '\'';
       fo << ' ' << qChar << SyTxt.data() << qChar;
    }
    return result;
