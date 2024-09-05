@@ -17,12 +17,13 @@ class TestGdxMerge(unittest.TestCase):
         'examples': os.path.join(TESTS_DIRECTORY_PATH, 'examples'),
         'output': os.path.join(TESTS_DIRECTORY_PATH, 'output', 'gdxmerge')
     }
-    FILE_PATHS = {
-        'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
-        'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
-        'small_example_changed_data': os.path.join(DIRECTORY_PATHS['examples'], 'small_example_changed_data.gdx'),
-        'merge_file': os.path.join(DIRECTORY_PATHS['examples'], 'merge_file.gdx')
-    }
+    FILE_NAMES = [
+        'small_example',
+        'full_example',
+        'small_example_changed_data',
+        'merge_file'
+    ]
+    FILE_PATHS: dict[str, str]
 
     @classmethod
     def run_gdxmerge(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -107,6 +108,13 @@ class TestGdxMerge(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        cls.FILE_PATHS = {
+            file_name: os.path.join(
+                cls.DIRECTORY_PATHS['examples'],
+                f'{file_name}.gdx'
+            ) for file_name in cls.FILE_NAMES
+        }
+
         create_small_example(cls.FILE_PATHS['small_example'])
         create_full_example(cls.FILE_PATHS['full_example'])
         create_small_example_changed_data(cls.FILE_PATHS['small_example_changed_data'])

@@ -22,22 +22,19 @@ class TestGdxDiff(unittest.TestCase):
         'examples': os.path.join(TESTS_DIRECTORY_PATH, 'examples'),
         'output': os.path.join(TESTS_DIRECTORY_PATH, 'output', 'gdxdiff')
     }
-    FILE_PATHS = {
-        'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
-        'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
-        'small_example_changed_data': os.path.join(DIRECTORY_PATHS['examples'], 'small_example_changed_data.gdx'),
-        'full_example_changed_variables': os.path.join(DIRECTORY_PATHS['examples'], 'full_example_changed_variables.gdx'),
-        'full_example_changed_data_and_variables': os.path.join(DIRECTORY_PATHS['examples'], 'full_example_changed_data_and_variables.gdx'),
-        'default_values_example_1': os.path.join(DIRECTORY_PATHS['examples'], 'default_values_example_1.gdx'),
-        'default_values_example_2': os.path.join(DIRECTORY_PATHS['examples'], 'default_values_example_2.gdx'),
-        'domain_example_1': os.path.join(DIRECTORY_PATHS['examples'], 'domain_example_1.gdx'),
-        'domain_example_2': os.path.join(DIRECTORY_PATHS['examples'], 'domain_example_2.gdx'),
-        'order_example_1': os.path.join(DIRECTORY_PATHS['examples'], 'order_example_1.gdx'),
-        'order_example_2': os.path.join(DIRECTORY_PATHS['examples'], 'order_example_2.gdx'),
-        'description_example_1': os.path.join(DIRECTORY_PATHS['examples'], 'description_example_1.gdx'),
-        'description_example_2': os.path.join(DIRECTORY_PATHS['examples'], 'description_example_2.gdx'),
-        'diff_file': os.path.join(DIRECTORY_PATHS['examples'], 'diff_file.gdx')
-    }
+    FILE_NAMES = [
+        'small_example',
+        'full_example',
+        'small_example_changed_data',
+        'full_example_changed_variables',
+        'full_example_changed_data_and_variables',
+        'default_values_example_1', 'default_values_example_2',
+        'domain_example_1', 'domain_example_2',
+        'order_example_1', 'order_example_2',
+        'description_example_1', 'description_example_2',
+        'diff_file'
+    ]
+    FILE_PATHS: dict[str, str]
 
     @classmethod
     def run_gdxdiff(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -109,6 +106,13 @@ class TestGdxDiff(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        cls.FILE_PATHS = {
+            file_name: os.path.join(
+                cls.DIRECTORY_PATHS['examples'],
+                f'{file_name}.gdx'
+            ) for file_name in cls.FILE_NAMES
+        }
+
         create_small_example(cls.FILE_PATHS['small_example'])
         create_full_example(cls.FILE_PATHS['full_example'])
         create_small_example_changed_data(cls.FILE_PATHS['small_example_changed_data'])

@@ -18,13 +18,14 @@ class TestGdxDump(unittest.TestCase):
         'examples': os.path.join(TESTS_DIRECTORY_PATH, 'examples'),
         'output': os.path.join(TESTS_DIRECTORY_PATH, 'output', 'gdxdump')
     }
-    FILE_PATHS = {
-        'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
-        'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
-        'element_text_example': os.path.join(DIRECTORY_PATHS['examples'], 'element_text_example.gdx'),
-        'special_values_example': os.path.join(DIRECTORY_PATHS['examples'], 'special_values_example.gdx'),
-        'label_example': os.path.join(DIRECTORY_PATHS['examples'], 'label_example.gdx')
-    }
+    FILE_NAMES = [
+        'small_example',
+        'full_example',
+        'element_text_example',
+        'special_values_example',
+        'label_example'
+    ]
+    FILE_PATHS: dict[str, str]
 
     @classmethod
     def run_gdxdump(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -66,6 +67,13 @@ class TestGdxDump(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
+        cls.FILE_PATHS = {
+            file_name: os.path.join(
+                cls.DIRECTORY_PATHS['examples'],
+                f'{file_name}.gdx'
+            ) for file_name in cls.FILE_NAMES
+        }
+
         create_small_example(cls.FILE_PATHS['small_example'])
         create_full_example(cls.FILE_PATHS['full_example'])
         create_element_text_example(cls.FILE_PATHS['element_text_example'])

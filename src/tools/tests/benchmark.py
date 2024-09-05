@@ -12,11 +12,17 @@ DIRECTORY_PATHS = {
     'examples': os.path.join(TESTS_DIRECTORY_PATH, 'examples'),
     'results': os.path.join(TESTS_DIRECTORY_PATH, 'results')
 }
+FILE_NAMES = [
+    'small_example',
+    'full_example',
+    'diff_file',
+    'merge_file'
+]
 FILE_PATHS = {
-    'small_example': os.path.join(DIRECTORY_PATHS['examples'], 'small_example.gdx'),
-    'full_example': os.path.join(DIRECTORY_PATHS['examples'], 'full_example.gdx'),
-    'diff_file': os.path.join(DIRECTORY_PATHS['examples'], 'diff_file.gdx'),
-    'merge_file': os.path.join(DIRECTORY_PATHS['examples'], 'merge_file.gdx')
+    file_name: os.path.join(
+        DIRECTORY_PATHS['examples'],
+        f'{file_name}.gdx'
+    ) for file_name in FILE_NAMES
 }
 
 
