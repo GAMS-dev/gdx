@@ -727,7 +727,7 @@ void Usage()
              << "      Eps     = Val       epsilon for comparison" << '\n'
              << "      RelEps  = Val       epsilon for relative comparison" << '\n'
              // TODO: Add closing bracket?
-             << "      Field   = gamsfield (L, M, Up, Lo, Prior, Scale or All" << '\n'
+             << "      Field   = gamsfield (L, M, Up, Lo, Prior, Scale or All)" << '\n'
              << "      FldOnly             write var or equ as parameter for selected field" << '\n'
              << "      DiffOnly            write var or equ as parameter with field as an extra dimension" << '\n'
              << "      CmpDefaults         compare default values" << '\n'
