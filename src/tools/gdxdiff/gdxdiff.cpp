@@ -734,7 +734,8 @@ void Usage()
              << "      MatrixFile          compare GAMS matrix files in GDX format" << '\n'
              << "      IgnoreOrder         ignore UEL order of input files - reduces size of output file" << '\n'
              << "      SetDesc = Y|N       compare explanatory texts for set elements, activated by default (=Y)" << '\n'
-             << "      Id      = one or more identifiers; only ids listed will be compared" << '\n'
+             << "      ID      = one or more identifiers; only ids listed will be compared" << '\n'
+             << "      SkipID  = one or more identifiers; ids listed will be skipped" << '\n'
              << "   The .gdx file extension is the default" << std::endl;
 }
 
