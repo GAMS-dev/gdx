@@ -1063,6 +1063,14 @@ int main( const int argc, const char *argv[] )
       std::cout << std::endl;
    }
 
+   if( SkipIDs )
+   {
+      std::cout << "SkipID:";
+      for( int N {}; N < SkipIDs->GetCount(); N++ )
+         std::cout << ' ' << SkipIDs->GetConst( N );
+      std::cout << std::endl;
+   }
+
    library::short_string S2;
    if( !gdxCreate( &PGXDIF, S2.data(), S2.length() ) )
       FatalError( "Unable to load GDX library: " + S2.string(), static_cast<int>( ErrorCode::ERR_LOADDLL ) );
@@ -1107,7 +1115,8 @@ int main( const int argc, const char *argv[] )
       int N { 1 };
       while( gdxSymbolInfo( PGX1, N, ID.data(), &Dim, &iST ) != 0 )
       {
-         if( !IDsOnly || IDsOnly->IndexOf( ID.data() ) >= 0 )
+         if( ( !IDsOnly || IDsOnly->IndexOf( ID.data() ) >= 0 ) &&
+             ( !SkipIDs || SkipIDs->IndexOf( ID.data() ) < 0 ) )
             IDTable.insert( { ID, N } );
          N++;
       }
@@ -1129,7 +1138,8 @@ int main( const int argc, const char *argv[] )
       int N { 1 };
       while( gdxSymbolInfo( PGX2, N, ID.data(), &Dim, &iST ) != 0 )
       {
-         if( !IDsOnly || IDsOnly->IndexOf( ID.data() ) >= 0 )
+         if( ( !IDsOnly || IDsOnly->IndexOf( ID.data() ) >= 0 ) &&
+             ( !SkipIDs || SkipIDs->IndexOf( ID.data() ) < 0 ) )
             IDTable.insert( { ID, N } );
          N++;
       }
