@@ -964,7 +964,10 @@ int main( const int argc, const char *argv[] )
             // std::cout << S << std::endl;
             while( !S.empty() )
             {
-               int k { gdlib::strutilx::LChSetPos( std::vector<char> { ',', ' ' }.data(), S.data(), static_cast<int>( S.length() ) ) };
+               int k { gdlib::strutilx::LChSetPos(
+                       std::vector<char> { ',', ' ' }.data(),
+                       S.data(),
+                       static_cast<int>( S.length() ) ) };
                if( k == -1 )
                {
                   ID = S;
@@ -981,7 +984,7 @@ int main( const int argc, const char *argv[] )
                {
                   if( IDsOnly->IndexOf( ID.data() ) < 0 )
                      IDsOnly->Add( ID.data(), ID.length() );
-                  // std::cout << "Include Id: " << ID << std::endl;
+                  // std::cout << "Include ID: " << ID << std::endl;
                }
             }
          }
