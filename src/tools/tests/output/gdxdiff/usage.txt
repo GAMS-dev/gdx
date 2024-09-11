@@ -15,5 +15,6 @@ Usage:
       MatrixFile          compare GAMS matrix files in GDX format
       IgnoreOrder         ignore UEL order of input files - reduces size of output file
       SetDesc = Y|N       compare explanatory texts for set elements, activated by default (=Y)
-      Id      = one or more identifiers; only ids listed will be compared
+      ID      = one or more identifiers; only ids listed will be compared
+      SkipID  = one or more identifiers; ids listed will be skipped
    The .gdx file extension is the default
