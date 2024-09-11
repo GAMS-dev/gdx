@@ -538,7 +538,7 @@ class TestGdxDiff(unittest.TestCase):
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['full_example_changed_data_and_variables'],
             self.FILE_PATHS['diff_file'],
-            'Id=x'
+            'ID=x'
         ])
         self.check_output(
             output,
@@ -571,7 +571,7 @@ class TestGdxDiff(unittest.TestCase):
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['full_example_changed_data_and_variables'],
             self.FILE_PATHS['diff_file'],
-            'Id', 'x'
+            'ID', 'x'
         ])
         self.check_output(
             output_space_separator,
@@ -588,7 +588,7 @@ class TestGdxDiff(unittest.TestCase):
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['full_example_changed_data_and_variables'],
             self.FILE_PATHS['diff_file'],
-            'Id=c', 'Id=d'
+            'ID=c', 'ID=d'
         ])
         self.check_output(
             output,
@@ -639,7 +639,7 @@ class TestGdxDiff(unittest.TestCase):
             self.FILE_PATHS['full_example'],
             self.FILE_PATHS['full_example_changed_data_and_variables'],
             self.FILE_PATHS['diff_file'],
-            'Id=\'c d\''
+            'ID=\'c d\''
         ])
         self.check_output(
             output_quotation_marks,
