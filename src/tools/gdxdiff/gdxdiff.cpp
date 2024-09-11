@@ -188,7 +188,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 {
    int Dim, VarEquType;
    gdxSyType ST;
-   library::short_string Id;
+   library::short_string ID;
    bool SymbOpen {};
    TStatusCode Status;
    gdxValues_t DefValues {};
@@ -202,12 +202,12 @@ void CompareSy( const int Sy1, const int Sy2 )
          if( FldOnlyVar == FldOnly::fld_yes && ( ST == dt_var || ST == dt_equ ) )
          {
             library::short_string ExplTxt { "Differences Field = " + GamsFieldNames[FldOnlyFld] };
-            gdxDataWriteStrStart( PGXDIF, Id.data(), ExplTxt.data(), Dim + 1, static_cast<int>( dt_par ), 0 );
+            gdxDataWriteStrStart( PGXDIF, ID.data(), ExplTxt.data(), Dim + 1, static_cast<int>( dt_par ), 0 );
          }
          else if( DiffOnly && ( ST == dt_var || ST == dt_equ ) )
-            gdxDataWriteStrStart( PGXDIF, Id.data(), "Differences Only", Dim + 2, static_cast<int>( dt_par ), 0 );
+            gdxDataWriteStrStart( PGXDIF, ID.data(), "Differences Only", Dim + 2, static_cast<int>( dt_par ), 0 );
          else
-            gdxDataWriteStrStart( PGXDIF, Id.data(), "Differences", Dim + 1, static_cast<int>( ST ), VarEquType );
+            gdxDataWriteStrStart( PGXDIF, ID.data(), "Differences", Dim + 1, static_cast<int>( ST ), VarEquType );
          SymbOpen = true;
       }
       return SymbOpen;
@@ -526,14 +526,14 @@ void CompareSy( const int Sy1, const int Sy2 )
    GDXSTRINDEXPTRS_INIT( DomSy2, DomSy2Ptrs );
 
    SymbOpen = false;
-   gdxSymbolInfo( PGX1, Sy1, Id.data(), &Dim, &iST );
+   gdxSymbolInfo( PGX1, Sy1, ID.data(), &Dim, &iST );
    ST = static_cast<gdxSyType>( iST );
    if( ST == dt_alias )
       ST = dt_set;
    // We do nothing with type in file2
    gdxSymbolInfoX( PGX1, Sy1, &acount, &VarEquType, stxt.data() );
 
-   gdxSymbolInfo( PGX2, Sy2, Id.data(), &Dim2, &iST2 );
+   gdxSymbolInfo( PGX2, Sy2, ID.data(), &Dim2, &iST2 );
    ST2 = static_cast<gdxSyType>( iST2 );
    if( ST2 == dt_alias )
       ST2 = dt_set;
@@ -541,7 +541,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 
    if( Dim != Dim2 || ST != ST2 )
    {
-      std::cout << "*** symbol = " << Id << " cannot be compared" << std::endl;
+      std::cout << "*** symbol = " << ID << " cannot be compared" << std::endl;
       if( ST != ST2 )
       {
          std::cout << "Typ1 = " << library::gdxDataTypStrL( ST ) << ", Typ2 = " << library::gdxDataTypStrL( ST2 ) << std::endl;
@@ -573,7 +573,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          Status = TStatusCode::sc_domain;
 
 #if VERBOSE >= 1
-         std::cout << "Domain differences for symbol = " << Id << std::endl;
+         std::cout << "Domain differences for symbol = " << ID << std::endl;
          for( int D {}; D < Dim; D++ )
          {
             if( gdlib::strutilx::StrUEqual( DomSy1[D], DomSy2[D] ) )
@@ -588,7 +588,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    }
 
 #if VERBOSE >= 1
-   std::cout << library::gdxDataTypStrL( ST ) << ' ' << Id << std::endl;
+   std::cout << library::gdxDataTypStrL( ST ) << ' ' << ID << std::endl;
 #endif
 
    // Create default record for this type
@@ -703,7 +703,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 
 label999:
    if( !( Status == TStatusCode::sc_same || Status == TStatusCode::sc_dim10 ) )
-      StatusTable.insert( { Id, Status } );
+      StatusTable.insert( { ID, Status } );
 }
 
 bool GetAsDouble( const library::short_string &S, double &V )
@@ -1057,7 +1057,7 @@ int main( const int argc, const char *argv[] )
 
    if( IDsOnly )
    {
-      std::cout << "Id    :";
+      std::cout << "ID    :";
       for( int N {}; N < IDsOnly->GetCount(); N++ )
          std::cout << ' ' << IDsOnly->GetConst( N );
       std::cout << std::endl;
