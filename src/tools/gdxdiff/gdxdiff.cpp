@@ -1029,7 +1029,7 @@ int main( const int argc, const char *argv[] )
       }
    }
 
-   // if( IDsOnly != nullptr && IDsOnly->GetCount() == 0 )
+   // if( IDsOnly && IDsOnly->GetCount() == 0 )
    //    // Like ID = "" (or ID.empty())
    //    FreeAndNil( IDsOnly );
 
@@ -1055,7 +1055,7 @@ int main( const int argc, const char *argv[] )
    std::cout << "File1 : " << InFile1 << std::endl;
    std::cout << "File2 : " << InFile2 << std::endl;
 
-   if( IDsOnly != nullptr )
+   if( IDsOnly )
    {
       std::cout << "Id    :";
       for( int N {}; N < IDsOnly->GetCount(); N++ )
@@ -1107,7 +1107,7 @@ int main( const int argc, const char *argv[] )
       int N { 1 };
       while( gdxSymbolInfo( PGX1, N, ID.data(), &Dim, &iST ) != 0 )
       {
-         if( IDsOnly == nullptr || IDsOnly->IndexOf( ID.data() ) >= 0 )
+         if( !IDsOnly || IDsOnly->IndexOf( ID.data() ) >= 0 )
             IDTable.insert( { ID, N } );
          N++;
       }
@@ -1129,7 +1129,7 @@ int main( const int argc, const char *argv[] )
       int N { 1 };
       while( gdxSymbolInfo( PGX2, N, ID.data(), &Dim, &iST ) != 0 )
       {
-         if( IDsOnly == nullptr || IDsOnly->IndexOf( ID.data() ) >= 0 )
+         if( !IDsOnly || IDsOnly->IndexOf( ID.data() ) >= 0 )
             IDTable.insert( { ID, N } );
          N++;
       }
