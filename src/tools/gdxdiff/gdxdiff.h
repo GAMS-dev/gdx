@@ -61,7 +61,8 @@ enum class KP
    kp_showdef,
    kp_cmpdomain,
    kp_matrixfile,
-   kp_ignoreOrd
+   kp_ignoreOrd,
+   kp_skip_id
 };
 
 const std::array<std::string, 10> StatusText {
