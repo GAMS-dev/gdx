@@ -68,6 +68,7 @@ FldOnly FldOnlyVar;
 tvarvaltype FldOnlyFld;
 bool DiffOnly, CompSetText, matrixFile, ignoreOrder;
 std::unique_ptr<gdlib::gmsobj::TXStrings> IDsOnly;
+std::unique_ptr<gdlib::gmsobj::TXStrings> SkipIDs;
 bool ShowDefRec, CompDomains;
 
 std::string ValAsString( const gdxHandle_t &PGX, const double V )
@@ -782,6 +783,7 @@ int main( const int argc, const char *argv[] )
    CmdParams->AddParam( static_cast<int>( KP::kp_settext ), "SetDesc" );
    CmdParams->AddParam( static_cast<int>( KP::kp_ide ), "IDE" );
    CmdParams->AddParam( static_cast<int>( KP::kp_id ), "ID" );
+   CmdParams->AddParam( static_cast<int>( KP::kp_skip_id ), "SkipID" );
 
    CmdParams->AddKeyWord( static_cast<int>( KP::kp_fldonly ), "FldOnly" );
    CmdParams->AddKeyWord( static_cast<int>( KP::kp_diffonly ), "DiffOnly" );
@@ -980,6 +982,44 @@ int main( const int argc, const char *argv[] )
                   if( IDsOnly->IndexOf( ID.data() ) < 0 )
                      IDsOnly->Add( ID.data(), ID.length() );
                   // std::cout << "Include Id: " << ID << std::endl;
+               }
+            }
+         }
+      }
+   }
+
+   if( CmdParams->HasParam( static_cast<int>( KP::kp_skip_id ), S ) )
+   {
+      SkipIDs = std::make_unique<gdlib::gmsobj::TXStrings>();
+      for( int N {}; N < CmdParams->GetParamCount(); N++ )
+      {
+         if( CmdParams->GetParams( N ).Key == static_cast<int>( KP::kp_skip_id ) )
+         {
+            S = utils::trim( CmdParams->GetParams( N ).KeyS );
+            // std::cout << S << std::endl;
+            while( !S.empty() )
+            {
+               int k { gdlib::strutilx::LChSetPos(
+                       std::vector<char> { ',', ' ' }.data(),
+                       S.data(),
+                       static_cast<int>( S.length() ) ) };
+               if( k == -1 )
+               {
+                  ID = S;
+                  S.clear();
+               }
+               else
+               {
+                  ID = S.string().substr( 0, k );
+                  S = S.string().erase( 0, k + 1 );
+                  S = utils::trim( S.string() );
+               }
+               ID = utils::trim( ID.string() );
+               if( !ID.empty() )
+               {
+                  if( SkipIDs->IndexOf( ID.data() ) < 0 )
+                     SkipIDs->Add( ID.data(), ID.length() );
+                  // std::cout << "Skip ID: " << ID << std::endl;
                }
             }
          }
