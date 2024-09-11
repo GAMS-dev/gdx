@@ -991,6 +991,10 @@ int main( const int argc, const char *argv[] )
       }
    }
 
+   // if( IDsOnly && IDsOnly->GetCount() == 0 )
+   //    // Like ID = "" (or ID.empty())
+   //    FreeAndNil( IDsOnly );
+
    if( CmdParams->HasParam( static_cast<int>( KP::kp_skip_id ), S ) )
    {
       SkipIDs = std::make_unique<gdlib::gmsobj::TXStrings>();
@@ -1028,10 +1032,6 @@ int main( const int argc, const char *argv[] )
          }
       }
    }
-
-   // if( IDsOnly && IDsOnly->GetCount() == 0 )
-   //    // Like ID = "" (or ID.empty())
-   //    FreeAndNil( IDsOnly );
 
    // We removed this but not sure why
    // if( rtl::sysutils_p3::FileExists( DiffFileName ) )
