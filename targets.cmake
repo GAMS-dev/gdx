@@ -138,6 +138,8 @@ target_link_libraries(gdxmerge gdxtools-library)
 
 # gdx2veda
 add_executable(gdx2veda
+    src/tools/gdx2veda/container.h
+    src/tools/gdx2veda/container.cpp
     src/tools/gdx2veda/gdx2veda.h
     src/tools/gdx2veda/gdx2veda.cpp
 )
