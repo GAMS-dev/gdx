@@ -231,7 +231,15 @@ void CompareSy( const int Sy1, const int Sy2 )
 
       registerDiffUELs();
       for( int D {}; D < Dim; D++ )
-         strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
+         // TODO: Improve this check (especially the else case)
+         if( Keys[D] < UELTable->Count() )
+            strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
+         else
+         {
+            std::string label { "L__" };
+            label += std::to_string( Keys[D] );
+            strcpy( StrKeysPtrs[D], label.data() );
+         }
       if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
          strcpy( StrKeysPtrs[Dim], Act.data() );
       else
