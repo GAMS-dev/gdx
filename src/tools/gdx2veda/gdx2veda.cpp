@@ -30,6 +30,44 @@ namespace gdx2veda
 
 int main( const int argc, const char *argv[] )
 {
+   int ParamCount { argc - 1 };
+   const char **ParamStr { argv };
+
+   // TODO: Remove? Update to GDX2VEDA?
+   // gdlSetSystemName( 'GMS2VEDA' );
+   // if( gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
+   // {
+   //    std::cout << gdlGetAuditLine() << std::endl;
+   //    return 0;
+   // }
+
+   // unsigned int NumErr {};
+
+   std::map<gdxSyType, std::string> DataText {
+           { dt_set, "Set" },
+           { dt_par, "Par" },
+           { dt_var, "Var" },
+           { dt_equ, "Equ" } };
+
+   std::string help;
+   if( ParamCount == 0 )
+      help = "-H";
+   else
+      help = gdlib::strutilx::UpperCase( ParamStr[1] );
+
+   if( help == "--HELP" )
+   {
+      ShortHelp();
+      // VddHelp();
+      return 0;
+   }
+
+   if( help == "-H" || help == "-HELP" || help == "/?" || help == "?" )
+   {
+      ShortHelp();
+      return 0;
+   }
+
    return 0;
 }
 
