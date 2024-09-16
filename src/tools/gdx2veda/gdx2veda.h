@@ -4,6 +4,8 @@
 namespace gdx2veda
 {
 
+void ShortHelp();
+
 int main( int argc, const char *argv[] );
 
 }// namespace gdx2veda
