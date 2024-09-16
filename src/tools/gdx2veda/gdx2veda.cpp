@@ -23,7 +23,10 @@
  * SOFTWARE.
  */
 
+#include <map>
+
 #include "gdx2veda.h"
+#include "../../gdlib/strutilx.h"
 
 namespace gdx2veda
 {
