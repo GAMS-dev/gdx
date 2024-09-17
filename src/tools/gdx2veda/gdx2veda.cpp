@@ -27,6 +27,7 @@
 #include <map>
 
 #include "gdx2veda.h"
+#include "../library/common.h"
 #include "../../gdlib/strutilx.h"
 
 namespace gdx2veda
@@ -93,6 +94,28 @@ int main( const int argc, const char *argv[] )
    {
       ShortHelp();
       return 0;
+   }
+
+   library::short_string msg;
+   if( !gdxGetReady( msg.data(), msg.length() ) )
+   {
+      library::printErrorMessage( "*** Could not load GDX library" );
+      library::printErrorMessage( "*** Msg: " + msg.string() );
+      return 1;
+   }
+
+   gdxHandle_t PGX;
+   std::string fngdx = gdlib::strutilx::CompleteFileExtEx( ParamStr[1], ".gdx" );
+   gdxCreate( &PGX, msg.data(), msg.length() );
+   int rc;
+   gdxOpenRead( PGX, fngdx.data(), &rc );
+   if( rc != 0 )
+   {
+      gdxErrorStr( nullptr, rc, msg.data() );
+      library::printErrorMessage( "*** Could not open GDX: " + fngdx );
+      library::printErrorMessage( "*** Msg: " + msg.string() );
+      // UnloadGdxLibrary();
+      return 1;
    }
 
    return 0;
