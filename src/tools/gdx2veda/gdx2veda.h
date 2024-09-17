@@ -16,6 +16,8 @@ namespace gdx2veda
 
 void ShortHelp();
 
+void GetSpecialValues( const gdxHandle_t &PGX );
+
 int main( int argc, const char *argv[] );
 
 }// namespace gdx2veda

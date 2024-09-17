@@ -56,6 +56,13 @@ void ShortHelp()
              << std::endl;
 }
 
+gdxSVals_t SpecialValues {};
+void GetSpecialValues( const gdxHandle_t &PGX )
+{
+   gdxResetSpecialValues( PGX );
+   gdxGetSpecialValues( PGX, SpecialValues );
+}
+
 int main( const int argc, const char *argv[] )
 {
    int ParamCount { argc - 1 };
