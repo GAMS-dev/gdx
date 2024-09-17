@@ -150,6 +150,61 @@ int main( const int argc, const char *argv[] )
    gdxSystemInfo( PGX, &NrSy, &NrUel );
    std::cout << "--- GDX File : Symbols=" << NrSy << " UELs=" << NrUel << std::endl;
 
+   if( ParamCount == 1 )
+   {
+      fnveda = gdlib::strutilx::ChangeFileExtEx( fngdx, ".csv" );
+      std::cout << "\nContent of GDX " << fngdx << " dump written to " << fnveda << '\n'
+                << "\nNum Typ Dim Count  Name" << std::endl;
+
+      for( int N { 1 }; N <= NrSy; N++ )
+      {
+         library::short_string SyName;
+         int xf, iSyType;
+         gdxSymbolInfo( PGX, N, SyName.data(), &xf, &iSyType );
+
+         if( SyDim > MaxSyDim )
+            MaxSyDim = SyDim;
+
+         int ElemCount, iDummy;
+         library::short_string SyText;
+         gdxSymbolInfoX( PGX, N, &ElemCount, &iDummy, SyText.data() );
+
+         gdxSyType SyType { gdxSyType( iSyType ) };
+         std::cout << std::setw( 3 ) << N << ' '
+                   << DataText.at( SyType )
+                   << std::setw( 3 ) << SyDim
+                   << std::setw( 6 ) << ElemCount
+                   << "  " << SyName
+                   << std::setw( 12 - SyName.length() ) << ' '
+                   << SyText << std::endl;
+
+         if( SyType == dt_var || SyType == dt_equ )
+            cnt1 += maxsuff * ElemCount;
+         else
+            cnt1 += ElemCount;
+         cnt += ElemCount;
+      }
+
+      std::cout << std::setw( 17 ) << cnt << "  GDX record count" << '\n'
+                << std::setw( 17 ) << cnt1 + 1 << "  CSV record count (including header)" << std::endl;
+   }
+
+   std::ofstream f( fnveda );
+   if( !f.is_open() )
+   {
+      ReportError( "Could not open file: " + fnveda );
+      ReportError( "Msg: " + std::string { strerror( errno ) } );
+      return 1;
+   }
+
+   DataLine.at( 1 ) = '"' + gdlib::strutilx::ExtractFileNameEx( fngdx ) + '"';
+   DataLine.at( 2 ) = "\"Name\"";
+   for( int i { 1 }; i <= MaxSyDim; i++ )
+      DataLine.at( i + 2 ) = "\"Index " + std::to_string( i ) + '"';
+   WriteDataLine( f );
+   f << "\"Value\",\"Text\"" << std::endl;
+
+   // TODO: f.close();
    return 0;
 }
 
