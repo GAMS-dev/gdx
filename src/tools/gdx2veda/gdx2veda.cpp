@@ -56,6 +56,13 @@ void ShortHelp()
              << std::endl;
 }
 
+void WriteDataLine( std::ofstream &f )
+{
+   for( int i { 1 }; i <= MaxSyDim + 2; i++ )
+      f << DataLine.at( i ) << ',';
+   // f << std::endl;
+}
+
 gdxSVals_t SpecialValues {};
 void GetSpecialValues( const gdxHandle_t &PGX )
 {
