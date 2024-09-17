@@ -179,7 +179,7 @@ int main( const int argc, const char *argv[] )
                    << SyText << std::endl;
 
          if( SyType == dt_var || SyType == dt_equ )
-            cnt1 += maxsuff * ElemCount;
+            cnt1 += MaxSuff * ElemCount;
          else
             cnt1 += ElemCount;
          cnt += ElemCount;
