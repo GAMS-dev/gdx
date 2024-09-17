@@ -4,6 +4,7 @@
 #include <string>
 
 #include "container.cpp"
+#include "vdd.h"
 #include "../library/short_string.h"
 
 // Global constants
