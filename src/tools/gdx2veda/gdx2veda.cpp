@@ -24,7 +24,10 @@
  */
 
 #include <iostream>
+#include <iomanip>
 #include <map>
+#include <fstream>
+#include <cstring>
 
 #include "gdx2veda.h"
 #include "../library/common.h"
