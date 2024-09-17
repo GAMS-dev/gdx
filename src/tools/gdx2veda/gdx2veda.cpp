@@ -33,6 +33,20 @@
 namespace gdx2veda
 {
 
+// YYYY-MM-DD, ISO format
+const std::string BuildVersion { "2005-10-07" };
+
+// Store the Uels
+library::one_indexed_container<library::short_string> Uels { 1000000 };
+library::one_indexed_container<library::short_string> DataLine { GMS_MAX_INDEX_DIM };
+
+gdxSVals_t SpecialValues {};
+
+std::string fnveda;
+int SyDim {}, MaxSyDim {};
+int cnt {}, cnt1 {};
+bool vedaline {};
+
 void ShortHelp()
 {
    std::cout << '\n'
@@ -63,7 +77,6 @@ void WriteDataLine( std::ofstream &f )
    // f << std::endl;
 }
 
-gdxSVals_t SpecialValues {};
 void GetSpecialValues( const gdxHandle_t &PGX )
 {
    gdxResetSpecialValues( PGX );
