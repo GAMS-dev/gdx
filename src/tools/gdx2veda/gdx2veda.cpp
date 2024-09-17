@@ -125,6 +125,11 @@ int main( const int argc, const char *argv[] )
       return 1;
    }
 
+   GetSpecialValues( PGX );
+   int NrSy, NrUel;
+   gdxSystemInfo( PGX, &NrSy, &NrUel );
+   std::cout << "--- GDX File : Symbols=" << NrSy << " UELs=" << NrUel << std::endl;
+
    return 0;
 }
 
