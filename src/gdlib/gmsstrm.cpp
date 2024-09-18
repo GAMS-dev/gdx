@@ -82,7 +82,7 @@ constexpr uint8_t signature_header = 0xFF;
 const std::string signature_gams = "*GAMS*"s;
 constexpr int verify_offset = 100;
 
-constexpr static char substChar {/*0x1A*/ std::char_traits<char>::eof()};
+constexpr static char substChar { std::numeric_limits<char>::is_signed ? std::char_traits<char>::eof() : 0x1A };
 
 union TDoubleVar
 {

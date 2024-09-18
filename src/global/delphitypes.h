@@ -41,6 +41,19 @@
 namespace global::delphitypes
 {
 
+// According to Embarcadero docs
+// http://docwiki.embarcadero.com/RADStudio/Sydney/en/Simple_Types_(Delphi)
+using Byte = uint8_t; // unsigned char
+using Word = uint16_t;// unsigned short
+using LongWord = uint32_t; // unsigned
+using Cardinal = uint32_t;// unsigned int
+using Longint = int32_t;
+using Int32 = int32_t;// int
+using Int64 = int64_t;// long long
+using Shortint = signed char;
+using Integer = int;
+using Smallint = int16_t;// short
+
 // mimick Pascal "array[lbIncl..ubIncl] of T"
 // internally uses std::array. lbIncl maps to 0, ubIncl maps to size()-1
 template<typename T, int lbIncl, int ubIncl>
