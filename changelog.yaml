@@ -1,8 +1,12 @@
 ---
+- 7.11.7:
+    - Fix building GDX on arm64 with GCC (char is unsigned by default there).
+    - Multiple cosmetic changes.
+    - Another batch of changes to infrastructure code and CI pipeline that is not directly affecting GDX.
 - 7.11.6:
-    - Make building (so far) unused infrastructure classes in CMake project optional
-    - Added toggles to disable building tests and examples as part of CMake project (use -DNO_TESTS=ON or -DNO_EXAMPLES=ON)
-    - Extended README with short recipe for quickly building a minimal GDX library with CMake
+    - Make building (so far) unused infrastructure classes in CMake project optional.
+    - Added toggles to disable building tests and examples as part of CMake project (use -DNO_TESTS=ON or -DNO_EXAMPLES=ON).
+    - Extended README with short recipe for quickly building a minimal GDX library with CMake.
 - 7.11.5:
     - Fixed gdxOpenAppend not indicating a problem (in the return code) when trying to append to a GDX file with format version before 7 (incompatible for appending).
     - Fixed gdxDataReadMap crashing when record (user-mapped) UEL indices are out of bounds (index exceeds number of UELs).
