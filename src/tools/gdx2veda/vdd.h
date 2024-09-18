@@ -12,9 +12,9 @@ namespace gdx2veda
 // Cube data definitions
 
 // Errors during loading
-int NumErr {};
+extern int NumErr;
 // Veda Data base name
-library::short_string VEDAFlavor;
+extern library::short_string VEDAFlavor;
 
 // Max gams dimension
 constexpr int MaxGamsDim { 10 };
@@ -22,18 +22,18 @@ constexpr int MaxGamsDim { 10 };
 constexpr int MaxSuff { 5 };
 
 // .LM is new: write both level and marginal
-library::one_indexed_container<std::string>
+const library::one_indexed_container<std::string>
         NameSuff { { "l", "m", "lo", "up", "lm" } };
 
 // Max cube dimensions
 constexpr int MaxDimension { 50 };
 // Number of dimensions
-int NumDimension {};
+extern int NumDimension;
 
 // Position of the runname
-// int RunPos {};
+// extern int RunPos;
 // Position of the attributes
-int AtrPos {};
+extern int AtrPos;
 
 // const std::string RunDimension { "Scenario" };
 const std::string AtrDimension { "Attribute" };

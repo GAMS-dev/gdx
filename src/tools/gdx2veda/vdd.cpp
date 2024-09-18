@@ -5,6 +5,8 @@
 namespace gdx2veda
 {
 
+int NumErr {};
+
 void ReportError( const std::string &msg )
 {
    NumErr++;
