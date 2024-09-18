@@ -178,7 +178,11 @@ public:
             chars.set(i);
    }
 
-   [[nodiscard]] bool contains(char c) const {
+   [[nodiscard]] bool contains(const char c) const {
+      return chars[c+offset];
+   }
+
+   [[nodiscard]] bool operator[](const char c) const {
       return chars[c+offset];
    }
 

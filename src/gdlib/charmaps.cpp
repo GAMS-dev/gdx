@@ -40,6 +40,42 @@ char quotecharx {};
 
 std::array<char, numCharVals> mapcharBuf;
 
+constexpr std::array mapToSelf {
+        ' ', // blank
+        '!', // exclamation mark  !
+        '"', // double quote      "
+        '#', // number sign       #
+        '$', // dollar            $
+        '%', // per-cent          %
+        '&', // ampersand         &
+        '(', // left paren        (
+        ')', // right paren       )
+        '*', // asterisk          *
+        '+', // plus              +
+        ',', // comma             ,
+        '-', // minus             -
+        '.', // period            .
+        '/', // slash             /
+        ':', // colon             :
+        ',', // semi-colon        ,
+        '<', // less than         <
+        '=', // equals            =
+        '>', // greater than      >
+        '?', // question mark     ?
+        '@', // at sign           @
+        '\\',// backslash
+        '_', // underscore        _
+        '\'',// single quote      '
+        '[', // left sq bracket    [
+        ']', // right sq bracket   ]
+        '^', // circumflex         ^
+        '|', // vert bar           |
+        '`', // accent grave       `
+        '}', // right brace
+        '{', // left  brace
+        '~', // tilde              ~
+};
+
 void InitChars( const bool AllChars )
 {
    static_assert( mapcharBuf.size() == 256 );
@@ -54,23 +90,38 @@ void InitChars( const bool AllChars )
    // everything not explicitly whitelisted afterward kills the compilation (or is it ignored?)?
    for( unsigned char c = std::numeric_limits<unsigned char>::min(); c <= std::numeric_limits<unsigned char>::max(); c++ )
       mapcharBuf[c] = std::char_traits<char>::eof();
+
+   for(char c {'A'}; c <= 'Z'; c++)
+      if(letter[c])
+         mapcharBuf[c] = c;
+
+   for(char c {'a'}; c <= 'z'; c++)
+      if(letter[c])
+         mapcharBuf[c] = c;
+
+   for(char c {'0'}; c <= '9'; c++)
+      if(digit[c])
+         mapcharBuf[c] = c;
+
+   for( const char c : mapToSelf )
+      mapcharBuf[c] = c;
 }
 
 void InitCharacterMaps()
 {
-   // set other characeter arrays useful in compiler and execution
+   // set other character arrays useful in compiler and execution
    // make sets empty first
    const utils::charset Empty;
    capletter = textquote = digit = lowletter = letter = identchar = Empty;
-   utils::charRangeInsert( digit, '0', '9' );
+   charRangeInsert( digit, '0', '9' );
 
-   utils::charRangeInsert( letter, 'A', 'Z' );
-   utils::charRangeInsert( capletter, 'A', 'Z' );
+   charRangeInsert( letter, 'A', 'Z' );
+   charRangeInsert( capletter, 'A', 'Z' );
 
-   utils::charRangeInsert( letter, 'a', 'z' );
-   utils::charRangeInsert( lowletter, 'a', 'z' );
+   charRangeInsert( letter, 'a', 'z' );
+   charRangeInsert( lowletter, 'a', 'z' );
 
-   identchar = utils::unionOp( letter, digit );
+   identchar = unionOp( letter, digit );
    alphanum = identchar;
    // set ident character array
    identchar.insert( '_' );
@@ -78,8 +129,8 @@ void InitCharacterMaps()
    // set label character array - unquoted characters
    labelchar = identchar;
 
-   utils::insertAllChars( labelchar, "+-" );
-   utils::insertAllChars( textquote, "\"\'" );
+   insertAllChars( labelchar, "+-" );
+   insertAllChars( textquote, "\"\'" );
 }
 
 // Brief:
@@ -97,9 +148,8 @@ char DetermineQuote( const char *s )
 
    for( int i {}; s[i] != '\0'; i++ )
    {
-      char sk = s[i];
       // don't need quotes
-      if( !utils::in( sk, labelchar ) )
+      if( const char sk = s[i]; !utils::in( sk, labelchar ) )
       {
          quoted = true;
          if( sk == '\'' )
