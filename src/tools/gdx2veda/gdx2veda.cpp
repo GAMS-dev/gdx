@@ -222,18 +222,18 @@ int main( const int argc, const char *argv[] )
       std::cout << "\nContent of GDX " << FnGdx << " dump written to " << FnVeda << '\n'
                 << "\nNum Typ Dim Count  Name" << std::endl;
 
-      for( int N { 1 }; N <= NrSy; N++ )
+      for( n = 1; n <= NrSy; n++ )
       {
          int xf;
-         gdxSymbolInfo( PGX, N, SyName.data(), &xf, &iSyType );
+         gdxSymbolInfo( PGX, n, SyName.data(), &xf, &iSyType );
          SyType = gdxSyType( iSyType );
 
          if( SyDim > MaxSyDim )
             MaxSyDim = SyDim;
 
-         gdxSymbolInfoX( PGX, N, &ElemCount, &iDummy, SyText.data() );
+         gdxSymbolInfoX( PGX, n, &ElemCount, &iDummy, SyText.data() );
 
-         std::cout << std::setw( 3 ) << N << ' '
+         std::cout << std::setw( 3 ) << n << ' '
                    << DataText.at( SyType )
                    << std::setw( 3 ) << SyDim
                    << std::setw( 6 ) << ElemCount
@@ -262,7 +262,7 @@ int main( const int argc, const char *argv[] )
 
    DataLine.at( 1 ) = '"' + gdlib::strutilx::ExtractFileNameEx( FnGdx.string() ) + '"';
    DataLine.at( 2 ) = "\"Name\"";
-   for( int i { 1 }; i <= MaxSyDim; i++ )
+   for( i = 1; i <= MaxSyDim; i++ )
       DataLine.at( i + 2 ) = "\"Index " + std::to_string( i ) + '"';
    WriteDataLine( f );
    f << "\"Value\",\"Text\"" << std::endl;
