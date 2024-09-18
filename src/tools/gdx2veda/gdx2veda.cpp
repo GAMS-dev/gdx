@@ -161,7 +161,7 @@ void GetSpecialValues( const gdxHandle_t &PGX )
 
 int main( const int argc, const char *argv[] )
 {
-   int ParamCount { argc - 1 };
+   const int ParamCount { argc - 1 };
    const char **ParamStr { argv };
 
    // TODO: Remove? Update to GDX2VEDA?
@@ -173,12 +173,6 @@ int main( const int argc, const char *argv[] )
    // }
 
    NumErr = 0;
-
-   std::map<gdxSyType, std::string> DataText {
-           { dt_set, "Set" },
-           { dt_par, "Par" },
-           { dt_var, "Var" },
-           { dt_equ, "Equ" } };
 
    std::string help;
    if( ParamCount == 0 )
@@ -199,7 +193,6 @@ int main( const int argc, const char *argv[] )
       return 0;
    }
 
-   library::short_string msg;
    if( !gdxGetReady( msg.data(), msg.length() ) )
    {
       library::printErrorMessage( "*** Could not load GDX library" );
@@ -207,45 +200,39 @@ int main( const int argc, const char *argv[] )
       return 1;
    }
 
-   gdxHandle_t PGX;
-   std::string fngdx = gdlib::strutilx::CompleteFileExtEx( ParamStr[1], ".gdx" );
+   fngdx = gdlib::strutilx::CompleteFileExtEx( ParamStr[1], ".gdx" );
    gdxCreate( &PGX, msg.data(), msg.length() );
-   int rc;
    gdxOpenRead( PGX, fngdx.data(), &rc );
    if( rc != 0 )
    {
       gdxErrorStr( nullptr, rc, msg.data() );
-      library::printErrorMessage( "*** Could not open GDX: " + fngdx );
+      library::printErrorMessage( "*** Could not open GDX: " + fngdx.string() );
       library::printErrorMessage( "*** Msg: " + msg.string() );
       // UnloadGdxLibrary();
       return 1;
    }
 
    GetSpecialValues( PGX );
-   int NrSy, NrUel;
    gdxSystemInfo( PGX, &NrSy, &NrUel );
    std::cout << "--- GDX File : Symbols=" << NrSy << " UELs=" << NrUel << std::endl;
 
    if( ParamCount == 1 )
    {
-      fnveda = gdlib::strutilx::ChangeFileExtEx( fngdx, ".csv" );
+      fnveda = gdlib::strutilx::ChangeFileExtEx( fngdx.string(), ".csv" );
       std::cout << "\nContent of GDX " << fngdx << " dump written to " << fnveda << '\n'
                 << "\nNum Typ Dim Count  Name" << std::endl;
 
       for( int N { 1 }; N <= NrSy; N++ )
       {
-         library::short_string SyName;
-         int xf, iSyType;
+         int xf;
          gdxSymbolInfo( PGX, N, SyName.data(), &xf, &iSyType );
+         SyType = gdxSyType( iSyType );
 
          if( SyDim > MaxSyDim )
             MaxSyDim = SyDim;
 
-         int ElemCount, iDummy;
-         library::short_string SyText;
          gdxSymbolInfoX( PGX, N, &ElemCount, &iDummy, SyText.data() );
 
-         gdxSyType SyType { gdxSyType( iSyType ) };
          std::cout << std::setw( 3 ) << N << ' '
                    << DataText.at( SyType )
                    << std::setw( 3 ) << SyDim
@@ -265,15 +252,15 @@ int main( const int argc, const char *argv[] )
                 << std::setw( 17 ) << cnt1 + 1 << "  CSV record count (including header)" << std::endl;
    }
 
-   std::ofstream f( fnveda );
+   f.open( fnveda.string() );
    if( !f.is_open() )
    {
-      ReportError( "Could not open file: " + fnveda );
+      ReportError( "Could not open file: " + fnveda.string() );
       ReportError( "Msg: " + std::string { strerror( errno ) } );
       return 1;
    }
 
-   DataLine.at( 1 ) = '"' + gdlib::strutilx::ExtractFileNameEx( fngdx ) + '"';
+   DataLine.at( 1 ) = '"' + gdlib::strutilx::ExtractFileNameEx( fngdx.string() ) + '"';
    DataLine.at( 2 ) = "\"Name\"";
    for( int i { 1 }; i <= MaxSyDim; i++ )
       DataLine.at( i + 2 ) = "\"Index " + std::to_string( i ) + '"';
