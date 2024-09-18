@@ -429,7 +429,7 @@ public:
 
    [[nodiscard]] int MemoryUsed() const
    {
-      return FBaseCap * sizeof( T * ) + FBaseCnt * FBucketSize;
+      return FBaseCap * static_cast<int>(sizeof( T * )) + FBaseCnt * FBucketSize;
    }
 
    void DeleteAtEnd( int Cnt )
