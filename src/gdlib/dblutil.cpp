@@ -120,7 +120,7 @@ std::string DblToStrHexponential( const double x )
    bool isNeg;
    uint32_t expo;
    int64_t mant;
-   dblDecomp( x, isNeg, expo, mant );
+   DblDecomp( x, isNeg, expo, mant );
    std::string result;
    // Consider all 10 cases: SNaN, QNaN, and +/-[INF,denormal,zero,normal]
    if( isNeg )
