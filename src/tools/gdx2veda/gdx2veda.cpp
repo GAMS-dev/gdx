@@ -45,10 +45,83 @@ library::one_indexed_container<library::short_string> DataLine { GMS_MAX_INDEX_D
 
 gdxSVals_t SpecialValues {};
 
-std::string fnveda;
-int SyDim {}, MaxSyDim {};
-int cnt {}, cnt1 {};
+std::ofstream f, g;
+
+library::short_string
+        msg,
+        homedir,
+        runid,
+        fnvdd,
+        fndll,
+        fnveda,
+        fnvedah,
+        fnvde,
+        fnvds,
+        fngdx;
+
+gdxHandle_t PGX;
+
+gdxStrIndex_t Elements {};
+gdxValues_t Values {};
+gdxUelIndex_t Indices {}, MappedIndices {};
+int first {};
+library::short_string tmp;
+
+int
+        NodeNr {},
+        NrRecs {},
+        iSyType {},
+        SyNr {},
+        NrSy {}, // Number of symbols in gdx file
+        NrUel {},// Number of Uels in gdx file
+        ElemCount {},
+        SyDim {}, MaxSyDim {}, SyDimMapped {},
+        cnt {}, cnt1 {},
+        cnttxt {}, cntsub {},
+        i {}, j {}, jj {}, k {}, l {}, n {}, nn {},
+        iDummy {},
+        rc {};
+
+gdxSyType SyType;
+
+library::short_string NodeStr, SyText, SyName;
+
+std::map<gdxSyType, std::string> DataText {
+        { dt_set, "Set" },
+        { dt_par, "Par" },
+        { dt_var, "Var" },
+        { dt_equ, "Equ" } };
+
+bool skip {};
+library::short_string Filler;
 bool vedaline {};
+
+// TDataLineMapping DataLineMapping {};
+int h {};
+gdxUelIndex_t x {};
+library::short_string s, s2, s3;
+int uel {};
+library::short_string DimensionName;
+int DimensionNumber {};
+library::one_indexed_container<int> TextDim { MaxText };
+gdxUelIndex_t IndexMapping {};
+int UelLength {}, mark {};
+
+library::short_string MappedValue;
+bool IsAString {};
+
+int parentindx {}, childindx {},
+        parentuel {}, childuel {}, explantext {};
+
+library::short_string Symbol;
+
+int dimno {}, textdimension {};
+
+int expltext {};
+library::one_indexed_container<int> LiteralFilter { GMS_MAX_INDEX_DIM };
+
+bool doSuppressZero {};
+double xx1 {}, xx2 {};
 
 void ShortHelp()
 {
