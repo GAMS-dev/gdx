@@ -48,23 +48,23 @@ gdxSVals_t SpecialValues {};
 std::ofstream f, g;
 
 library::short_string
-        msg,
-        homedir,
-        runid,
-        fnvdd,
-        fndll,
-        fnveda,
-        fnvedah,
-        fnvde,
-        fnvds,
-        fngdx;
+        Msg,
+        HomeDir,
+        RunId,
+        FnVdd,
+        FnDll,
+        FnVeda,
+        FnVedah,
+        FnVde,
+        FnVds,
+        FnGdx;
 
 gdxHandle_t PGX;
 
 gdxStrIndex_t Elements {};
 gdxValues_t Values {};
 gdxUelIndex_t Indices {}, MappedIndices {};
-int first {};
+int First {};
 library::short_string tmp;
 
 int
@@ -76,8 +76,8 @@ int
         NrUel {},// Number of Uels in gdx file
         ElemCount {},
         SyDim {}, MaxSyDim {}, SyDimMapped {},
-        cnt {}, cnt1 {},
-        cnttxt {}, cntsub {},
+        Cnt {}, Cnt1 {},
+        CntTxt {}, CntSub {},
         i {}, j {}, jj {}, k {}, l {}, n {}, nn {},
         iDummy {},
         rc {};
@@ -92,35 +92,35 @@ std::map<gdxSyType, std::string> DataText {
         { dt_var, "Var" },
         { dt_equ, "Equ" } };
 
-bool skip {};
+bool Skip {};
 library::short_string Filler;
-bool vedaline {};
+bool VedaLine {};
 
 // TDataLineMapping DataLineMapping {};
 int h {};
 gdxUelIndex_t x {};
 library::short_string s, s2, s3;
-int uel {};
+int Uel {};
 library::short_string DimensionName;
 int DimensionNumber {};
 library::one_indexed_container<int> TextDim { MaxText };
 gdxUelIndex_t IndexMapping {};
-int UelLength {}, mark {};
+int UelLength {}, Mark {};
 
 library::short_string MappedValue;
 bool IsAString {};
 
-int parentindx {}, childindx {},
-        parentuel {}, childuel {}, explantext {};
+int ParentIndx {}, ChildIndx {};
+int ParentUel {}, ChildUel {}, ExplanText {};
 
 library::short_string Symbol;
 
-int dimno {}, textdimension {};
+int DimNo {}, TextDimension {};
 
-int expltext {};
+int ExplText {};
 library::one_indexed_container<int> LiteralFilter { GMS_MAX_INDEX_DIM };
 
-bool doSuppressZero {};
+bool DoSuppressZero {};
 double xx1 {}, xx2 {};
 
 void ShortHelp()
@@ -193,21 +193,21 @@ int main( const int argc, const char *argv[] )
       return 0;
    }
 
-   if( !gdxGetReady( msg.data(), msg.length() ) )
+   if( !gdxGetReady( Msg.data(), Msg.length() ) )
    {
       library::printErrorMessage( "*** Could not load GDX library" );
-      library::printErrorMessage( "*** Msg: " + msg.string() );
+      library::printErrorMessage( "*** Msg: " + Msg.string() );
       return 1;
    }
 
-   fngdx = gdlib::strutilx::CompleteFileExtEx( ParamStr[1], ".gdx" );
-   gdxCreate( &PGX, msg.data(), msg.length() );
-   gdxOpenRead( PGX, fngdx.data(), &rc );
+   FnGdx = gdlib::strutilx::CompleteFileExtEx( ParamStr[1], ".gdx" );
+   gdxCreate( &PGX, Msg.data(), Msg.length() );
+   gdxOpenRead( PGX, FnGdx.data(), &rc );
    if( rc != 0 )
    {
-      gdxErrorStr( nullptr, rc, msg.data() );
-      library::printErrorMessage( "*** Could not open GDX: " + fngdx.string() );
-      library::printErrorMessage( "*** Msg: " + msg.string() );
+      gdxErrorStr( nullptr, rc, Msg.data() );
+      library::printErrorMessage( "*** Could not open GDX: " + FnGdx.string() );
+      library::printErrorMessage( "*** Msg: " + Msg.string() );
       // UnloadGdxLibrary();
       return 1;
    }
@@ -218,8 +218,8 @@ int main( const int argc, const char *argv[] )
 
    if( ParamCount == 1 )
    {
-      fnveda = gdlib::strutilx::ChangeFileExtEx( fngdx.string(), ".csv" );
-      std::cout << "\nContent of GDX " << fngdx << " dump written to " << fnveda << '\n'
+      FnVeda = gdlib::strutilx::ChangeFileExtEx( FnGdx.string(), ".csv" );
+      std::cout << "\nContent of GDX " << FnGdx << " dump written to " << FnVeda << '\n'
                 << "\nNum Typ Dim Count  Name" << std::endl;
 
       for( int N { 1 }; N <= NrSy; N++ )
@@ -242,25 +242,25 @@ int main( const int argc, const char *argv[] )
                    << SyText << std::endl;
 
          if( SyType == dt_var || SyType == dt_equ )
-            cnt1 += MaxSuff * ElemCount;
+            Cnt1 += MaxSuff * ElemCount;
          else
-            cnt1 += ElemCount;
-         cnt += ElemCount;
+            Cnt1 += ElemCount;
+         Cnt += ElemCount;
       }
 
-      std::cout << std::setw( 17 ) << cnt << "  GDX record count" << '\n'
-                << std::setw( 17 ) << cnt1 + 1 << "  CSV record count (including header)" << std::endl;
+      std::cout << std::setw( 17 ) << Cnt << "  GDX record count" << '\n'
+                << std::setw( 17 ) << Cnt1 + 1 << "  CSV record count (including header)" << std::endl;
    }
 
-   f.open( fnveda.string() );
+   f.open( FnVeda.string() );
    if( !f.is_open() )
    {
-      ReportError( "Could not open file: " + fnveda.string() );
+      ReportError( "Could not open file: " + FnVeda.string() );
       ReportError( "Msg: " + std::string { strerror( errno ) } );
       return 1;
    }
 
-   DataLine.at( 1 ) = '"' + gdlib::strutilx::ExtractFileNameEx( fngdx.string() ) + '"';
+   DataLine.at( 1 ) = '"' + gdlib::strutilx::ExtractFileNameEx( FnGdx.string() ) + '"';
    DataLine.at( 2 ) = "\"Name\"";
    for( int i { 1 }; i <= MaxSyDim; i++ )
       DataLine.at( i + 2 ) = "\"Index " + std::to_string( i ) + '"';
