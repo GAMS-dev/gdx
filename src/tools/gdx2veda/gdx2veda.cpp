@@ -99,7 +99,7 @@ int main( const int argc, const char *argv[] )
    //    return 0;
    // }
 
-   // unsigned int NumErr {};
+   NumErr = 0;
 
    std::map<gdxSyType, std::string> DataText {
            { dt_set, "Set" },
