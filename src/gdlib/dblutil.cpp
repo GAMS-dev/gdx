@@ -96,15 +96,32 @@ std::string dblToStrHexponential( const double x )
    uint32_t expo;
    int64_t mant;
    dblDecomp( x, isNeg, expo, mant );
+   std::string result;
    // Consider all 10 cases: SNaN, QNaN, and +/-[INF,denormal,zero,normal]
-   std::string res;
    if( isNeg )
-      res = "-"s;
-   if (!expo)
-      return res + ( !mant ? "0x0.0p0"s : "0x0."s + mFormat( mant ) + "p-1022"s );
-   if (expo < 2047) // not all ones
-      return res + "0x1."s + mFormat( mant ) + 'p' + rtl::sysutils_p3::IntToStr( expo - 1023 );
-   return !mant ? res + "Infinity"s : "NaN"s;
+      result += '-';
+   if( !expo )
+   {
+      if( !mant ) // zero
+         result += "0x0.0p0"s;
+      else // denorm
+         result += "0x0."s + mFormat( mant ) + "p-1022"s;
+   }
+   // not all ones
+   else if( expo < 2047 )
+      // normalized double
+         result += "0x1."s + mFormat( mant ) + 'p' + rtl::sysutils_p3::IntToStr( static_cast<int64_t>( expo ) - 1023 );
+   // exponent all ones
+   else
+   {
+      // infinity
+      if( !mant )
+         result += "Infinity"s;
+      else // NaN
+         result = "NaN"s;
+   }
+   return result;
 }
+
 
 }// namespace gdlib::dblutil
