@@ -161,6 +161,17 @@ void GetSpecialValues( const gdxHandle_t &PGX )
    gdxGetSpecialValues( PGX, SpecialValues );
 }
 
+bool IsASpecialValue( const double v, library::short_string &MappedValue, bool &IsAString )
+{
+   gdxSpecValue spv { gdxSpecValue( v ) };
+   if( spv == sv_normal )
+      return false;
+   // TODO:
+   // MappedValue = SpecialValueMapping.at(spv);
+   // IsAString = SpecialValueIsString.at(spv);
+   return true;
+}
+
 int main( const int argc, const char *argv[] )
 {
    const int ParamCount { argc - 1 };
