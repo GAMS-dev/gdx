@@ -2,6 +2,8 @@
 #define GDX_VDD_H
 
 #include <string>
+#include <map>
+#include <fstream>
 
 #include "container.h"
 #include "../library/short_string.h"
@@ -39,8 +41,8 @@ extern int AtrPos;
 const std::string AtrDimension { "Attribute" };
 
 // EK: The following arrays are now inside the TDimensionStore class
-// library::one_indexed_container<std::string> NameDimension { MaxDimension };
-// library::one_indexed_container<std::string> DummyDimension { MaxDimension };
+// extern library::one_indexed_container<std::string> NameDimension;
+// extern library::one_indexed_container<std::string> DummyDimension;
 
 // Max number of tuples
 constexpr int MaxTuple { 20 };
@@ -50,6 +52,89 @@ constexpr int MaxDataEntry { 500 };
 constexpr int MaxText { 200 };
 // Max subsets to extract text
 constexpr int MaxSubset { 200 };
+
+extern int NumDataEntry;
+
+extern library::one_indexed_container<std::string> AtrName;
+extern library::one_indexed_container<int> GamsName;
+extern library::one_indexed_container<int> GamsDim;
+
+// List of attributes whose records have to be skipped if zero
+// TODO: TXStrHashList SuppressZero;
+
+extern int NumText;
+
+extern library::one_indexed_container<std::string> GamsText;
+extern library::one_indexed_container<int> DummyText;
+extern library::one_indexed_container<bool> ExpandMap;
+
+// Number of subset definitions (0..MaxSubset)
+extern int NumSubset;
+
+extern library::one_indexed_container<int> DimSubset;
+extern library::one_indexed_container<library::short_string> Subset;
+extern library::one_indexed_container<std::string> GamsSubset;
+extern library::one_indexed_container<int> NextSubset;
+// Next set in chain
+extern library::one_indexed_container<int> NextSet;
+
+enum class Subset_t
+{
+   NoParent,
+   ParentIsIndex1,
+   ParentIsIndex2
+};
+
+extern library::one_indexed_container<Subset_t> ParentOfSubset;
+
+// -1 or 1..NumDimension
+extern int Parent;
+extern library::one_indexed_container<int> Children;
+extern int NumChildren;
+
+struct ParentChildSet_t {
+   library::short_string GamsSetName;
+   // Dimension numbers
+   int Index1 {}, Index2 {}, child {};
+};
+
+extern library::one_indexed_container<ParentChildSet_t> ParentDimensionText;
+extern int NumParentDimensionTextSets;
+
+constexpr int MaxLiteral { 100 };
+
+extern library::one_indexed_container<library::short_string> LiteralPool;
+extern library::one_indexed_container<int> LiteralUel;
+extern int NumLiteral;
+
+// TODO: TDimensionStore DimensionStore;
+
+extern std::map<gdxSpecValue, std::string> SpecialValueMapping;
+extern std::map<gdxSpecValue, bool> SpecialValueIsString;
+extern std::map<gdxSpecValue, bool> SpecialValueIsZero;
+
+enum class Format_t
+{
+   FormatVeda,
+   FormatCSV
+};
+
+struct Options_t {
+   std::string TupleSeparator;
+   bool ShowAllSeparators {}, RelaxDimensionAll {};
+   int ValueDim {};
+   bool SetsAllowedFlag {};
+   library::one_indexed_container<bool> SetsAllowed { MaxDimension };
+   std::string ScenarioSet;
+   Format_t Format;
+};
+
+extern Options_t Options;
+
+extern std::ofstream f;
+extern int NumLine, NumToken, rc;
+extern std::string Token, OrigLine, Line, ExpandedLine;
+extern char CharTab;
 
 void ReportError( const std::string &msg );
 
