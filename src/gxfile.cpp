@@ -1296,25 +1296,29 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
       }
       if( FDim == FCurrentDim && delta <= DeltaForWrite )
       {// small change in last dimension
-         FFile->WriteByte( FCurrentDim + delta );
+         assert(FCurrentDim >= 0 && FCurrentDim <= 255);
+         FFile->WriteByte( utils::ui8(FCurrentDim + delta) );
          LastElem[FCurrentDim - 1] = AElements[FCurrentDim - 1];
       }
       else
       {// general change
-         FFile->WriteByte( FDim );
+         assert(FDim >= 0 && FDim <= 255);
+         FFile->WriteByte( static_cast<uint8_t>(FDim) );
          for( int D { FDim - 1 }; D < FCurrentDim; D++ )
          {
-            int v { AElements[D] - MinElem[D] };
+            const int v { AElements[D] - MinElem[D] };
             switch( ElemType[D] )
             {
                case TgdxElemSize::sz_integer:
                   FFile->WriteInteger( v );
                   break;
                case TgdxElemSize::sz_word:
-                  FFile->WriteWord( v );
+                  assert(v >= 0 && v <= 65535);
+                  FFile->WriteWord( static_cast<uint16_t>(v) );
                   break;
                case TgdxElemSize::sz_byte:
-                  FFile->WriteByte( v );
+                  assert(v >= 0 && v <= 255);
+                  FFile->WriteByte( static_cast<uint8_t>(v) );
                   break;
             }
             LastElem[D] = AElements[D];
@@ -1325,10 +1329,10 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
    {
       for( int DV {}; DV <= LastDataField; DV++ )
       {
-         double X { AVals[DV] };
+         const double X { AVals[DV] };
          int64_t i64;
-         TDblClass dClass { dblInfo( X, i64 ) };
-         int xv { vm_valund };
+         const TDblClass dClass { dblInfo( X, i64 ) };
+         uint8_t xv { vm_valund };
          for( ; xv < vm_normal; xv++ )
             if( i64 == intlValueMapI64[xv] ) break;
          if( xv == vm_normal )
