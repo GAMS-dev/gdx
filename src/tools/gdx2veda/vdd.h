@@ -124,7 +124,7 @@ struct Options_t {
    bool ShowAllSeparators {}, RelaxDimensionAll {};
    int ValueDim {};
    bool SetsAllowedFlag {};
-   library::one_indexed_container<bool> SetsAllowed { MaxDimension };
+   library::one_indexed_container<bool> SetsAllowed;
    std::string ScenarioSet;
    Format_t Format;
 };

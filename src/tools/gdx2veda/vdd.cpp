@@ -77,13 +77,14 @@ library::one_indexed_container<ParentChildSet_t> ParentDimensionText { MaxDimens
 int NumParentDimensionTextSets {};
 
 Options_t Options {
-        .TupleSeparator = ".",
-        .ShowAllSeparators = false,
-        .RelaxDimensionAll = false,
-        .ValueDim = 1,
-        .SetsAllowedFlag = false,
-        .ScenarioSet = "",
-        .Format = Format_t::FormatVeda };
+        ".",
+        false,
+        false,
+        1,
+        false,
+        library::one_indexed_container<bool> { MaxDimension },
+        "",
+        Format_t::FormatVeda };
 
 std::ofstream f {};
 
