@@ -25,155 +25,21 @@
 
 
 #pragma once
+
 #include "modhead.h"
 #include <stdexcept>
 #include <string>
 #include <sstream>
-// only supported by MSVC so far :(
-//#include <format>
 #include <functional>
-#include <set>
 #include <cmath>
 #include <array>
 #include <cassert>
 #include <cstring>
 #include <cstdint>
 
-
 // Interface
 namespace global::delphitypes
 {
-
-class ShortStringHeap
-{
-   char *buf;
-
-public:
-   ShortStringHeap(const ShortStringHeap &other) {
-      buf = new char[other.buf[0]+2];
-      std::memcpy(buf, other.buf, sizeof(char)*buf[0]+2);
-   }
-
-   explicit ShortStringHeap( const char *s )
-   {
-      auto l { std::strlen( s ) };
-      buf = new char[l + 2];
-      buf[0] = static_cast<uint8_t>( l );
-      std::memcpy( &buf[1], s, l + 1 );
-   }
-
-   ~ShortStringHeap()
-   {
-      delete[] buf;
-   }
-
-   [[nodiscard]] std::string string() const
-   {
-      return &buf[1];
-   }
-
-   [[nodiscard]] char *c_str() const
-   {
-      return &buf[1];
-   }
-
-   char *d_str()
-   {
-      return buf;
-   }
-
-   [[nodiscard]] uint8_t size() const
-   {
-      return (uint8_t) buf[0];
-   }
-
-   [[nodiscard]] bool empty() const
-   {
-      return !(uint8_t) buf[0];
-   }
-
-   bool operator==( const std::string &s ) const
-   {
-      if( s.length() != size() ) return false;
-      for( int i {}; i < size(); i++ )
-         if( s[i] != buf[i + 1] ) return false;
-      return true;
-   }
-
-   ShortStringHeap &operator=( const std::string &s )
-   {
-      buf[0] = static_cast<uint8_t>( s.length() );
-      std::memcpy( &buf[1], s.c_str(), s.length() + 1 );
-      return *this;
-   }
-};
-
-class ShortString
-{
-   uint8_t length {};
-   std::array<char, 255> buf {};
-
-public:
-   explicit ShortString( const char *s ) : length { (uint8_t) std::strlen( s ) }
-   {
-      assert( std::strlen( s ) <= 254 );
-      std::memcpy( buf.data(), s, length + 1 );
-   }
-
-   explicit ShortString( const std::string &s ) : ShortString( s.c_str() )
-   {
-   }
-
-   [[nodiscard]] std::string string() const
-   {
-      return buf.data();
-   }
-
-   char *c_str()
-   {
-      return buf.data();
-   }
-
-   char *d_str()
-   {
-      return (char *) &length;
-   }
-
-   [[nodiscard]] uint8_t size() const
-   {
-      return length;
-   }
-
-   [[nodiscard]] bool empty() const
-   {
-      return !length;
-   }
-
-   bool operator==( const std::string &s ) const
-   {
-      if( s.length() != length ) return false;
-      for( int i {}; i < length; i++ )
-         if( s[i] != buf[i] ) return false;
-      return true;
-   }
-
-   ShortString &operator=( const std::string &s )
-   {
-      length = (uint8_t) s.length();
-      std::memcpy( buf.data(), s.c_str(), length + 1 );
-      return *this;
-   }
-};
-
-template<typename T>
-inline void FreeAndNil( T *&ptr )
-{
-   if( ptr )
-   {
-      delete ptr;
-      ptr = nullptr;
-   }
-}
 
 // According to Embarcadero docs
 // http://docwiki.embarcadero.com/RADStudio/Sydney/en/Simple_Types_(Delphi)
@@ -181,12 +47,41 @@ using Byte = uint8_t; // unsigned char
 using Word = uint16_t;// unsigned short
 using LongWord = uint32_t; // unsigned
 using Cardinal = uint32_t;// unsigned int
-using Longint = int;
+using Longint = int32_t;
 using Int32 = int32_t;// int
 using Int64 = int64_t;// long long
 using Shortint = signed char;
 using Integer = int;
 using Smallint = int16_t;// short
+
+// mimick Pascal "array[lbIncl..ubIncl] of T"
+// internally uses std::array. lbIncl maps to 0, ubIncl maps to size()-1
+template<typename T, int lbIncl, int ubIncl>
+class OffsetArray : public std::array<T, ubIncl-lbIncl+1>
+{
+   // Hide direct buffer access as this could be error-prone
+   T *data() { return nullptr; }
+public:
+   T& operator[]( const int ix) {
+      assert( ix >= lbIncl && ix <= ubIncl && "Index must be in range!" );
+      return std::array<T, ubIncl-lbIncl+1>::operator[](ix - lbIncl);
+   }
+
+   const T& operator[]( const int ix) const {
+      assert( ix >= lbIncl && ix <= ubIncl && "Index must be in range!" );
+      return std::array<T, ubIncl-lbIncl+1>::operator[](ix - lbIncl);
+   }
+};
+
+template<typename T>
+void FreeAndNil( T *&ptr )
+{
+   if( ptr )
+   {
+      delete ptr;
+      ptr = nullptr;
+   }
+}
 
 using tDateTime = double;
 using Text = std::fstream*;
@@ -285,13 +180,19 @@ public:
       return upperBoundIncl;
    }
 
+   // Number of elements from lower bound to upper bound (both inclusive)
+   constexpr static T getCount()
+   {
+      return upperBoundIncl - lowerBoundIncl + 1;
+   }
+
    T *getStorage()
    {
       return &value;
    }
 };
 
-inline double frac( double v )
+inline double frac( const double v )
 {
    return v - trunc( v );
 }

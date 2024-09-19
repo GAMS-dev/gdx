@@ -178,7 +178,11 @@ public:
             chars.set(i);
    }
 
-   [[nodiscard]] bool contains(char c) const {
+   [[nodiscard]] bool contains(const char c) const {
+      return chars[c+offset];
+   }
+
+   [[nodiscard]] bool operator[](const char c) const {
       return chars[c+offset];
    }
 
@@ -492,6 +496,13 @@ bool hasCharLt( std::string_view s, int n );
 
 double round( double n, int ndigits );
 
+// since std::round behaves differently from Delphi's System.Round
+template<class T>
+T round( const double n)
+{
+   return static_cast<T>(n >= 0 ? n+0.5 : n-0.5);
+}
+
 void replaceChar( char a, char b, std::string &s );
 
 std::vector<size_t> substrPositions( std::string_view s, std::string_view substr );
@@ -727,7 +738,7 @@ inline char *NewString( const char *s,
 
 int64_t queryPeakRSS();
 
-inline int ord( const char c )
+inline auto ord( const char c )
 {
    return static_cast<unsigned char>( c );
 }
@@ -746,14 +757,32 @@ std::string IntToStrW( int n, int w, char blankChar = ' ' );
 void trimLeft( std::string &s );
 
 template<int N, int firstValid=0>
-inline int indexOfSameText(const std::array<std::string, N> &strs, const std::string &s) {
+int indexOfSameText(const std::array<std::string, N> &strs, const std::string &s) {
    int i{firstValid};
    for(const std::string &s2 : strs) {
       if(sameText(s, s2))
          return i;
-      i++;
+      ++i;
    }
    return firstValid-1;
+}
+
+template<typename T>
+auto ui8(const T x)
+{
+   return static_cast<uint8_t>( x );
+}
+
+template<typename T>
+auto ui16(const T x)
+{
+   return static_cast<uint16_t>( x );
+}
+
+template<typename T>
+auto ui32(const T x)
+{
+   return static_cast<uint32_t>( x );
 }
 
 }// namespace utils

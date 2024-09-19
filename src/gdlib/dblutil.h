@@ -26,9 +26,12 @@
 
 #pragma once
 
+#include <string>
+
 namespace gdlib::dblutil
 {
 
 double gdRoundTo( double x, int i );
+std::string dblToStrHexponential( double x );
 
 }

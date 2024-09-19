@@ -37,7 +37,7 @@ tgmsvalue mapval( double x )
    if( x < valund ) return xvreal;
    if( x >= valacr ) return xvacr;
    x /= valund;
-   int k = static_cast<int>( std::round( x ) );
+   const int k = utils::round<int>( x );
    if( std::abs( k - x ) > 1.0e-5 )
       return xvund;
 

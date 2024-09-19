@@ -27,8 +27,11 @@
 #include <cstring> // for strerror, size_t, strcmp, strcpy
 
 #include "sysutils_p3.h"
-#include "p3platform.h" // for OSFileType, tOSFileType
+#include "p3platform.h"// for OSFileType, tOSFileType
+
 #include "global/unit.h" // for UNIT_INIT_FINI
+
+#include "gdlib/utils.h" // for ui16
 
 #if defined( _WIN32 )
    #include <Windows.h>
@@ -40,9 +43,11 @@
    #include <fnmatch.h>
 #endif
 
-using namespace global::delphitypes;
+
 using namespace rtl::p3platform;
 using namespace std::literals::string_literals;
+
+using utils::ui16;
 
 // ==============================================================================================================
 // Implementation
@@ -93,14 +98,14 @@ bool FileExists( const std::string &FileName )
 #endif
 }
 
-static TTimeStamp DateTimeToTimeStamp( tDateTime DateTime )
+static TTimeStamp DateTimeToTimeStamp( global::delphitypes::tDateTime DateTime )
 {
    return {
-           static_cast<int>( round( std::abs( frac( DateTime ) ) * MSecsPerDay ) ),
+           static_cast<int>( round( std::abs( global::delphitypes::frac( DateTime ) ) * MSecsPerDay ) ),
            static_cast<int>( trunc( DateTime ) + DateDelta ) };
 }
 
-void DecodeTime( const tDateTime DateTime, uint16_t &Hour, uint16_t &Min, uint16_t &Sec, uint16_t &Msec )
+void DecodeTime( const global::delphitypes::tDateTime DateTime, uint16_t &Hour, uint16_t &Min, uint16_t &Sec, uint16_t &Msec )
 {
    uint16_t MinCount, MSecCount;
    const auto tmp = DateTimeToTimeStamp( DateTime );
@@ -112,8 +117,8 @@ void DecodeTime( const tDateTime DateTime, uint16_t &Hour, uint16_t &Min, uint16
 void DivMod( const int Dividend, const uint16_t Divisor, uint16_t &Result, uint16_t &Remainder )
 {
    const auto res = div( Dividend, Divisor );
-   Result = res.quot;
-   Remainder = res.rem;
+   Result = static_cast<uint16_t>(res.quot);
+   Remainder = static_cast<uint16_t>(res.rem);
 }
 
 double EncodeDate( uint16_t Year, uint16_t Month, const uint16_t Day )
@@ -286,7 +291,7 @@ std::string IncludeTrailingPathDelimiter( const std::string &S )
    return S + PathDelim;
 }
 
-const std::array<int, 12>
+const std::array<uint8_t, 12>
         daysPerMonthRegularYear = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
         daysPerMonthLeapYear = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
@@ -490,7 +495,7 @@ void FindClose( TSearchRec &F )
 
 bool tryEncodeDate( const uint16_t year, const uint16_t month, uint16_t day, double &date )
 {
-   if( const std::array<int, 12> &daysPerMonth = isLeapYear( year ) ? daysPerMonthLeapYear : daysPerMonthRegularYear;
+   if( const std::array<uint8_t, 12> &daysPerMonth = isLeapYear( year ) ? daysPerMonthLeapYear : daysPerMonthRegularYear;
       year >= 1 && year <= 9999 && month >= 1 && month <= 12 && day >= 1 && day <= daysPerMonth[month - 1] )
    {
       const int stop = month - 1;
@@ -535,8 +540,8 @@ double Now()
    if(gettimeofday(&tv, nullptr) || !localtime_r(&tv.tv_sec, &lt))
       return 0.0;
    double dnow, tnow;
-   const bool rc1 = tryEncodeDate( lt.tm_year + 1900, lt.tm_mon + 1, lt.tm_mday, dnow );
-   const bool rc2 = tryEncodeTime (lt.tm_hour, lt.tm_min, lt.tm_sec, tv.tv_usec/1000, tnow);
+   const bool rc1 = tryEncodeDate( ui16(lt.tm_year + 1900), ui16(lt.tm_mon + 1), ui16(lt.tm_mday), dnow );
+   const bool rc2 = tryEncodeTime (ui16(lt.tm_hour), ui16(lt.tm_min), ui16(lt.tm_sec), ui16(tv.tv_usec/1000), tnow);
    return rc1 && rc2 ? dnow + tnow : 0.0;
 #endif
 }
@@ -560,7 +565,7 @@ static bool DecodeDateFully(const double DateTime, uint16_t &Year, uint16_t &Mon
       Year = Month = Day = DOW = 0;
       return false;
    }
-   DOW = T % 7 + 1;
+   DOW = ui16(T % 7 + 1);
    T--;
    uint16_t Y = 1;
    while( T >= D400 )
@@ -575,9 +580,9 @@ static bool DecodeDateFully(const double DateTime, uint16_t &Year, uint16_t &Mon
       I--;
       D += D100;
    }
-   Y += I * 100;
+   Y += ui16(I * 100);
    DivMod( D, D4, I, D );
-   Y += I * 4;
+   Y += ui16(I * 4);
    DivMod( D, D1, I, D );
    if( I == 4 )
    {
@@ -600,7 +605,7 @@ static bool DecodeDateFully(const double DateTime, uint16_t &Year, uint16_t &Mon
    return res;
 }
 
-void DecodeDate( const tDateTime DateTime, uint16_t &Year, uint16_t &Month, uint16_t &Day )
+void DecodeDate( const global::delphitypes::tDateTime DateTime, uint16_t &Year, uint16_t &Month, uint16_t &Day )
 {
    uint16_t Dummy {};
    DecodeDateFully(DateTime, Year, Month, Day, Dummy);
@@ -700,8 +705,8 @@ double FileDateToDateTime( int fd )
    time_t tim;
    tim = fd;
    localtime_r( &tim, &ut );
-   return EncodeDate( ut.tm_year + 1900, ut.tm_mon + 1, ut.tm_mday ) +
-      EncodeTime( ut.tm_hour, ut.tm_min, ut.tm_sec, 0 );
+   return EncodeDate( ui16(ut.tm_year + 1900), ui16(ut.tm_mon + 1), ui16(ut.tm_mday) ) +
+      EncodeTime( ui16(ut.tm_hour), ui16(ut.tm_min), ui16(ut.tm_sec), 0 );
 #endif
 }
 
@@ -714,8 +719,8 @@ int DateTimeToFileDate( double dt )
    DecodeTime( dt, hour, min, sec, msec );
 #if defined(_WIN32)
    LongRec lr {
-      ( sec >> 1 ) | ( min << 5 ) | ( hour << 11 ),
-      day | ( month << 5 ) | ( (year - 1980) << 9 )
+      static_cast<uint16_t>( ( sec >> 1 ) | ( min << 5 ) | ( hour << 11 ) ),
+      static_cast<uint16_t>(day | ( month << 5 ) | ( (year - 1980) << 9 ))
    };
    static_assert( sizeof( LongRec ) == sizeof( int ) );
    int res;

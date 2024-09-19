@@ -33,11 +33,11 @@ using namespace global::gmsspecs;
 namespace gdlib::gmsglob
 {
 std::array<tvarreca, stypsemiint + 1> defrecvar;
-std::array<tvarreca, ssyequb + 1> defrecequ;
+global::delphitypes::OffsetArray<tvarreca, ssyeque, ssyequb> defrecequ;
 
 void InitDefaultRecords()
 {
-   for( int v = tvarstyp::stypunknwn; v <= tvarstyp::stypsemiint; v++ )
+   for( int v = stypunknwn; v <= stypsemiint; v++ )
    {
       for( int f = vallevel; f <= valupper; f++ )
          defrecvar[v][f] = 0.0;

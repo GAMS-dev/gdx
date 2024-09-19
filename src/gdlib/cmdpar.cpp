@@ -141,6 +141,8 @@ bool TCmdParams::AddParameters( int AInsP, const std::string &CmdLine )
       if(T.empty())
          return ke_empty;
       // ...
+      STUBWARN();
+      // TODO: Implement me!
       return 0;
    };
 

@@ -57,12 +57,13 @@ struct Item {
    }
 };
 
-class MyMapping : public TGAMSRecList<Item>
+class MyMapping final : public TGAMSRecList<Item>
 {
-   std::pair<gdlib::strutilx::DelphiStrRef, int *> AccessRecord( Item *prec ) override
+   std::pair<DelphiStrRef, int *> AccessRecord( Item *prec ) override
    {
-      gdlib::strutilx::DelphiStrRef dsr {};
-      dsr.length = static_cast<int>(prec->s.length());
+      DelphiStrRef dsr {};
+      assert(prec->s.length() <= 255);
+      dsr.length = static_cast<uint8_t>(prec->s.length());
       dsr.chars = const_cast<char *>( prec->s.c_str() );
       return { dsr, &prec->nextBucketIx };
    }

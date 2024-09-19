@@ -44,6 +44,7 @@ endif ()
 if (UNIX)
     # -fsanitize=undefined -fno-inline
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas")
+    #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wconversion -funsigned-char") # aggressive signage warnings
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZ_HAVE_UNISTD_H")
     if (NOT APPLE AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-truncation=0")
@@ -82,6 +83,7 @@ set(gdx-core
         src/gdlib/utils.cpp
         src/gdlib/strutilx.h
         src/gdlib/strutilx.cpp
+        src/gdlib/strindexbuf.h
 
         # GDX specific units
         src/gxfile.h
