@@ -148,7 +148,7 @@ void ShortHelp()
              << std::endl;
 }
 
-void WriteDataLine( std::ofstream &f )
+void WriteDataLine()
 {
    for( int i { 1 }; i <= MaxSyDim + 2; i++ )
       f << DataLine.at( i ) << ',';
@@ -268,7 +268,7 @@ int main( const int argc, const char *argv[] )
    DataLine.at( 2 ) = "\"Name\"";
    for( i = 1; i <= MaxSyDim; i++ )
       DataLine.at( i + 2 ) = "\"Index " + std::to_string( i ) + '"';
-   WriteDataLine( f );
+   WriteDataLine();
    f << "\"Value\",\"Text\"" << std::endl;
 
    // TODO: f.close();

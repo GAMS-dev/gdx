@@ -17,7 +17,7 @@ namespace gdx2veda
 
 void ShortHelp();
 
-void WriteDataLine( std::ofstream &f );
+void WriteDataLine();
 
 void GetSpecialValues( const gdxHandle_t &PGX );
 
