@@ -28,6 +28,7 @@
 #include <map>
 #include <fstream>
 #include <cstring>
+#include <cmath>
 
 #include "gdx2veda.h"
 #include "../library/common.h"
@@ -35,6 +36,8 @@
 
 namespace gdx2veda
 {
+
+using tvarvaltype = unsigned int;
 
 // YYYY-MM-DD, ISO format
 const std::string BuildVersion { "2005-10-07" };
@@ -265,24 +268,113 @@ int main( const int argc, const char *argv[] )
 
       std::cout << std::setw( 17 ) << Cnt << "  GDX record count" << '\n'
                 << std::setw( 17 ) << Cnt1 + 1 << "  CSV record count (including header)" << std::endl;
-   }
 
-   f.open( FnVeda.string() );
-   if( !f.is_open() )
-   {
-      ReportError( "Could not open file: " + FnVeda.string() );
-      ReportError( "Msg: " + std::string { strerror( errno ) } );
+      f.open( FnVeda.string() );
+      if( !f.is_open() )
+      {
+         ReportError( "Could not open file: " + FnVeda.string() );
+         ReportError( "Msg: " + std::string { strerror( errno ) } );
+         return 1;
+      }
+
+      DataLine.at( 1 ) = '"' + gdlib::strutilx::ExtractFileNameEx( FnGdx.string() ) + '"';
+      DataLine.at( 2 ) = "\"Name\"";
+      for( i = 1; i <= MaxSyDim; i++ )
+         DataLine.at( i + 2 ) = "\"Index " + std::to_string( i ) + '"';
+      WriteDataLine();
+      f << "\"Value\",\"Text\"" << std::endl;
+
+      for( SyNr = 1; SyNr <= NrSy; SyNr++ )
+      {
+         gdxSymbolInfo( PGX, SyNr, SyName.data(), &SyDim, &iSyType );
+         SyType = gdxSyType( iSyType );
+         gdxSymbolInfoX( PGX, SyNr, &ElemCount, &iDummy, SyText.data() );
+
+         // TODO: Check whether this is necessary
+         for( i = 3; SyNr <= MaxSyDim + 2; i++ )
+            DataLine.at( i ).clear();
+
+         switch( SyType )
+         {
+            case dt_set:
+               DataLine.at( 2 ) = '"' + SyName.string() + '"';
+               gdxDataReadStrStart( PGX, SyNr, &NrRecs );
+               while( gdxDataReadStr( PGX, ElementsPtrs, Values, &First ) != 0 )
+               {
+                  for( i = First; i <= SyDim; i++ )
+                     DataLine.at( i + 2 ) = '"' + std::string { Elements[i] } + '"';
+                  WriteDataLine();
+                  nn = std::round( Values[GMS_VAL_LEVEL] );
+                  f << nn;
+                  if( nn == 0 )
+                     f << std::endl;
+                  else
+                  {
+                     gdxGetElemText( PGX, std::round( Values[GMS_VAL_LEVEL] ), NodeStr.data(), &NodeNr );
+                     f << ",\"" << NodeStr << '"' << std::endl;
+                  }
+               }
+               break;
+
+            case dt_par:
+               DataLine.at( 2 ) = '"' + SyName.string() + '"';
+               gdxDataReadStrStart( PGX, SyNr, &NrRecs );
+               while( gdxDataReadStr( PGX, ElementsPtrs, Values, &First ) != 0 )
+               {
+                  for( i = First; i <= SyDim; i++ )
+                     DataLine.at( i + 2 ) = '"' + std::string { Elements[i] } + '"';
+                  WriteDataLine();
+                  if( IsASpecialValue( Values[GMS_VAL_LEVEL], MappedValue, IsAString ) )
+                  {
+                     if( IsAString )
+                        f << '"' << MappedValue << '"' << std::endl;
+                     else
+                        f << MappedValue << std::endl;
+                  }
+                  else
+                     f << gdlib::strutilx::DblToStr( Values[GMS_VAL_LEVEL] ) << std::endl;
+               }
+               break;
+
+            case dt_var:
+            case dt_equ:
+               gdxDataReadStrStart( PGX, SyNr, &NrRecs );
+               while( gdxDataReadStr( PGX, ElementsPtrs, Values, &First ) != 0 )
+               {
+                  for( i = First; i <= SyDim; i++ )
+                     DataLine.at( i + 2 ) = '"' + std::string { Elements[i] } + '"';
+                  for( i = 1; i <= MaxSuff; i++ )
+                  {
+                     DataLine.at( 2 ) = '"' + SyName.string() + '.' + NameSuff.at( i ) + '"';
+                     WriteDataLine();
+                     // TODO: Check tvarvaltype(i - 1)
+                     if( IsASpecialValue( Values[tvarvaltype( i - 1 )], MappedValue, IsAString ) )
+                     {
+                        if( IsAString )
+                           f << '"' << MappedValue << '"' << std::endl;
+                        else
+                           f << MappedValue << std::endl;
+                     }
+                     else
+                        // TODO: Check tvarvaltype(i - 1)
+                        f << gdlib::strutilx::DblToStr( Values[tvarvaltype( i - 1 )] ) << std::endl;
+                  }
+               }
+               break;
+
+            default:
+               // TODO: Throw an error here?
+               break;
+         }
+      }
+
+      f.close();
+      gdxClose( PGX );
+      gdxFree( &PGX );
+      // UnloadGdxLibrary();
       return 1;
    }
 
-   DataLine.at( 1 ) = '"' + gdlib::strutilx::ExtractFileNameEx( FnGdx.string() ) + '"';
-   DataLine.at( 2 ) = "\"Name\"";
-   for( i = 1; i <= MaxSyDim; i++ )
-      DataLine.at( i + 2 ) = "\"Index " + std::to_string( i ) + '"';
-   WriteDataLine();
-   f << "\"Value\",\"Text\"" << std::endl;
-
-   // TODO: f.close();
    return 0;
 }
 
