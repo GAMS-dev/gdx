@@ -89,7 +89,7 @@ void InitChars( const bool AllChars )
 
    // everything not explicitly whitelisted afterward kills the compilation (or is it ignored?)?
    for( unsigned char c = std::numeric_limits<unsigned char>::min(); c <= std::numeric_limits<unsigned char>::max(); c++ )
-      mapcharBuf[c] = std::char_traits<char>::eof();
+      mapcharBuf[c] = chareof;
 
    for(char c {'A'}; c <= 'Z'; c++)
       if(letter[c])
