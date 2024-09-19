@@ -22,8 +22,8 @@ public:
    T &at( std::size_t index );
    T &operator[]( std::size_t index );
 
-   // const T &at( std::size_t index ) const;
-   // const T &operator[]( std::size_t index ) const;
+   const T &at( std::size_t index ) const;
+   const T &operator[]( std::size_t index ) const;
 
    std::size_t size() const;
    void resize( std::size_t size );
@@ -61,17 +61,19 @@ T &one_indexed_container<T>::operator[]( const std::size_t index )
    return at( index );
 }
 
-// template<typename T>
-// const T &one_indexed_container<T>::at( const std::size_t index ) const
-// {
-//    return at( index );
-// }
+template<typename T>
+const T &one_indexed_container<T>::at( const std::size_t index ) const
+{
+   if( index < 1 || index > data.size() )
+      throw std::out_of_range( "Index out of range" );
+   return data.at( index - 1 );
+}
 
-// template<typename T>
-// const T &one_indexed_container<T>::operator[]( const std::size_t index ) const
-// {
-//    return at( index );
-// }
+template<typename T>
+const T &one_indexed_container<T>::operator[]( const std::size_t index ) const
+{
+   return at( index );
+}
 
 template<typename T>
 std::size_t one_indexed_container<T>::size() const
