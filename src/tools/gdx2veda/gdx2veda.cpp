@@ -62,6 +62,8 @@ library::short_string
 gdxHandle_t PGX;
 
 gdxStrIndex_t Elements {};
+gdxStrIndexPtrs_t ElementsPtrs;
+
 gdxValues_t Values {};
 gdxUelIndex_t Indices {}, MappedIndices {};
 int First {};
@@ -171,6 +173,8 @@ int main( const int argc, const char *argv[] )
    //    std::cout << gdlGetAuditLine() << std::endl;
    //    return 0;
    // }
+
+   GDXSTRINDEXPTRS_INIT( Elements, ElementsPtrs );
 
    NumErr = 0;
 
