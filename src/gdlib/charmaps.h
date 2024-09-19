@@ -38,12 +38,12 @@
 namespace gdlib::charmaps
 {
 
-constexpr char charff = '\f',
-           charcr = '\r',
-           chareof = std::char_traits<char>::eof(),
-           chareol = '\0',
-           charlf = '\n',
-           chartab = '\t',
+constexpr char charff = '\f', // 0x0C
+           charcr = '\r', // 0x0D
+           chareof = 0x1A, // note: != std::char_traits<char>::eof(),
+           chareol = '\0', // 0x00
+           charlf = '\n', // 0x0A
+           chartab = '\t', // 0x09
            char200 = static_cast<char>( 200 );
 
 extern utils::charset digit,
