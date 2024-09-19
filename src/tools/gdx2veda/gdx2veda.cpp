@@ -45,7 +45,8 @@ library::one_indexed_container<library::short_string> DataLine { GMS_MAX_INDEX_D
 
 gdxSVals_t SpecialValues {};
 
-std::ofstream f, g;
+// std::ofstream f, g;
+std::ofstream g;
 
 library::short_string
         Msg,
