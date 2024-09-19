@@ -167,9 +167,8 @@ bool IsASpecialValue( const double v, library::short_string &MappedValue, bool &
    gdxSpecValue spv { gdxSpecValue( v ) };
    if( spv == sv_normal )
       return false;
-   // TODO:
-   // MappedValue = SpecialValueMapping.at(spv);
-   // IsAString = SpecialValueIsString.at(spv);
+   MappedValue = SpecialValueMapping.at( spv );
+   IsAString = SpecialValueIsString.at( spv );
    return true;
 }
 
