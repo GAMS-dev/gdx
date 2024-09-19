@@ -37,8 +37,6 @@
 namespace gdx2veda
 {
 
-using tvarvaltype = unsigned int;
-
 // YYYY-MM-DD, ISO format
 const std::string BuildVersion { "2005-10-07" };
 
@@ -347,8 +345,7 @@ int main( const int argc, const char *argv[] )
                   {
                      DataLine.at( 2 ) = '"' + SyName.string() + '.' + NameSuff.at( i ) + '"';
                      WriteDataLine();
-                     // TODO: Check tvarvaltype(i - 1)
-                     if( IsASpecialValue( Values[tvarvaltype( i - 1 )], MappedValue, IsAString ) )
+                     if( IsASpecialValue( Values[i - 1], MappedValue, IsAString ) )
                      {
                         if( IsAString )
                            f << '"' << MappedValue << '"' << std::endl;
@@ -356,8 +353,7 @@ int main( const int argc, const char *argv[] )
                            f << MappedValue << std::endl;
                      }
                      else
-                        // TODO: Check tvarvaltype(i - 1)
-                        f << gdlib::strutilx::DblToStr( Values[tvarvaltype( i - 1 )] ) << std::endl;
+                        f << gdlib::strutilx::DblToStr( Values[i - 1] ) << std::endl;
                   }
                }
                break;
