@@ -1296,7 +1296,8 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
       }
       if( FDim == FCurrentDim && delta <= DeltaForWrite )
       {// small change in last dimension
-         FFile->WriteByte( FCurrentDim + delta );
+         assert(FCurrentDim >= 0 && FCurrentDim <= 255);
+         FFile->WriteByte( utils::ui8(FCurrentDim + delta) );
          LastElem[FCurrentDim - 1] = AElements[FCurrentDim - 1];
       }
       else
