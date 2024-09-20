@@ -62,6 +62,7 @@ constexpr int numCharVals {std::numeric_limits<unsigned char>::max()+1};
 extern std::array<char, numCharVals> mapcharBuf;
 
 inline char mapchar( const char c) {
+   assert( c >= 0 && static_cast<unsigned char>(c) <= 255 );
    return mapcharBuf[static_cast<unsigned char>( c )];
 }
 

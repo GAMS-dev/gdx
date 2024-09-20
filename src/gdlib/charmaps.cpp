@@ -78,33 +78,37 @@ constexpr std::array mapToSelf {
 
 void InitChars( const bool AllChars )
 {
+   using uchar = unsigned char;
    static_assert( mapcharBuf.size() == 256 );
 
    if( AllChars )
    {
-      for( unsigned char c = std::numeric_limits<unsigned char>::min(); c < std::numeric_limits<unsigned char>::max(); c++ )
+      for( unsigned char c = std::numeric_limits<uchar>::min(); c < std::numeric_limits<uchar>::max(); c++ )
          mapcharBuf[c] = static_cast<char>(c);
       return;
    }
 
    // everything not explicitly whitelisted afterward kills the compilation (or is it ignored?)?
-   for( unsigned char c = std::numeric_limits<unsigned char>::min(); c <= std::numeric_limits<unsigned char>::max(); c++ )
+   for( uchar c = std::numeric_limits<uchar>::min(); c <= std::numeric_limits<uchar>::max(); c++ )
       mapcharBuf[c] = chareof;
 
-   for(char c {'A'}; c <= 'Z'; c++)
+   for( char c { 'A' }; c <= 'Z'; c++ )
       if(letter[c])
          mapcharBuf[c] = c;
 
-   for(char c {'a'}; c <= 'z'; c++)
+   for( char c { 'a' }; c <= 'z'; c++ )
       if(letter[c])
          mapcharBuf[c] = c;
 
-   for(char c {'0'}; c <= '9'; c++)
+   for( char c { '0' }; c <= '9'; c++ )
       if(digit[c])
          mapcharBuf[c] = c;
 
-   for( const char c : mapToSelf )
-      mapcharBuf[c] = c;
+   for( const uchar c: mapToSelf )
+   {
+      assert( c <= std::numeric_limits<char>::max() );
+      mapcharBuf[c] = static_cast<char>(c);
+   }
 }
 
 void InitCharacterMaps()
