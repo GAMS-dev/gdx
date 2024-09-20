@@ -136,6 +136,9 @@ extern int NumLine, NumToken, rc;
 extern std::string Token, OrigLine, Line, ExpandedLine;
 extern char CharTab;
 
+void VddHelp();
+void LoadVdd( const std::string &fn );
+void DumpVdd( const std::ofstream &f );
 void ReportError( const std::string &msg );
 
 }// namespace gdx2veda

@@ -94,6 +94,21 @@ int NumLiteral {};
 
 // TODO: SuppressZero = TXStrHashList.Create;
 
+void VddHelp()
+{
+   // TODO: Implement function
+}
+
+void LoadVdd( const std::string &fn )
+{
+   // TODO: Implement function
+}
+
+void DumpVdd( const std::ofstream &f )
+{
+   // TODO: Implement function
+}
+
 void ReportError( const std::string &msg )
 {
    NumErr++;
