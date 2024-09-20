@@ -433,7 +433,7 @@ void TSymbolList::WritePGXFile( const int SyNr, const TProcessPass Pass )
       SyObj->SyData->GetRecord( R, IndxI, Vals );
       if( SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
       {
-         Txt = StrPool->GetObject( std::round( Vals[GMS_VAL_LEVEL] ) )->data();
+         Txt = StrPool->GetString( std::round( Vals[GMS_VAL_LEVEL] ) );
          gdxAddSetText( PGXMerge, Txt.data(), &INode );
          Vals[GMS_VAL_LEVEL] = INode;
       }
