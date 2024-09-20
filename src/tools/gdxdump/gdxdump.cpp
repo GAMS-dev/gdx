@@ -202,10 +202,10 @@ void WrVal( const double V )
                fo << gdlib::strutilx::DblToStrSep( V, DecimalSep );
                break;
             case TDblFormat::dbl_hexBytes:
-               fo << gdlib::dblutil::DblToStrHex( V );
+               fo << gdlib::dblutil::dblToStrHex( V );
                break;
             case TDblFormat::dbl_hexponential:
-               fo << gdlib::dblutil::DblToStrHexponential( V );
+               fo << gdlib::dblutil::dblToStrHexponential( V );
                break;
             default:
                break;
