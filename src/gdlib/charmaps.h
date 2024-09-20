@@ -26,11 +26,8 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
-#include <set>
 #include <array>
 #include <limits>
-#include <cassert>
 
 #include "utils.h"
 
@@ -41,12 +38,12 @@
 namespace gdlib::charmaps
 {
 
-const char charff = '\f',
-           charcr = '\r',
-           chareof = std::char_traits<char>::eof(),
-           chareol = '\0',
-           charlf = '\n',
-           chartab = '\t',
+constexpr char charff = '\f', // 0x0C
+           charcr = '\r', // 0x0D
+           chareof = 0x1A, // note: != std::char_traits<char>::eof(),
+           chareol = '\0', // 0x00
+           charlf = '\n', // 0x0A
+           chartab = '\t', // 0x09
            char200 = static_cast<char>( 200 );
 
 extern utils::charset digit,
@@ -64,36 +61,36 @@ extern char quotecharx;
 constexpr int numCharVals {std::numeric_limits<unsigned char>::max()+1};
 extern std::array<char, numCharVals> mapcharBuf;
 
-inline char mapchar(char c) {
-   assert( (unsigned char) c >= 0 && (unsigned char) c <= 255 );
-   return mapcharBuf[(unsigned char)c];
+inline char mapchar( const char c) {
+   assert( c >= 0 && static_cast<unsigned char>(c) <= 255 );
+   return mapcharBuf[static_cast<unsigned char>( c )];
 }
 
 void InitChars( bool AllChars );
 void InitCharacterMaps();
 char DetermineQuote( const char *s );
 
-inline bool IsLetter( char c )
+inline bool IsLetter( const char c )
 {
    return ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' );
 }
 
-inline bool IsDigit( char c )
+inline bool IsDigit( const char c )
 {
    return c >= '0' && c <= '9';
 }
 
-inline bool IsLabelChar(char c)
+inline bool IsLabelChar( const char c )
 {
    return IsLetter( c ) || IsDigit(c) || c == '_' || c == '+' || c == '-';
 }
 
-inline bool IsIdentChar(char c)
+inline bool IsIdentChar(const char c)
 {
    return IsLetter( c ) || IsDigit(c) || c == '_';
 }
 
-inline bool IsTextQuote(char c)
+inline bool IsTextQuote(const char c)
 {
    return c == '\'' || c == '\"';
 }

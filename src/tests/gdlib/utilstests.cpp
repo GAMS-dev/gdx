@@ -393,9 +393,9 @@ TEST_CASE( "Test upper-/lowercasing of strings (copy)" )
 
 TEST_CASE( "Test checking if a string case-insensitive matches at least one element from a string list" )
 {
-   REQUIRE_FALSE( utils::sameTextAsAny( "test", { "abc", "aBc", "test X" } ) );
-   REQUIRE( utils::sameTextAsAny( "test", { "abc", "TEST" } ) );
-   REQUIRE_FALSE( utils::sameTextAsAny( "", {} ) );
+   REQUIRE_FALSE( utils::sameTextAsAny( "test", "abc", "aBc", "test X" ) );
+   REQUIRE( utils::sameTextAsAny( "test", "abc", "TEST" ) );
+   REQUIRE( utils::sameTextAsAny( "test"s, "abc"s, "TEST"s ) );
 }
 
 TEST_CASE( "Test if a string starts with a prefix" )

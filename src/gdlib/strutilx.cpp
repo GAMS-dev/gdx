@@ -41,14 +41,16 @@ using namespace std::literals::string_literals;
 using namespace rtl::sysutils_p3;
 using namespace rtl::p3platform;
 
+using utils::ui8;
+
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
 namespace gdlib::strutilx
 {
 
-const std::string MAXINT_S = "maxint"s, MININT_S = "minint"s;
-const std::string MAXDOUBLE_S = "maxdouble"s, EPSDOUBLE_S = "eps", MINDOUBLE_S = "mindouble";
+const auto MAXINT_S = "maxint"s, MININT_S = "minint"s;
+const auto MAXDOUBLE_S = "maxdouble"s, EPSDOUBLE_S = "eps"s, MINDOUBLE_S = "mindouble"s;
 
 std::string UpperCase( const std::string_view s )
 {
@@ -306,7 +308,7 @@ static uint8_t DblToStrSepCore(double V, const char DecimalSep, char *s)
             break;
       }
    }
-   return slen;
+   return ui8(slen);
 }
 
 // Closer port of corresponding Delphi function (faster?)
@@ -350,7 +352,7 @@ uint8_t DblToStrSep(double V, const char DecimalSep, char* sout)
       }
       sout[i] = sout[l];
    }
-   return i - 1;
+   return ui8(i - 1);
 }
 
 std::string DblToStr( const double V )
@@ -743,8 +745,8 @@ int StrUCmp( const std::string_view S1, const std::string_view S2 )
    if( L > S2.length() ) L = S2.length();
    for( int K {}; K < static_cast<int>( L ); K++ )
    {
-      const int d = utils::toupper( S1[K] ) - utils::toupper( S2[K] );
-      if( d ) return d;
+      if( const int d = utils::toupper( S1[K] ) - utils::toupper( S2[K] ) )
+         return d;
    }
    return static_cast<int>( S1.length() - S2.length() );
 }
@@ -768,8 +770,8 @@ int StrUCmp( const DelphiStrRef &S1, const DelphiStrRef &S2 )
    if( L > S2.length ) L = S2.length;
    for( int K {}; K < L; K++ )
    {
-      const int d = utils::toupper( S1.chars[K] ) - utils::toupper( S2.chars[K] );
-      if( d ) return d;
+      if( const int d = utils::toupper( S1.chars[K] ) - utils::toupper( S2.chars[K] ) )
+         return d;
    }
    return S1.length - S2.length;
 }

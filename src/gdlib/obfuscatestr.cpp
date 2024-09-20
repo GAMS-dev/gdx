@@ -121,7 +121,7 @@ void obfuscateInit()
       const int fcharmapLen = 254 - 32 - ( 'z' - 'a' + 1 ) - 1, ffcharmapLen = fcharmapLen - 1;
       LabelCharMapPtr = std::make_unique<TObfuscateCharMap>( fcharmapLen, ffcharmapLen );
       int k {};
-      for( int i { 33 }; i <= 254; i++ )
+      for( uint8_t i { 33 }; i <= 254; i++ )
       {
          if( i != 127 && !( ( i >= 'a' && i <= 'z' ) || i == '\'' ) )
          {

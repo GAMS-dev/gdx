@@ -251,85 +251,81 @@ void P3_Val_i(const char *s, int *i, int *code)
  * where d is a decimal digit unless preceded by the 0x or $,
  * in which case it is a hex digit
  */
-void P3_Val_i(const char *s, size_t slen, int *i, int *code)
+void P3_Val_i( const char *s, size_t slen, int *i, int *code )
 {
    std::array<char, 256> buffer;
-   char *end, *s2, *sd;
-   long int li;
-   int sign = 1;
+   std::memcpy( buffer.data(), s, sizeof( char ) * ( slen + 1 ) );
 
-   std::memcpy(buffer.data(), s, sizeof(char)*(slen+1));
-
-   /* skip over blanks
-   * - Kylix 3 does not treat any other chars as whitespace
-   */
-   for (s2 = (char *)buffer.data();  ' ' == *s2;  s2++);
-   if ('+' == *s2) {
-      sd = s2+1;
-   }
-   else if ('-' == *s2) {
+   // skip over blanks
+   // - Kylix 3 does not treat any other chars as whitespace
+   char *s2, *sd;
+   for( s2 = buffer.data(); ' ' == *s2; s2++ ) {}
+   int sign { 1 };
+   if( '+' == *s2 )
+      sd = s2 + 1;
+   else if( '-' == *s2 )
+   {
       sign = -1;
-      sd = s2+1;
+      sd = s2 + 1;
    }
    else
       sd = s2;
 
-   /* first check for the usual case - decimal digits */
-   if (((*sd > '0') && (*sd <= '9')) ||
-       (('0' == *sd) && ('\0' == sd[1] || (sd[1] >= '0' && sd[1] <= '9') )) ) {
-      li = strtol((char *)s2, (char **)&end, 10);
-      *i = li;
-      if ('\0' == *end) {         /* reached the end, things went OK */
-         *code = 0;
-      }
-      else
-         *code = (int)(end - (char *)buffer.data() + 1);
+   // first check for the usual case - decimal digits
+   if( (*sd > '0' && *sd <= '9') || ('0' == *sd && ( '\0' == sd[1] || (sd[1] >= '0' && sd[1] <= '9') )) )
+   {
+      char *end;
+      const auto li = strtol( s2, &end, 10 );
+      *i = static_cast<int>(li);
+      // reached the end, things went OK
+      *code = '\0' == *end ? 0 : static_cast<int>( end - buffer.data() + 1 );
       return;
    }
 
-   /* if not a decimal string,
-   * must be either $ffff or 0xffff or an error */
-   if ('$' == *sd) {
-      if ((sd[1] >= '0' && sd[1] <= '9') || (sd[1] >= 'A' && sd[1] <= 'F')) { // isxdigit
-         if (-1 == sign)
+   // if not a decimal string,
+   // must be either $ffff or 0xffff or an error
+   if( '$' == *sd )
+   {
+      if( ( sd[1] >= '0' && sd[1] <= '9' ) || ( sd[1] >= 'A' && sd[1] <= 'F' ) )
+      {
+         // isxdigit
+         if( -1 == sign )
             *sd = '-';
          else
             sd++;
-         li = strtol((char *)sd, (char **)&end, 16);
-         *i = li;
-         if ('\0' == *end) {               /* reached the end, things went OK */
-            *code = 0;
-         }
-         else
-            *code = (int)(end - (char *)buffer.data() + 1);
+         char *end;
+         const auto li = strtol( sd, &end, 16 );
+         *i = static_cast<int>(li);
+         // reached the end, things went OK
+         *code = '\0' == *end ? 0 : static_cast<int>( end - buffer.data() + 1 );
       }
-      else {
+      else
+      {
          *i = 0;
          sd++;
-         *code = (int)(sd - (char *)buffer.data() + 1);
+         *code = static_cast<int>( sd - buffer.data() + 1 );
       }
       return;
    }
-   else if (('0' == *sd) &&
-            (('x' == sd[1]) || ('X' == sd[1]))
-   ) {
-      li = strtol((char *)s2, (char **)&end, 16);
-      *i = li;
-      if ('\0' == *end) {         /* reached the end, things went OK */
+   if( '0' == *sd && ( 'x' == sd[1] || 'X' == sd[1] ) )
+   {
+      char *end;
+      const auto li = strtol( s2, &end, 16 );
+      *i = static_cast<int>(li);
+      // reached the end, things went OK
+      if( '\0' == *end )
          *code = 0;
-      }
-      else {
-         /* we alread read the 0x, that is not an error for val */
-         if (end < sd+2)
-            end = sd+2;
-         *code = (int)(end - (char *)buffer.data() + 1);
+      else
+      {
+         // we already read the 0x, that is not an error for val
+         if( end < sd + 2 )
+            end = sd + 2;
+         *code = static_cast<int>( end - buffer.data() + 1 );
       }
       return;
    }
-   else {
-      *i = 0;
-      *code = (int)(sd - (char *)buffer.data() + 1);
-   }
+   *i = 0;
+   *code = static_cast<int>( sd - buffer.data() + 1 );
 }
 
 //=================================================================================

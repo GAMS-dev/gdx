@@ -81,6 +81,7 @@
 using namespace rtl::sysutils_p3;
 using namespace rtl::p3platform;
 using namespace std::literals::string_literals;
+using utils::ui32;
 
 // ==============================================================================================================
 // Implementation
@@ -162,7 +163,7 @@ uint32_t P3GetEnvPC( const std::string &name, char *buf, uint32_t bufSize )
 #else
    const char *p = getenv( name.c_str() );
    if( !p ) return 0;// no match in the env
-   const auto psiz = strlen( p ) + 1;
+   const auto psiz = utils::ui32(strlen( p ) + 1);
    if( psiz <= bufSize )
    {
       // it fits: copy it over
@@ -491,13 +492,12 @@ int p3FileRead( Tp3FileHandle h, char *buffer, uint32_t buflen, uint32_t &numRea
          res = EIO;
    }
 #else
-   auto rc = read( h, buffer, buflen );
-   if( rc < 0 )
+   if( const auto rc = read( h, buffer, buflen ); rc < 0 )
    {
       res = errno;
       numRead = 0;
    }
-   else numRead = rc;
+   else numRead = ui32(rc);
 #endif
    return res;
 }
@@ -514,13 +514,12 @@ int p3FileWrite( Tp3FileHandle h, const char *buffer, uint32_t buflen, uint32_t 
          res = EIO;
    }
 #else
-   auto rc = write(h, buffer, buflen);
-   if (rc < 0) {
+   if ( const auto rc = write( h, buffer, buflen ); rc < 0) {
       res = errno;
       numWritten = 0;
    }
    else
-      numWritten = rc;
+      numWritten = ui32(rc);
 #endif
    return res;
 }
@@ -1107,7 +1106,7 @@ int xGetExecName( std::string &execName, std::string &msg )
    }
    else
    {
-      ssz = std::min<int>( execBuf.size() - 1, ssz );
+      ssz = std::min<decltype(ssz)>( execBuf.size() - 1, ssz );
       rc = 0;
    }
 #elif defined( _WIN32 )

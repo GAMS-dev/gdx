@@ -138,11 +138,6 @@ std::string getLineWithSep( std::istream &fs )
    return line;
 }
 
-bool sameTextAsAny( const std::string_view a, const std::initializer_list<std::string_view> &bs )
-{
-   return any<std::string_view>( [&a]( const std::string_view b ) { return sameText( a, b ); }, bs );
-}
-
 bool sameTextPrefix( const std::string_view s, const std::string_view prefix )
 {
    return sameText( s.substr( 0, prefix.length() ), prefix );

@@ -162,13 +162,13 @@ class charset {
 
 public:
    charset(const std::initializer_list<char> cs) {
-      for(char c : cs)
+      for( const char c : cs)
          insert(c);
    }
    charset(const charset &other) = default;
    charset() = default;
 
-   void insert(char c) {
+   void insert( const char c) {
       chars.set(c+offset);
    }
 
@@ -178,7 +178,11 @@ public:
             chars.set(i);
    }
 
-   [[nodiscard]] bool contains(char c) const {
+   [[nodiscard]] bool contains(const char c) const {
+      return chars[c+offset];
+   }
+
+   [[nodiscard]] bool operator[](const char c) const {
       return chars[c+offset];
    }
 
@@ -186,7 +190,7 @@ public:
       chars.reset();
    }
 
-   void erase(char c) {
+   void erase( const char c) {
       chars.reset(c+offset);
    }
 };
@@ -454,7 +458,17 @@ bool sameText( const std::string_view a, const std::string_view b )
    return caseInvariant ? sameTextInvariant( a, b ) : a == b;
 }
 
-bool sameTextAsAny( std::string_view a, const std::initializer_list<std::string_view> &bs );
+inline bool sameTextAsAny(std::string_view a, std::string_view b)
+{
+   return sameText( a, b );
+}
+
+template<typename... Args>
+bool sameTextAsAny( std::string_view str1, std::string_view str2, Args... args )
+{
+   return sameText( str1, str2 ) || sameTextAsAny( str1, args... );
+}
+
 bool sameTextPrefix( std::string_view s, std::string_view prefix );
 
 // Port of PStr(U)Equal
@@ -734,7 +748,7 @@ inline char *NewString( const char *s,
 
 int64_t queryPeakRSS();
 
-inline int ord( const char c )
+inline auto ord( const char c )
 {
    return static_cast<unsigned char>( c );
 }
@@ -753,14 +767,32 @@ std::string IntToStrW( int n, int w, char blankChar = ' ' );
 void trimLeft( std::string &s );
 
 template<int N, int firstValid=0>
-inline int indexOfSameText(const std::array<std::string, N> &strs, const std::string &s) {
+int indexOfSameText(const std::array<std::string, N> &strs, const std::string &s) {
    int i{firstValid};
    for(const std::string &s2 : strs) {
       if(sameText(s, s2))
          return i;
-      i++;
+      ++i;
    }
    return firstValid-1;
+}
+
+template<typename T>
+auto ui8(const T x)
+{
+   return static_cast<uint8_t>( x );
+}
+
+template<typename T>
+auto ui16(const T x)
+{
+   return static_cast<uint16_t>( x );
+}
+
+template<typename T>
+auto ui32(const T x)
+{
+   return static_cast<uint32_t>( x );
 }
 
 }// namespace utils

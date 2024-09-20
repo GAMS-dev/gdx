@@ -47,6 +47,7 @@
 
 using namespace std::literals::string_literals;
 using namespace rtl::p3utils;
+using utils::ui8, utils::ui16, utils::ui32;
 
 #if defined(__IN_CPPMEX__)
 #include "../gdlib/statlib.h"
@@ -82,7 +83,7 @@ constexpr uint8_t signature_header = 0xFF;
 const std::string signature_gams = "*GAMS*"s;
 constexpr int verify_offset = 100;
 
-constexpr static char substChar { std::numeric_limits<char>::is_signed ? std::char_traits<char>::eof() : 0x1A };
+constexpr static char substChar { 0x1A };
 
 union TDoubleVar
 {
@@ -588,19 +589,19 @@ bool TBufferedFileStream::FillBuffer()
    }
    else
    {
-      if( const uint16_t RLen = TXFileStream::Read( &CBufPtr->cxHeader, sizeof( TCompressHeader ) );
+      if( const auto RLen = ui16(TXFileStream::Read( &CBufPtr->cxHeader, sizeof( TCompressHeader ) ));
          RLen < sizeof( TCompressHeader ) )
          NrLoaded = 0;
       else
       {
-         const uint16_t WLen = ( CBufPtr->cxHeader.cxB1 << 8 ) + CBufPtr->cxHeader.cxB2;
+         const auto WLen = ui16( ( CBufPtr->cxHeader.cxB1 << 8 ) + CBufPtr->cxHeader.cxB2 );
          if( !CBufPtr->cxHeader.cxTyp ) NrLoaded = TXFileStream::Read( BufPtr.data(), WLen );
          else
          {
             TXFileStream::Read( &CBufPtr->cxData, WLen );
             unsigned long XLen = BufSize;// we need a var parameter
             uncompress( BufPtr.data(), &XLen, &CBufPtr->cxData, WLen );
-            NrLoaded = XLen;
+            NrLoaded = ui32(XLen);
          }
       }
    }
@@ -675,7 +676,7 @@ bool TBufferedFileStream::FlushBuffer()
    }
    else
    {
-      unsigned long Len = CBufSize - sizeof( TCompressHeader );
+      unsigned long Len { CBufSize - sizeof( TCompressHeader ) };
       compress( &CBufPtr->cxData, &Len, BufPtr.data(), NrWritten );
       if( Len < NrWritten )
       {
@@ -683,14 +684,14 @@ bool TBufferedFileStream::FlushBuffer()
          CBufPtr->cxHeader.cxB1 = static_cast<uint8_t>( Len >> 8 );
          CBufPtr->cxHeader.cxB2 = Len & 0xFF;
          Len += sizeof( TCompressHeader );
-         ActWritten = TXFileStream::Write( &CBufPtr->cxHeader.cxTyp, Len );
+         ActWritten = TXFileStream::Write( &CBufPtr->cxHeader.cxTyp, ui32(Len) );
          res = Len == ActWritten;
       }
       else
       {
          CBufPtr->cxHeader.cxTyp = 0;// indicates no compression
-         CBufPtr->cxHeader.cxB1 = NrWritten >> 8;
-         CBufPtr->cxHeader.cxB2 = NrWritten & 0xFF;
+         CBufPtr->cxHeader.cxB1 = ui8(NrWritten >> 8);
+         CBufPtr->cxHeader.cxB2 = ui8(NrWritten & 0xFF);
          TXFileStream::Write( &CBufPtr->cxHeader.cxTyp, sizeof( TCompressHeader ) );
          ActWritten = TXFileStream::Write( BufPtr.data(), NrWritten );
          res = NrWritten == ActWritten;
@@ -881,10 +882,10 @@ void TMiBufferedStream::WriteGmsInteger( int N )
    std::array<uint8_t, 5> W {};
    while( N )
    {
-      W[++C] = N & 255;
+      W[++C] = ui8(N & 255);
       N >>= 8;
    }
-   W[0] = B | C << 4;
+   W[0] = ui8(B | C << 4);
    Write( W.data(), C + 1 );
 }
 
@@ -936,7 +937,7 @@ void TMiBufferedStream::WriteGmsDouble( double D )
       if( gv == xvacr ) WriteGmsInteger( utils::round<int>( D / GMS_SV_ACR ) );
       return;
    }
-   int C {};
+   uint8_t C {};
    TDoubleVar Z {};
    Z.V = D;
    if( NormalOrder )
@@ -949,7 +950,7 @@ void TMiBufferedStream::WriteGmsDouble( double D )
       }
       B = 128 | C;
       Write( &B, 1 );
-      assert( C >= 0 && C <= 7 );
+      assert( /*C >= 0 &&*/ C <= 7 );
       Write( &Z.VA[C], static_cast<uint32_t>( Z.VA.size() ) - C );
    }
    else
@@ -971,7 +972,7 @@ int TMiBufferedStream::ReadGmsInteger()
 {
    uint8_t B;
 #if !defined( NDEBUG )
-   auto numBytesRead { Read( &B, 1 ) };
+   const auto numBytesRead { Read( &B, 1 ) };
    assert( numBytesRead == 1 );
    // should not happen
    if( !numBytesRead )
@@ -1242,7 +1243,7 @@ void TBinaryTextFileIO::ReadLine( std::string &StrBuffer, int &Len, const int Ma
       return;
    }
    StrBuffer.clear();
-   while( !( utils::in( LastChar, substChar, '\n', '\r', static_cast<char>(0x1A) ) || static_cast<int>( StrBuffer.size() ) == MaxInp ) )
+   while( !( utils::in( LastChar, substChar, '\n', '\r' ) || static_cast<int>( StrBuffer.size() ) == MaxInp ) )
    {
       StrBuffer.push_back( LastChar );
       // the simple case
