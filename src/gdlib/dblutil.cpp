@@ -54,7 +54,7 @@ constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
         mantMask { ~( signMask | expoMask ) };
 
 
-static void DblDecomp( const double x, bool &isNeg, uint32_t &expo, int64_t &mant )
+static void dblDecomp( const double x, bool &isNeg, uint32_t &expo, int64_t &mant )
 {
    TI64Rec xi { x };
    isNeg = ( xi.i64 & signMask ) == signMask;
@@ -67,7 +67,7 @@ char hexDigit( const uint8_t b )
    return static_cast<char>( b < 10 ? utils::ord( '0' ) + b : utils::ord( 'a' ) + b - 10 );
 }
 
-std::string DblToStrHex( const double x )
+std::string dblToStrHex( const double x )
 {
    TI64Rec xi { x };
    uint8_t c;
@@ -115,12 +115,12 @@ static std::string mFormat( int64_t m )
    return res;
 }
 
-std::string DblToStrHexponential( const double x )
+std::string dblToStrHexponential( const double x )
 {
    bool isNeg;
    uint32_t expo;
    int64_t mant;
-   DblDecomp( x, isNeg, expo, mant );
+   dblDecomp( x, isNeg, expo, mant );
    std::string result;
    // Consider all 10 cases: SNaN, QNaN, and +/-[INF,denormal,zero,normal]
    if( isNeg )

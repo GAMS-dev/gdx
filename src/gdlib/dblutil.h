@@ -44,8 +44,8 @@ double gdRoundTo( double x, int i );
 
 char hexDigit( uint8_t b );
 
-std::string DblToStrHex( double x );
+std::string dblToStrHex( double x );
 
-std::string DblToStrHexponential( double x );
+std::string dblToStrHexponential( double x );
 
 }// namespace gdlib::dblutil
