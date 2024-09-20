@@ -127,6 +127,15 @@ library::one_indexed_container<int> LiteralFilter { GMS_MAX_INDEX_DIM };
 bool DoSuppressZero {};
 double xx1 {}, xx2 {};
 
+std::string StripExt( const std::string &fln )
+{
+   std::string result { fln };
+   std::string ext { gdlib::strutilx::ExtractFileExtEx( fln ) };
+   if( !ext.empty() )
+      return result.erase( result.length() - ext.length(), ext.length() );
+   return result;
+}
+
 void ShortHelp()
 {
    std::cout << '\n'

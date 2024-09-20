@@ -15,6 +15,8 @@
 namespace gdx2veda
 {
 
+std::string StripExt( const std::string &fln );
+
 void ShortHelp();
 
 void WriteDataLine();
