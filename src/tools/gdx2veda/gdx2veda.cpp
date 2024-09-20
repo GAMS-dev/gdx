@@ -33,6 +33,7 @@
 #include "gdx2veda.h"
 #include "../library/common.h"
 #include "../../gdlib/strutilx.h"
+#include "../../gdlib/utils.h"
 
 namespace gdx2veda
 {
@@ -379,6 +380,40 @@ int main( const int argc, const char *argv[] )
       // UnloadGdxLibrary();
       return 1;
    }
+
+   FnVdd = ParamStr[2];
+
+   // Default RunId is the gdx file name
+   // if runid given (3rd parameter) is also use
+   // to see what format to write
+
+   if( ParamCount > 2 )
+   {
+      FnVeda = ParamStr[3];
+      RunId = StripExt( gdlib::strutilx::ExtractFileNameEx( FnVeda.string() ) );
+      if( utils::sameText( gdlib::strutilx::ExtractFileExtEx( FnVeda.string() ), ".csv" ) )
+      {
+         FnVeda = gdlib::strutilx::ChangeFileExtEx( RunId.string() + "_vd", ".csv" );
+         VedaLine = false;
+      }
+      else
+      {
+         VedaLine = true;
+         FnVeda = gdlib::strutilx::ChangeFileExtEx( FnVeda.string(), ".vd" );
+      }
+   }
+   else
+   {
+      RunId = StripExt( gdlib::strutilx::ExtractFileNameEx( FnGdx.string() ) );
+      FnVeda = gdlib::strutilx::ChangeFileExtEx( RunId.string(), ".vd" );
+      VedaLine = true;
+   }
+
+   // Empty strings are different for VEDA and CSV files
+   if( VedaLine )
+      Filler = "\"-\"";
+   else
+      Filler.clear();
 
    return 0;
 }
