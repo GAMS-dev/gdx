@@ -148,7 +148,7 @@ void VddHelp()
              << "<myveda> is usually the application name which will be displayed" << '\n'
              << "         on the top of the VEDA splash screen. When a new VEDA database is" << '\n'
              << "         created, a new folder with this name will appear:" << '\n'
-             << "         ...veda\database\mayveda_date_time." << '\n'
+             << "         ...veda\\database\\mayveda_date_time." << '\n'
              << "         Where data and time are the creation time stamp." << '\n'
              << "<tab_name> corresponds to the tabs of your VEDA screen" << '\n'
              << '\n'
