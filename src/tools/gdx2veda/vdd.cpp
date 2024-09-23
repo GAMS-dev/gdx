@@ -33,7 +33,7 @@ library::one_indexed_container<library::short_string> GamsText { MaxText };
 library::one_indexed_container<int> DummyText { MaxText };
 library::one_indexed_container<bool> ExpandMap { MaxText };
 
-int NumSubSet {};
+int NumSubset {};
 
 library::one_indexed_container<int> DimSubset { MaxDimension };
 library::one_indexed_container<library::short_string> Subset { MaxSubset };
