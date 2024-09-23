@@ -313,13 +313,13 @@ int main( const int argc, const char *argv[] )
                   for( i = First; i <= SyDim; i++ )
                      DataLine.at( i + 2 ) = '"' + std::string { Elements[i] } + '"';
                   WriteDataLine();
-                  nn = std::round( Values[GMS_VAL_LEVEL] );
+                  nn = static_cast<int>( std::round( Values[GMS_VAL_LEVEL] ) );
                   f << nn;
                   if( nn == 0 )
                      f << std::endl;
                   else
                   {
-                     gdxGetElemText( PGX, std::round( Values[GMS_VAL_LEVEL] ), NodeStr.data(), &NodeNr );
+                     gdxGetElemText( PGX, static_cast<int>( std::round( Values[GMS_VAL_LEVEL] ) ), NodeStr.data(), &NodeNr );
                      f << ",\"" << NodeStr << '"' << std::endl;
                   }
                }

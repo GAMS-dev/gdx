@@ -278,7 +278,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
                IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
          if( SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
          {
-            gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
+            gdxGetElemText( PGX, static_cast<int>( std::round( Vals[GMS_VAL_LEVEL] ) ), Txt.data(), &INode );
             Vals[GMS_VAL_LEVEL] = StrPool->Add( Txt.data(), Txt.length() );
          }
          SyObj->SyData->AddRecord( IndxI, Vals );
@@ -342,7 +342,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
                IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
             if( SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
             {
-               gdxGetElemText( PGX, std::round( Vals[GMS_VAL_LEVEL] ), Txt.data(), &INode );
+               gdxGetElemText( PGX, static_cast<int>( std::round( Vals[GMS_VAL_LEVEL] ) ), Txt.data(), &INode );
                Vals[GMS_VAL_LEVEL] = StrPool->Add( Txt.data(), Txt.length() );
             }
             SyObj->SyData->AddRecord( IndxI, Vals );
@@ -433,7 +433,7 @@ void TSymbolList::WritePGXFile( const int SyNr, const TProcessPass Pass )
       SyObj->SyData->GetRecord( R, IndxI, Vals );
       if( SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
       {
-         Txt = StrPool->GetString( std::round( Vals[GMS_VAL_LEVEL] ) );
+         Txt = StrPool->GetString( static_cast<int>( std::round( Vals[GMS_VAL_LEVEL] ) ) );
          gdxAddSetText( PGXMerge, Txt.data(), &INode );
          Vals[GMS_VAL_LEVEL] = INode;
       }
