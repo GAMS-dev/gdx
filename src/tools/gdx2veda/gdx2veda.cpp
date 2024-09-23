@@ -29,6 +29,7 @@
 #include <fstream>
 #include <cstring>
 #include <cmath>
+#include <cstring>
 
 #include "gdx2veda.h"
 #include "../library/common.h"
@@ -414,6 +415,103 @@ int main( const int argc, const char *argv[] )
       Filler = "\"-\"";
    else
       Filler.clear();
+
+   LoadVdd( FnVdd.string() );
+   if( strcmp( ParamStr[4], "" ) != 0 )
+   {
+      f.open( ParamStr[4] );
+      if( !f.is_open() )
+      {
+         ReportError( "Could not open dump file: " + std::string { ParamStr[4] } );
+         ReportError( "Msg: " + std::string { strerror( errno ) } );
+      }
+      else
+      {
+         DumpVdd( f );
+         f.close();
+      }
+   }
+
+   std::cout << "--- VEDA Cube: Dimensions=" << NumDimension
+             << " Entries=" << NumDataEntry
+             << "' Text=" << NumText
+             << " SubSets=" << NumSubset << std::endl;
+
+   // Match gdx and cube
+   Cnt = 0;
+   for( i = 1; i <= NumDataEntry; i++ )
+   {
+      gdxFindSymbol( PGX, GamsName.at( i ).data(), &SyNr );
+
+      if( SyNr <= 0 )
+      {
+         ReportError( "Did not find GAMS name " + GamsName.at( i ).string() + " in GDX file" );
+         continue;
+      }
+      gdxSymbolInfo( PGX, SyNr, SyName.data(), &SyDim, &iSyType );
+      SyType = gdxSyType( iSyType );
+      gdxSymbolInfoX( PGX, SyNr, &ElemCount, &iDummy, SyText.data() );
+
+      if( SyDim != GamsDim.at( i ) )
+      {
+         ReportError( "Symbol dimensions do not match for GAMS name " + GamsName.at( i ).string() );
+         ReportError( "GDX dimension=" + std::to_string( SyDim ) + " VDD dimension is " + std::to_string( GamsDim.at( i ) ) );
+         continue;
+      }
+
+      switch( SyType )
+      {
+         case dt_set:
+            if( GamsSuff.at( i ) != 0 )
+            {
+               ReportError( "Suffix not allowed for GAMS symbol " + GamsName.at( i ).string() );
+               continue;
+            }
+            break;
+
+         case dt_par:
+            // Apparently gary wants primal/dual pairs also for parameters
+            if( !( GamsSuff.at( i ) == 0 || GamsSuff.at( i ) == 5 ) )
+            {
+               ReportError( "Suffix not allowed for GAMS symbol " + GamsName.at( i ).string() );
+               continue;
+            }
+            break;
+
+         case dt_var:
+         case dt_equ:
+            if( GamsSuff.at( i ) == 0 )
+            {
+               ReportError( "Suffix missing for GAMS symbol " + GamsName.at( i ).string() );
+               continue;
+            }
+
+         default:
+            // TODO: Throw an error here?
+            break;
+      }
+
+      Cnt += ElemCount;
+   }
+
+   std::cout << "--- VEDA Cube: DataRecords=" << Cnt << std::endl;
+
+   for( i = 1; i <= NumText; i++ )
+   {
+      gdxFindSymbol( PGX, GamsText.at( i ).data(), &SyNr );
+      if( SyNr <= 0 )
+      {
+         ReportError( "Did not find GAMS text/set name \"" + GamsText.at( i ).string() + "\" in GDX file" );
+         continue;
+      }
+      gdxSymbolInfo( PGX, SyNr, SyName.data(), &SyDim, &iSyType );
+      SyType = gdxSyType( iSyType );
+      if( SyType != dt_set )
+      {
+         ReportError( "Gams text \"" + GamsText.at( i ).string() + "\" not a set" );
+         continue;
+      }
+   }
 
    return 0;
 }
