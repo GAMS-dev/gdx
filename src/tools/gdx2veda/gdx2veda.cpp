@@ -30,6 +30,7 @@
 #include <cstring>
 #include <cmath>
 #include <cstring>
+#include <cassert>
 
 #include "gdx2veda.h"
 #include "../library/common.h"
@@ -511,7 +512,70 @@ int main( const int argc, const char *argv[] )
          ReportError( "Gams text \"" + GamsText.at( i ).string() + "\" not a set" );
          continue;
       }
+
+      // We allow multiple dimensions now
+      // if( SyDim != 1 )
+      // {
+      //    ReportError( "Gams text \"" + GamsText.at( i ).string() + "\" not of dimension 1 but " + std::to_string( SyDim ) );
+      //    continue;
+      // }
+
+      // Instead lets make sure the dimension of gamstext[i] is the same
+      // as the number of indices in dimensionstore.textmap
+      k = DimensionStore.TextListLength( i );
+      assert( k >= 1 );
+
+      // if( SyDim > k && Options.RelaxDimensionAll )
+      // {
+      //    ReportError( "Dim(" + GamsText.at( i ).string() + ")=" + std::to_string( SyDim ) + "  Dim in [dimensiontext(all)]=" + std::to_string( k ) );
+      //    continue;
+      // }
+
+      if( ( ExpandMap.at( i ) == false && SyDim != k ) ||
+          ( ExpandMap.at( i ) == true && SyDim != k && !Options.RelaxDimensionAll ) )
+      {
+         ReportError( "Dimension mismatch: Dim(" + GamsText.at( i ).string() + ")=" + std::to_string( SyDim ) + "  Dim in [DimensionText]=" + std::to_string( k ) );
+         continue;
+      }
+
+      // Get the dimension number corresponding to this [DimensionText(all)] entry.
+      // Note: SyName is same as GamsText[i].
+      DimensionNumber = -1;
+
+      for( j = 1; j <= k; j++ )
+      {
+         s = DimensionStore.TextList( i, j );
+         DimNo = DimensionStore.GetDimensionS( s );
+
+         if( DimNo == Parent )
+            continue;
+         if( DimensionNumber == -1 )
+            DimensionNumber = DimNo;
+         if( DimNo != DimensionNumber )
+         {
+            ReportError( "Record " + SyName.string() + " in [DimensionText(all)] section points to different tabs" );
+            continue;
+         }
+
+         for( nn = 1; nn <= k - 1; nn++ )
+            if( DimensionStore.TextList( i, nn ) == DimensionStore.TextList( i, k ) )
+            {
+               ReportError( "Duplicate index for " + SyName.string() + " in [DimensionText(all)] section" );
+               break;
+            }
+      }
+
+      if( DimensionNumber == -1 )
+      {
+         ReportError( "Record " + SyName.string() + " in [DimensionText(all)] has not a valid tab" );
+         return 1;
+      }
+
+      TextDim.at( i ) = DimensionNumber;
    }
+
+   if( NumErr > 0 )
+      return 1;
 
    return 0;
 }
