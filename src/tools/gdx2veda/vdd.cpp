@@ -65,6 +65,144 @@ int SubsetList_t::GetSubset( const int i )
    return list.at( i - 1 );
 }
 
+int DimensionStore_t::AddName( const library::short_string &s, const int dim, const int tuple )
+{
+   // TODO: Implement function
+   return {};
+}
+
+bool DimensionStore_t::NameIsUsed( const library::short_string &s )
+{
+   // TODO: Implement function
+   return {};
+}
+
+bool DimensionStore_t::AddNewTab( const library::short_string &s, const int dimension )
+{
+   // TODO: Implement function
+   return {};
+}
+
+bool DimensionStore_t::AddNewTupleIndex( const library::short_string &s, const int dimension )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::GetDimensionS( const library::short_string &s )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::GetDimensionI( const int h )
+{
+   // TODO: Implement function
+   return {};
+}
+
+library::short_string DimensionStore_t::GetTabName( const int i )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::GetNumTuple( const int i )
+{
+   // TODO: Implement function
+   return {};
+}
+
+library::short_string DimensionStore_t::GetTuple( const int i, const int j )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::GetTupleI( const int i, const int j )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::GetHash( const library::short_string &s )
+{
+   // TODO: Implement function
+   return {};
+}
+
+library::short_string DimensionStore_t::GetName( const int i )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::EntryList( const int e, const int k )
+{
+   // TODO: Implement function
+   return {};
+}
+
+bool DimensionStore_t::AddEntryList( const int e, const int k, const int j )
+{
+   // TODO: Implement function
+   return {};
+}
+
+bool DimensionStore_t::AddTextList( const int t, const int k, const int j )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::TextListLength( const int t )
+{
+   // TODO: Implement function
+   return {};
+}
+
+library::short_string DimensionStore_t::TextList( const int t, const int k )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::DimensionListLength( const int t )
+{
+   // TODO: Implement function
+   return {};
+}
+
+library::short_string DimensionStore_t::DimensionList( const int i, const int j )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::GetTupleIndex( const int h )
+{
+   // TODO: Implement function
+   return {};
+}
+
+bool DimensionStore_t::AddSubset( const int subset, const int i, const library::short_string &s )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::GetSubsetTuples( const int subset )
+{
+   // TODO: Implement function
+   return {};
+}
+
+int DimensionStore_t::GetSubset( const int subset, const int i )
+{
+   // TODO: Implement function
+   return {};
+}
+
 DimensionStore_t DimensionStore {};
 
 // Defaults:
