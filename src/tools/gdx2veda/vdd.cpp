@@ -41,6 +41,30 @@ library::one_indexed_container<std::string> GamsSubset { MaxSubset };
 library::one_indexed_container<int> NextSubset { MaxSubset };
 library::one_indexed_container<int> NextSet { MaxSubset };
 
+bool SubsetList_t::AddSubset( const int i, const int k )
+{
+   if( !assigned )
+   {
+      // list.clear();
+      dimension = i;
+      assigned = true;
+   }
+   else if( i != dimension )
+      return false;
+   list.emplace_back( k );
+   return true;
+}
+
+int SubsetList_t::GetCount()
+{
+   return list.size();
+}
+
+int SubsetList_t::GetSubset( const int i )
+{
+   return list.at( i - 1 );
+}
+
 // TODO: DimensionStore = TDimensionStore.Create;
 
 // Defaults:

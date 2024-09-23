@@ -108,6 +108,19 @@ extern library::one_indexed_container<library::short_string> LiteralPool;
 extern library::one_indexed_container<int> LiteralUel;
 extern int NumLiteral;
 
+class SubsetList_t
+{
+private:
+   int dimension {};
+   std::vector<int> list;
+   bool assigned {};
+
+public:
+   bool AddSubset( int i, int k );
+   int GetCount();
+   int GetSubset( int i );
+};
+
 // TODO: TDimensionStore DimensionStore;
 
 extern std::map<gdxSpecValue, std::string> SpecialValueMapping;
