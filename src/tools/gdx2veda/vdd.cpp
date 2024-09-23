@@ -23,12 +23,13 @@ library::short_string VEDAFlavor { "MyVEDA" };
 // library::one_indexed_container<std::string> DummyDimension { MaxDimension };
 
 library::one_indexed_container<std::string> AtrName { MaxDataEntry };
-library::one_indexed_container<int> GamsName { MaxDataEntry };
+library::one_indexed_container<library::short_string> GamsName { MaxDataEntry };
+library::one_indexed_container<int> GamsSuff { MaxDataEntry };
 library::one_indexed_container<int> GamsDim { MaxDataEntry };
 
 int NumText {};
 
-library::one_indexed_container<std::string> GamsText { MaxText };
+library::one_indexed_container<library::short_string> GamsText { MaxText };
 library::one_indexed_container<int> DummyText { MaxText };
 library::one_indexed_container<bool> ExpandMap { MaxText };
 

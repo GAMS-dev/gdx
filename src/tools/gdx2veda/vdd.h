@@ -56,7 +56,8 @@ constexpr int MaxSubset { 200 };
 extern int NumDataEntry;
 
 extern library::one_indexed_container<std::string> AtrName;
-extern library::one_indexed_container<int> GamsName;
+extern library::one_indexed_container<library::short_string> GamsName;
+extern library::one_indexed_container<int> GamsSuff;
 extern library::one_indexed_container<int> GamsDim;
 
 // List of attributes whose records have to be skipped if zero
@@ -64,7 +65,7 @@ extern library::one_indexed_container<int> GamsDim;
 
 extern int NumText;
 
-extern library::one_indexed_container<std::string> GamsText;
+extern library::one_indexed_container<library::short_string> GamsText;
 extern library::one_indexed_container<int> DummyText;
 extern library::one_indexed_container<bool> ExpandMap;
 
