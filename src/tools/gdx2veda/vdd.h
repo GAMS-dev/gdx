@@ -121,7 +121,97 @@ public:
    int GetSubset( int i );
 };
 
-// TODO: TDimensionStore DimensionStore;
+class DimensionStore_t
+{
+private:
+   // TODO: Check types of map
+   std::map<int, library::short_string> StringStore;
+   library::one_indexed_container<int> NameDimension { MaxDimension };
+   library::one_indexed_container<std::vector<int>> DummyDimension { MaxDimension };
+   library::one_indexed_container<std::vector<int>> EntryMap { MaxDataEntry };
+   library::one_indexed_container<std::vector<int>> TextMap { MaxText };
+   library::one_indexed_container<SubsetList_t> SubsetList { MaxSubset };
+
+   // Add new name to the stringstore. Also store its associated
+   // dimension number (1..MaxDimension) and the tuple member (1..MaxTuple)
+   int AddName( const library::short_string &s, int dim, int tuple );
+
+public:
+   // Returns true if name is used already
+   // global comparison in hash object (case insensitive)
+   bool NameIsUsed( const library::short_string &s );
+
+   // Returns false if name is used already
+   // else a new dimension name is added
+   bool AddNewTab( const library::short_string &s, int dimension );
+
+   // Returns false if name is used already
+   // else a new tuple member name is added to the dimension
+   bool AddNewTupleIndex( const library::short_string &s, int dimension );
+
+   // 0 if not found
+   int GetDimensionS( const library::short_string &s );
+
+   // Id but for number
+   int GetDimensionI( int h );
+
+   // i=1..NumDimension
+   library::short_string GetTabName( int i );
+
+   // Size of tuple in dimension i
+   // 1 : normal one dimensional thing
+   int GetNumTuple( int i );
+
+   // i=1..NumDimension
+   // j=1..getNumTuple(i)
+   library::short_string GetTuple( int i, int j );
+
+   // i=1..NumDimension
+   // j=1..getNumTuple(i)
+   int GetTupleI( int i, int j );
+
+   // Get hash for string s
+   int GetHash( const library::short_string &s );
+
+   // i = hash
+   library::short_string GetName( int i );
+
+   // Get k-th hash for entry e
+   int EntryList( int e, int k );
+
+   // Add k-th hash for entry e
+   // true : success
+   bool AddEntryList( int e, int k, int j );
+
+   // Add k-th hash for text t
+   // true: success
+   bool AddTextList( int t, int k, int j );
+
+   // Returns the number of tuple members for DimensionText list
+   int TextListLength( int t );
+
+   // Return a tuple member of a DimensionText list
+   library::short_string TextList( int t, int k );
+
+   // Return number of tuple members for dimension i
+   int DimensionListLength( int t );
+
+   // Return j-th tuple member for dimension i
+   library::short_string DimensionList( int i, int j );
+
+   // Return tuple member index for string stored in position h
+   int GetTupleIndex( int h );
+
+   // Add tuplemember to a subset in dimension i
+   bool AddSubset( int subset, int i, const library::short_string &s );
+
+   // Get number of tuple members for subset
+   int GetSubsetTuples( int subset );
+
+   int GetSubset( int subset, int i );
+};
+
+extern DimensionStore_t DimensionStore;
 
 extern std::map<gdxSpecValue, std::string> SpecialValueMapping;
 extern std::map<gdxSpecValue, bool> SpecialValueIsString;

@@ -65,7 +65,7 @@ int SubsetList_t::GetSubset( const int i )
    return list.at( i - 1 );
 }
 
-// TODO: DimensionStore = TDimensionStore.Create;
+DimensionStore_t DimensionStore {};
 
 // Defaults:
 std::map<gdxSpecValue, std::string> SpecialValueMapping {
