@@ -223,6 +223,14 @@ void WriteValue( std::ofstream &f, double v )
       f << gdlib::strutilx::DblToStr( v );
 }
 
+std::string WritePV( char sepchar )
+{
+   if( Options.ValueDim == 2 )
+      return "PV" + std::string { sepchar } + "DV";
+   else
+      return "PV";
+}
+
 int main( const int argc, const char *argv[] )
 {
    const int ParamCount { argc - 1 };

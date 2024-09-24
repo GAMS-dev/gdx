@@ -32,6 +32,8 @@ bool IsASpecialValue( double v, library::short_string &MappedValue, bool &IsAStr
 
 void WriteValue( std::ofstream &f, double v );
 
+std::string WritePV( char sepchar );
+
 int main( int argc, const char *argv[] );
 
 }// namespace gdx2veda
