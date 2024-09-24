@@ -706,7 +706,13 @@ int main( const int argc, const char *argv[] )
    }
    else
    {
-      // TODO
+      // csv headers
+      for( i = 1; i <= NumDimension; i++ )
+         f << '"' << DimensionStore.GetTabName( i ) << "\",";
+      f << "\"PV\"";
+      if( Options.ValueDim == 2 )
+         f << ",\"DV\"";
+      f << std::endl;
    }
 
    return 0;
