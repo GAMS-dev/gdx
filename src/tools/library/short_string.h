@@ -30,6 +30,7 @@ public:
    [[nodiscard]] char front() const;
    [[nodiscard]] char back() const;
 
+   char at( uint8_t i ) const;
    char operator[]( uint8_t i ) const;
 
    [[nodiscard]] bool empty() const;

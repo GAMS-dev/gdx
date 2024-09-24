@@ -65,7 +65,7 @@ char short_string::back() const
    return buffer.at( length - 1 );
 }
 
-char short_string::operator[]( const uint8_t i ) const
+char short_string::at( const uint8_t i ) const
 {
 #if defined( ENABLE_ASSERTIONS )
    [[maybe_unused]] const uint8_t length { this->length() };
@@ -75,6 +75,11 @@ char short_string::operator[]( const uint8_t i ) const
       assert( i <= length );
 #endif
    return buffer.at( i );
+}
+
+char short_string::operator[]( const uint8_t i ) const
+{
+   return at( i );
 }
 
 bool short_string::empty() const
