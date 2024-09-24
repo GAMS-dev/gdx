@@ -165,7 +165,7 @@ int DateTimeToFileDate( double dt );
 union LongRec {
    struct {
       uint16_t lo, hi;
-   };
+   } parts;
    uint8_t bytes[4];
 };
 

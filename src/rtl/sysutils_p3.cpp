@@ -698,8 +698,8 @@ double FileDateToDateTime( int fd )
    LongRec rec;
    static_assert( sizeof( int ) == sizeof( LongRec ) );
    std::memcpy( &rec, &fd, sizeof( int ) );
-   return EncodeDate( ( rec.hi >> 9 ) + 1980, ( rec.hi >> 5 ) & 15, rec.hi & 31 ) +
-      EncodeTime(rec.lo >> 11, (rec.lo >> 5) & 63, (rec.lo & 31) << 1, 0);
+   return EncodeDate( ( rec.parts.hi >> 9 ) + 1980, ( rec.parts.hi >> 5 ) & 15, rec.parts.hi & 31 ) +
+      EncodeTime(rec.parts.lo >> 11, (rec.parts.lo >> 5) & 63, (rec.parts.lo & 31) << 1, 0);
 #else
    tm ut {};
    time_t tim;
