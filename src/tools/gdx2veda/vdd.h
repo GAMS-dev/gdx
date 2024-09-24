@@ -4,12 +4,15 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <cstdint>
 
 #include "container.h"
 #include "../library/short_string.h"
 
 namespace gdx2veda
 {
+
+using bool_t = uint8_t;
 
 // Cube data definitions
 
@@ -67,7 +70,7 @@ extern int NumText;
 
 extern library::one_indexed_container<library::short_string> GamsText;
 extern library::one_indexed_container<int> DummyText;
-extern library::one_indexed_container<bool> ExpandMap;
+extern library::one_indexed_container<bool_t> ExpandMap;
 
 // Number of subset definitions (0..MaxSubset)
 extern int NumSubset;
@@ -228,7 +231,7 @@ struct Options_t {
    bool ShowAllSeparators {}, RelaxDimensionAll {};
    int ValueDim {};
    bool SetsAllowedFlag {};
-   library::one_indexed_container<bool> SetsAllowed;
+   library::one_indexed_container<bool_t> SetsAllowed;
    std::string ScenarioSet;
    Format_t Format;
 };

@@ -31,7 +31,7 @@ int NumText {};
 
 library::one_indexed_container<library::short_string> GamsText { MaxText };
 library::one_indexed_container<int> DummyText { MaxText };
-library::one_indexed_container<bool> ExpandMap { MaxText };
+library::one_indexed_container<bool_t> ExpandMap { MaxText };
 
 int NumSubset {};
 
@@ -245,7 +245,7 @@ Options_t Options {
         false,
         1,
         false,
-        library::one_indexed_container<bool> { MaxDimension },
+        library::one_indexed_container<bool_t> { MaxDimension },
         "",
         Format_t::FormatVeda };
 
