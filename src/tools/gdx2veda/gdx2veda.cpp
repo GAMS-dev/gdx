@@ -231,6 +231,20 @@ std::string WritePV( char sepchar )
       return "PV";
 }
 
+void CheckLiterals()
+{
+   int EN {}, UMap {};
+   for( i = 1; i <= NumLiteral; i++ )
+   {
+      if( gdxUMFindUEL( PGX, LiteralPool.at( i ).data(), &EN, &UMap ) == 0 )
+      {
+         ReportError( "Literal " + LiteralPool.at( i ).string() + " not a valid UEL in GDX file" );
+         EN = -1;
+      }
+      LiteralUel.at( i ) = EN;
+   }
+}
+
 int main( const int argc, const char *argv[] )
 {
    const int ParamCount { argc - 1 };

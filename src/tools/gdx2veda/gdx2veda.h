@@ -74,6 +74,8 @@ void WriteValue( std::ofstream &f, double v );
 
 std::string WritePV( char sepchar );
 
+void CheckLiterals();
+
 int main( int argc, const char *argv[] );
 
 }// namespace gdx2veda
