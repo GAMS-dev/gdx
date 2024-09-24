@@ -20,7 +20,7 @@ std::string StripExt( const std::string &fln );
 
 std::string DQuotedStr( const std::string &s );
 
-void WriteHeader( std::ofstream &f, const library::short_string &key, const library::short_string &value );
+void WriteHeader( std::ofstream &f, const std::string &key, const std::string &value );
 
 void ShortHelp();
 

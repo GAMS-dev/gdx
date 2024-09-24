@@ -148,12 +148,12 @@ std::string DQuotedStr( const std::string &s )
    return "\"" + result + "\"";
 }
 
-void WriteHeader( std::ofstream &f, const library::short_string &key, const library::short_string &value )
+void WriteHeader( std::ofstream &f, const std::string &key, const std::string &value )
 {
    switch( Options.Format )
    {
       case Format_t::FormatCSV:
-         f << DQuotedStr( key.string() ) << ',' << DQuotedStr( value.string() ) << std::endl;
+         f << DQuotedStr( key ) << ',' << DQuotedStr( value ) << std::endl;
          break;
 
       case Format_t::FormatVeda:
