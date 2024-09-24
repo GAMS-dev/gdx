@@ -142,7 +142,7 @@ std::string DQuotedStr( const std::string &s )
 {
    // Workaround for p2c bug
    std::string qs { "\"" }, result { s };
-   for( i = result.length(); i >= 1; i-- )
+   for( i = result.length() - 1; i >= 0; i-- )
       if( result.at( i ) == '"' )
          qs.insert( i, result );
    return "\"" + result + "\"";
