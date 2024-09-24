@@ -715,6 +715,20 @@ int main( const int argc, const char *argv[] )
       f << std::endl;
    }
 
+   if( Options.Format == Format_t::FormatCSV )
+   {
+      f.close();
+      FnVeda = gdlib::strutilx::ChangeFileExtEx( RunId.string() + "_vd", ".csv" );
+      f.open( FnVeda.string() );
+
+      if( !f.is_open() )
+      {
+         ReportError( "Could not open file: " + FnVeda.string() );
+         ReportError( "Msg: " + std::string { strerror( errno ) } );
+         return 1;
+      }
+   }
+
    return 0;
 }
 
