@@ -59,7 +59,7 @@ library::short_string
         FnVdd,
         FnDll,
         FnVeda,
-        FnVedah,
+        FnVedaH,
         FnVde,
         FnVds,
         FnGdx;
