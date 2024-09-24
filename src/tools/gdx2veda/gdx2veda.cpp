@@ -26,7 +26,6 @@
 #include <iostream>
 #include <iomanip>
 #include <map>
-#include <fstream>
 #include <cstring>
 #include <cmath>
 #include <cstring>
@@ -147,6 +146,20 @@ std::string DQuotedStr( const std::string &s )
       if( result.at( i ) == '"' )
          qs.insert( i, result );
    return "\"" + result + "\"";
+}
+
+void WriteHeader( std::ofstream &f, const library::short_string &key, const library::short_string &value )
+{
+   switch( Options.Format )
+   {
+      case Format_t::FormatCSV:
+         f << DQuotedStr( key.string() ) << ',' << DQuotedStr( value.string() ) << std::endl;
+         break;
+
+      case Format_t::FormatVeda:
+         f << '*' << std::setw( 17 ) << key << "- " << value << std::endl;
+         break;
+   }
 }
 
 void ShortHelp()

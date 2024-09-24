@@ -2,6 +2,7 @@
 #define GDX_GDX2VEDA_H
 
 #include <string>
+#include <fstream>
 
 #include "container.h"
 #include "vdd.h"
@@ -18,6 +19,8 @@ namespace gdx2veda
 std::string StripExt( const std::string &fln );
 
 std::string DQuotedStr( const std::string &s );
+
+void WriteHeader( std::ofstream &f, const library::short_string &key, const library::short_string &value );
 
 void ShortHelp();
 
