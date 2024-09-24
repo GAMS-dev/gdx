@@ -16,22 +16,22 @@
 namespace gdx2veda
 {
 
-class TMyHashList
+class MyHashList_t
 {
 public:
    int Compare( const library::short_string &PS1, const library::short_string &PS2 );
 };
 
-class THashTuple
+class HashTuple_t
 {
 private:
-   TMyHashList StringStore;
+   MyHashList_t StringStore;
 
    library::short_string Encode( int x, int n );
    void Decode( const library::short_string &s, int x, int n );
 
 public:
-   THashTuple();
+   HashTuple_t();
    void Add( int x, int n, int mark );
    int Find( int x, int n, int &mark );
    int GetCount();
@@ -43,13 +43,13 @@ public:
    void ClearText();
 };
 
-class TProjection
+class Projection_t
 {
 private:
-   library::one_indexed_container<THashTuple> tabs { GMS_MAX_INDEX_DIM };
+   library::one_indexed_container<HashTuple_t> tabs { GMS_MAX_INDEX_DIM };
 
 public:
-   TProjection();
+   Projection_t();
    int AddUel( int dimension, int x, int n, int &mark );
    int AddInteger( int dimension, int k );
    int GetUel( int dimension, int i, int &n );
