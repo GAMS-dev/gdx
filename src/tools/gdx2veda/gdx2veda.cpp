@@ -139,6 +139,16 @@ std::string StripExt( const std::string &fln )
    return result;
 }
 
+std::string DQuotedStr( const std::string &s )
+{
+   // Workaround for p2c bug
+   std::string qs { "\"" }, result { s };
+   for( i = result.length(); i >= 1; i-- )
+      if( result.at( i ) == '"' )
+         qs.insert( i, result );
+   return "\"" + result + "\"";
+}
+
 void ShortHelp()
 {
    std::cout << '\n'
