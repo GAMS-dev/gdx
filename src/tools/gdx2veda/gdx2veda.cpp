@@ -623,6 +623,92 @@ int main( const int argc, const char *argv[] )
    if( NumErr > 0 )
       return 1;
 
+   // Finally we can dump the veda data
+
+   if( Options.Format == Format_t::FormatCSV )
+   {
+      FnVedaH = gdlib::strutilx::ChangeFileExtEx( RunId.string() + "_vdheader", ".csv" );
+      f.open( FnVedaH.string() );
+   }
+   else
+      f.open( FnVeda.string() );
+
+   if( !f.is_open() )
+   {
+      ReportError( "Could not open file: " + FnVeda.string() );
+      ReportError( "Msg: " + std::string { strerror( errno ) } );
+      return 1;
+   }
+
+   if( VedaLine )
+   {
+      // bveda headers
+      // f << "*ImportID         - " << DimensionStore.GetTabName( RunPos ) << ':' << RunId << std::endl;
+      WriteHeader( f, "GDX2VEDAversion", BuildVersion );
+      WriteHeader( f, "ImportID", "Scenario:" + RunId.string() );
+      WriteHeader( f, "VEDAFlavor", VEDAFlavor.string() );
+
+      s.clear();
+      for( i = 1; i < NumDimension; i++ )
+         s += DimensionStore.GetTabName( i ).string() + ';';
+      s += WritePV( ';' );
+      WriteHeader( f, "Dimensions", s.string() );
+
+      if( Parent != -1 )
+      {
+         s.clear();
+         for( i = 1; i <= NumChildren; i++ )
+         {
+            if( i > 1 )
+               s += ", ";
+            s += DimensionStore.GetTabName( Children.at( i ) ).string() + ": " +
+                 DimensionStore.GetTabName( Parent ).string();
+         }
+         WriteHeader( f, "ParentDimensions", s.string() );
+      }
+
+      Skip = true;
+      s.clear();
+      for( i = 1; i < NumDimension; i++ )
+         if( !Options.SetsAllowedFlag || Options.SetsAllowed.at( i ) )
+            // if( i != RunPos || i != AtrPos )
+            if( i != AtrPos )
+            {
+               if( Skip )
+                  Skip = false;
+               else
+                  s += ';';
+               s += DimensionStore.GetTabName( i );
+            }
+      WriteHeader( f, "SetsAllowed", s.string() );
+
+      s.clear();
+      for( i = 1; i <= NumDimension; i++ )
+         s += DimensionStore.GetTabName( i ).string() + ":63;";
+      s += "PV:20";
+      if( Options.ValueDim == 2 )
+         s += ";DV:20";
+      WriteHeader( f, "FieldSize", s.string() );
+
+      // if( AtrPos > 0 )
+      //    f << "*UnitsID          - " << DimensionStore.GetTabName( AtrPos ) << std::endl;
+      // else
+      //    f << "*UnitsID          - Attributes is missing" << std::endl;
+
+      WriteHeader( f, "NotIndexed", WritePV( ';' ) );
+      WriteHeader( f, "ValueDim", WritePV( ';' ) );
+      WriteHeader( f, "DefaultValueDim", "PV" );
+      WriteHeader( f, "FieldSeparator", "," );
+      WriteHeader( f, "TextDelim", "\"" );
+
+      if( Options.Format == Format_t::FormatVeda )
+         f << std::endl;
+   }
+   else
+   {
+      // TODO
+   }
+
    return 0;
 }
 
