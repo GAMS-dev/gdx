@@ -30,6 +30,8 @@ void GetSpecialValues( const gdxHandle_t &PGX );
 
 bool IsASpecialValue( double v, library::short_string &MappedValue, bool &IsAString );
 
+void WriteValue( std::ofstream &f, double v );
+
 int main( int argc, const char *argv[] );
 
 }// namespace gdx2veda

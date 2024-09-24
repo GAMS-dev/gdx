@@ -208,6 +208,21 @@ bool IsASpecialValue( const double v, library::short_string &MappedValue, bool &
    return true;
 }
 
+void WriteValue( std::ofstream &f, double v )
+{
+   library::short_string MappedValue;
+   bool IsAString;
+   if( IsASpecialValue( v, MappedValue, IsAString ) )
+   {
+      if( IsAString )
+         f << '"' << MappedValue << '"';
+      else
+         f << MappedValue;
+   }
+   else
+      f << gdlib::strutilx::DblToStr( v );
+}
+
 int main( const int argc, const char *argv[] )
 {
    const int ParamCount { argc - 1 };
