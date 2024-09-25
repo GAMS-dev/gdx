@@ -255,7 +255,7 @@ library::one_indexed_container<library::short_string> LiteralPool { MaxLiteral }
 library::one_indexed_container<int> LiteralUel { MaxLiteral };
 int NumLiteral {};
 
-// TODO: SuppressZero = TXStrHashList.Create;
+gdlib::strhash::TXStrHashList<nullptr_t> SuppressZero {};
 
 void VddHelp()
 {

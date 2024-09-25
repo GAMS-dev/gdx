@@ -8,6 +8,7 @@
 
 #include "container.h"
 #include "../library/short_string.h"
+#include "../../gdlib/strhash.h"
 
 namespace gdx2veda
 {
@@ -64,7 +65,7 @@ extern library::one_indexed_container<int> GamsSuff;
 extern library::one_indexed_container<int> GamsDim;
 
 // List of attributes whose records have to be skipped if zero
-// TODO: TXStrHashList SuppressZero;
+extern gdlib::strhash::TXStrHashList<nullptr_t> SuppressZero;
 
 extern int NumText;
 
@@ -127,8 +128,7 @@ public:
 class DimensionStore_t
 {
 private:
-   // TODO: Check types of map
-   std::map<int, library::short_string> StringStore;
+   gdlib::strhash::TXStrHashList<nullptr_t> StringStore {};
    library::one_indexed_container<int> NameDimension { MaxDimension };
    library::one_indexed_container<std::vector<int>> DummyDimension { MaxDimension };
    library::one_indexed_container<std::vector<int>> EntryMap { MaxDataEntry };
