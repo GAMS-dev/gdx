@@ -245,6 +245,20 @@ void CheckLiterals()
    }
 }
 
+bool CheckLiteralFilter( const gdxUelIndex_t &Indices, const int N )
+{
+   if( NumLiteral == 0 )
+      return true;
+   for( int k { 1 }; k <= N; k++ )
+   {
+      if( LiteralFilter.at( k ) == -1 )
+         continue;
+      if( Indices[k] != LiteralFilter.at( k ) )
+         return false;
+   }
+   return true;
+}
+
 int main( const int argc, const char *argv[] )
 {
    const int ParamCount { argc - 1 };

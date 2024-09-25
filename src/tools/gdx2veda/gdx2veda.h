@@ -88,6 +88,8 @@ std::string WritePV( char sepchar );
 
 void CheckLiterals();
 
+bool CheckLiteralFilter( const gdxUelIndex_t &Indices, int N );
+
 int main( int argc, const char *argv[] );
 
 }// namespace gdx2veda
