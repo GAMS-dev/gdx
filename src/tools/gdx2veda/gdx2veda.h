@@ -27,17 +27,16 @@ class HashTuple_t
 {
 private:
    MyHashList_t StringStore;
-
-   library::short_string Encode( int x, int n );
-   void Decode( const library::short_string &s, int x, int n );
+   library::short_string Encode( const gdxUelIndex_t &x, int n );
+   void Decode( const library::short_string &s, const gdxUelIndex_t &x, int n );
 
 public:
    HashTuple_t();
-   void Add( int x, int n, int mark );
-   int Find( int x, int n, int &mark );
+   void Add( const gdxUelIndex_t &x, int n, int mark );
+   int Find( const gdxUelIndex_t &x, int n, int &mark );
    int GetCount();
-   int Get( int i, int &n );
-   int GetSorted( int i, int &n );
+   const gdxUelIndex_t &Get( int i, int &n );
+   const gdxUelIndex_t &GetSorted( int i, int &n );
    void SetText( int i, int t );
    int GetText( int i );
    int GetSortedText( int i );
@@ -51,10 +50,18 @@ private:
 
 public:
    Projection_t();
-   int AddUel( int dimension, int x, int n, int &mark );
+   int AddUel( int dimension, const gdxUelIndex_t &x, int n, int &mark );
    int AddInteger( int dimension, int k );
-   int GetUel( int dimension, int i, int &n );
-   int GetSortedUel( int dimension, int i, int &n );
+   const gdxUelIndex_t &GetUel( int dimension, int i, int &n );
+   const gdxUelIndex_t &GetSortedUel( int dimension, int i, int &n );
+   int GetInteger( int dimension, int i );
+   int GetCount( int dimension );
+   int FindUel( int dimension, const gdxUelIndex_t &x, int n, int &mark );
+   void SetText( int dimension, int i, int t );
+   int GetText( int dimension, int i );
+   int GetSortedText( int dimension, int i );
+   void ClearText( int dimension );
+   void ClearAllText();
 };
 
 class DataLineMapping_t
@@ -66,7 +73,7 @@ public:
    DataLineMapping_t();
    void Clear();
    void Insert( int Dimension, int TupleIndex, int EntryIndex );
-   void WriteDataLines( int Indices, library::one_indexed_container<library::short_string> &Uels );
+   void WriteDataLines( const gdxUelIndex_t &Indices, library::one_indexed_container<library::short_string> &Uels );
 };
 
 std::string StripExt( const std::string &fln );
