@@ -90,6 +90,8 @@ void CheckLiterals();
 
 bool CheckLiteralFilter( const gdxUelIndex_t &Indices, int N );
 
+double SpecialValueCheck( double d );
+
 int main( int argc, const char *argv[] );
 
 }// namespace gdx2veda

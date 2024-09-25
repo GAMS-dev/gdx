@@ -259,6 +259,15 @@ bool CheckLiteralFilter( const gdxUelIndex_t &Indices, const int N )
    return true;
 }
 
+double SpecialValueCheck( const double d )
+{
+   gdxSpecValue xsv { gdxSpecValue( static_cast<int>( d ) ) };
+   if( xsv == sv_normal )
+      return d;
+   if( SpecialValueIsZero.at( xsv ) )
+      return 0.0;
+}
+
 int main( const int argc, const char *argv[] )
 {
    const int ParamCount { argc - 1 };
