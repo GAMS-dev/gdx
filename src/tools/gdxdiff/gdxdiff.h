@@ -4,6 +4,7 @@
 #include <array>
 #include <string>
 
+#include "../library/common.h"
 #include "../library/short_string.h"
 
 // GDX library interface
@@ -112,7 +113,7 @@ void CompareSy( int Sy1, int Sy2 );
 
 bool GetAsDouble( const library::short_string &S, double &V );
 
-void Usage();
+void Usage( const library::AuditLine &AuditLine );
 
 // void CopyAcronyms( const gdxHandle_t &PGX );
 

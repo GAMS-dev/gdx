@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "../library/common.h"
 #include "../library/short_string.h"
 #include "../../gdlib/gmsdata.h"
 #include "../../gdlib/gmsobj.h"
@@ -101,7 +102,7 @@ std::string FormatDateTime( uint16_t Year, uint16_t Month, uint16_t Day,
 
 bool GetParameters( int argc, const char *argv[] );
 
-void Usage();
+void Usage(const library::AuditLine &AuditLine);
 
 int main( int argc, const char *argv[] );
 

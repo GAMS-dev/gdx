@@ -31,7 +31,6 @@
 #include <cmath>
 
 #include "gdxmerge.h"
-#include "../library/common.h"
 #include "../library/cmdpar.h"
 #include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
@@ -713,10 +712,10 @@ bool GetParameters( const int argc, const char *argv[] )
    return Result;
 }
 
-void Usage()
+void Usage( const library::AuditLine &AuditLine )
 {
    std::cout << "gdxmerge: Merge GDX files" << '\n'
-             << library::gdlGetAuditLine() << '\n'
+             << AuditLine.gdlGetAuditLine() << '\n'
              << '\n'
              << "Usage:" << '\n'
              << "   gdxmerge filepat1 filepat2 ... filepatn" << '\n'
@@ -735,16 +734,16 @@ int main( const int argc, const char *argv[] )
    library::short_string Msg;
    int N, ErrNr;
 
-   library::gdlSetSystemName( "GDXMERGE" );
+   library::AuditLine AuditLine { "GDXMERGE" };
    if( gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
    {
-      std::cout << library::gdlGetAuditLine() << std::endl;
+      std::cout << AuditLine.gdlGetAuditLine() << std::endl;
       return {};
    }
 
    if( argc == 1 || ( argc == 2 && std::strcmp( argv[1], "/?" ) == 0 ) )
    {
-      Usage();
+      Usage( AuditLine );
       return {};
    }
 

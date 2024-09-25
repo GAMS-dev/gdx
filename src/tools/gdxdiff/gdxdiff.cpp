@@ -34,7 +34,6 @@
 #include <memory>
 
 #include "gdxdiff.h"
-#include "../library/common.h"
 #include "../library/cmdpar.h"
 #include "../../gdlib/strutilx.h"
 #include "../../gdlib/strhash.h"
@@ -724,10 +723,10 @@ bool GetAsDouble( const library::short_string &S, double &V )
    return result;
 }
 
-void Usage()
+void Usage( const library::AuditLine &AuditLine )
 {
    std::cout << "gdxdiff: GDX file differ" << '\n'
-             << library::gdlGetAuditLine() << '\n'
+             << AuditLine.gdlGetAuditLine() << '\n'
              << '\n'
              << "Usage: " << '\n'
              << "   gdxdiff file1.gdx file2.gdx [diffile.gdx] [options]" << '\n'
@@ -767,10 +766,10 @@ int main( const int argc, const char *argv[] )
    GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
    gdxValues_t StrVals {};
 
-   library::gdlSetSystemName( "GDXDIFF" );
+   library::AuditLine AuditLine { "GDXDIFF" };
    if( gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
    {
-      std::cout << library::gdlGetAuditLine() << std::endl;
+      std::cout << AuditLine.gdlGetAuditLine() << std::endl;
       return 0;
    }
 
@@ -800,7 +799,7 @@ int main( const int argc, const char *argv[] )
 
    if( !CmdParams->CrackCommandLine( argc, argv ) )
    {
-      Usage();
+      Usage( AuditLine );
       return static_cast<int>( ErrorCode::ERR_USAGE );
    }
 
@@ -1048,11 +1047,11 @@ int main( const int argc, const char *argv[] )
    {
       // TODO: Remove?
       // std::cout << std::endl;
-      Usage();
+      Usage( AuditLine );
       return static_cast<int>( ErrorCode::ERR_USAGE );
    }
 
-   std::cout << library::gdlGetAuditLine() << std::endl;
+   std::cout << AuditLine.gdlGetAuditLine() << std::endl;
 
    CheckFile( InFile1 );
    CheckFile( InFile2 );

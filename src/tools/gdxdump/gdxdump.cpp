@@ -32,7 +32,6 @@
 #include <cstring>
 
 #include "gdxdump.h"
-#include "../library/common.h"
 #include "../library/short_string.h"
 #include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
@@ -963,10 +962,10 @@ void WriteSetText()
    }
 }
 
-void Usage()
+void Usage( const library::AuditLine &AuditLine )
 {
    std::cout << "gdxdump: Write GDX file in ASCII" << '\n'
-             << library::gdlGetAuditLine() << '\n'
+             << AuditLine.gdlGetAuditLine() << '\n'
              << '\n'
              << "Usage:" << '\n'
              << "gdxdump <filename> <options>" << '\n'
@@ -1075,10 +1074,10 @@ int main( const int argc, const char *argv[] )
    ParamCount = argc - 1;
    ParamStr = argv;
 
-   library::gdlSetSystemName( "GDXDUMP" );
+   library::AuditLine AuditLine { "GDXDUMP" };
    if( gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
    {
-      std::cout << library::gdlGetAuditLine() << std::endl;
+      std::cout << AuditLine.gdlGetAuditLine() << std::endl;
       return 0;
    }
 
@@ -1411,7 +1410,7 @@ int main( const int argc, const char *argv[] )
 
    if( ExitCode != 0 )
    {
-      Usage();
+      Usage( AuditLine );
       goto End;
    }
 

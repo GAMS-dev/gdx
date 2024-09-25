@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <array>
 
+#include "../library/common.h"
+
 namespace gdxdump
 {
 
@@ -69,7 +71,7 @@ void WriteDomainInfo();
 
 void WriteSetText();
 
-void Usage();
+void Usage(const library::AuditLine &AuditLine);
 
 std::string NextParam();
 
