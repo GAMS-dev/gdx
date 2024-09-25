@@ -157,4 +157,13 @@ bool goodUELString( const char *s, const size_t slen )
    return slen < GLOBAL_UEL_IDENT_SIZE && canBeQuoted( s, slen );
 }
 
+void gdlSetSystemName( const std::string &name )
+{
+}
+
+std::string gdlGetAuditLine()
+{
+   return {};
+}
+
 }// namespace library

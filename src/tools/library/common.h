@@ -29,6 +29,10 @@ bool canBeQuoted( const char *s, size_t slen );
 
 bool goodUELString( const char *s, size_t slen );
 
+void gdlSetSystemName( const std::string &name );
+
+std::string gdlGetAuditLine();
+
 }// namespace library
 
 #endif//GDX_LIBRARY_H
