@@ -766,7 +766,6 @@ int main( const int argc, const char *argv[] )
       f.close();
       FnVeda = gdlib::strutilx::ChangeFileExtEx( RunId.string() + "_vd", ".csv" );
       f.open( FnVeda.string() );
-
       if( !f.is_open() )
       {
          ReportError( "Could not open file: " + FnVeda.string() );
@@ -774,6 +773,94 @@ int main( const int argc, const char *argv[] )
          return 1;
       }
    }
+
+   // Read all UEL names (strings) in array
+   for( i = 1; i <= NrUel; i++ )
+      gdxUMUelGet( PGX, i, Uels.at( i ).data(), &j );
+
+   // Check literals: must be uel
+   CheckLiterals();
+
+   // We will also project all index position to be able to
+   // write a .VDE file and attach set text if specified
+   // in the [DimensionText] section
+
+   // EK:
+   // For every dimension/tab we need a hash table
+   // Some dimensions/tabs have tuples.
+
+   for( i = 1; i <= NumDataEntry; i++ )
+   {
+      gdxFindSymbol( PGX, GamsName.at( i ).data(), &SyNr );
+      gdxSymbolInfo( PGX, SyNr, SyName.data(), &SyDim, &iSyType );
+      SyType = gdxSyType( iSyType );
+
+      for( k = 1; k < NumDimension; k++ )
+         DataLine.at( k ) = Filler;
+      if( GamsSuff.at( i ) == 0 )
+         j = 1;
+      else
+         j = GamsSuff.at( i );
+
+      DoSuppressZero = SuppressZero.IndexOf( AtrName.at( i ).data() ) != -1;
+
+      // DataLine.at( RunPos ) = '"' + RunId.string() + '"';
+      if( AtrPos > 0 )
+         DataLine.at( AtrPos ) = '"' + AtrName.at( i ) + '"';
+
+      for( k = 1; k <= GMS_MAX_INDEX_DIM; k++ )
+         LiteralFilter.at( k ) = -1;
+
+      // Prepare for mapping
+      DataLineMapping.Clear();
+
+      for( k = 1; k <= SyDim; k++ )
+      {
+         h = DimensionStore.EntryList( i, k );
+         if( h > 0 )
+            // TODO: Check -h
+            LiteralFilter.at( k ) = LiteralUel.at( -h );
+         else
+            DataLineMapping.Insert( DimensionStore.GetDimensionI( h ), DimensionStore.GetTupleIndex( h ), k );
+      }
+
+      gdxDataReadRawStart( PGX, SyNr, &NrRecs );
+      while( gdxDataReadRaw( PGX, Indices, Values, &First ) != 0 )
+      {
+         if( CheckLiteralFilter( Indices, SyDim ) )
+            continue;
+
+         if( DoSuppressZero )
+         {
+            xx1 = 0;
+            xx2 = 0;
+
+            switch( j )
+            {
+               case 1:
+               case 2:
+               case 3:
+               case 4:
+                  xx1 = SpecialValueCheck( Values[j - 1] );
+                  break;
+
+               case 5:
+                  xx1 = SpecialValueCheck( Values[GMS_VAL_LEVEL] );
+                  if( Options.ValueDim == 2 && ( SyType == dt_equ || SyType == dt_var ) )
+                     xx2 = SpecialValueCheck( Values[GMS_VAL_MARGINAL] );
+                  break;
+
+               default:
+                  // TODO: Throw an error here?
+                  break;
+            }
+         }
+
+         if( xx1 == 0 && xx2 == 0 )
+            continue;
+      }
+   }
+
 
    return 0;
 }
