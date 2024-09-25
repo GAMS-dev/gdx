@@ -46,6 +46,9 @@ const std::string BuildVersion { "2005-10-07" };
 library::one_indexed_container<library::short_string> Uels { 1000000 };
 library::one_indexed_container<library::short_string> DataLine { GMS_MAX_INDEX_DIM };
 
+Projection_t Projection {};
+library::short_string ParentField;
+
 gdxSVals_t SpecialValues {};
 
 // std::ofstream f, g;
@@ -102,7 +105,7 @@ bool Skip {};
 library::short_string Filler;
 bool VedaLine {};
 
-// TDataLineMapping DataLineMapping {};
+DataLineMapping_t DataLineMapping {};
 int h {};
 gdxUelIndex_t x {};
 library::short_string s, s2, s3;
