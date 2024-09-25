@@ -1075,7 +1075,7 @@ int main( const int argc, const char *argv[] )
    ParamStr = argv;
 
    library::AuditLine AuditLine { "GDXDUMP" };
-   if( gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
+   if( ParamCount > 0 && gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
    {
       std::cout << AuditLine.gdlGetAuditLine() << std::endl;
       return 0;

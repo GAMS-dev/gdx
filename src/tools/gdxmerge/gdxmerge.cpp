@@ -735,7 +735,7 @@ int main( const int argc, const char *argv[] )
    int N, ErrNr;
 
    library::AuditLine AuditLine { "GDXMERGE" };
-   if( gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
+   if( argc > 1 && gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
    {
       std::cout << AuditLine.gdlGetAuditLine() << std::endl;
       return {};
