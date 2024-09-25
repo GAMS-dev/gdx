@@ -727,8 +727,7 @@ bool GetAsDouble( const library::short_string &S, double &V )
 void Usage()
 {
    std::cout << "gdxdiff: GDX file differ" << '\n'
-             // TODO: Fix this function call
-             // << gdlGetAuditLine() << '\n'
+             << library::gdlGetAuditLine() << '\n'
              << '\n'
              << "Usage: " << '\n'
              << "   gdxdiff file1.gdx file2.gdx [diffile.gdx] [options]" << '\n'
@@ -768,13 +767,12 @@ int main( const int argc, const char *argv[] )
    GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
    gdxValues_t StrVals {};
 
-   // TODO: Remove?
-   // gdlSetSystemName( 'GDXDIFF' );
-   // if( gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
-   // {
-   //    std::cout << gdlGetAuditLine() << std::endl;
-   //    return 0;
-   // }
+   library::gdlSetSystemName( "GDXDIFF" );
+   if( gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
+   {
+      std::cout << library::gdlGetAuditLine() << std::endl;
+      return 0;
+   }
 
    // So we can check later
    DiffTmpName.clear();
@@ -1054,8 +1052,7 @@ int main( const int argc, const char *argv[] )
       return static_cast<int>( ErrorCode::ERR_USAGE );
    }
 
-   // TODO: Remove?
-   // std::cout << gdlGetAuditLine() << '\n';
+   std::cout << library::gdlGetAuditLine() << std::endl;
 
    CheckFile( InFile1 );
    CheckFile( InFile2 );

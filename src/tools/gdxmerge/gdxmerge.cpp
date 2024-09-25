@@ -716,8 +716,7 @@ bool GetParameters( const int argc, const char *argv[] )
 void Usage()
 {
    std::cout << "gdxmerge: Merge GDX files" << '\n'
-             // TODO: Fix this function call
-             //  << gdlGetAuditLine() << '\n'
+             << library::gdlGetAuditLine() << '\n'
              << '\n'
              << "Usage:" << '\n'
              << "   gdxmerge filepat1 filepat2 ... filepatn" << '\n'
@@ -736,13 +735,12 @@ int main( const int argc, const char *argv[] )
    library::short_string Msg;
    int N, ErrNr;
 
-   // TODO: Remove?
-   // gdlSetSystemName( "GDXMERGE" );
-   // if( gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
-   // {
-   //    std::cout << gdlGetAuditLine() << std::endl;
-   //    return {};
-   // }
+   library::gdlSetSystemName( "GDXMERGE" );
+   if( gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
+   {
+      std::cout << library::gdlGetAuditLine() << std::endl;
+      return {};
+   }
 
    if( argc == 1 || ( argc == 2 && std::strcmp( argv[1], "/?" ) == 0 ) )
    {

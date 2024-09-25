@@ -966,8 +966,7 @@ void WriteSetText()
 void Usage()
 {
    std::cout << "gdxdump: Write GDX file in ASCII" << '\n'
-             // TODO: Fix this function call
-             // << gdlGetAuditLine() << '\n'
+             << library::gdlGetAuditLine() << '\n'
              << '\n'
              << "Usage:" << '\n'
              << "gdxdump <filename> <options>" << '\n'
@@ -1076,13 +1075,12 @@ int main( const int argc, const char *argv[] )
    ParamCount = argc - 1;
    ParamStr = argv;
 
-   // TODO: Remove?
-   // gdlSetSystemName( 'GDXDUMP' );
-   // if( gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
-   // {
-   //    std::cout << gdlGetAuditLine() << std::endl;
-   //    return 0;
-   // }
+   library::gdlSetSystemName( "GDXDUMP" );
+   if( gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
+   {
+      std::cout << library::gdlGetAuditLine() << std::endl;
+      return 0;
+   }
 
    Delim = '\0';
    DecimalSep = '\0';
