@@ -275,6 +275,7 @@ double SpecialValueCheck( const double d )
       return d;
    if( SpecialValueIsZero.at( xsv ) )
       return {};
+   return d;
 }
 
 int main( const int argc, const char *argv[] )
