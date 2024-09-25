@@ -56,6 +56,18 @@ public:
    int GetSortedUel( int dimension, int i, int &n );
 };
 
+class DataLineMapping_t
+{
+private:
+   library::one_indexed_container<std::vector<int>> v { GMS_MAX_INDEX_DIM };
+
+public:
+   DataLineMapping_t();
+   void Clear();
+   void Insert( int Dimension, int TupleIndex, int EntryIndex );
+   void WriteDataLines( int Indices, library::one_indexed_container<library::short_string> &Uels );
+};
+
 std::string StripExt( const std::string &fln );
 
 std::string DQuotedStr( const std::string &s );
