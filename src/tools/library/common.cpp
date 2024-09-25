@@ -168,7 +168,14 @@ void AuditLine::gdlSetSystemName( const std::string &system_name )
 
 std::string AuditLine::gdlGetAuditLine() const
 {
-   return {};
+#if defined( __has_include )
+#if __has_include( "../../../../../../../btree/global/auditreldates.h" )
+#include "../../../../../../../btree/global/auditreldates.h"
+   return GDL_REL_CPR;
+#endif
+#endif
+
+   return { "Test" };
 }
 
 }// namespace library
