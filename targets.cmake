@@ -135,14 +135,3 @@ add_executable(gdxmerge
 )
 target_include_directories(gdxmerge PRIVATE ${inc-dirs})
 target_link_libraries(gdxmerge gdxtools-library)
-
-# gdx2veda
-add_executable(gdx2veda
-    src/tools/gdx2veda/container.h
-    src/tools/gdx2veda/vdd.h
-    src/tools/gdx2veda/vdd.cpp
-    src/tools/gdx2veda/gdx2veda.h
-    src/tools/gdx2veda/gdx2veda.cpp
-)
-target_include_directories(gdx2veda PRIVATE ${inc-dirs})
-target_link_libraries(gdx2veda gdxtools-library)
