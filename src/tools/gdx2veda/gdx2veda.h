@@ -94,6 +94,8 @@ void WriteValue( std::ofstream &f, double v );
 
 std::string WritePV( char sepchar );
 
+std::string FormIndices(const gdxUelIndex_t &x, int n);
+
 void CheckLiterals();
 
 bool CheckLiteralFilter( const gdxUelIndex_t &Indices, int N );

@@ -234,6 +234,12 @@ std::string WritePV( char sepchar )
       return "PV";
 }
 
+std::string FormIndices( const gdxUelIndex_t &x, int n )
+{
+   // TODO: Implement function
+   return {};
+}
+
 void CheckLiterals()
 {
    int EN {}, UMap {};
