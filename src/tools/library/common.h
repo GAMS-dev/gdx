@@ -29,9 +29,16 @@ bool canBeQuoted( const char *s, size_t slen );
 
 bool goodUELString( const char *s, size_t slen );
 
-void gdlSetSystemName( const std::string &name );
+class AuditLine
+{
+private:
+   std::string system_name;
 
-std::string gdlGetAuditLine();
+public:
+   AuditLine( const std::string &system_name );
+   void gdlSetSystemName( const std::string &system_name );
+   std::string gdlGetAuditLine() const;
+};
 
 }// namespace library
 
