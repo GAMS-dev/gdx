@@ -584,8 +584,6 @@ void stocp( const std::string &s, char *cp )
    std::memcpy( cp, s.c_str(), s.length() + 1 );
 }
 
-inline int b2i( bool b ) { return b ? 1 : 0; }
-
 int strCompare( const std::string_view S1, const std::string_view S2, const bool caseInsensitive )
 {
    if( S1.empty() || S2.empty() ) return b2i( !S1.empty() ) - b2i( !S2.empty() );
@@ -601,7 +599,7 @@ int strCompare( const std::string_view S1, const std::string_view S2, const bool
    return static_cast<int>( S1.length() - S2.length() );
 }
 
-StringBuffer::StringBuffer( int size ) : s( size, '\0' ), bufferSize { size } {}
+StringBuffer::StringBuffer( const int size ) : s( size, '\0' ), bufferSize { size } {}
 
 char *StringBuffer::getPtr() { return &s[0]; }
 

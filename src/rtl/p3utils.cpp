@@ -49,6 +49,7 @@
       //#define _WINSOCK2API_
       #define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
       #include <winsock2.h>
+      #include <ws2tcpip.h>
    #endif
    #include <Windows.h>
    #include <io.h>
@@ -1502,8 +1503,9 @@ T_P3SOCKET p3SockCreateConnectedClient( int port )
    SOCKADDR_IN addr {};
    std::memset( &addr, 0, sizeof( addr ) );
    addr.sin_family = AF_INET;
+   //addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
+   InetPtonA( AF_INET, "127.0.0.1", &addr );
    addr.sin_port = htons( port );
-   addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
    if( connect( s, reinterpret_cast<SOCKADDR *>( &addr ), sizeof( addr ) ) == SOCKET_ERROR )
       return res;
    res.wsocket = s;
@@ -1748,8 +1750,9 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse )
    SOCKADDR_IN addr;
    (void) std::memset( &addr, 0, sizeof( addr ) );
    addr.sin_family = AF_INET;
+   //addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
+   InetPtonA( AF_INET, "127.0.0.1", &addr );
    addr.sin_port = htons( port );
-   addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
    int rc { bind( acceptSocket, (SOCKADDR *) &addr, sizeof( addr ) ) };
    if( rc == SOCKET_ERROR )
    {

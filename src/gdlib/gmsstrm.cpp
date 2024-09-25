@@ -676,7 +676,7 @@ bool TBufferedFileStream::FlushBuffer()
    }
    else
    {
-      unsigned long Len { CBufSize - sizeof( TCompressHeader ) };
+      auto Len { static_cast<long unsigned int>(CBufSize - sizeof( TCompressHeader )) };
       compress( &CBufPtr->cxData, &Len, BufPtr.data(), NrWritten );
       if( Len < NrWritten )
       {
