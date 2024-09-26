@@ -124,7 +124,7 @@ The fastest way to build the GDX library (static and dynamic) locally is by runn
 git clone https://github.com/GAMS-dev/gdx.git
 cd gdx
 git clone https://github.com/madler/zlib zlib
-cmake -DNO_TESTS=ON -DNO_EXAMPLES=ON .
+cmake -DNO_TESTS=ON -DNO_EXAMPLES=ON -DNO_TOOLS=ON .
 cmake --build .
 ```
 Running this on Linux creates the dynamic library `libgdxcclib64.so` and the static library `libgdx-static.a`.

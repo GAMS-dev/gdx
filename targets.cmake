@@ -16,11 +16,10 @@ set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # Check compilation of unused infrastructure units
 set(BASE_ALL OFF CACHE BOOL "Check compilation of unused infrastructure units")
-# TODO: Fix commented out if
-# if(BASE_ALL)
+if(BASE_ALL)
     add_library(base-units-all STATIC ${base-units-all})
     target_include_directories(base-units-all PRIVATE ${inc-dirs})
-# endif()
+endif()
 
 # Static library
 add_library(gdx-static STATIC ${gdx-core})
@@ -96,6 +95,9 @@ endif ()
 
 endif()
 
+set(NO_TOOLS OFF CACHE BOOL "Skip building GDX tools")
+if(NOT NO_TOOLS)
+
 # Library for gdxdump, gdxdiff and gdxmerge
 add_library(gdxtools-library
     generated/gdxcc.h
@@ -106,8 +108,10 @@ add_library(gdxtools-library
     src/tools/library/short_string.cpp
     src/tools/library/cmdpar.h
     src/tools/library/cmdpar.cpp
+    ${base-units-all}
 )
-target_link_libraries(gdxtools-library base-units-all gdx-static)
+target_include_directories(gdxtools-library PRIVATE ${inc-dirs})
+target_link_libraries(gdxtools-library gdx-static)
 if (UNIX)
     target_link_libraries(gdxtools-library dl)
 endif ()
@@ -135,3 +139,5 @@ add_executable(gdxmerge
 )
 target_include_directories(gdxmerge PRIVATE ${inc-dirs})
 target_link_libraries(gdxmerge gdxtools-library)
+
+endif(NOT NO_TOOLS)
