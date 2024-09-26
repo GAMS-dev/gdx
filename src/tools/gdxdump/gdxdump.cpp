@@ -146,12 +146,12 @@ void WriteUELTable( const std::string &name )
    if( OutFormat != TOutFormat::fmt_csv )
    {
       if( NrUel > 0 )
-         fo << "Set " << name << " /" << '\n';
+         fo << "Set " << name << " /\n";
       else
       {
-         fo << "$onEmpty" << '\n'
-            << "Set " << name << "(*) / /;" << '\n'
-            << "$offEmpty" << '\n';
+         fo << "$onEmpty\n"
+            << "Set " << name << "(*) / /;\n"
+            << "$offEmpty\n";
       }
    }
    for( N = 1; N <= NrUel; N++ )
@@ -278,13 +278,13 @@ void WriteSymbolsAsSet( const bool DomInfo )
 {
    if( DomInfo )
    {
-      fo << "alias (Symbol, Dim, Type, Domain, *);" << '\n'
-         << "set    gdxitemsDI(Symbol,Dim,Type,Domain)  Items in the GDX file /" << '\n';
+      fo << "alias (Symbol, Dim, Type, Domain, *);\n"
+         << "set    gdxitemsDI(Symbol,Dim,Type,Domain)  Items in the GDX file /\n";
    }
    else
    {
-      fo << "alias (Symbol, Dim, Type, *);" << '\n'
-         << "set    gdxitems(Symbol,Dim,Type)  Items in the GDX file /" << '\n';
+      fo << "alias (Symbol, Dim, Type, *);\n"
+         << "set    gdxitems(Symbol,Dim,Type)  Items in the GDX file /\n";
    }
    int NrSy, NrUel;
    gdxSystemInfo( PGX, &NrSy, &NrUel );
@@ -295,7 +295,7 @@ void WriteSymbolsAsSet( const bool DomInfo )
          fo << ',';
       fo << '\n';
    }
-   fo << "/;" << '\n';
+   fo << "/;\n";
 }
 
 void WriteSymbol( const int SyNr )
@@ -315,7 +315,7 @@ void WriteSymbol( const int SyNr )
       if( FrstWrite )
          FrstWrite = false;
       else if( OutFormat == TOutFormat::fmt_gamsbas )
-         fo << " ;" << '\n';
+         fo << " ;\n";
       else
       {
          fo << ", ";
@@ -325,7 +325,7 @@ void WriteSymbol( const int SyNr )
       if( OutFormat == TOutFormat::fmt_gamsbas )
       {
          if( LineCount == 6 )
-            fo << "$offListing" << '\n';
+            fo << "$offListing\n";
          fo << ' ' << SyName.data() << '.' << library::valTypStr( ValNr ) << ' ';
       }
       if( ADim > 0 )
@@ -398,7 +398,7 @@ void WriteSymbol( const int SyNr )
    if( ShowHdr )
       fo << '\n';
    // if( false )
-   //    fo << "$onText" << '\n';
+   //    fo << "$onText\n";
    BadUELs = 0;
    IsScalar = ADim == 0 && ATyp == dt_par;
    gdxSymbolInfoX( PGX, SyNr, &ACount, &AUser, S.data() );
@@ -447,7 +447,7 @@ void WriteSymbol( const int SyNr )
             A2Name = "*";
          else
             gdxSymbolInfo( PGX, AUser, A2Name.data(), &A2Dim, &iA2Typ );
-         fo << ", " << A2Name.data() << ");" << '\n';
+         fo << ", " << A2Name.data() << ");\n";
       }
       if( ATyp != dt_alias )
       {
@@ -482,12 +482,12 @@ void WriteSymbol( const int SyNr )
    {
       if( IsScalar )
       {
-         fo << " / 0.0 /;" << '\n';
+         fo << " / 0.0 /;\n";
          WriteComments();
       }
       else if( ShowHdr && ATyp != dt_alias )
       {
-         fo << " / /;" << '\n';
+         fo << " / /;\n";
          WriteComments();
       }
    }
@@ -506,12 +506,12 @@ void WriteSymbol( const int SyNr )
          {
             if( ACount == 0 )
             {
-               fo << " ; !!empty" << '\n'
-                  << "$loadDC " << SyName.data() << " !!empty" << '\n';
+               fo << " ; !!empty\n"
+                  << "$loadDC " << SyName.data() << " !!empty\n";
             }
             else
             {
-               fo << " ;" << '\n'
+               fo << " ;\n"
                   << "$loadDC " << SyName.data() << '\n';
             }
          }
@@ -555,13 +555,13 @@ void WriteSymbol( const int SyNr )
          }
          gdxDataReadDone( PGX );
          if( OutFormat == TOutFormat::fmt_gamsbas )
-            fo << " ;" << '\n';
+            fo << " ;\n";
          else if( ShowHdr )
-            fo << " /;" << '\n';
+            fo << " /;\n";
       }
    }
    // if( false )
-   //    fo << "$offText" << '\n';
+   //    fo << "$offText\n";
    if( BadUELs > 0 )
       fo << "**** " << BadUELs << " reference(s) to unique elements without a string representation";
 }
@@ -817,7 +817,7 @@ void WriteSymbolCSV( const int SyNr )
       gdxDataReadDone( PGX );
    }
    if( BadUELs > 0 )
-      fo << "**** " << BadUELs << " reference(s) to unique elements without a string representation" << '\n';
+      fo << "**** " << BadUELs << " reference(s) to unique elements without a string representation\n";
 }
 
 int getIntegerWidth( const int number )
@@ -849,7 +849,7 @@ void WriteSymbolInfo()
       << gdlib::strutilx::PadRight( "Symbol", w2 )
       << " Dim" << " Type "
       << gdlib::strutilx::PadRight( "Records", w3 )
-      << "  " << "Explanatory text" << '\n';
+      << "  " << "Explanatory text\n";
 
    int N {};
    for( const auto &pair: SL )
@@ -879,7 +879,7 @@ void WriteDomainInfo()
    if( w1 < 4 )
       w1 = 4;
    fo << gdlib::strutilx::PadLeft( "SyNr", w1 )
-      << "  Type" << "  DomInf " << "Symbol" << '\n';
+      << "  Type" << "  DomInf " << "Symbol\n";
    for( int N { 1 }; N <= NrSy; N++ )
    {
       gdxSymbolInfo( PGX, N, AName.data(), &ADim, &iATyp );
@@ -951,7 +951,7 @@ void WriteSetText()
    // fo << '\n';
    fo << "Count of set text strings in GDX: " << nText << '\n'
       << "max 0-based textIdx found in GDX: " << mxTextIdx << '\n'
-      << "   idx   text" << '\n';
+      << "   idx   text\n";
    for( textIdx = 0; textIdx < nText; textIdx++ )
    {
       if( textIdx == 0 )
@@ -964,40 +964,39 @@ void WriteSetText()
 
 void Usage( const library::AuditLine &AuditLine )
 {
-   std::cout << "gdxdump: Write GDX file in ASCII" << '\n'
-             << AuditLine.getAuditLine() << '\n'
-             << '\n'
-             << "Usage:" << '\n'
-             << "gdxdump <filename> <options>" << '\n'
-             << "<options>" << '\n'
-             << "   -V or -Version        Write version info of input file only" << '\n'
-             << "   Output=<filename>     Write output to file" << '\n'
-             << "   Symb=<identifier>     Select a single identifier" << '\n'
-             << "   UelTable=<identifier> Include all unique elements" << '\n'
-             << "   Delim=[period, comma, tab, blank, semicolon]" << '\n'
-             << "                         Specify a dimension delimiter" << '\n'
-             << "   DecimalSep=[period, comma]" << '\n'
-             << "                         Specify a decimal separator" << '\n'
-             << "   NoHeader              Suppress writing of the headers" << '\n'
-             << "   NoData                Write headers only; no data" << '\n'
-             << "   CSVAllFields          When writing CSV write all variable/equation fields" << '\n'
-             << "   CSVSetText            When writing CSV write set element text" << '\n'
-             << "   Symbols               Get a list of all symbols" << '\n'
-             << "   DomainInfo            Get a list of all symbols showing domain information" << '\n'
-             << "   SymbolsAsSet          Get a list of all symbols as data for a set" << '\n'
-             << "   SymbolsAsSetDI        Get a list of all symbols as data for a set includes domain information" << '\n'
-             << "   SetText               Show the list of set text (aka associated text)" << '\n'
-             << "   Format=[normal, gamsbas, csv]" << '\n'
-             << "   dFormat=[normal, hexponential, hexBytes]" << '\n'
-             << "   CDim=[Y, N]           Use last dimension as column headers" << '\n'
-             << "                         (for CSV format only; default=N)" << '\n'
-             << "   FilterDef=[Y, N]      Filter default values; default=Y" << '\n'
-             << "   EpsOut=<string>       String to be used when writing the value for EPS;               default=EPS" << '\n'
-             << "   NaOut=<string>        String to be used when writing the value for Not Available;     default=NA" << '\n'
-             << "   PinfOut=<string>      String to be used when writing the value for Positive Infinity; default=+Inf" << '\n'
-             << "   MinfOut=<string>      String to be used when writing the value for Negative Infinity; default=-Inf" << '\n'
-             << "   UndfOut=<string>      String to be used when writing the value for Undefined;         default=Undf" << '\n'
-             << "   ZeroOut=<string>      String to be used when writing the value for Zero;              default=0" << '\n'
+   std::cout << "gdxdump: Write GDX file in ASCII\n"
+             << AuditLine.getAuditLine() << "\n\n"
+             << "Usage:\n"
+             << "gdxdump <filename> <options>\n"
+             << "<options>\n"
+             << "   -V or -Version        Write version info of input file only\n"
+             << "   Output=<filename>     Write output to file\n"
+             << "   Symb=<identifier>     Select a single identifier\n"
+             << "   UelTable=<identifier> Include all unique elements\n"
+             << "   Delim=[period, comma, tab, blank, semicolon]\n"
+             << "                         Specify a dimension delimiter\n"
+             << "   DecimalSep=[period, comma]\n"
+             << "                         Specify a decimal separator\n"
+             << "   NoHeader              Suppress writing of the headers\n"
+             << "   NoData                Write headers only; no data\n"
+             << "   CSVAllFields          When writing CSV write all variable/equation fields\n"
+             << "   CSVSetText            When writing CSV write set element text\n"
+             << "   Symbols               Get a list of all symbols\n"
+             << "   DomainInfo            Get a list of all symbols showing domain information\n"
+             << "   SymbolsAsSet          Get a list of all symbols as data for a set\n"
+             << "   SymbolsAsSetDI        Get a list of all symbols as data for a set includes domain information\n"
+             << "   SetText               Show the list of set text (aka associated text)\n"
+             << "   Format=[normal, gamsbas, csv]\n"
+             << "   dFormat=[normal, hexponential, hexBytes]\n"
+             << "   CDim=[Y, N]           Use last dimension as column headers\n"
+             << "                         (for CSV format only; default=N)\n"
+             << "   FilterDef=[Y, N]      Filter default values; default=Y\n"
+             << "   EpsOut=<string>       String to be used when writing the value for EPS;               default=EPS\n"
+             << "   NaOut=<string>        String to be used when writing the value for Not Available;     default=NA\n"
+             << "   PinfOut=<string>      String to be used when writing the value for Positive Infinity; default=+Inf\n"
+             << "   MinfOut=<string>      String to be used when writing the value for Negative Infinity; default=-Inf\n"
+             << "   UndfOut=<string>      String to be used when writing the value for Undefined;         default=Undf\n"
+             << "   ZeroOut=<string>      String to be used when writing the value for Zero;              default=0\n"
              << "   Header=<string>       New header for CSV output format" << std::endl;
 }
 
@@ -1596,21 +1595,21 @@ int main( const int argc, const char *argv[] )
    {
       if( OutFormat == TOutFormat::fmt_normal )
          ShowHdr = true;
-      fo << "$onEmpty" << '\n';
+      fo << "$onEmpty\n";
       if( !ShowData )
       {
-         fo << "$offEolCom" << '\n'
-            << "$eolCom !!" << '\n';
+         fo << "$offEolCom\n"
+            << "$eolCom !!\n";
       }
       int NrSy, NrUel;
       gdxSystemInfo( PGX, &NrSy, &NrUel );
       for( int N { 1 }; N <= NrSy; N++ )
          WriteSymbol( N );
       fo << '\n'
-         << "$offEmpty" << '\n';
+         << "$offEmpty\n";
    }
    if( OutFormat == TOutFormat::fmt_gamsbas && LineCount > 6 )
-      fo << "$onListing" << '\n';
+      fo << "$onListing\n";
 
 AllDone:
    gdxClose( PGX );
