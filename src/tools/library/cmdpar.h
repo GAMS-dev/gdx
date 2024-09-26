@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <cstdint>
 
 #include "../library/short_string.h"
 
@@ -46,7 +47,7 @@ public:
    [[nodiscard]] std::string GetParamText( int key ) const;
 };
 
-enum class CmdParamStatus
+enum class CmdParamStatus : int16_t
 {
    kp_input,
    ke_empty = -1,
