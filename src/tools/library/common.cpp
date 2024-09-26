@@ -157,25 +157,62 @@ bool goodUELString( const char *s, const size_t slen )
    return slen < GLOBAL_UEL_IDENT_SIZE && canBeQuoted( s, slen );
 }
 
-AuditLine::AuditLine( const std::string &system_name ) : system_name( system_name )
+void AuditLine::setAuditLine()
 {
-}
+   std::string
+           GDL_REL_PLT,
+           GDL_BLD_COD;
+   bool auditreldates_header_file_found {};
 
-void AuditLine::gdlSetSystemName( const std::string &system_name )
-{
-   this->system_name = system_name;
-}
+   audit_line = system_name + ' ';
+   this->audit_line.resize( 17, ' ' );
 
-std::string AuditLine::gdlGetAuditLine() const
-{
+#if defined( _WIN32 )
+   GDL_REL_PLT = "x86 64bit/MS Windows";
+   GDL_BLD_COD = "WEI";
+#elif defined( __APPLE__ )
+#if !defined( __arm64__ )
+   GDL_REL_PLT = "x86 64bit/macOS";
+   GDL_BLD_COD = "DEG";
+#else
+   GDL_REL_PLT = "arm 64bit/macOS";
+   GDL_BLD_COD = "DAC";
+#endif
+#elif defined( __linux__ )
+   GDL_REL_PLT = "x86 64bit/Linux";
+   GDL_BLD_COD = "LEG";
+#endif
+
 #if defined( __has_include )
 #if __has_include( "../../../../../../../btree/global/auditreldates.h" )
 #include "../../../../../../../btree/global/auditreldates.h"
-   return GDL_REL_CPR;
+   auditreldates_header_file_found = true;
+   audit_line += GDL_REL_MAJ + '.' + GDL_REL_MIN + '.' + GDL_REL_GOLD + ' ' + GDL_REVISION + ' ' + GDL_REL_DAT;
 #endif
 #endif
 
-   return { "Test" };
+   if( !auditreldates_header_file_found )
+      audit_line += "TEST";
+
+   audit_line.resize( audit_line.length() + 33, ' ' );
+
+   audit_line += ' ' + GDL_BLD_COD + ' ' + GDL_REL_PLT;
+}
+
+AuditLine::AuditLine( const std::string &system_name )
+{
+   setSystemName( system_name );
+}
+
+void AuditLine::setSystemName( const std::string &system_name )
+{
+   this->system_name = system_name;
+   setAuditLine();
+}
+
+std::string AuditLine::getAuditLine() const
+{
+   return audit_line;
 }
 
 }// namespace library

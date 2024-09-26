@@ -33,11 +33,13 @@ class AuditLine
 {
 private:
    std::string system_name;
+   std::string audit_line;
+   void setAuditLine();
 
 public:
    AuditLine( const std::string &system_name );
-   void gdlSetSystemName( const std::string &system_name );
-   std::string gdlGetAuditLine() const;
+   void setSystemName( const std::string &system_name );
+   std::string getAuditLine() const;
 };
 
 }// namespace library
