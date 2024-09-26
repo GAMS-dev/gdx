@@ -98,8 +98,7 @@ std::string dblToStrHex( const double x )
 static std::string mFormat( int64_t m )
 {
    if( !m )
-      return "0";
-   // TI64Rec xi { m };
+      return "0"s;
    int64_t mask { static_cast<int64_t>( 0x000f0000 ) << 32 };
    int shiftCount = 48;
    std::string res;
