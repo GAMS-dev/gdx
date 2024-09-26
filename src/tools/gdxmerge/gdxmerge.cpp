@@ -715,7 +715,7 @@ bool GetParameters( const int argc, const char *argv[] )
 void Usage( const library::AuditLine &AuditLine )
 {
    std::cout << "gdxmerge: Merge GDX files" << '\n'
-             << AuditLine.gdlGetAuditLine() << '\n'
+             << AuditLine.getAuditLine() << '\n'
              << '\n'
              << "Usage:" << '\n'
              << "   gdxmerge filepat1 filepat2 ... filepatn" << '\n'
@@ -737,7 +737,7 @@ int main( const int argc, const char *argv[] )
    library::AuditLine AuditLine { "GDXMERGE" };
    if( argc > 1 && gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
    {
-      std::cout << AuditLine.gdlGetAuditLine() << std::endl;
+      std::cout << AuditLine.getAuditLine() << std::endl;
       return {};
    }
 

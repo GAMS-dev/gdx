@@ -726,7 +726,7 @@ bool GetAsDouble( const library::short_string &S, double &V )
 void Usage( const library::AuditLine &AuditLine )
 {
    std::cout << "gdxdiff: GDX file differ" << '\n'
-             << AuditLine.gdlGetAuditLine() << '\n'
+             << AuditLine.getAuditLine() << '\n'
              << '\n'
              << "Usage: " << '\n'
              << "   gdxdiff file1.gdx file2.gdx [diffile.gdx] [options]" << '\n'
@@ -769,7 +769,7 @@ int main( const int argc, const char *argv[] )
    library::AuditLine AuditLine { "GDXDIFF" };
    if( argc > 1 && gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
    {
-      std::cout << AuditLine.gdlGetAuditLine() << std::endl;
+      std::cout << AuditLine.getAuditLine() << std::endl;
       return 0;
    }
 
@@ -1051,7 +1051,7 @@ int main( const int argc, const char *argv[] )
       return static_cast<int>( ErrorCode::ERR_USAGE );
    }
 
-   std::cout << AuditLine.gdlGetAuditLine() << std::endl;
+   std::cout << AuditLine.getAuditLine() << std::endl;
 
    CheckFile( InFile1 );
    CheckFile( InFile2 );
