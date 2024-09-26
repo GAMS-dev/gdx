@@ -3,6 +3,7 @@
 
 #include <array>
 #include <string>
+#include <cstdint>
 
 #include "../library/common.h"
 #include "../library/short_string.h"
