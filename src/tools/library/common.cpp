@@ -187,7 +187,7 @@ void AuditLine::setAuditLine()
 #if __has_include( "../../../../../../../btree/global/auditreldates.h" )
 #include "../../../../../../../btree/global/auditreldates.h"
    auditreldates_header_file_found = true;
-   audit_line += GDL_REL_MAJ + '.' + GDL_REL_MIN + '.' + GDL_REL_GOLD + ' ' + GDL_REVISION + ' ' + GDL_REL_DAT;
+   audit_line += std::to_string( GDL_REL_MAJ ) + '.' + std::to_string( GDL_REL_MIN ) + '.' + std::to_string( GDL_REL_GOLD ) + ' ' + GDL_REVISION + ' ' + GDL_REL_DAT;
 #endif
 #endif
 
