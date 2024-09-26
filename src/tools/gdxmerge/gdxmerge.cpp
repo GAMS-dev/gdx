@@ -596,7 +596,7 @@ std::string FormatDateTime( const uint16_t Year, const uint16_t Month, const uin
 
 bool GetParameters( const int argc, const char *argv[] )
 {
-   enum class KP
+   enum class KP : uint8_t
    {
       Id = 1,
       Exclude,

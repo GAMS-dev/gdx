@@ -11,7 +11,7 @@
 namespace gdxdump
 {
 
-enum class TOutFormat
+enum class TOutFormat : uint8_t
 {
    fmt_none,
    fmt_normal,
@@ -19,7 +19,7 @@ enum class TOutFormat
    fmt_csv
 };
 
-enum class TDblFormat
+enum class TDblFormat : uint8_t
 {
    dbl_none,
    dbl_normal,

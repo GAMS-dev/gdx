@@ -21,7 +21,7 @@ namespace gdxmerge
 
 const std::vector<int> DataTypSize { 1, 1, 5, 5, 0 };
 
-enum class TProcessPass
+enum class TProcessPass : uint8_t
 {
    RpDoAll,
    RpScan,

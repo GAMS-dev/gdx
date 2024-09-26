@@ -13,7 +13,7 @@
 namespace gdxdiff
 {
 
-enum class ErrorCode
+enum class ErrorCode : uint8_t
 {
    ERR_DIFFERENT = 1,
    ERR_USAGE,
@@ -24,7 +24,7 @@ enum class ErrorCode
    ERR_RENAME
 };
 
-enum class FldOnly
+enum class FldOnly : uint8_t
 {
    fld_maybe,
    fld_yes,
@@ -32,7 +32,7 @@ enum class FldOnly
    fld_never
 };
 
-enum class TStatusCode
+enum class TStatusCode : uint8_t
 {
    sc_same,
    sc_notf1,
@@ -47,7 +47,7 @@ enum class TStatusCode
 };
 
 // TODO: Name correctly
-enum class KP
+enum class KP : uint8_t
 {
    // kp_input,
    kp_eps = 1,
