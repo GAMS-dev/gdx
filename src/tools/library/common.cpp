@@ -192,9 +192,10 @@ void AuditLine::setAuditLine()
 #endif
 
    if( !auditreldates_header_file_found )
-      audit_line += "TEST";
+      // TODO: Insert something sensible
+      audit_line += "47.6.0 c2de9d6d Sep 12, 2024";
 
-   audit_line.resize( audit_line.length() + 33, ' ' );
+   audit_line.resize( 54, ' ' );
 
    audit_line += ' ' + GDL_BLD_COD + ' ' + GDL_REL_PLT;
 }
