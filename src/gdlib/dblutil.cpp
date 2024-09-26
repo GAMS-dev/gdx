@@ -77,7 +77,7 @@ std::string dblToStrHex( const double x )
    {
       for( int i {}; i < 8; i++ )
       {
-         c = xi.bytes.at( i );
+         c = xi.bytes[i];
          result += gdlib::dblutil::hexDigit( c / 16 );
          result += gdlib::dblutil::hexDigit( c & 0x0F );
       }
@@ -86,7 +86,7 @@ std::string dblToStrHex( const double x )
    {
       for( int i { 7 }; i >= 0; i-- )
       {
-         c = xi.bytes.at( i );
+         c = xi.bytes[i];
          result += gdlib::dblutil::hexDigit( c / 16 );
          result += gdlib::dblutil::hexDigit( c & 0x0F );
       }
