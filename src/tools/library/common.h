@@ -31,7 +31,6 @@ bool goodUELString( const char *s, size_t slen );
 
 class AuditLine
 {
-private:
    std::string system_name;
    std::string audit_line;
    void setAuditLine();

@@ -12,7 +12,6 @@ namespace library
 
 class short_string
 {
-private:
    static constexpr uint16_t MAX_LENGTH { GMS_SSSIZE };
    std::array<char, MAX_LENGTH> buffer {};
 

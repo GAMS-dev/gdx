@@ -23,7 +23,6 @@ using PParamRec = TParamRec *;
 // Class to handle command line parameters
 class TCmdParams
 {
-private:
    std::vector<std::pair<std::string, int>> FKeyList;
    std::map<int, TParamRec> FParList;
 
