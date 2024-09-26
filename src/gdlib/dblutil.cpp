@@ -47,7 +47,7 @@ double gdRoundTo( const double x, const int i )
 }
 
 constexpr TI64Rec t64 { 1 };
-const bool bigEndian { t64.bytes.at( 7 ) == 1 };
+const bool bigEndian { t64.bytes.back() == 1 };
 
 constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
         expoMask { static_cast<int64_t>( 0x7ff00000 ) << 32 },
