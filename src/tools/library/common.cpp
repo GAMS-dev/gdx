@@ -1,7 +1,9 @@
 #include <iostream>
+#include <iomanip>
 #include <cassert>
 #include <sstream>
 #include <array>
+#include <ctime>
 
 #include "common.h"
 // Global constants
@@ -192,8 +194,13 @@ void AuditLine::setAuditLine()
 #endif
 
    if( !auditreldates_header_file_found )
-      // TODO: Insert something sensible
-      audit_line += "47.6.0 c2de9d6d Sep 12, 2024";
+   {
+      std::time_t time { std::time( nullptr ) };
+      std::tm *localtime { std::localtime( &time ) };
+      std::stringstream date;
+      date << std::put_time( localtime, "%b %d, %Y" );
+      audit_line += "GDX tools compiled " + date.str();
+   }
 
    audit_line.resize( 54, ' ' );
 
