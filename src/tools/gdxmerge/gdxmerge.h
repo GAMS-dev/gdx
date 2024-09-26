@@ -67,7 +67,6 @@ public:
 
 class TSymbolList : public gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>
 {
-private:
    std::unique_ptr<gdlib::gmsobj::TXStrPool<library::short_string>> StrPool;
    int FErrorCount {}, NextAcroNr {};
    std::unique_ptr<TFileList<TGDXFileEntry>> FileList;
