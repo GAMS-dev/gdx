@@ -5,4 +5,4 @@ dependencies:
   - pip
 
   - pip:
-    - gamsapi[transfer]==47.5.0
+    - gamsapi[transfer]==47.6.0
