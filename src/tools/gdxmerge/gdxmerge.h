@@ -31,9 +31,7 @@ enum class TProcessPass : uint8_t
    RpTooBig
 };
 
-class TGAMSSymbol
-{
-public:
+struct TGAMSSymbol {
    int SyDim, SySubTyp;
    gdxSyType SyTyp;
    std::unique_ptr<gdlib::gmsdata::TTblGamsData<double>> SyData;
@@ -47,18 +45,14 @@ public:
    // void SetCurrentFile( const std::string &S );
 };
 
-class TGDXFileEntry
-{
-public:
+struct TGDXFileEntry {
    std::string FFileName, FFileId, FFileInfo;
 
    TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
 };
 
 template<typename T>
-class TFileList final : public gdlib::gmsobj::TXList<T>
-{
-public:
+struct TFileList final : public gdlib::gmsobj::TXList<T> {
    ~TFileList() override;
    void Clear() override;
    void AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
