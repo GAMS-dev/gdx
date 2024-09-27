@@ -166,7 +166,7 @@ void AuditLine::setAuditLine()
            GDL_BLD_COD;
    bool auditreldates_header_file_found {};
 
-   audit_line = system_name + ' ';
+   audit_line = system_name;
    this->audit_line.resize( 17, ' ' );
 
 #if defined( _WIN32 )
@@ -202,9 +202,8 @@ void AuditLine::setAuditLine()
       audit_line += "GDX tools compiled " + date.str();
    }
 
-   audit_line.resize( 54, ' ' );
-
-   audit_line += ' ' + GDL_BLD_COD + ' ' + GDL_REL_PLT;
+   audit_line.resize( 55, ' ' );
+   audit_line += GDL_BLD_COD + ' ' + GDL_REL_PLT;
 }
 
 AuditLine::AuditLine( const std::string &system_name )
