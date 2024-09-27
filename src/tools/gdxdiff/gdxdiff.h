@@ -4,6 +4,7 @@
 #include <array>
 #include <string>
 #include <cstdint>
+#include <string_view>
 
 #include "../library/common.h"
 #include "../library/short_string.h"
@@ -13,6 +14,8 @@
 
 namespace gdxdiff
 {
+
+using namespace std::literals::string_literals;
 
 enum class ErrorCode : uint8_t
 {
@@ -89,12 +92,12 @@ const std::string
 constexpr int tvarvaltype_size { 5 };
 
 // Names of gdx::tvarvaltype(s)
-const std::array<std::string, tvarvaltype_size> GamsFieldNames {
-        "Level",
-        "Marginal",
-        "Lower",
-        "Upper",
-        "Scale" };
+const std::array GamsFieldNames {
+        "Level"s,
+        "Marginal"s,
+        "Lower"s,
+        "Upper"s,
+        "Scale"s };
 
 std::string ValAsString( const gdxHandle_t &PGX, double V );
 
