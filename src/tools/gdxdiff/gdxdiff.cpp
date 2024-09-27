@@ -32,6 +32,7 @@
 #include <limits>
 #include <cstring>
 #include <memory>
+#include <cstdio>
 
 #include "gdxdiff.h"
 #include "../library/cmdpar.h"
@@ -231,9 +232,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          if( Keys[D] < UELTable->Count() )
             strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
          else
-         {
-   snprintf(StrKeysPtrs[D], GMS_SSSIZE, "L__%d", Keys[D]);
-         }
+            snprintf( StrKeysPtrs[D], GMS_SSSIZE, "L__%d", Keys[D] );
       if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
          strcpy( StrKeysPtrs[Dim], Act.data() );
       else
