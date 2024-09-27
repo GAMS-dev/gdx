@@ -145,9 +145,6 @@ int TSymbolList::AddSymbol( const std::string &AName, const int ADim, const gdxS
        ( !ExcludeList.empty() && is_in_list( ExcludeList, AName ) ) )
       return -1;
 
-#ifdef __clang__
-   __attribute__((suppress))
-#endif
    return TXHashedStringList::AddObject( AName.data(), AName.length(), new TGAMSSymbol( ADim, AType, ASubTyp ) );
 }
 
