@@ -19,7 +19,7 @@ void TCmdParams::ClearParams()
 void TCmdParams::AddVS( int v, const std::string &s )
 {
    for( const auto &pair: FKeyList )
-      if( pair.first == s )
+      if( gdlib::strutilx::UpperCase( pair.first ) == gdlib::strutilx::UpperCase( s ) )
          library::assertWithMessage( false, "Duplicate keyword!" );
    FKeyList.emplace_back( s, v );
 }
@@ -112,7 +112,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       {
          int result { -1 };
          for( const auto &pair: FKeyList )
-            if( gdlib::strutilx::LowerCase( pair.first ) == gdlib::strutilx::LowerCase( T ) )
+            if( gdlib::strutilx::UpperCase( pair.first ) == gdlib::strutilx::UpperCase( T ) )
             {
                result = pair.second;
                break;
