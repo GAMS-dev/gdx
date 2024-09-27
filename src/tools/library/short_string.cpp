@@ -158,14 +158,7 @@ short_string &short_string::operator=( const std::string &s )
 
 bool short_string::operator==( const char *s ) const
 {
-   uint8_t i {};
-   while( buffer.at( i ) != '\0' )
-   {
-      if( buffer[i] != s[i] )
-         return false;
-      i++;
-   }
-   return s[i] == '\0';
+   return strcmp( buffer.data(), s ) == 0;
 }
 
 bool short_string::operator==( const short_string &s ) const
@@ -180,7 +173,7 @@ bool short_string::operator==( const std::string &s ) const
 
 bool short_string::operator<( const short_string &s ) const
 {
-   return strcmp( data(), s.data() ) < 0;
+   return strcmp( buffer.data(), s.data() ) < 0;
 }
 
 std::ostream &operator<<( std::ostream &os, const short_string &s )
