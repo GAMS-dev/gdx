@@ -130,6 +130,7 @@ class TestGdxMerge(unittest.TestCase):
             output,
             return_code=0,
             file_name='usage.txt',
+            first_delete=[1],
             second_delete=[1]
         )
 

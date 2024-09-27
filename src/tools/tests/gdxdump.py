@@ -91,6 +91,7 @@ class TestGdxDump(unittest.TestCase):
             output,
             return_code=1,
             file_name='usage.txt',
+            first_delete=[1],
             second_delete=[1]
         )
 
@@ -165,6 +166,7 @@ class TestGdxDump(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
+            first_delete=[2],
             second_delete=[2]
         )
 
@@ -193,6 +195,7 @@ class TestGdxDump(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
+            first_delete=[2],
             second_delete=[2]
         )
 
@@ -239,6 +242,7 @@ class TestGdxDump(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
+            first_delete=[2],
             second_delete=[2]
         )
 

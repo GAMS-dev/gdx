@@ -139,6 +139,7 @@ class TestGdxDiff(unittest.TestCase):
             return_code=2,
             file_name='usage.txt',
             second_offset=1,
+            first_delete=[1],
             second_delete=[1]
         )
 
@@ -151,7 +152,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -174,7 +175,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -213,7 +214,7 @@ class TestGdxDiff(unittest.TestCase):
             output,
             return_code=1,
             file_name='small_example_and_small_example_changed_data.txt',
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -242,7 +243,7 @@ class TestGdxDiff(unittest.TestCase):
             output,
             return_code=0,
             file_name='small_example_and_small_example_changed_data_epsilon.txt',
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -269,7 +270,7 @@ class TestGdxDiff(unittest.TestCase):
                     output,
                     return_code=0,
                     file_name='small_example_and_small_example_changed_data_epsilon.txt',
-                    first_offset=2,
+                    first_offset=3,
                     second_offset=3,
                     first_delete=[-3],
                     second_delete=[-3]
@@ -292,7 +293,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -327,7 +328,7 @@ class TestGdxDiff(unittest.TestCase):
             output,
             return_code=1,
             file_name='full_example_and_full_example_changed_variables.txt',
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -362,7 +363,7 @@ class TestGdxDiff(unittest.TestCase):
             output,
             return_code=1,
             file_name='full_example_and_full_example_changed_variables.txt',
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -396,7 +397,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=0,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -422,7 +423,7 @@ class TestGdxDiff(unittest.TestCase):
             output,
             return_code=1,
             file_name='full_example_and_full_example_changed_variables.txt',
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -458,7 +459,7 @@ class TestGdxDiff(unittest.TestCase):
             output,
             return_code=0,
             file_name='full_example_and_full_example_changed_variables_field_m.txt',
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -481,7 +482,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -543,7 +544,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -576,7 +577,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output_space_separator,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -593,7 +594,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -644,7 +645,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output_quotation_marks,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -661,7 +662,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -712,7 +713,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output_space_separator,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -729,7 +730,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -762,7 +763,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output_quotation_marks,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -780,7 +781,7 @@ class TestGdxDiff(unittest.TestCase):
             output,
             return_code=1,
             file_name='full_example_and_full_example_changed_variables.txt',
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -813,7 +814,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=0,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -837,7 +838,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -863,7 +864,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -887,7 +888,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -910,7 +911,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -957,7 +958,7 @@ class TestGdxDiff(unittest.TestCase):
             output,
             return_code=1,
             file_name='order_example_1_and_order_example_2.txt',
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -1003,7 +1004,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=1,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
@@ -1033,7 +1034,7 @@ class TestGdxDiff(unittest.TestCase):
         self.check_output(
             output,
             return_code=0,
-            first_offset=2,
+            first_offset=3,
             second_offset=3,
             first_delete=[-3],
             second_delete=[-3]
