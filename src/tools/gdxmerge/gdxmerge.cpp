@@ -57,7 +57,11 @@ TGAMSSymbol::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubT
 
 TGAMSSymbol::~TGAMSSymbol()
 {
-   SyData->Clear();
+   if(SyData)
+   {
+      SyData->Clear();
+      SyData = nullptr;
+   }
 }
 
 TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
@@ -65,15 +69,23 @@ TGDXFileEntry::TGDXFileEntry( const std::string &AFileName, const std::string &A
 {}
 
 template<typename T>
-void TFileList<T>::AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
+TFileList<T>::~TFileList()
 {
-   gdlib::gmsobj::TXList<T>::Add( new TGDXFileEntry( AFileName, AFileId, AFileInfo ) );
+   Clear();
 }
 
 template<typename T>
-void TFileList<T>::FreeItem( const int Index )
+void TFileList<T>::Clear()
 {
-   gdlib::gmsobj::TXList<T>::Delete( Index );
+   for( int i {}; i < this->GetCount(); i++ )
+      delete( *this )[i];
+   gdlib::gmsobj::TXList<T>::Clear();
+}
+
+template<typename T>
+void TFileList<T>::AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo )
+{
+   gdlib::gmsobj::TXList<T>::Add( new TGDXFileEntry( AFileName, AFileId, AFileInfo ) );
 }
 
 template<typename T>
@@ -107,7 +119,16 @@ TSymbolList::TSymbolList()
 
 TSymbolList::~TSymbolList()
 {
-   gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>::Clear();
+   Clear();
+}
+
+// TODO: AS: The whole TX*List destruction and element deletion mechanism is not ideal now
+// and requires duplicated code (see TFileList destructor and clear)
+void TSymbolList::Clear()
+{
+   for( int i {}; i < FCount; i++ )
+      delete GetObject( i );
+   TXHashedStringList::Clear();
 }
 
 void TSymbolList::OpenOutput( const library::short_string &AFileName, int &ErrNr )

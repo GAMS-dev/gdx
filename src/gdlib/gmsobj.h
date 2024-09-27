@@ -118,7 +118,7 @@ public:
       return res;
    }
 
-   void Clear()
+   virtual void Clear()
    {
       for( int N { FCount - 1 + ( OneBased ? 1 : 0 ) }; N >= ( OneBased ? 1 : 0 ); N-- ) FreeItem( N );
       FCount = 0;

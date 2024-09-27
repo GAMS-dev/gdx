@@ -55,11 +55,12 @@ public:
 };
 
 template<typename T>
-class TFileList : public gdlib::gmsobj::TXList<T>
+class TFileList final : public gdlib::gmsobj::TXList<T>
 {
 public:
+   ~TFileList() override;
+   void Clear() override;
    void AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
-   void FreeItem( int Index );// No-op?
    std::string FileName( int Index );
    std::string FileId( int Index );
    std::string FileInfo( int Index );
@@ -74,7 +75,8 @@ class TSymbolList : public gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>
 
 public:
    TSymbolList();
-   ~TSymbolList();
+   ~TSymbolList() override;
+   void Clear() override;
 
    static void OpenOutput( const library::short_string &AFileName, int &ErrNr );
    static int AddUEL( const library::short_string &S );
