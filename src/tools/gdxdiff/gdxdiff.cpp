@@ -546,10 +546,10 @@ void CompareSy( const int Sy1, const int Sy2 )
 
    if( Dim != Dim2 || ST != ST2 )
    {
-      std::cout << "*** symbol = " << ID << " cannot be compared" << std::endl;
+      std::cout << "*** symbol = " << ID << " cannot be compared\n";
       if( ST != ST2 )
       {
-         std::cout << "Typ1 = " << library::gdxDataTypStrL( ST ) << ", Typ2 = " << library::gdxDataTypStrL( ST2 ) << std::endl;
+         std::cout << "Typ1 = " << library::gdxDataTypStrL( ST ) << ", Typ2 = " << library::gdxDataTypStrL( ST2 ) << '\n';
          Status = TStatusCode::sc_typ;
       }
       if( Dim != Dim2 )
