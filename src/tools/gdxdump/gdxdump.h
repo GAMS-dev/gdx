@@ -62,9 +62,6 @@ int64_t delphiRound( double x );
 
 void WriteSymbolCSV( int SyNr );
 
-// Auxiliary function for WriteSymbolInfo and WriteDomainInfo
-int getIntegerWidth( int number );
-
 void WriteSymbolInfo();
 
 void WriteDomainInfo();

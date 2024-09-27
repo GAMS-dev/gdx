@@ -820,11 +820,6 @@ void WriteSymbolCSV( const int SyNr )
       fo << "**** " << BadUELs << " reference(s) to unique elements without a string representation\n";
 }
 
-int getIntegerWidth( const int number )
-{
-   return static_cast<int>( std::to_string( number ).length() );
-}
-
 void WriteSymbolInfo()
 {
    int ADim, iATyp, NrSy, NrUel, w1, w2, w3, ACount, AUserInfo;
@@ -832,7 +827,7 @@ void WriteSymbolInfo()
    std::map<library::short_string, int> SL;
 
    gdxSystemInfo( PGX, &NrSy, &NrUel );
-   w1 = getIntegerWidth( NrSy );
+   w1 = gdlib::strutilx::IntegerWidth( NrSy );
    w2 = static_cast<int>( std::string { "Symbol" }.length() );
    w3 = static_cast<int>( std::string { "Records" }.length() );
    for( int N { 1 }; N <= NrSy; N++ )
@@ -841,8 +836,8 @@ void WriteSymbolInfo()
       gdxSymbolInfoX( PGX, N, &ACount, &AUserInfo, AExplText.data() );
       if( static_cast<int>( AName.length() ) > w2 )
          w2 = AName.length();
-      if( getIntegerWidth( ACount ) > w3 )
-         w3 = getIntegerWidth( ACount );
+      if( gdlib::strutilx::IntegerWidth( ACount ) > w3 )
+         w3 = gdlib::strutilx::IntegerWidth( ACount );
       SL.insert( { AName, N } );
    }
    fo << gdlib::strutilx::PadLeft( " ", w1 ) << ' '
@@ -875,7 +870,7 @@ void WriteDomainInfo()
    GDXSTRINDEXPTRS_INIT( DomainIDs, DomainIDsPtrs );
 
    gdxSystemInfo( PGX, &NrSy, &NrUel );
-   w1 = getIntegerWidth( NrSy );
+   w1 = gdlib::strutilx::IntegerWidth( NrSy );
    if( w1 < 4 )
       w1 = 4;
    fo << gdlib::strutilx::PadLeft( "SyNr", w1 )
