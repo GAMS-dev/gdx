@@ -1,0 +1,6 @@
+Include Id: i
+Output file: merged.gdx
+Reading file: small_example.gdx
+Reading file: full_example.gdx
+
+Merge complete, 2 input files merged

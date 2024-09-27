@@ -395,14 +395,31 @@ void TGmsList::CheckIndxQue()
    }
 }
 
-void TGmsList::SysStrWrite( std::string_view s )
+void TGmsList::SysStrWrite( const std::string_view s )
 {
    if( !PFile ) return;
-   utils::fputstr( PFile, ( CaseAction == casToUpper ? strutilx::UpperCase( s ) : ( CaseAction == casToLower ? strutilx::LowerCase( s ) : s ) ) );
+   switch( CaseAction )
+   {
+      case casToLower:
+      {
+         const auto ls = strutilx::UpperCase( s );
+         utils::fputstr( PFile, ls );
+         break;
+      }
+      case casToUpper:
+      {
+         const auto us = strutilx::UpperCase( s );
+         utils::fputstr( PFile, us );
+         break;
+      }
+      case casNone:
+         utils::fputstr( PFile, s );
+         break;
+   }
    FCharsWritten += static_cast<int>( s.length() );
 }
 
-void TGmsList::SysStrWrite( const char *s, size_t slen )
+void TGmsList::SysStrWrite( const char *s, const size_t slen )
 {
    if( !PFile ) return;
    fwrite( s, sizeof( char ), slen, PFile );

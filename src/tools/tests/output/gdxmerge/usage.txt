@@ -1,0 +1,13 @@
+gdxmerge: Merge GDX files
+GDXMERGE         47.4.1 4b675771 Aug 13, 2024          DAC arm 64bit/macOS    
+
+Usage:
+   gdxmerge filepat1 filepat2 ... filepatn
+     Optional parameters:
+          id=ident1, ident2: Merge specified IDs only
+          exclude=ident1, ident2: Do not merge specified IDs
+          big=<integer>    : Size indicator for a large symbol
+          output=filename  : Output file; merged.gdx by default
+          strict=true/false: Terminate on failure, e.g. missing input files
+Filepat represents a filename or a file pattern.
+The form: @filename will process parameters from that file

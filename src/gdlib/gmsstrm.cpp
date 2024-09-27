@@ -83,7 +83,7 @@ constexpr uint8_t signature_header = 0xFF;
 const std::string signature_gams = "*GAMS*"s;
 constexpr int verify_offset = 100;
 
-constexpr static char substChar { std::numeric_limits<char>::is_signed ? std::char_traits<char>::eof() : 0x1A };
+constexpr static char substChar { 0x1A };
 
 union TDoubleVar
 {
@@ -1243,7 +1243,7 @@ void TBinaryTextFileIO::ReadLine( std::string &StrBuffer, int &Len, const int Ma
       return;
    }
    StrBuffer.clear();
-   while( !( utils::in( LastChar, substChar, '\n', '\r', static_cast<char>(0x1A) ) || static_cast<int>( StrBuffer.size() ) == MaxInp ) )
+   while( !( utils::in( LastChar, substChar, '\n', '\r' ) || static_cast<int>( StrBuffer.size() ) == MaxInp ) )
    {
       StrBuffer.push_back( LastChar );
       // the simple case

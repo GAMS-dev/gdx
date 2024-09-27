@@ -1,0 +1,2 @@
+"seattle",350
+"san-diego",600

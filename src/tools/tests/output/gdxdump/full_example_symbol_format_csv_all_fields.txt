@@ -1,0 +1,4 @@
+"j","Val","Marginal","Lower","Upper","Scale"
+"new-york",325,0.225,325,+Inf,1
+"chicago",300,0.153,300,+Inf,1
+"topeka",275,0.126,275,+Inf,1

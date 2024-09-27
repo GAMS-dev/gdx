@@ -135,9 +135,9 @@ bool RemoveDir(const std::string &Dir);
 using TFileName = std::string;
 
 struct TSearchRec {
-   int Time, Size, Attr;
+   int Time {}, Size {}, Attr {};
    TFileName Name;
-   int ExcludeAttr;
+   int ExcludeAttr {};
 #if defined(_WIN32)
    HANDLE FindHandle {};
    _WIN32_FIND_DATAA * FindData {};
@@ -145,7 +145,7 @@ struct TSearchRec {
    DIR *FindHandle {};
 #endif
    std::string PathOnly, Pattern;
-   uint32_t mode;
+   uint32_t mode {};
 
    ~TSearchRec();
 };

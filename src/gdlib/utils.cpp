@@ -138,11 +138,6 @@ std::string getLineWithSep( std::istream &fs )
    return line;
 }
 
-bool sameTextAsAny( const std::string_view a, const std::initializer_list<std::string_view> &bs )
-{
-   return any<std::string_view>( [&a]( const std::string_view b ) { return sameText( a, b ); }, bs );
-}
-
 bool sameTextPrefix( const std::string_view s, const std::string_view prefix )
 {
    return sameText( s.substr( 0, prefix.length() ), prefix );
@@ -589,8 +584,6 @@ void stocp( const std::string &s, char *cp )
    std::memcpy( cp, s.c_str(), s.length() + 1 );
 }
 
-inline int b2i( bool b ) { return b ? 1 : 0; }
-
 int strCompare( const std::string_view S1, const std::string_view S2, const bool caseInsensitive )
 {
    if( S1.empty() || S2.empty() ) return b2i( !S1.empty() ) - b2i( !S2.empty() );
@@ -606,7 +599,7 @@ int strCompare( const std::string_view S1, const std::string_view S2, const bool
    return static_cast<int>( S1.length() - S2.length() );
 }
 
-StringBuffer::StringBuffer( int size ) : s( size, '\0' ), bufferSize { size } {}
+StringBuffer::StringBuffer( const int size ) : s( size, '\0' ), bufferSize { size } {}
 
 char *StringBuffer::getPtr() { return &s[0]; }
 

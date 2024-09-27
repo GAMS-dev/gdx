@@ -162,13 +162,13 @@ class charset {
 
 public:
    charset(const std::initializer_list<char> cs) {
-      for(char c : cs)
+      for( const char c : cs)
          insert(c);
    }
    charset(const charset &other) = default;
    charset() = default;
 
-   void insert(char c) {
+   void insert( const char c) {
       chars.set(c+offset);
    }
 
@@ -190,7 +190,7 @@ public:
       chars.reset();
    }
 
-   void erase(char c) {
+   void erase( const char c) {
       chars.reset(c+offset);
    }
 };
@@ -458,7 +458,17 @@ bool sameText( const std::string_view a, const std::string_view b )
    return caseInvariant ? sameTextInvariant( a, b ) : a == b;
 }
 
-bool sameTextAsAny( std::string_view a, const std::initializer_list<std::string_view> &bs );
+inline bool sameTextAsAny(std::string_view a, std::string_view b)
+{
+   return sameText( a, b );
+}
+
+template<typename... Args>
+bool sameTextAsAny( std::string_view str1, std::string_view str2, Args... args )
+{
+   return sameText( str1, str2 ) || sameTextAsAny( str1, args... );
+}
+
 bool sameTextPrefix( std::string_view s, std::string_view prefix );
 
 // Port of PStr(U)Equal
@@ -742,6 +752,8 @@ inline auto ord( const char c )
 {
    return static_cast<unsigned char>( c );
 }
+
+inline auto b2i(const bool x) { return x ? 1 : 0; }
 
 inline int pos( const char c, const std::string &s )
 {

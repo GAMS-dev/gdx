@@ -64,8 +64,13 @@ std::string ExcelColStr( int C );
 int IntegerWidth( int n );
 
 int PadModLength( std::string_view s, int M );
-
 std::string PadRightMod( std::string_view s, int M );
+
+int LChPosSp( char Ch, const char *S, int Sp );
+int LChPos( char Ch, const char *S );
+
+int LChSetPos( const char *Cs, const char *S, int slen );
+int RChSetPos( const char *Cs, const char *S, int slen );
 
 std::string DblToStrSep( double V, char DecimalSep );
 uint8_t DblToStrSep( double V, char DecimalSep, char *s );

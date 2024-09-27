@@ -1,0 +1,80 @@
+
+Set e /
+  'seattle' ,
+  'san-diego' ,
+  'new-york' ,
+  'chicago' ,
+  'topeka' /;
+$onEmpty
+
+Set i(*) supply /
+'seattle', 
+'san-diego' /;
+
+Set j(*) markets /
+'new-york', 
+'chicago', 
+'topeka' /;
+
+Parameter a(*) capacity of plant i in cases /
+'seattle' 350, 
+'san-diego' 600 /;
+
+Parameter b(j) demand at market j in cases /
+'new-york' 325, 
+'chicago' 300, 
+'topeka' 275 /;
+
+Parameter d(i,j) distance in thousands of miles /
+'seattle'.'new-york' 2.5, 
+'seattle'.'chicago' 1.7, 
+'seattle'.'topeka' 1.8, 
+'san-diego'.'new-york' 2.5, 
+'san-diego'.'chicago' 1.8, 
+'san-diego'.'topeka' 1.4 /;
+
+Scalar f freight in dollars per case per thousand miles / 90 /;
+
+Parameter c(i,j) transport cost in thousands of dollars per case /
+'seattle'.'new-york' 0.225, 
+'seattle'.'chicago' 0.153, 
+'seattle'.'topeka' 0.162, 
+'san-diego'.'new-york' 0.225, 
+'san-diego'.'chicago' 0.162, 
+'san-diego'.'topeka' 0.126 /;
+
+positive Variable x(i,j) shipment quantities in cases /
+'seattle'.'new-york'.L 50, 
+'seattle'.'chicago'.L 300, 
+'seattle'.'topeka'.M 0.036, 
+'san-diego'.'new-york'.L 275, 
+'san-diego'.'chicago'.M 0.009, 
+'san-diego'.'topeka'.L 275 /;
+
+free     Variable z total transportation costs in thousands of dollars /L 153.675 /;
+
+Equation cost define objective function /M 1, LO 0, UP 0 /;
+
+Equation supply(i) observe supply limit at plant i /
+'seattle'.L 350, 
+'seattle'.LO -Inf, 
+'seattle'.UP 350, 
+'san-diego'.L 550, 
+'san-diego'.LO -Inf, 
+'san-diego'.UP 600 /;
+
+Equation demand(j) satisfy demand at market j /
+'new-york'.L 325, 
+'new-york'.M 0.225, 
+'new-york'.LO 325, 
+'new-york'.UP +Inf, 
+'chicago'.L 300, 
+'chicago'.M 0.153, 
+'chicago'.LO 300, 
+'chicago'.UP +Inf, 
+'topeka'.L 275, 
+'topeka'.M 0.126, 
+'topeka'.LO 275, 
+'topeka'.UP +Inf /;
+
+$offEmpty

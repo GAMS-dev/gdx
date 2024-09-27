@@ -27,7 +27,6 @@
 
 #include <string>
 #include <array>
-#include <set>
 
 #include "../gdlib/utils.h"
 
@@ -57,19 +56,19 @@ enum tprocname : uint8_t
    proccount
 };
 
-const int procnameslength = 16;
-const std::array<std::string, procnameslength> procnames = {
+constexpr int procnameslength { 16 };
+const std::array<std::string, procnameslength> procnames {
         "NONE", "LP", "MIP", "RMIP", "NLP", "MCP", "MPEC", "RMPEC", "CNS", "DNLP", "RMINLP", "MINLP", "QCP", "MIQCP", "RMIQCP", "EMP" };
 
-const utils::bsSet<tprocname, proccount+1> pshortform = { procmcp, proccns },
-                          pdiscrete = { procmip, procrmip, procmpec, procrmpec, procrminlp, procminlp, procmiqcp, procrmiqcp, procemp },
-                          pnonlinear = { procnlp, procmcp, procmpec, procrmpec, proccns, procdnlp, procrminlp, procminlp, procqcp, procmiqcp, procrmiqcp, procemp },
-                          pcontinuous = { procnlp, procmcp, procmpec, proccns, procrminlp, procminlp, procqcp, procmiqcp, procrmiqcp, procemp },
-                          pdiscontinuous = { procdnlp, procrminlp, procminlp, procemp },
-                          pdrelaxed = { procrmip, procrmpec, procrminlp, procrmiqcp },
-                          pdtrylinear = { procnlp, procdnlp, procrminlp, procminlp, procqcp, procmiqcp, procrmiqcp },
-                          pdskiplist = { procnone },
-                          pdpairs = { procmcp, procmpec, procrmpec, proccns, procemp };
+const utils::bsSet<tprocname, proccount+1> pshortform { procmcp, proccns },
+                          pdiscrete { procmip, procrmip, procmpec, procrmpec, procrminlp, procminlp, procmiqcp, procrmiqcp, procemp },
+                          pnonlinear { procnlp, procmcp, procmpec, procrmpec, proccns, procdnlp, procrminlp, procminlp, procqcp, procmiqcp, procrmiqcp, procemp },
+                          pcontinuous { procnlp, procmcp, procmpec, proccns, procrminlp, procminlp, procqcp, procmiqcp, procrmiqcp, procemp },
+                          pdiscontinuous { procdnlp, procrminlp, procminlp, procemp },
+                          pdrelaxed { procrmip, procrmpec, procrminlp, procrmiqcp },
+                          pdtrylinear { procnlp, procdnlp, procrminlp, procminlp, procqcp, procmiqcp, procrmiqcp },
+                          pdskiplist { procnone },
+                          pdpairs { procmcp, procmpec, procrmpec, proccns, procemp };
 
 const std::array<std::string, 16> proctexts {
          "NONE" ,

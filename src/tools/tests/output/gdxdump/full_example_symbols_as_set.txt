@@ -1,0 +1,15 @@
+alias (Symbol, Dim, Type, *);
+set    gdxitems(Symbol,Dim,Type)  Items in the GDX file /
+"i".1."Set" "supply",
+"j".1."Set" "markets",
+"a".1."Par" "capacity of plant i in cases",
+"b".1."Par" "demand at market j in cases",
+"d".2."Par" "distance in thousands of miles",
+"f".0."Par" "freight in dollars per case per thousand miles",
+"c".2."Par" "transport cost in thousands of dollars per case",
+"x".2."Var" "shipment quantities in cases",
+"z".0."Var" "total transportation costs in thousands of dollars",
+"cost".0."Equ" "define objective function",
+"supply".1."Equ" "observe supply limit at plant i",
+"demand".1."Equ" "satisfy demand at market j"
+/;

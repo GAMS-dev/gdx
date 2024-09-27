@@ -1,0 +1,6 @@
+GDXDIFF          47.4.1 4b675771 Aug 13, 2024          DAC arm 64bit/macOS    
+File1 : default_values_example_1.gdx
+File2 : default_values_example_2.gdx
+No differences found
+Output: diffile.gdx
+GDXDiff finished

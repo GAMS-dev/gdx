@@ -199,7 +199,7 @@ public:
    {
       assert( !HashTable && "StoreEntry" );
       RecList.push_back( PRec );
-      return RecList.size();
+      return static_cast<int>(RecList.size());
    }
 
    int MemoryUsed() { return RecList.size() * sizeof( T ); }
@@ -290,7 +290,7 @@ public:
       if( FSrtCount != static_cast<int>( RecList.size() ) )
       {
          if( FSrtCount > 0 ) FSrtIndx = nullptr;
-         FSrtCount = RecList.size();
+         FSrtCount = static_cast<int>(RecList.size());
          FSrtIndx = std::make_unique<std::vector<T *>>( FSrtCount );
       }
       PA = FSrtIndx->data();// local copy for speed
@@ -336,12 +336,12 @@ public:
 
    [[nodiscard]] int GetCount() const
    {
-      return RecList.size();
+      return static_cast<int>(RecList.size());
    }
 
    [[nodiscard]] int Count() const
    {
-      return RecList.size();
+      return static_cast<int>(RecList.size());
    }
 };
 

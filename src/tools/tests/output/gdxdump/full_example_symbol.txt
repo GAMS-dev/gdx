@@ -1,0 +1,4 @@
+
+Set i(*) supply /
+'seattle', 
+'san-diego' /;

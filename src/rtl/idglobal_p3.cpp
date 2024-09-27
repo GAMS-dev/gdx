@@ -45,6 +45,10 @@ uint32_t GetTickDiff( const uint32_t AOldTickCount, const uint32_t ANewTickCount
 
 uint32_t GetTickCount() {
 #if defined( _WIN32 )
+   // Consider using 'GetTickCount64' instead of 'GetTickCount'.
+   // Reason: GetTickCount overflows roughly every 49 days. 
+   // Code that does not take that into account can loop indefinitely.
+   // GetTickCount64 operates on 64 bit values and does not have that problem
    return ::GetTickCount();
 #else
   timeval tv {};

@@ -1,0 +1,3 @@
+"i","new-york","chicago","topeka"
+"seattle",50,300,0
+"san-diego",275,0,275

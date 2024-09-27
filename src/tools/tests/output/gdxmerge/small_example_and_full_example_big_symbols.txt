@@ -1,0 +1,13 @@
+Output file: merged.gdx
+Reading file: small_example.gdx
+Reading file: full_example.gdx
+Reading file: small_example.gdx
+Reading file: full_example.gdx
+
+looking for symbol j     
+looking for symbol d     
+looking for symbol c     
+looking for symbol x     
+looking for symbol supply     
+looking for symbol demand     
+Merge complete, 4 input files merged

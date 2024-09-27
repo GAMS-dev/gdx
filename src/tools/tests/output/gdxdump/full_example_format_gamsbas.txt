@@ -1,0 +1,17 @@
+$onEmpty
+ x.L ('seattle'.'new-york') = 50 ;
+ x.L ('seattle'.'chicago') = 300 ;
+ x.M ('seattle'.'topeka') = 0.036 ;
+ x.L ('san-diego'.'new-york') = 275 ;
+ x.M ('san-diego'.'chicago') = 0.009 ;
+ x.L ('san-diego'.'topeka') = 275 ;
+$offListing
+ z.L  = 153.675 ;
+ cost.M  = 1 ;
+ ;
+ demand.M ('new-york') = 0.225 ;
+ demand.M ('chicago') = 0.153 ;
+ demand.M ('topeka') = 0.126 ;
+
+$offEmpty
+$onListing

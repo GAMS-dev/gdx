@@ -1,0 +1,15 @@
+GDXDIFF          47.4.1 4b675771 Aug 13, 2024          DAC arm 64bit/macOS    
+File1 : small_example.gdx
+File2 : full_example.gdx
+Summary of differences:
+     a   Symbol not found in file 1
+     b   Symbol not found in file 1
+     c   Symbol not found in file 1
+  cost   Symbol not found in file 1
+demand   Symbol not found in file 1
+     f   Symbol not found in file 1
+supply   Symbol not found in file 1
+     x   Symbol not found in file 1
+     z   Symbol not found in file 1
+Output: diffile.gdx
+GDXDiff finished
