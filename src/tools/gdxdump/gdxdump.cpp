@@ -822,7 +822,7 @@ void WriteSymbolCSV( const int SyNr )
 
 int getIntegerWidth( const int number )
 {
-   return static_cast<int>( std::string { std::to_string( number ) }.length() );
+   return static_cast<int>( std::to_string( number ).length() );
 }
 
 void WriteSymbolInfo()
