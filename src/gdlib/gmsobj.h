@@ -505,6 +505,7 @@ public:
       if( OneBased ) Index--;
       if( Index < FCount )// overlap so use memmove instead of memcpy
          std::memmove( &FList[Index + 1], &FList[Index], ( FCount - Index ) * sizeof( TStringItem<T> ) );
+      assert(FList);
       FList[Index].FString = NewString( S, slen, FStrMemory );
       FList[Index].FObject = APointer;
       FCount++;
@@ -740,6 +741,7 @@ public:
       if( !pHashSC || this->FCount > trigger ) SetHashSize( this->FCount );
       const auto hv { hashValue( s, slen ) };
       PHashRecord PH;
+      assert(pHashSC);
       for( PH = pHashSC[hv]; PH && !compareEntry( s, PH->RefNr ); PH = PH->PNext )
          ;
       if( PH ) return PH->RefNr + ( this->OneBased ? 1 : 0 );
