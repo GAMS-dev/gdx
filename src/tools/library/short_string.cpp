@@ -10,7 +10,10 @@
 namespace library
 {
 
-short_string::short_string() = default;
+short_string::short_string()
+{
+   buffer.front() = '\0';
+}
 
 short_string::short_string( const char *s )
 {
@@ -19,6 +22,7 @@ short_string::short_string( const char *s )
    assert( s_length < MAX_LENGTH );
 #endif
    std::memcpy( buffer.data(), s, s_length );
+   buffer[s_length] = '\0';
 }
 
 short_string::short_string( const std::string &s ) : short_string( s.data() ) {}
