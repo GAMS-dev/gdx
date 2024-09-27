@@ -730,6 +730,7 @@ void WriteSymbolCSV( const int SyNr )
    else
    {
       CSVCols = std::make_unique<bool[]>( NrUEL );
+      // TODO: Check this, could be redundant:
       std::fill_n( CSVCols.get(), NrUEL, false );
       HighIndex = 0;
       ColCnt = 0;
@@ -748,6 +749,7 @@ void WriteSymbolCSV( const int SyNr )
       gdxDataReadDone( PGX );
 
       CSVUels = std::make_unique<int[]>( ColCnt );
+      // TODO: Check this, could be redundant:
       std::fill_n( CSVUels.get(), ColCnt, 0 );
       Col = 0;
       for( Indx = 0; Indx < HighIndex; Indx++ )
