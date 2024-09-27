@@ -309,10 +309,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 
    auto DoublesEqual = []( const double V1, const double V2 ) -> bool {
       auto DMin = []( const double a, const double b ) -> double {
-         if( a <= b )
-            return a;
-         else
-            return b;
+         return a <= b ? a : b;
       };
 
       // auto DMax = []( const double a, const double b ) -> double {
