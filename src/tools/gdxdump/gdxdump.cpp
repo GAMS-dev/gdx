@@ -60,6 +60,7 @@ char QQ( const std::string &s )
    return s.find( '\'' ) == std::string::npos ? '\'' : '\"';
 }
 
+// No risk of overflow; only used for IDs, UELs or known strings
 std::string QQCSV( const std::string &s )
 {
    if( Delim == '\t' )
