@@ -79,7 +79,7 @@ std::string valTypStr( const int i )
    }
    else
    {
-      const std::array<std::string, 5> valsTypTxt { "L", "M", "LO", "UP", "SCALE" };
+      constexpr std::array valsTypTxt { "L", "M", "LO", "UP", "SCALE" };
       return valsTypTxt[i];
 
       // std::string result { gmsValTypeText[i] };
@@ -98,7 +98,7 @@ std::string varTypStr( const int i )
    }
    else
    {
-      const std::array<std::string, 10> varsTypTxt { "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };
+      constexpr std::array varsTypTxt { "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };
       return varsTypTxt[i];
 
       // return gmsVarTypeText[i];
@@ -114,7 +114,7 @@ std::string specialValueStr( const int i )
    }
    else
    {
-      const std::array<std::string, 7> svTxt { "Undf", "NA", "+Inf", "-Inf", "Eps", "0", "AcroN" };
+      constexpr std::array svTxt { "Undf", "NA", "+Inf", "-Inf", "Eps", "0", "AcroN" };
       return svTxt[i];
 
       // return gmsSVText[i];

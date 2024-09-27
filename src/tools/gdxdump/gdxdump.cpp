@@ -865,7 +865,7 @@ void WriteSymbolInfo()
 
 void WriteDomainInfo()
 {
-   const std::array<std::string, 4> StrDInfo { "N/A", "None", "Relaxed", "Regular" };
+   constexpr std::array StrDInfo { "N/A", "None", "Relaxed", "Regular" };
 
    library::short_string AName;
    int ADim, iATyp, NrSy, NrUel, w1, dinfo;

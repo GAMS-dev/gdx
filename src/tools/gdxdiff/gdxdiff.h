@@ -67,7 +67,7 @@ enum class KP : uint8_t
    kp_skip_id
 };
 
-const std::array<std::string, 10> StatusText {
+constexpr std::array StatusText {
         "Symbols are identical",
         "Symbol not found in file 1",
         "Symbol not found in file 2",
