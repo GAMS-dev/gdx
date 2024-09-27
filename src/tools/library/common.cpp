@@ -199,7 +199,7 @@ void AuditLine::setAuditLine()
       std::tm *localtime { std::localtime( &time ) };
       std::stringstream date;
       date << std::put_time( localtime, "%b %d, %Y" );
-      audit_line += "GDX tools compiled " + date.str();
+      audit_line += "??.?.? ???????? " + date.str();
    }
 
    audit_line.resize( 55, ' ' );
