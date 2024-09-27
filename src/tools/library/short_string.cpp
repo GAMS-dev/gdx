@@ -41,10 +41,7 @@ std::string short_string::string() const
 
 uint8_t short_string::length() const
 {
-   uint8_t i {};
-   while( buffer.at( i ) != '\0' )
-      i++;
-   return i;
+   return strlen(buffer.data());
 }
 
 char short_string::front() const
