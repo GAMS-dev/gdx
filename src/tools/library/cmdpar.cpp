@@ -187,7 +187,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       do {
          int fnd { -1 };
          for( int k { sp }; k < static_cast<int>( Src.length() ); k++ )
-            if( Src.at( k ) == '@' )
+            if( Src[k] == '@' )
             {
                fnd = k;
                break;
@@ -216,7 +216,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
          std::string fname;
          {
             int k { sp };
-            while( k < static_cast<int>( Src.length() ) && Src.at( k ) != Brk )
+            while( k >= 0 && k < static_cast<int>( Src.length() ) && Src[k] != Brk )
                k++;
             if( k > static_cast<int>( Src.length() ) )
             {
@@ -227,7 +227,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             sp = k;
          }
 
-         if( sp < static_cast<int>( Src.length() ) && Src.at( sp ) == '"' )
+         if( sp >= 0 && sp < static_cast<int>( Src.length() ) && Src[sp] == '"' )
             sp++;
          if( gdlib::strutilx::ExtractFileExtEx( fname ).empty() )
             fname = gdlib::strutilx::ChangeFileExtEx( fname, ".txt" );
@@ -247,9 +247,9 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
                   continue;
                for( size_t k {}; k < strings.size(); k++ )
                {
-                  if( strings.at( k ).empty() )
+                  if( strings[k].empty() )
                      break;
-                  Dest.append( " " + strings.at( k ) );
+                  Dest.append( " " + strings[k] );
                }
                // TODO: Check whether this if is still necessary
                if( strings.back().length() == 255 )
@@ -337,7 +337,7 @@ bool TCmdParams::HasKey( int v )
 TParamRec TCmdParams::GetParams( int n )
 {
    if( n >= 0 && n < static_cast<int>( FParList.size() ) )
-      return FParList.at( n );
+      return FParList[n];
    else
       return TParamRec { static_cast<int>( CmdParamStatus::ke_empty ), {} };
 }
