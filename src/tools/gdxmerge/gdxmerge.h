@@ -40,7 +40,6 @@ struct TGAMSSymbol {
    bool SySkip {};
 
    TGAMSSymbol( int ADim, gdxSyType AType, int ASubTyp );
-   ~TGAMSSymbol();
 
    // void SetCurrentFile( const std::string &S );
 };
