@@ -40,7 +40,7 @@ std::string short_string::string() const
 
 uint8_t short_string::length() const
 {
-   return strlen(buffer.data());
+   return static_cast<uint8_t>( strlen( buffer.data() ) );
 }
 
 char short_string::front() const
