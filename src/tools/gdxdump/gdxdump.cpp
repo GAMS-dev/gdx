@@ -30,6 +30,7 @@
 #include <map>
 #include <limits>
 #include <cstring>
+#include <string_view>
 
 #include "gdxdump.h"
 #include "../library/short_string.h"
@@ -44,6 +45,8 @@
 
 namespace gdxdump
 {
+
+using namespace std::literals::string_literals;
 
 std::ostream &fo { std::cout };
 std::ofstream OutputFile;
