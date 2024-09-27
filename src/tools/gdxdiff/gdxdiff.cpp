@@ -1136,13 +1136,12 @@ int main( const int argc, const char *argv[] )
    IDTable.clear();
 
    {
-      int N { 1 };
-      while( gdxSymbolInfo( PGX2, N, ID.data(), &Dim, &iST ) != 0 )
+      int N;
+      for( N = 1; gdxSymbolInfo( PGX2, N, ID.data(), &Dim, &iST ) != 0; N++ )
       {
          if( ( !IDsOnly || IDsOnly->IndexOf( ID.data() ) >= 0 ) &&
              ( !SkipIDs || SkipIDs->IndexOf( ID.data() ) < 0 ) )
             IDTable.insert( { ID, N } );
-         N++;
       }
    }
 
