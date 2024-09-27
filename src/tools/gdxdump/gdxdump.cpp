@@ -114,7 +114,7 @@ void WriteQText( const std::string &S, const bool checkParenthesis )
 
    if( checkParenthesis )
       for( ; i < S.length(); i++ )
-         if( S.at( i ) != ' ' )
+         if( S[ i ] != ' ' )
          {
             // open parenthesis at the start of the symbol text throws off the GAMS compiler
             G = S[i] != '(';
