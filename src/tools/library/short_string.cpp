@@ -5,8 +5,7 @@
 
 #include "short_string.h"
 
-// TODO: Disable at some point
-#define ENABLE_ASSERTIONS
+// #define ENABLE_ASSERTIONS
 
 namespace library
 {
