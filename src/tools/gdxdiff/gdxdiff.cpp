@@ -568,12 +568,12 @@ void CompareSy( const int Sy1, const int Sy2 )
          Status = TStatusCode::sc_domain;
 
 #if VERBOSE >= 1
-         std::cout << "Domain differences for symbol = " << ID << std::endl;
+         std::cout << "Domain differences for symbol = " << ID << '\n';
          for( int D {}; D < Dim; D++ )
          {
             if( gdlib::strutilx::StrUEqual( DomSy1[D], DomSy2[D] ) )
                continue;
-            std::cout << gdlib::strutilx::PadRight( std::to_string( D ), 2 ) << ' ' << DomSy1[D] << ' ' << DomSy2[D] << std::endl;
+            std::cout << gdlib::strutilx::PadRight( std::to_string( D ), 2 ) << ' ' << DomSy1[D] << ' ' << DomSy2[D] << '\n';
          }
          std::cout << std::endl;
 #endif
