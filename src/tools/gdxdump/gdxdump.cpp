@@ -310,8 +310,10 @@ void WriteSymbol( const int SyNr )
    gdxValues_t Vals {};
    std::array<double, GMS_VAL_MAX> DefaultValues {};
 
-   auto WriteItem = [&IsScalar, &ATyp, &Vals, &DefaultValues, &FrstWrite, &ADim, &SyName, &Keys, &S, &IDum, &ACount]( const uint8_t &ValNr ) {
-      if( !IsScalar && ATyp != dt_set && ( FilterDef && Vals[ValNr] == DefaultValues[ValNr] ) && !( ATyp == dt_equ && ( ValNr == GMS_VAL_LOWER || ValNr == GMS_VAL_UPPER ) ) )
+   auto WriteItem = [&]( const uint8_t &ValNr ) {
+      if( !IsScalar && ATyp != dt_set &&
+          ( FilterDef && Vals[ValNr] == DefaultValues[ValNr] ) &&
+          !( ATyp == dt_equ && ( ValNr == GMS_VAL_LOWER || ValNr == GMS_VAL_UPPER ) ) )
          return;
       if( FrstWrite )
          FrstWrite = false;
@@ -375,7 +377,7 @@ void WriteSymbol( const int SyNr )
       LineCount++;
    };
 
-   auto WriteComments = [&SyNr]() {
+   auto WriteComments = [&]() {
       library::short_string S;
       for( int N { 1 }; N <= std::numeric_limits<int>::max(); N++ )
       {
@@ -582,7 +584,7 @@ void WriteSymbolCSV( const int SyNr )
    gdxStrIndexPtrs_t DomSPtrs;
    GDXSTRINDEXPTRS_INIT( DomS, DomSPtrs );
 
-   auto GetDomainNames = [&ADim, &DomSPtrs, &SyNr]() {
+   auto GetDomainNames = [&]() {
       gdxStrIndex_t gdxDomS {};
       gdxStrIndexPtrs_t gdxDomSPtrs;
       GDXSTRINDEXPTRS_INIT( gdxDomS, gdxDomSPtrs );
