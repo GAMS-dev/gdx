@@ -574,7 +574,7 @@ int64_t delphiRound( const double x )
    if( x >= 0 )
       return static_cast<int64_t>( x + 0.5 );
    else
-      return static_cast<int64_t>( x - 0.5 );
+   return static_cast<int64_t>( x >= 0 ? x+0.5 : x-0.5 );
 }
 
 void WriteSymbolCSV( const int SyNr )
