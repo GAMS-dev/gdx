@@ -232,9 +232,7 @@ void CompareSy( const int Sy1, const int Sy2 )
             strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
          else
          {
-            std::string label { "L__" };
-            label += std::to_string( Keys[D] );
-            strcpy( StrKeysPtrs[D], label.data() );
+   snprintf(StrKeysPtrs[D], GMS_SSSIZE, "L__%d", Keys[D]);
          }
       if( !( DiffOnly && ( ST == dt_var || ST == dt_equ ) ) )
          strcpy( StrKeysPtrs[Dim], Act.data() );
