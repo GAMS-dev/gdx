@@ -57,7 +57,7 @@ TGAMSSymbol::TGAMSSymbol( const int ADim, const gdxSyType AType, const int ASubT
 
 TGAMSSymbol::~TGAMSSymbol()
 {
-   if(SyData)
+   if( SyData )
    {
       SyData->Clear();
       SyData = nullptr;

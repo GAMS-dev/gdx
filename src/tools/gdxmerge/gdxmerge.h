@@ -1,8 +1,9 @@
 #ifndef GDX_GDXMERGE_H
 #define GDX_GDXMERGE_H
 
-#include <string>
+#include <array>
 #include <vector>
+#include <string>
 #include <cstdint>
 #include <memory>
 
@@ -19,7 +20,7 @@
 namespace gdxmerge
 {
 
-const std::vector<int> DataTypSize { 1, 1, 5, 5, 0 };
+constexpr std::array DataTypSize { 1, 1, 5, 5, 0 };
 
 enum class TProcessPass : uint8_t
 {
@@ -103,7 +104,7 @@ std::string FormatDateTime( uint16_t Year, uint16_t Month, uint16_t Day,
 
 bool GetParameters( int argc, const char *argv[] );
 
-void Usage(const library::AuditLine &AuditLine);
+void Usage( const library::AuditLine &AuditLine );
 
 int main( int argc, const char *argv[] );
 
