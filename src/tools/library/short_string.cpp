@@ -58,7 +58,7 @@ char short_string::back() const
 #if defined( ENABLE_ASSERTIONS )
    assert( length > 0 );
 #endif
-   return buffer.at( length - 1 );
+   return buffer[length - 1];
 }
 
 char short_string::at( const uint8_t i ) const
@@ -70,12 +70,12 @@ char short_string::at( const uint8_t i ) const
    else
       assert( i <= length );
 #endif
-   return buffer.at( i );
+   return buffer[i];
 }
 
 char short_string::operator[]( const uint8_t i ) const
 {
-   return at( i );
+   return buffer[i];
 }
 
 bool short_string::empty() const
@@ -94,8 +94,8 @@ void short_string::append( const char c )
 #if defined( ENABLE_ASSERTIONS )
    assert( length + 1 < MAX_LENGTH );
 #endif
-   buffer.at( length ) = c;
-   buffer.at( length + 1 ) = '\0';
+   buffer[length] = c;
+   buffer[length + 1] = '\0';
 }
 
 void short_string::append( const char *s )
@@ -106,7 +106,7 @@ void short_string::append( const char *s )
    assert( length + s_length < MAX_LENGTH );
 #endif
    std::memcpy( buffer.data() + length, s, s_length );
-   buffer.at( length + s_length ) = '\0';
+   buffer[length + s_length] = '\0';
 }
 
 void short_string::append( const short_string &s )
@@ -142,7 +142,7 @@ void short_string::operator+=( const std::string &s )
 void short_string::to_upper_case()
 {
    for( uint8_t i {}; buffer.at( i ) != '\0'; i++ )
-      buffer.at( i ) = static_cast<char>( utils::toupper( buffer.at( i ) ) );
+      buffer[i] = static_cast<char>( utils::toupper( buffer[i] ) );
 }
 
 short_string &short_string::operator=( const std::string &s )
@@ -152,7 +152,7 @@ short_string &short_string::operator=( const std::string &s )
    assert( s_length < MAX_LENGTH );
 #endif
    std::memcpy( buffer.data(), s.data(), s_length );
-   buffer.at( s_length ) = '\0';
+   buffer[s_length] = '\0';
    return *this;
 }
 
@@ -161,7 +161,7 @@ bool short_string::operator==( const char *s ) const
    uint8_t i {};
    while( buffer.at( i ) != '\0' )
    {
-      if( buffer.at( i ) != s[i] )
+      if( buffer[i] != s[i] )
          return false;
       i++;
    }
