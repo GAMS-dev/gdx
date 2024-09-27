@@ -1135,14 +1135,11 @@ int main( const int argc, const char *argv[] )
    // Find symbols in file 2 that are not in file 1
    IDTable.clear();
 
+   for( int N { 1 }; gdxSymbolInfo( PGX2, N, ID.data(), &Dim, &iST ) != 0; N++ )
    {
-      int N;
-      for( N = 1; gdxSymbolInfo( PGX2, N, ID.data(), &Dim, &iST ) != 0; N++ )
-      {
-         if( ( !IDsOnly || IDsOnly->IndexOf( ID.data() ) >= 0 ) &&
-             ( !SkipIDs || SkipIDs->IndexOf( ID.data() ) < 0 ) )
-            IDTable.insert( { ID, N } );
-      }
+      if( ( !IDsOnly || IDsOnly->IndexOf( ID.data() ) >= 0 ) &&
+          ( !SkipIDs || SkipIDs->IndexOf( ID.data() ) < 0 ) )
+         IDTable.insert( { ID, N } );
    }
 
    for( const auto &pair: IDTable )
