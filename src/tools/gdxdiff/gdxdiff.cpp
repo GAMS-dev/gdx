@@ -970,7 +970,7 @@ int main( const int argc, const char *argv[] )
             while( !S.empty() )
             {
                int k { gdlib::strutilx::LChSetPos(
-                       std::vector<char> { ',', ' ' }.data(),
+                       ", ",
                        S.data(),
                        static_cast<int>( S.length() ) ) };
                if( k == -1 )
@@ -1012,7 +1012,7 @@ int main( const int argc, const char *argv[] )
             while( !S.empty() )
             {
                int k { gdlib::strutilx::LChSetPos(
-                       std::vector<char> { ',', ' ' }.data(),
+                       ", ",
                        S.data(),
                        static_cast<int>( S.length() ) ) };
                if( k == -1 )

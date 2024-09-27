@@ -662,7 +662,10 @@ bool GetParameters( const int argc, const char *argv[] )
             case KP::Exclude:
                while( !KS.empty() )
                {
-                  K = gdlib::strutilx::LChSetPos( std::vector<char> { ',', ' ' }.data(), KS.data(), static_cast<int>( KS.length() ) );
+                  K = gdlib::strutilx::LChSetPos(
+                          ", ",
+                          KS.data(),
+                          static_cast<int>( KS.length() ) );
                   if( K == -1 )
                   {
                      Id = KS;
