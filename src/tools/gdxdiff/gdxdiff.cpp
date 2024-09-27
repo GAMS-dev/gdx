@@ -82,6 +82,7 @@ std::string ValAsString( const gdxHandle_t &PGX, const double V )
          return gdlib::strutilx::PadLeft( library::gdxSpecialValuesStr( iSV ), WIDTH );
       else
       {
+         // TODO: Improve this conversion
          std::ostringstream oss;
          oss << std::fixed << std::setprecision( 5 ) << V;
          result = oss.str();
