@@ -32,9 +32,6 @@ class TCmdParams
    int FindKeyV( int V );
 
 public:
-   TCmdParams();
-   ~TCmdParams();
-
    bool CrackCommandLine( int ParamCount, const char *ParamStr[] );
    bool AddParameters( int AInsP, const std::string &CmdLine, int ParamCount, const char *ParamStr[] );
    void AddKeyWord( int v, const std::string &s );

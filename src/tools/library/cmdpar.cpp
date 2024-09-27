@@ -10,17 +10,6 @@
 namespace library::cmdpar
 {
 
-// Brief:
-//   Create instance of command line object
-TCmdParams::TCmdParams() = default;
-
-// Brief:
-//   Release allocated memory and destroy the object
-TCmdParams::~TCmdParams()
-{
-   ClearParams();
-}
-
 void TCmdParams::ClearParams()
 {
    FKeyList.clear();
