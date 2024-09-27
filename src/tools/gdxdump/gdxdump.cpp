@@ -828,8 +828,8 @@ void WriteSymbolInfo()
 
    gdxSystemInfo( PGX, &NrSy, &NrUel );
    w1 = gdlib::strutilx::IntegerWidth( NrSy );
-   w2 = static_cast<int>( std::string { "Symbol" }.length() );
-   w3 = static_cast<int>( std::string { "Records" }.length() );
+   w2 = static_cast<int>( "Symbol"s.length() );
+   w3 = static_cast<int>( "Records"s.length() );
    for( int N { 1 }; N <= NrSy; N++ )
    {
       gdxSymbolInfo( PGX, N, AName.data(), &ADim, &iATyp );
