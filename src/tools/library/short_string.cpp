@@ -1,9 +1,9 @@
 #include <cstring>
-#include <cctype>
 #include <ostream>
 #include <cassert>
 
 #include "short_string.h"
+#include "../../gdlib/utils.h"
 
 // #define ENABLE_ASSERTIONS
 
@@ -142,7 +142,7 @@ void short_string::operator+=( const std::string &s )
 void short_string::to_upper_case()
 {
    for( uint8_t i {}; buffer.at( i ) != '\0'; i++ )
-      buffer.at( i ) = static_cast<char>( std::toupper( buffer.at( i ) ) );
+      buffer.at( i ) = static_cast<char>( utils::toupper( buffer.at( i ) ) );
 }
 
 short_string &short_string::operator=( const std::string &s )
