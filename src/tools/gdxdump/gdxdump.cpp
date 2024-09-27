@@ -904,6 +904,7 @@ void WriteDomainInfo()
    }
 }
 
+// Write out the set text in the GDX file
 void WriteSetText()
 {
    int nText, lo, hi, mid, idummy, rc, textIdx, mxTextIdx, nSyms, symDim, symTyp, nRecs, fDim;
