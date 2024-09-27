@@ -930,6 +930,7 @@ void WriteSetText()
    library::assertWithMessage( lo + 1 == hi, "Impossible end to binary search in WriteSetText" );
    nText = lo + 1;
 
+   // now find the max textIdx stored for any set element
    mxTextIdx = 0;
    gdxSystemInfo( PGX, &nSyms, &idummy );
    for( int iSym {}; iSym < nSyms; iSym++ )
