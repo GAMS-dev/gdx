@@ -497,10 +497,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       {
          library::short_string stxt;
          int N;
-         if( Act == c_ins1 )
-            gdxGetElemText( PGX1, static_cast<int>( round( Vals[GMS_VAL_LEVEL] ) ), stxt.data(), &N );
-         else
-            gdxGetElemText( PGX2, static_cast<int>( round( Vals[GMS_VAL_LEVEL] ) ), stxt.data(), &N );
+            gdxGetElemText( Act == c_ins1 ? PGX1 : PGX2, static_cast<int>( round( Vals[GMS_VAL_LEVEL] ) ), stxt.data(), &N );
          gdxAddSetText( PGXDIF, stxt.data(), &N );
          Vals[GMS_VAL_LEVEL] = N;
       }
