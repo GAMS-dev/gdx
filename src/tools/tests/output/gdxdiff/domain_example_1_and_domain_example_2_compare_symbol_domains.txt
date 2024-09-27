@@ -1,0 +1,9 @@
+GDXDIFF          47.4.1 4b675771 Aug 13, 2024          DAC arm 64bit/macOS    
+File1 : domain_example_1.gdx
+File2 : domain_example_2.gdx
+Summary of differences:
+a   Domains are different
+i   Symbol not found in file 2
+j   Symbol not found in file 1
+Output: diff_file.gdx
+GDXDiff finished

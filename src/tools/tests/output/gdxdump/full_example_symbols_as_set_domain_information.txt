@@ -1,0 +1,15 @@
+alias (Symbol, Dim, Type, Domain, *);
+set    gdxitemsDI(Symbol,Dim,Type,Domain)  Items in the GDX file /
+"i".1."Set"."*",
+"j".1."Set"."*",
+"a".1."Par"."*",
+"b".1."Par"."j",
+"d".2."Par"."i, j",
+"f".0."Par"."",
+"c".2."Par"."i, j",
+"x".2."Var"."i, j",
+"z".0."Var"."",
+"cost".0."Equ"."",
+"supply".1."Equ"."i",
+"demand".1."Equ"."j"
+/;

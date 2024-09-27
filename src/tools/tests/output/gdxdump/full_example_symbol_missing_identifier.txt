@@ -1,0 +1,36 @@
+Symbol missing
+gdxdump: Write GDX file in ASCII
+GDXDUMP          47.4.1 4b675771 Aug 13, 2024          DAC arm 64bit/macOS    
+
+Usage:
+gdxdump <filename> <options>
+<options>
+   -V or -Version        Write version info of input file only
+   Output=<filename>     Write output to file
+   Symb=<identifier>     Select a single identifier
+   UelTable=<identifier> Include all unique elements
+   Delim=[period, comma, tab, blank, semicolon]
+                         Specify a dimension delimiter
+   DecimalSep=[period, comma]
+                         Specify a decimal separator
+   NoHeader              Suppress writing of the headers
+   NoData                Write headers only; no data
+   CSVAllFields          When writing CSV write all variable/equation fields
+   CSVSetText            When writing CSV write set element text
+   Symbols               Get a list of all symbols
+   DomainInfo            Get a list of all symbols showing domain information
+   SymbolsAsSet          Get a list of all symbols as data for a set
+   SymbolsAsSetDI        Get a list of all symbols as data for a set includes domain information
+   SetText               Show the list of set text (aka associated text)
+   Format=[normal, gamsbas, csv]
+   dFormat=[normal, hexponential, hexBytes]
+   CDim=[Y, N]           Use last dimension as column headers
+                         (for CSV format only; default=N)
+   FilterDef=[Y, N]      Filter default values; default=Y
+   EpsOut=<string>       String to be used when writing the value for EPS;               default=EPS
+   NaOut=<string>        String to be used when writing the value for Not Available;     default=NA
+   PinfOut=<string>      String to be used when writing the value for Positive Infinity; default=+Inf
+   MinfOut=<string>      String to be used when writing the value for Negative Infinity; default=-Inf
+   UndfOut=<string>      String to be used when writing the value for Undefined;         default=Undf
+   ZeroOut=<string>      String to be used when writing the value for Zero;              default=0
+   Header=<string>       New header for CSV output format

@@ -46,42 +46,66 @@ double gdRoundTo( const double x, const int i )
    return std::trunc( x * zReciprocal + 0.5 * ( x > 0.0 ? 1.0 : -1.0 ) ) / zReciprocal;
 }
 
+constexpr TI64Rec t64 { 1 };
+const bool bigEndian { t64.bytes.back() == 1 };
+
 constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
-                  expoMask { static_cast<int64_t>( 0x7ff00000 ) << 32 },
-                  mantMask { ~( signMask | expoMask ) };
+        expoMask { static_cast<int64_t>( 0x7ff00000 ) << 32 },
+        mantMask { ~( signMask | expoMask ) };
 
-union TI64Rec
-{
-   double x;
-   int64_t i64;
-//   uint8_t bytes[8];
-};
 
-static void dblDecomp( const double x, bool& isNeg, uint32_t& expo, int64_t& mant)
+static void dblDecomp( const double x, bool &isNeg, uint32_t &expo, int64_t &mant )
 {
-   TI64Rec xi {};
-   xi.x = x;
+   TI64Rec xi { x };
    isNeg = ( xi.i64 & signMask ) == signMask;
    expo = ( xi.i64 & expoMask ) >> 52;
    mant = xi.i64 & mantMask;
 }
 
-static char hexDigit( const uint8_t b) {
-   return static_cast<char>(b < 10 ? utils::ord('0') + b : utils::ord('a') + b - 10);
+char hexDigit( const uint8_t b )
+{
+   return static_cast<char>( b < 10 ? utils::ord( '0' ) + b : utils::ord( 'a' ) + b - 10 );
+}
+
+std::string dblToStrHex( const double x )
+{
+   TI64Rec xi { x };
+   uint8_t c;
+   std::string result = "0x";
+
+   if( bigEndian )
+   {
+      for( int i {}; i < 8; i++ )
+      {
+         c = xi.bytes[i];
+         result += gdlib::dblutil::hexDigit( c / 16 );
+         result += gdlib::dblutil::hexDigit( c & 0x0F );
+      }
+   }
+   else
+   {
+      for( int i { 7 }; i >= 0; i-- )
+      {
+         c = xi.bytes[i];
+         result += gdlib::dblutil::hexDigit( c / 16 );
+         result += gdlib::dblutil::hexDigit( c & 0x0F );
+      }
+   }
+   return result;
 }
 
 // format the bytes in the mantissa
-static std::string mFormat(int64_t m) {
-   if (!m)
+static std::string mFormat( int64_t m )
+{
+   if( !m )
       return "0"s;
-   //TI64Rec xi {};
-   //xi.i64 = m;
    int64_t mask { static_cast<int64_t>( 0x000f0000 ) << 32 };
    int shiftCount = 48;
    std::string res;
-   while (m) {
+   while( m )
+   {
       const int64_t m2 { ( m & mask ) >> shiftCount };
-      const auto b { static_cast<uint8_t>(m2) };
+      const auto b { static_cast<uint8_t>( m2 ) };
       res += hexDigit( b );
       m &= ~mask;
       mask >>= 4;

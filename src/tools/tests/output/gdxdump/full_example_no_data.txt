@@ -1,0 +1,43 @@
+
+$gdxIn full_example.gdx
+$onEmpty
+$offEolCom
+$eolCom !!
+
+Set i(*) supply ;
+$loadDC i
+
+Set j(*) markets ;
+$loadDC j
+
+Parameter a(*) capacity of plant i in cases ;
+$loadDC a
+
+Parameter b(j) demand at market j in cases ;
+$loadDC b
+
+Parameter d(i,j) distance in thousands of miles ;
+$loadDC d
+
+Scalar f freight in dollars per case per thousand miles ;
+$loadDC f
+
+Parameter c(i,j) transport cost in thousands of dollars per case ;
+$loadDC c
+
+positive Variable x(i,j) shipment quantities in cases ;
+$loadDC x
+
+free     Variable z total transportation costs in thousands of dollars ;
+$loadDC z
+
+Equation cost define objective function ;
+$loadDC cost
+
+Equation supply(i) observe supply limit at plant i ;
+$loadDC supply
+
+Equation demand(j) satisfy demand at market j ;
+$loadDC demand
+
+$offEmpty

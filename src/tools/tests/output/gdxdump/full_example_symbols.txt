@@ -1,0 +1,13 @@
+   Symbol Dim Type Records  Explanatory text
+ 1 a        1  Par       2  capacity of plant i in cases
+ 2 b        1  Par       3  demand at market j in cases
+ 3 c        2  Par       6  transport cost in thousands of dollars per case
+ 4 cost     0  Equ       1  define objective function
+ 5 d        2  Par       6  distance in thousands of miles
+ 6 demand   1  Equ       3  satisfy demand at market j
+ 7 f        0  Par       1  freight in dollars per case per thousand miles
+ 8 i        1  Set       2  supply
+ 9 j        1  Set       3  markets
+10 supply   1  Equ       2  observe supply limit at plant i
+11 x        2  Var       6  shipment quantities in cases
+12 z        0  Var       1  total transportation costs in thousands of dollars

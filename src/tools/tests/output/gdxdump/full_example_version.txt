@@ -1,0 +1,6 @@
+*  File version   : GDX Library C++ V7 (AUDIT) Mon Aug  5 09:13:12 2024 arm64 macOS
+*  Producer       : GAMS Transfer
+*  File format    :    7
+*  Compression    :    0
+*  Symbols        :   12
+*  Unique Elements:    5

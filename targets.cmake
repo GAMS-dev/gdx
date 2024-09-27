@@ -94,3 +94,50 @@ if (DEFINED ENV{GAMSDIR})
 endif ()
 
 endif()
+
+set(NO_TOOLS OFF CACHE BOOL "Skip building GDX tools")
+if(NOT NO_TOOLS)
+
+# Library for gdxdump, gdxdiff and gdxmerge
+add_library(gdxtools-library
+    generated/gdxcc.h
+    generated/gdxcc.c
+    src/tools/library/common.h
+    src/tools/library/common.cpp
+    src/tools/library/short_string.h
+    src/tools/library/short_string.cpp
+    src/tools/library/cmdpar.h
+    src/tools/library/cmdpar.cpp
+    ${base-units-all}
+)
+target_include_directories(gdxtools-library PRIVATE ${inc-dirs})
+target_link_libraries(gdxtools-library gdx-static)
+if (UNIX)
+    target_link_libraries(gdxtools-library dl)
+endif ()
+
+# gdxdump
+add_executable(gdxdump
+    src/tools/gdxdump/gdxdump.h
+    src/tools/gdxdump/gdxdump.cpp
+)
+target_include_directories(gdxdump PRIVATE ${inc-dirs})
+target_link_libraries(gdxdump gdxtools-library)
+
+# gdxdiff
+add_executable(gdxdiff
+    src/tools/gdxdiff/gdxdiff.h
+    src/tools/gdxdiff/gdxdiff.cpp
+)
+target_include_directories(gdxdiff PRIVATE ${inc-dirs})
+target_link_libraries(gdxdiff gdxtools-library)
+
+# gdxmerge
+add_executable(gdxmerge
+    src/tools/gdxmerge/gdxmerge.h
+    src/tools/gdxmerge/gdxmerge.cpp
+)
+target_include_directories(gdxmerge PRIVATE ${inc-dirs})
+target_link_libraries(gdxmerge gdxtools-library)
+
+endif(NOT NO_TOOLS)

@@ -124,7 +124,7 @@ The fastest way to build the GDX library (static and dynamic) locally is by runn
 git clone https://github.com/GAMS-dev/gdx.git
 cd gdx
 git clone https://github.com/madler/zlib zlib
-cmake -DNO_TESTS=ON -DNO_EXAMPLES=ON .
+cmake -DNO_TESTS=ON -DNO_EXAMPLES=ON -DNO_TOOLS=ON .
 cmake --build .
 ```
 Running this on Linux creates the dynamic library `libgdxcclib64.so` and the static library `libgdx-static.a`.
@@ -1053,14 +1053,14 @@ static gdxValues_t       Values;
 void ReportGDXError(gdxHandle_t PGX) {
 	char S[GMS_SSSIZE];
 
-	std::cout << "**** Fatal GDX Error" << endl;
+	cout << "**** Fatal GDX Error" << endl;
 	gdxErrorStr(PGX, gdxGetLastError(PGX), S);
-	std::cout << "**** " << S << endl;
+	cout << "**** " << S << endl;
 	exit(1);
 }
 
-void ReportIOError(int N, const std::string &msg) {
-	std::cout << "**** Fatal I/O Error = " << N << " when calling " << msg << endl;
+void ReportIOError(int N, const string &msg) {
+	cout << "**** Fatal I/O Error = " << N << " when calling " << msg << endl;
 	exit(1);
 }
 

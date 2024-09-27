@@ -1,0 +1,104 @@
+$onEmpty
+
+Set i(*) supply /
+'seattle', 
+'san-diego' /;
+
+Set j(*) markets /
+'new-york', 
+'chicago', 
+'topeka' /;
+
+Parameter a(*) capacity of plant i in cases /
+'seattle' 350, 
+'san-diego' 600 /;
+
+Parameter b(j) demand at market j in cases /
+'new-york' 325, 
+'chicago' 300, 
+'topeka' 275 /;
+
+Parameter d(i,j) distance in thousands of miles /
+'seattle'.'new-york' 2.5, 
+'seattle'.'chicago' 1.7, 
+'seattle'.'topeka' 1.8, 
+'san-diego'.'new-york' 2.5, 
+'san-diego'.'chicago' 1.8, 
+'san-diego'.'topeka' 1.4 /;
+
+Scalar f freight in dollars per case per thousand miles / 90 /;
+
+Parameter c(i,j) transport cost in thousands of dollars per case /
+'seattle'.'new-york' 0.225, 
+'seattle'.'chicago' 0.153, 
+'seattle'.'topeka' 0.162, 
+'san-diego'.'new-york' 0.225, 
+'san-diego'.'chicago' 0.162, 
+'san-diego'.'topeka' 0.126 /;
+
+positive Variable x(i,j) shipment quantities in cases /
+'seattle'.'new-york'.L 50, 
+'seattle'.'new-york'.M 0, 
+'seattle'.'new-york'.LO 0, 
+'seattle'.'new-york'.UP +Inf, 
+'seattle'.'new-york'.SCALE 1, 
+'seattle'.'chicago'.L 300, 
+'seattle'.'chicago'.M 0, 
+'seattle'.'chicago'.LO 0, 
+'seattle'.'chicago'.UP +Inf, 
+'seattle'.'chicago'.SCALE 1, 
+'seattle'.'topeka'.L 0, 
+'seattle'.'topeka'.M 0.036, 
+'seattle'.'topeka'.LO 0, 
+'seattle'.'topeka'.UP +Inf, 
+'seattle'.'topeka'.SCALE 1, 
+'san-diego'.'new-york'.L 275, 
+'san-diego'.'new-york'.M 0, 
+'san-diego'.'new-york'.LO 0, 
+'san-diego'.'new-york'.UP +Inf, 
+'san-diego'.'new-york'.SCALE 1, 
+'san-diego'.'chicago'.L 0, 
+'san-diego'.'chicago'.M 0.009, 
+'san-diego'.'chicago'.LO 0, 
+'san-diego'.'chicago'.UP +Inf, 
+'san-diego'.'chicago'.SCALE 1, 
+'san-diego'.'topeka'.L 275, 
+'san-diego'.'topeka'.M 0, 
+'san-diego'.'topeka'.LO 0, 
+'san-diego'.'topeka'.UP +Inf, 
+'san-diego'.'topeka'.SCALE 1 /;
+
+free     Variable z total transportation costs in thousands of dollars /L 153.675, M 0, LO -Inf, UP +Inf, SCALE 1 /;
+
+Equation cost define objective function /L 0, M 1, LO 0, UP 0, SCALE 1 /;
+
+Equation supply(i) observe supply limit at plant i /
+'seattle'.L 350, 
+'seattle'.M 0, 
+'seattle'.LO -Inf, 
+'seattle'.UP 350, 
+'seattle'.SCALE 1, 
+'san-diego'.L 550, 
+'san-diego'.M 0, 
+'san-diego'.LO -Inf, 
+'san-diego'.UP 600, 
+'san-diego'.SCALE 1 /;
+
+Equation demand(j) satisfy demand at market j /
+'new-york'.L 325, 
+'new-york'.M 0.225, 
+'new-york'.LO 325, 
+'new-york'.UP +Inf, 
+'new-york'.SCALE 1, 
+'chicago'.L 300, 
+'chicago'.M 0.153, 
+'chicago'.LO 300, 
+'chicago'.UP +Inf, 
+'chicago'.SCALE 1, 
+'topeka'.L 275, 
+'topeka'.M 0.126, 
+'topeka'.LO 275, 
+'topeka'.UP +Inf, 
+'topeka'.SCALE 1 /;
+
+$offEmpty

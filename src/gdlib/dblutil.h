@@ -26,12 +26,26 @@
 
 #pragma once
 
+#include <cstdint>
 #include <string>
+#include <array>
 
 namespace gdlib::dblutil
 {
 
+union TI64Rec
+{
+   double x;
+   int64_t i64;
+   std::array<uint8_t, 8> bytes;
+};
+
 double gdRoundTo( double x, int i );
+
+char hexDigit( uint8_t b );
+
+std::string dblToStrHex( double x );
+
 std::string dblToStrHexponential( double x );
 
-}
+}// namespace gdlib::dblutil

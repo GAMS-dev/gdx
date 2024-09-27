@@ -54,97 +54,97 @@ endif (UNIX)
 include(base-units.cmake)
 
 set(zlib-units
-        # ZLIB modules
-        # missing? run in project root: git clone https://github.com/madler/zlib zlib
-        zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c
-        zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c
-        zlib/zutil.c
+    # ZLIB modules
+    # missing? run in project root: git clone https://github.com/madler/zlib zlib
+    zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c
+    zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c
+    zlib/zutil.c
 )
 
 set(gdx-core
-        # P3 runtime library
-        src/rtl/dtoaLoc.h
-        src/rtl/dtoaLoc.c
-        src/rtl/p3io.h
-        src/rtl/p3io.cpp
-        src/rtl/p3utils.h
-        src/rtl/p3utils.cpp
-        src/rtl/sysutils_p3.h
-        src/rtl/sysutils_p3.cpp
-        src/rtl/p3platform.h
-        src/rtl/p3platform.cpp
-        src/rtl/math_p3.h
-        src/rtl/math_p3.cpp
+    # P3 runtime library
+    src/rtl/dtoaLoc.h
+    src/rtl/dtoaLoc.c
+    src/rtl/p3io.h
+    src/rtl/p3io.cpp
+    src/rtl/p3utils.h
+    src/rtl/p3utils.cpp
+    src/rtl/sysutils_p3.h
+    src/rtl/sysutils_p3.cpp
+    src/rtl/p3platform.h
+    src/rtl/p3platform.cpp
+    src/rtl/math_p3.h
+    src/rtl/math_p3.cpp
 
-        # gdlib essential units
-        src/gdlib/gmsstrm.cpp
-        src/gdlib/gmsstrm.h
-        src/gdlib/utils.h
-        src/gdlib/utils.cpp
-        src/gdlib/strutilx.h
-        src/gdlib/strutilx.cpp
-        src/gdlib/strindexbuf.h
+    # gdlib essential units
+    src/gdlib/gmsstrm.cpp
+    src/gdlib/gmsstrm.h
+    src/gdlib/utils.h
+    src/gdlib/utils.cpp
+    src/gdlib/strutilx.h
+    src/gdlib/strutilx.cpp
+    src/gdlib/strindexbuf.h
 
-        # GDX specific units
-        src/gxfile.h
-        src/gxfile.cpp
-        src/gdx.h
+    # GDX specific units
+    src/gxfile.h
+    src/gxfile.cpp
+    src/gdx.h
 
-        ${zlib-units}
+    ${zlib-units}
 )
 
 set(test-deps
-        # runtime library
-        src/rtl/p3library.cpp
-        src/rtl/p3library.h
-        src/rtl/stdthread.cpp
-        src/rtl/stdthread.h
+    # runtime library
+    src/rtl/p3library.cpp
+    src/rtl/p3library.h
+    src/rtl/stdthread.cpp
+    src/rtl/stdthread.h
 
-        # global
-        src/global/gmslibname.cpp
-        src/global/gmslibname.h
+    # global
+    src/global/gmslibname.cpp
+    src/global/gmslibname.h
 
-        # gdlib
-        src/gdlib/charmaps.cpp
-        src/gdlib/charmaps.h
-        src/gdlib/gmacro.cpp
-        src/gdlib/gmacro.h
-        src/gdlib/gmsheapnew.cpp
-        src/gdlib/gmsheapnew.h
-        src/gdlib/gmsonly.h
-        src/gdlib/gmsonly.cpp
-        src/gdlib/obfuscatestr.cpp
-        src/gdlib/obfuscatestr.h
-        src/gdlib/strhash.h
-        src/gdlib/strhash.cpp
-        src/gdlib/xcompress.cpp
-        src/gdlib/xcompress.h
+    # gdlib
+    src/gdlib/charmaps.cpp
+    src/gdlib/charmaps.h
+    src/gdlib/gmacro.cpp
+    src/gdlib/gmacro.h
+    src/gdlib/gmsheapnew.cpp
+    src/gdlib/gmsheapnew.h
+    src/gdlib/gmsonly.h
+    src/gdlib/gmsonly.cpp
+    src/gdlib/obfuscatestr.cpp
+    src/gdlib/obfuscatestr.h
+    src/gdlib/strhash.h
+    src/gdlib/strhash.cpp
+    src/gdlib/xcompress.cpp
+    src/gdlib/xcompress.h
 )
 
 set(tests
-        src/tests/doctestmain.cpp
+    src/tests/doctestmain.cpp
 
-        src/tests/gdxtests.h
-        src/tests/gdxtests.cpp
-        src/tests/gxfiletests.cpp
+    src/tests/gdxtests.h
+    src/tests/gdxtests.cpp
+    src/tests/gxfiletests.cpp
 
-        src/tests/gdlib/datastoragetests.cpp
-        src/tests/gdlib/glookuptests.cpp
-        src/tests/gdlib/gmacrotests.cpp
-        src/tests/gdlib/gmsdatatests.cpp
-        src/tests/gdlib/gmsheapnewtests.cpp
-        src/tests/gdlib/gmsobjtests.cpp
-        src/tests/gdlib/gmsstrmtests.cpp
-        src/tests/gdlib/obfuscatestrtests.cpp
-        src/tests/gdlib/strhashtests.cpp
-        src/tests/gdlib/strutilxtests.cpp
-        src/tests/gdlib/utilstests.cpp
-        src/tests/gdlib/xcompresstests.cpp
+    src/tests/gdlib/datastoragetests.cpp
+    src/tests/gdlib/glookuptests.cpp
+    src/tests/gdlib/gmacrotests.cpp
+    src/tests/gdlib/gmsdatatests.cpp
+    src/tests/gdlib/gmsheapnewtests.cpp
+    src/tests/gdlib/gmsobjtests.cpp
+    src/tests/gdlib/gmsstrmtests.cpp
+    src/tests/gdlib/obfuscatestrtests.cpp
+    src/tests/gdlib/strhashtests.cpp
+    src/tests/gdlib/strutilxtests.cpp
+    src/tests/gdlib/utilstests.cpp
+    src/tests/gdlib/xcompresstests.cpp
 
-        src/tests/rtl/p3iotests.cpp
-        src/tests/rtl/p3utilstests.cpp
-        src/tests/rtl/stdthreadtests.cpp
-        src/tests/rtl/sysutilsp3tests.cpp
+    src/tests/rtl/p3iotests.cpp
+    src/tests/rtl/p3utilstests.cpp
+    src/tests/rtl/stdthreadtests.cpp
+    src/tests/rtl/sysutilsp3tests.cpp
 )
 
 set(inc-dirs zlib src generated)
