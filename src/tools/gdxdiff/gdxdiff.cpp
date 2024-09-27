@@ -168,11 +168,7 @@ void registerDiffUELs()
    if( diffUELsRegistered )
       return;
 
-   int maxUEL;
-   if( ignoreOrder )
-      maxUEL = staticUELNum;
-   else
-      maxUEL = UELTable->Count();
+   const int maxUEL { ignoreOrder ? staticUELNum : UELTable->Count() };
 
    gdxUELRegisterStrStart( PGXDIF );
    int d;
