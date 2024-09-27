@@ -1,4 +1,3 @@
-#include <set>
 #include <fstream>
 // #include <iostream>
 
@@ -72,7 +71,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       SkipBl();
       if( xr <= maxr )
       {
-         std::set<char> StopSet;
+         std::vector<char> StopSet;
          if( FParams.at( xr ) != '"' )
             StopSet = { ' ', '\t' };
          else
@@ -80,7 +79,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
             StopSet = { '"' };
             xr++;
          }
-         StopSet.insert( '=' );
+         StopSet.emplace_back( '=' );
          int xk {};
          for( int k { 1 }; k <= maxr - xr + 1; k++ )
             if( utils::in( FParams.at( xr + k - 1 ), StopSet ) )
