@@ -19,7 +19,7 @@ short_string::short_string( const char *s )
 {
    const size_t s_length { std::strlen( s ) };
 #if defined( ENABLE_ASSERTIONS )
-   assert( s_length < MAX_LENGTH );
+   assert( s_length < GMS_SSSIZE );
 #endif
    std::memcpy( buffer.data(), s, s_length );
    buffer[s_length] = '\0';
@@ -96,7 +96,7 @@ void short_string::append( const char c )
 {
    const uint8_t length { this->length() };
 #if defined( ENABLE_ASSERTIONS )
-   assert( length + 1 < MAX_LENGTH );
+   assert( length + 1 < GMS_SSSIZE );
 #endif
    buffer[length] = c;
    buffer[length + 1] = '\0';
@@ -107,7 +107,7 @@ void short_string::append( const char *s )
    const uint8_t length { this->length() };
    const size_t s_length { std::strlen( s ) };
 #if defined( ENABLE_ASSERTIONS )
-   assert( length + s_length < MAX_LENGTH );
+   assert( length + s_length < GMS_SSSIZE );
 #endif
    std::memcpy( buffer.data() + length, s, s_length );
    buffer[length + s_length] = '\0';
@@ -153,7 +153,7 @@ short_string &short_string::operator=( const std::string &s )
 {
    const size_t s_length { s.length() };
 #if defined( ENABLE_ASSERTIONS )
-   assert( s_length < MAX_LENGTH );
+   assert( s_length < GMS_SSSIZE );
 #endif
    std::memcpy( buffer.data(), s.data(), s_length );
    buffer[s_length] = '\0';
