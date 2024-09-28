@@ -22,6 +22,7 @@ public:
    char *data();
    [[nodiscard]] const char *data() const;
    [[nodiscard]] std::string string() const;
+   [[nodiscard]] operator std::string() const;
 
    [[nodiscard]] uint8_t length() const;
 

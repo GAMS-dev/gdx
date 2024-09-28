@@ -42,6 +42,11 @@ std::string short_string::string() const
    return buffer.data();
 }
 
+short_string::operator std::string() const
+{
+   return buffer.data();
+}
+
 uint8_t short_string::length() const
 {
    return static_cast<uint8_t>( strlen( buffer.data() ) );
@@ -182,7 +187,7 @@ bool short_string::operator<( const short_string &s ) const
 
 std::ostream &operator<<( std::ostream &os, const short_string &s )
 {
-   return os << s.string();
+   return os << s.data();
 }
 
 }// namespace library
