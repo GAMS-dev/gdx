@@ -28,8 +28,8 @@ public:
    [[nodiscard]] char front() const;
    [[nodiscard]] char back() const;
 
-   char at( uint8_t i ) const;
-   char operator[]( uint8_t i ) const;
+   [[nodiscard]] char at( uint8_t i ) const;
+   [[nodiscard]] char operator[]( uint8_t i ) const;
 
    [[nodiscard]] bool empty() const;
 
@@ -49,11 +49,11 @@ public:
 
    short_string &operator=( const std::string &s );
 
-   bool operator==( const char *s ) const;
-   bool operator==( const short_string &s ) const;
-   bool operator==( const std::string &s ) const;
+   [[nodiscard]] bool operator==( const char *s ) const;
+   [[nodiscard]] bool operator==( const short_string &s ) const;
+   [[nodiscard]] bool operator==( const std::string &s ) const;
 
-   bool operator<( const short_string &s ) const;
+   [[nodiscard]] bool operator<( const short_string &s ) const;
 
    friend std::ostream &operator<<( std::ostream &os, const short_string &s );
 };
