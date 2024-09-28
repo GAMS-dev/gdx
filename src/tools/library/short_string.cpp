@@ -190,4 +190,14 @@ std::ostream &operator<<( std::ostream &os, const short_string &s )
    return os << s.data();
 }
 
+std::string operator+( const std::string &lhs, const short_string &rhs )
+{
+   return lhs + rhs.data();
+}
+
+std::string operator+( const short_string &lhs, const std::string &rhs )
+{
+   return lhs.data() + rhs;
+}
+
 }// namespace library

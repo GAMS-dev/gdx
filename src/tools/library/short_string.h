@@ -57,6 +57,9 @@ public:
    [[nodiscard]] bool operator<( const short_string &s ) const;
 
    friend std::ostream &operator<<( std::ostream &os, const short_string &s );
+
+   friend std::string operator+( const std::string &lhs, const short_string &rhs );
+   friend std::string operator+( const short_string &lhs, const std::string &rhs );
 };
 
 }// namespace library
