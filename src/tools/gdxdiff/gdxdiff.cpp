@@ -945,85 +945,51 @@ int main( const int argc, const char *argv[] )
    ShowDefRec = CmdParams->HasKey( static_cast<int>( KP::kp_showdef ) );
    CompDomains = CmdParams->HasKey( static_cast<int>( KP::kp_cmpdomain ) );
 
-   if( CmdParams->HasParam( static_cast<int>( KP::kp_id ), S ) )
-   {
-      IDsOnly = std::make_unique<gdlib::gmsobj::TXStrings>();
-      for( int N {}; N < CmdParams->GetParamCount(); N++ )
+   auto populateListFromParams = [&]( const gdxdiff::KP paramKey, std::unique_ptr<gdlib::gmsobj::TXStrings> &idList ) {
+      if( CmdParams->HasParam( static_cast<int>( paramKey ), S ) )
       {
-         if( CmdParams->GetParams( N ).Key == static_cast<int>( KP::kp_id ) )
-         {
-            S = utils::trim( CmdParams->GetParams( N ).KeyS );
-            // std::cout << S << std::endl;
-            while( !S.empty() )
+         idList = std::make_unique<gdlib::gmsobj::TXStrings>();
+         for( int N {}; N < CmdParams->GetParamCount(); N++ )
+            if( CmdParams->GetParams( N ).Key == static_cast<int>( paramKey ) )
             {
-               int k { gdlib::strutilx::LChSetPos(
-                       ", ",
-                       S.data(),
-                       static_cast<int>( S.length() ) ) };
-               if( k == -1 )
+               S = utils::trim( CmdParams->GetParams( N ).KeyS );
+               // std::cout << S << std::endl;
+               while( !S.empty() )
                {
-                  ID = S;
-                  S.clear();
-               }
-               else
-               {
-                  ID = S.string().substr( 0, k );
-                  S = S.string().erase( 0, k + 1 );
-                  S = utils::trim( S );
-               }
-               ID = utils::trim( ID );
-               if( !ID.empty() )
-               {
-                  if( IDsOnly->IndexOf( ID.data() ) < 0 )
-                     IDsOnly->Add( ID.data(), ID.length() );
-                  // std::cout << "Include ID: " << ID << std::endl;
+                  int k { gdlib::strutilx::LChSetPos(
+                          ", ",
+                          S.data(),
+                          static_cast<int>( S.length() ) ) };
+                  if( k == -1 )
+                  {
+                     ID = S;
+                     S.clear();
+                  }
+                  else
+                  {
+                     ID = S.string().substr( 0, k );
+                     S = S.string().erase( 0, k + 1 );
+                     S = utils::trim( S );
+                  }
+                  ID = utils::trim( ID );
+                  if( !ID.empty() )
+                  {
+                     if( idList->IndexOf( ID.data() ) < 0 )
+                        idList->Add( ID.data(), ID.length() );
+                     // std::cout << "Include ID: " << ID << std::endl;
+                  }
                }
             }
-         }
       }
-   }
+   };
+
+   populateListFromParams( KP::kp_id, IDsOnly );
 
    // if( IDsOnly && IDsOnly->GetCount() == 0 )
    //    // Like ID = "" (or ID.empty())
    //    FreeAndNil( IDsOnly );
 
-   if( CmdParams->HasParam( static_cast<int>( KP::kp_skip_id ), S ) )
-   {
-      SkipIDs = std::make_unique<gdlib::gmsobj::TXStrings>();
-      for( int N {}; N < CmdParams->GetParamCount(); N++ )
-      {
-         if( CmdParams->GetParams( N ).Key == static_cast<int>( KP::kp_skip_id ) )
-         {
-            S = utils::trim( CmdParams->GetParams( N ).KeyS );
-            // std::cout << S << std::endl;
-            while( !S.empty() )
-            {
-               int k { gdlib::strutilx::LChSetPos(
-                       ", ",
-                       S.data(),
-                       static_cast<int>( S.length() ) ) };
-               if( k == -1 )
-               {
-                  ID = S;
-                  S.clear();
-               }
-               else
-               {
-                  ID = S.string().substr( 0, k );
-                  S = S.string().erase( 0, k + 1 );
-                  S = utils::trim( S );
-               }
-               ID = utils::trim( ID );
-               if( !ID.empty() )
-               {
-                  if( SkipIDs->IndexOf( ID.data() ) < 0 )
-                     SkipIDs->Add( ID.data(), ID.length() );
-                  // std::cout << "Skip ID: " << ID << std::endl;
-               }
-            }
-         }
-      }
-   }
+   populateListFromParams( KP::kp_skip_id, SkipIDs );
 
    // We removed this but not sure why
    // if( rtl::sysutils_p3::FileExists( DiffFileName ) )
