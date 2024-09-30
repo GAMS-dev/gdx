@@ -11,7 +11,6 @@ namespace library
 template<typename T>
 class one_indexed_container
 {
-private:
    std::vector<T> data;
 
 public:

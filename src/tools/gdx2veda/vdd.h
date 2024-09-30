@@ -114,7 +114,6 @@ extern int NumLiteral;
 
 class SubsetList_t
 {
-private:
    int dimension {};
    std::vector<int> list;
    bool assigned {};
@@ -127,7 +126,6 @@ public:
 
 class DimensionStore_t
 {
-private:
    gdlib::strhash::TXStrHashList<nullptr_t> StringStore {};
    library::one_indexed_container<int> NameDimension { MaxDimension };
    library::one_indexed_container<std::vector<int>> DummyDimension { MaxDimension };

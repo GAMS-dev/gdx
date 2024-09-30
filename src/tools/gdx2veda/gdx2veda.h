@@ -25,7 +25,6 @@ public:
 
 class HashTuple_t
 {
-private:
    MyHashList_t StringStore;
    library::short_string Encode( const gdxUelIndex_t &x, int n );
    void Decode( const library::short_string &s, const gdxUelIndex_t &x, int n );
@@ -45,7 +44,6 @@ public:
 
 class Projection_t
 {
-private:
    library::one_indexed_container<HashTuple_t> tabs { GMS_MAX_INDEX_DIM };
 
 public:
@@ -66,7 +64,6 @@ public:
 
 class DataLineMapping_t
 {
-private:
    library::one_indexed_container<std::vector<int>> v { GMS_MAX_INDEX_DIM };
 
 public:
