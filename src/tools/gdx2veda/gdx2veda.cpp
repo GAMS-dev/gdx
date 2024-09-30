@@ -190,12 +190,10 @@ void WriteHeader( std::ofstream &f, const std::string &key, const std::string &v
    }
 }
 
-void ShortHelp()
+void ShortHelp( const library::AuditLine &AuditLine )
 {
    std::cout << '\n'
-             //  << gdlGetAuditLine() << '\n'
-             //  << '\n'
-             //  << '\n'
+             << AuditLine.getAuditLine() << "\n\n"
              << ">gdx2veda gdx vdd [run]\n"
              << '\n'
              << "   gdx  GAMS GDX file\n"
@@ -308,13 +306,12 @@ int main( const int argc, const char *argv[] )
    const int ParamCount { argc - 1 };
    const char **ParamStr { argv };
 
-   // TODO: Remove? Update to GDX2VEDA?
-   // gdlSetSystemName( 'GMS2VEDA' );
-   // if( gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
-   // {
-   //    std::cout << gdlGetAuditLine() << std::endl;
-   //    return 0;
-   // }
+   library::AuditLine AuditLine { "GMS2VEDA" };
+   if( argc > 1 && gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
+   {
+      std::cout << AuditLine.getAuditLine() << std::endl;
+      return 0;
+   }
 
    GDXSTRINDEXPTRS_INIT( Elements, ElementsPtrs );
 
@@ -328,14 +325,14 @@ int main( const int argc, const char *argv[] )
 
    if( help == "--HELP" )
    {
-      ShortHelp();
+      ShortHelp( AuditLine );
       // VddHelp();
       return 0;
    }
 
    if( help == "-H" || help == "-HELP" || help == "/?" || help == "?" )
    {
-      ShortHelp();
+      ShortHelp( AuditLine );
       return 0;
    }
 
