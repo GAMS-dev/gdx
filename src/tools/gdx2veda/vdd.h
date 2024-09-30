@@ -83,7 +83,7 @@ extern library::one_indexed_container<int> NextSubset;
 // Next set in chain
 extern library::one_indexed_container<int> NextSet;
 
-enum class Subset_t
+enum class Subset_t : uint8_t
 {
    NoParent,
    ParentIsIndex1,
@@ -220,7 +220,7 @@ extern std::map<gdxSpecValue, std::string> SpecialValueMapping;
 extern std::map<gdxSpecValue, bool> SpecialValueIsString;
 extern std::map<gdxSpecValue, bool> SpecialValueIsZero;
 
-enum class Format_t
+enum class Format_t : uint8_t
 {
    FormatVeda,
    FormatCSV
