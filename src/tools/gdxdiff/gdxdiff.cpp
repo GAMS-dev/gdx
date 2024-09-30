@@ -53,14 +53,14 @@ namespace gdxdiff
 
 using tvarvaltype = uint8_t;
 
-library::short_string DiffTmpName;
+library::ShortString_t DiffTmpName;
 gdxHandle_t PGX1, PGX2, PGXDIF;
 bool diffUELsRegistered;
 // TODO: Use the correct type instead of nullptr type?
 std::unique_ptr<gdlib::strhash::TXStrHashList<std::nullptr_t>> UELTable;
 int staticUELNum;
 double EpsAbsolute, EpsRelative;
-std::map<library::short_string, StatusCode_t> StatusTable;
+std::map<library::ShortString_t, StatusCode_t> StatusTable;
 std::unique_ptr<library::cmdpar::CmdParams_t> CmdParams;
 utils::bsSet<tvarvaltype, GMS_VAL_MAX> ActiveFields;
 FldOnly_t FldOnly;
@@ -73,7 +73,7 @@ bool ShowDefRec, CompDomains;
 std::string ValAsString( const gdxHandle_t &PGX, const double V )
 {
    constexpr int WIDTH { 14 };
-   library::short_string result;
+   library::ShortString_t result;
    if( gdxAcronymName( PGX, V, result.data() ) == 0 )
    {
       int iSV;
@@ -125,18 +125,18 @@ void CheckGDXError( const gdxHandle_t &PGX )
    int ErrNr { gdxGetLastError( PGX ) };
    if( ErrNr != 0 )
    {
-      library::short_string S;
+      library::ShortString_t S;
       gdxErrorStr( PGX, ErrNr, S.data() );
       library::printErrorMessage( "GDXDIFF GDX Error: " + S );
    }
 }
 
-void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
+void OpenGDX( const library::ShortString_t &fn, gdxHandle_t &PGX )
 {
    if( !rtl::sysutils_p3::FileExists( fn ) )
       FatalError( "Input file not found " + fn, static_cast<int>( ErrorCode_t::ERR_NOFILE ) );
 
-   library::short_string S;
+   library::ShortString_t S;
    if( !gdxCreate( &PGX, S.data(), S.length() ) )
       FatalError( "Cannot load GDX library " + S, static_cast<int>( ErrorCode_t::ERR_LOADDLL ) );
 
@@ -154,7 +154,7 @@ void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
    for( int N { 1 }; N <= NrElem; N++ )
    {
       int NN;
-      library::short_string UEL;
+      library::ShortString_t UEL;
       gdxUMUelGet( PGX, N, UEL.data(), &NN );
       NN = UELTable->Add( UEL.data(), UEL.length() );
       gdxUELRegisterMap( PGX, NN, UEL.data() );
@@ -184,7 +184,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 {
    int Dim, VarEquType;
    gdxSyType ST;
-   library::short_string ID;
+   library::ShortString_t ID;
    bool SymbOpen {};
    StatusCode_t Status;
    gdxValues_t DefValues {};
@@ -197,7 +197,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       {
          if( FldOnly == FldOnly_t::fld_yes && ( ST == dt_var || ST == dt_equ ) )
          {
-            library::short_string ExplTxt { "Differences Field = " + GamsFieldNames[FldOnlyFld] };
+            library::ShortString_t ExplTxt { "Differences Field = " + GamsFieldNames[FldOnlyFld] };
             gdxDataWriteStrStart( PGXDIF, ID.data(), ExplTxt.data(), Dim + 1, static_cast<int>( dt_par ), 0 );
          }
          else if( DiffOnly && ( ST == dt_var || ST == dt_equ ) )
@@ -259,7 +259,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals );
    };
 
-   auto WriteSetDiff = [&]( const std::string &Act, const gdxUelIndex_t &Keys, const library::short_string &S ) -> void {
+   auto WriteSetDiff = [&]( const std::string &Act, const gdxUelIndex_t &Keys, const library::ShortString_t &S ) -> void {
       gdxStrIndex_t StrKeys {};
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
@@ -323,7 +323,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       gdxMapValue( PGX2, V2, &iSV2 );
 
       bool result;
-      library::short_string S1, S2;
+      library::ShortString_t S1, S2;
       double AbsDiff;
       if( iSV1 == sv_normal )
       {
@@ -410,7 +410,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    };
 
    auto CheckSetDifference = [&]( const gdxUelIndex_t &Keys, const int txt1, const int txt2 ) -> bool {
-      library::short_string S1, S2;
+      library::ShortString_t S1, S2;
       int iNode;
       if( txt1 == 0 )
          S1.clear();
@@ -484,7 +484,7 @@ void CompareSy( const int Sy1, const int Sy2 )
 
       if( ST == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
       {
-         library::short_string stxt;
+         library::ShortString_t stxt;
          int N;
          gdxGetElemText( Act == c_ins1 ? PGX1 : PGX2, static_cast<int>( round( Vals[GMS_VAL_LEVEL] ) ), stxt.data(), &N );
          gdxAddSetText( PGXDIF, stxt.data(), &N );
@@ -511,7 +511,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    bool Flg1, Flg2, Eq, DomFlg;
    gdxUelIndex_t Keys1 {}, Keys2 {};
    gdxValues_t Vals1 {}, Vals2 {};
-   library::short_string stxt;
+   library::ShortString_t stxt;
    gdxStrIndex_t DomSy1 {};
    gdxStrIndexPtrs_t DomSy1Ptrs;
    GDXSTRINDEXPTRS_INIT( DomSy1, DomSy1Ptrs );
@@ -700,7 +700,7 @@ label999:
       StatusTable.insert( { ID, Status } );
 }
 
-bool GetAsDouble( const library::short_string &S, double &V )
+bool GetAsDouble( const library::ShortString_t &S, double &V )
 {
    int k;
    utils::val( S, V, k );
@@ -735,7 +735,7 @@ void Usage( const library::AuditLine_t &AuditLine )
 // Function is empty in Delphi code
 // void CopyAcronyms( const gdxHandle_t &PGX ) {}
 
-void CheckFile( library::short_string &fn )
+void CheckFile( library::ShortString_t &fn )
 {
    if( !rtl::sysutils_p3::FileExists( fn ) && gdlib::strutilx::ExtractFileExtEx( fn ).empty() )
       fn = gdlib::strutilx::ChangeFileExtEx( fn, ".gdx" );
@@ -744,8 +744,8 @@ void CheckFile( library::short_string &fn )
 int main( const int argc, const char *argv[] )
 {
    int ErrorCode_t, ErrNr, Dim, iST, StrNr;
-   library::short_string S, ID, InFile1, InFile2, DiffFileName;
-   std::map<library::short_string, int> IDTable;
+   library::ShortString_t S, ID, InFile1, InFile2, DiffFileName;
+   std::map<library::ShortString_t, int> IDTable;
    bool UsingIDE, RenameOK;
    gdxStrIndex_t StrKeys {};
    gdxStrIndexPtrs_t StrKeysPtrs;
@@ -1027,7 +1027,7 @@ int main( const int argc, const char *argv[] )
       std::cout << std::endl;
    }
 
-   library::short_string S2;
+   library::ShortString_t S2;
    if( !gdxCreate( &PGXDIF, S2.data(), S2.length() ) )
       FatalError( "Unable to load GDX library: " + S2, static_cast<int>( ErrorCode_t::ERR_LOADDLL ) );
 

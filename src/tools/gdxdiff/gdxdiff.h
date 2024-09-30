@@ -106,19 +106,19 @@ void FatalError2( const std::string &Msg1, const std::string &Msg2, int ErrNr );
 
 void CheckGDXError( const gdxHandle_t &PGX );
 
-void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX );
+void OpenGDX( const library::ShortString_t &fn, gdxHandle_t &PGX );
 
 void RegisterDiffUELs();
 
 void CompareSy( int Sy1, int Sy2 );
 
-bool GetAsDouble( const library::short_string &S, double &V );
+bool GetAsDouble( const library::ShortString_t &S, double &V );
 
 void Usage( const library::AuditLine_t &AuditLine );
 
 // void CopyAcronyms( const gdxHandle_t &PGX );
 
-void CheckFile( library::short_string &fn );
+void CheckFile( library::ShortString_t &fn );
 
 int main( int argc, const char *argv[] );
 

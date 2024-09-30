@@ -36,7 +36,7 @@ public:
    bool AddParameters( int AInsP, const std::string &CmdLine, int ParamCount, const char *ParamStr[] );
    void AddKeyWord( int v, const std::string &s );
    void AddParam( int v, const std::string &s );
-   bool HasParam( int v, library::short_string &s );
+   bool HasParam( int v, library::ShortString_t &s );
    bool HasKey( int v );
 
    ParamRec_t GetParams( int n );

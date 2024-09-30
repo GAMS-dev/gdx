@@ -20,7 +20,7 @@ using bool_t = uint8_t;
 // Errors during loading
 extern int NumErr;
 // Veda Data base name
-extern library::short_string VEDAFlavor;
+extern library::ShortString_t VEDAFlavor;
 
 // Max gams dimension
 constexpr int MaxGamsDim { 10 };
@@ -60,7 +60,7 @@ constexpr int MaxSubset { 200 };
 extern int NumDataEntry;
 
 extern library::Container_t<std::string> AtrName;
-extern library::Container_t<library::short_string> GamsName;
+extern library::Container_t<library::ShortString_t> GamsName;
 extern library::Container_t<int> GamsSuff;
 extern library::Container_t<int> GamsDim;
 
@@ -69,7 +69,7 @@ extern gdlib::strhash::TXStrHashList<std::nullptr_t> SuppressZero;
 
 extern int NumText;
 
-extern library::Container_t<library::short_string> GamsText;
+extern library::Container_t<library::ShortString_t> GamsText;
 extern library::Container_t<int> DummyText;
 extern library::Container_t<bool_t> ExpandMap;
 
@@ -77,7 +77,7 @@ extern library::Container_t<bool_t> ExpandMap;
 extern int NumSubset;
 
 extern library::Container_t<int> DimSubset;
-extern library::Container_t<library::short_string> Subset;
+extern library::Container_t<library::ShortString_t> Subset;
 extern library::Container_t<std::string> GamsSubset;
 extern library::Container_t<int> NextSubset;
 // Next set in chain
@@ -98,7 +98,7 @@ extern library::Container_t<int> Children;
 extern int NumChildren;
 
 struct ParentChildSet_t {
-   library::short_string GamsSetName;
+   library::ShortString_t GamsSetName;
    // Dimension numbers
    int Index1 {}, Index2 {}, child {};
 };
@@ -108,7 +108,7 @@ extern int NumParentDimensionTextSets;
 
 constexpr int MaxLiteral { 100 };
 
-extern library::Container_t<library::short_string> LiteralPool;
+extern library::Container_t<library::ShortString_t> LiteralPool;
 extern library::Container_t<int> LiteralUel;
 extern int NumLiteral;
 
@@ -135,29 +135,29 @@ class DimensionStore_t
 
    // Add new name to the stringstore. Also store its associated
    // dimension number (1..MaxDimension) and the tuple member (1..MaxTuple)
-   int AddName( const library::short_string &s, int dim, int tuple );
+   int AddName( const library::ShortString_t &s, int dim, int tuple );
 
 public:
    // Returns true if name is used already
    // global comparison in hash object (case insensitive)
-   bool NameIsUsed( const library::short_string &s );
+   bool NameIsUsed( const library::ShortString_t &s );
 
    // Returns false if name is used already
    // else a new dimension name is added
-   bool AddNewTab( const library::short_string &s, int dimension );
+   bool AddNewTab( const library::ShortString_t &s, int dimension );
 
    // Returns false if name is used already
    // else a new tuple member name is added to the dimension
-   bool AddNewTupleIndex( const library::short_string &s, int dimension );
+   bool AddNewTupleIndex( const library::ShortString_t &s, int dimension );
 
    // 0 if not found
-   int GetDimensionS( const library::short_string &s );
+   int GetDimensionS( const library::ShortString_t &s );
 
    // Id but for number
    int GetDimensionI( int h );
 
    // i=1..NumDimension
-   library::short_string GetTabName( int i );
+   library::ShortString_t GetTabName( int i );
 
    // Size of tuple in dimension i
    // 1 : normal one dimensional thing
@@ -165,17 +165,17 @@ public:
 
    // i=1..NumDimension
    // j=1..getNumTuple(i)
-   library::short_string GetTuple( int i, int j );
+   library::ShortString_t GetTuple( int i, int j );
 
    // i=1..NumDimension
    // j=1..getNumTuple(i)
    int GetTupleI( int i, int j );
 
    // Get hash for string s
-   int GetHash( const library::short_string &s );
+   int GetHash( const library::ShortString_t &s );
 
    // i = hash
-   library::short_string GetName( int i );
+   library::ShortString_t GetName( int i );
 
    // Get k-th hash for entry e
    int EntryList( int e, int k );
@@ -192,19 +192,19 @@ public:
    int TextListLength( int t );
 
    // Return a tuple member of a DimensionText list
-   library::short_string TextList( int t, int k );
+   library::ShortString_t TextList( int t, int k );
 
    // Return number of tuple members for dimension i
    int DimensionListLength( int t );
 
    // Return j-th tuple member for dimension i
-   library::short_string DimensionList( int i, int j );
+   library::ShortString_t DimensionList( int i, int j );
 
    // Return tuple member index for string stored in position h
    int GetTupleIndex( int h );
 
    // Add tuplemember to a subset in dimension i
-   bool AddSubset( int subset, int i, const library::short_string &s );
+   bool AddSubset( int subset, int i, const library::ShortString_t &s );
 
    // Get number of tuple members for subset
    int GetSubsetTuples( int subset );

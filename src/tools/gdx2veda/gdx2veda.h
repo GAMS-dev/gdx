@@ -19,14 +19,14 @@ namespace gdx2veda
 {
 
 struct MyHashList_t {
-   int Compare( const library::short_string &PS1, const library::short_string &PS2 );
+   int Compare( const library::ShortString_t &PS1, const library::ShortString_t &PS2 );
 };
 
 class HashTuple_t
 {
    MyHashList_t StringStore;
-   library::short_string Encode( const gdxUelIndex_t &x, int n );
-   void Decode( const library::short_string &s, const gdxUelIndex_t &x, int n );
+   library::ShortString_t Encode( const gdxUelIndex_t &x, int n );
+   void Decode( const library::ShortString_t &s, const gdxUelIndex_t &x, int n );
 
 public:
    HashTuple_t();
@@ -69,7 +69,7 @@ public:
    DataLineMapping_t();
    void Clear();
    void Insert( int Dimension, int TupleIndex, int EntryIndex );
-   void WriteDataLines( const gdxUelIndex_t &Indices, library::Container_t<library::short_string> &Uels );
+   void WriteDataLines( const gdxUelIndex_t &Indices, library::Container_t<library::ShortString_t> &Uels );
 };
 
 std::string StripExt( const std::string &fln );// 623
@@ -84,7 +84,7 @@ void WriteDataLine();// 1089
 
 void GetSpecialValues( const gdxHandle_t &PGX );// 1125
 
-bool IsASpecialValue( double v, library::short_string &MappedValue, bool &IsAString );// 1143
+bool IsASpecialValue( double v, library::ShortString_t &MappedValue, bool &IsAString );// 1143
 
 void WriteValue( std::ofstream &f, double v );// 1164
 

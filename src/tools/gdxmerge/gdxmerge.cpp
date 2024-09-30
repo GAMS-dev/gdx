@@ -44,7 +44,7 @@ namespace gdxmerge
 
 bool DoBigSymbols, StrictMode;
 int64_t SizeCutOff;
-library::short_string OutFile;
+library::ShortString_t OutFile;
 std::vector<std::string> FilePatterns;
 gdxHandle_t PGXMerge;
 unsigned int InputFilesRead;
@@ -100,11 +100,11 @@ std::string FileList_t<T>::FileInfo( const int Index )
 SymbolList_t::SymbolList_t()
     : gdlib::gmsobj::TXHashedStringList<GAMSSymbol_t>()
 {
-   StrPool = std::make_unique<gdlib::gmsobj::TXStrPool<library::short_string>>();
-   const library::short_string empty_string;
+   StrPool = std::make_unique<gdlib::gmsobj::TXStrPool<library::ShortString_t>>();
+   const library::ShortString_t empty_string;
    StrPool->Add( empty_string.data(), empty_string.length() );
    FileList = std::make_unique<FileList_t<GDXFileEntry_t>>();
-   library::short_string Msg;
+   library::ShortString_t Msg;
    gdxCreate( &PGXMerge, Msg.data(), Msg.length() );
 }
 
@@ -122,13 +122,13 @@ void SymbolList_t::Clear()
    TXHashedStringList::Clear();
 }
 
-void SymbolList_t::OpenOutput( const library::short_string &AFileName, int &ErrNr )
+void SymbolList_t::OpenOutput( const library::ShortString_t &AFileName, int &ErrNr )
 {
    gdxOpenWrite( PGXMerge, AFileName.data(), "gdxmerge", &ErrNr );
    gdxStoreDomainSetsSet( PGXMerge, false );
 }
 
-int SymbolList_t::AddUEL( const library::short_string &S )
+int SymbolList_t::AddUEL( const library::ShortString_t &S )
 {
    int result;
    gdxUELRegisterStr( PGXMerge, S.data(), &result );
@@ -151,7 +151,7 @@ int SymbolList_t::AddSymbol( const std::string &AName, const int ADim, const gdx
 void SymbolList_t::AddPGXFile( const int FNr, const ProcessPass_t Pass )
 {
    bool FrstError;
-   library::short_string SyName, FileName;
+   library::ShortString_t SyName, FileName;
 
    auto CheckError = [&]( const bool Cnd, const std::string &Msg ) -> bool {
       bool Result { !Cnd };
@@ -178,7 +178,7 @@ void SymbolList_t::AddPGXFile( const int FNr, const ProcessPass_t Pass )
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
    gdxUelIndex_t IndxI {};
    gdxValues_t Vals {};
-   library::short_string Txt, SyText, ErrMsg, FileId;
+   library::ShortString_t Txt, SyText, ErrMsg, FileId;
    int64_t XCount, Size;
 
    FileName = FileList->FileName( FNr );
@@ -286,7 +286,7 @@ void SymbolList_t::AddPGXFile( const int FNr, const ProcessPass_t Pass )
       {
          if( Dim > 0 )
             for( D = FDim - 1; D < Dim; D++ )
-               IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
+               IndxI[D + 1] = AddUEL( library::ShortString_t { IndxSPtrs[D] } );
          if( SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
          {
             gdxGetElemText( PGX, static_cast<int>( std::round( Vals[GMS_VAL_LEVEL] ) ), Txt.data(), &INode );
@@ -314,7 +314,7 @@ bool SymbolList_t::CollectBigOne( const int SyNr )
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
    gdxUelIndex_t IndxI {};
    gdxValues_t Vals {};
-   library::short_string Txt, ErrMsg, FileName, FileId;
+   library::ShortString_t Txt, ErrMsg, FileName, FileId;
 
    SyObj = gdlib::gmsobj::TXHashedStringList<GAMSSymbol_t>::GetObject( SyNr );
    if( SyObj->SyData == nullptr )
@@ -349,7 +349,7 @@ bool SymbolList_t::CollectBigOne( const int SyNr )
          while( gdxDataReadStr( PGX, IndxSPtrs, Vals, &FDim ) != 0 )
          {
             for( D = FDim - 1; D <= SyObj->SyDim; D++ )
-               IndxI[D + 1] = AddUEL( library::short_string { IndxSPtrs[D] } );
+               IndxI[D + 1] = AddUEL( library::ShortString_t { IndxSPtrs[D] } );
             if( SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0 )
             {
                gdxGetElemText( PGX, static_cast<int>( std::round( Vals[GMS_VAL_LEVEL] ) ), Txt.data(), &INode );
@@ -428,7 +428,7 @@ void SymbolList_t::WritePGXFile( const int SyNr, const ProcessPass_t Pass )
    int R, INode;
    gdxUelIndex_t IndxI {};
    gdxValues_t Vals {};
-   library::short_string Txt;
+   library::ShortString_t Txt;
 
    SyObj = gdlib::gmsobj::TXHashedStringList<GAMSSymbol_t>::GetObject( SyNr );
    if( SyObj->SyData == nullptr )
@@ -457,7 +457,7 @@ void SymbolList_t::WritePGXFile( const int SyNr, const ProcessPass_t Pass )
 void SymbolList_t::WriteNameList()
 {
    const std::string BASE_NAME { "Merged_set_" };
-   library::short_string SetName;
+   library::ShortString_t SetName;
    int N, SyNr, TextNr;
    gdxStrIndex_t AIndex {};
    gdxStrIndexPtrs_t AIndexPtrs;
@@ -492,7 +492,7 @@ void SymbolList_t::KeepNewAcronyms( const gdxHandle_t &PGX )
       return;
 
    int OrgIndx, NewIndx, AutoIndx, AIndx;
-   library::short_string AName, AText;
+   library::ShortString_t AName, AText;
    for( int N { 1 }; N <= gdxAcronymCount( PGX ); N++ )
    {
       gdxAcronymGetMapping( PGX, N, &OrgIndx, &NewIndx, &AutoIndx );
@@ -525,7 +525,7 @@ void SymbolList_t::ShareAcronyms( const gdxHandle_t &PGX )
       return;
    }
 
-   library::short_string AName, AText;
+   library::ShortString_t AName, AText;
    int AIndx;
    if( NextAcroNr == 0 )
    {
@@ -535,7 +535,7 @@ void SymbolList_t::ShareAcronyms( const gdxHandle_t &PGX )
 
    gdxAcronymNextNr( PGX, NextAcroNr );
 
-   library::short_string ANameM, ATextM;
+   library::ShortString_t ANameM, ATextM;
    int NM, AIndxM;
    for( int N { 1 }; N <= gdxAcronymCount( PGX ); N++ )
    {
@@ -549,9 +549,9 @@ void SymbolList_t::ShareAcronyms( const gdxHandle_t &PGX )
    }
 }
 
-int SymbolList_t::FindAcronym( const library::short_string &Id )
+int SymbolList_t::FindAcronym( const library::ShortString_t &Id )
 {
-   library::short_string AName, AText;
+   library::ShortString_t AName, AText;
    int AIndx;
    for( int N { 1 }; N <= gdxAcronymCount( PGXMerge ); N++ )
    {
@@ -744,7 +744,7 @@ void Usage( const library::AuditLine_t &AuditLine )
 
 int main( const int argc, const char *argv[] )
 {
-   library::short_string Msg;
+   library::ShortString_t Msg;
    int N, ErrNr;
 
    library::AuditLine_t AuditLine { "GDXMERGE" };

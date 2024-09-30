@@ -42,18 +42,18 @@ namespace gdx2veda
 const std::string BuildVersion { "2005-10-07" };
 
 // Store the Uels
-library::Container_t<library::short_string> Uels { 1000000 };
-library::Container_t<library::short_string> DataLine { GMS_MAX_INDEX_DIM };
+library::Container_t<library::ShortString_t> Uels { 1000000 };
+library::Container_t<library::ShortString_t> DataLine { GMS_MAX_INDEX_DIM };
 
 Projection_t Projection {};
-library::short_string ParentField;
+library::ShortString_t ParentField;
 
 gdxSVals_t SpecialValues {};
 
 // std::ofstream f, g;
 std::ofstream g;
 
-library::short_string
+library::ShortString_t
         Msg,
         HomeDir,
         RunId,
@@ -73,7 +73,7 @@ gdxStrIndexPtrs_t ElementsPtrs;
 gdxValues_t Values {};
 gdxUelIndex_t Indices {}, MappedIndices {};
 int First {};
-library::short_string tmp;
+library::ShortString_t tmp;
 
 int
         NodeNr {},
@@ -92,7 +92,7 @@ int
 
 gdxSyType SyType;
 
-library::short_string NodeStr, SyText, SyName;
+library::ShortString_t NodeStr, SyText, SyName;
 
 std::map<gdxSyType, std::string> DataText {
         { dt_set, "Set" },
@@ -101,27 +101,27 @@ std::map<gdxSyType, std::string> DataText {
         { dt_equ, "Equ" } };
 
 bool Skip {};
-library::short_string Filler;
+library::ShortString_t Filler;
 bool VedaLine {};
 
 DataLineMapping_t DataLineMapping {};
 int h {};
 gdxUelIndex_t x {};
-library::short_string s, s2, s3;
+library::ShortString_t s, s2, s3;
 int Uel {};
-library::short_string DimensionName;
+library::ShortString_t DimensionName;
 int DimensionNumber {};
 library::Container_t<int> TextDim { MaxText };
 gdxUelIndex_t IndexMapping {};
 int UelLength {}, Mark {};
 
-library::short_string MappedValue;
+library::ShortString_t MappedValue;
 bool IsAString {};
 
 int ParentIndx {}, ChildIndx {};
 int ParentUel {}, ChildUel {}, ExplanText {};
 
-library::short_string Symbol;
+library::ShortString_t Symbol;
 
 int DimNo {}, TextDimension {};
 
@@ -223,7 +223,7 @@ void GetSpecialValues( const gdxHandle_t &PGX )
    gdxGetSpecialValues( PGX, SpecialValues );
 }
 
-bool IsASpecialValue( const double v, library::short_string &MappedValue, bool &IsAString )
+bool IsASpecialValue( const double v, library::ShortString_t &MappedValue, bool &IsAString )
 {
    gdxSpecValue spv { gdxSpecValue( v ) };
    if( spv == sv_normal )
@@ -235,7 +235,7 @@ bool IsASpecialValue( const double v, library::short_string &MappedValue, bool &
 
 void WriteValue( std::ofstream &f, double v )
 {
-   library::short_string MappedValue;
+   library::ShortString_t MappedValue;
    bool IsAString;
    if( IsASpecialValue( v, MappedValue, IsAString ) )
    {

@@ -35,7 +35,7 @@ struct GAMSSymbol_t {
    int SyDim, SySubTyp;
    gdxSyType SyTyp;
    std::unique_ptr<gdlib::gmsdata::TTblGamsData<double>> SyData;
-   library::short_string SyExplTxt;
+   library::ShortString_t SyExplTxt;
    int64_t SySize {}, SyMemory {};
    bool SySkip {};
 
@@ -62,7 +62,7 @@ struct FileList_t final : public gdlib::gmsobj::TXList<T> {
 
 class SymbolList_t : public gdlib::gmsobj::TXHashedStringList<GAMSSymbol_t>
 {
-   std::unique_ptr<gdlib::gmsobj::TXStrPool<library::short_string>> StrPool;
+   std::unique_ptr<gdlib::gmsobj::TXStrPool<library::ShortString_t>> StrPool;
    int FErrorCount {}, NextAcroNr {};
    std::unique_ptr<FileList_t<GDXFileEntry_t>> FileList;
    std::vector<std::string> IncludeList, ExcludeList;
@@ -72,8 +72,8 @@ public:
    ~SymbolList_t() override;
    void Clear() override;
 
-   static void OpenOutput( const library::short_string &AFileName, int &ErrNr );
-   static int AddUEL( const library::short_string &S );
+   static void OpenOutput( const library::ShortString_t &AFileName, int &ErrNr );
+   static int AddUEL( const library::ShortString_t &S );
    int AddSymbol( const std::string &AName, int ADim, gdxSyType AType, int ASubTyp );
    void AddPGXFile( int FNr, ProcessPass_t Pass );
    bool CollectBigOne( int SyNr );
@@ -82,7 +82,7 @@ public:
    void WriteNameList();
    void KeepNewAcronyms( const gdxHandle_t &PGX );
    void ShareAcronyms( const gdxHandle_t &PGX );
-   int FindAcronym( const library::short_string &Id );
+   int FindAcronym( const library::ShortString_t &Id );
 
    int GetFErrorCount() const;
    int GetFileListSize() const;

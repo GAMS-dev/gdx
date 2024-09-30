@@ -17,26 +17,26 @@ int AtrPos {};
 int NumDimension {};
 int NumDataEntry {};
 
-library::short_string VEDAFlavor { "MyVEDA" };
+library::ShortString_t VEDAFlavor { "MyVEDA" };
 
 // library::Container_t<std::string> NameDimension { MaxDimension };
 // library::Container_t<std::string> DummyDimension { MaxDimension };
 
 library::Container_t<std::string> AtrName { MaxDataEntry };
-library::Container_t<library::short_string> GamsName { MaxDataEntry };
+library::Container_t<library::ShortString_t> GamsName { MaxDataEntry };
 library::Container_t<int> GamsSuff { MaxDataEntry };
 library::Container_t<int> GamsDim { MaxDataEntry };
 
 int NumText {};
 
-library::Container_t<library::short_string> GamsText { MaxText };
+library::Container_t<library::ShortString_t> GamsText { MaxText };
 library::Container_t<int> DummyText { MaxText };
 library::Container_t<bool_t> ExpandMap { MaxText };
 
 int NumSubset {};
 
 library::Container_t<int> DimSubset { MaxDimension };
-library::Container_t<library::short_string> Subset { MaxSubset };
+library::Container_t<library::ShortString_t> Subset { MaxSubset };
 library::Container_t<std::string> GamsSubset { MaxSubset };
 library::Container_t<int> NextSubset { MaxSubset };
 library::Container_t<int> NextSet { MaxSubset };
@@ -65,31 +65,31 @@ int SubsetList_t::GetSubset( const int i )
    return list.at( i - 1 );
 }
 
-int DimensionStore_t::AddName( const library::short_string &s, const int dim, const int tuple )
+int DimensionStore_t::AddName( const library::ShortString_t &s, const int dim, const int tuple )
 {
    // TODO: Implement function
    return {};
 }
 
-bool DimensionStore_t::NameIsUsed( const library::short_string &s )
+bool DimensionStore_t::NameIsUsed( const library::ShortString_t &s )
 {
    // TODO: Implement function
    return {};
 }
 
-bool DimensionStore_t::AddNewTab( const library::short_string &s, const int dimension )
+bool DimensionStore_t::AddNewTab( const library::ShortString_t &s, const int dimension )
 {
    // TODO: Implement function
    return {};
 }
 
-bool DimensionStore_t::AddNewTupleIndex( const library::short_string &s, const int dimension )
+bool DimensionStore_t::AddNewTupleIndex( const library::ShortString_t &s, const int dimension )
 {
    // TODO: Implement function
    return {};
 }
 
-int DimensionStore_t::GetDimensionS( const library::short_string &s )
+int DimensionStore_t::GetDimensionS( const library::ShortString_t &s )
 {
    // TODO: Implement function
    return {};
@@ -101,7 +101,7 @@ int DimensionStore_t::GetDimensionI( const int h )
    return {};
 }
 
-library::short_string DimensionStore_t::GetTabName( const int i )
+library::ShortString_t DimensionStore_t::GetTabName( const int i )
 {
    // TODO: Implement function
    return {};
@@ -113,7 +113,7 @@ int DimensionStore_t::GetNumTuple( const int i )
    return {};
 }
 
-library::short_string DimensionStore_t::GetTuple( const int i, const int j )
+library::ShortString_t DimensionStore_t::GetTuple( const int i, const int j )
 {
    // TODO: Implement function
    return {};
@@ -125,13 +125,13 @@ int DimensionStore_t::GetTupleI( const int i, const int j )
    return {};
 }
 
-int DimensionStore_t::GetHash( const library::short_string &s )
+int DimensionStore_t::GetHash( const library::ShortString_t &s )
 {
    // TODO: Implement function
    return {};
 }
 
-library::short_string DimensionStore_t::GetName( const int i )
+library::ShortString_t DimensionStore_t::GetName( const int i )
 {
    // TODO: Implement function
    return {};
@@ -161,7 +161,7 @@ int DimensionStore_t::TextListLength( const int t )
    return {};
 }
 
-library::short_string DimensionStore_t::TextList( const int t, const int k )
+library::ShortString_t DimensionStore_t::TextList( const int t, const int k )
 {
    // TODO: Implement function
    return {};
@@ -173,7 +173,7 @@ int DimensionStore_t::DimensionListLength( const int t )
    return {};
 }
 
-library::short_string DimensionStore_t::DimensionList( const int i, const int j )
+library::ShortString_t DimensionStore_t::DimensionList( const int i, const int j )
 {
    // TODO: Implement function
    return {};
@@ -185,7 +185,7 @@ int DimensionStore_t::GetTupleIndex( const int h )
    return {};
 }
 
-bool DimensionStore_t::AddSubset( const int subset, const int i, const library::short_string &s )
+bool DimensionStore_t::AddSubset( const int subset, const int i, const library::ShortString_t &s )
 {
    // TODO: Implement function
    return {};
@@ -251,7 +251,7 @@ Options_t Options {
 
 std::ofstream f {};
 
-library::Container_t<library::short_string> LiteralPool { MaxLiteral };
+library::Container_t<library::ShortString_t> LiteralPool { MaxLiteral };
 library::Container_t<int> LiteralUel { MaxLiteral };
 int NumLiteral {};
 

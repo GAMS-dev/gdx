@@ -312,7 +312,7 @@ void CmdParams_t::AddParam( int v, const std::string &s )
    AddVS( v + static_cast<int>( CmdParamStatus::kk_big ), utils::trim( s ) );
 }
 
-bool CmdParams_t::HasParam( int v, library::short_string &s )
+bool CmdParams_t::HasParam( int v, library::ShortString_t &s )
 {
    int N = FindKeyV( v );
    bool result = N >= 0;
