@@ -28,7 +28,7 @@ enum class ErrorCode : uint8_t
    ERR_RENAME
 };
 
-enum class FldOnly : uint8_t
+enum class FldOnly_t : uint8_t
 {
    fld_maybe,
    fld_yes,

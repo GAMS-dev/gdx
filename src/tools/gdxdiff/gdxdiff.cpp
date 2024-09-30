@@ -63,8 +63,7 @@ double EpsAbsolute, EpsRelative;
 std::map<library::short_string, TStatusCode> StatusTable;
 std::unique_ptr<library::cmdpar::TCmdParams> CmdParams;
 utils::bsSet<tvarvaltype, GMS_VAL_MAX> ActiveFields;
-// Use FldOnlyVar instead of FldOnly as the variable name
-FldOnly FldOnlyVar;
+FldOnly_t FldOnly;
 tvarvaltype FldOnlyFld;
 bool DiffOnly, CompSetText, matrixFile, ignoreOrder;
 std::unique_ptr<gdlib::gmsobj::TXStrings> IDsOnly;
@@ -196,7 +195,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          Status = TStatusCode::sc_dim10_diff;
       if( !SymbOpen && Status != TStatusCode::sc_dim10_diff )
       {
-         if( FldOnlyVar == FldOnly::fld_yes && ( ST == dt_var || ST == dt_equ ) )
+         if( FldOnly == FldOnly_t::fld_yes && ( ST == dt_var || ST == dt_equ ) )
          {
             library::short_string ExplTxt { "Differences Field = " + GamsFieldNames[FldOnlyFld] };
             gdxDataWriteStrStart( PGXDIF, ID.data(), ExplTxt.data(), Dim + 1, static_cast<int>( dt_par ), 0 );
@@ -251,7 +250,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       std::cout << std::endl;
 #endif
 
-      if( FldOnlyVar == FldOnly::fld_yes && ( ST == dt_var || ST == dt_equ ) )
+      if( FldOnly == FldOnly_t::fld_yes && ( ST == dt_var || ST == dt_equ ) )
       {
          Vals2[GMS_VAL_LEVEL] = Vals[FldOnlyFld];
          gdxDataWriteStr( PGXDIF, const_cast<const char **>( StrKeysPtrs ), Vals2 );
@@ -360,7 +359,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       bool result { true };
       if( ST == dt_par )
          result = DoublesEqual( V1[GMS_VAL_LEVEL], V2[GMS_VAL_LEVEL] );
-      else if( FldOnlyVar == FldOnly::fld_yes )
+      else if( FldOnly == FldOnly_t::fld_yes )
          result = DoublesEqual( V1[FldOnlyFld], V2[FldOnlyFld] );
       else
       {
@@ -858,7 +857,7 @@ int main( const int argc, const char *argv[] )
    }
 
    DiffOnly = CmdParams->HasKey( static_cast<int>( KP::kp_diffonly ) );
-   FldOnlyVar = FldOnly::fld_no;
+   FldOnly = FldOnly_t::fld_no;
    matrixFile = CmdParams->HasKey( static_cast<int>( KP::kp_matrixfile ) );
    ignoreOrder = CmdParams->HasKey( static_cast<int>( KP::kp_ignoreOrd ) );
 
@@ -871,27 +870,27 @@ int main( const int argc, const char *argv[] )
       else if( gdlib::strutilx::StrUEqual( S.data(), "L" ) )
       {
          FldOnlyFld = GMS_VAL_LEVEL;
-         FldOnlyVar = FldOnly::fld_maybe;
+         FldOnly = FldOnly_t::fld_maybe;
       }
       else if( gdlib::strutilx::StrUEqual( S.data(), "M" ) )
       {
          FldOnlyFld = GMS_VAL_MARGINAL;
-         FldOnlyVar = FldOnly::fld_maybe;
+         FldOnly = FldOnly_t::fld_maybe;
       }
       else if( gdlib::strutilx::StrUEqual( S.data(), "Up" ) )
       {
          FldOnlyFld = GMS_VAL_UPPER;
-         FldOnlyVar = FldOnly::fld_maybe;
+         FldOnly = FldOnly_t::fld_maybe;
       }
       else if( gdlib::strutilx::StrUEqual( S.data(), "Lo" ) )
       {
          FldOnlyFld = GMS_VAL_LOWER;
-         FldOnlyVar = FldOnly::fld_maybe;
+         FldOnly = FldOnly_t::fld_maybe;
       }
       else if( gdlib::strutilx::StrUEqual( S.data(), "Prior" ) || gdlib::strutilx::StrUEqual( S.data(), "Scale" ) )
       {
          FldOnlyFld = GMS_VAL_SCALE;
-         FldOnlyVar = FldOnly::fld_maybe;
+         FldOnly = FldOnly_t::fld_maybe;
       }
       else
       {
@@ -899,15 +898,15 @@ int main( const int argc, const char *argv[] )
          ErrorCode = 4;
       }
 
-      if( FldOnlyVar == FldOnly::fld_maybe )
+      if( FldOnly == FldOnly_t::fld_maybe )
          ActiveFields = { FldOnlyFld };
    }
 
    if( CmdParams->HasKey( static_cast<int>( KP::kp_fldonly ) ) )
    {
-      if( FldOnlyVar == FldOnly::fld_maybe )
+      if( FldOnly == FldOnly_t::fld_maybe )
       {
-         FldOnlyVar = FldOnly::fld_yes;
+         FldOnly = FldOnly_t::fld_yes;
          if( DiffOnly )
          {
             // TODO: Change combines to combined?
