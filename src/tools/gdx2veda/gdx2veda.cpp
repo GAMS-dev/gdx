@@ -132,6 +132,31 @@ library::one_indexed_container<int> LiteralFilter { GMS_MAX_INDEX_DIM };
 bool DoSuppressZero {};
 double xx1 {}, xx2 {};
 
+HashTuple_t::HashTuple_t()
+{
+   // TODO: Implement constructor
+}
+
+Projection_t::Projection_t()
+{
+   // TODO: Implement constructor
+}
+
+DataLineMapping_t::DataLineMapping_t()
+{
+   // TODO: Implement constructor
+}
+
+void DataLineMapping_t::Clear()
+{
+   // TODO: Implement function
+}
+
+void DataLineMapping_t::Insert( const int Dimension, const int TupleIndex, const int EntryIndex )
+{
+   // TODO: Implement function
+}
+
 std::string StripExt( const std::string &fln )
 {
    std::string result { fln };
