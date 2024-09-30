@@ -28,7 +28,7 @@ constexpr int MaxGamsDim { 10 };
 constexpr int MaxSuff { 5 };
 
 // .LM is new: write both level and marginal
-const library::one_indexed_container<std::string>
+const library::container<std::string>
         NameSuff { { "l", "m", "lo", "up", "lm" } };
 
 // Max cube dimensions
@@ -45,8 +45,8 @@ extern int AtrPos;
 const std::string AtrDimension { "Attribute" };
 
 // EK: The following arrays are now inside the DimensionStore_t class
-// extern library::one_indexed_container<std::string> NameDimension;
-// extern library::one_indexed_container<std::string> DummyDimension;
+// extern library::container<std::string> NameDimension;
+// extern library::container<std::string> DummyDimension;
 
 // Max number of tuples
 constexpr int MaxTuple { 20 };
@@ -59,29 +59,29 @@ constexpr int MaxSubset { 200 };
 
 extern int NumDataEntry;
 
-extern library::one_indexed_container<std::string> AtrName;
-extern library::one_indexed_container<library::short_string> GamsName;
-extern library::one_indexed_container<int> GamsSuff;
-extern library::one_indexed_container<int> GamsDim;
+extern library::container<std::string> AtrName;
+extern library::container<library::short_string> GamsName;
+extern library::container<int> GamsSuff;
+extern library::container<int> GamsDim;
 
 // List of attributes whose records have to be skipped if zero
 extern gdlib::strhash::TXStrHashList<std::nullptr_t> SuppressZero;
 
 extern int NumText;
 
-extern library::one_indexed_container<library::short_string> GamsText;
-extern library::one_indexed_container<int> DummyText;
-extern library::one_indexed_container<bool_t> ExpandMap;
+extern library::container<library::short_string> GamsText;
+extern library::container<int> DummyText;
+extern library::container<bool_t> ExpandMap;
 
 // Number of subset definitions (0..MaxSubset)
 extern int NumSubset;
 
-extern library::one_indexed_container<int> DimSubset;
-extern library::one_indexed_container<library::short_string> Subset;
-extern library::one_indexed_container<std::string> GamsSubset;
-extern library::one_indexed_container<int> NextSubset;
+extern library::container<int> DimSubset;
+extern library::container<library::short_string> Subset;
+extern library::container<std::string> GamsSubset;
+extern library::container<int> NextSubset;
 // Next set in chain
-extern library::one_indexed_container<int> NextSet;
+extern library::container<int> NextSet;
 
 enum class Subset_t : uint8_t
 {
@@ -90,11 +90,11 @@ enum class Subset_t : uint8_t
    ParentIsIndex2
 };
 
-extern library::one_indexed_container<Subset_t> ParentOfSubset;
+extern library::container<Subset_t> ParentOfSubset;
 
 // -1 or 1..NumDimension
 extern int Parent;
-extern library::one_indexed_container<int> Children;
+extern library::container<int> Children;
 extern int NumChildren;
 
 struct ParentChildSet_t {
@@ -103,13 +103,13 @@ struct ParentChildSet_t {
    int Index1 {}, Index2 {}, child {};
 };
 
-extern library::one_indexed_container<ParentChildSet_t> ParentDimensionText;
+extern library::container<ParentChildSet_t> ParentDimensionText;
 extern int NumParentDimensionTextSets;
 
 constexpr int MaxLiteral { 100 };
 
-extern library::one_indexed_container<library::short_string> LiteralPool;
-extern library::one_indexed_container<int> LiteralUel;
+extern library::container<library::short_string> LiteralPool;
+extern library::container<int> LiteralUel;
 extern int NumLiteral;
 
 class SubsetList_t
@@ -127,11 +127,11 @@ public:
 class DimensionStore_t
 {
    gdlib::strhash::TXStrHashList<std::nullptr_t> StringStore {};
-   library::one_indexed_container<int> NameDimension { MaxDimension };
-   library::one_indexed_container<std::vector<int>> DummyDimension { MaxDimension };
-   library::one_indexed_container<std::vector<int>> EntryMap { MaxDataEntry };
-   library::one_indexed_container<std::vector<int>> TextMap { MaxText };
-   library::one_indexed_container<SubsetList_t> SubsetList { MaxSubset };
+   library::container<int> NameDimension { MaxDimension };
+   library::container<std::vector<int>> DummyDimension { MaxDimension };
+   library::container<std::vector<int>> EntryMap { MaxDataEntry };
+   library::container<std::vector<int>> TextMap { MaxText };
+   library::container<SubsetList_t> SubsetList { MaxSubset };
 
    // Add new name to the stringstore. Also store its associated
    // dimension number (1..MaxDimension) and the tuple member (1..MaxTuple)
@@ -229,7 +229,7 @@ struct Options_t {
    bool ShowAllSeparators {}, RelaxDimensionAll {};
    int ValueDim {};
    bool SetsAllowedFlag {};
-   library::one_indexed_container<bool_t> SetsAllowed;
+   library::container<bool_t> SetsAllowed;
    std::string ScenarioSet;
    Format_t Format;
 };

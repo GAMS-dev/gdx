@@ -42,8 +42,8 @@ namespace gdx2veda
 const std::string BuildVersion { "2005-10-07" };
 
 // Store the Uels
-library::one_indexed_container<library::short_string> Uels { 1000000 };
-library::one_indexed_container<library::short_string> DataLine { GMS_MAX_INDEX_DIM };
+library::container<library::short_string> Uels { 1000000 };
+library::container<library::short_string> DataLine { GMS_MAX_INDEX_DIM };
 
 Projection_t Projection {};
 library::short_string ParentField;
@@ -111,7 +111,7 @@ library::short_string s, s2, s3;
 int Uel {};
 library::short_string DimensionName;
 int DimensionNumber {};
-library::one_indexed_container<int> TextDim { MaxText };
+library::container<int> TextDim { MaxText };
 gdxUelIndex_t IndexMapping {};
 int UelLength {}, Mark {};
 
@@ -126,7 +126,7 @@ library::short_string Symbol;
 int DimNo {}, TextDimension {};
 
 int ExplText {};
-library::one_indexed_container<int> LiteralFilter { GMS_MAX_INDEX_DIM };
+library::container<int> LiteralFilter { GMS_MAX_INDEX_DIM };
 
 bool DoSuppressZero {};
 double xx1 {}, xx2 {};
