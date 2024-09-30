@@ -200,4 +200,14 @@ std::string operator+( const short_string &lhs, const std::string &rhs )
    return lhs.data() + rhs;
 }
 
+std::string operator+( const char lhs, const short_string &rhs )
+{
+   return lhs + rhs.string();
+}
+
+std::string operator+( const short_string &lhs, const char rhs )
+{
+   return lhs.string() + rhs;
+}
+
 }// namespace library
