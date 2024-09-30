@@ -163,7 +163,7 @@ void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
    CheckGDXError( PGX );
 }
 
-void registerDiffUELs()
+void RegisterDiffUELs()
 {
    if( diffUELsRegistered )
       return;
@@ -190,7 +190,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    gdxValues_t DefValues {};
 
    auto CheckSymbOpen = [&]() -> bool {
-      registerDiffUELs();
+      RegisterDiffUELs();
       if( Status == StatusCode_t::sc_dim10 )
          Status = StatusCode_t::sc_dim10_diff;
       if( !SymbOpen && Status != StatusCode_t::sc_dim10_diff )
@@ -225,7 +225,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
       gdxValues_t Vals2 {};
 
-      registerDiffUELs();
+      RegisterDiffUELs();
       for( int D {}; D < Dim; D++ )
          // TODO: Improve this check (especially the else case)
          if( Keys[D] < UELTable->Count() )
@@ -266,7 +266,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       gdxValues_t Vals {};
       int iNode;
 
-      registerDiffUELs();
+      RegisterDiffUELs();
       for( int D {}; D < Dim; D++ )
          strcpy( StrKeysPtrs[D], UELTable->GetString( Keys[D] ) );
       strcpy( StrKeysPtrs[Dim], Act.data() );
@@ -296,7 +296,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    };
 
    auto WriteKeys = [&]( const gdxUelIndex_t &Keys ) -> void {
-      registerDiffUELs();
+      RegisterDiffUELs();
       for( int D {}; D < Dim; D++ )
       {
          std::cout << ' ' << UELTable->GetString( Keys[D] );

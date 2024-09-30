@@ -108,7 +108,7 @@ void CheckGDXError( const gdxHandle_t &PGX );
 
 void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX );
 
-void registerDiffUELs();
+void RegisterDiffUELs();
 
 void CompareSy( int Sy1, int Sy2 );
 
