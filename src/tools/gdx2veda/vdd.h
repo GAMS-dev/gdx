@@ -44,7 +44,7 @@ extern int AtrPos;
 // const std::string RunDimension { "Scenario" };
 const std::string AtrDimension { "Attribute" };
 
-// EK: The following arrays are now inside the TDimensionStore class
+// EK: The following arrays are now inside the DimensionStore_t class
 // extern library::one_indexed_container<std::string> NameDimension;
 // extern library::one_indexed_container<std::string> DummyDimension;
 
