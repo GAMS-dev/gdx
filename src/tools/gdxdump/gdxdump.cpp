@@ -53,8 +53,8 @@ std::ofstream OutputFile;
 gdxHandle_t PGX;
 char Delim, DecimalSep;
 bool ShowHdr, ShowData, CDim, FilterDef, bEpsOut, bNaOut, bPinfOut, bMinfOut, bUndfOut, bZeroOut, bHeader, bFullEVRec, bCSVSetText;
-TOutFormat OutFormat;
-TDblFormat dblFormat;
+OutFormat_t OutFormat;
+DblFormat_t dblFormat;
 int LineCount;
 std::string EpsOut, NaOut, PinfOut, MinfOut, UndfOut, ZeroOut, Header;
 
@@ -147,7 +147,7 @@ void WriteUELTable( const std::string &name )
 {
    int N, NrUel;
    gdxSystemInfo( PGX, &N, &NrUel );
-   if( OutFormat != TOutFormat::fmt_csv )
+   if( OutFormat != OutFormat_t::fmt_csv )
    {
       if( NrUel > 0 )
          fo << "Set " << name << " /\n";
@@ -165,7 +165,7 @@ void WriteUELTable( const std::string &name )
       gdxUMUelGet( PGX, N, s.data(), &UMap );
       fo << "  ";
       WriteUEL( s.data() );
-      if( OutFormat == TOutFormat::fmt_csv )
+      if( OutFormat == OutFormat_t::fmt_csv )
          fo << '\n';
       else
          fo << ( N < NrUel ? " ," : " /;" ) << '\n';
@@ -201,13 +201,13 @@ void WrVal( const double V )
       else
          switch( dblFormat )
          {
-            case TDblFormat::dbl_normal:
+            case DblFormat_t::dbl_normal:
                fo << gdlib::strutilx::DblToStrSep( V, DecimalSep );
                break;
-            case TDblFormat::dbl_hexBytes:
+            case DblFormat_t::dbl_hexBytes:
                fo << gdlib::dblutil::dblToStrHex( V );
                break;
-            case TDblFormat::dbl_hexponential:
+            case DblFormat_t::dbl_hexponential:
                fo << gdlib::dblutil::dblToStrHexponential( V );
                break;
             default:
@@ -320,7 +320,7 @@ void WriteSymbol( const int SyNr )
          return;
       if( FrstWrite )
          FrstWrite = false;
-      else if( OutFormat == TOutFormat::fmt_gamsbas )
+      else if( OutFormat == OutFormat_t::fmt_gamsbas )
          fo << " ;\n";
       else
       {
@@ -328,7 +328,7 @@ void WriteSymbol( const int SyNr )
          if( !( ( ATyp == dt_var || ATyp == dt_equ ) && ADim == 0 ) )
             fo << '\n';
       }
-      if( OutFormat == TOutFormat::fmt_gamsbas )
+      if( OutFormat == OutFormat_t::fmt_gamsbas )
       {
          if( LineCount == 6 )
             fo << "$offListing\n";
@@ -336,7 +336,7 @@ void WriteSymbol( const int SyNr )
       }
       if( ADim > 0 )
       {
-         if( OutFormat == TOutFormat::fmt_gamsbas )
+         if( OutFormat == OutFormat_t::fmt_gamsbas )
             fo << '(';
          for( int D {}; D < ADim; D++ )
          {
@@ -344,7 +344,7 @@ void WriteSymbol( const int SyNr )
             if( D < ADim - 1 )
                fo << Delim;
          }
-         if( OutFormat == TOutFormat::fmt_gamsbas )
+         if( OutFormat == OutFormat_t::fmt_gamsbas )
             fo << ')';
       }
       switch( ATyp )
@@ -362,7 +362,7 @@ void WriteSymbol( const int SyNr )
             break;
          case dt_equ:
          case dt_var:
-            if( OutFormat == TOutFormat::fmt_gamsbas )
+            if( OutFormat == OutFormat_t::fmt_gamsbas )
                fo << " = ";
             else
             {
@@ -399,7 +399,7 @@ void WriteSymbol( const int SyNr )
 
    gdxSymbolInfo( PGX, SyNr, SyName.data(), &ADim, &iATyp );
    ATyp = static_cast<gdxSyType>( iATyp );
-   if( ( ATyp == dt_set || ATyp == dt_par ) && OutFormat == TOutFormat::fmt_gamsbas )
+   if( ( ATyp == dt_set || ATyp == dt_par ) && OutFormat == OutFormat_t::fmt_gamsbas )
       return;
    if( ShowHdr )
       fo << '\n';
@@ -530,7 +530,7 @@ void WriteSymbol( const int SyNr )
          {
             switch( OutFormat )
             {
-               case TOutFormat::fmt_gamsbas:
+               case OutFormat_t::fmt_gamsbas:
                   if( ATyp == dt_equ )
                      WriteItem( GMS_VAL_MARGINAL );
                   else
@@ -539,10 +539,10 @@ void WriteSymbol( const int SyNr )
                      WriteItem( GMS_VAL_MARGINAL );
                   }
                   break;
-               case TOutFormat::fmt_csv:
+               case OutFormat_t::fmt_csv:
                   library::assertWithMessage( false, "No CSV processing" );
                   break;
-               case TOutFormat::fmt_normal:
+               case OutFormat_t::fmt_normal:
                   WriteItem( GMS_VAL_LEVEL );
                   if( ATyp == dt_var || ATyp == dt_equ )
                   {
@@ -560,7 +560,7 @@ void WriteSymbol( const int SyNr )
             }
          }
          gdxDataReadDone( PGX );
-         if( OutFormat == TOutFormat::fmt_gamsbas )
+         if( OutFormat == OutFormat_t::fmt_gamsbas )
             fo << " ;\n";
          else if( ShowHdr )
             fo << " /;\n";
@@ -1091,9 +1091,9 @@ int main( const int argc, const char *argv[] )
    ListSymbolsAsSetDI = false;
    DomainInfo = false;
    showSetText = false;
-   OutFormat = TOutFormat::fmt_none;
+   OutFormat = OutFormat_t::fmt_none;
    CDim = false;
-   dblFormat = TDblFormat::dbl_none;
+   dblFormat = DblFormat_t::dbl_none;
    UsingIDE = false;
    ExitCode = 0;
    VersionOnly = false;
@@ -1254,7 +1254,7 @@ int main( const int argc, const char *argv[] )
          }
          if( s == "FORMAT" || s == "FORMAT=" )
          {
-            if( OutFormat != TOutFormat::fmt_none )
+            if( OutFormat != OutFormat_t::fmt_none )
             {
                library::printErrorMessage( "Only one format can be specified" );
                ExitCode = 1;
@@ -1263,11 +1263,11 @@ int main( const int argc, const char *argv[] )
             s = NextParam();
             s.to_upper_case();
             if( s == "NORMAL" )
-               OutFormat = TOutFormat::fmt_normal;
+               OutFormat = OutFormat_t::fmt_normal;
             else if( s == "GAMSBAS" )
-               OutFormat = TOutFormat::fmt_gamsbas;
+               OutFormat = OutFormat_t::fmt_gamsbas;
             else if( s == "CSV" )
-               OutFormat = TOutFormat::fmt_csv;
+               OutFormat = OutFormat_t::fmt_csv;
             else
             {
                library::printErrorMessage( "Unrecognized format" );
@@ -1278,7 +1278,7 @@ int main( const int argc, const char *argv[] )
          }
          if( s == "DFORMAT" || s == "DFORMAT=" )
          {
-            if( dblFormat != TDblFormat::dbl_none )
+            if( dblFormat != DblFormat_t::dbl_none )
             {
                library::printErrorMessage( "Only one dformat can be specified" );
                ExitCode = 1;
@@ -1287,11 +1287,11 @@ int main( const int argc, const char *argv[] )
             s = NextParam();
             s.to_upper_case();
             if( s == "NORMAL" )
-               dblFormat = TDblFormat::dbl_none;
+               dblFormat = DblFormat_t::dbl_none;
             else if( s == "HEXBYTES" )
-               dblFormat = TDblFormat::dbl_hexBytes;
+               dblFormat = DblFormat_t::dbl_hexBytes;
             else if( s == "HEXPONENTIAL" )
-               dblFormat = TDblFormat::dbl_hexponential;
+               dblFormat = DblFormat_t::dbl_hexponential;
             else
             {
                library::printErrorMessage( "Unrecognized dformat" );
@@ -1412,20 +1412,20 @@ int main( const int argc, const char *argv[] )
       goto End;
    }
 
-   if( OutFormat == TOutFormat::fmt_none )
-      OutFormat = TOutFormat::fmt_normal;
-   if( dblFormat == TDblFormat::dbl_none )
-      dblFormat = TDblFormat::dbl_normal;
+   if( OutFormat == OutFormat_t::fmt_none )
+      OutFormat = OutFormat_t::fmt_normal;
+   if( dblFormat == DblFormat_t::dbl_none )
+      dblFormat = DblFormat_t::dbl_normal;
    if( Delim == '\0' )
    {
-      if( OutFormat == TOutFormat::fmt_csv )
+      if( OutFormat == OutFormat_t::fmt_csv )
          Delim = ',';
       else
          Delim = '.';
    }
    if( DecimalSep == '\0' )
       DecimalSep = '.';
-   if( OutFormat == TOutFormat::fmt_csv )
+   if( OutFormat == OutFormat_t::fmt_csv )
       ShowData = true;
    if( Delim == DecimalSep && Delim != '.' )
    {
@@ -1433,7 +1433,7 @@ int main( const int argc, const char *argv[] )
       ExitCode = 1;
       goto End;
    }
-   if( OutFormat == TOutFormat::fmt_csv && Symb.empty() )
+   if( OutFormat == OutFormat_t::fmt_csv && Symb.empty() )
    {
       library::printErrorMessage( "Symbol not specified when writing a CSV file" );
       ExitCode = 1;
@@ -1453,7 +1453,7 @@ int main( const int argc, const char *argv[] )
 
    if( Symb.empty() )
       ShowHdr = true;
-   if( OutFormat == TOutFormat::fmt_gamsbas )
+   if( OutFormat == OutFormat_t::fmt_gamsbas )
    {
       ShowHdr = false;
       ShowData = true;
@@ -1529,11 +1529,11 @@ int main( const int argc, const char *argv[] )
    {
       fo << "\n$gdxIn " << InputFile << '\n';
    }
-   if( OutFormat != TOutFormat::fmt_csv )
+   if( OutFormat != OutFormat_t::fmt_csv )
       WriteAcronyms();
    if( !UELSetName.empty() )
    {
-      if( OutFormat == TOutFormat::fmt_csv )
+      if( OutFormat == OutFormat_t::fmt_csv )
       {
          WriteUELTable( {} );
          goto AllDone;
@@ -1573,7 +1573,7 @@ int main( const int argc, const char *argv[] )
       int N;
       if( gdxFindSymbol( PGX, Symb.data(), &N ) != 0 )
       {
-         if( OutFormat == TOutFormat::fmt_csv )
+         if( OutFormat == OutFormat_t::fmt_csv )
             WriteSymbolCSV( N );
          else
          {
@@ -1590,7 +1590,7 @@ int main( const int argc, const char *argv[] )
    }
    else
    {
-      if( OutFormat == TOutFormat::fmt_normal )
+      if( OutFormat == OutFormat_t::fmt_normal )
          ShowHdr = true;
       fo << "$onEmpty\n";
       if( !ShowData )
@@ -1604,7 +1604,7 @@ int main( const int argc, const char *argv[] )
          WriteSymbol( N );
       fo << "\n$offEmpty\n";
    }
-   if( OutFormat == TOutFormat::fmt_gamsbas && LineCount > 6 )
+   if( OutFormat == OutFormat_t::fmt_gamsbas && LineCount > 6 )
       fo << "$onListing\n";
 
 AllDone:
