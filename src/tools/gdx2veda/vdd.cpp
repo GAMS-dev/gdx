@@ -19,27 +19,27 @@ int NumDataEntry {};
 
 library::short_string VEDAFlavor { "MyVEDA" };
 
-// library::container<std::string> NameDimension { MaxDimension };
-// library::container<std::string> DummyDimension { MaxDimension };
+// library::Container_t<std::string> NameDimension { MaxDimension };
+// library::Container_t<std::string> DummyDimension { MaxDimension };
 
-library::container<std::string> AtrName { MaxDataEntry };
-library::container<library::short_string> GamsName { MaxDataEntry };
-library::container<int> GamsSuff { MaxDataEntry };
-library::container<int> GamsDim { MaxDataEntry };
+library::Container_t<std::string> AtrName { MaxDataEntry };
+library::Container_t<library::short_string> GamsName { MaxDataEntry };
+library::Container_t<int> GamsSuff { MaxDataEntry };
+library::Container_t<int> GamsDim { MaxDataEntry };
 
 int NumText {};
 
-library::container<library::short_string> GamsText { MaxText };
-library::container<int> DummyText { MaxText };
-library::container<bool_t> ExpandMap { MaxText };
+library::Container_t<library::short_string> GamsText { MaxText };
+library::Container_t<int> DummyText { MaxText };
+library::Container_t<bool_t> ExpandMap { MaxText };
 
 int NumSubset {};
 
-library::container<int> DimSubset { MaxDimension };
-library::container<library::short_string> Subset { MaxSubset };
-library::container<std::string> GamsSubset { MaxSubset };
-library::container<int> NextSubset { MaxSubset };
-library::container<int> NextSet { MaxSubset };
+library::Container_t<int> DimSubset { MaxDimension };
+library::Container_t<library::short_string> Subset { MaxSubset };
+library::Container_t<std::string> GamsSubset { MaxSubset };
+library::Container_t<int> NextSubset { MaxSubset };
+library::Container_t<int> NextSet { MaxSubset };
 
 bool SubsetList_t::AddSubset( const int i, const int k )
 {
@@ -230,13 +230,13 @@ std::map<gdxSpecValue, bool> SpecialValueIsZero {
         { sv_valeps, true },
         { sv_normal, false } };
 
-library::container<Subset_t> ParentOfSubset { MaxSubset };
+library::Container_t<Subset_t> ParentOfSubset { MaxSubset };
 
 int Parent { -1 };
-library::container<int> Children { MaxDimension };
+library::Container_t<int> Children { MaxDimension };
 int NumChildren {};
 
-library::container<ParentChildSet_t> ParentDimensionText { MaxDimension };
+library::Container_t<ParentChildSet_t> ParentDimensionText { MaxDimension };
 int NumParentDimensionTextSets {};
 
 Options_t Options {
@@ -245,14 +245,14 @@ Options_t Options {
         false,
         1,
         false,
-        library::container<bool_t> { MaxDimension },
+        library::Container_t<bool_t> { MaxDimension },
         "",
         Format_t::FormatVeda };
 
 std::ofstream f {};
 
-library::container<library::short_string> LiteralPool { MaxLiteral };
-library::container<int> LiteralUel { MaxLiteral };
+library::Container_t<library::short_string> LiteralPool { MaxLiteral };
+library::Container_t<int> LiteralUel { MaxLiteral };
 int NumLiteral {};
 
 gdlib::strhash::TXStrHashList<std::nullptr_t> SuppressZero {};

@@ -43,7 +43,7 @@ public:
 
 class Projection_t
 {
-   library::container<HashTuple_t> tabs { GMS_MAX_INDEX_DIM };
+   library::Container_t<HashTuple_t> tabs { GMS_MAX_INDEX_DIM };
 
 public:
    Projection_t();
@@ -63,13 +63,13 @@ public:
 
 class DataLineMapping_t
 {
-   library::container<std::vector<int>> v { GMS_MAX_INDEX_DIM };
+   library::Container_t<std::vector<int>> v { GMS_MAX_INDEX_DIM };
 
 public:
    DataLineMapping_t();
    void Clear();
    void Insert( int Dimension, int TupleIndex, int EntryIndex );
-   void WriteDataLines( const gdxUelIndex_t &Indices, library::container<library::short_string> &Uels );
+   void WriteDataLines( const gdxUelIndex_t &Indices, library::Container_t<library::short_string> &Uels );
 };
 
 std::string StripExt( const std::string &fln );// 623

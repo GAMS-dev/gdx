@@ -9,14 +9,14 @@ namespace library
 {
 
 template<typename T>
-class container
+class Container_t
 {
    std::vector<T> data;
 
 public:
-   container();
-   container( std::size_t size );
-   container( const std::vector<T> &data );
+   Container_t();
+   Container_t( std::size_t size );
+   Container_t( const std::vector<T> &data );
 
    T &at( std::size_t index );
    T &operator[]( std::size_t index );
@@ -32,22 +32,22 @@ public:
 };
 
 template<typename T>
-container<T>::container()
+Container_t<T>::Container_t()
     : data()
 {}
 
 template<typename T>
-container<T>::container( const std::size_t size )
+Container_t<T>::Container_t( const std::size_t size )
     : data( size )
 {}
 
 template<typename T>
-container<T>::container( const std::vector<T> &data )
+Container_t<T>::Container_t( const std::vector<T> &data )
     : data( std::move( data ) )
 {}
 
 template<typename T>
-T &container<T>::at( const std::size_t index )
+T &Container_t<T>::at( const std::size_t index )
 {
    if( index < 1 || index > data.size() )
       throw std::out_of_range( "Index out of range" );
@@ -55,13 +55,13 @@ T &container<T>::at( const std::size_t index )
 }
 
 template<typename T>
-T &container<T>::operator[]( const std::size_t index )
+T &Container_t<T>::operator[]( const std::size_t index )
 {
    return at( index );
 }
 
 template<typename T>
-const T &container<T>::at( const std::size_t index ) const
+const T &Container_t<T>::at( const std::size_t index ) const
 {
    if( index < 1 || index > data.size() )
       throw std::out_of_range( "Index out of range" );
@@ -69,31 +69,31 @@ const T &container<T>::at( const std::size_t index ) const
 }
 
 template<typename T>
-const T &container<T>::operator[]( const std::size_t index ) const
+const T &Container_t<T>::operator[]( const std::size_t index ) const
 {
    return at( index );
 }
 
 template<typename T>
-std::size_t container<T>::size() const
+std::size_t Container_t<T>::size() const
 {
    return data.size();
 }
 
 template<typename T>
-void container<T>::resize( const std::size_t size )
+void Container_t<T>::resize( const std::size_t size )
 {
    data.resize( size );
 }
 
 template<typename T>
-void container<T>::push_back( const T &element )
+void Container_t<T>::push_back( const T &element )
 {
    data.push_back( element );
 }
 
 template<typename T>
-void container<T>::emplace_back( const T &element )
+void Container_t<T>::emplace_back( const T &element )
 {
    data.emplace_back( element );
 }
