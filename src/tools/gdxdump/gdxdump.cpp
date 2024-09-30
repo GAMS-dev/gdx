@@ -26,7 +26,6 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
-#include <filesystem>
 #include <map>
 #include <limits>
 #include <cstring>
@@ -37,6 +36,7 @@
 #include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
 #include "../../gdlib/dblutil.h"
+#include "../../rtl/sysutils_p3.h"
 
 // Global constants
 #include "../../../generated/gclgms.h"
@@ -1406,9 +1406,6 @@ int main( const int argc, const char *argv[] )
       }
    }
 
-   // The following line has been moved to fix errors with gotos
-   std::filesystem::path InputFilePath( InputFile );
-
    if( ExitCode != 0 )
    {
       Usage( AuditLine );
@@ -1443,12 +1440,11 @@ int main( const int argc, const char *argv[] )
       goto End;
    }
 
-   if( !std::filesystem::exists( InputFilePath ) && InputFilePath.extension().string().empty() )
-   {
-      InputFilePath.replace_extension( std::filesystem::path( "gdx" ) );
-      InputFile = InputFilePath.string();
-   }
-   if( !std::filesystem::exists( InputFilePath ) )
+   if( !rtl::sysutils_p3::FileExists( InputFile ) &&
+       gdlib::strutilx::ExtractFileExtEx( InputFile ).empty() )
+      InputFile = gdlib::strutilx::ChangeFileExtEx( InputFile, ".gdx" );
+
+   if( !rtl::sysutils_p3::FileExists( InputFile ) )
    {
       library::printErrorMessage( "GDX file not found: " + InputFile );
       ExitCode = 2;
