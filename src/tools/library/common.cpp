@@ -16,10 +16,14 @@ std::ostream &errorStream { std::cout };
 // TODO: Possible improvement for later, but currently results in problems with the tests
 // std::ostream &errorStream { std::cerr };
 
-void printErrorMessage( const std::string &message, const bool printError )
+void printErrorMessage( const std::string &message )
 {
-   if( printError ) errorStream << "Error: ";
    errorStream << message << std::endl;
+}
+
+void printErrorMessageWithError( const std::string &message )
+{
+   errorStream << "Error: " << message << std::endl;
 }
 
 // TODO: Make this a no-op in release mode builds (NDEBUG set)
