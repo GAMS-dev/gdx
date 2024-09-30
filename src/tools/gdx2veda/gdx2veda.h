@@ -89,7 +89,7 @@ void WriteValue( std::ofstream &f, double v );// 1164
 
 std::string WritePV( char sepchar );// 1179
 
-std::string FormIndices(const gdxUelIndex_t &x, int n);// 1271
+std::string FormIndices( const gdxUelIndex_t &x, int n );// 1271
 
 void CheckLiterals();// 1302
 
