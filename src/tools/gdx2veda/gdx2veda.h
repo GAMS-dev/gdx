@@ -17,9 +17,7 @@
 namespace gdx2veda
 {
 
-class MyHashList_t
-{
-public:
+struct MyHashList_t {
    int Compare( const library::short_string &PS1, const library::short_string &PS2 );
 };
 
