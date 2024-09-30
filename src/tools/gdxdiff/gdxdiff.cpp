@@ -134,18 +134,18 @@ void CheckGDXError( const gdxHandle_t &PGX )
 void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
 {
    if( !rtl::sysutils_p3::FileExists( fn ) )
-      FatalError( "Input file not found " + fn, static_cast<int>( ErrorCode::ERR_NOFILE ) );
+      FatalError( "Input file not found " + fn, static_cast<int>( ErrorCode_t::ERR_NOFILE ) );
 
    library::short_string S;
    if( !gdxCreate( &PGX, S.data(), S.length() ) )
-      FatalError( "Cannot load GDX library " + S, static_cast<int>( ErrorCode::ERR_LOADDLL ) );
+      FatalError( "Cannot load GDX library " + S, static_cast<int>( ErrorCode_t::ERR_LOADDLL ) );
 
    int ErrNr;
    gdxOpenRead( PGX, fn.data(), &ErrNr );
    if( ErrNr != 0 )
    {
       gdxErrorStr( PGX, ErrNr, S.data() );
-      FatalError2( "Problem reading GDX file + " + fn, S, static_cast<int>( ErrorCode::ERR_READGDX ) );
+      FatalError2( "Problem reading GDX file + " + fn, S, static_cast<int>( ErrorCode_t::ERR_READGDX ) );
    }
 
    int NrElem, HighV;
@@ -743,7 +743,7 @@ void CheckFile( library::short_string &fn )
 
 int main( const int argc, const char *argv[] )
 {
-   int ErrorCode, ErrNr, Dim, iST, StrNr;
+   int ErrorCode_t, ErrNr, Dim, iST, StrNr;
    library::short_string S, ID, InFile1, InFile2, DiffFileName;
    std::map<library::short_string, int> IDTable;
    bool UsingIDE, RenameOK;
@@ -786,10 +786,10 @@ int main( const int argc, const char *argv[] )
    if( !CmdParams->CrackCommandLine( argc, argv ) )
    {
       Usage( AuditLine );
-      return static_cast<int>( ErrorCode::ERR_USAGE );
+      return static_cast<int>( ErrorCode_t::ERR_USAGE );
    }
 
-   ErrorCode = 0;
+   ErrorCode_t = 0;
    UsingIDE = false;
    matrixFile = false;
    diffUELsRegistered = false;
@@ -807,7 +807,7 @@ int main( const int argc, const char *argv[] )
    //    InFile2.clear();
 
    if( InFile1.empty() || InFile2.empty() )
-      ErrorCode = 1;
+      ErrorCode_t = 1;
 
    if( !CmdParams->HasParam( static_cast<int>( KP::kp_output ), DiffFileName ) )
    {
@@ -831,13 +831,13 @@ int main( const int argc, const char *argv[] )
       if( EpsAbsolute < 0 )
       {
          std::cout << "Eps cannot be negative" << std::endl;
-         ErrorCode = 2;
+         ErrorCode_t = 2;
       }
    }
    else
    {
       std::cout << "Bad value for Eps = " << S << std::endl;
-      ErrorCode = 2;
+      ErrorCode_t = 2;
    }
 
    if( !CmdParams->HasParam( static_cast<int>( KP::kp_releps ), S ) )
@@ -847,13 +847,13 @@ int main( const int argc, const char *argv[] )
       if( EpsRelative < 0 )
       {
          std::cout << "RelEps cannot be negative" << std::endl;
-         ErrorCode = 2;
+         ErrorCode_t = 2;
       }
    }
    else
    {
       std::cout << "Bad value for RelEps = " << S << std::endl;
-      ErrorCode = 2;
+      ErrorCode_t = 2;
    }
 
    DiffOnly = CmdParams->HasKey( static_cast<int>( KP::kp_diffonly ) );
@@ -895,7 +895,7 @@ int main( const int argc, const char *argv[] )
       else
       {
          std::cout << "Bad field name = " << S << std::endl;
-         ErrorCode = 4;
+         ErrorCode_t = 4;
       }
 
       if( FldOnly == FldOnly_t::fld_maybe )
@@ -911,13 +911,13 @@ int main( const int argc, const char *argv[] )
          {
             // TODO: Change combines to combined?
             std::cout << "Diff only cannot be combined with FldOnly" << std::endl;
-            ErrorCode = 4;
+            ErrorCode_t = 4;
          }
       }
       else
       {
          std::cout << "FldOnly option used with a single field comparison" << std::endl;
-         ErrorCode = 4;
+         ErrorCode_t = 4;
       }
    }
 
@@ -937,7 +937,7 @@ int main( const int argc, const char *argv[] )
       else
       {
          std::cout << "Bad value for CompSetText = " << S << std::endl;
-         ErrorCode = 4;
+         ErrorCode_t = 4;
       }
    }
 
@@ -995,12 +995,12 @@ int main( const int argc, const char *argv[] )
    //    rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName );
 
    // Parameter errors
-   if( ErrorCode > 0 )
+   if( ErrorCode_t > 0 )
    {
       // TODO: Remove?
       // std::cout << std::endl;
       Usage( AuditLine );
-      return static_cast<int>( ErrorCode::ERR_USAGE );
+      return static_cast<int>( ErrorCode_t::ERR_USAGE );
    }
 
    std::cout << AuditLine.getAuditLine() << std::endl;
@@ -1029,7 +1029,7 @@ int main( const int argc, const char *argv[] )
 
    library::short_string S2;
    if( !gdxCreate( &PGXDIF, S2.data(), S2.length() ) )
-      FatalError( "Unable to load GDX library: " + S2, static_cast<int>( ErrorCode::ERR_LOADDLL ) );
+      FatalError( "Unable to load GDX library: " + S2, static_cast<int>( ErrorCode_t::ERR_LOADDLL ) );
 
    // Temporary file name
    for( int N { 1 }; N <= std::numeric_limits<int>::max(); N++ )
@@ -1045,7 +1045,7 @@ int main( const int argc, const char *argv[] )
       int N { gdxGetLastError( PGXDIF ) };
       // Nil is used instead of PGXDIF in Delphi code
       gdxErrorStr( PGXDIF, N, S.data() );
-      FatalError2( "Cannot create file: " + DiffTmpName, S, static_cast<int>( ErrorCode::ERR_WRITEGDX ) );
+      FatalError2( "Cannot create file: " + DiffTmpName, S, static_cast<int>( ErrorCode_t::ERR_WRITEGDX ) );
    }
 
    UELTable = std::make_unique<gdlib::strhash::TXStrHashList<std::nullptr_t>>();
@@ -1184,7 +1184,7 @@ int main( const int argc, const char *argv[] )
    {
       std::cout << "Could not rename " << DiffTmpName << " to " << DiffFileName << std::endl;
       DiffFileName = DiffTmpName;
-      ExitCode = static_cast<int>( ErrorCode::ERR_RENAME );
+      ExitCode = static_cast<int>( ErrorCode_t::ERR_RENAME );
    }
    std::cout << "Output: " << DiffFileName << std::endl;
 
@@ -1195,7 +1195,7 @@ int main( const int argc, const char *argv[] )
    // FreeAndNil( UELTable );
 
    if( ExitCode == 0 && !StatusTable.empty() )
-      return static_cast<int>( ErrorCode::ERR_DIFFERENT );
+      return static_cast<int>( ErrorCode_t::ERR_DIFFERENT );
 
    return ExitCode;
 }

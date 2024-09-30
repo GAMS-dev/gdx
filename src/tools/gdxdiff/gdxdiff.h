@@ -17,7 +17,7 @@ namespace gdxdiff
 
 using namespace std::literals::string_literals;
 
-enum class ErrorCode : uint8_t
+enum class ErrorCode_t : uint8_t
 {
    ERR_DIFFERENT = 1,
    ERR_USAGE,
