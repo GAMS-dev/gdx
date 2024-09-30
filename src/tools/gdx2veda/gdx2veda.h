@@ -7,6 +7,7 @@
 
 #include "container.h"
 #include "vdd.h"
+#include "../library/common.h"
 #include "../library/short_string.h"
 
 // Global constants

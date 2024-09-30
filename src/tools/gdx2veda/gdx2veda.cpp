@@ -32,7 +32,6 @@
 #include <cassert>
 
 #include "gdx2veda.h"
-#include "../library/common.h"
 #include "../../gdlib/strutilx.h"
 #include "../../gdlib/utils.h"
 
