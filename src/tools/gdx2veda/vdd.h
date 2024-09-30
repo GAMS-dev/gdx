@@ -65,7 +65,7 @@ extern library::one_indexed_container<int> GamsSuff;
 extern library::one_indexed_container<int> GamsDim;
 
 // List of attributes whose records have to be skipped if zero
-extern gdlib::strhash::TXStrHashList<nullptr_t> SuppressZero;
+extern gdlib::strhash::TXStrHashList<std::nullptr_t> SuppressZero;
 
 extern int NumText;
 
@@ -126,7 +126,7 @@ public:
 
 class DimensionStore_t
 {
-   gdlib::strhash::TXStrHashList<nullptr_t> StringStore {};
+   gdlib::strhash::TXStrHashList<std::nullptr_t> StringStore {};
    library::one_indexed_container<int> NameDimension { MaxDimension };
    library::one_indexed_container<std::vector<int>> DummyDimension { MaxDimension };
    library::one_indexed_container<std::vector<int>> EntryMap { MaxDataEntry };

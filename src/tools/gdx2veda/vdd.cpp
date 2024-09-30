@@ -255,7 +255,7 @@ library::one_indexed_container<library::short_string> LiteralPool { MaxLiteral }
 library::one_indexed_container<int> LiteralUel { MaxLiteral };
 int NumLiteral {};
 
-gdlib::strhash::TXStrHashList<nullptr_t> SuppressZero {};
+gdlib::strhash::TXStrHashList<std::nullptr_t> SuppressZero {};
 
 void VddHelp()
 {
