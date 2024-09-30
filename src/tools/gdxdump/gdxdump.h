@@ -58,7 +58,7 @@ void WriteSymbolsAsSet( bool DomInfo );
 void WriteSymbol( int SyNr );
 
 // Auxiliary function for WriteSymbolCSV and WriteSetText
-int64_t delphiRound( double x );
+int64_t DelphiRound( double x );
 
 void WriteSymbolCSV( int SyNr );
 
