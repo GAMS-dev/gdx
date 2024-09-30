@@ -189,7 +189,7 @@ void WriteHeader( std::ofstream &f, const std::string &key, const std::string &v
    }
 }
 
-void ShortHelp( const library::AuditLine &AuditLine )
+void ShortHelp( const library::AuditLine_t &AuditLine )
 {
    std::cout << '\n'
              << AuditLine.getAuditLine() << "\n\n"
@@ -305,7 +305,7 @@ int main( const int argc, const char *argv[] )
    const int ParamCount { argc - 1 };
    const char **ParamStr { argv };
 
-   library::AuditLine AuditLine { "GMS2VEDA" };
+   library::AuditLine_t AuditLine { "GMS2VEDA" };
    if( argc > 1 && gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
    {
       std::cout << AuditLine.getAuditLine() << std::endl;

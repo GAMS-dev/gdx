@@ -114,7 +114,7 @@ void CompareSy( int Sy1, int Sy2 );
 
 bool GetAsDouble( const library::short_string &S, double &V );
 
-void Usage( const library::AuditLine &AuditLine );
+void Usage( const library::AuditLine_t &AuditLine );
 
 // void CopyAcronyms( const gdxHandle_t &PGX );
 

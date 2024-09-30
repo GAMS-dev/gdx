@@ -78,7 +78,7 @@ std::string DQuotedStr( const std::string &s );// 647
 
 void WriteHeader( std::ofstream &f, const std::string &key, const std::string &value );// 660
 
-void ShortHelp( const library::AuditLine &AuditLine );// 959
+void ShortHelp( const library::AuditLine_t &AuditLine );// 959
 
 void WriteDataLine();// 1089
 

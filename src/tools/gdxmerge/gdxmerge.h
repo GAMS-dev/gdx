@@ -97,7 +97,7 @@ std::string FormatDateTime( uint16_t Year, uint16_t Month, uint16_t Day,
 
 bool GetParameters( int argc, const char *argv[] );
 
-void Usage( const library::AuditLine &AuditLine );
+void Usage( const library::AuditLine_t &AuditLine );
 
 int main( int argc, const char *argv[] );
 

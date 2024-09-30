@@ -710,7 +710,7 @@ bool GetAsDouble( const library::short_string &S, double &V )
    return result;
 }
 
-void Usage( const library::AuditLine &AuditLine )
+void Usage( const library::AuditLine_t &AuditLine )
 {
    std::cout << "gdxdiff: GDX file differ\n"
              << AuditLine.getAuditLine() << "\n\n"
@@ -752,7 +752,7 @@ int main( const int argc, const char *argv[] )
    GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
    gdxValues_t StrVals {};
 
-   library::AuditLine AuditLine { "GDXDIFF" };
+   library::AuditLine_t AuditLine { "GDXDIFF" };
    if( argc > 1 && gdlib::strutilx::StrUEqual( argv[1], "AUDIT" ) )
    {
       std::cout << AuditLine.getAuditLine() << std::endl;

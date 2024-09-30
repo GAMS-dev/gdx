@@ -964,7 +964,7 @@ void WriteSetText()
    }
 }
 
-void Usage( const library::AuditLine &AuditLine )
+void Usage( const library::AuditLine_t &AuditLine )
 {
    std::cout << "gdxdump: Write GDX file in ASCII\n"
              << AuditLine.getAuditLine() << "\n\n"
@@ -1075,7 +1075,7 @@ int main( const int argc, const char *argv[] )
    ParamCount = argc - 1;
    ParamStr = argv;
 
-   library::AuditLine AuditLine { "GDXDUMP" };
+   library::AuditLine_t AuditLine { "GDXDUMP" };
    if( ParamCount > 0 && gdlib::strutilx::StrUEqual( ParamStr[1], "AUDIT" ) )
    {
       std::cout << AuditLine.getAuditLine() << std::endl;

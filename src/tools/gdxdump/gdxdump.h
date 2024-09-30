@@ -68,7 +68,7 @@ void WriteDomainInfo();
 
 void WriteSetText();
 
-void Usage( const library::AuditLine &AuditLine );
+void Usage( const library::AuditLine_t &AuditLine );
 
 std::string NextParam();
 
