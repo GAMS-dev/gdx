@@ -22,7 +22,7 @@ struct TParamRec {
 using PParamRec = TParamRec *;
 
 // Class to handle command line parameters
-class TCmdParams
+class CmdParams_t
 {
    std::vector<std::pair<std::string, int>> FKeyList;
    std::map<int, TParamRec> FParList;
