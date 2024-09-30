@@ -22,6 +22,8 @@ void printErrorMessage( const std::string &message, const bool printError )
    errorStream << message << std::endl;
 }
 
+// TODO: Make this a no-op in release mode builds (NDEBUG set)
+// The assert checks in Delphi/P3 will be removed in debug builds
 void assertWithMessage( const bool expression, const std::string &message )
 {
    if( !expression ) printErrorMessage( message );
