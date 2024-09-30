@@ -36,7 +36,7 @@ enum class FldOnly_t : uint8_t
    fld_never
 };
 
-enum class TStatusCode : uint8_t
+enum class StatusCode_t : uint8_t
 {
    sc_same,
    sc_notf1,

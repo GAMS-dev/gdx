@@ -60,7 +60,7 @@ bool diffUELsRegistered;
 std::unique_ptr<gdlib::strhash::TXStrHashList<std::nullptr_t>> UELTable;
 int staticUELNum;
 double EpsAbsolute, EpsRelative;
-std::map<library::short_string, TStatusCode> StatusTable;
+std::map<library::short_string, StatusCode_t> StatusTable;
 std::unique_ptr<library::cmdpar::TCmdParams> CmdParams;
 utils::bsSet<tvarvaltype, GMS_VAL_MAX> ActiveFields;
 FldOnly_t FldOnly;
@@ -186,14 +186,14 @@ void CompareSy( const int Sy1, const int Sy2 )
    gdxSyType ST;
    library::short_string ID;
    bool SymbOpen {};
-   TStatusCode Status;
+   StatusCode_t Status;
    gdxValues_t DefValues {};
 
    auto CheckSymbOpen = [&]() -> bool {
       registerDiffUELs();
-      if( Status == TStatusCode::sc_dim10 )
-         Status = TStatusCode::sc_dim10_diff;
-      if( !SymbOpen && Status != TStatusCode::sc_dim10_diff )
+      if( Status == StatusCode_t::sc_dim10 )
+         Status = StatusCode_t::sc_dim10_diff;
+      if( !SymbOpen && Status != StatusCode_t::sc_dim10_diff )
       {
          if( FldOnly == FldOnly_t::fld_yes && ( ST == dt_var || ST == dt_equ ) )
          {
@@ -470,12 +470,12 @@ void CompareSy( const int Sy1, const int Sy2 )
       if( Eq && !ShowDefRec )
          return;
 
-      if( Status == TStatusCode::sc_same )
-         Status = TStatusCode::sc_key;
-      if( Status == TStatusCode::sc_dim10 )
-         Status = TStatusCode::sc_dim10_diff;
+      if( Status == StatusCode_t::sc_same )
+         Status = StatusCode_t::sc_key;
+      if( Status == StatusCode_t::sc_dim10 )
+         Status = StatusCode_t::sc_dim10_diff;
 
-      if( Status == TStatusCode::sc_dim10_diff || !CheckSymbOpen() )
+      if( Status == StatusCode_t::sc_dim10_diff || !CheckSymbOpen() )
          return;
 
 #if VERBOSE >= 2
@@ -531,7 +531,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    ST2 = static_cast<gdxSyType>( iST2 );
    if( ST2 == dt_alias )
       ST2 = dt_set;
-   Status = TStatusCode::sc_same;
+   Status = StatusCode_t::sc_same;
 
    if( Dim != Dim2 || ST != ST2 )
    {
@@ -539,13 +539,13 @@ void CompareSy( const int Sy1, const int Sy2 )
       if( ST != ST2 )
       {
          std::cout << "Typ1 = " << library::gdxDataTypStrL( ST ) << ", Typ2 = " << library::gdxDataTypStrL( ST2 ) << '\n';
-         Status = TStatusCode::sc_typ;
+         Status = StatusCode_t::sc_typ;
       }
       if( Dim != Dim2 )
       {
          std::cout << "Dim1 = " << Dim << ", Dim2 = " << Dim2 << std::endl;
-         if( Status == TStatusCode::sc_same )
-            Status = TStatusCode::sc_dim;
+         if( Status == StatusCode_t::sc_same )
+            Status = StatusCode_t::sc_dim;
       }
       goto label999;
    }
@@ -564,7 +564,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          }
       if( DomFlg )
       {
-         Status = TStatusCode::sc_domain;
+         Status = StatusCode_t::sc_domain;
 
 #if VERBOSE >= 1
          std::cout << "Domain differences for symbol = " << ID << '\n';
@@ -595,7 +595,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    }
 
    if( Dim >= GMS_MAX_INDEX_DIM || ( DiffOnly && Dim - 1 >= GMS_MAX_INDEX_DIM ) )
-      Status = TStatusCode::sc_dim10;
+      Status = StatusCode_t::sc_dim10;
 
    if( matrixFile )
    {
@@ -642,8 +642,8 @@ void CompareSy( const int Sy1, const int Sy2 )
          else
             Eq = CheckParDifference( Keys1, Vals1, Vals2 );
 
-         if( !Eq && Status == TStatusCode::sc_same )
-            Status = TStatusCode::sc_data;
+         if( !Eq && Status == StatusCode_t::sc_same )
+            Status = StatusCode_t::sc_data;
 
          if( matrixFile )
          {
@@ -696,7 +696,7 @@ void CompareSy( const int Sy1, const int Sy2 )
    SymbClose();
 
 label999:
-   if( !( Status == TStatusCode::sc_same || Status == TStatusCode::sc_dim10 ) )
+   if( !( Status == StatusCode_t::sc_same || Status == StatusCode_t::sc_dim10 ) )
       StatusTable.insert( { ID, Status } );
 }
 
@@ -1084,7 +1084,7 @@ int main( const int argc, const char *argv[] )
       if( gdxFindSymbol( PGX2, pair.first.data(), &NN ) != 0 )
          CompareSy( pair.second, NN );
       else
-         StatusTable.insert( { pair.first, TStatusCode::sc_notf2 } );
+         StatusTable.insert( { pair.first, StatusCode_t::sc_notf2 } );
    }
 
    // Find symbols in file 2 that are not in file 1
@@ -1101,7 +1101,7 @@ int main( const int argc, const char *argv[] )
    {
       int NN;
       if( gdxFindSymbol( PGX1, pair.first.data(), &NN ) == 0 )
-         StatusTable.insert( { pair.first, TStatusCode::sc_notf1 } );
+         StatusTable.insert( { pair.first, StatusCode_t::sc_notf1 } );
    }
 
    if( StatusTable.empty() )
