@@ -87,7 +87,7 @@ std::string ValAsString( const gdxHandle_t &PGX, const double V )
          std::ostringstream oss;
          oss << std::fixed << std::setprecision( 5 ) << V;
          result = oss.str();
-         return gdlib::strutilx::PadLeft( result.string(), WIDTH );
+         return gdlib::strutilx::PadLeft( result, WIDTH );
       }
    }
    // Empty string will be returned
@@ -96,14 +96,14 @@ std::string ValAsString( const gdxHandle_t &PGX, const double V )
 
 void FatalErrorExit( const int ErrNr )
 {
-   if( !DiffTmpName.empty() && rtl::sysutils_p3::FileExists( DiffTmpName.string() ) )
+   if( !DiffTmpName.empty() && rtl::sysutils_p3::FileExists( DiffTmpName ) )
    {
       if( PGXDIF )
       {
          gdxClose( PGXDIF );
          gdxFree( &PGXDIF );
       }
-      rtl::sysutils_p3::DeleteFileFromDisk( DiffTmpName.string() );
+      rtl::sysutils_p3::DeleteFileFromDisk( DiffTmpName );
    }
    exit( ErrNr );
 }
@@ -128,25 +128,25 @@ void CheckGDXError( const gdxHandle_t &PGX )
    {
       library::short_string S;
       gdxErrorStr( PGX, ErrNr, S.data() );
-      library::printErrorMessage( "GDXDIFF GDX Error: " + S.string() );
+      library::printErrorMessage( "GDXDIFF GDX Error: " + S );
    }
 }
 
 void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX )
 {
-   if( !rtl::sysutils_p3::FileExists( fn.string() ) )
-      FatalError( "Input file not found " + fn.string(), static_cast<int>( ErrorCode::ERR_NOFILE ) );
+   if( !rtl::sysutils_p3::FileExists( fn ) )
+      FatalError( "Input file not found " + fn, static_cast<int>( ErrorCode::ERR_NOFILE ) );
 
    library::short_string S;
    if( !gdxCreate( &PGX, S.data(), S.length() ) )
-      FatalError( "Cannot load GDX library " + S.string(), static_cast<int>( ErrorCode::ERR_LOADDLL ) );
+      FatalError( "Cannot load GDX library " + S, static_cast<int>( ErrorCode::ERR_LOADDLL ) );
 
    int ErrNr;
    gdxOpenRead( PGX, fn.data(), &ErrNr );
    if( ErrNr != 0 )
    {
       gdxErrorStr( PGX, ErrNr, S.data() );
-      FatalError2( "Problem reading GDX file + " + fn.string(), S.string(), static_cast<int>( ErrorCode::ERR_READGDX ) );
+      FatalError2( "Problem reading GDX file + " + fn, S, static_cast<int>( ErrorCode::ERR_READGDX ) );
    }
 
    int NrElem, HighV;
@@ -331,7 +331,7 @@ void CompareSy( const int Sy1, const int Sy2 )
          if( iSV2 == sv_normal )
          {
             if( gdxAcronymName( PGX1, V1, S1.data() ) != 0 && gdxAcronymName( PGX2, V2, S2.data() ) != 0 )
-               result = gdlib::strutilx::StrUEqual( S1.string(), S2.string() );
+               result = gdlib::strutilx::StrUEqual( S1.data(), S2.data() );
             else
             {
                AbsDiff = std::abs( V1 - V2 );
@@ -704,7 +704,7 @@ label999:
 bool GetAsDouble( const library::short_string &S, double &V )
 {
    int k;
-   utils::val( S.string(), V, k );
+   utils::val( S, V, k );
    bool result { k == 0 && V >= 0 };
    if( !result )
       V = 0;
@@ -738,8 +738,8 @@ void Usage( const library::AuditLine &AuditLine )
 
 void CheckFile( library::short_string &fn )
 {
-   if( !rtl::sysutils_p3::FileExists( fn.string() ) && gdlib::strutilx::ExtractFileExtEx( fn.string() ).empty() )
-      fn = gdlib::strutilx::ChangeFileExtEx( fn.string(), ".gdx" );
+   if( !rtl::sysutils_p3::FileExists( fn ) && gdlib::strutilx::ExtractFileExtEx( fn ).empty() )
+      fn = gdlib::strutilx::ChangeFileExtEx( fn, ".gdx" );
 }
 
 int main( const int argc, const char *argv[] )
@@ -822,8 +822,8 @@ int main( const int argc, const char *argv[] )
    if( DiffFileName.empty() )
       DiffFileName = "diffile";
 
-   if( gdlib::strutilx::ExtractFileExtEx( DiffFileName.string() ).empty() )
-      DiffFileName = gdlib::strutilx::ChangeFileExtEx( DiffFileName.string(), ".gdx" );
+   if( gdlib::strutilx::ExtractFileExtEx( DiffFileName ).empty() )
+      DiffFileName = gdlib::strutilx::ChangeFileExtEx( DiffFileName, ".gdx" );
 
    if( !CmdParams->HasParam( static_cast<int>( KP::kp_eps ), S ) )
       EpsAbsolute = 0;
@@ -866,29 +866,29 @@ int main( const int argc, const char *argv[] )
       ActiveFields = { GMS_VAL_LEVEL, GMS_VAL_MARGINAL, GMS_VAL_LOWER, GMS_VAL_UPPER, GMS_VAL_SCALE };
    else
    {
-      if( gdlib::strutilx::StrUEqual( S.string(), "All" ) )
+      if( gdlib::strutilx::StrUEqual( S.data(), "All" ) )
          ActiveFields = { GMS_VAL_LEVEL, GMS_VAL_MARGINAL, GMS_VAL_LOWER, GMS_VAL_UPPER, GMS_VAL_SCALE };
-      else if( gdlib::strutilx::StrUEqual( S.string(), "L" ) )
+      else if( gdlib::strutilx::StrUEqual( S.data(), "L" ) )
       {
          FldOnlyFld = GMS_VAL_LEVEL;
          FldOnlyVar = FldOnly::fld_maybe;
       }
-      else if( gdlib::strutilx::StrUEqual( S.string(), "M" ) )
+      else if( gdlib::strutilx::StrUEqual( S.data(), "M" ) )
       {
          FldOnlyFld = GMS_VAL_MARGINAL;
          FldOnlyVar = FldOnly::fld_maybe;
       }
-      else if( gdlib::strutilx::StrUEqual( S.string(), "Up" ) )
+      else if( gdlib::strutilx::StrUEqual( S.data(), "Up" ) )
       {
          FldOnlyFld = GMS_VAL_UPPER;
          FldOnlyVar = FldOnly::fld_maybe;
       }
-      else if( gdlib::strutilx::StrUEqual( S.string(), "Lo" ) )
+      else if( gdlib::strutilx::StrUEqual( S.data(), "Lo" ) )
       {
          FldOnlyFld = GMS_VAL_LOWER;
          FldOnlyVar = FldOnly::fld_maybe;
       }
-      else if( gdlib::strutilx::StrUEqual( S.string(), "Prior" ) || gdlib::strutilx::StrUEqual( S.string(), "Scale" ) )
+      else if( gdlib::strutilx::StrUEqual( S.data(), "Prior" ) || gdlib::strutilx::StrUEqual( S.data(), "Scale" ) )
       {
          FldOnlyFld = GMS_VAL_SCALE;
          FldOnlyVar = FldOnly::fld_maybe;
@@ -930,7 +930,7 @@ int main( const int argc, const char *argv[] )
    // This is a mistake; should be HasKey but leave it
    if( CmdParams->HasParam( static_cast<int>( KP::kp_settext ), S ) )
    {
-      S = gdlib::strutilx::UpperCase( S.string() );
+      S = gdlib::strutilx::UpperCase( S.data() );
       if( S == "0" || S == "N" || S == "F" )
          CompSetText = false;
       else if( S.empty() || S == "1" || S == "Y" || S == "T" )
@@ -969,9 +969,9 @@ int main( const int argc, const char *argv[] )
                {
                   ID = S.string().substr( 0, k );
                   S = S.string().erase( 0, k + 1 );
-                  S = utils::trim( S.string() );
+                  S = utils::trim( S );
                }
-               ID = utils::trim( ID.string() );
+               ID = utils::trim( ID );
                if( !ID.empty() )
                {
                   if( IDsOnly->IndexOf( ID.data() ) < 0 )
@@ -1011,9 +1011,9 @@ int main( const int argc, const char *argv[] )
                {
                   ID = S.string().substr( 0, k );
                   S = S.string().erase( 0, k + 1 );
-                  S = utils::trim( S.string() );
+                  S = utils::trim( S );
                }
-               ID = utils::trim( ID.string() );
+               ID = utils::trim( ID );
                if( !ID.empty() )
                {
                   if( SkipIDs->IndexOf( ID.data() ) < 0 )
@@ -1064,13 +1064,13 @@ int main( const int argc, const char *argv[] )
 
    library::short_string S2;
    if( !gdxCreate( &PGXDIF, S2.data(), S2.length() ) )
-      FatalError( "Unable to load GDX library: " + S2.string(), static_cast<int>( ErrorCode::ERR_LOADDLL ) );
+      FatalError( "Unable to load GDX library: " + S2, static_cast<int>( ErrorCode::ERR_LOADDLL ) );
 
    // Temporary file name
    for( int N { 1 }; N <= std::numeric_limits<int>::max(); N++ )
    {
       DiffTmpName = "tmpdifffile" + std::to_string( N ) + ".gdx";
-      if( !rtl::sysutils_p3::FileExists( DiffTmpName.string() ) )
+      if( !rtl::sysutils_p3::FileExists( DiffTmpName ) )
          break;
    }
 
@@ -1080,7 +1080,7 @@ int main( const int argc, const char *argv[] )
       int N { gdxGetLastError( PGXDIF ) };
       // Nil is used instead of PGXDIF in Delphi code
       gdxErrorStr( PGXDIF, N, S.data() );
-      FatalError2( "Cannot create file: " + DiffTmpName.string(), S.string(), static_cast<int>( ErrorCode::ERR_WRITEGDX ) );
+      FatalError2( "Cannot create file: " + DiffTmpName, S, static_cast<int>( ErrorCode::ERR_WRITEGDX ) );
    }
 
    UELTable = std::make_unique<gdlib::strhash::TXStrHashList<std::nullptr_t>>();
@@ -1150,7 +1150,7 @@ int main( const int argc, const char *argv[] )
          if( pair.first.length() > NN )
             NN = static_cast<int>( pair.first.length() );
       for( const auto &pair: StatusTable )
-         std::cout << gdlib::strutilx::PadLeft( pair.first.string(), NN ) << "   "
+         std::cout << gdlib::strutilx::PadLeft( pair.first, NN ) << "   "
                    << StatusText.at( static_cast<int>( pair.second ) ) << std::endl;
    }
 
@@ -1188,25 +1188,25 @@ int main( const int argc, const char *argv[] )
    gdxClose( PGXDIF );
    gdxFree( &PGXDIF );
 
-   if( !rtl::sysutils_p3::FileExists( DiffFileName.string() ) )
+   if( !rtl::sysutils_p3::FileExists( DiffFileName ) )
       RenameOK = true;
    else
    {
-      RenameOK = rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName.string() );
+      RenameOK = rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName );
 #if defined( _WIN32 )
       if( !RenameOK )
       {
          int ShellCode;
-         if( rtl::p3process::P3ExecP( "IDECmds.exe ViewClose \"" + DiffFileName.string() + "\"", ShellCode ) == 0 )
-            RenameOK = rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName.string() );
+         if( rtl::p3process::P3ExecP( "IDECmds.exe ViewClose \"" + DiffFileName + "\"", ShellCode ) == 0 )
+            RenameOK = rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName );
       }
 #endif
    }
 
    if( RenameOK )
    {
-      rtl::sysutils_p3::RenameFile( DiffTmpName.string(), DiffFileName.string() );
-      RenameOK = rtl::sysutils_p3::FileExists( DiffFileName.string() );
+      rtl::sysutils_p3::RenameFile( DiffTmpName, DiffFileName );
+      RenameOK = rtl::sysutils_p3::FileExists( DiffFileName );
    }
 
    gdxClose( PGX1 );

@@ -161,10 +161,10 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
          if( FrstError )
          {
             // TODO: Use four stars here instead of the usual three?
-            library::printErrorMessage( "\n**** Error in file " + FileName.string() );
+            library::printErrorMessage( "\n**** Error in file " + FileName );
             FrstError = false;
          }
-         library::printErrorMessage( "     " + Msg + ": " + SyName.string() );
+         library::printErrorMessage( "     " + Msg + ": " + SyName );
       }
       return Result;
    };
@@ -190,7 +190,7 @@ void TSymbolList::AddPGXFile( const int FNr, const TProcessPass Pass )
    if( ErrNr != 0 )
    {
       gdxErrorStr( nullptr, ErrNr, ErrMsg.data() );
-      library::printErrorMessage( "\nError reading file, message: " + ErrMsg.string() );
+      library::printErrorMessage( "\nError reading file, message: " + ErrMsg );
       return;
    }
    InputFilesRead++;
@@ -336,7 +336,7 @@ bool TSymbolList::CollectBigOne( const int SyNr )
       if( ErrNr != 0 )
       {
          gdxErrorStr( nullptr, ErrNr, ErrMsg.data() );
-         library::printErrorMessage( "Error reading file, message: " + ErrMsg.string() );
+         library::printErrorMessage( "Error reading file, message: " + ErrMsg );
          return false;
       }
 
@@ -556,7 +556,7 @@ int TSymbolList::FindAcronym( const library::short_string &Id )
    for( int N { 1 }; N <= gdxAcronymCount( PGXMerge ); N++ )
    {
       gdxAcronymGetInfo( PGXMerge, N, AName.data(), AText.data(), &AIndx );
-      if( gdlib::strutilx::StrUEqual( Id.string(), AName.string() ) )
+      if( gdlib::strutilx::StrUEqual( Id.data(), AName.data() ) )
          return N;
    }
    return {};
@@ -720,8 +720,8 @@ bool GetParameters( const int argc, const char *argv[] )
 
    if( OutFile.empty() )
       OutFile = "merged.gdx";
-   else if( gdlib::strutilx::ExtractFileExtEx( OutFile.string() ).empty() )
-      OutFile = gdlib::strutilx::ChangeFileExtEx( OutFile.string(), ".gdx" );
+   else if( gdlib::strutilx::ExtractFileExtEx( OutFile ).empty() )
+      OutFile = gdlib::strutilx::ChangeFileExtEx( OutFile, ".gdx" );
 
    return Result;
 }
@@ -762,7 +762,7 @@ int main( const int argc, const char *argv[] )
 
    if( !gdxGetReady( Msg.data(), Msg.length() ) )
    {
-      library::printErrorMessage( "*** Error: Unable to load gdx library, message:\n" + Msg.string() );
+      library::printErrorMessage( "*** Error: Unable to load gdx library, message:\n" + Msg );
       return 1;
    }
 
@@ -774,15 +774,15 @@ int main( const int argc, const char *argv[] )
       return 1;
    }
 
-   if( rtl::sysutils_p3::FileExists( OutFile.string() ) )
+   if( rtl::sysutils_p3::FileExists( OutFile ) )
    {
       if( StrictMode )
       {
-         library::printErrorMessage( "*** Error  : Output file \"" + OutFile.string() + "\" already exists (strict mode)" );
+         library::printErrorMessage( "*** Error  : Output file \"" + OutFile + "\" already exists (strict mode)" );
          return 1;
       }
       else
-         rtl::sysutils_p3::DeleteFileFromDisk( OutFile.string() );
+         rtl::sysutils_p3::DeleteFileFromDisk( OutFile );
    }
 
    if( !SyList->IsIncludeListEmpty() && !SyList->IsExcludeListEmpty() )
@@ -798,7 +798,7 @@ int main( const int argc, const char *argv[] )
    {
       library::printErrorMessage( "*** Error  : Cannot write to output file, Error Nr = " + std::to_string( ErrNr ) );
       gdxErrorStr( nullptr, ErrNr, Msg.data() );
-      library::printErrorMessage( "*** Message: " + Msg.string() );
+      library::printErrorMessage( "*** Message: " + Msg );
       return 1;
    }
 

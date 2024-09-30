@@ -269,7 +269,7 @@ void CheckLiterals()
    {
       if( gdxUMFindUEL( PGX, LiteralPool.at( i ).data(), &EN, &UMap ) == 0 )
       {
-         ReportError( "Literal " + LiteralPool.at( i ).string() + " not a valid UEL in GDX file" );
+         ReportError( "Literal " + LiteralPool.at( i ) + " not a valid UEL in GDX file" );
          EN = -1;
       }
       LiteralUel.at( i ) = EN;
@@ -338,7 +338,7 @@ int main( const int argc, const char *argv[] )
    if( !gdxGetReady( Msg.data(), Msg.length() ) )
    {
       library::printErrorMessage( "*** Could not load GDX library" );
-      library::printErrorMessage( "*** Msg: " + Msg.string() );
+      library::printErrorMessage( "*** Msg: " + Msg );
       return 1;
    }
 
@@ -348,8 +348,8 @@ int main( const int argc, const char *argv[] )
    if( rc != 0 )
    {
       gdxErrorStr( nullptr, rc, Msg.data() );
-      library::printErrorMessage( "*** Could not open GDX: " + FnGdx.string() );
-      library::printErrorMessage( "*** Msg: " + Msg.string() );
+      library::printErrorMessage( "*** Could not open GDX: " + FnGdx );
+      library::printErrorMessage( "*** Msg: " + Msg );
       // UnloadGdxLibrary();
       return 1;
    }
@@ -360,7 +360,7 @@ int main( const int argc, const char *argv[] )
 
    if( ParamCount == 1 )
    {
-      FnVeda = gdlib::strutilx::ChangeFileExtEx( FnGdx.string(), ".csv" );
+      FnVeda = gdlib::strutilx::ChangeFileExtEx( FnGdx, ".csv" );
       std::cout << "\nContent of GDX " << FnGdx << " dump written to " << FnVeda << '\n'
                 << "\nNum Typ Dim Count  Name" << std::endl;
 
@@ -393,15 +393,15 @@ int main( const int argc, const char *argv[] )
       std::cout << std::setw( 17 ) << Cnt << "  GDX record count\n"
                 << std::setw( 17 ) << Cnt1 + 1 << "  CSV record count (including header)" << std::endl;
 
-      f.open( FnVeda.string() );
+      f.open( FnVeda );
       if( !f.is_open() )
       {
-         ReportError( "Could not open file: " + FnVeda.string() );
+         ReportError( "Could not open file: " + FnVeda );
          ReportError( "Msg: " + std::string { strerror( errno ) } );
          return 1;
       }
 
-      DataLine.at( 1 ) = '"' + gdlib::strutilx::ExtractFileNameEx( FnGdx.string() ) + '"';
+      DataLine.at( 1 ) = '"' + gdlib::strutilx::ExtractFileNameEx( FnGdx ) + '"';
       DataLine.at( 2 ) = "\"Name\"";
       for( i = 1; i <= MaxSyDim; i++ )
          DataLine.at( i + 2 ) = "\"Index " + std::to_string( i ) + '"';
@@ -421,7 +421,7 @@ int main( const int argc, const char *argv[] )
          switch( SyType )
          {
             case dt_set:
-               DataLine.at( 2 ) = '"' + SyName.string() + '"';
+               DataLine.at( 2 ) = '"' + SyName + '"';
                gdxDataReadStrStart( PGX, SyNr, &NrRecs );
                while( gdxDataReadStr( PGX, ElementsPtrs, Values, &First ) != 0 )
                {
@@ -441,7 +441,7 @@ int main( const int argc, const char *argv[] )
                break;
 
             case dt_par:
-               DataLine.at( 2 ) = '"' + SyName.string() + '"';
+               DataLine.at( 2 ) = '"' + SyName + '"';
                gdxDataReadStrStart( PGX, SyNr, &NrRecs );
                while( gdxDataReadStr( PGX, ElementsPtrs, Values, &First ) != 0 )
                {
@@ -469,7 +469,7 @@ int main( const int argc, const char *argv[] )
                      DataLine.at( i + 2 ) = '"' + std::string { Elements[i] } + '"';
                   for( i = 1; i <= MaxSuff; i++ )
                   {
-                     DataLine.at( 2 ) = '"' + SyName.string() + '.' + NameSuff.at( i ) + '"';
+                     DataLine.at( 2 ) = '"' + SyName + '.' + NameSuff.at( i ) + '"';
                      WriteDataLine();
                      if( IsASpecialValue( Values[i - 1], MappedValue, IsAString ) )
                      {
@@ -506,22 +506,22 @@ int main( const int argc, const char *argv[] )
    if( ParamCount > 2 )
    {
       FnVeda = ParamStr[3];
-      RunId = StripExt( gdlib::strutilx::ExtractFileNameEx( FnVeda.string() ) );
-      if( utils::sameText( gdlib::strutilx::ExtractFileExtEx( FnVeda.string() ), ".csv" ) )
+      RunId = StripExt( gdlib::strutilx::ExtractFileNameEx( FnVeda ) );
+      if( utils::sameText( gdlib::strutilx::ExtractFileExtEx( FnVeda ), ".csv" ) )
       {
-         FnVeda = gdlib::strutilx::ChangeFileExtEx( RunId.string() + "_vd", ".csv" );
+         FnVeda = gdlib::strutilx::ChangeFileExtEx( RunId + "_vd", ".csv" );
          VedaLine = false;
       }
       else
       {
          VedaLine = true;
-         FnVeda = gdlib::strutilx::ChangeFileExtEx( FnVeda.string(), ".vd" );
+         FnVeda = gdlib::strutilx::ChangeFileExtEx( FnVeda, ".vd" );
       }
    }
    else
    {
-      RunId = StripExt( gdlib::strutilx::ExtractFileNameEx( FnGdx.string() ) );
-      FnVeda = gdlib::strutilx::ChangeFileExtEx( RunId.string(), ".vd" );
+      RunId = StripExt( gdlib::strutilx::ExtractFileNameEx( FnGdx ) );
+      FnVeda = gdlib::strutilx::ChangeFileExtEx( RunId, ".vd" );
       VedaLine = true;
    }
 
@@ -531,7 +531,7 @@ int main( const int argc, const char *argv[] )
    else
       Filler.clear();
 
-   LoadVdd( FnVdd.string() );
+   LoadVdd( FnVdd );
    if( strcmp( ParamStr[4], "" ) != 0 )
    {
       f.open( ParamStr[4] );
@@ -560,7 +560,7 @@ int main( const int argc, const char *argv[] )
 
       if( SyNr <= 0 )
       {
-         ReportError( "Did not find GAMS name " + GamsName.at( i ).string() + " in GDX file" );
+         ReportError( "Did not find GAMS name " + GamsName.at( i ) + " in GDX file" );
          continue;
       }
       gdxSymbolInfo( PGX, SyNr, SyName.data(), &SyDim, &iSyType );
@@ -569,7 +569,7 @@ int main( const int argc, const char *argv[] )
 
       if( SyDim != GamsDim.at( i ) )
       {
-         ReportError( "Symbol dimensions do not match for GAMS name " + GamsName.at( i ).string() );
+         ReportError( "Symbol dimensions do not match for GAMS name " + GamsName.at( i ) );
          ReportError( "GDX dimension=" + std::to_string( SyDim ) + " VDD dimension is " + std::to_string( GamsDim.at( i ) ) );
          continue;
       }
@@ -579,7 +579,7 @@ int main( const int argc, const char *argv[] )
          case dt_set:
             if( GamsSuff.at( i ) != 0 )
             {
-               ReportError( "Suffix not allowed for GAMS symbol " + GamsName.at( i ).string() );
+               ReportError( "Suffix not allowed for GAMS symbol " + GamsName.at( i ) );
                continue;
             }
             break;
@@ -588,7 +588,7 @@ int main( const int argc, const char *argv[] )
             // Apparently gary wants primal/dual pairs also for parameters
             if( !( GamsSuff.at( i ) == 0 || GamsSuff.at( i ) == 5 ) )
             {
-               ReportError( "Suffix not allowed for GAMS symbol " + GamsName.at( i ).string() );
+               ReportError( "Suffix not allowed for GAMS symbol " + GamsName.at( i ) );
                continue;
             }
             break;
@@ -597,7 +597,7 @@ int main( const int argc, const char *argv[] )
          case dt_equ:
             if( GamsSuff.at( i ) == 0 )
             {
-               ReportError( "Suffix missing for GAMS symbol " + GamsName.at( i ).string() );
+               ReportError( "Suffix missing for GAMS symbol " + GamsName.at( i ) );
                continue;
             }
 
@@ -616,21 +616,21 @@ int main( const int argc, const char *argv[] )
       gdxFindSymbol( PGX, GamsText.at( i ).data(), &SyNr );
       if( SyNr <= 0 )
       {
-         ReportError( "Did not find GAMS text/set name \"" + GamsText.at( i ).string() + "\" in GDX file" );
+         ReportError( "Did not find GAMS text/set name \"" + GamsText.at( i ) + "\" in GDX file" );
          continue;
       }
       gdxSymbolInfo( PGX, SyNr, SyName.data(), &SyDim, &iSyType );
       SyType = gdxSyType( iSyType );
       if( SyType != dt_set )
       {
-         ReportError( "Gams text \"" + GamsText.at( i ).string() + "\" not a set" );
+         ReportError( "Gams text \"" + GamsText.at( i ) + "\" not a set" );
          continue;
       }
 
       // We allow multiple dimensions now
       // if( SyDim != 1 )
       // {
-      //    ReportError( "Gams text \"" + GamsText.at( i ).string() + "\" not of dimension 1 but " + std::to_string( SyDim ) );
+      //    ReportError( "Gams text \"" + GamsText.at( i ) + "\" not of dimension 1 but " + std::to_string( SyDim ) );
       //    continue;
       // }
 
@@ -641,14 +641,14 @@ int main( const int argc, const char *argv[] )
 
       // if( SyDim > k && Options.RelaxDimensionAll )
       // {
-      //    ReportError( "Dim(" + GamsText.at( i ).string() + ")=" + std::to_string( SyDim ) + "  Dim in [dimensiontext(all)]=" + std::to_string( k ) );
+      //    ReportError( "Dim(" + GamsText.at( i ) + ")=" + std::to_string( SyDim ) + "  Dim in [dimensiontext(all)]=" + std::to_string( k ) );
       //    continue;
       // }
 
       if( ( ExpandMap.at( i ) == false && SyDim != k ) ||
           ( ExpandMap.at( i ) == true && SyDim != k && !Options.RelaxDimensionAll ) )
       {
-         ReportError( "Dimension mismatch: Dim(" + GamsText.at( i ).string() + ")=" + std::to_string( SyDim ) + "  Dim in [DimensionText]=" + std::to_string( k ) );
+         ReportError( "Dimension mismatch: Dim(" + GamsText.at( i ) + ")=" + std::to_string( SyDim ) + "  Dim in [DimensionText]=" + std::to_string( k ) );
          continue;
       }
 
@@ -667,21 +667,21 @@ int main( const int argc, const char *argv[] )
             DimensionNumber = DimNo;
          if( DimNo != DimensionNumber )
          {
-            ReportError( "Record " + SyName.string() + " in [DimensionText(all)] section points to different tabs" );
+            ReportError( "Record " + SyName + " in [DimensionText(all)] section points to different tabs" );
             continue;
          }
 
          for( nn = 1; nn <= k - 1; nn++ )
             if( DimensionStore.TextList( i, nn ) == DimensionStore.TextList( i, k ) )
             {
-               ReportError( "Duplicate index for " + SyName.string() + " in [DimensionText(all)] section" );
+               ReportError( "Duplicate index for " + SyName + " in [DimensionText(all)] section" );
                break;
             }
       }
 
       if( DimensionNumber == -1 )
       {
-         ReportError( "Record " + SyName.string() + " in [DimensionText(all)] has not a valid tab" );
+         ReportError( "Record " + SyName + " in [DimensionText(all)] has not a valid tab" );
          return 1;
       }
 
@@ -695,15 +695,15 @@ int main( const int argc, const char *argv[] )
 
    if( Options.Format == Format_t::FormatCSV )
    {
-      FnVedaH = gdlib::strutilx::ChangeFileExtEx( RunId.string() + "_vdheader", ".csv" );
-      f.open( FnVedaH.string() );
+      FnVedaH = gdlib::strutilx::ChangeFileExtEx( RunId + "_vdheader", ".csv" );
+      f.open( FnVedaH );
    }
    else
-      f.open( FnVeda.string() );
+      f.open( FnVeda );
 
    if( !f.is_open() )
    {
-      ReportError( "Could not open file: " + FnVeda.string() );
+      ReportError( "Could not open file: " + FnVeda );
       ReportError( "Msg: " + std::string { strerror( errno ) } );
       return 1;
    }
@@ -713,14 +713,14 @@ int main( const int argc, const char *argv[] )
       // bveda headers
       // f << "*ImportID         - " << DimensionStore.GetTabName( RunPos ) << ':' << RunId << std::endl;
       WriteHeader( f, "GDX2VEDAversion", BuildVersion );
-      WriteHeader( f, "ImportID", "Scenario:" + RunId.string() );
-      WriteHeader( f, "VEDAFlavor", VEDAFlavor.string() );
+      WriteHeader( f, "ImportID", "Scenario:" + RunId );
+      WriteHeader( f, "VEDAFlavor", VEDAFlavor );
 
       s.clear();
       for( i = 1; i < NumDimension; i++ )
-         s += DimensionStore.GetTabName( i ).string() + ';';
+         s += DimensionStore.GetTabName( i ) + ';';
       s += WritePV( ';' );
-      WriteHeader( f, "Dimensions", s.string() );
+      WriteHeader( f, "Dimensions", s );
 
       if( Parent != -1 )
       {
@@ -729,10 +729,10 @@ int main( const int argc, const char *argv[] )
          {
             if( i > 1 )
                s += ", ";
-            s += DimensionStore.GetTabName( Children.at( i ) ).string() + ": " +
-                 DimensionStore.GetTabName( Parent ).string();
+            s += DimensionStore.GetTabName( Children.at( i ) ) + ": " +
+                 DimensionStore.GetTabName( Parent );
          }
-         WriteHeader( f, "ParentDimensions", s.string() );
+         WriteHeader( f, "ParentDimensions", s );
       }
 
       Skip = true;
@@ -748,15 +748,15 @@ int main( const int argc, const char *argv[] )
                   s += ';';
                s += DimensionStore.GetTabName( i );
             }
-      WriteHeader( f, "SetsAllowed", s.string() );
+      WriteHeader( f, "SetsAllowed", s );
 
       s.clear();
       for( i = 1; i <= NumDimension; i++ )
-         s += DimensionStore.GetTabName( i ).string() + ":63;";
+         s += DimensionStore.GetTabName( i ) + ":63;";
       s += "PV:20";
       if( Options.ValueDim == 2 )
          s += ";DV:20";
-      WriteHeader( f, "FieldSize", s.string() );
+      WriteHeader( f, "FieldSize", s );
 
       // if( AtrPos > 0 )
       //    f << "*UnitsID          - " << DimensionStore.GetTabName( AtrPos ) << std::endl;
@@ -786,11 +786,11 @@ int main( const int argc, const char *argv[] )
    if( Options.Format == Format_t::FormatCSV )
    {
       f.close();
-      FnVeda = gdlib::strutilx::ChangeFileExtEx( RunId.string() + "_vd", ".csv" );
-      f.open( FnVeda.string() );
+      FnVeda = gdlib::strutilx::ChangeFileExtEx( RunId + "_vd", ".csv" );
+      f.open( FnVeda );
       if( !f.is_open() )
       {
-         ReportError( "Could not open file: " + FnVeda.string() );
+         ReportError( "Could not open file: " + FnVeda );
          ReportError( "Msg: " + std::string { strerror( errno ) } );
          return 1;
       }
@@ -826,7 +826,7 @@ int main( const int argc, const char *argv[] )
 
       DoSuppressZero = SuppressZero.IndexOf( AtrName.at( i ).data() ) != -1;
 
-      // DataLine.at( RunPos ) = '"' + RunId.string() + '"';
+      // DataLine.at( RunPos ) = '"' + RunId + '"';
       if( AtrPos > 0 )
          DataLine.at( AtrPos ) = '"' + AtrName.at( i ) + '"';
 

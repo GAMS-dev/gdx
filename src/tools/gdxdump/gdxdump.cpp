@@ -1400,7 +1400,7 @@ int main( const int argc, const char *argv[] )
             bHeader = true;
             continue;
          }
-         library::printErrorMessage( "Unrecognized option: " + s.string() );
+         library::printErrorMessage( "Unrecognized option: " + s );
          ExitCode = 1;
          break;
       }
@@ -1468,14 +1468,14 @@ int main( const int argc, const char *argv[] )
 
       if( !gdxGetReady( error_message.data(), error_message.length() ) )
       {
-         library::printErrorMessage( "Error loading GDX library: " + error_message.string() );
+         library::printErrorMessage( "Error loading GDX library: " + error_message );
          ExitCode = 3;
          goto End;
       }
 
       if( !gdxCreate( &PGX, error_message.data(), error_message.length() ) )
       {
-         library::printErrorMessage( "Error using GDX library: " + error_message.string() );
+         library::printErrorMessage( "Error using GDX library: " + error_message );
          ExitCode = 3;
          goto End;
       }
@@ -1485,7 +1485,7 @@ int main( const int argc, const char *argv[] )
    if( ErrNr != 0 )
    {
       gdxErrorStr( PGX, ErrNr, s.data() );
-      library::printErrorMessage( "Problem reading GDX file: " + s.string() );
+      library::printErrorMessage( "Problem reading GDX file: " + s );
       ExitCode = 4;
       goto End;
    }
@@ -1494,7 +1494,7 @@ int main( const int argc, const char *argv[] )
    if( ErrNr != 0 )
    {
       gdxErrorStr( PGX, ErrNr, s.data() );
-      library::printErrorMessage( "Problem reading GDX file: " + s.string() );
+      library::printErrorMessage( "Problem reading GDX file: " + s );
       ExitCode = 5;
       goto End;
    }
