@@ -960,7 +960,7 @@ void WriteSetText()
          s.clear();
       else
          gdxGetElemText( PGX, textIdx, s.data(), &idummy );
-      fo << gdlib::strutilx::PadLeft( std::to_string( textIdx ), 6 ) << "   \"" << s.data() << '\"' << '\n';
+      fo << gdlib::strutilx::PadLeft( std::to_string( textIdx ), 6 ) << "   \"" << s.data() << "\"\n";
    }
 }
 
@@ -1058,7 +1058,7 @@ void WriteAcronyms()
       fo << "Acronym " << sName.data();
       if( !sText.empty() )
          WriteQText( sText.data(), true );
-      fo << ';' << '\n';
+      fo << ";\n";
    }
 }
 
@@ -1531,8 +1531,7 @@ int main( const int argc, const char *argv[] )
 
    if( !ShowData )
    {
-      fo << '\n'
-         << "$gdxIn " << InputFile << '\n';
+      fo << "\n$gdxIn " << InputFile << '\n';
    }
    if( OutFormat != TOutFormat::fmt_csv )
       WriteAcronyms();
@@ -1607,8 +1606,7 @@ int main( const int argc, const char *argv[] )
       gdxSystemInfo( PGX, &NrSy, &NrUel );
       for( int N { 1 }; N <= NrSy; N++ )
          WriteSymbol( N );
-      fo << '\n'
-         << "$offEmpty\n";
+      fo << "\n$offEmpty\n";
    }
    if( OutFormat == TOutFormat::fmt_gamsbas && LineCount > 6 )
       fo << "$onListing\n";

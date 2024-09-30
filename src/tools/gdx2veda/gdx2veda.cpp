@@ -196,20 +196,20 @@ void ShortHelp()
              //  << gdlGetAuditLine() << '\n'
              //  << '\n'
              //  << '\n'
-             << ">gdx2veda gdx vdd [run]" << '\n'
+             << ">gdx2veda gdx vdd [run]\n"
              << '\n'
-             << "   gdx  GAMS GDX file" << '\n'
-             << "   vdd  VEDA Data Definition file" << '\n'
-             << "   run  VEDA Run identifier (optional)" << '\n'
+             << "   gdx  GAMS GDX file\n"
+             << "   vdd  VEDA Data Definition file\n"
+             << "   run  VEDA Run identifier (optional)\n"
              << '\n'
-             << "The VEDA data file name and run identifier are either taken from the gdx file name" << '\n'
-             << "or specified with the run name. Use \"token with blanks\" if needed." << '\n'
+             << "The VEDA data file name and run identifier are either taken from the gdx file name\n"
+             << "or specified with the run name. Use \"token with blanks\" if needed.\n"
              << '\n'
-             << ">gdx2veda mygdx    //  will dump the gdx symbols" << '\n'
-             << ">gdx2veda          //  prints this message" << '\n'
-             << ">gdx2veda --help   //  prints more detailed help message" << '\n'
+             << ">gdx2veda mygdx    //  will dump the gdx symbols\n"
+             << ">gdx2veda          //  prints this message\n"
+             << ">gdx2veda --help   //  prints more detailed help message\n"
              << '\n'
-             << "Add .csv to the run name to write in csv format" << '\n'
+             << "Add .csv to the run name to write in csv format\n"
              << std::endl;
 }
 
@@ -394,7 +394,7 @@ int main( const int argc, const char *argv[] )
          Cnt += ElemCount;
       }
 
-      std::cout << std::setw( 17 ) << Cnt << "  GDX record count" << '\n'
+      std::cout << std::setw( 17 ) << Cnt << "  GDX record count\n"
                 << std::setw( 17 ) << Cnt1 + 1 << "  CSV record count (including header)" << std::endl;
 
       f.open( FnVeda.string() );
