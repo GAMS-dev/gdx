@@ -288,7 +288,7 @@ bool CmdParams_t::AddParameters( const int AInsP, const std::string &CmdLine, co
       const int kw = NextKey( ks );
       if( kw == static_cast<int>( CmdParamStatus::ke_empty ) )
          break;
-      FParList.insert( { Insp, TParamRec { kw, ks } } );
+      FParList.insert( { Insp, ParamRec_t { kw, ks } } );
       Insp++;
    } while( true );
 
@@ -334,12 +334,12 @@ bool CmdParams_t::HasKey( int v )
    return FindKeyV( v ) >= 0;
 }
 
-TParamRec CmdParams_t::GetParams( int n )
+ParamRec_t CmdParams_t::GetParams( int n )
 {
    if( n >= 0 && n < static_cast<int>( FParList.size() ) )
       return FParList[n];
    else
-      return TParamRec { static_cast<int>( CmdParamStatus::ke_empty ), {} };
+      return ParamRec_t { static_cast<int>( CmdParamStatus::ke_empty ), {} };
 }
 
 int CmdParams_t::GetParamCount() const
