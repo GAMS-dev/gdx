@@ -616,7 +616,7 @@ bool GetParameters( const int argc, const char *argv[] )
       Output
    };
 
-   std::unique_ptr<library::cmdpar::TCmdParams> CmdParams;
+   std::unique_ptr<library::cmdpar::CmdParams_t> CmdParams;
    int ParNr, KW, X, K;
    std::string KS, Id;
 
@@ -626,7 +626,7 @@ bool GetParameters( const int argc, const char *argv[] )
    // Probably unnecessary:
    OutFile.clear();
    StrictMode = false;
-   CmdParams = std::make_unique<library::cmdpar::TCmdParams>();
+   CmdParams = std::make_unique<library::cmdpar::CmdParams_t>();
 
    CmdParams->AddParam( static_cast<int>( KP::Id ), "ID" );
    CmdParams->AddParam( static_cast<int>( KP::Exclude ), "EXCLUDE" );
@@ -641,7 +641,7 @@ bool GetParameters( const int argc, const char *argv[] )
    {
       ParNr = 0;
       do {
-         library::cmdpar::TParamRec ParamRec { CmdParams->GetParams( ParNr ) };
+         library::cmdpar::ParamRec_t ParamRec { CmdParams->GetParams( ParNr ) };
          KW = ParamRec.Key;
          KS = ParamRec.KeyS;
 

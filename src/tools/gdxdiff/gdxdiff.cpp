@@ -61,7 +61,7 @@ std::unique_ptr<gdlib::strhash::TXStrHashList<std::nullptr_t>> UELTable;
 int staticUELNum;
 double EpsAbsolute, EpsRelative;
 std::map<library::short_string, StatusCode_t> StatusTable;
-std::unique_ptr<library::cmdpar::TCmdParams> CmdParams;
+std::unique_ptr<library::cmdpar::CmdParams_t> CmdParams;
 utils::bsSet<tvarvaltype, GMS_VAL_MAX> ActiveFields;
 FldOnly_t FldOnly;
 tvarvaltype FldOnlyFld;
@@ -762,7 +762,7 @@ int main( const int argc, const char *argv[] )
    // So we can check later
    DiffTmpName.clear();
 
-   CmdParams = std::make_unique<library::cmdpar::TCmdParams>();
+   CmdParams = std::make_unique<library::cmdpar::CmdParams_t>();
 
    CmdParams->AddParam( static_cast<int>( library::cmdpar::CmdParamStatus::kp_input ), "I" );
    CmdParams->AddParam( static_cast<int>( library::cmdpar::CmdParamStatus::kp_input ), "Input" );
@@ -794,7 +794,7 @@ int main( const int argc, const char *argv[] )
    matrixFile = false;
    diffUELsRegistered = false;
 
-   library::cmdpar::TParamRec Parameter { CmdParams->GetParams( 0 ) };
+   library::cmdpar::ParamRec_t Parameter { CmdParams->GetParams( 0 ) };
    if( Parameter.Key == static_cast<int>( library::cmdpar::CmdParamStatus::kp_input ) )
       InFile1 = Parameter.KeyS;
    // else
