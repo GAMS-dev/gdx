@@ -30,7 +30,8 @@ void printErrorMessageWithError( const std::string &message )
 // The assert checks in Delphi/P3 will be removed in debug builds
 void assertWithMessage( const bool expression, const std::string &message )
 {
-   if( !expression ) printErrorMessage( message );
+   if( !expression )
+      printErrorMessage( message );
    assert( expression );
 }
 
