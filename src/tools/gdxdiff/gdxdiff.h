@@ -83,13 +83,10 @@ constexpr std::array StatusText {
         "Domains are different" };
 
 const std::string
-        c_ins1 = "ins1",
-        c_ins2 = "ins2",
-        c_dif1 = "dif1",
-        c_dif2 = "dif2";
-
-// Size of gdx::tvarvaltype
-constexpr int tvarvaltype_size { 5 };
+        c_ins1 { "ins1" },
+        c_ins2 { "ins2" },
+        c_dif1 { "dif1" },
+        c_dif2 { "dif2" };
 
 // Names of gdx::tvarvaltype(s)
 const std::array GamsFieldNames {

@@ -24,7 +24,6 @@
  */
 
 #include <map>
-#include <set>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
@@ -36,6 +35,7 @@
 
 #include "gdxdiff.h"
 #include "../library/cmdpar.h"
+#include "../../gdlib/utils.h"
 #include "../../gdlib/strutilx.h"
 #include "../../gdlib/strhash.h"
 #include "../../gdlib/gmsobj.h"
@@ -51,7 +51,7 @@
 namespace gdxdiff
 {
 
-using tvarvaltype = unsigned int;
+using tvarvaltype = uint8_t;
 
 library::short_string DiffTmpName;
 gdxHandle_t PGX1, PGX2, PGXDIF;
@@ -62,7 +62,7 @@ int staticUELNum;
 double EpsAbsolute, EpsRelative;
 std::map<library::short_string, TStatusCode> StatusTable;
 std::unique_ptr<library::cmdpar::TCmdParams> CmdParams;
-std::set<tvarvaltype> ActiveFields;
+utils::bsSet<tvarvaltype, GMS_VAL_MAX> ActiveFields;
 // Use FldOnlyVar instead of FldOnly as the variable name
 FldOnly FldOnlyVar;
 tvarvaltype FldOnlyFld;
@@ -289,7 +289,7 @@ void CompareSy( const int Sy1, const int Sy2 )
             break;
 
          default:
-            for( int T {}; T < tvarvaltype_size; T++ )
+            for( int T {}; T < GMS_VAL_MAX; T++ )
                std::cout << ValAsString( PGX, Vals[T] ) << ' ';
             std::cout << std::endl;
             break;
@@ -364,9 +364,9 @@ void CompareSy( const int Sy1, const int Sy2 )
          result = DoublesEqual( V1[FldOnlyFld], V2[FldOnlyFld] );
       else
       {
-         for( int T {}; T < tvarvaltype_size; T++ )
+         for( int T {}; T < GMS_VAL_MAX; T++ )
          {
-            if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) != ActiveFields.end() && !DoublesEqual( V1[T], V2[T] ) )
+            if( ActiveFields.contains( static_cast<tvarvaltype>( T ) ) && !DoublesEqual( V1[T], V2[T] ) )
             {
                result = false;
                break;
@@ -392,9 +392,9 @@ void CompareSy( const int Sy1, const int Sy2 )
          }
          else
          {
-            for( int T {}; T < tvarvaltype_size; T++ )
+            for( int T {}; T < GMS_VAL_MAX; T++ )
             {
-               if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() )
+               if( !ActiveFields.contains( static_cast<tvarvaltype>( T ) ) )
                   continue;
                if( DoublesEqual( V1[T], V2[T] ) )
                   continue;
@@ -453,9 +453,9 @@ void CompareSy( const int Sy1, const int Sy2 )
          case dt_var:
          case dt_equ:
             Eq = true;
-            for( int T {}; T < tvarvaltype_size; T++ )
+            for( int T {}; T < GMS_VAL_MAX; T++ )
             {
-               if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) != ActiveFields.end() && !DoublesEqual( Vals[T], DefValues[T] ) )
+               if( ActiveFields.contains( static_cast<tvarvaltype>( T ) ) && !DoublesEqual( Vals[T], DefValues[T] ) )
                {
                   Eq = false;
                   break;
@@ -497,9 +497,9 @@ void CompareSy( const int Sy1, const int Sy2 )
       else
       {
          gdxValues_t Vals2 {};
-         for( int T {}; T < tvarvaltype_size; T++ )
+         for( int T {}; T < GMS_VAL_MAX; T++ )
          {
-            if( ActiveFields.find( static_cast<tvarvaltype>( T ) ) == ActiveFields.end() )
+            if( !ActiveFields.contains( static_cast<tvarvaltype>( T ) ) )
                continue;
             Vals2[GMS_VAL_LEVEL] = Vals[T];
             WriteDiff( Act, GamsFieldNames[T], Keys, Vals2 );
@@ -1059,7 +1059,7 @@ int main( const int argc, const char *argv[] )
    UELTable->Add( c_dif2.data(), c_dif2.length() );
 
    if( DiffOnly )
-      for( int T {}; T < tvarvaltype_size; T++ )
+      for( int T {}; T < GMS_VAL_MAX; T++ )
          UELTable->Add( GamsFieldNames[T].data(), GamsFieldNames[T].length() );
 
    staticUELNum = UELTable->Count();
