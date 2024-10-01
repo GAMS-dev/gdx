@@ -9,6 +9,7 @@
 #include "container.h"
 #include "../library/short_string.h"
 #include "../../gdlib/strhash.h"
+#include "../../gdlib/gmsdata.h"
 
 namespace gdx2veda
 {
@@ -115,7 +116,7 @@ extern int NumLiteral;
 class SubsetList_t
 {
    int dimension {};
-   std::vector<int> list;
+   gdlib::gmsdata::TXIntList list {};
    bool assigned {};
 
 public:
@@ -128,9 +129,9 @@ class DimensionStore_t
 {
    gdlib::strhash::TXStrHashList<std::nullptr_t> StringStore {};
    library::Container_t<int> NameDimension { MaxDimension };
-   library::Container_t<std::vector<int>> DummyDimension { MaxDimension };
-   library::Container_t<std::vector<int>> EntryMap { MaxDataEntry };
-   library::Container_t<std::vector<int>> TextMap { MaxText };
+   library::Container_t<gdlib::gmsdata::TXIntList> DummyDimension { MaxDimension };
+   library::Container_t<gdlib::gmsdata::TXIntList> EntryMap { MaxDataEntry };
+   library::Container_t<gdlib::gmsdata::TXIntList> TextMap { MaxText };
    library::Container_t<SubsetList_t> SubsetList { MaxSubset };
 
    // Add new name to the stringstore. Also store its associated

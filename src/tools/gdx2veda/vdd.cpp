@@ -51,18 +51,20 @@ bool SubsetList_t::AddSubset( const int i, const int k )
    }
    else if( i != dimension )
       return false;
-   list.emplace_back( k );
+   list.Add( k );
    return true;
 }
 
 int SubsetList_t::GetCount()
 {
-   return list.size();
+   return list.GetCount();
 }
 
 int SubsetList_t::GetSubset( const int i )
 {
-   return list.at( i - 1 );
+   int *result {};
+   list.GetItem( i - 1, &result );
+   return *result;
 }
 
 int DimensionStore_t::AddName( const library::ShortString_t &s, const int dim, const int tuple )
