@@ -45,7 +45,7 @@ namespace gdxmerge
 bool DoBigSymbols, StrictMode;
 int64_t SizeCutOff;
 library::ShortString_t OutFile;
-std::vector<std::string> FilePatterns;
+std::unique_ptr<gdlib::gmsobj::TXStrings> FilePatterns;
 gdxHandle_t PGXMerge;
 unsigned int InputFilesRead;
 std::unique_ptr<SymbolList_t> SyList;
@@ -626,6 +626,7 @@ bool GetParameters( const int argc, const char *argv[] )
    // Probably unnecessary:
    OutFile.clear();
    StrictMode = false;
+   FilePatterns = std::make_unique<gdlib::gmsobj::TXStrings>();
    CmdParams = std::make_unique<library::cmdpar::CmdParams_t>();
 
    CmdParams->AddParam( static_cast<int>( KP::Id ), "ID" );
@@ -711,7 +712,7 @@ bool GetParameters( const int argc, const char *argv[] )
                break;
 
             default:
-               FilePatterns.emplace_back( KS );
+               FilePatterns->Add( KS.data(), KS.length() );
                // SyList->FindGDXFiles( KS );
                break;
          }
@@ -771,6 +772,7 @@ int main( const int argc, const char *argv[] )
    if( !GetParameters( argc, argv ) )
    {
       library::printErrorMessage( "*** Error: Parameter error" );
+      FilePatterns->Clear();
       return 1;
    }
 
@@ -802,12 +804,14 @@ int main( const int argc, const char *argv[] )
       return 1;
    }
 
-   for( const std::string &FilePattern: FilePatterns )
-      if( !SyList->FindGDXFiles( FilePattern ) && StrictMode )
+   for( N = 0; N < FilePatterns->GetCount(); N++ )
+      if( !SyList->FindGDXFiles( FilePatterns->GetConst( N ) ) && StrictMode )
       {
-         library::printErrorMessage( "*** Error  : Issue with file name \"" + FilePattern + "\" (strict mode)" );
+         library::printErrorMessage( "*** Error  : Issue with file name \"" + std::string { FilePatterns->GetConst( N ) } + "\" (strict mode)" );
          return 1;
       }
+   FilePatterns->Clear();
+
    InputFilesRead = 0;
    if( !DoBigSymbols )
    {
