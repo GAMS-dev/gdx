@@ -139,6 +139,13 @@ public:
       return new(XGetMem<T>()) T {};
    }
 
+   // Use perfect forwarding for arguments to T's constructor
+   template<typename T, typename... Args>
+   inline T *XGetMemCreat( Args &&...args )
+   {
+      return new( XGetMem<T>() ) T( std::forward<Args>( args )... );
+   }
+
    void *XGetMemNC( int Size );
    void *XAllocMem( int Size );
 
