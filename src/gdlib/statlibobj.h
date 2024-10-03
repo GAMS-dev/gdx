@@ -76,10 +76,10 @@ class TGMSLogStream
    void CndShowStatLine();
    void ShowStatLine();
    void gstatStartWriting();
-   void writeln_gf( const std::string &msg );
-   void write_gf( const std::string &msg );
-   void writeln_gf( const char *msg );
-   void write_gf( const char *msg );
+   void writeln_gf( const std::string &msg ) const;
+   void write_gf( const std::string &msg ) const;
+   void writeln_gf( const char *msg ) const;
+   void write_gf( const char *msg ) const;
 
 public:
    explicit TGMSLogStream( std::string &Msg );
@@ -102,7 +102,7 @@ public:
    void LogDumpFilename( const std::string &prfx, bool enabled, const std::string &what, const std::string &gs, gdlib::gmsgen::tfileaction fa, int ioResOrNeg );
    void LogWriteLn( const std::string &s );
    void LogWrite( const std::string &p );
-   void LogWritePlain( const std::string &s );
+   void LogWritePlain( const std::string &s ) const;
    void showCounts();
 
    // Properties
@@ -116,7 +116,7 @@ public:
 
    [[nodiscard]] std::string getRedirFilename() const;
    [[nodiscard]] std::string getRedirString() const;
-   std::string getShortRedirString( const std::string &Dir );
+   std::string getShortRedirString( const std::string &Dir ) const;
 
    void SetOSMemory( int v );
 
@@ -143,10 +143,10 @@ struct rcerrrec {
 };
 using trcerrrec = rcerrrec *;
 
-class TGMSStatusStream
+class TGMSStatusStream final
 {
    void *Fgfusrmem {};
-   gdlib::stattypes::tgwrite *Fgfcb {};
+   stattypes::tgwrite *Fgfcb {};
    FILE *Ffsysout {}, *Ffstat {};
    std::string Ffnstat;
    bool Fcopysysout {};
@@ -161,26 +161,26 @@ class TGMSStatusStream
    trcerrrec Fnextheader {};
    trcerrtyp Fnexterror {};
 
-   void writeln_gf( const std::string &msg );
-   void write_gf( const std::string &msg );
+   void writeln_gf( const std::string &msg ) const;
+   void write_gf( const std::string &msg ) const;
    void SolverErrorInit();
    trcerrtxt SolverErrorMessage( const std::string &s );
    void SolverErrorAdd( int rownum, int columnnum, const std::string &msg );
    bool checkfile( std::string &msg );
 
-   std::function<void( const std::string & )> commonStatusFunc( const std::string &s1, const std::string &s2 );
+   [[nodiscard]] std::function<void( const std::string & )> commonStatusFunc( const std::string &s1, const std::string &s2 ) const;
 
 public:
    explicit TGMSStatusStream( std::string &Msg );
-   virtual ~TGMSStatusStream();
+   ~TGMSStatusStream();
 
-   void registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem );
+   void registerWriteCallback( stattypes::tgwrite *fptr, void *usermem );
    void StatusErrorFree();
    void StatusDumpFirst();
-   bool StatusAppend( const std::string &fn, std::string &msg );
+   bool StatusAppend( const std::string &fn, std::string &msg ) const;
    void StatusProcessFirst();
    bool StatusDumpNext( std::string &msg );
-   bool StatusProcessNext( gdlib::stattypes::tstatusproc &statusproc, std::string &msg1, std::string &msg2, int &num );
+   bool StatusProcessNext( stattypes::tstatusproc &statusproc, std::string &msg1, std::string &msg2, int &num );
    void StatusSetFilename( const std::string &fn );
    bool StatusDummy( std::string &msg );
    void StatusErrorFirst();
@@ -191,27 +191,27 @@ public:
    bool StatusErrorDetail( int &cnt, std::string &msg );
    void StatusSetRowCol( int rowmax, int colmax );
    void StatusClose();
-   bool StatusFileOpen( gdlib::gmsgen::tfileaction AAction, std::string &msg );
-   void StatusWriteLn( const std::string &s );
-   void StatusWrite( const std::string &p );
-   void StatusWritePlain( const std::string &s );
-   void StatusTerminationRequestfromSolver();
-   void StatusCopyOn();
-   void StatusCopyOff();
-   void StatusLSTAnchor( const std::string &s );
-   void StatusCopyLine( const std::string &s );
-   void StatusCopyFile( const std::string &s );
-   void StatusCopyFileOnSysOut( const std::string &s );
-   void StatusEndOfFile();
-   void StatusSysOut();
-   void StatusPageEject();
+   bool StatusFileOpen( gmsgen::tfileaction AAction, std::string &msg );
+   void StatusWriteLn( const std::string &s ) const;
+   void StatusWrite( const std::string &p ) const;
+   void StatusWritePlain( const std::string &s ) const;
+   void StatusTerminationRequestfromSolver() const;
+   void StatusCopyOn() const;
+   void StatusCopyOff() const;
+   void StatusLSTAnchor( const std::string &s ) const;
+   void StatusCopyLine( const std::string &s ) const;
+   void StatusCopyFile( const std::string &s ) const;
+   void StatusCopyFileOnSysOut( const std::string &s ) const;
+   void StatusEndOfFile() const;
+   void StatusSysOut() const;
+   void StatusPageEject() const;
    void StatusSetEditSymbol( char c );
-   void StatusAuditLine( const std::string &s );
-   void StatusEquationName( const std::string &s1, int num, std::string &s2 );
-   void StatusVariableName( const std::string &s1, int num, const std::string &s2 );
-   void StatusEquationError( int num, const std::string &s );
-   void StatusVariableError( int num, const std::string &s );
-   void StatusJacobianError( int num1, int num2, const std::string &s );
+   void StatusAuditLine( const std::string &s ) const;
+   void StatusEquationName( const std::string &s1, int num, const std::string &s2 ) const;
+   void StatusVariableName( const std::string &s1, int num, const std::string &s2 ) const;
+   void StatusEquationError( int num, const std::string &s ) const;
+   void StatusVariableError( int num, const std::string &s ) const;
+   void StatusJacobianError( int num1, int num2, const std::string &s ) const;
 };
 
 
