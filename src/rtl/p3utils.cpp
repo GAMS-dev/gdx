@@ -322,7 +322,7 @@ static constexpr std::array<DWORD, 3> accessMode {
 // this works for GDX so we do it: it is kind of silly to use the
 // shareMode var then but why not?
 static constexpr std::array<DWORD, 3> shareMode {
-        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
         FILE_SHARE_READ | FILE_SHARE_WRITE,
         FILE_SHARE_READ | FILE_SHARE_WRITE };
 static constexpr std::array<DWORD, 3> createHow {
