@@ -331,6 +331,8 @@ bool TGAMSMacro::Define( const std::string &p, int &LUsed )
    }
    Body.clear();
    LUsed = static_cast<int>( p.length() );
+   // fake trailing blank
+   Rdr.pr.push_back( ' ' );
    return AddToBody( Rdr.pr );
 }
 
@@ -342,8 +344,9 @@ bool TGAMSMacro::AddToBody( const std::string &p )
 
    TPWriter Wrt;
    Wrt.StoreStr( Body );
-   const auto L = static_cast<int>( p.length() );
-   const TPReader Rdr { p };
+   //no trailing blank
+   const auto L = static_cast<int>( p.length() ) - 1;
+   const TPReader Rdr { p.substr(0, L) };
    const bool res { Rdr.ChFromEnd( 0 ) == '\\' };
    if( !res ) Wrt.StoreTrimStr( p );
    else
