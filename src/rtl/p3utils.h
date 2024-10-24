@@ -86,7 +86,6 @@ bool P3SetEnvPC( const std::string &name, char *val );
 uint32_t P3GetEnvPC( const std::string &name, char *buf, uint32_t bufSize );
 
 int p3GetExecName( std::string &execName, std::string &msg );
-int p3GetLibName( std::string &libName, std::string &msg );
 
 bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss );
 

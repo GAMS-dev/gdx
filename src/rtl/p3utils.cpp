@@ -75,7 +75,6 @@
    #endif
    #include <netinet/in.h>
    #include <unistd.h>
-   #include <dlfcn.h>
    #include <poll.h>
 #endif
 
@@ -322,7 +321,7 @@ static constexpr std::array<DWORD, 3> accessMode {
 // this works for GDX so we do it: it is kind of silly to use the
 // shareMode var then but why not?
 static constexpr std::array<DWORD, 3> shareMode {
-        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
         FILE_SHARE_READ | FILE_SHARE_WRITE,
         FILE_SHARE_READ | FILE_SHARE_WRITE };
 static constexpr std::array<DWORD, 3> createHow {
@@ -1158,122 +1157,6 @@ int p3GetExecName( std::string &execName, std::string &msg )
 #else
    msg = "P3: not yet implemented";
    return xGetExecName( execName, msg );
-#endif
-}
-
-// FIXME: Do not always return false!
-static bool isLibrary()
-{
-   return false;
-}
-
-static int xGetLibName( std::string &libName, std::string &msg )
-{
-   char libBuf[4096];
-   msg.clear();
-   int rc;
-
-#if defined( __linux ) || defined( __APPLE__ )
-   {
-      char tmpBuf[2048];
-      static_assert( sizeof( tmpBuf ) == 2048 );
-      Dl_info dlInfo;
-      const int k = dladdr( reinterpret_cast<void *>( &xGetLibName ), &dlInfo );
-      if( k > 0 )
-      {
-         strncpy( tmpBuf, dlInfo.dli_fname, sizeof( tmpBuf ) - 1 );
-         tmpBuf[sizeof( tmpBuf ) - 1] = '\0';
-         if( realpath( tmpBuf, libBuf ) )
-            rc = 0;
-         else
-         {
-            myStrError( errno, tmpBuf, sizeof( tmpBuf ) );
-            msg = "realpath() failure: "s + tmpBuf;
-            *libBuf = '\0';
-            rc = 5;
-         }
-      }
-      else
-      {
-         msg = "dladdr() failure"s;
-         *libBuf = '\0';
-         rc = 4;
-      }
-   }
-#elif defined( _WIN32 )
-   {
-      HMODULE h;
-      int k = GetModuleHandleEx( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-                                     GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-                             reinterpret_cast<LPCTSTR>( &xGetLibName ), &h );
-      if( k )
-      { /* OK: got a handle */
-         k = static_cast<int>( GetModuleFileNameA( h, libBuf, sizeof( libBuf ) ) );
-         if( 0 == k )
-         {
-            msg = "GetModuleFileName() failure: rc="s + rtl::sysutils_p3::IntToStr(k);
-            *libBuf = '\0';
-            rc = 5;
-         }
-         else
-            rc = 0;
-      }
-      else
-      {
-         msg = "GetModuleHandleEx() failure: rc="s + rtl::sysutils_p3::IntToStr(k);
-         *libBuf = '\0';
-         rc = 4;
-      }
-   }
-#else
-   *libBuf = '\0';
-   msg = "not implemented for this platform"s;
-   rc = 8;
-#endif
-   libName.assign( libBuf );
-   return 0 == rc && strlen( libBuf ) > 255 ? 1 : rc;
-} /* xGetLibName */
-
-int p3GetLibName( std::string &libName, std::string &msg )
-{
-   return xGetLibName( libName, msg );
-#if defined( _WIN32 )
-   libName.clear();
-   if( !isLibrary() )
-   {
-      msg = "Not called from a library"s;
-      return 2;
-   }
-   std::array<char, 256> buf;
-   HMODULE hinstance;
-   auto rc { GetModuleFileNameA( hinstance, buf.data(), static_cast<DWORD>(buf.size()) ) };
-   if( !rc )
-   {
-      msg = "GetModuleFileNameA call failed"s;
-      return 3;
-   }
-   else if( rc >= 256 )
-   {
-      libName.assign( buf.data() );
-      msg = "Result truncated to 255 characters"s;
-      return 1;
-   }
-   else
-   {
-      libName.assign( buf.data() );
-      msg.clear();
-      return 0;
-   }
-#else
-   if( !isLibrary() )
-   {
-      libName.clear();
-      msg = "Not called from a library"s;
-      return 2;
-   }
-   libName.clear();
-   msg = "P3: not yet implemented"s;
-   return 9;
 #endif
 }
 

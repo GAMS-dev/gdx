@@ -1891,6 +1891,25 @@ TEST_CASE( "Test simple write/read with compression activated" )
    std::filesystem::remove( fn );
 }
 
+TEST_CASE( "Test opening a file for reading and then deleting (while it is open)")
+{
+   const auto fn {"unlocked.gdx"s};
+   testWrite(fn, [&](TGXFileObj &pgx) {
+      pgx.gdxDataWriteRawStart( "i", "", 1, dt_set, 0 );
+      pgx.gdxDataWriteDone();
+   });
+   testRead( fn, [&](TGXFileObj &pgx) {
+      std::filesystem::remove(fn); // this is mean. :)
+      int nrRecs;
+      // should fail now!
+      REQUIRE(pgx.gdxDataReadRawStart( 1, nrRecs ));
+      int key, dimFrst;
+      double val;
+      REQUIRE_FALSE(pgx.gdxDataReadRaw( &key, &val, dimFrst ));
+      REQUIRE_FALSE(std::filesystem::exists( fn ));
+   } );
+}
+
 TEST_CASE( "Test symbol index max UEL length" )
 {
    testReadModelGDX( "trnsport"s, [&]( TGXFileObj &pgx ) {
