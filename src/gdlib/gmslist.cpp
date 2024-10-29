@@ -252,7 +252,10 @@ void TGmsList::PushHeader( std::string_view debugstr )
    FCurrHeader.clear();
 }
 
-void TGmsList::CalcCharsLeft() { FCharsLeft = FRightMargin - ( FIndentColumn >= FLeftMargin ? FIndentColumn : FLeftMargin ); }
+void TGmsList::CalcCharsLeft()
+{
+   FCharsLeft = FRightMargin - ( FIndentColumn >= FLeftMargin ? FIndentColumn : FLeftMargin );
+}
 
 void TGmsList::LWrite( bool src )
 {
@@ -827,7 +830,7 @@ void TGmsList::WrPCharLn( const int LineNr, const bool ShowLineNr, const char *P
       do
       {
          const int k { ShowMargins && ( p == FUserLeftMargin || p == FUserRightMargin ) ? 2 : 1 };
-         if( FCharsWritten - Corr + k > FRightMargin ) break;
+         if( FCharsWritten + i - Corr + k > FRightMargin ) break;
          if( k == 1 )
          {
             //SysChWrite( Str[p] );
@@ -961,7 +964,9 @@ void TGmsList::WrStrBrk( std::string_view s, char brkch )
 
 void TGmsList::SetLstTitleLeftAligned( int n ) { FLstTitleLeftAligned = n; }
 
-void TGmsList::SetLineNumber( int n ) { FFileLineNumber = n; }
+void TGmsList::SetLineNumber( int n ) {
+   FFileLineNumber = n;
+}
 
 void TGmsList::SetLinesPerPage( int n )
 {
