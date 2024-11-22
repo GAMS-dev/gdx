@@ -23,7 +23,8 @@ RUN apt-get update &&                                   \
       libssl-dev                    \
       gperf                         \
       cmake                         \
-      bison && \
+      cython3                       \
+      bison &&                      \
     python3 -m venv /opt/codechecker_env && \
     /opt/codechecker_env/bin/pip install codechecker==6.22.1 && \
     ln -s /opt/codechecker_env/bin/codechecker /usr/local/bin/codechecker  
