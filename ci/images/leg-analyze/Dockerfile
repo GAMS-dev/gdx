@@ -11,9 +11,9 @@ RUN apt-get update &&                                   \
       curl                          \
       ninja-build                   \
       flex                          \
-      fuse                          \
+      fuse3                         \
       tree                          \
-      python                        \
+      python-is-python3             \
       python3                       \
       python3-html5lib              \
       python3-pip                   \
