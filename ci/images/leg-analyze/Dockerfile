@@ -27,5 +27,5 @@ RUN apt-get update &&                                   \
 # Requirements for CodeChecker
 RUN apt-get update && apt-get install -y clang clang-tools clang-tidy cppcheck
 ### Install codechecker, version 6.22.2 has a LD_PRELOAD bug... wait for the fix
-RUN pip3 install codechecker==6.22.1
+RUN pip3 install --break-system-packages codechecker==6.22.1
 RUN apt-get clean
