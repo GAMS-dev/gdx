@@ -31,9 +31,10 @@ RUN apt-get update &&                                   \
     python3 -m venv /opt/codechecker_env && \
     /opt/codechecker_env/bin/pip install --upgrade pip setuptools wheel && \
     /opt/codechecker_env/bin/pip install codechecker && \
-    ln -s /opt/codechecker_env/bin/CodeChecker /usr/local/bin/CodeChecker \
-    ln -s /opt/codechecker_env/lib/python3.12/site-packages/codechecker_analyzer/ld_logger/lib/x86_64/ldlogger.so /lib/ldlogger.so
+    ln -s /opt/codechecker_env/bin/CodeChecker /usr/local/bin/CodeChecker
 
 # Requirements for CodeChecker
 RUN apt-get update && apt-get install -y clang clang-tools clang-tidy cppcheck
 RUN apt-get clean
+
+RUN ln -s /opt/codechecker_env/lib/python3.12/site-packages/codechecker_analyzer/ld_logger/lib/x86_64/ldlogger.so /usr/local/lib/ldlogger.so
