@@ -8,7 +8,7 @@ if (CCACHE_FOUND)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif (CCACHE_FOUND)
 
-set(mylibs dl pthread m)
+set(mylibs ${CMAKE_DL_LIBS} pthread m)
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_SKIP_RPATH FALSE)
@@ -43,12 +43,22 @@ endif ()
 
 if (UNIX)
     # -fsanitize=undefined -fno-inline
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas -pedantic")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas -pedantic -Wextra -Wno-unused-parameter -Wno-deprecated-copy")
     #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wconversion -funsigned-char") # aggressive signage warnings
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZ_HAVE_UNISTD_H")
     if (NOT APPLE AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-truncation=0")
     endif ()
+    # strictly handle alignment and structure padding around flexible arrays (only newer compilers)
+    if ((CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16) OR
+    (CMAKE_CXX_COMPILER_ID MATCHES "GCC" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13))
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-flex-arrays=3")
+    endif()
+    # ADD common hardening features on Linux
+    if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3 ")
+        add_link_options(LINKER:-z,defs LINKER:-z,now LINKER:-z,relro LINKER:-z,noexecstack)
+    endif()
 endif (UNIX)
 
 include(base-units.cmake)
