@@ -15,6 +15,7 @@ RUN apt-get update &&                                   \
       tree                          \
       python-is-python3             \
       python3                       \
+      python3-dev                   \
       python3-html5lib              \
       python3-pip                   \
       pipx                          \
@@ -28,6 +29,7 @@ RUN apt-get update &&                                   \
       libxslt1-dev                  \
       bison &&                      \
     python3 -m venv /opt/codechecker_env && \
+    /opt/codechecker_env/bin/pip install --upgrade pip setuptools wheel && \
     /opt/codechecker_env/bin/pip install codechecker==6.22.1 && \
     ln -s /opt/codechecker_env/bin/codechecker /usr/local/bin/codechecker  
 ### Install codechecker, version 6.22.2 has a LD_PRELOAD bug... wait for the fix
