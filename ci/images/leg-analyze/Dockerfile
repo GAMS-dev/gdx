@@ -24,6 +24,8 @@ RUN apt-get update &&                                   \
       gperf                         \
       cmake                         \
       cython3                       \
+      libxml2-dev                   \
+      libxslt1-dev                  \
       bison &&                      \
     python3 -m venv /opt/codechecker_env && \
     /opt/codechecker_env/bin/pip install codechecker==6.22.1 && \
