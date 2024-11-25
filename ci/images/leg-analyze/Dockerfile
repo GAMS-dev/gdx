@@ -30,9 +30,8 @@ RUN apt-get update &&                                   \
       bison &&                      \
     python3 -m venv /opt/codechecker_env && \
     /opt/codechecker_env/bin/pip install --upgrade pip setuptools wheel && \
-    /opt/codechecker_env/bin/pip install codechecker==6.22.1 && \
-    ln -s /opt/codechecker_env/bin/codechecker /usr/local/bin/codechecker  
-### Install codechecker, version 6.22.2 has a LD_PRELOAD bug... wait for the fix
+    /opt/codechecker_env/bin/pip install codechecker && \
+    ln -s /opt/codechecker_env/bin/codechecker /usr/local/bin/codechecker
 
 # Requirements for CodeChecker
 RUN apt-get update && apt-get install -y clang clang-tools clang-tidy cppcheck
