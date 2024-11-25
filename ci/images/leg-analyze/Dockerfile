@@ -37,4 +37,4 @@ RUN apt-get update &&                                   \
 RUN apt-get update && apt-get install -y clang clang-tools clang-tidy cppcheck
 RUN apt-get clean
 
-RUN ln -s /opt/codechecker_env/lib/python3.12/site-packages/codechecker_analyzer/ld_logger/lib/x86_64/ldlogger.so /usr/local/lib/ldlogger.so
+RUN ln -s /opt/codechecker_env/lib/python3.12/site-packages/codechecker_analyzer/ld_logger/lib/x86_64/ldlogger.so /lib/ldlogger.so
