@@ -2473,7 +2473,7 @@ int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
             res = false;
          }
       }
-      int SyNr;
+      int SyNr {};
       if( DomSy > 0 )
       {
          SyNr = DomSy;
