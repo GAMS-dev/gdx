@@ -174,7 +174,7 @@ void AuditLine_t::setAuditLine()
    bool auditreldates_header_file_found {};
 
    audit_line = system_name;
-   this->audit_line.resize( 17, ' ' );
+   audit_line.resize( 17, ' ' );
 
 #if defined( _WIN32 )
    GDL_REL_PLT = "x86 64bit/MS Windows";
@@ -196,7 +196,10 @@ void AuditLine_t::setAuditLine()
 #if __has_include( "../../../../../../../btree/global/auditreldates.h" )
 #include "../../../../../../../btree/global/auditreldates.h"
    auditreldates_header_file_found = true;
-   audit_line += std::to_string( GDL_REL_MAJ ) + '.' + std::to_string( GDL_REL_MIN ) + '.' + std::to_string( GDL_REL_GOLD ) + ' ' + GDL_REVISION + ' ' + GDL_REL_DAT;
+   audit_line += std::to_string( GDL_REL_MAJ ) + '.' +
+                 std::to_string( GDL_REL_MIN ) + '.' +
+                 std::to_string( GDL_REL_GOLD ) + ' ' +
+                 GDL_REVISION + ' ' + GDL_REL_DAT;
 #endif
 #endif
 
@@ -204,8 +207,10 @@ void AuditLine_t::setAuditLine()
    {
       std::time_t time { std::time( nullptr ) };
       std::tm *localtime { std::localtime( &time ) };
+
       std::stringstream date;
       date << std::put_time( localtime, "%b %d, %Y" );
+
       audit_line += "??.?.? ???????? " + date.str();
    }
 
