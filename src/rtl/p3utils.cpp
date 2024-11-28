@@ -1038,7 +1038,7 @@ bool PrefixEnv( const std::string &dir, const std::string &evName )
    assert(!evName.empty());
    const auto pEvName {evName.c_str()};
    if(!pEvName) return false; // can never happen
-   std::string tptr = getenv( evName.c_str() );
+   std::string tptr = getenv( pEvName );
    if( tptr.empty() ) return setEnvironmentVariableUnix( evName, dir );
    if( tptr.length() >= trimDir.length() && dir == tptr &&
        ( tptr.length() == trimDir.length() || tptr[trimDir.length()] == PathSep ) ) return true;

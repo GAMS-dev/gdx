@@ -5,3 +5,4 @@
 -/usr/include/*
 -*/apigenerator/*
 -*/rtl/dtoaLoc.c
+-*/tools/gdxmerge/gdxmerge.cpp
