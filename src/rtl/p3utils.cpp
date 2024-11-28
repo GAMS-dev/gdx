@@ -1035,13 +1035,14 @@ bool PrefixEnv( const std::string &dir, const std::string &evName )
    std::string tPtr { trimDir + PathSep + opPtr };
    return SetEnvironmentVariableA( evName.c_str(), tPtr.c_str() );
 #else
-   assert(!evName.empty());
-   const auto pEvName {evName.c_str()};
-   if(!pEvName) return false; // can never happen
-   std::string tptr = getenv( pEvName );
-   if( tptr.empty() ) return setEnvironmentVariableUnix( evName, dir );
-   if( tptr.length() >= trimDir.length() && dir == tptr &&
-       ( tptr.length() == trimDir.length() || tptr[trimDir.length()] == PathSep ) ) return true;
+   const auto tptrBuf = getenv( evName.c_str() );
+   if( !tptrBuf || tptrBuf[0] == '\0' ) // fail or empty
+      return setEnvironmentVariableUnix( evName, dir );
+   std::string tptr {tptrBuf};
+   if( tptr.length() >= trimDir.length()
+      && dir == tptr
+      && ( tptr.length() == trimDir.length() || tptr[trimDir.length()] == PathSep ) )
+      return true;
    return setEnvironmentVariableUnix( evName, dir + PathSep + tptr );
 #endif
 }
