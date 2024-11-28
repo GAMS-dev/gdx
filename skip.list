@@ -1,6 +1,8 @@
 # Skiplist for https://github.com/Ericsson/codechecker used in CI pipeline
 -*/zlib/*
 -*/generated/*
--*/tests/doctest.h
+-*/tests/*
 -/usr/include/*
 -*/apigenerator/*
+-*/rtl/dtoaLoc.c
+-*/tools/gdxmerge/gdxmerge.cpp

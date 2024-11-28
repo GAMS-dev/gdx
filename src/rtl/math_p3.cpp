@@ -31,18 +31,20 @@
 namespace rtl::math_p3
 {
 
-double IntPower( double X, int I )
+double IntPower( double X, const int I )
 {
    double res { 1.0 };
-   for( int Y { std::abs( I ) }; Y > 0; Y--, res *= X )
+   for( int Y { std::abs( I ) }; Y > 0; Y-- )
    {
       while( !( Y % 2 ) )
       {
          Y >>= 1;
          X *= X;
       }
+      res *= X;
    }
-   if( I < 0 ) res = 1.0 / res;
+   if( I < 0 )
+      res = 1.0 / res;
    return res;
 }
 

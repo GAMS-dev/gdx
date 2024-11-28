@@ -113,7 +113,7 @@ add_library(gdxtools-library
 target_include_directories(gdxtools-library PRIVATE ${inc-dirs})
 target_link_libraries(gdxtools-library gdx-static)
 if (UNIX)
-    target_link_libraries(gdxtools-library dl)
+    target_link_libraries(gdxtools-library ${CMAKE_DL_LIBS})
 endif ()
 
 # gdxdump
