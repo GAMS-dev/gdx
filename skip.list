@@ -4,3 +4,4 @@
 -*/tests/*
 -/usr/include/*
 -*/apigenerator/*
+-*/rtl/dtoaLoc.c
