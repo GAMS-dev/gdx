@@ -1,8 +1,8 @@
-#include "gmsheaprep.h"
+#include "gmsheaprep.hpp"
 
-#include "gmsheapnew.h"
-#include "gmslist.h"
-#include "strutilx.h"
+#include "gmsheapnew.hpp"
+#include "gmslist.hpp"
+#include "strutilx.hpp"
 
 using namespace std::literals::string_literals;
 

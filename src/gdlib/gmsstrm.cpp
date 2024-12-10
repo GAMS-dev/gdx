@@ -50,7 +50,7 @@ using namespace rtl::p3utils;
 using utils::ui8, utils::ui16, utils::ui32;
 
 #if defined(__IN_CPPMEX__)
-#include "../gdlib/statlib.h"
+#include "../gdlib/statlib.hpp"
 #endif
 
 // ==============================================================================================================
