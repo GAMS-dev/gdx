@@ -33,7 +33,7 @@
 #include <string>               // for string, basic_string
 #include <string_view>          // for string_view
 #include <vector>               // for vector
-#include "../rtl/p3utils.h"     // for Tp3FileHandle
+#include "../rtl/p3utils.hpp"     // for Tp3FileHandle
 
 #if defined( NO_ZLIB )
 inline int uncompress( void *dest, unsigned long *destLen, const void *source, unsigned long sourceLen )

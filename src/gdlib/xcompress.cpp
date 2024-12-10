@@ -25,13 +25,13 @@
 
 
 
-#include "../rtl/p3library.h"
-#include "../global/gmslibname.h"
+#include "../rtl/p3library.hpp"
+#include "../global/gmslibname.hpp"
 
-#include "utils.h"
+#include "utils.hpp"
 
-#include "xcompress.h"
-#include "strutilx.h"
+#include "xcompress.hpp"
+#include "strutilx.hpp"
 #include "global/unit.h"
 
 using namespace rtl::p3library;

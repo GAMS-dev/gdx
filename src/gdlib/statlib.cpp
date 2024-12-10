@@ -25,11 +25,11 @@
 
 
 
-#include "statlib.h"
+#include "statlib.hpp"
 #include <string>
 #include <memory>
-#include "gmsgen.h"
-#include "statlibobj.h"
+#include "gmsgen.hpp"
+#include "statlibobj.hpp"
 #include "global/unit.h"
 
 using namespace gdlib::gmsgen;

@@ -29,7 +29,7 @@
 #include <cstdint>
 #include <cassert>
 #include <limits>
-#include "utils.h"
+#include "utils.hpp"
 
 // ==============================================================================================================
 // Interface

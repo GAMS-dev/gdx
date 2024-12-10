@@ -23,8 +23,8 @@
 * SOFTWARE.
 */
 
-#include "rtl/p3utils.h"
-#include "../doctest.h"
+#include "rtl/p3utils.hpp"
+#include "../doctest.hpp"
 #include <string>
 
 using namespace std::literals::string_literals;

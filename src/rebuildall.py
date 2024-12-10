@@ -9,12 +9,12 @@ import subprocess
 import yaml2doxy
 import yaml2cwrap
 
-# Rebuild main header file (gdx.h)
+# Rebuild main header file (gdx.hpp)
 yaml2doxy.generate_method_declarations(
     'gdxapi.yaml',
     'templates',
     'gdxheader.template.j2',
-    'gdx.h'
+    'gdx.hpp'
 )
 
 # Rebuild C wrapper around GDX object (gdxcwrap.hpp)

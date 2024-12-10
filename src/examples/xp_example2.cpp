@@ -38,7 +38,7 @@
  */
 
 #include "gclgms.h"
-#include "gdx.h"
+#include "gdx.hpp"
 #include "optcc.h"
 
 #include <cstdlib>

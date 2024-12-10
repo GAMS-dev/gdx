@@ -60,7 +60,7 @@ apigenerator:
     entrypoint: [ "" ]
   script:
     - mkdir -p apifiles
-    - python3 src/yaml2doxy.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdx.h
+    - python3 src/yaml2doxy.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdx.hpp
     - python3 src/yaml2cwrap.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdxcwrap.hpp
     - >
       python3
@@ -72,7 +72,7 @@ apigenerator:
     # somehow I need absolute path for apidef arg
     - python3 src/apigenerator/src/mkapi.py --apidef `pwd`/src/gdxapi.yaml --outputpath apifiles/ --output cc cpplib
     - cp src/apigenerator/include/gc*.h apifiles
-    - cp src/gdx.h generated/gdx.h
+    - cp src/gdx.hpp generated/gdx.hpp
     - |
       for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h" "gdx.h" "gdxcwrap.hpp" "gdxcppwrap.h"; do
         echo "Diffing 'apifiles/$f' with 'generated/$f'"

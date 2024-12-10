@@ -34,13 +34,13 @@
 #include <memory>
 #include <cstdio>
 
-#include "gdxdiff.h"
-#include "../library/cmdpar.h"
-#include "../../gdlib/strutilx.h"
-#include "../../gdlib/strhash.h"
-#include "../../gdlib/gmsobj.h"
-#include "../../rtl/sysutils_p3.h"
-#include "../../rtl/p3process.h"
+#include "gdxdiff.hpp"
+#include "../library/cmdpar.hpp"
+#include "../../gdlib/strutilx.hpp"
+#include "../../gdlib/strhash.hpp"
+#include "../../gdlib/gmsobj.hpp"
+#include "../../rtl/sysutils_p3.hpp"
+#include "../../rtl/p3process.hpp"
 
 // Global constants
 #include "../../../generated/gclgms.h"

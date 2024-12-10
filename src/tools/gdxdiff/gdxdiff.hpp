@@ -6,8 +6,8 @@
 #include <cstdint>
 #include <string_view>
 
-#include "../library/common.h"
-#include "../library/short_string.h"
+#include "../library/common.hpp"
+#include "../library/short_string.hpp"
 
 // GDX library interface
 #include "../../../generated/gdxcc.h"

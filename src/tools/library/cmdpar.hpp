@@ -6,7 +6,7 @@
 #include <map>
 #include <cstdint>
 
-#include "../library/short_string.h"
+#include "../library/short_string.hpp"
 
 // Description:
 //   Object that handles command line parameters

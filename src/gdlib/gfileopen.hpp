@@ -23,75 +23,32 @@
  * SOFTWARE.
  */
 
+
 #pragma once
 
 #include <string>
-#include <array>
-#include <limits>
-
-#include "utils.h"
-
+#include "../global/delphitypes.hpp"
+#include "../rtl/p3utils.hpp"
 
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace gdlib::charmaps
+namespace gdlib::gfileopen
 {
+int grRewrite( const std::string &fn, bool ReTry, std::fstream &FileHandle, int &IORes );
+int grReset( const std::string &fn, bool ReTry, std::fstream &FileHandle, int &IORes );
+int grAppend( const std::string &fn, bool ReTry, std::fstream &FileHandle, int &IORes );
 
-constexpr char charff = '\f', // 0x0C
-           charcr = '\r', // 0x0D
-           chareof = 0x1A, // note: != std::char_traits<char>::eof(),
-           chareol = '\0', // 0x00
-           charlf = '\n', // 0x0A
-           chartab = '\t', // 0x09
-           char200 = static_cast<char>( 200 );
+int grRewrite( const std::string &fn, bool ReTry, FILE *&FileHandle, int &IORes );
+int grReset( const std::string &fn, bool ReTry, FILE *&FileHandle, int &IORes );
+int grAppend( const std::string &fn, bool ReTry, FILE *&FileHandle, int &IORes );
 
-extern utils::charset digit,
-        letter,
-        alphanum,
-        capletter,
-        lowletter,
-        identchar,
-        labelchar,
-        textquote,
-        setcomch;
+int grResetUntyped( const std::string &fn, int RecSize, bool ReTry, std::fstream &FileHandle, int &IORes );
+int grRewriteUntyped( const std::string &fn, int RecSize, bool ReTry, std::fstream &FileHandle, int &IORes );
 
-extern char quotecharx;
+int grResetUntyped( const std::string &fn, int RecSize, bool ReTry, rtl::p3utils::Tp3FileHandle &FileHandle, int &IORes );
+int grRewriteUntyped( const std::string &fn, int RecSize, bool ReTry, rtl::p3utils::Tp3FileHandle &FileHandle, int &IORes );
 
-constexpr int numCharVals {std::numeric_limits<unsigned char>::max()+1};
-extern std::array<char, numCharVals> mapcharBuf;
-
-inline char mapchar( const char c) {
-   return mapcharBuf[static_cast<unsigned char>( c )];
-}
-
-void InitChars( bool AllChars );
-void InitCharacterMaps();
-char DetermineQuote( const char *s );
-
-inline bool IsLetter( const char c )
-{
-   return ( c >= 'a' && c <= 'z' ) || ( c >= 'A' && c <= 'Z' );
-}
-
-inline bool IsDigit( const char c )
-{
-   return c >= '0' && c <= '9';
-}
-
-inline bool IsLabelChar( const char c )
-{
-   return IsLetter( c ) || IsDigit(c) || c == '_' || c == '+' || c == '-';
-}
-
-inline bool IsIdentChar(const char c)
-{
-   return IsLetter( c ) || IsDigit(c) || c == '_';
-}
-
-inline bool IsTextQuote(const char c)
-{
-   return c == '\'' || c == '\"';
-}
-
-}// namespace gdlib::charmaps
+int grResetUntyped( const std::string &fn, int RecSize, bool ReTry, FILE *&FileHandle, int &IORes );
+int grRewriteUntyped( const std::string &fn, int RecSize, bool ReTry, FILE *&FileHandle, int &IORes );
+}// namespace gdlib::gfileopen

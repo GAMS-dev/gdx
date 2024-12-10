@@ -23,15 +23,15 @@
  * SOFTWARE.
  */
 
-#include "p3process.h"
-#include "p3platform.h"
+#include "p3process.hpp"
+#include "p3platform.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <filesystem>
 #include <cassert>
 #include <cstring>
-#include "../gdlib/utils.h"
-#include "sysutils_p3.h"
+#include "../gdlib/utils.hpp"
+#include "sysutils_p3.hpp"
 
 #if defined( _WIN32 ) || defined( _WIN64 )
 #include <Windows.h>

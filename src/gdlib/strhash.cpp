@@ -24,7 +24,7 @@
  */
 
 
-#include "strhash.h"
+#include "strhash.hpp"
 
 namespace gdlib::strhash
 {

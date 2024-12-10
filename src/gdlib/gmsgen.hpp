@@ -23,14 +23,38 @@
  * SOFTWARE.
  */
 
+
+
 #pragma once
+#include "../global/modhead.hpp"
+#include "../global/gmsspecs.hpp"
 
-#include "gmsheapnew.h"
-
-namespace gmsonly
-{
-
-extern gdlib::gmsheapnew::THeapMgr gheap;
-extern bool gheapWasFreed;
-
+namespace rtl::p3io {
+struct P3File;
 }
+
+namespace gdlib::gmsgen
+{
+using TAnsiCharArray = char[global::gmsspecs::BigIndex+1]; //std::array<char, global::gmsspecs::BigIndex>;
+using PAnsiCharArray = TAnsiCharArray *;
+using DoubleArray = double[global::gmsspecs::BigIndex+1]; //std::array<double, global::gmsspecs::BigIndex>;
+using PDoubleArray = DoubleArray *;
+using PTextFile = rtl::p3io::P3File *;
+
+using LongIntArray = int[global::gmsspecs::BigIndex+1]; //std::array<int, global::gmsspecs::BigIndex>;
+using PLongIntArray = LongIntArray *;
+
+using TBooleanArray = bool[global::gmsspecs::BigIndex+1]; // std::array<bool, global::gmsspecs::BigIndex>;
+using PBooleanArray = TBooleanArray *;
+
+using TByteDataArray = uint8_t[global::gmsspecs::BigIndex]; // std::array<uint8_t, global::gmsspecs::BigIndex>;
+using PByteDataArray = TByteDataArray *;
+
+enum tfileaction : uint8_t
+{
+   forRead,
+   forWrite,
+   forAppend
+};
+
+}// namespace gdlib::gmsgen

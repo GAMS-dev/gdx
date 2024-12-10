@@ -23,8 +23,8 @@
 * SOFTWARE.
 */
 
-#include "doctest.h"// for ResultBuilder, Expressi...
-#include "../gxfile.h"
+#include "doctest.hpp"// for ResultBuilder, Expressi...
+#include "../gxfile.hpp"
 
 using namespace gdx;
 using namespace std::literals::string_literals;

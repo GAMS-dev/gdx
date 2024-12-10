@@ -26,12 +26,12 @@
 #include <string> // for string
 #include <cstring> // for strerror, size_t, strcmp, strcpy
 
-#include "sysutils_p3.h"
-#include "p3platform.h"// for OSFileType, tOSFileType
+#include "sysutils_p3.hpp"
+#include "p3platform.hpp"// for OSFileType, tOSFileType
 
 #include "global/unit.h" // for UNIT_INIT_FINI
 
-#include "gdlib/utils.h" // for ui16
+#include "gdlib/utils.hpp" // for ui16
 
 #if defined( _WIN32 )
    #include <Windows.h>

@@ -27,11 +27,11 @@
 #include <cstring>
 #include <utility>
 
-#include "../rtl/sysutils_p3.h"
+#include "../rtl/sysutils_p3.hpp"
 
-#include "gmacro.h"
-#include "utils.h"
-#include "gmsstrm.h"
+#include "gmacro.hpp"
+#include "utils.hpp"
+#include "gmsstrm.hpp"
 
 using namespace std::literals::string_literals;
 

@@ -23,9 +23,9 @@
 * SOFTWARE.
 */
 
-#include "gdlib/strutilx.h"
-#include "gdlib/utils.h"
-#include "../doctest.h"
+#include "gdlib/strutilx.hpp"
+#include "gdlib/utils.hpp"
+#include "../doctest.hpp"
 
 using namespace std::literals::string_literals;
 using namespace gdlib::strutilx;

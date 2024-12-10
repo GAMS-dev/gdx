@@ -7,10 +7,10 @@
 #include <cstdint>
 #include <memory>
 
-#include "../library/common.h"
-#include "../library/short_string.h"
-#include "../../gdlib/gmsdata.h"
-#include "../../gdlib/gmsobj.h"
+#include "../library/common.hpp"
+#include "../library/short_string.hpp"
+#include "../../gdlib/gmsdata.hpp"
+#include "../../gdlib/gmsobj.hpp"
 
 // GDX library interface
 #include "../../../generated/gdxcc.h"

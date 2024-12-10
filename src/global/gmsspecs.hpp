@@ -28,8 +28,8 @@
 #include <string>
 #include <array>
 
-#include "delphitypes.h"
-#include "../gdlib/utils.h"
+#include "delphitypes.hpp"
+#include "../gdlib/utils.hpp"
 
 // ==============================================================================================================
 // Interface

@@ -28,7 +28,7 @@
 #include <string>
 #include <array>
 
-#include "../gdlib/utils.h"
+#include "../gdlib/utils.hpp"
 
 // ==============================================================================================================
 // Interface

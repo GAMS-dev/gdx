@@ -24,8 +24,8 @@
  */
 
 #include "gclgms.h" // for GLOBAL_MAX_INDEX_DIM
-#include "gdlib/gmsdata.h"// for TTblGamsData, TTblGams...
-#include "tests/doctest.h"   // for ResultBuilder, REQUIRE_EQ
+#include "gdlib/gmsdata.hpp"// for TTblGamsData, TTblGams...
+#include "tests/doctest.hpp"   // for ResultBuilder, REQUIRE_EQ
 #include <algorithm>   // for fill
 #include <array>       // for array
 

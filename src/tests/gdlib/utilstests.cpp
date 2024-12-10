@@ -27,9 +27,9 @@
 #include <fstream>
 #include <filesystem>
 
-#include "gdlib/utils.h"
+#include "gdlib/utils.hpp"
 
-#include "tests/doctest.h"
+#include "tests/doctest.hpp"
 
 using namespace std::literals::string_literals;
 

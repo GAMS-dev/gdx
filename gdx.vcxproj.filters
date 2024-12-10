@@ -241,91 +241,91 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\gxfile.h">
+    <ClInclude Include="src\gxfile.hpp">
     </ClInclude>
     <ClInclude Include="src\tests\doctest.h">
       <Filter>tests</Filter>
     </ClInclude>
-    <ClInclude Include="src\tests\gdxtests.h">
+    <ClInclude Include="src\tests\gdxtests.hpp">
       <Filter>tests</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdx.h" />
-    <ClInclude Include="src\gdlib\gmsstrm.h">
+    <ClInclude Include="src\gdx.hpp" />
+    <ClInclude Include="src\gdlib\gmsstrm.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\utils.h">
+    <ClInclude Include="src\gdlib\utils.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\batchalloc.h">
+    <ClInclude Include="src\gdlib\batchalloc.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\charmaps.h">
+    <ClInclude Include="src\gdlib\charmaps.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\cmdpar.h">
+    <ClInclude Include="src\gdlib\cmdpar.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\datastorage.h">
+    <ClInclude Include="src\gdlib\datastorage.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\dblutil.h">
+    <ClInclude Include="src\gdlib\dblutil.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gamsdirs.h">
+    <ClInclude Include="src\gdlib\gamsdirs.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gfileopen.h">
+    <ClInclude Include="src\gdlib\gfileopen.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\glookup.h">
+    <ClInclude Include="src\gdlib\glookup.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gmacro.h">
+    <ClInclude Include="src\gdlib\gmacro.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gmsdata.h">
+    <ClInclude Include="src\gdlib\gmsdata.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gmsgen.h">
+    <ClInclude Include="src\gdlib\gmsgen.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gmsglob.h">
+    <ClInclude Include="src\gdlib\gmsglob.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gmsheapnew.h">
+    <ClInclude Include="src\gdlib\gmsheapnew.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gmslist.h">
+    <ClInclude Include="src\gdlib\gmslist.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gmsobj.h">
+    <ClInclude Include="src\gdlib\gmsobj.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gmsonly.h">
+    <ClInclude Include="src\gdlib\gmsonly.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\obfuscatestr.h">
+    <ClInclude Include="src\gdlib\obfuscatestr.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\runner.h">
+    <ClInclude Include="src\gdlib\runner.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\statlib.h">
+    <ClInclude Include="src\gdlib\statlib.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\statlibobj.h">
+    <ClInclude Include="src\gdlib\statlibobj.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\stattypes.h">
+    <ClInclude Include="src\gdlib\stattypes.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\strhash.h">
+    <ClInclude Include="src\gdlib\strhash.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\strutilx.h">
+    <ClInclude Include="src\gdlib\strutilx.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\xcompress.h">
+    <ClInclude Include="src\gdlib\xcompress.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
     <ClInclude Include="src\rtl\dtoaLoc.h">
@@ -334,43 +334,43 @@
     <ClInclude Include="src\rtl\idglobal_p3.h">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\rtl\math_p3.h">
+    <ClInclude Include="src\rtl\math_p3.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\rtl\p3io.h">
+    <ClInclude Include="src\rtl\p3io.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\rtl\p3library.h">
+    <ClInclude Include="src\rtl\p3library.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\rtl\p3platform.h">
+    <ClInclude Include="src\rtl\p3platform.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\rtl\p3process.h">
+    <ClInclude Include="src\rtl\p3process.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\rtl\p3utils.h">
+    <ClInclude Include="src\rtl\p3utils.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\rtl\stdthread.h">
+    <ClInclude Include="src\rtl\stdthread.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\rtl\sysutils_p3.h">
+    <ClInclude Include="src\rtl\sysutils_p3.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\global\ctvproc.h">
+    <ClInclude Include="src\global\ctvproc.hpp">
       <Filter>global</Filter>
     </ClInclude>
-    <ClInclude Include="src\global\delphitypes.h">
+    <ClInclude Include="src\global\delphitypes.hpp">
       <Filter>global</Filter>
     </ClInclude>
-    <ClInclude Include="src\global\gmslibname.h">
+    <ClInclude Include="src\global\gmslibname.hpp">
       <Filter>global</Filter>
     </ClInclude>
-    <ClInclude Include="src\global\gmsspecs.h">
+    <ClInclude Include="src\global\gmsspecs.hpp">
       <Filter>global</Filter>
     </ClInclude>
-    <ClInclude Include="src\global\modhead.h">
+    <ClInclude Include="src\global\modhead.hpp">
       <Filter>global</Filter>
     </ClInclude>
     <ClInclude Include="src\global\unit.h">

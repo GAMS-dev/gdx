@@ -34,7 +34,7 @@
 #include <map>
 #include <array>
 
-#include "gdx.h"
+#include "gdx.hpp"
 
 using namespace std::literals::string_literals;
 

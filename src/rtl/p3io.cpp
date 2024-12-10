@@ -31,7 +31,7 @@
 #include <array>
 #include <stdexcept>
 
-#include "p3io.h"
+#include "p3io.hpp"
 #include "dtoaLoc.h"
 
 #if !defined(_WIN32)
