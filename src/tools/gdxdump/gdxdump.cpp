@@ -204,12 +204,15 @@ void WrVal( const double V )
             case DblFormat_t::dbl_normal:
                fo << gdlib::strutilx::DblToStrSep( V, DecimalSep );
                break;
+
             case DblFormat_t::dbl_hexBytes:
                fo << gdlib::dblutil::dblToStrHex( V );
                break;
+
             case DblFormat_t::dbl_hexponential:
                fo << gdlib::dblutil::dblToStrHexponential( V );
                break;
+
             default:
                break;
          }
@@ -356,10 +359,12 @@ void WriteSymbol( const int SyNr )
                WriteQUELText( S.data() );
             }
             break;
+
          case dt_par:
             fo << ' ';
             WrVal( Vals[ValNr] );
             break;
+
          case dt_equ:
          case dt_var:
             if( OutFormat == OutFormat_t::fmt_gamsbas )
@@ -372,6 +377,7 @@ void WriteSymbol( const int SyNr )
             }
             WrVal( Vals[ValNr] );
             break;
+
          default:
             fo << "Oops";
             break;
@@ -416,6 +422,7 @@ void WriteSymbol( const int SyNr )
          if( AUser == GMS_SETTYPE_SINGLETON )
             SubTypeName = "Singleton";
          break;
+
       case dt_var:
          if( AUser < 0 || AUser > GMS_VARTYPE_SEMIINT )
             AUser = GMS_VARTYPE_FREE;
@@ -423,6 +430,7 @@ void WriteSymbol( const int SyNr )
          if( AUser != GMS_VARTYPE_UNKNOWN )
             SubTypeName = library::varTypStr( AUser );
          break;
+
       case dt_equ:
          if( AUser < GMS_EQUTYPE_E || AUser > GMS_EQUTYPE_B )
             AUser = GMS_EQUTYPE_E;
@@ -430,6 +438,7 @@ void WriteSymbol( const int SyNr )
          if( AUser == GMS_EQUTYPE_B )
             SubTypeName = "Logic";
          break;
+
       default:
          DefaultValues[GMS_VAL_LEVEL] = 0;
          break;
@@ -539,9 +548,11 @@ void WriteSymbol( const int SyNr )
                      WriteItem( GMS_VAL_MARGINAL );
                   }
                   break;
+
                case OutFormat_t::fmt_csv:
                   library::assertWithMessage( false, "No CSV processing" );
                   break;
+
                case OutFormat_t::fmt_normal:
                   WriteItem( GMS_VAL_LEVEL );
                   if( ATyp == dt_var || ATyp == dt_equ )
@@ -555,6 +566,7 @@ void WriteSymbol( const int SyNr )
                      WriteItem( GMS_VAL_SCALE );
                   }
                   break;
+
                default:
                   break;
             }
