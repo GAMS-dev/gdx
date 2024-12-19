@@ -36,6 +36,7 @@
 
 #include "../gdlib/strutilx.h"     // for DblToStr
 #include "../gdlib/utils.h"        // for in, trim, val
+
 #include "global/modhead.h"        // for STUBWARN
 #include "math_p3.h"               // for IntPower
 #include "p3platform.h"            // for tOSPlatform, OSPlatform, OSFileType
@@ -110,9 +111,9 @@ bool PrefixPath( const std::string &s )
 {
    if( s.empty() ) return true;
 
-   const auto prevPath = rtl::sysutils_p3::QueryEnvironmentVariable( "PATH" );
-   const std::string newPath = s + rtl::sysutils_p3::PathSep + prevPath;
-   return !rtl::sysutils_p3::AssignEnvironmentVariable( "PATH", newPath );
+   const auto prevPath = QueryEnvironmentVariable( "PATH" );
+   const std::string newPath = s + PathSep + prevPath;
+   return !AssignEnvironmentVariable( "PATH", newPath );
 }
 
 bool P3SetEnv( const std::string &name, const std::string &val )
@@ -402,7 +403,7 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
       flags |= O_CREAT;
    if (flags & 1)
       flags |= O_TRUNC;
-   int fd = open(fName.c_str(), flags, 0666);
+   const int fd = open(fName.c_str(), flags, 0666);
    if (-1 == fd) {
       h = 0;
       return errno;
@@ -411,8 +412,7 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
    // before calling this a success, check for directory on read-only
    struct stat statBuf {};
    if (p3OpenRead == mode) {
-      int rc = fstat (fd, &statBuf);
-      if (rc)
+      if ( const int rc = fstat( fd, &statBuf ) )
          result = errno;
       else if (S_ISDIR(statBuf.st_mode))
          result = EISDIR;
@@ -573,10 +573,10 @@ int p3FileSetPointer(Tp3FileHandle h, int64_t distance, int64_t &newPointer, uin
          return EINVAL;
    }
    // check if conversion to off_t loses info
-   auto offset = (off_t)distance;
-   if (offset != distance) // only can happen on 32 bit machines?
+   const auto offset = (off_t)distance;
+   if( offset != distance )// only can happen on 32 bit machines?
       return EOVERFLOW;
-   off_t newPos = lseek (h, offset, w);
+   const off_t newPos = lseek (h, offset, w);
    if ((off_t)-1 == newPos)
       return errno;
    newPointer = newPos;
@@ -640,29 +640,30 @@ int p3FileGetPointer(Tp3FileHandle h, int64_t &filePointer)
 bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocNames &locNames, int &eCount )
 {
    eCount = 0;
-   locNames = { ""s };// { rtl::sysutils_p3::GetCurrentDir() };
-   bool res = p3WritableLocation( locType, appName, locNames.front() );
+   locNames = { ""s };// { GetCurrentDir() };
+   const bool res = p3WritableLocation( locType, appName, locNames.front() );
    if( p3Documents == locType ) return res;
 
-   bool isDataLoc { utils::in( locType, p3Data, p3AppData, p3AppLocalData ) };
+   const bool isDataLoc { utils::in( locType, p3Data, p3AppData, p3AppLocalData ) };
 
    if( OSFileType() == OSFileWIN )
    {
-      bool isConfigLoc { utils::in( locType, p3Config, p3AppConfig ) };
+      const bool isConfigLoc { utils::in( locType, p3Config, p3AppConfig ) };
       if( isConfigLoc || isDataLoc )
       {
-         std::string suffix = appName.empty() ? ""s : PathDelim + appName;
+         const std::string suffix = appName.empty() ? ""s : PathDelim + appName;
          locNames.emplace_back( "C:\\ProgramData" + suffix );
       }
       if( isDataLoc )
       {
-         std::string execName, msg;
-         if( p3GetExecName( execName, msg ) )
+         std::string execName;
+         if( std::string msg;
+             p3GetExecName( execName, msg ) )
          {
             eCount++;
             return res;
          }
-         std::string execPath { ExtractFilePath( execName ) };
+         const std::string execPath { ExtractFilePath( execName ) };
          locNames.emplace_back( ExcludeTrailingPathDelimiter( execPath ) );
          locNames.emplace_back( execPath + "data"s );
          if( !appName.empty() ) locNames.emplace_back( locNames.back() + PathDelim + appName );
@@ -772,7 +773,7 @@ bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::s
       }
    }
    if( !locName.empty() && !appName.empty() && utils::in( locType, p3Config, p3AppConfig, p3Data, p3AppData, p3AppLocalData ) )
-      locName += rtl::sysutils_p3::PathDelim + appName;
+      locName += PathDelim + appName;
    return !locName.empty();
 #else
    std::string dd = appName.empty() ? ""s : PathDelim + appName;
@@ -887,13 +888,13 @@ std::string getDigits( const int64_t i64 )
 {
    constexpr int M = 100000000, LOGM = 8;
    auto i = static_cast<int>( i64 );
-   if( i == i64 ) return rtl::sysutils_p3::IntToStr( i );
+   if( i == i64 ) return IntToStr( i );
    i = static_cast<int>( i64 % M );
-   std::string s = rtl::sysutils_p3::IntToStr( i );
+   std::string s = IntToStr( i );
    i = LOGM - static_cast<int>( s.length() );
    if( i > 0 ) s = std::string( i, '0' ) + s;
    i = static_cast<int>( i64 / M );
-   std::string res = rtl::sysutils_p3::IntToStr( i ) + s;
+   std::string res = IntToStr( i ) + s;
    // strip trailing zeros
    for( i = static_cast<int>( res.length() ) - 1; i >= 1 && res.back() == '0'; i-- )
       res.pop_back();
@@ -999,7 +1000,7 @@ bool PrefixLoadPath( const std::string &dir )
            ldPath = loadPathVarName();
    if( ldPath.empty() ) return true;
    const char *tptr { getenv( ldPath.c_str() ) };
-   return setEnvironmentVariableUnix( ldPath, s + ( tptr ? ""s + rtl::sysutils_p3::PathSep + tptr : ""s ) );
+   return setEnvironmentVariableUnix( ldPath, s + ( tptr ? ""s + PathSep + tptr : ""s ) );
 #endif
 }
 
@@ -1034,10 +1035,14 @@ bool PrefixEnv( const std::string &dir, const std::string &evName )
    std::string tPtr { trimDir + PathSep + opPtr };
    return SetEnvironmentVariableA( evName.c_str(), tPtr.c_str() );
 #else
-   std::string tptr = getenv( evName.c_str() );
-   if( tptr.empty() ) return setEnvironmentVariableUnix( evName, dir );
-   if( tptr.length() >= trimDir.length() && dir == tptr &&
-       ( tptr.length() == trimDir.length() || tptr[trimDir.length()] == PathSep ) ) return true;
+   const auto tptrBuf = getenv( evName.c_str() );
+   if( !tptrBuf || tptrBuf[0] == '\0' ) // fail or empty
+      return setEnvironmentVariableUnix( evName, dir );
+   std::string tptr {tptrBuf};
+   if( tptr.length() >= trimDir.length()
+      && dir == tptr
+      && ( tptr.length() == trimDir.length() || tptr[trimDir.length()] == PathSep ) )
+      return true;
    return setEnvironmentVariableUnix( evName, dir + PathSep + tptr );
 #endif
 }
@@ -1087,7 +1092,7 @@ int xGetExecName( std::string &execName, std::string &msg )
    if( k <= 0 )
    {
       myStrError( errno, tmpBuf.data(), sizeof( char ) * tmpBuf.size() );
-      msg = "proc_pidpath(pid="s + rtl::sysutils_p3::IntToStr( pid ) + ") failed: "s + std::string( tmpBuf.begin(), tmpBuf.end() );
+      msg = "proc_pidpath(pid="s + IntToStr( pid ) + ") failed: "s + std::string( tmpBuf.begin(), tmpBuf.end() );
       execName.clear();
       rc = 4;
    }
@@ -1112,7 +1117,7 @@ int xGetExecName( std::string &execName, std::string &msg )
 #elif defined( _WIN32 )
    if( const auto k = GetModuleFileNameA( nullptr, execBuf.data(), static_cast<DWORD>(sizeof( char ) * execBuf.size()) ); !k )
    {
-      msg = "GetModuleFileName() failure: rc="s + rtl::sysutils_p3::IntToStr( k );
+      msg = "GetModuleFileName() failure: rc="s + IntToStr( k );
       execName.clear();
       rc = 4;
    }
@@ -1181,8 +1186,8 @@ bool p3GetFirstMACAddress( std::string &mac )
       ifreq ifr {};
 
       {
-         struct ifreq *it = ifc.ifc_req;
-         const struct ifreq *const end = it + ( ifc.ifc_len / sizeof( struct ifreq ) );
+         ifreq *it = ifc.ifc_req;
+         const ifreq *const end = it + ifc.ifc_len / sizeof( struct ifreq );
 
          for( ; it != end; ++it )
          {
@@ -1614,37 +1619,44 @@ T_P3SOCKET p3SockAcceptClientConn( T_P3SOCKET srvSock )
 //    set the SO_REUSEADDR option on the socket.  This prevents the socket from
 //    entering the TIME_WAIT state when it is closed
 // returns the socket on success, invalid socket on failure
-T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse )
+T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse, int *retCode )
 {
+   if(retCode)
+      *retCode = 0;
    T_P3SOCKET res {};
    mkInvalidSock( res );
 #if defined( _WIN32 )
-   const auto acceptSocket { socket( AF_INET, SOCK_STREAM, 0 ) };
-   if( INVALID_SOCKET == acceptSocket ) return res;
+   const auto acceptSocket { socket( AF_INET, SOCK_STREAM, IPPROTO_TCP ) };
+   if( INVALID_SOCKET == acceptSocket )
+      return res;
    if( reuse )
    {
       int enable { 1 };
-      // without this magic Windows will bar connections to this port for a small time window
+      // without this magic Windows will bar connections to this port for a small-time window
       // after the socket is closed to avoid delayed packets from a previous connection going to
       // any new connections
-      if( setsockopt( acceptSocket, SOL_SOCKET, SO_REUSEADDR, (char *) &enable, sizeof( int ) ) )
+      if( setsockopt( acceptSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<char *>( &enable ), sizeof( int ) ) )
          return res;
    }
    SOCKADDR_IN addr;
    (void) std::memset( &addr, 0, sizeof( addr ) );
    addr.sin_family = AF_INET;
-   //addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
-   InetPtonA( AF_INET, "127.0.0.1", &addr );
+   addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
+   //InetPtonA( AF_INET, "127.0.0.1", &addr );
    addr.sin_port = htons( port );
-   int rc { bind( acceptSocket, (SOCKADDR *) &addr, sizeof( addr ) ) };
+   int rc { bind( acceptSocket, reinterpret_cast<SOCKADDR *>( &addr ), sizeof( addr ) ) };
    if( rc == SOCKET_ERROR )
    {
+      if( retCode )
+         *retCode = WSAGetLastError();
       closesocket( acceptSocket );
       return res;
    }
    rc = listen( acceptSocket, 5 );
    if( rc == SOCKET_ERROR )
    {
+      if( retCode )
+         *retCode = WSAGetLastError();
       closesocket( acceptSocket );
       return res;
    }
@@ -1656,7 +1668,7 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse )
    if( reuse )
    {
       int enable { 1 };
-      // without this magic Linux/Mac will bar connections to this port for a small time window
+      // without this magic Linux/Mac will bar connections to this port for a small-time window
       // after the socket is closed to avoid delayed packets from a previous connection going to
       // any new connections
       if( setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof( enable ) ) )
@@ -1670,11 +1682,15 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse )
 
    if( bind( sockfd, reinterpret_cast<sockaddr *>( &servaddr ), sizeof( servaddr ) ) )
    {
+      if(retCode)
+         *retCode = errno;
       (void) close( sockfd );
       return res;
    }
    if( listen( sockfd, 5 ) )
    {
+      if(retCode)
+         *retCode = errno;
       (void) close( sockfd );
       return res;
    }
@@ -1706,7 +1722,7 @@ int p3SockGetPort( T_P3SOCKET s, int &res )
    }
 #else
    socklen_t addrLen = sizeof(sockaddr_in);
-   rc = getsockname(s.socketfd, (sockaddr*)&addr, &addrLen);
+   rc = getsockname(s.socketfd, reinterpret_cast<sockaddr *>( &addr ), &addrLen);
    if(rc)
    {
       res = errno;

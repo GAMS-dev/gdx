@@ -61,9 +61,11 @@ std::string FileStopper, ExtStopper;
 std::string ExtractShortPathName( const std::string &FileName )
 {
 #if defined( _WIN32 )
-   std::array<char, 260> buf;
+   std::array<char, 260> buf {};
    const auto rc = GetShortPathNameA( FileName.c_str(), buf.data(), static_cast<DWORD>( sizeof( char ) * buf.size() ) );
    assert(rc);
+   if(!rc)
+      throw std::runtime_error("Failed to determine short path name: \""s + FileName + "\""s);
    return buf.data();
 #else
    // TODO: Does this make sense?
@@ -718,9 +720,11 @@ int DateTimeToFileDate( double dt )
    uint16_t hour, min, sec, msec;
    DecodeTime( dt, hour, min, sec, msec );
 #if defined(_WIN32)
-   LongRec lr {
-      static_cast<uint16_t>( ( sec >> 1 ) | ( min << 5 ) | ( hour << 11 ) ),
-      static_cast<uint16_t>(day | ( month << 5 ) | ( (year - 1980) << 9 ))
+   const LongRec lr {
+      {
+         static_cast<uint16_t>( ( sec >> 1 ) | ( min << 5 ) | ( hour << 11 ) ),
+         static_cast<uint16_t>(day | ( month << 5 ) | ( (year - 1980) << 9 ))
+      }
    };
    static_assert( sizeof( LongRec ) == sizeof( int ) );
    int res;

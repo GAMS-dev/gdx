@@ -81,6 +81,12 @@ void gstatMessage( const std::string &s )
       GMSLogObj->LogMessage( s );
 }
 
+
+bool gstatReady()
+{
+   return GMSLogObj && GMSLogObj->getLogEnabled();
+}
+
 void dumpfilename( const std::string &prfx, const bool enabled, const std::string &what, const std::string &gs, const tfileaction fa, const int ioResOrNeg )
 {
    GMSLogObj->LogDumpFilename( prfx, enabled, what, gs, fa, ioResOrNeg );

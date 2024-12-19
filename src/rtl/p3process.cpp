@@ -789,8 +789,6 @@ static bool killProcGroupUnix( pid_t p, TKillHow how )
    return result;
 } /* killProcGroupUnix */
 
-#endif// _WIN32
-
 static void uglyGmsUnzipHack( std::list<std::string> &args )
 {
    // AS: Very ugly hack to circumvent gmsunzip issue in gamslib/dplytest on macOS
@@ -840,6 +838,7 @@ static int ForkWithSplitArgs( const std::function<int( int, char *const[], int *
    argv.back() = nullptr;
    return forkExecFunc( argc, argv.data(), &ProgRC );
 }
+#endif
 
 int P3ExecP( const std::string &CmdPtr, int &ProgRC )
 {

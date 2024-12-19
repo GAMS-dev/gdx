@@ -132,6 +132,7 @@ void registerWriteCallback( gdlib::stattypes::tgwrite fptr, void *usermem );
 
 
 void gstatMessage( const std::string &s );
+bool gstatReady();
 bool gstatOpen( int Astat, gmsgen::tfileaction AAction, const std::string &Afn );
 void gstatLineNr( int N );
 void gstatTraceLevel( int N );

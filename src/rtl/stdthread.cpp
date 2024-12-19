@@ -54,16 +54,18 @@ namespace rtl::stdthread
    * so ...  trunc(TDateTime) + DATE_DELTA_CV_DT = (TCVTime div nicksPerDay)
    * TCVTime epoch + DATE_DELTA_CV_UNIX = Unix epoch
 */
-constexpr int DATE_DELTA_CV_UNIX = 134774,
-              NICKS_PER_USEC = 10,
-              NICKS_PER_MSEC = 1000 * NICKS_PER_USEC,
-              NICKS_PER_SEC = 1000 * NICKS_PER_MSEC;
-
 /* 64-bit constants do not initialize properly in P3 so
  * initialize them at execution time in initialization section */
+
+constexpr int NICKS_PER_USEC = 10;
+constexpr int NICKS_PER_MSEC = 1000 * NICKS_PER_USEC;
+#ifndef _WIN32
+constexpr int NICKS_PER_SEC = 1000 * NICKS_PER_MSEC;
 static int64_t nicksPerMin { 60 * NICKS_PER_SEC },
-        nicksPerHour { nicksPerMin * 60 },
-        nicksPerDay { nicksPerHour * 24 };
+               nicksPerHour { nicksPerMin * 60 },
+               nicksPerDay { nicksPerHour * 24 };
+constexpr int DATE_DELTA_CV_UNIX = 134774;
+#endif
 
 int64_t nowCV()
 {

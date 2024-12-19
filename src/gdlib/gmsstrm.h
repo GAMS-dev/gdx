@@ -134,9 +134,10 @@ protected:
    {
       if( Paranoid ) ParCheck( rwt );
       T res;
-#if !defined(NDEBUG)
+#if !defined( NDEBUG ) && defined(__IN_CPPMEX__)
       auto numBytesRead { Read( &res, sizeof( T ) ) };
-      assert(numBytesRead == sizeof( T ));
+      // is not required to generally hold and code automatically detects EOF otherwise
+      //assert( numBytesRead == sizeof( T ) );
 #else
       Read( &res, sizeof( T ) );
 #endif

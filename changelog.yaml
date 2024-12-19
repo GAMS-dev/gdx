@@ -1,4 +1,6 @@
 ---
+- 7.11.10:
+    - Multiple small fixes to infrastructure code, shared modules, and hardening compiler flags.
 - 7.11.9:
     - Made gdxOpenRead not lock the file (from being deleted) on Windows.
     - Removed unnecessary dependency on "dladdr" as requested in GitHub issue.
