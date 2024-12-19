@@ -51,7 +51,7 @@ TEST_CASE( "Test simple usage of the custom heap" )
    thm.XFreeMem( buf, l );
    constexpr int n { 10000 };
    std::array<void *, n> ptrs {};
-   std::array<uint8_t, 20> buf2 {};
+   std::array<uint8_t, 64> buf2 {};
    const auto ref { reinterpret_cast<int64_t *>( buf2.data() ) };
    for( int i {}; i < n; i++ )
    {

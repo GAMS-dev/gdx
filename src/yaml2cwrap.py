@@ -46,7 +46,7 @@ def main():
     ap.add_argument('--input', type=str,
                     default='gdxapi.yaml', help='YAML API definition input filename')
     ap.add_argument('--output', type=str,
-                    default='gdxcwrap.hpp', help='Output GDX C-API wrapper header filename')
+                    default='gdxcwrap.h', help='Output GDX C-API wrapper header filename')
     ap.add_argument('--template', type=str,
                     default='cwrap.template.j2', help='Name of Jinja2 template file')
     ap.add_argument('--template_folder', type=str,

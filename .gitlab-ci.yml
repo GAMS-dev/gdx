@@ -61,7 +61,7 @@ apigenerator:
   script:
     - mkdir -p apifiles
     - python3 src/yaml2doxy.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdx.hpp
-    - python3 src/yaml2cwrap.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdxcwrap.hpp
+    - python3 src/yaml2cwrap.py --input src/gdxapi.yaml --template_folder src/templates --output apifiles/gdxcwrap.h
     - >
       python3
       src/yaml2cwrap.py

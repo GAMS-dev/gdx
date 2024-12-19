@@ -29,7 +29,7 @@
 #endif
 
 #if defined( GXFILE_CPPWRAP )
-#include "gdxcppwrap.h"
+#include "gdxcppwrap.hpp"
 #else
 #include "gclgms.h" // for GMS_SSSIZE, GMS_VAL_LEVEL
 #include "../gdx.hpp"// for TGXFileObj, TgdxValues

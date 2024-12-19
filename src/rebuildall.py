@@ -17,20 +17,20 @@ yaml2doxy.generate_method_declarations(
     'gdx.hpp'
 )
 
-# Rebuild C wrapper around GDX object (gdxcwrap.hpp)
+# Rebuild C wrapper around GDX object (gdxcwrap.h)
 yaml2cwrap.generate_c_wrapper(
     'gdxapi.yaml',
     'templates',
     'cwrap.template.j2',
-    '../generated/gdxcwrap.hpp'
+    '../generated/gdxcwrap.h'
 )
 
-# Rebuild OOP C++ wrapper around C API (gdxcppwrap.h)
+# Rebuild OOP C++ wrapper around C API (gdxcppwrap.hpp)
 yaml2cwrap.generate_c_wrapper(
     'gdxapi.yaml',
     'templates',
     'gdxcppwrap.template.j2',
-    '../generated/gdxcppwrap.h'
+    '../generated/gdxcppwrap.hpp'
 )
 
 # Rebuild gdxcc.{h,c} and gdxcclib.cpp
