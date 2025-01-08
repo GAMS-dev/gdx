@@ -979,6 +979,7 @@ std::string loadPathVarName()
       case OSDarwin_arm64:
          return "DYLD_LIBRARY_PATH"s;
       case OSLinux86_64:
+      case OSLinux_arm64:
          return "LD_LIBRARY_PATH";
       default:
          return {};

@@ -66,7 +66,11 @@ tOSPlatform OSPlatform()
       return OSDarwin_arm64;
    #endif
 #elif defined( __linux__ )
-   return OSLinux86_64;
+   #if defined( __x86_64__ ) || defined( _M_X64 )
+      return OSLinux86_64;
+   #else
+      return OSLinux_arm64;
+   #endif
 #else
    return OSMissing;
 #endif

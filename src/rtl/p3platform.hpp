@@ -53,6 +53,7 @@ enum tOSPlatform : uint8_t
    OSWindowsNT,
    OSWindows64EMT,
    OSLinux86_64,
+   OSLinux_arm64,
    OSDarwin_x64,
    OSDarwin_arm64,
    OSMissing,
@@ -63,6 +64,7 @@ const std::array<std::string, OSPlatformCount> OSPlatformText {
         "WinNT",
         "Win64EMT",
         "Linux86_64",
+        "Linux_arm64",
         "Darwin-x64",
         "Darwin-arm64",
         "Missing" };
@@ -71,6 +73,7 @@ const std::array<std::string, OSPlatformCount> OSDllExtension {
         ".dll",
         ".dll",
         ".so",
+        ".so",
         ".dylib",
         ".dylib",
         ".XXX" };
@@ -78,6 +81,7 @@ const std::array<std::string, OSPlatformCount> OSDllExtension {
 const std::array<std::string, OSPlatformCount> OSDllPrefix {
         "",
         "",
+        "lib",
         "lib",
         "lib",
         "lib",
