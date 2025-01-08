@@ -97,6 +97,7 @@ TEST_CASE( "Convert double to string" )
 
    // Edge cases
    REQUIRE_EQ("1E15", DblToStr(1e15));
+   REQUIRE_EQ("1E-10", DblToStr(1e-10));
    REQUIRE_EQ("1E15", DblToStr(1e15+1));
    REQUIRE_EQ("0.000101", DblToStr(1.01e-4));
 }

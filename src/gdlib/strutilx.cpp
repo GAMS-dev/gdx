@@ -295,6 +295,7 @@ static uint8_t DblToStrSepCore(double V, const char DecimalSep, char *s)
             if( i == static_cast<int>( slen ) )
                s[k - 1] = ' ';
          }
+         else break;
       }
       for( int i = k - 2; i >= j + 1; i-- )
       {
