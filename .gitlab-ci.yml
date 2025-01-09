@@ -496,7 +496,7 @@ deploy-gitlab-github:
     - cp Release/gdxcclib64.dll apifiles/*.h apifiles/*.hpp apifiles/*.c apifiles/*.cpp .
     - cp Release/gdx-static.lib libgdx-windows.lib
     - |
-      for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib libgdx-macos.a libgdx-linux.a libgdx-windows.lib gclgms.h gcmutex.h gdxcc.h gdxcc.c gdxcwrap.hpp gdxcclib.cpp
+      for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib libgdx-macos.a libgdx-linux.a libgdx-windows.lib gclgms.h gcmutex.h gdxcc.h gdxcc.c gdxcwrap.h gdxcclib.cpp
       do
         GITHUB_TOKEN=${GITHUB_TOKEN} github-release -v upload -R -u GAMS-dev -r gdx -t "${GDX_TAG_NAME}" -n $fn -f $fn
       done
