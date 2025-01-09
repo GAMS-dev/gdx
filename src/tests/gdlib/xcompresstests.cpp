@@ -23,8 +23,8 @@
 * SOFTWARE.
 */
 
-#include "gdlib/xcompress.h"
-#include "../doctest.h"
+#include "gdlib/xcompress.hpp"
+#include "../doctest.hpp"
 
 #include <vector>
 #include <array>

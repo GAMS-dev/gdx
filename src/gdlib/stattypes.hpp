@@ -27,7 +27,7 @@
 #pragma once
 
 #include <functional>
-#include "../global/delphitypes.h"
+#include "../global/delphitypes.hpp"
 
 namespace gdlib::stattypes
 {

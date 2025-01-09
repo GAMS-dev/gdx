@@ -24,7 +24,7 @@
  */
 
 
-#include "datastorage.h"
+#include "datastorage.hpp"
 
 namespace gdlib::datastorage
 {

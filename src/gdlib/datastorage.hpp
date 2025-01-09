@@ -31,7 +31,7 @@
 #include <optional>
 #include <cstdint>
 
-#include "gmsheapnew.h"
+#include "gmsheapnew.hpp"
 
 // Batch allocations
 // When TLD_DYN_ARRAYS is active: No single item #TotalSize-bytes new allocations
@@ -43,7 +43,7 @@
 #define TLD_REC_TYPE TLinkedDataRec<KeyType, ValueType>
 
 #if defined(TSH_BATCH_ALLOCS)
-#include "batchalloc.h"
+#include "batchalloc.hpp"
 #endif
 
 #if defined( __IN_CPPMEX__ )

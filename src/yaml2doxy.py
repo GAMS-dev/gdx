@@ -137,7 +137,7 @@ def generate_method_declarations(input_yaml_fn, template_folder, template_fn, ou
 
 def main():
     p = argparse.ArgumentParser(prog='yaml2doxy',
-                                description='Generate GDX header file gdx.h from GDX API definition YAML')
+                                description='Generate GDX header file gdx.hpp from GDX API definition YAML')
     p.add_argument('--input', type=str,
                    default='gdxapi.yaml', help='Filename of GDX API definition YAML file')
     p.add_argument('--template', type=str,
@@ -145,7 +145,7 @@ def main():
     p.add_argument('--template_folder', type=str,
                    default='templates', help='Name of the folder holding the Jinja2 template files')
     p.add_argument('--output', type=str,
-                   default='gdx.h',
+                   default='gdx.hpp',
                    help='Name of C++ GDX header file to be generated')
     p.add_argument('--no_html_beautify', action='store_true')
     args = p.parse_args()

@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include "modhead.h"
+#include "modhead.hpp"
 #include <stdexcept>
 #include <string>
 #include <sstream>

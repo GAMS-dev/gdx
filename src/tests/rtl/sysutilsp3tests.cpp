@@ -23,9 +23,9 @@
 * SOFTWARE.
 */
 
-#include "rtl/sysutils_p3.h"
-#include "gdlib/utils.h"
-#include "../doctest.h"
+#include "rtl/sysutils_p3.hpp"
+#include "gdlib/utils.hpp"
+#include "../doctest.hpp"
 #include <string>
 #include <chrono>
 #include <filesystem>

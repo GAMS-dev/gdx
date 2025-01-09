@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "gmsonly.h"
+#include "gmsonly.hpp"
 
 #include <string>
 using namespace std::literals::string_literals;

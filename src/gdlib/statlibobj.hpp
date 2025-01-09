@@ -27,8 +27,8 @@
 #pragma once
 
 #include <string>
-#include "stattypes.h"
-#include "gmsgen.h"
+#include "stattypes.hpp"
+#include "gmsgen.hpp"
 
 namespace gdlib::statlibobj
 {

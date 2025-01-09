@@ -23,8 +23,8 @@
 * SOFTWARE.
 */
 
-#include "gdlib/gmsstrm.h"
-#include "../doctest.h"
+#include "gdlib/gmsstrm.hpp"
+#include "../doctest.hpp"
 #include <fstream>
 #include <filesystem>
 

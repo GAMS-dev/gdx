@@ -24,8 +24,8 @@
 */
 
 #include <string>
-#include "../doctest.h"
-#include "gdlib/datastorage.h"
+#include "../doctest.hpp"
+#include "gdlib/datastorage.hpp"
 
 using namespace std::literals::string_literals;
 using namespace gdlib::datastorage;

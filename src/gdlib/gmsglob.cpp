@@ -24,7 +24,7 @@
  */
 
 
-#include "gmsglob.h"
+#include "gmsglob.hpp"
 
 #include "global/unit.h"
 

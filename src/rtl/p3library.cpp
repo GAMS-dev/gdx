@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "p3library.h"
+#include "p3library.hpp"
 
 #if defined( WIN32 ) || defined( _WIN64 ) || defined( __WIN32__ ) || defined( _WIN32 ) || defined( __NT__ )
 #include <Windows.h>
@@ -32,8 +32,8 @@
 #include <dlfcn.h>
 #endif
 
-#include "sysutils_p3.h"
-#include "p3platform.h"
+#include "sysutils_p3.hpp"
+#include "p3platform.hpp"
 
 using namespace rtl::sysutils_p3;
 using namespace rtl::p3platform;

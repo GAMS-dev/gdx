@@ -23,11 +23,11 @@
  * SOFTWARE.
  */
 
-#include "../rtl/math_p3.h"
-#include "../rtl/sysutils_p3.h"
+#include "../rtl/math_p3.hpp"
+#include "../rtl/sysutils_p3.hpp"
 
-#include "dblutil.h"
-#include "utils.h"
+#include "dblutil.hpp"
+#include "utils.hpp"
 
 #include <cmath>
 

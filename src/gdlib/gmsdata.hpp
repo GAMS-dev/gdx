@@ -31,7 +31,7 @@
 #include <array>
 #include <vector>
 
-#include "gmsobj.h"
+#include "gmsobj.hpp"
 
 namespace gdlib::gmsdata
 {

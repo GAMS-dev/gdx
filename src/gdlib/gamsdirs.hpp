@@ -24,37 +24,20 @@
  */
 
 
-
 #pragma once
-#include "../global/modhead.h"
-#include "../global/gmsspecs.h"
 
-namespace rtl::p3io {
-struct P3File;
-}
+#include <string>
+#include <vector>
+#include "../rtl/p3utils.hpp"
 
-namespace gdlib::gmsgen
+namespace gdlib::gamsdirs
 {
-using TAnsiCharArray = char[global::gmsspecs::BigIndex+1]; //std::array<char, global::gmsspecs::BigIndex>;
-using PAnsiCharArray = TAnsiCharArray *;
-using DoubleArray = double[global::gmsspecs::BigIndex+1]; //std::array<double, global::gmsspecs::BigIndex>;
-using PDoubleArray = DoubleArray *;
-using PTextFile = rtl::p3io::P3File *;
+const int NGMSLocNames = rtl::p3utils::NLocNames + 2;
+using TGMSLocNames = std::vector<std::string>;
+const std::string INCLIBDIR = "inclib", EXTEQUDIR = "external_equations", EXTRFUNCDIR = "extrinsic_functions";
 
-using LongIntArray = int[global::gmsspecs::BigIndex+1]; //std::array<int, global::gmsspecs::BigIndex>;
-using PLongIntArray = LongIntArray *;
-
-using TBooleanArray = bool[global::gmsspecs::BigIndex+1]; // std::array<bool, global::gmsspecs::BigIndex>;
-using PBooleanArray = TBooleanArray *;
-
-using TByteDataArray = uint8_t[global::gmsspecs::BigIndex]; // std::array<uint8_t, global::gmsspecs::BigIndex>;
-using PByteDataArray = TByteDataArray *;
-
-enum tfileaction : uint8_t
-{
-   forRead,
-   forWrite,
-   forAppend
-};
-
-}// namespace gdlib::gmsgen
+bool GMSDataLocations( TGMSLocNames &GMSLocNames, const std::string &sysDir );
+bool GMSConfigLocations( TGMSLocNames &GMSLocNames, const std::string &sysDir );
+bool GMSWritableLocation( rtl::p3utils::Tp3Location locType, std::string &locName );
+bool findDataDirFile( const std::string &fName, std::string &fPathName, const std::string &sysDir, bool &allSearched );
+}// namespace gdlib::gamsdirs

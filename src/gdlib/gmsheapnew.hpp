@@ -26,8 +26,8 @@
 
 #pragma once
 
-#include "../global/delphitypes.h"
-#include "../gdlib/gmsobj.h"
+#include "../global/delphitypes.hpp"
+#include "../gdlib/gmsobj.hpp"
 
 namespace gdlib::gmsheapnew
 {

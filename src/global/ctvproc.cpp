@@ -23,9 +23,9 @@
  * SOFTWARE.
  */
 
-#include "ctvproc.h"
+#include "ctvproc.hpp"
 #include <string>
-#include "../gdlib/utils.h"
+#include "../gdlib/utils.hpp"
 
 
 // ==============================================================================================================

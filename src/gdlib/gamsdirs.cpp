@@ -26,9 +26,9 @@
 
 #include <algorithm>
 
-#include "gamsdirs.h"
-#include "../rtl/p3platform.h"
-#include "../rtl/sysutils_p3.h"
+#include "gamsdirs.hpp"
+#include "../rtl/p3platform.hpp"
+#include "../rtl/sysutils_p3.hpp"
 
 using namespace rtl::p3utils;
 using namespace rtl::p3platform;

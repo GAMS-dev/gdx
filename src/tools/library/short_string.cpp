@@ -2,8 +2,8 @@
 #include <ostream>
 #include <cassert>
 
-#include "short_string.h"
-#include "../../gdlib/utils.h"
+#include "short_string.hpp"
+#include "../../gdlib/utils.hpp"
 
 // #define ENABLE_ASSERTIONS
 

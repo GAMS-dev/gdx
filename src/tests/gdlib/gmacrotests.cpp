@@ -23,8 +23,8 @@
 * SOFTWARE.
 */
 
-#include "gdlib/gmacro.h"
-#include "../doctest.h"
+#include "gdlib/gmacro.hpp"
+#include "../doctest.hpp"
 
 using namespace std::literals::string_literals;
 using namespace gdlib::gmacro;

@@ -27,18 +27,18 @@
 
 #include <iostream>
 
-#include "../rtl/sysutils_p3.h"
-#include "../rtl/p3platform.h"
-#include "../rtl/p3utils.h"
-#include "../rtl/idglobal_p3.h"
+#include "../rtl/sysutils_p3.hpp"
+#include "../rtl/p3platform.hpp"
+#include "../rtl/p3utils.hpp"
+#include "../rtl/idglobal_p3.hpp"
 
-#include "utils.h"
+#include "utils.hpp"
 
-#include "strutilx.h"
-#include "statlibobj.h"
-#include "gmsgen.h"
+#include "strutilx.hpp"
+#include "statlibobj.hpp"
+#include "gmsgen.hpp"
 #include "global/unit.h"
-#include "rtl/p3process.h"
+#include "rtl/p3process.hpp"
 
 using namespace gdlib::gmsgen;
 using namespace rtl::sysutils_p3;

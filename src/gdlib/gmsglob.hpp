@@ -25,7 +25,7 @@
 
 
 #pragma once
-#include "../global/gmsspecs.h"
+#include "../global/gmsspecs.hpp"
 
 // Interface
 namespace gdlib::gmsglob

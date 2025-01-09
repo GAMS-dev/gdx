@@ -27,10 +27,10 @@
 #include <numeric>
 #include <utility>
 
-#include "../doctest.h"
+#include "../doctest.hpp"
 
-#include "gdlib/glookup.h"
-#include "gdlib/strutilx.h"
+#include "gdlib/glookup.hpp"
+#include "gdlib/strutilx.hpp"
 
 using namespace std::literals::string_literals;
 

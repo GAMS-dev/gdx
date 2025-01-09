@@ -40,7 +40,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "gdx.h"
+#include "gdx.hpp"
 #include "gmdcc.h"
 
 using namespace std::literals::string_literals;

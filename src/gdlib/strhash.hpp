@@ -27,10 +27,10 @@
 
 #pragma once
 
-#include "gmsstrm.h"
-#include "utils.h"
-#include "datastorage.h"
-#include "gmsdata.h"
+#include "gmsstrm.hpp"
+#include "utils.hpp"
+#include "datastorage.hpp"
+#include "gmsdata.hpp"
 
 #include <vector>
 #include <string>

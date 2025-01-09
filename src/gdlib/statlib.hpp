@@ -26,8 +26,8 @@
 
 
 #pragma once
-#include "gmsgen.h"
-#include "stattypes.h"
+#include "gmsgen.hpp"
+#include "stattypes.hpp"
 
 
 /*

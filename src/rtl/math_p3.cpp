@@ -23,10 +23,10 @@
  * SOFTWARE.
  */
 
-#include "math_p3.h"
+#include "math_p3.hpp"
 #include <cstdlib>              // for abs
 #include <cmath>                // for log1p
-#include "../global/modhead.h"  // for STUBWARN
+#include "../global/modhead.hpp"  // for STUBWARN
 
 namespace rtl::math_p3
 {

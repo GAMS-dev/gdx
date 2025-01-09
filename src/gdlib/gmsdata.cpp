@@ -24,7 +24,7 @@
  */
 
 
-#include "gmsdata.h"
+#include "gmsdata.hpp"
 
 namespace gdlib::gmsdata
 {

@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#include "modhead.h"
-#include "rtl/sysutils_p3.h"
+#include "modhead.hpp"
+#include "rtl/sysutils_p3.hpp"
 
 using namespace std::literals::string_literals;
 

@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "p3utils.h"
+#include "p3utils.hpp"
 
 #include <algorithm>               // for max, min
 #include <array>                   // for array
@@ -34,13 +34,13 @@
 #include <filesystem>              // for path
 #include <string>                  // for basic_string, operator+, string
 
-#include "../gdlib/strutilx.h"     // for DblToStr
-#include "../gdlib/utils.h"        // for in, trim, val
+#include "../gdlib/strutilx.hpp"     // for DblToStr
+#include "../gdlib/utils.hpp"        // for in, trim, val
 
-#include "global/modhead.h"        // for STUBWARN
-#include "math_p3.h"               // for IntPower
-#include "p3platform.h"            // for tOSPlatform, OSPlatform, OSFileType
-#include "sysutils_p3.h"           // for ExtractFilePath, ExcludeTrailingPa...
+#include "global/modhead.hpp"        // for STUBWARN
+#include "math_p3.hpp"               // for IntPower
+#include "p3platform.hpp"            // for tOSPlatform, OSPlatform, OSFileType
+#include "sysutils_p3.hpp"           // for ExtractFilePath, ExcludeTrailingPa...
 
 #if defined(_WIN32)
    // Windows
