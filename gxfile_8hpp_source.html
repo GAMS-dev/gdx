@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.5"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>GAMS Data eXchange (GDX) API: src/gxfile.h Source File</title>
+<title>GAMS Data eXchange (GDX) API: src/gxfile.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(document).ready(function(){initNavTree('gxfile_8h_source.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('gxfile_8hpp_source.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -92,7 +92,7 @@ $(document).ready(function(){initNavTree('gxfile_8h_source.html',''); initResiza
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">gxfile.h</div></div>
+  <div class="headertitle"><div class="title">gxfile.hpp</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
@@ -125,12 +125,12 @@ $(document).ready(function(){initNavTree('gxfile_8h_source.html',''); initResiza
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="comment">// Description:</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="comment">//  This unit defines the GDX Object as a C++ object.</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;gdlib/datastorage.h&quot;</span>   <span class="comment">// for TLinkedData</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;gclgms.h&quot;</span>        <span class="comment">// for GLOBAL_MAX_INDEX_DIM, GMS_MAX_INDEX_DIM</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;gdlib/gmsdata.h&quot;</span>       <span class="comment">// for TTblGamsData</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;gdlib/gmsobj.h&quot;</span>        <span class="comment">// for TBooleanBitArray, TXList, TXStrings</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;gdlib/strhash.h&quot;</span>       <span class="comment">// for TXCSStrHashList, TXStrHashList</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &quot;gdlib/utils.h&quot;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;gdlib/datastorage.hpp&quot;</span>   <span class="comment">// for TLinkedData</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &lt;gclgms.h&gt;</span>        <span class="comment">// for GLOBAL_MAX_INDEX_DIM, GMS_MAX_INDEX_DIM</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;gdlib/gmsdata.hpp&quot;</span>       <span class="comment">// for TTblGamsData</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;gdlib/gmsobj.hpp&quot;</span>        <span class="comment">// for TBooleanBitArray, TXList, TXStrings</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;gdlib/strhash.hpp&quot;</span>       <span class="comment">// for TXCSStrHashList, TXStrHashList</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &quot;gdlib/utils.hpp&quot;</span></div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &lt;array&gt;</span>           <span class="comment">// for array</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include &lt;cstdint&gt;</span>         <span class="comment">// for int64_t, uint8_t</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include &lt;cstring&gt;</span>         <span class="comment">// for size_t</span></div>
@@ -452,22 +452,22 @@ $(document).ready(function(){initNavTree('gxfile_8h_source.html',''); initResiza
 <div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span><span class="keywordtype">int</span> ConvertGDXFile( <span class="keyword">const</span> std::string &amp;fn, <span class="keyword">const</span> std::string &amp;MyComp );</div>
 <div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span> </div>
 <div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>}<span class="comment">// namespace gdx</span></div>
-<div class="ttc" id="aclassgdx_1_1TAcronymList_html"><div class="ttname"><a href="classgdx_1_1TAcronymList.html">gdx::TAcronymList</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:289</div></div>
-<div class="ttc" id="aclassgdx_1_1TFilterList_html"><div class="ttname"><a href="classgdx_1_1TFilterList.html">gdx::TFilterList</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:307</div></div>
-<div class="ttc" id="aclassgdx_1_1TIntegerMapping_html"><div class="ttname"><a href="classgdx_1_1TIntegerMapping.html">gdx::TIntegerMapping</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:209</div></div>
-<div class="ttc" id="aclassgdx_1_1TUELTable_html"><div class="ttname"><a href="classgdx_1_1TUELTable.html">gdx::TUELTable</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:245</div></div>
-<div class="ttc" id="aclassgdx_1_1TgxModeSet_html"><div class="ttname"><a href="classgdx_1_1TgxModeSet.html">gdx::TgxModeSet</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:183</div></div>
-<div class="ttc" id="astructgdx_1_1TAcronym_html"><div class="ttname"><a href="structgdx_1_1TAcronym.html">gdx::TAcronym</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:274</div></div>
-<div class="ttc" id="astructgdx_1_1TDFilter_html"><div class="ttname"><a href="structgdx_1_1TDFilter.html">gdx::TDFilter</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:79</div></div>
-<div class="ttc" id="astructgdx_1_1TDomain_html"><div class="ttname"><a href="structgdx_1_1TDomain.html">gdx::TDomain</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:117</div></div>
-<div class="ttc" id="astructgdx_1_1TgdxSymbRecord_html"><div class="ttname"><a href="structgdx_1_1TgdxSymbRecord.html">gdx::TgdxSymbRecord</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:126</div></div>
-<div class="ttc" id="auniongdx_1_1uInt64_html"><div class="ttname"><a href="uniongdx_1_1uInt64.html">gdx::uInt64</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:346</div></div>
+<div class="ttc" id="aclassgdx_1_1TAcronymList_html"><div class="ttname"><a href="classgdx_1_1TAcronymList.html">gdx::TAcronymList</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:289</div></div>
+<div class="ttc" id="aclassgdx_1_1TFilterList_html"><div class="ttname"><a href="classgdx_1_1TFilterList.html">gdx::TFilterList</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:307</div></div>
+<div class="ttc" id="aclassgdx_1_1TIntegerMapping_html"><div class="ttname"><a href="classgdx_1_1TIntegerMapping.html">gdx::TIntegerMapping</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:209</div></div>
+<div class="ttc" id="aclassgdx_1_1TUELTable_html"><div class="ttname"><a href="classgdx_1_1TUELTable.html">gdx::TUELTable</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:245</div></div>
+<div class="ttc" id="aclassgdx_1_1TgxModeSet_html"><div class="ttname"><a href="classgdx_1_1TgxModeSet.html">gdx::TgxModeSet</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:183</div></div>
+<div class="ttc" id="astructgdx_1_1TAcronym_html"><div class="ttname"><a href="structgdx_1_1TAcronym.html">gdx::TAcronym</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:274</div></div>
+<div class="ttc" id="astructgdx_1_1TDFilter_html"><div class="ttname"><a href="structgdx_1_1TDFilter.html">gdx::TDFilter</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:79</div></div>
+<div class="ttc" id="astructgdx_1_1TDomain_html"><div class="ttname"><a href="structgdx_1_1TDomain.html">gdx::TDomain</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:117</div></div>
+<div class="ttc" id="astructgdx_1_1TgdxSymbRecord_html"><div class="ttname"><a href="structgdx_1_1TgdxSymbRecord.html">gdx::TgdxSymbRecord</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:126</div></div>
+<div class="ttc" id="auniongdx_1_1uInt64_html"><div class="ttname"><a href="uniongdx_1_1uInt64.html">gdx::uInt64</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:346</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>gxfile.h</b></li>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>gxfile.hpp</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>

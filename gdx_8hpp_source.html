@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.5"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>GAMS Data eXchange (GDX) API: src/gdx.h Source File</title>
+<title>GAMS Data eXchange (GDX) API: src/gdx.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -66,7 +66,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(document).ready(function(){initNavTree('gdx_8h_source.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('gdx_8hpp_source.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -92,7 +92,7 @@ $(document).ready(function(){initNavTree('gdx_8h_source.html',''); initResizable
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">gdx.h</div></div>
+  <div class="headertitle"><div class="title">gdx.hpp</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
@@ -124,7 +124,7 @@ $(document).ready(function(){initNavTree('gdx_8h_source.html',''); initResizable
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;gxfile.h&quot;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;gxfile.hpp&quot;</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">namespace </span>gdx</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>{</div>
@@ -495,7 +495,7 @@ $(document).ready(function(){initNavTree('gdx_8h_source.html',''); initResizable
 <div class="line"><a id="l01854" name="l01854"></a><span class="lineno"> 1854</span>};</div>
 <div class="line"><a id="l01855" name="l01855"></a><span class="lineno"> 1855</span> </div>
 <div class="line"><a id="l01856" name="l01856"></a><span class="lineno"> 1856</span>}<span class="comment">// namespace gdx</span></div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html">gdx::TGXFileObj</a></div><div class="ttdef"><b>Definition:</b> gdx.h:37</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html">gdx::TGXFileObj</a></div><div class="ttdef"><b>Definition:</b> gdx.hpp:37</div></div>
 <div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a014bf6aef956e6fbc0536e40c0cfb42f"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a014bf6aef956e6fbc0536e40c0cfb42f">gdx::TGXFileObj::gdxDataReadRawFastFilt</a></div><div class="ttdeci">int gdxDataReadRawFastFilt(int SyNr, const char **UelFilterStr, TDataStoreFiltProc_t DP)</div><div class="ttdoc">Read a symbol in Raw mode while applying a filter using a callback procedure. Returns zero if the ope...</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:3596</div></div>
 <div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a02cfa59bcabe31a143079f5dbd1fd3d6"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a02cfa59bcabe31a143079f5dbd1fd3d6">gdx::TGXFileObj::gdxErrorStr</a></div><div class="ttdeci">static int gdxErrorStr(int ErrNr, char *ErrMsg)</div><div class="ttdoc">Returns the text for a given error number. Always non-zero.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:1715</div></div>
 <div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a0473b4f834a31d23e494ae5b1323f380"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a0473b4f834a31d23e494ae5b1323f380">gdx::TGXFileObj::gdxSymbolAddComment</a></div><div class="ttdeci">int gdxSymbolAddComment(int SyNr, const char *Txt)</div><div class="ttdoc">Add a line of comment text for a symbol. Returns zero if the operation is not possible.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:3511</div></div>
@@ -594,15 +594,15 @@ $(document).ready(function(){initNavTree('gdx_8h_source.html',''); initResizable
 <div class="ttc" id="aclassgdx_1_1TGXFileObj_html_af39b863999089bcb61b5d58014603fb3"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#af39b863999089bcb61b5d58014603fb3">gdx::TGXFileObj::gdxUELRegisterRawStart</a></div><div class="ttdeci">int gdxUELRegisterRawStart()</div><div class="ttdoc">Start registering unique elements in raw mode. Returns zero if the operation is not possible.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:2602</div></div>
 <div class="ttc" id="aclassgdx_1_1TGXFileObj_html_af7de4b7f90ec26e71c54b6e1df1e8595"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#af7de4b7f90ec26e71c54b6e1df1e8595">gdx::TGXFileObj::gdxSymbIndxMaxLength</a></div><div class="ttdeci">int gdxSymbIndxMaxLength(int SyNr, int *LengthInfo)</div><div class="ttdoc">Returns the length of the longest UEL used for every index position for a given symbol.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:3468</div></div>
 <div class="ttc" id="aclassgdx_1_1TGXFileObj_html_afe7f6c210e407402fcb24ba63d4392a8"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#afe7f6c210e407402fcb24ba63d4392a8">gdx::TGXFileObj::gdxAcronymSetInfo</a></div><div class="ttdeci">int gdxAcronymSetInfo(int N, const char *AName, const char *Txt, int AIndx)</div><div class="ttdoc">Modify acronym information in the acronym table.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:2970</div></div>
-<div class="ttc" id="aclassgdx_1_1TgxModeSet_html"><div class="ttname"><a href="classgdx_1_1TgxModeSet.html">gdx::TgxModeSet</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:183</div></div>
-<div class="ttc" id="astructgdx_1_1TDFilter_html"><div class="ttname"><a href="structgdx_1_1TDFilter.html">gdx::TDFilter</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:79</div></div>
-<div class="ttc" id="astructgdx_1_1TgdxSymbRecord_html"><div class="ttname"><a href="structgdx_1_1TgdxSymbRecord.html">gdx::TgdxSymbRecord</a></div><div class="ttdef"><b>Definition:</b> gxfile.h:126</div></div>
+<div class="ttc" id="aclassgdx_1_1TgxModeSet_html"><div class="ttname"><a href="classgdx_1_1TgxModeSet.html">gdx::TgxModeSet</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:183</div></div>
+<div class="ttc" id="astructgdx_1_1TDFilter_html"><div class="ttname"><a href="structgdx_1_1TDFilter.html">gdx::TDFilter</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:79</div></div>
+<div class="ttc" id="astructgdx_1_1TgdxSymbRecord_html"><div class="ttname"><a href="structgdx_1_1TgdxSymbRecord.html">gdx::TgdxSymbRecord</a></div><div class="ttdef"><b>Definition:</b> gxfile.hpp:126</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>gdx.h</b></li>
+    <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><b>gdx.hpp</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5 </li>
   </ul>
 </div>
