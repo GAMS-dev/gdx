@@ -24,14 +24,14 @@
  */
 
 
-#include "gmsheapnew.h"
+#include "gmsheapnew.hpp"
 
-#include "gmsonly.h"
+#include "gmsonly.hpp"
 
 #include <utility>
 #include <string>
 
-#include "../rtl/p3utils.h"
+#include "../rtl/p3utils.hpp"
 
 //#define BYPASSHEAPMGR
 

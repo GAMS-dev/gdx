@@ -24,7 +24,7 @@
  */
 
 
-#include "gmsobj.h"
+#include "gmsobj.hpp"
 
 namespace gdlib::gmsobj
 {

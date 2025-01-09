@@ -32,11 +32,11 @@
 #include <cstring>
 #include <string_view>
 
-#include "gdxdump.h"
-#include "../library/short_string.h"
-#include "../../gdlib/utils.h"
-#include "../../gdlib/strutilx.h"
-#include "../../gdlib/dblutil.h"
+#include "gdxdump.hpp"
+#include "../library/short_string.hpp"
+#include "../../gdlib/utils.hpp"
+#include "../../gdlib/strutilx.hpp"
+#include "../../gdlib/dblutil.hpp"
 
 // Global constants
 #include "../../../generated/gclgms.h"

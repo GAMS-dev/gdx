@@ -1,4 +1,6 @@
 ---
+- 7.11.11:
+    - Changed extension for C++ header files from *.h to *.hpp to fix potentially incorrect classification as C headers from tooling.
 - 7.11.10:
     - Multiple small fixes to infrastructure code, shared modules, and hardening compiler flags.
 - 7.11.9:

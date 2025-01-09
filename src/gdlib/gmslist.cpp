@@ -27,13 +27,13 @@
 #include <iostream>
 #include <cassert>
 
-#include "rtl/sysutils_p3.h"
+#include "rtl/sysutils_p3.hpp"
 
-#include "gmslist.h"
-#include "strutilx.h"
+#include "gmslist.hpp"
+#include "strutilx.hpp"
 
-#include "utils.h"
-#include "rtl/p3io.h"
+#include "utils.hpp"
+#include "rtl/p3io.hpp"
 
 using namespace std::literals::string_literals;
 

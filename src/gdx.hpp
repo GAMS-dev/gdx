@@ -27,7 +27,7 @@
 
 #pragma once
 
-#include "gxfile.h"
+#include "gxfile.hpp"
 
 namespace gdx
 {

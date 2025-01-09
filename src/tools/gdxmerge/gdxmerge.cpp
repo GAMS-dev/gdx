@@ -30,11 +30,11 @@
 #include <iostream>
 #include <cmath>
 
-#include "gdxmerge.h"
-#include "../library/cmdpar.h"
-#include "../../gdlib/utils.h"
-#include "../../gdlib/strutilx.h"
-#include "../../rtl/sysutils_p3.h"
+#include "gdxmerge.hpp"
+#include "../library/cmdpar.hpp"
+#include "../../gdlib/utils.hpp"
+#include "../../gdlib/strutilx.hpp"
+#include "../../rtl/sysutils_p3.hpp"
 
 // TODO: Disable at some point?
 #define OLD_MEMORY_CHECK

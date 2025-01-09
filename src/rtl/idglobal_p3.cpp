@@ -30,7 +30,7 @@
 #include <sys/time.h>
 #endif
 
-#include "idglobal_p3.h"
+#include "idglobal_p3.hpp"
 #include <limits>
 
 // ==============================================================================================================

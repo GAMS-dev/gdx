@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "gmslibname.h"
+#include "gmslibname.hpp"
 
 namespace global::gmslibname
 {

@@ -26,9 +26,9 @@
 
 #include <cassert>
 #include <memory>
-#include "obfuscatestr.h"
-#include "charmaps.h"
-#include "utils.h"
+#include "obfuscatestr.hpp"
+#include "charmaps.hpp"
+#include "utils.hpp"
 
 using namespace gdlib::charmaps;
 

@@ -23,21 +23,58 @@
  * SOFTWARE.
  */
 
-
 #pragma once
-
+#include <cstdint>
 #include <string>
-#include <vector>
-#include "../rtl/p3utils.h"
 
-namespace gdlib::gamsdirs
+
+#include "../global/delphitypes.hpp"
+
+namespace rtl::p3process
 {
-const int NGMSLocNames = rtl::p3utils::NLocNames + 2;
-using TGMSLocNames = std::vector<std::string>;
-const std::string INCLIBDIR = "inclib", EXTEQUDIR = "external_equations", EXTRFUNCDIR = "extrinsic_functions";
 
-bool GMSDataLocations( TGMSLocNames &GMSLocNames, const std::string &sysDir );
-bool GMSConfigLocations( TGMSLocNames &GMSLocNames, const std::string &sysDir );
-bool GMSWritableLocation( rtl::p3utils::Tp3Location locType, std::string &locName );
-bool findDataDirFile( const std::string &fName, std::string &fPathName, const std::string &sysDir, bool &allSearched );
-}// namespace gdlib::gamsdirs
+enum TKillHow : uint8_t
+{
+   soft,
+   hard
+};
+
+struct TProcInfo {
+   uint32_t pid {};// process ID
+   uint32_t tid {};// thread ID
+   void *hProcess {};
+
+   void clear() {
+      pid = tid = 0;
+      hProcess = nullptr;
+   }
+};
+
+bool p3GetCPUInfo( int &nSockets, int &nCores, int &nThreads, int &coresPerSocket, int &threadsPerCore );
+int p3GetNumberOfProcessors();
+
+int P3SystemP( const std::string &CmdPtr, int &ProgRC );
+int P3ExecP( const std::string &CmdPtr, int &ProgRC );
+
+int p3ASyncSystemP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInfo, std::string &msg );
+int p3ASyncExecP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInfo, std::string &msg );
+
+int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg );
+
+bool p3KillProcGroupTP( const TProcInfo &procInfo, TKillHow how );
+bool p3IsPIDValid( uint32_t pid );
+
+using tCtrlHandler = void(*)();
+
+enum CtrlHandlerState : uint8_t
+{
+   P3CtrlHandlerOK,
+   P3CtrlHandlerWasEmpty,
+   P3CtrlHandlerSysFail
+};
+
+CtrlHandlerState P3InstallCtrlHandler( tCtrlHandler newHandler );
+int P3UninstallCtrlHandler();
+tCtrlHandler P3GetCtrlHandler();
+
+}// namespace rtl::p3process

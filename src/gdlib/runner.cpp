@@ -24,10 +24,10 @@
  */
 
 
-#include "runner.h"
-#include "utils.h"
-#include "../rtl/p3process.h"
-#include "../rtl/sysutils_p3.h"
+#include "runner.hpp"
+#include "utils.hpp"
+#include "../rtl/p3process.hpp"
+#include "../rtl/sysutils_p3.hpp"
 
 using namespace std::literals::string_literals;
 

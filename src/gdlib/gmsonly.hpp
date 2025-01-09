@@ -24,57 +24,13 @@
  */
 
 #pragma once
-#include <cstdint>
-#include <string>
 
+#include "gmsheapnew.hpp"
 
-#include "../global/delphitypes.h"
-
-namespace rtl::p3process
+namespace gmsonly
 {
 
-enum TKillHow : uint8_t
-{
-   soft,
-   hard
-};
+extern gdlib::gmsheapnew::THeapMgr gheap;
+extern bool gheapWasFreed;
 
-struct TProcInfo {
-   uint32_t pid {};// process ID
-   uint32_t tid {};// thread ID
-   void *hProcess {};
-
-   void clear() {
-      pid = tid = 0;
-      hProcess = nullptr;
-   }
-};
-
-bool p3GetCPUInfo( int &nSockets, int &nCores, int &nThreads, int &coresPerSocket, int &threadsPerCore );
-int p3GetNumberOfProcessors();
-
-int P3SystemP( const std::string &CmdPtr, int &ProgRC );
-int P3ExecP( const std::string &CmdPtr, int &ProgRC );
-
-int p3ASyncSystemP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInfo, std::string &msg );
-int p3ASyncExecP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInfo, std::string &msg );
-
-int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg );
-
-bool p3KillProcGroupTP( const TProcInfo &procInfo, TKillHow how );
-bool p3IsPIDValid( uint32_t pid );
-
-using tCtrlHandler = void(*)();
-
-enum CtrlHandlerState : uint8_t
-{
-   P3CtrlHandlerOK,
-   P3CtrlHandlerWasEmpty,
-   P3CtrlHandlerSysFail
-};
-
-CtrlHandlerState P3InstallCtrlHandler( tCtrlHandler newHandler );
-int P3UninstallCtrlHandler();
-tCtrlHandler P3GetCtrlHandler();
-
-}// namespace rtl::p3process
+}

@@ -102,11 +102,11 @@ if(NOT NO_TOOLS)
 add_library(gdxtools-library
     generated/gdxcc.h
     generated/gdxcc.c
-    src/tools/library/common.h
+        src/tools/library/common.hpp
     src/tools/library/common.cpp
-    src/tools/library/short_string.h
+        src/tools/library/short_string.hpp
     src/tools/library/short_string.cpp
-    src/tools/library/cmdpar.h
+        src/tools/library/cmdpar.hpp
     src/tools/library/cmdpar.cpp
     ${base-units-all}
 )
@@ -118,7 +118,7 @@ endif ()
 
 # gdxdump
 add_executable(gdxdump
-    src/tools/gdxdump/gdxdump.h
+        src/tools/gdxdump/gdxdump.hpp
     src/tools/gdxdump/gdxdump.cpp
 )
 target_include_directories(gdxdump PRIVATE ${inc-dirs})
@@ -126,7 +126,7 @@ target_link_libraries(gdxdump gdxtools-library)
 
 # gdxdiff
 add_executable(gdxdiff
-    src/tools/gdxdiff/gdxdiff.h
+        src/tools/gdxdiff/gdxdiff.hpp
     src/tools/gdxdiff/gdxdiff.cpp
 )
 target_include_directories(gdxdiff PRIVATE ${inc-dirs})
@@ -134,7 +134,7 @@ target_link_libraries(gdxdiff gdxtools-library)
 
 # gdxmerge
 add_executable(gdxmerge
-    src/tools/gdxmerge/gdxmerge.h
+        src/tools/gdxmerge/gdxmerge.hpp
     src/tools/gdxmerge/gdxmerge.cpp
 )
 target_include_directories(gdxmerge PRIVATE ${inc-dirs})

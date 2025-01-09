@@ -28,10 +28,10 @@
 #include <filesystem>
 #include <iostream>
 
-#include "../global/delphitypes.h"
-#include "../gdlib/utils.h"
-#include "../rtl/sysutils_p3.h"
-#include "gfileopen.h"
+#include "../global/delphitypes.hpp"
+#include "../gdlib/utils.hpp"
+#include "../rtl/sysutils_p3.hpp"
+#include "gfileopen.hpp"
 
 
 using namespace std::literals::string_literals;

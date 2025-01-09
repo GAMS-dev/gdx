@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "p3platform.h"
+#include "p3platform.hpp"
 #include "global/unit.h"
 
 using namespace std::literals::string_literals;

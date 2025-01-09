@@ -28,8 +28,8 @@
 #include <iostream>
 #include <limits>
 
-#include "rtl/p3io.h"
-#include "../doctest.h"
+#include "rtl/p3io.hpp"
+#include "../doctest.hpp"
 
 using namespace std::literals::string_literals;
 using namespace rtl::p3io;

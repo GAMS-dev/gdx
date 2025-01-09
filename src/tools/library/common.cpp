@@ -5,7 +5,7 @@
 #include <array>
 #include <ctime>
 
-#include "common.h"
+#include "common.hpp"
 // Global constants
 #include "../../../generated/gclgms.h"
 

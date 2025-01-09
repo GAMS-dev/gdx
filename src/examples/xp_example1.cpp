@@ -36,7 +36,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "gdx.h"
+#include "gdx.hpp"
 
 using namespace std::literals::string_literals;
 using namespace gdx;

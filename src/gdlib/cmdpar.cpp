@@ -24,9 +24,9 @@
  */
 
 
-#include "cmdpar.h"
-#include "utils.h"
-#include "rtl/sysutils_p3.h"
+#include "cmdpar.hpp"
+#include "utils.hpp"
+#include "rtl/sysutils_p3.hpp"
 
 #include <cassert>
 #include <optional>

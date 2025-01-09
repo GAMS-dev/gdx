@@ -24,7 +24,7 @@
  */
 
 
-#include "glookup.h"
+#include "glookup.hpp"
 
 namespace gdlib::glookup
 {

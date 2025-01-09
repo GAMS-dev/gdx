@@ -25,8 +25,8 @@
 
 
 #pragma once
-#include "../global/delphitypes.h"
-#include "gmsgen.h"
+#include "../global/delphitypes.hpp"
+#include "gmsgen.hpp"
 
 // ==============================================================================================================
 // Interface

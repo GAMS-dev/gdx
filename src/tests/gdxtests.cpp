@@ -29,13 +29,13 @@
 #endif
 
 #if defined( GXFILE_CPPWRAP )
-#include "gdxcppwrap.h"
+#include "gdxcppwrap.hpp"
 #else
 #include "gclgms.h" // for GMS_SSSIZE, GMS_VAL_LEVEL
-#include "../gdx.h"   // for TGXFileObj, TgdxValues
+#include "../gdx.hpp"// for TGXFileObj, TgdxValues
 #endif
 
-#include "doctest.h"// for ResultBuilder, Expressi...
+#include "doctest.hpp"// for ResultBuilder, Expressi...
 
 #include <algorithm> // for fill_n, find, copy
 #include <cstdlib>   // for system, setenv, unsetenv
@@ -50,8 +50,8 @@
 #include <fstream>
 #include <cassert>
 
-#include "gdxtests.h"
-#include "gdlib/strindexbuf.h"
+#include "gdxtests.hpp"
+#include "gdlib/strindexbuf.hpp"
 
 using namespace std::literals::string_literals;
 using namespace gdx;

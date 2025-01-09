@@ -23,8 +23,8 @@
 * SOFTWARE.
 */
 
-#include "rtl/stdthread.h"
-#include "../doctest.h"
+#include "rtl/stdthread.hpp"
+#include "../doctest.hpp"
 
 #include <algorithm>
 #include <list>

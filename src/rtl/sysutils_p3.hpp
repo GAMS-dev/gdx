@@ -36,7 +36,7 @@ struct _WIN32_FIND_DATAA;
 #include <cstdint>                 // for uint16_t, int64_t, uint32_t
 #include <array>                    // for array
 #include <string>                   // for string, basic_string
-#include "../global/delphitypes.h"  // for tDateTime
+#include "../global/delphitypes.hpp"// for tDateTime
 
 // ==============================================================================================================
 // Interface

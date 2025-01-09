@@ -33,13 +33,13 @@
 #include <cassert>
 #include <limits>
 
-#include "../rtl/sysutils_p3.h"
+#include "../rtl/sysutils_p3.hpp"
 
-#include "strutilx.h"
-#include "utils.h"
-#include "gmsonly.h"
+#include "strutilx.hpp"
+#include "utils.hpp"
+#include "gmsonly.hpp"
 
-#include "gmsheapnew.h"
+#include "gmsheapnew.hpp"
 
 namespace gdlib::glookup
 {

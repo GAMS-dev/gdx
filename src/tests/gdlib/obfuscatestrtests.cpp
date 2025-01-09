@@ -23,8 +23,8 @@
 * SOFTWARE.
 */
 
-#include "gdlib/obfuscatestr.h"
-#include "../doctest.h"
+#include "gdlib/obfuscatestr.hpp"
+#include "../doctest.hpp"
 
 using namespace std::literals::string_literals;
 

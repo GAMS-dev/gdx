@@ -24,8 +24,8 @@
  */
 
 
-#include "charmaps.h"
-#include "utils.h"
+#include "charmaps.hpp"
+#include "utils.hpp"
 #include <limits>
 
 // ==============================================================================================================

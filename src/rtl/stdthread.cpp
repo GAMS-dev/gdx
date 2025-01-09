@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "stdthread.h"
+#include "stdthread.hpp"
 
 #include <chrono>
 #include <system_error>
