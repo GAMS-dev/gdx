@@ -509,7 +509,7 @@ bool tryEncodeDate( const uint16_t year, const uint16_t month, uint16_t day, dou
          } while( i++ != stop );
       }
       i = year - 1;
-      date = static_cast<int64_t>( i * 365 + i / 4 - i / 100 + i / 400 + day - DateDelta );
+      date = static_cast<double>( static_cast<int64_t>( i * 365 + i / 4 - i / 100 + i / 400 + day - DateDelta ) );
       return true;
    }
 
