@@ -128,7 +128,7 @@
     <ClInclude Include="src\global\unit.h" />
     <ClInclude Include="src\gxfile.hpp" />
     <ClInclude Include="src\rtl\dtoaLoc.h" />
-    <ClInclude Include="src\rtl\idglobal_p3.h" />
+    <ClInclude Include="src\rtl\idglobal_p3.hpp" />
     <ClInclude Include="src\rtl\math_p3.hpp" />
     <ClInclude Include="src\rtl\p3io.hpp" />
     <ClInclude Include="src\rtl\p3library.hpp" />
@@ -137,7 +137,7 @@
     <ClInclude Include="src\rtl\p3utils.hpp" />
     <ClInclude Include="src\rtl\stdthread.hpp" />
     <ClInclude Include="src\rtl\sysutils_p3.hpp" />
-    <ClInclude Include="src\tests\doctest.h" />
+    <ClInclude Include="src\tests\doctest.hpp" />
     <ClInclude Include="src\tests\gdxtests.hpp" />
     <ClInclude Include="zlib\crc32.h" />
     <ClInclude Include="zlib\deflate.h" />
