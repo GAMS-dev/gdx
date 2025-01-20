@@ -1850,10 +1850,12 @@ TEST_CASE( "Test convert and compress" )
    }
    testWithCompressConvert( false, "" );
 #ifndef __APPLE__
+#ifndef __aarch64__
    testWithCompressConvert( false, "v5" );
    testWithCompressConvert( true, "v5" );
    testWithCompressConvert( false, "v6" );
    testWithCompressConvert( true, "v6" );
+#endif
 #endif
    testWithCompressConvert( false, "v7" );
    testWithCompressConvert( true, "v7" );
@@ -2313,6 +2315,10 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
    std::cout << "Skipping legacy version GDX file read test on macOS since gdxcopy does not support V5 and V6 there." << std::endl;
    return;
 #endif
+#ifdef __aarch64__
+   std::cout << "Skipping legacy version GDX file read test on aarch64 since gdxcopy does not support V5 and V6 there." << std::endl;
+   return;
+#endif
    const auto modelName { "trnsport"s };
    acquireGDXforModel( modelName );
    for( const auto &versSuff: { "V5"s, "V6U"s, "V6C"s } )
@@ -2412,6 +2418,10 @@ TEST_CASE( "Open append should report error for old GDX file versions" )
 
 #ifdef __APPLE__
    std::cout << "Skipping legacy version GDX file open append test on macOS since gdxcopy does not support V5 and V6 there." << std::endl;
+   return;
+#endif
+#ifdef __aarch64__
+   std::cout << "Skipping legacy version GDX file open append test on aarch64 since gdxcopy does not support V5 and V6 there." << std::endl;
    return;
 #endif
 
