@@ -1,4 +1,6 @@
 ---
+- 7.11.12:
+    - Added internal codes for arm64 architecture on Linux (previously only available for macOS)
 - 7.11.11:
     - Changed extension for C++ header files from *.h to *.hpp to fix potentially incorrect classification as C headers from tooling.
 - 7.11.10:
