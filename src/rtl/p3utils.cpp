@@ -1713,8 +1713,10 @@ T_P3SOCKET p3SockAcceptClientConn( T_P3SOCKET srvSock, const uint32_t timeOut )
    mkInvalidSock( res );
 #if defined(_WIN32)
    const auto &listenSock {srvSock.wsocket};
+   constexpr int selectSock {0};
 #else
    const auto &listenSock {srvSock.socketfd};
+   const int selectSock {listenSock+1};
 #endif
    if( timeOut )
    {
@@ -1724,7 +1726,7 @@ T_P3SOCKET p3SockAcceptClientConn( T_P3SOCKET srvSock, const uint32_t timeOut )
       timeval timeout {};
       timeout.tv_sec = static_cast<long>( timeOut / 1000 );
       timeout.tv_usec = static_cast<long>( timeOut % 1000 * 1000 );
-      if( const int rc { select( 0, &readfds, nullptr, nullptr, &timeout ) };
+      if( const int rc { select( selectSock, &readfds, nullptr, nullptr, &timeout ) };
           rc <= 0 || !FD_ISSET( listenSock, &readfds ) )
          return res;// invalid sock
    }
