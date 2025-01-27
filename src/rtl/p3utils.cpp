@@ -1414,6 +1414,36 @@ T_P3SOCKET p3SockCreateConnectedClient( int port )
 #endif
 }
 
+// control the nonblocking bit for the socket s
+// mode=false: --> NONBLOCK bit is disabled (this is the default on socket creation)
+// mode= true: --> NONBLOCK bit is enabled
+// returns true if the operation succeeded, false o/w
+bool p3SockSetNonBlockingMode(const T_P3SOCKET s, bool mode)
+{
+#if defined(_WIN32)
+   auto u {mode ? 1ul : 0};
+   return NO_ERROR == ioctlsocket( s.wsocket, FIONBIO, &u);
+#else
+   const int fd = s.socketfd;
+   int flags { fcntl( fd, F_GETFL, 0 ) };
+   if( flags < 0 )// error, should never happen
+      return false;
+   if( mode )
+   {
+      if( flags & O_NONBLOCK )
+         return true;// already set
+      flags |= O_NONBLOCK;
+   }
+   else
+   {
+      if( !( flags & O_NONBLOCK ) )
+         return true;// already not set
+      flags &= ~O_NONBLOCK;
+   }
+   return !fcntl( fd, F_SETFL, flags );
+#endif
+}
+
 bool p3SockSendEx(T_P3SOCKET s, const char *buf, int count, int &res, bool pollFirst, int timeOut);
 
 bool p3SockSend( const T_P3SOCKET s, const char *buf, int count, int &res )

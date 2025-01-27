@@ -451,7 +451,7 @@ doxygen-html:
   stage: docs
   tags: [linux]
   image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-devel:latest
+    name: $MACHINES_CONTAINER_REG/leg/builder-devel:dist48
     entrypoint: [""]
   script:
     - python3 ci/readme_filter.py
