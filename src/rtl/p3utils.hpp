@@ -151,7 +151,7 @@ void p3SockCleanUp();
 bool p3SockRecv(T_P3SOCKET s, char *buf, int count, int &res);
 bool p3SockRecvTimeout(T_P3SOCKET s, char *buf, int count, int &res, int timeOut);
 
-T_P3SOCKET p3SockAcceptClientConn(T_P3SOCKET srvSock);
+T_P3SOCKET p3SockAcceptClientConn( T_P3SOCKET srvSock, uint32_t timeOut = 0 );
 T_P3SOCKET p3SockCreateServerSocket(int port, bool reuse, int *retCode = nullptr);
 
 int p3SockGetPort(T_P3SOCKET s, int &res);
