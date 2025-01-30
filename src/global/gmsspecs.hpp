@@ -260,7 +260,7 @@ const int numsolprint = 5;// following four from 0...numxxxx
 const int numhandlestat = 3;
 const int numsolvelink = 7;
 const int numsolveopt = 2;
-const int numplatformcode = 4;
+const int numplatformcode = 5;
 
 #if defined(__IN_CPPMEX__)
    #include "../generated/gmsspecs.inc.h"
