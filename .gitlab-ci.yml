@@ -97,6 +97,7 @@ build-leg:
     - !reference [.get-gams]
     - !reference [.gams-folder-leg]
     - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
@@ -121,6 +122,7 @@ build-debug-leg:
     - !reference [.get-gams]
     - !reference [.gams-folder-leg]
     - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
     - cmake --build . 2>&1
     - mv gdxtest gdxtest_dbg
@@ -140,6 +142,7 @@ build-lag:
     - !reference [.get-gams]
     - !reference [.gams-folder-leg]
     - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
     - cmake --build . 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
