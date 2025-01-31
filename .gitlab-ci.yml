@@ -130,6 +130,30 @@ build-debug-leg:
     paths: [gdxtest_dbg]
     expire_in: 2 hours
 
+build-lag:
+  stage: build
+  tags: [linux-arm64]
+  image:
+    name: $MACHINES_CONTAINER_REG/lag/builder-devel:latest
+    entrypoint: [""]
+  script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-leg]
+    - cp apifiles/* src/
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
+    - cmake --build . 2>&1 | tee build_log.txt
+    - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
+    - mv libgdx-static.a libgdx-linux.a
+    - mkdir -p ./build
+    - mv {gdxdump,gdxdiff,gdxmerge} ./build
+  needs: [fetch-ci-scripts,apigenerator]
+  artifacts:
+    name: gdx-lag
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a,build]
+    expire_in: 2 hours
+    reports:
+      junit: warnings.xml
+
 build-deg:
   stage: build
   tags: [macos]
@@ -221,14 +245,34 @@ test-leg:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_linux.xml
-    - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_linux.xml
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_leg.xml
+    - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_leg.xml
   artifacts:
-    name: unittest-results-linux
+    name: unittest-results-leg
     paths: [./*.xml]
     expire_in: 2 hours
     reports:
-      junit: doctest_results_*linux.xml
+      junit: doctest_results_*leg.xml
+
+test-lag:
+  stage: test
+  tags: [linux-arm64]
+  image:
+    name: $MACHINES_CONTAINER_REG/lag/builder-devel:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-lag]
+  script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-leg ]
+    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_lag.xml
+    - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_lag.xml
+  artifacts:
+    name: unittest-results-lag
+    paths: [./*.xml]
+    expire_in: 2 hours
+    reports:
+      junit: doctest_results_*lag.xml
 
 test-deg:
   stage: test
@@ -275,13 +319,13 @@ test-wei:
     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
     - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
     - $env:GAMSDIR = "$GAMS_PATH;$GAMS_PATH\gbin"
-    - ./Release/gdxtest --reporters=junit --out=doctest_results_windows.xml
-    - ./Release/gdxwraptest --reporters=junit --out=doctest_results_wrap_windows.xml
+    - ./Release/gdxtest --reporters=junit --out=doctest_results_wei.xml
+    - ./Release/gdxwraptest --reporters=junit --out=doctest_results_wrap_wei.xml
   artifacts:
-    name: unittest-results-windows
+    name: unittest-results-wei
     paths: [./*.xml]
     reports:
-      junit: doctest_results_*windows.xml
+      junit: doctest_results_*wei.xml
 
 #=======================================================================================================================
 
