@@ -43,11 +43,11 @@ endif ()
 
 if (UNIX)
 	# -fsanitize=undefined -fno-inline
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas -pedantic -Wextra -Wno-unused-parameter -Wno-deprecated-copy -Wno-cast-function-type")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas -pedantic -Wextra -Wno-unused-parameter -Wno-deprecated-copy")
 	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wconversion -funsigned-char") # aggressive signage warnings
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZ_HAVE_UNISTD_H")
 	if (NOT APPLE AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-truncation=0")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-truncation=0 -Wno-cast-function-type")
 	endif ()
 	# strictly handle alignment and structure padding around flexible arrays (only newer compilers)
 	if ((CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16) OR
