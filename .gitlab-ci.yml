@@ -99,7 +99,7 @@ build-leg:
     - cp apifiles/* src/
     - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
-    - cmake --build . 2>&1 | tee build_log.txt
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
     - mkdir -p ./build
@@ -124,7 +124,7 @@ build-debug-leg:
     - cp apifiles/* src/
     - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
-    - cmake --build . 2>&1
+    - cmake --build . -- -j$(nproc) 2>&1
     - mv gdxtest gdxtest_dbg
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
@@ -144,7 +144,7 @@ build-lag:
     - cp apifiles/* src/
     - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
-    - cmake --build . 2>&1 | tee build_log.txt
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
     - mkdir -p ./build
@@ -165,7 +165,7 @@ build-deg:
     - !reference [.gams-folder-deg]
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
-    - cmake --build . 2>&1 | tee build_log.txt
+    - cmake --build . -- -j$(sysctl -n hw.ncpu) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-macos.a
     - mkdir -p ./build
@@ -188,7 +188,7 @@ build-dac:
     - mv libgdx-macos.a libgdx-macos-deg.a
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
-    - cmake --build . 2>&1 | tee build_log.txt
+    - cmake --build . -- -j$(sysctl -n hw.ncpu) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdxcclib64.dylib libgdxcclib64_dac.dylib
     - mv libgdx-static.a libgdx-macos-dac.a
@@ -213,13 +213,14 @@ build-wei:
     - !reference [.get-gams-wei]
     - !reference [.gams-folder-wei]
     - cp apifiles/* src/
-    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
-    - cmake --build  . --config Release -- -m | Tee-Object -FilePath 'build_log.txt'
+    - $env:SCCACHE_DIR="C:\Cache\sccache"
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -G Ninja CMakeLists.txt
+    - cmake --build  . --config Release 2>&1 | Tee-Object -FilePath 'build_log.txt'
     - python ciscripts/report_for_log.py msvc build_log.txt warnings.xml
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-wei
-    paths: [Release]
+    paths: [gdx*.exe,xp_*.exe,gdx*.lib,gdx*.dll]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -322,8 +323,8 @@ test-wei:
     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
     - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
     - $env:GAMSDIR = "$GAMS_PATH;$GAMS_PATH\gbin"
-    - ./Release/gdxtest --reporters=junit --out=doctest_results_wei.xml
-    - ./Release/gdxwraptest --reporters=junit --out=doctest_results_wrap_wei.xml
+    - ./gdxtest --reporters=junit --out=doctest_results_wei.xml
+    - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_wei.xml
   artifacts:
     name: unittest-results-wei
     paths: [./*.xml]
@@ -540,8 +541,8 @@ deploy-gitlab-github:
       -d "${GDX_DESCRIPTION}"
       -n "${GDX_RELEASE_NAME}"
     - sleep 10s # make sure the release is available to reference
-    - cp Release/gdxcclib64.dll apifiles/*.h apifiles/*.hpp apifiles/*.c apifiles/*.cpp .
-    - cp Release/gdx-static.lib libgdx-windows.lib
+    - cp gdxcclib64.dll apifiles/*.h apifiles/*.hpp apifiles/*.c apifiles/*.cpp .
+    - cp gdx-static.lib libgdx-windows.lib
     - |
       for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib libgdx-macos.a libgdx-linux.a libgdx-windows.lib gclgms.h gcmutex.h gdxcc.h gdxcc.c gdxcwrap.h gdxcclib.cpp
       do
