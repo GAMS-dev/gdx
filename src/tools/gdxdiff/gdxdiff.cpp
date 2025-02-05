@@ -743,7 +743,7 @@ void CheckFile( library::ShortString_t &fn )
 
 int main( const int argc, const char *argv[] )
 {
-   int ErrorCode_t, ErrNr, Dim, iST, StrNr;
+   int ErrorCode, ErrNr, Dim, iST, StrNr;
    library::ShortString_t S, ID, InFile1, InFile2, DiffFileName;
    std::map<library::ShortString_t, int> IDTable;
    bool UsingIDE, RenameOK;
@@ -789,7 +789,7 @@ int main( const int argc, const char *argv[] )
       return static_cast<int>( ErrorCode_t::ERR_USAGE );
    }
 
-   ErrorCode_t = 0;
+   ErrorCode = 0;
    UsingIDE = false;
    matrixFile = false;
    diffUELsRegistered = false;
@@ -807,7 +807,7 @@ int main( const int argc, const char *argv[] )
    //    InFile2.clear();
 
    if( InFile1.empty() || InFile2.empty() )
-      ErrorCode_t = 1;
+      ErrorCode = 1;
 
    if( !CmdParams->HasParam( static_cast<int>( KP::kp_output ), DiffFileName ) )
    {
@@ -831,13 +831,13 @@ int main( const int argc, const char *argv[] )
       if( EpsAbsolute < 0 )
       {
          std::cout << "Eps cannot be negative" << std::endl;
-         ErrorCode_t = 2;
+         ErrorCode = 2;
       }
    }
    else
    {
       std::cout << "Bad value for Eps = " << S << std::endl;
-      ErrorCode_t = 2;
+      ErrorCode = 2;
    }
 
    if( !CmdParams->HasParam( static_cast<int>( KP::kp_releps ), S ) )
@@ -847,13 +847,13 @@ int main( const int argc, const char *argv[] )
       if( EpsRelative < 0 )
       {
          std::cout << "RelEps cannot be negative" << std::endl;
-         ErrorCode_t = 2;
+         ErrorCode = 2;
       }
    }
    else
    {
       std::cout << "Bad value for RelEps = " << S << std::endl;
-      ErrorCode_t = 2;
+      ErrorCode = 2;
    }
 
    DiffOnly = CmdParams->HasKey( static_cast<int>( KP::kp_diffonly ) );
@@ -895,7 +895,7 @@ int main( const int argc, const char *argv[] )
       else
       {
          std::cout << "Bad field name = " << S << std::endl;
-         ErrorCode_t = 4;
+         ErrorCode = 4;
       }
 
       if( FldOnly == FldOnly_t::fld_maybe )
@@ -911,13 +911,13 @@ int main( const int argc, const char *argv[] )
          {
             // TODO: Change combines to combined?
             std::cout << "Diff only cannot be combined with FldOnly" << std::endl;
-            ErrorCode_t = 4;
+            ErrorCode = 4;
          }
       }
       else
       {
          std::cout << "FldOnly option used with a single field comparison" << std::endl;
-         ErrorCode_t = 4;
+         ErrorCode = 4;
       }
    }
 
@@ -937,7 +937,7 @@ int main( const int argc, const char *argv[] )
       else
       {
          std::cout << "Bad value for CompSetText = " << S << std::endl;
-         ErrorCode_t = 4;
+         ErrorCode = 4;
       }
    }
 
@@ -995,7 +995,7 @@ int main( const int argc, const char *argv[] )
    //    rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName );
 
    // Parameter errors
-   if( ErrorCode_t > 0 )
+   if( ErrorCode > 0 )
    {
       // TODO: Remove?
       // std::cout << std::endl;
