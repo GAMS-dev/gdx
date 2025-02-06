@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,12 +26,12 @@
 #include <string> // for string
 #include <cstring> // for strerror, size_t, strcmp, strcpy
 
-#include "sysutils_p3.h"
-#include "p3platform.h"// for OSFileType, tOSFileType
+#include "sysutils_p3.hpp"
+#include "p3platform.hpp"// for OSFileType, tOSFileType
 
 #include "global/unit.h" // for UNIT_INIT_FINI
 
-#include "gdlib/utils.h" // for ui16
+#include "gdlib/utils.hpp" // for ui16
 
 #if defined( _WIN32 )
    #include <Windows.h>
@@ -61,9 +61,11 @@ std::string FileStopper, ExtStopper;
 std::string ExtractShortPathName( const std::string &FileName )
 {
 #if defined( _WIN32 )
-   std::array<char, 260> buf;
+   std::array<char, 260> buf {};
    const auto rc = GetShortPathNameA( FileName.c_str(), buf.data(), static_cast<DWORD>( sizeof( char ) * buf.size() ) );
    assert(rc);
+   if(!rc)
+      throw std::runtime_error("Failed to determine short path name: \""s + FileName + "\""s);
    return buf.data();
 #else
    // TODO: Does this make sense?
@@ -101,8 +103,8 @@ bool FileExists( const std::string &FileName )
 static TTimeStamp DateTimeToTimeStamp( global::delphitypes::tDateTime DateTime )
 {
    return {
-           static_cast<int>( round( std::abs( global::delphitypes::frac( DateTime ) ) * MSecsPerDay ) ),
-           static_cast<int>( trunc( DateTime ) + DateDelta ) };
+           utils::round<int>( std::abs( global::delphitypes::frac( DateTime ) ) * MSecsPerDay ),
+           static_cast<int>( static_cast<int64_t>( DateTime ) + DateDelta ) };
 }
 
 void DecodeTime( const global::delphitypes::tDateTime DateTime, uint16_t &Hour, uint16_t &Min, uint16_t &Sec, uint16_t &Msec )
@@ -291,9 +293,9 @@ std::string IncludeTrailingPathDelimiter( const std::string &S )
    return S + PathDelim;
 }
 
-const std::array<uint8_t, 12>
-        daysPerMonthRegularYear = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
-        daysPerMonthLeapYear = { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+constexpr std::array<uint8_t, 12>
+        daysPerMonthRegularYear { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 },
+        daysPerMonthLeapYear { 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 bool isLeapYear( const int year )
 {
@@ -507,7 +509,7 @@ bool tryEncodeDate( const uint16_t year, const uint16_t month, uint16_t day, dou
          } while( i++ != stop );
       }
       i = year - 1;
-      date = trunc( i * 365.0 + i / 4.0 - i / 100.0 + i / 400.0 + day - DateDelta /* + 1*/ );
+      date = static_cast<double>( static_cast<int64_t>( i * 365 + i / 4 - i / 100 + i / 400 + day - DateDelta ) );
       return true;
    }
 
@@ -516,7 +518,7 @@ bool tryEncodeDate( const uint16_t year, const uint16_t month, uint16_t day, dou
 
 static bool tryEncodeTime( const uint16_t hour, const uint16_t minute, const uint16_t sec, const uint16_t msec, double &curt )
 {
-   if( hour < HoursPerDay && minute < MinsPerHour && /*sec < SecsPerDay &&*/ msec < MSecsPerSec )
+   if( hour < HoursPerDay && minute < MinsPerHour && msec < MSecsPerSec )
    {
       curt = ( hour * 36e5 + minute * 6e4 + sec * MSecsPerSec + msec ) / MSecsPerDay;
       return true;
@@ -718,9 +720,11 @@ int DateTimeToFileDate( double dt )
    uint16_t hour, min, sec, msec;
    DecodeTime( dt, hour, min, sec, msec );
 #if defined(_WIN32)
-   LongRec lr {
-      static_cast<uint16_t>( ( sec >> 1 ) | ( min << 5 ) | ( hour << 11 ) ),
-      static_cast<uint16_t>(day | ( month << 5 ) | ( (year - 1980) << 9 ))
+   const LongRec lr {
+      {
+         static_cast<uint16_t>( ( sec >> 1 ) | ( min << 5 ) | ( hour << 11 ) ),
+         static_cast<uint16_t>(day | ( month << 5 ) | ( (year - 1980) << 9 ))
+      }
    };
    static_assert( sizeof( LongRec ) == sizeof( int ) );
    int res;

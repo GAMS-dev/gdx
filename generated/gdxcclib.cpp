@@ -31,7 +31,7 @@
 #include <ctype.h>
 #include <assert.h>
 
-#include "gdxcwrap.hpp"
+#include "gdxcwrap.h"
 #include "gclgms.h"
 
 #if defined(_WIN32)

@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
 *
-* Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
-* Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+* Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+* Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -29,13 +29,13 @@
 #endif
 
 #if defined( GXFILE_CPPWRAP )
-#include "gdxcppwrap.h"
+#include "gdxcppwrap.hpp"
 #else
 #include "gclgms.h" // for GMS_SSSIZE, GMS_VAL_LEVEL
-#include "../gdx.h"   // for TGXFileObj, TgdxValues
+#include "../gdx.hpp"// for TGXFileObj, TgdxValues
 #endif
 
-#include "doctest.h"// for ResultBuilder, Expressi...
+#include "doctest.hpp"// for ResultBuilder, Expressi...
 
 #include <algorithm> // for fill_n, find, copy
 #include <cstdlib>   // for system, setenv, unsetenv
@@ -50,8 +50,8 @@
 #include <fstream>
 #include <cassert>
 
-#include "gdxtests.h"
-#include "gdlib/strindexbuf.h"
+#include "gdxtests.hpp"
+#include "gdlib/strindexbuf.hpp"
 
 using namespace std::literals::string_literals;
 using namespace gdx;
@@ -1850,10 +1850,12 @@ TEST_CASE( "Test convert and compress" )
    }
    testWithCompressConvert( false, "" );
 #ifndef __APPLE__
+#ifndef __aarch64__
    testWithCompressConvert( false, "v5" );
    testWithCompressConvert( true, "v5" );
    testWithCompressConvert( false, "v6" );
    testWithCompressConvert( true, "v6" );
+#endif
 #endif
    testWithCompressConvert( false, "v7" );
    testWithCompressConvert( true, "v7" );
@@ -1889,6 +1891,25 @@ TEST_CASE( "Test simple write/read with compression activated" )
    } );
    unsetEnvironmentVar( "GDXCOMPRESS" );
    std::filesystem::remove( fn );
+}
+
+TEST_CASE( "Test opening a file for reading and then deleting (while it is open)")
+{
+   const auto fn {"unlocked.gdx"s};
+   testWrite(fn, [&](TGXFileObj &pgx) {
+      pgx.gdxDataWriteRawStart( "i", "", 1, dt_set, 0 );
+      pgx.gdxDataWriteDone();
+   });
+   testRead( fn, [&](TGXFileObj &pgx) {
+      std::filesystem::remove(fn); // this is mean. :)
+      int nrRecs;
+      // should fail now!
+      REQUIRE(pgx.gdxDataReadRawStart( 1, nrRecs ));
+      int key, dimFrst;
+      double val;
+      REQUIRE_FALSE(pgx.gdxDataReadRaw( &key, &val, dimFrst ));
+      REQUIRE_FALSE(std::filesystem::exists( fn ));
+   } );
 }
 
 TEST_CASE( "Test symbol index max UEL length" )
@@ -2294,6 +2315,10 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
    std::cout << "Skipping legacy version GDX file read test on macOS since gdxcopy does not support V5 and V6 there." << std::endl;
    return;
 #endif
+#ifdef __aarch64__
+   std::cout << "Skipping legacy version GDX file read test on aarch64 since gdxcopy does not support V5 and V6 there." << std::endl;
+   return;
+#endif
    const auto modelName { "trnsport"s };
    acquireGDXforModel( modelName );
    for( const auto &versSuff: { "V5"s, "V6U"s, "V6C"s } )
@@ -2393,6 +2418,10 @@ TEST_CASE( "Open append should report error for old GDX file versions" )
 
 #ifdef __APPLE__
    std::cout << "Skipping legacy version GDX file open append test on macOS since gdxcopy does not support V5 and V6 there." << std::endl;
+   return;
+#endif
+#ifdef __aarch64__
+   std::cout << "Skipping legacy version GDX file open append test on aarch64 since gdxcopy does not support V5 and V6 there." << std::endl;
    return;
 #endif
 

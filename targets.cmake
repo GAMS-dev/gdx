@@ -102,23 +102,23 @@ if(NOT NO_TOOLS)
 add_library(gdxtools-library
     generated/gdxcc.h
     generated/gdxcc.c
-    src/tools/library/common.h
+    src/tools/library/common.hpp
     src/tools/library/common.cpp
-    src/tools/library/short_string.h
+    src/tools/library/short_string.hpp
     src/tools/library/short_string.cpp
-    src/tools/library/cmdpar.h
+    src/tools/library/cmdpar.hpp
     src/tools/library/cmdpar.cpp
     ${base-units-all}
 )
 target_include_directories(gdxtools-library PRIVATE ${inc-dirs})
 target_link_libraries(gdxtools-library gdx-static)
 if (UNIX)
-    target_link_libraries(gdxtools-library dl)
+    target_link_libraries(gdxtools-library ${CMAKE_DL_LIBS})
 endif ()
 
 # gdxdump
 add_executable(gdxdump
-    src/tools/gdxdump/gdxdump.h
+        src/tools/gdxdump/gdxdump.hpp
     src/tools/gdxdump/gdxdump.cpp
 )
 target_include_directories(gdxdump PRIVATE ${inc-dirs})
@@ -126,7 +126,7 @@ target_link_libraries(gdxdump gdxtools-library)
 
 # gdxdiff
 add_executable(gdxdiff
-    src/tools/gdxdiff/gdxdiff.h
+    src/tools/gdxdiff/gdxdiff.hpp
     src/tools/gdxdiff/gdxdiff.cpp
 )
 target_include_directories(gdxdiff PRIVATE ${inc-dirs})
@@ -134,7 +134,7 @@ target_link_libraries(gdxdiff gdxtools-library)
 
 # gdxmerge
 add_executable(gdxmerge
-    src/tools/gdxmerge/gdxmerge.h
+    src/tools/gdxmerge/gdxmerge.hpp
     src/tools/gdxmerge/gdxmerge.cpp
 )
 target_include_directories(gdxmerge PRIVATE ${inc-dirs})
@@ -142,10 +142,10 @@ target_link_libraries(gdxmerge gdxtools-library)
 
 # gdx2veda
 add_executable(gdx2veda
-    src/tools/gdx2veda/container.h
-    src/tools/gdx2veda/vdd.h
+    src/tools/gdx2veda/container.hpp
+    src/tools/gdx2veda/vdd.hpp
     src/tools/gdx2veda/vdd.cpp
-    src/tools/gdx2veda/gdx2veda.h
+    src/tools/gdx2veda/gdx2veda.hpp
     src/tools/gdx2veda/gdx2veda.cpp
 )
 target_include_directories(gdx2veda PRIVATE ${inc-dirs})

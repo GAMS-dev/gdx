@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,13 +27,13 @@
 #include <iostream>
 #include <cassert>
 
-#include "rtl/sysutils_p3.h"
+#include "rtl/sysutils_p3.hpp"
 
-#include "gmslist.h"
-#include "strutilx.h"
+#include "gmslist.hpp"
+#include "strutilx.hpp"
 
-#include "utils.h"
-#include "rtl/p3io.h"
+#include "utils.hpp"
+#include "rtl/p3io.hpp"
 
 using namespace std::literals::string_literals;
 
@@ -252,7 +252,10 @@ void TGmsList::PushHeader( std::string_view debugstr )
    FCurrHeader.clear();
 }
 
-void TGmsList::CalcCharsLeft() { FCharsLeft = FRightMargin - ( FIndentColumn >= FLeftMargin ? FIndentColumn : FLeftMargin ); }
+void TGmsList::CalcCharsLeft()
+{
+   FCharsLeft = FRightMargin - ( FIndentColumn >= FLeftMargin ? FIndentColumn : FLeftMargin );
+}
 
 void TGmsList::LWrite( bool src )
 {
@@ -827,7 +830,7 @@ void TGmsList::WrPCharLn( const int LineNr, const bool ShowLineNr, const char *P
       do
       {
          const int k { ShowMargins && ( p == FUserLeftMargin || p == FUserRightMargin ) ? 2 : 1 };
-         if( FCharsWritten - Corr + k > FRightMargin ) break;
+         if( FCharsWritten + i - Corr + k > FRightMargin ) break;
          if( k == 1 )
          {
             //SysChWrite( Str[p] );
@@ -961,7 +964,9 @@ void TGmsList::WrStrBrk( std::string_view s, char brkch )
 
 void TGmsList::SetLstTitleLeftAligned( int n ) { FLstTitleLeftAligned = n; }
 
-void TGmsList::SetLineNumber( int n ) { FFileLineNumber = n; }
+void TGmsList::SetLineNumber( int n ) {
+   FFileLineNumber = n;
+}
 
 void TGmsList::SetLinesPerPage( int n )
 {

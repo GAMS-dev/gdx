@@ -1,4 +1,4 @@
-#include "system_p3.h"
+#include "system_p3.hpp"
 
 #if defined(_WIN32)
 #include <Windows.h>

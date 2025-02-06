@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,18 +27,18 @@
 
 #include <iostream>
 
-#include "../rtl/sysutils_p3.h"
-#include "../rtl/p3platform.h"
-#include "../rtl/p3utils.h"
-#include "../rtl/idglobal_p3.h"
+#include "../rtl/sysutils_p3.hpp"
+#include "../rtl/p3platform.hpp"
+#include "../rtl/p3utils.hpp"
+#include "../rtl/idglobal_p3.hpp"
 
-#include "utils.h"
+#include "utils.hpp"
 
-#include "strutilx.h"
-#include "statlibobj.h"
-#include "gmsgen.h"
+#include "strutilx.hpp"
+#include "statlibobj.hpp"
+#include "gmsgen.hpp"
 #include "global/unit.h"
-#include "rtl/p3process.h"
+#include "rtl/p3process.hpp"
 
 using namespace gdlib::gmsgen;
 using namespace rtl::sysutils_p3;
@@ -56,9 +56,8 @@ static std::string termString;
 
 static bool tmElapsed( uint32_t &thenT, uint32_t minDiffT )
 {
-   auto nowT = rtl::idglobal_p3::GetTickCount();
-   auto diffT = rtl::idglobal_p3::GetTickDiff( thenT, nowT );
-   if( diffT > minDiffT )
+   const auto nowT = rtl::idglobal_p3::GetTickCount();
+   if( const auto diffT = rtl::idglobal_p3::GetTickDiff( thenT, nowT ); diffT > minDiffT )
    {
       thenT = nowT;
       return true;
@@ -76,14 +75,14 @@ static void statuslerror( const std::string &s )
    debugStream << "*** gStatusL." << s << '\n';
 }
 
-bool opentextmsg( FILE *&f, const std::string &fn, gdlib::gmsgen::tfileaction fa, std::string &msg );
+bool opentextmsg( FILE *&f, const std::string &fn, tfileaction fa, std::string &msg );
 
 TGMSLogStream::TGMSLogStream( std::string &Msg ) : FLastShowTicks { rtl::idglobal_p3::GetTickCount() }
 {
    Msg.clear();
 }
 
-void TGMSLogStream::registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem )
+void TGMSLogStream::registerWriteCallback( stattypes::tgwrite *fptr, void *usermem )
 {
    Fgfcb = fptr;
    Fgfusrmem = usermem;
@@ -110,7 +109,7 @@ void TGMSLogStream::LogClose()
    }
 }
 
-bool TGMSLogStream::LogOpen( int Astat, gdlib::gmsgen::tfileaction AAction, const std::string &Afn )
+bool TGMSLogStream::LogOpen( int Astat, const tfileaction AAction, const std::string &Afn )
 {
    if( FStatus != sl_closed )
    {
@@ -246,13 +245,13 @@ void TGMSLogStream::LogMessage( const std::string &s )
    FLastIsMsg = true;
 }
 
-void TGMSLogStream::LogFileName( const std::string &fn, int Lev )
+void TGMSLogStream::LogFileName( const std::string &fn, const int Lev )
 {
    if( !FLogEnabled ) return;
    if( FhasNewData && FTraceLevel > 0 ) ShowStatLine();
    FFullFileName = fn;
-   FFileName = gdlib::strutilx::ExtractFileNameEx( fn );
-   int OldLevel = FNestLevel;
+   FFileName = strutilx::ExtractFileNameEx( fn );
+   const int OldLevel = FNestLevel;
    FNestLevel = Lev;
    if( !( FNestLevel < OldLevel || FLastIsMsg || FTraceLevel > 2 ) ) FLastIsMsg = true;
    else
@@ -270,7 +269,7 @@ void TGMSLogStream::LogFileName( const std::string &fn, int Lev )
 		std::cout << "--- " << nestpoints << " " << fn << "(" << Lev << ") 0 Mb" << '\n';*/
 }
 
-void TGMSLogStream::LogLineNr( int N )
+void TGMSLogStream::LogLineNr( const int N )
 {
    if( FLogEnabled && N != FLineNr )
    {
@@ -291,11 +290,11 @@ void TGMSLogStream::LogLineNr( int N )
    }
 }
 
-void TGMSLogStream::LogAnchor( int N )
+void TGMSLogStream::LogAnchor( const int N )
 {
    if( FLogEnabled )
    {
-      std::string s = "[LST:"s + rtl::sysutils_p3::IntToStr( N ) + "]"s;
+      const std::string s = "[LST:"s + IntToStr( N ) + "]"s;
       CheckOpen();
       write_gf( s );
       FLenLast += static_cast<int>(s.length());
@@ -312,13 +311,13 @@ void TGMSLogStream::LogTitleAnchor( const std::string &Msg )
    }
 }
 
-void TGMSLogStream::LogFileAnchor( bool err, const std::string &fn, int line, int col )
+void TGMSLogStream::LogFileAnchor( const bool err, const std::string &fn, const int line, const int col )
 {
    if( !FLogEnabled ) return;
    doFileAnchor( err, fn, line, col );
 }
 
-void TGMSLogStream::LogMemory( double M )
+void TGMSLogStream::LogMemory( const double M )
 {
    if( FLogEnabled && std::abs( M - FMemory ) > 0.5 )
    {
@@ -328,7 +327,7 @@ void TGMSLogStream::LogMemory( double M )
    }
 }
 
-void TGMSLogStream::LogErrrorCnt( int N )
+void TGMSLogStream::LogErrrorCnt( const int N )
 {
 
    if( FLogEnabled && N != FErrorCnt )
@@ -348,11 +347,10 @@ void TGMSLogStream::freshenEx()
 {
    if( FLogEnabled && FStatus == sl_output && FTraceLevel > 1 )
    {
-      auto nowT = rtl::idglobal_p3::GetTickCount();
-      auto dt = rtl::idglobal_p3::GetTickDiff( FLineStartTicks, nowT );
+      const auto nowT = rtl::idglobal_p3::GetTickCount();
+      const auto dt = rtl::idglobal_p3::GetTickDiff( FLineStartTicks, nowT );
       FLastShowTicks = nowT;
-      auto secs = dt / 1000;
-      if( secs > 2 && secs > FPrevSecs && ( secs <= 30 || secs - 5 >= FPrevSecs ) )
+      if( const auto secs = dt / 1000; secs > 2 && secs > FPrevSecs && ( secs <= 30 || secs - 5 >= FPrevSecs ) )
       {
          FPrevSecs = secs;
          FhasNewData = true;
@@ -365,7 +363,7 @@ void TGMSLogStream::freshenEx()
    }
 }
 
-void TGMSLogStream::LogDumpFilename( const std::string &prfx, bool enabled, const std::string &what, const std::string &gs, gdlib::gmsgen::tfileaction fa, int ioResOrNeg )
+void TGMSLogStream::LogDumpFilename( const std::string &prfx, const bool enabled, const std::string &what, const std::string &gs, const tfileaction fa, const int ioResOrNeg )
 {
    if( !enabled || !FLogEnabled ) return;
    std::string s { prfx + " "s + what + " "s };
@@ -382,7 +380,7 @@ void TGMSLogStream::LogDumpFilename( const std::string &prfx, bool enabled, cons
          break;
    }
 
-   s += "="s + rtl::sysutils_p3::IntToStr( ioResOrNeg ) + " FN=\""s + gs + "\""s;
+   s += "="s + IntToStr( ioResOrNeg ) + " FN=\""s + gs + "\""s;
    LogMessage( s );
    if( ioResOrNeg > 0 )
       LogMessage( prfx + "MSG=" + SysErrorMessage( ioResOrNeg ) );
@@ -405,7 +403,7 @@ void TGMSLogStream::LogWriteLn( const std::string &s )
 
 void TGMSLogStream::LogWrite( const std::string &p )
 {
-   const int blockSize = 255;
+   constexpr int blockSize = 255;
    if( p.empty() || !FLogEnabled ) return;
    if( !Fgfcb ) gstatStartWriting();
    const int numBlocks = static_cast<int>( std::ceil( static_cast<double>( p.length() ) / static_cast<double>( blockSize ) ) );
@@ -417,7 +415,7 @@ void TGMSLogStream::LogWrite( const std::string &p )
    if( !Fgfcb ) std::fflush(Ffcon);;
 }
 
-void TGMSLogStream::LogWritePlain( const std::string &s )
+void TGMSLogStream::LogWritePlain( const std::string &s ) const
 {
    if( !FLogEnabled ) return;
    std::fwrite( s.c_str(), sizeof( char ), s.size(), Ffcon );
@@ -430,14 +428,14 @@ void TGMSLogStream::showCounts()
 {
 #ifdef METER
    LogMessage( "DEBUG: TGMSLogStream usage counts:" );
-   LogMessage( "  method LogLineNr: " + rtl::sysutils_p3::IntToStr( cntLogLineNr ) );
-   LogMessage( "  method LogMemory: " + rtl::sysutils_p3::IntToStr( cntLogMemory ) );
-   LogMessage( "  method   freshen: " + rtl::sysutils_p3::IntToStr( cntFreshen ) );
+   LogMessage( "  method LogLineNr: " + IntToStr( cntLogLineNr ) );
+   LogMessage( "  method LogMemory: " + IntToStr( cntLogMemory ) );
+   LogMessage( "  method   freshen: " + IntToStr( cntFreshen ) );
    LogMessage( "" );
 #endif
 }
 
-void TGMSLogStream::setIDErun( bool v )
+void TGMSLogStream::setIDErun( const bool v )
 {
    FIDE = v;
 }
@@ -447,7 +445,7 @@ bool TGMSLogStream::getLogEnabled() const
    return FLogEnabled;
 }
 
-void TGMSLogStream::setLogEnabled( bool v )
+void TGMSLogStream::setLogEnabled( const bool v )
 {
    FLogEnabled = v;
 }
@@ -457,7 +455,7 @@ int TGMSLogStream::getTraceLevel() const
    return FTraceLevel;
 }
 
-void TGMSLogStream::setTraceLevel( int v )
+void TGMSLogStream::setTraceLevel( const int v )
 {
    FTraceLevel = v;
 }
@@ -470,18 +468,18 @@ std::string TGMSLogStream::getRedirFilename() const
 std::string TGMSLogStream::getRedirString() const
 {
    if( FRedirFileName.empty() ) return ""s;
-   std::string pf = FSaveAstat == 4 ? " | tee -a " : " >> ";
+   const std::string pf = FSaveAstat == 4 ? " | tee -a " : " >> ";
    return pf + getRedirFilename();
 }
 
-std::string TGMSLogStream::getShortRedirString( const std::string &Dir )
+std::string TGMSLogStream::getShortRedirString( const std::string &Dir ) const
 {
    if( FRedirFileName.empty() ) return ""s;
-   auto k { Dir.find( FRedirFileName ) };
+   const auto k { Dir.find( FRedirFileName ) };
    return k == std::string::npos ? getRedirString() : " >> \"." + FRedirFileName.substr( Dir.length() ) + "\"";
 }
 
-void TGMSLogStream::SetOSMemory( int v )
+void TGMSLogStream::SetOSMemory( const int v )
 {
    FShowOSMem = v;
 }
@@ -492,7 +490,8 @@ void TGMSLogStream::CheckOpen()
    {
       Ffcon = stdout;//&debugStream;// new std::fstream("", std::ios_base::out);
       //debugStream << "*** Log reopened as output\n";
-      fwrite( "*** Log reopened as output\n", sizeof( char ), 27, Ffcon );
+      const auto msg {"*** Log reopened as output\n"};
+      std::fwrite( msg, sizeof( char ), 27, Ffcon );
       FStatus = sl_output;
    }
 }
@@ -510,10 +509,10 @@ void TGMSLogStream::Flush()
    FLastIsMsg = false;
 }
 
-void TGMSLogStream::doFileAnchor( bool err, const std::string &fn, int line, int col )
+void TGMSLogStream::doFileAnchor( const bool err, const std::string &fn, const int line, const int col )
 {
    CheckOpen();
-   std::string s { ( err ? "[ERR:"s : "[FIL:"s ) + "\"" + fn + "\"," + rtl::sysutils_p3::IntToStr( line ) + "," + rtl::sysutils_p3::IntToStr( col ) + "]" };
+   const std::string s { ( err ? "[ERR:"s : "[FIL:"s ) + "\""s + fn + "\","s + IntToStr( line ) + ","s + IntToStr( col ) + "]"s };
    write_gf( s );
    FLenLast += static_cast<int>(s.length());
 }
@@ -545,10 +544,11 @@ void TGMSLogStream::ShowStatLine()
       if( FNestLevel > 0 )
          s += std::string( FNestLevel, '.' ) + " "s;
       s += FFileName + "("s + IntToStr( FLineNr ) + ")"s;
-      uint64_t rss, vss;
-      if( FShowOSMem == 1 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) ) FMemory = (double) rss / 1e6;
+      uint64_t vss;
+      if( uint64_t rss; FShowOSMem == 1 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) )
+         FMemory = static_cast<double>( rss ) / 1e6;
       else if( FShowOSMem == 2 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) )
-         FMemory = (double) vss / 1e6;
+         FMemory = static_cast<double>( vss ) / 1e6;
       s += " "s + IntToStr( utils::round<int>( FMemory ) ) + " Mb"s;
       if( FErrorCnt > 0 )
       {
@@ -558,7 +558,7 @@ void TGMSLogStream::ShowStatLine()
       if( FSpinChar != ' ' ) s += " "s + FSpinChar;
       if( FPrevSecs > 0 ) s += " " + IntToStr( FPrevSecs ) + " secs";
       if( FLenLast > 0 ) write_gf( "\r" );
-      if( (int) s.length() < FLenLast )
+      if( static_cast<int>( s.length() ) < FLenLast )
       {
          write_gf( std::string( FLenLast, ' ' ) + "\r" );
       }
@@ -576,15 +576,15 @@ void TGMSLogStream::gstatStartWriting()
    Flush();
 }
 
-void TGMSLogStream::writeln_gf( const std::string &msg )
+void TGMSLogStream::writeln_gf( const std::string &msg ) const
 {
    write_gf( msg + termString);
 }
 
 
-void TGMSLogStream::write_gf( const std::string &msg )
+void TGMSLogStream::write_gf( const std::string &msg ) const
 {
-   if( Fgfcb ) ( *Fgfcb )( msg, gdlib::stattypes::doLog, Fgfusrmem );
+   if( Fgfcb ) ( *Fgfcb )( msg, stattypes::doLog, Fgfusrmem );
    else
    {
       std::fwrite( msg.c_str(), sizeof( char ), msg.size(), Ffcon );
@@ -592,7 +592,7 @@ void TGMSLogStream::write_gf( const std::string &msg )
    }
 }
 
-void TGMSLogStream::writeln_gf(const char* msg)
+void TGMSLogStream::writeln_gf(const char* msg ) const
 {
    static std::array<char, 256> ss;
    const auto l { std::strlen( msg ) };
@@ -601,8 +601,9 @@ void TGMSLogStream::writeln_gf(const char* msg)
    write_gf( ss.data() );
 }
 
-void TGMSLogStream::write_gf(const char* msg) {
-   if( Fgfcb ) ( *Fgfcb )( msg, gdlib::stattypes::doLog, Fgfusrmem );
+void TGMSLogStream::write_gf(const char* msg ) const
+{
+   if( Fgfcb ) ( *Fgfcb )( msg, stattypes::doLog, Fgfusrmem );
    else
    {
       fwrite( msg, sizeof( char ), std::strlen(msg), Ffcon );
@@ -610,12 +611,12 @@ void TGMSLogStream::write_gf(const char* msg) {
    }
 }
 
-void TGMSStatusStream::writeln_gf( const std::string &msg )
+void TGMSStatusStream::writeln_gf( const std::string &msg ) const
 {
    write_gf( msg + termString );
 }
 
-void TGMSStatusStream::write_gf( const std::string &msg )
+void TGMSStatusStream::write_gf( const std::string &msg ) const
 {
    if( Fgfcb ) ( *Fgfcb )( msg, gdlib::stattypes::doStat, Fgfusrmem );
    else fwrite( msg.c_str(), sizeof( char ), msg.size(), Ffstat );
@@ -654,9 +655,10 @@ trcerrtxt TGMSStatusStream::SolverErrorMessage( const std::string &s )
 
 void TGMSStatusStream::SolverErrorAdd( int rownum, int columnnum, const std::string &msg )
 {
-   trcerrrec ehdrptr { Ffrsteqptr }, nextrc { ehdrptr };
+   const trcerrrec ehdrptr { Ffrsteqptr };
+   trcerrrec nextrc { ehdrptr };
    bool firsttime { true };
-   trcerrtxt newerr { SolverErrorMessage( msg ) };
+   const trcerrtxt newerr { SolverErrorMessage( msg ) };
 
    while( rownum > nextrc->seqno )// find row
       nextrc = nextrc->tnxtrc;
@@ -671,11 +673,11 @@ void TGMSStatusStream::SolverErrorAdd( int rownum, int columnnum, const std::str
 
    if( firsttime )
    {// first time on this equ/var
-      auto newtyp = new rcerrtyp {
+      const auto newtyp = new rcerrtyp {
               1,
               nullptr,
               newerr };
-      auto newrc = new rcerrrec {
+      const auto newrc = new rcerrrec {
               nextrc->seqno,
               nextrc->colnum,
               nextrc->tnxtrc,
@@ -702,7 +704,7 @@ void TGMSStatusStream::SolverErrorAdd( int rownum, int columnnum, const std::str
       }
       if( firsttime )
       {
-         auto newtyp = new rcerrtyp {
+         const auto newtyp = new rcerrtyp {
                  1,
                  nextrc->tfrsttyp,
                  newerr };
@@ -747,7 +749,7 @@ TGMSStatusStream::~TGMSStatusStream()
    }
 }
 
-void TGMSStatusStream::registerWriteCallback( gdlib::stattypes::tgwrite *fptr, void *usermem )
+void TGMSStatusStream::registerWriteCallback( stattypes::tgwrite *fptr, void *usermem )
 {
    Fgfcb = fptr;
    Fgfusrmem = usermem;
@@ -802,7 +804,7 @@ void TGMSStatusStream::StatusDumpFirst()
    Fmsgbufcount = 0;
 }
 
-bool TGMSStatusStream::StatusAppend( const std::string &fn, std::string &msg )
+bool TGMSStatusStream::StatusAppend( const std::string &fn, std::string &msg ) const
 {
    if( !Fstatusopen )
    {
@@ -912,8 +914,8 @@ bool TGMSStatusStream::StatusDumpNext( std::string &msg )
       {
          case 'B':
          {
-            std::string fnsys = utils::trim( msg.substr( 2 ) ), s;
-            if( !opentextmsg( Ffsysout, fnsys, gmsgen::forRead, s ) )
+            const std::string fnsys = utils::trim( msg.substr( 2 ) );
+            if( std::string s; !opentextmsg( Ffsysout, fnsys, forRead, s ) )
             {
                Fmsgbuf.front() = "Msg=" + s;
                Fmsgbuf[1] = "Could not process above statement";
@@ -939,10 +941,10 @@ bool TGMSStatusStream::StatusDumpNext( std::string &msg )
    return true;
 }
 
-bool TGMSStatusStream::StatusProcessNext( gdlib::stattypes::tstatusproc &statusproc, std::string &msg1, std::string &msg2, int &num )
+bool TGMSStatusStream::StatusProcessNext( stattypes::tstatusproc &statusproc, std::string &msg1, std::string &msg2, int &num )
 {
    int VarNum, EquNum, p;
-   std::string line, s;
+   std::string s;
 
    if( Fmsgbufcount > 0 )
    {
@@ -968,21 +970,18 @@ bool TGMSStatusStream::StatusProcessNext( gdlib::stattypes::tstatusproc &statusp
    {
       statusproc = stattypes::statusLine;
       assert(Ffsysout);
-      if( !feof(Ffsysout) )
+      if( !feof( Ffsysout ) )
       {
          msg1 = utils::getline( Ffsysout );
          return true;
       }
-      else
-      {
-         Fcopysysout = false;
-         std::fclose(Ffsysout);
-      }
+      Fcopysysout = false;
+      std::fclose( Ffsysout );
    }
 
    while( !feof(Ffstat) )
    {
-      line = utils::getline( Ffstat );
+      std::string line = utils::getline( Ffstat );
       msg1.clear();
       msg2.clear();
       num = 0;
@@ -1221,8 +1220,7 @@ bool TGMSStatusStream::StatusErrorNextEqu( int &row )
       if( !Fnextheader || Fnextheader->seqno == std::numeric_limits<int>::max() )
          return false;
       row = Fnextheader->seqno;
-      int col = Fnextheader->colnum;
-      if( !row || col ) Fnextheader = Fnextheader->tnxtrc;
+      if( const int col = Fnextheader->colnum; !row || col ) Fnextheader = Fnextheader->tnxtrc;
       else
       {
          Fnexterror = Fnextheader->tfrsttyp;
@@ -1240,7 +1238,7 @@ bool TGMSStatusStream::StatusErrorNextVar( int &col )
    while( true )
    {
       if( !Fnextheader || Fnextheader->seqno == std::numeric_limits<int>::max() ) return false;
-      int row = Fnextheader->seqno;
+      const int row = Fnextheader->seqno;
       col = Fnextheader->colnum;
       if( !col || row ) Fnextheader = Fnextheader->tnxtrc;
       else
@@ -1300,12 +1298,12 @@ void TGMSStatusStream::StatusClose()
    }
 }
 
-bool TGMSStatusStream::StatusFileOpen( gdlib::gmsgen::tfileaction AAction, std::string &msg )
+bool TGMSStatusStream::StatusFileOpen( const tfileaction AAction, std::string &msg )
 {
    if( checkfile(msg) )
       msg.clear();
    else return false;
-   // shouldnt this be binary mode on windows?
+   // shouldn't this be binary mode on windows?
    Ffstat = fopen( Ffnstat.c_str(), "r" );
    bool newstat;
    if(Ffstat) {
@@ -1337,7 +1335,7 @@ bool TGMSStatusStream::StatusFileOpen( gdlib::gmsgen::tfileaction AAction, std::
    // TODO: Implement me!
 }
 
-void TGMSStatusStream::StatusWriteLn( const std::string &s )
+void TGMSStatusStream::StatusWriteLn( const std::string &s ) const
 {
    try
    {
@@ -1349,63 +1347,63 @@ void TGMSStatusStream::StatusWriteLn( const std::string &s )
    }
 }
 
-void TGMSStatusStream::StatusWrite( const std::string &p )
+void TGMSStatusStream::StatusWrite( const std::string &p ) const
 {
    if( p.empty() ) return;
    write_gf( p );
 }
 
-void TGMSStatusStream::StatusWritePlain( const std::string &s )
+void TGMSStatusStream::StatusWritePlain( const std::string &s ) const
 {
    fwrite( s.c_str(), sizeof( char ), s.size(), Ffstat );
 }
 
-void TGMSStatusStream::StatusTerminationRequestfromSolver()
+void TGMSStatusStream::StatusTerminationRequestfromSolver() const
 {
    commonStatusFunc( "TerminationRequestfromSolver", "StatusTerminationRequestfromSolver" )( "" );
 }
 
-void TGMSStatusStream::StatusCopyOn()
+void TGMSStatusStream::StatusCopyOn() const
 {
    commonStatusFunc( "1", "StatusCopyOn" )( "" );
 }
 
-void TGMSStatusStream::StatusCopyOff()
+void TGMSStatusStream::StatusCopyOff() const
 {
    commonStatusFunc( "2", "StatusCopyOff" )( "" );
 }
 
-void TGMSStatusStream::StatusLSTAnchor( const std::string &s )
+void TGMSStatusStream::StatusLSTAnchor( const std::string &s ) const
 {
    commonStatusFunc( "L", "StatusLSTAnchor" )( s );
 }
 
-void TGMSStatusStream::StatusCopyLine( const std::string &s )
+void TGMSStatusStream::StatusCopyLine( const std::string &s ) const
 {
    commonStatusFunc( "C", "StatusCopyLine" )( s );
 }
 
-void TGMSStatusStream::StatusCopyFile( const std::string &s )
+void TGMSStatusStream::StatusCopyFile( const std::string &s ) const
 {
    commonStatusFunc( "A", "StatusCopyFile" )( s );
 }
 
-void TGMSStatusStream::StatusCopyFileOnSysOut( const std::string &s )
+void TGMSStatusStream::StatusCopyFileOnSysOut( const std::string &s ) const
 {
    commonStatusFunc( "B", "StatusCopyFileOnSysOut" )( s );
 }
 
-void TGMSStatusStream::StatusEndOfFile()
+void TGMSStatusStream::StatusEndOfFile() const
 {
    commonStatusFunc( "3", "StatusEndOfFile" )( "" );
 }
 
-void TGMSStatusStream::StatusSysOut()
+void TGMSStatusStream::StatusSysOut() const
 {
    commonStatusFunc( "4", "StatusSysOut" )( "" );
 }
 
-void TGMSStatusStream::StatusPageEject()
+void TGMSStatusStream::StatusPageEject() const
 {
    commonStatusFunc( "8", "StatusPageEject" )( "" );
 }
@@ -1423,7 +1421,7 @@ void TGMSStatusStream::StatusSetEditSymbol( char c )
    }
 }
 
-void TGMSStatusStream::StatusAuditLine( const std::string &s )
+void TGMSStatusStream::StatusAuditLine( const std::string &s ) const
 {
    try
    {
@@ -1436,11 +1434,11 @@ void TGMSStatusStream::StatusAuditLine( const std::string &s )
    }
 }
 
-void TGMSStatusStream::StatusEquationName( const std::string &s1, int num, std::string &s2 )
+void TGMSStatusStream::StatusEquationName( const std::string &s1, const int num, const std::string &s2 ) const
 {
    try
    {
-      writeln_gf( ""s + Feditsymbol + "E \""s + s1 + "\" "s + rtl::sysutils_p3::IntToStr( num ) + " \""s + s2 + "\""s );
+      writeln_gf( ""s + Feditsymbol + "E \""s + s1 + "\" "s + IntToStr( num ) + " \""s + s2 + "\""s );
    }
    catch( ... )
    {
@@ -1448,11 +1446,11 @@ void TGMSStatusStream::StatusEquationName( const std::string &s1, int num, std::
    }
 }
 
-void TGMSStatusStream::StatusVariableName( const std::string &s1, int num, const std::string &s2 )
+void TGMSStatusStream::StatusVariableName( const std::string &s1, const int num, const std::string &s2 ) const
 {
    try
    {
-      writeln_gf( ""s + Feditsymbol + "V \""s + s1 + "\" "s + rtl::sysutils_p3::IntToStr( num ) + " \""s + s2 + "\""s );
+      writeln_gf( ""s + Feditsymbol + "V \""s + s1 + "\" "s + IntToStr( num ) + " \""s + s2 + "\""s );
    }
    catch( ... )
    {
@@ -1460,21 +1458,21 @@ void TGMSStatusStream::StatusVariableName( const std::string &s1, int num, const
    }
 }
 
-void TGMSStatusStream::StatusEquationError( int num, const std::string &s )
+void TGMSStatusStream::StatusEquationError( const int num, const std::string &s ) const
 {
-   commonStatusFunc( "5 "s + rtl::sysutils_p3::IntToStr( num ) + " "s, "StatusEquationError"s )( s );
+   commonStatusFunc( "5 "s + IntToStr( num ) + " "s, "StatusEquationError"s )( s );
 }
 
-void TGMSStatusStream::StatusVariableError( int num, const std::string &s )
+void TGMSStatusStream::StatusVariableError( const int num, const std::string &s ) const
 {
-   commonStatusFunc( "6 " + rtl::sysutils_p3::IntToStr( num ) + " "s, "StatusVariableError" )( s );
+   commonStatusFunc( "6 " + IntToStr( num ) + " "s, "StatusVariableError" )( s );
 }
 
-void TGMSStatusStream::StatusJacobianError( int num1, int num2, const std::string &s )
+void TGMSStatusStream::StatusJacobianError( const int num1, const int num2, const std::string &s ) const
 {
    try
    {
-      writeln_gf( ""s + Feditsymbol + "7 " + rtl::sysutils_p3::IntToStr( num1 ) + " " + rtl::sysutils_p3::IntToStr( num2 ) + " " + s );
+      writeln_gf( ""s + Feditsymbol + "7 "s + IntToStr( num1 ) + ' ' + IntToStr( num2 ) + ' ' + s );
    }
    catch( std::exception &e )
    {
@@ -1482,7 +1480,7 @@ void TGMSStatusStream::StatusJacobianError( int num1, int num2, const std::strin
    }
 }
 
-std::function<void( const std::string & )> TGMSStatusStream::commonStatusFunc( const std::string &s1, const std::string &s2 )
+std::function<void( const std::string & )> TGMSStatusStream::commonStatusFunc( const std::string &s1, const std::string &s2 ) const
 {
    return [&]( const std::string &s3 ) {
       try
@@ -1496,7 +1494,7 @@ std::function<void( const std::string & )> TGMSStatusStream::commonStatusFunc( c
    };
 }
 
-bool opentextmsg( FILE *&f, const std::string &fn, gdlib::gmsgen::tfileaction fa, std::string &msg )
+bool opentextmsg( FILE *&f, const std::string &fn, const tfileaction fa, std::string &msg )
 {
    const char *mode {};
    // shouldn't these be binary mode on Windows to avoid weird \r\n behavior?
@@ -1515,14 +1513,14 @@ bool opentextmsg( FILE *&f, const std::string &fn, gdlib::gmsgen::tfileaction fa
          throw std::runtime_error( "Unknown file action provided!"s );
    }
    f = fopen( fn.c_str(), mode );
-   int ioRes { f ? 0 : errno };
+   const int ioRes { f ? 0 : errno };
    msg = !ioRes ? ""s : SysErrorMessage( ioRes );
    return !ioRes;
 }
 
 static void initialization()
 {
-   bool isntUnix = rtl::p3platform::OSFileType() != rtl::p3platform::tOSFileType::OSFileUNIX;
+   const bool isntUnix = rtl::p3platform::OSFileType() != rtl::p3platform::tOSFileType::OSFileUNIX;
    termString = isntUnix ? "\r\n"s : "\n"s;
 }
 

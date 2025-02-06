@@ -5,7 +5,7 @@
 #include <array>
 #include <ctime>
 
-#include "common.h"
+#include "common.hpp"
 // Global constants
 #include "../../../generated/gclgms.h"
 
@@ -188,8 +188,13 @@ void AuditLine_t::setAuditLine()
    GDL_BLD_COD = "DAC";
 #endif
 #elif defined( __linux__ )
+#if !defined( __aarch64__ )
    GDL_REL_PLT = "x86 64bit/Linux";
    GDL_BLD_COD = "LEG";
+#else
+   GDL_REL_PLT = "arm 64bit/Linux";
+   GDL_BLD_COD = "LAG";
+#endif
 #endif
 
 #if defined( __has_include )

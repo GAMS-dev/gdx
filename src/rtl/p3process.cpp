@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,15 @@
  * SOFTWARE.
  */
 
-#include "p3process.h"
-#include "p3platform.h"
+#include "p3process.hpp"
+#include "p3platform.hpp"
 #include <stdexcept>
 #include <iostream>
 #include <filesystem>
 #include <cassert>
 #include <cstring>
-#include "../gdlib/utils.h"
-#include "sysutils_p3.h"
+#include "../gdlib/utils.hpp"
+#include "sysutils_p3.hpp"
 
 #if defined( _WIN32 ) || defined( _WIN64 )
 #include <Windows.h>
@@ -789,8 +789,6 @@ static bool killProcGroupUnix( pid_t p, TKillHow how )
    return result;
 } /* killProcGroupUnix */
 
-#endif// _WIN32
-
 static void uglyGmsUnzipHack( std::list<std::string> &args )
 {
    // AS: Very ugly hack to circumvent gmsunzip issue in gamslib/dplytest on macOS
@@ -840,6 +838,7 @@ static int ForkWithSplitArgs( const std::function<int( int, char *const[], int *
    argv.back() = nullptr;
    return forkExecFunc( argc, argv.data(), &ProgRC );
 }
+#endif
 
 int P3ExecP( const std::string &CmdPtr, int &ProgRC )
 {

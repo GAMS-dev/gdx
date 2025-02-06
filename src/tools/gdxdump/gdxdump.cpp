@@ -1,8 +1,8 @@
 /**
  * GAMS - General Algebraic Modeling System C++ API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,12 +31,12 @@
 #include <cstring>
 #include <string_view>
 
-#include "gdxdump.h"
-#include "../library/short_string.h"
-#include "../../gdlib/utils.h"
-#include "../../gdlib/strutilx.h"
-#include "../../gdlib/dblutil.h"
-#include "../../rtl/sysutils_p3.h"
+#include "gdxdump.hpp"
+#include "../library/short_string.hpp"
+#include "../../gdlib/utils.hpp"
+#include "../../gdlib/strutilx.hpp"
+#include "../../gdlib/dblutil.hpp"
+#include "../../rtl/sysutils_p3.hpp"
 
 // Global constants
 #include "../../../generated/gclgms.h"

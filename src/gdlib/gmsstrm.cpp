@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "gmsstrm.h"
+#include "gmsstrm.hpp"
 
 #include <algorithm>             // for min, max
 #include <cassert>               // for assert
@@ -36,11 +36,11 @@
 #include <string>                // for basic_string, string, operator+, ope...
 #include <utility>               // for move
 
-#include "../rtl/sysutils_p3.h"  // for IntToStr
+#include "../rtl/sysutils_p3.hpp"  // for IntToStr
 #include "gclgms.h"              // for GMS_SV_ACR, GMS_SV_UNDEF, GMS_SV_EPS
-#include "global/delphitypes.h"  // for Bounded
-#include "rtl/p3utils.h"         // for Tp3FileOpenAction, p3FileRead, p3Fil...
-#include "utils.h"               // for in, ord, checkBOMOffset, constructStr
+#include "global/delphitypes.hpp"// for Bounded
+#include "rtl/p3utils.hpp"         // for Tp3FileOpenAction, p3FileRead, p3Fil...
+#include "utils.hpp"               // for in, ord, checkBOMOffset, constructStr
 
 // only supported by MSVC so far :(
 //#include <format>
@@ -50,7 +50,7 @@ using namespace rtl::p3utils;
 using utils::ui8, utils::ui16, utils::ui32;
 
 #if defined(__IN_CPPMEX__)
-#include "../gdlib/statlib.h"
+#include "../gdlib/statlib.hpp"
 #endif
 
 // ==============================================================================================================

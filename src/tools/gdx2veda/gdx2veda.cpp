@@ -31,9 +31,9 @@
 #include <cstring>
 #include <cassert>
 
-#include "gdx2veda.h"
-#include "../../gdlib/strutilx.h"
-#include "../../gdlib/utils.h"
+#include "gdx2veda.hpp"
+#include "../../gdlib/strutilx.hpp"
+#include "../../gdlib/utils.hpp"
 
 namespace gdx2veda
 {

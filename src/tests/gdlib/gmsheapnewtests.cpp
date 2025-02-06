@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
 *
-* Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
-* Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+* Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+* Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -26,8 +26,8 @@
 #include <array>                   // for array
 #include <cstring>                 // for memcpy
 #include <string>                  // for operator""s, string_literals
-#include "gdlib/gmsheapnew.h"// for THeapMgr, gmsheapnew
-#include "../doctest.h"            // for ResultBuilder, TestCase, REQUIRE_EQ, TEST...
+#include "gdlib/gmsheapnew.hpp"// for THeapMgr, gmsheapnew
+#include "../doctest.hpp"            // for ResultBuilder, TestCase, REQUIRE_EQ, TEST...
 
 using namespace std::literals::string_literals;
 using namespace gdlib::gmsheapnew;
@@ -51,7 +51,7 @@ TEST_CASE( "Test simple usage of the custom heap" )
    thm.XFreeMem( buf, l );
    constexpr int n { 10000 };
    std::array<void *, n> ptrs {};
-   std::array<uint8_t, 20> buf2 {};
+   std::array<uint8_t, 64> buf2 {};
    const auto ref { reinterpret_cast<int64_t *>( buf2.data() ) };
    for( int i {}; i < n; i++ )
    {

@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,26 +23,28 @@
  * SOFTWARE.
  */
 
-#include "math_p3.h"
+#include "math_p3.hpp"
 #include <cstdlib>              // for abs
 #include <cmath>                // for log1p
-#include "../global/modhead.h"  // for STUBWARN
+#include "../global/modhead.hpp"  // for STUBWARN
 
 namespace rtl::math_p3
 {
 
-double IntPower( double X, int I )
+double IntPower( double X, const int I )
 {
    double res { 1.0 };
-   for( int Y { std::abs( I ) }; Y > 0; Y--, res *= X )
+   for( int Y { std::abs( I ) }; Y > 0; Y-- )
    {
       while( !( Y % 2 ) )
       {
          Y >>= 1;
          X *= X;
       }
+      res *= X;
    }
-   if( I < 0 ) res = 1.0 / res;
+   if( I < 0 )
+      res = 1.0 / res;
    return res;
 }
 

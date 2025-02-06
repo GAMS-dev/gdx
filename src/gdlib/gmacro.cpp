@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,11 +27,11 @@
 #include <cstring>
 #include <utility>
 
-#include "../rtl/sysutils_p3.h"
+#include "../rtl/sysutils_p3.hpp"
 
-#include "gmacro.h"
-#include "utils.h"
-#include "gmsstrm.h"
+#include "gmacro.hpp"
+#include "utils.hpp"
+#include "gmsstrm.hpp"
 
 using namespace std::literals::string_literals;
 
@@ -331,6 +331,8 @@ bool TGAMSMacro::Define( const std::string &p, int &LUsed )
    }
    Body.clear();
    LUsed = static_cast<int>( p.length() );
+   // fake trailing blank
+   Rdr.pr.push_back( ' ' );
    return AddToBody( Rdr.pr );
 }
 
@@ -342,8 +344,9 @@ bool TGAMSMacro::AddToBody( const std::string &p )
 
    TPWriter Wrt;
    Wrt.StoreStr( Body );
-   const auto L = static_cast<int>( p.length() );
-   const TPReader Rdr { p };
+   //no trailing blank
+   const auto L = static_cast<int>( p.length() ) - 1;
+   const TPReader Rdr { p.substr(0, L) };
    const bool res { Rdr.ChFromEnd( 0 ) == '\\' };
    if( !res ) Wrt.StoreTrimStr( p );
    else

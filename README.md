@@ -113,7 +113,7 @@ For an easier to use object-oriented interface GAMS offers wrappers for multiple
 
 Even more abstraction is offered by the GAMS Transfer libraries for
 [Python](https://www.gams.com/latest/docs/API_PY_GAMSTRANSFER.html) and
-[R](https://www.gams.com/latest/docs/API_R_GAMSTRANSFER.html).
+[R](https://transfer-r.readthedocs.io/en/stable).
 
 ### Building GDX from source
 

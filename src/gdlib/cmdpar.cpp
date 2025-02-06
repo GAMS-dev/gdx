@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,9 +24,9 @@
  */
 
 
-#include "cmdpar.h"
-#include "utils.h"
-#include "rtl/sysutils_p3.h"
+#include "cmdpar.hpp"
+#include "utils.hpp"
+#include "rtl/sysutils_p3.hpp"
 
 #include <cassert>
 #include <optional>

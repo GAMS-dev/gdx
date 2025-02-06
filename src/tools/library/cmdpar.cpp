@@ -1,10 +1,10 @@
 #include <fstream>
 // #include <iostream>
 
-#include "cmdpar.h"
-#include "common.h"
-#include "../../gdlib/utils.h"
-#include "../../gdlib/strutilx.h"
+#include "cmdpar.hpp"
+#include "common.hpp"
+#include "../../gdlib/utils.hpp"
+#include "../../gdlib/strutilx.hpp"
 
 namespace library::cmdpar
 {

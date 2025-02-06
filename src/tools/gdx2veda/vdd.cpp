@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "vdd.h"
+#include "vdd.hpp"
 
 namespace gdx2veda
 {

@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,11 +23,11 @@
  * SOFTWARE.
  */
 
-#include "gdlib/gmsstrm.h" // for TMiBufferedStream, TXStream, File...
-#include "rtl/sysutils_p3.h" // for IntToStr
+#include "gdlib/gmsstrm.hpp" // for TMiBufferedStream, TXStream, File...
+#include "rtl/sysutils_p3.hpp" // for IntToStr
 
-#include "gdx.h" // for TGXFileObj, TGXFileObj::stat_write
-#include "gdlib/utils.h" // for in, debugStream, arrayWithValue
+#include "gdx.hpp"      // for TGXFileObj, TGXFileObj::stat_write
+#include "gdlib/utils.hpp" // for in, debugStream, arrayWithValue
 #include <algorithm>// for fill_n, max, fill, sort
 #include <cassert>  // for assert
 #include <cmath>    // for round, isinf, isnan, isnormal, abs
@@ -1448,7 +1448,7 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
          TgdxIntlValTyp SV { static_cast<TgdxIntlValTyp>( BSV ) };
          // Delphi doesn't bound check here and just writes adjacent junk
          // but we at least consistently write 0
-         if (SV < 0 || SV >= vm_count) {
+         if (SV >= vm_count) {
             AVals[DV] = 0.0;
             if(verboseTrace && TraceLevel >= TraceLevels::trl_errors)
                 debugStream << "WARNING: Special value (" << BSV << ") byte out of range {0,...,10}!" << std::endl;
@@ -2473,7 +2473,7 @@ int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
             res = false;
          }
       }
-      int SyNr;
+      int SyNr {};
       if( DomSy > 0 )
       {
          SyNr = DomSy;

@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,11 +25,11 @@
 
 
 
-#include "statlib.h"
+#include "statlib.hpp"
 #include <string>
 #include <memory>
-#include "gmsgen.h"
-#include "statlibobj.h"
+#include "gmsgen.hpp"
+#include "statlibobj.hpp"
 #include "global/unit.h"
 
 using namespace gdlib::gmsgen;
@@ -79,6 +79,12 @@ void gstatMessage( const std::string &s )
 {
    if( GMSLogObj )
       GMSLogObj->LogMessage( s );
+}
+
+
+bool gstatReady()
+{
+   return GMSLogObj && GMSLogObj->getLogEnabled();
 }
 
 void dumpfilename( const std::string &prfx, const bool enabled, const std::string &what, const std::string &gs, const tfileaction fa, const int ioResOrNeg )

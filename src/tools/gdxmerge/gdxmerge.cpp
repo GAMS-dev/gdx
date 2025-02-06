@@ -1,8 +1,8 @@
 /**
  * GAMS - General Algebraic Modeling System C++ API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,11 +30,11 @@
 #include <iostream>
 #include <cmath>
 
-#include "gdxmerge.h"
-#include "../library/cmdpar.h"
-#include "../../gdlib/utils.h"
-#include "../../gdlib/strutilx.h"
-#include "../../rtl/sysutils_p3.h"
+#include "gdxmerge.hpp"
+#include "../library/cmdpar.hpp"
+#include "../../gdlib/utils.hpp"
+#include "../../gdlib/strutilx.hpp"
+#include "../../rtl/sysutils_p3.hpp"
 
 // TODO: Disable at some point?
 #define OLD_MEMORY_CHECK

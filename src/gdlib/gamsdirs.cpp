@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,9 +26,9 @@
 
 #include <algorithm>
 
-#include "gamsdirs.h"
-#include "../rtl/p3platform.h"
-#include "../rtl/sysutils_p3.h"
+#include "gamsdirs.hpp"
+#include "../rtl/p3platform.hpp"
+#include "../rtl/sysutils_p3.hpp"
 
 using namespace rtl::p3utils;
 using namespace rtl::p3platform;

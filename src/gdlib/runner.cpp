@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,10 @@
  */
 
 
-#include "runner.h"
-#include "utils.h"
-#include "../rtl/p3process.h"
-#include "../rtl/sysutils_p3.h"
+#include "runner.hpp"
+#include "utils.hpp"
+#include "../rtl/p3process.hpp"
+#include "../rtl/sysutils_p3.hpp"
 
 using namespace std::literals::string_literals;
 
