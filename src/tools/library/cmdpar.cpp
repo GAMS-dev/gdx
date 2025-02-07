@@ -9,13 +9,13 @@
 namespace library::cmdpar
 {
 
-void TCmdParams::ClearParams()
+void CmdParams_t::ClearParams()
 {
    FKeyList.clear();
    FParList.clear();
 }
 
-void TCmdParams::AddVS( int v, const std::string &s )
+void CmdParams_t::AddVS( int v, const std::string &s )
 {
    for( const auto &pair: FKeyList )
       if( gdlib::strutilx::UpperCase( pair.first ) == gdlib::strutilx::UpperCase( s ) )
@@ -24,7 +24,7 @@ void TCmdParams::AddVS( int v, const std::string &s )
 }
 
 // Search from the end so the LAST value will be used
-int TCmdParams::FindKeyV( int V )
+int CmdParams_t::FindKeyV( int V )
 {
    for( int N { GetParamCount() - 1 }; N >= 0; N-- )
       if( GetParams( N ).Key == V )
@@ -42,7 +42,7 @@ int TCmdParams::FindKeyV( int V )
 //   this function will build the list of keywords and parameters.
 //   A string that starts with '@' is interpreted as the name of
 //   a file with additional parameters.
-bool TCmdParams::CrackCommandLine( const int ParamCount, const char *ParamStr[] )
+bool CmdParams_t::CrackCommandLine( const int ParamCount, const char *ParamStr[] )
 {
    return AddParameters( 0, {}, ParamCount, ParamStr );
 }
@@ -56,7 +56,7 @@ bool TCmdParams::CrackCommandLine( const int ParamCount, const char *ParamStr[] 
 //   This function is used to add more parameters to the parameter list
 //   that could not be processed while reading the command line for the
 //   first time.
-bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, const int ParamCount, const char *ParamStr[] )
+bool CmdParams_t::AddParameters( const int AInsP, const std::string &CmdLine, const int ParamCount, const char *ParamStr[] )
 {
    std::string FParams;
    int xr, maxr;
@@ -288,7 +288,7 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
       const int kw = NextKey( ks );
       if( kw == static_cast<int>( CmdParamStatus::ke_empty ) )
          break;
-      FParList.insert( { Insp, TParamRec { kw, ks } } );
+      FParList.insert( { Insp, ParamRec_t { kw, ks } } );
       Insp++;
    } while( true );
 
@@ -298,21 +298,21 @@ bool TCmdParams::AddParameters( const int AInsP, const std::string &CmdLine, con
    return result;
 }
 
-void TCmdParams::AddKeyWord( int v, const std::string &s )
+void CmdParams_t::AddKeyWord( int v, const std::string &s )
 {
    library::assertWithMessage( v >= 0 && v < static_cast<int>( CmdParamStatus::kk_big ),
                                "Bad value for AddKeyw = " + std::to_string( v ) );
    AddVS( v, utils::trim( s ) );
 }
 
-void TCmdParams::AddParam( int v, const std::string &s )
+void CmdParams_t::AddParam( int v, const std::string &s )
 {
    library::assertWithMessage( v >= 0 && v < static_cast<int>( CmdParamStatus::kk_big ),
                                "Bad value for AddKeyw = " + std::to_string( v ) );
    AddVS( v + static_cast<int>( CmdParamStatus::kk_big ), utils::trim( s ) );
 }
 
-bool TCmdParams::HasParam( int v, library::short_string &s )
+bool CmdParams_t::HasParam( int v, library::ShortString_t &s )
 {
    int N = FindKeyV( v );
    bool result = N >= 0;
@@ -329,25 +329,25 @@ bool TCmdParams::HasParam( int v, library::short_string &s )
 //   V: Key number
 // Returns:
 //   True if keyword was specified; false otherwise
-bool TCmdParams::HasKey( int v )
+bool CmdParams_t::HasKey( int v )
 {
    return FindKeyV( v ) >= 0;
 }
 
-TParamRec TCmdParams::GetParams( int n )
+ParamRec_t CmdParams_t::GetParams( int n )
 {
    if( n >= 0 && n < static_cast<int>( FParList.size() ) )
       return FParList[n];
    else
-      return TParamRec { static_cast<int>( CmdParamStatus::ke_empty ), {} };
+      return ParamRec_t { static_cast<int>( CmdParamStatus::ke_empty ), {} };
 }
 
-int TCmdParams::GetParamCount() const
+int CmdParams_t::GetParamCount() const
 {
    return static_cast<int>( FParList.size() );
 }
 
-std::string TCmdParams::GetParamText( int key ) const
+std::string CmdParams_t::GetParamText( int key ) const
 {
    for( const auto &pair: FKeyList )
       if( pair.second == key )

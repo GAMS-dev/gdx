@@ -706,7 +706,7 @@ class TestGdxMerge(unittest.TestCase):
                         f'Output={self.FILE_PATHS['merge_file']}'
                     ]))
                 )
-                temporary_file.seek(0)
+                temporary_file.flush()
                 output = self.run_gdxmerge([f'@{temporary_file.name}'])
                 self.check_output(
                     output,

@@ -1,1 +1,0 @@
-gamsapi[transfer]==47.6.0
