@@ -134,7 +134,7 @@ std::vector<std::string> splitString( const std::string &string, const char deli
    std::istringstream iss( string );
    std::string token;
    while( getline( iss, token, delimiter ) )
-      tokens.push_back( token );
+      tokens.emplace_back( token );
    return tokens;
 }
 
