@@ -223,6 +223,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       gdxStrIndex_t StrKeys {};
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
+
       gdxValues_t Vals2 {};
 
       RegisterDiffUELs();
@@ -263,6 +264,7 @@ void CompareSy( const int Sy1, const int Sy2 )
       gdxStrIndex_t StrKeys {};
       gdxStrIndexPtrs_t StrKeysPtrs;
       GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
+
       gdxValues_t Vals {};
       int iNode;
 
@@ -512,9 +514,11 @@ void CompareSy( const int Sy1, const int Sy2 )
    gdxUelIndex_t Keys1 {}, Keys2 {};
    gdxValues_t Vals1 {}, Vals2 {};
    library::ShortString_t stxt;
+
    gdxStrIndex_t DomSy1 {};
    gdxStrIndexPtrs_t DomSy1Ptrs;
    GDXSTRINDEXPTRS_INIT( DomSy1, DomSy1Ptrs );
+
    gdxStrIndex_t DomSy2 {};
    gdxStrIndexPtrs_t DomSy2Ptrs;
    GDXSTRINDEXPTRS_INIT( DomSy2, DomSy2Ptrs );
@@ -747,9 +751,11 @@ int main( const int argc, const char *argv[] )
    library::ShortString_t S, ID, InFile1, InFile2, DiffFileName;
    std::map<library::ShortString_t, int> IDTable;
    bool UsingIDE, RenameOK;
+
    gdxStrIndex_t StrKeys {};
    gdxStrIndexPtrs_t StrKeysPtrs;
    GDXSTRINDEXPTRS_INIT( StrKeys, StrKeysPtrs );
+
    gdxValues_t StrVals {};
 
    library::AuditLine_t AuditLine { "GDXDIFF" };

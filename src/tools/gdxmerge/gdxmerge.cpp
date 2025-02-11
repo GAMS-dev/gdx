@@ -173,9 +173,11 @@ void SymbolList_t::AddPGXFile( const int FNr, const ProcessPass_t Pass )
    int NrSy, NrUel, N, Dim, SyITyp, SyIndx, NrRecs, FDim, D, INode, SySubTyp, DummyCount, ErrNr, RecLen;
    gdxSyType SyTyp;
    GAMSSymbol_t *SyObj;
+
    gdxStrIndex_t IndxS {};
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
+
    gdxUelIndex_t IndxI {};
    gdxValues_t Vals {};
    library::ShortString_t Txt, SyText, ErrMsg, FileId;
@@ -309,9 +311,11 @@ bool SymbolList_t::CollectBigOne( const int SyNr )
    gdxHandle_t PGX;
    int N, NrRecs, FDim, D, INode, ErrNr, FNr;
    GAMSSymbol_t *SyObj;
+
    gdxStrIndex_t IndxS {};
    gdxStrIndexPtrs_t IndxSPtrs;
    GDXSTRINDEXPTRS_INIT( IndxS, IndxSPtrs );
+
    gdxUelIndex_t IndxI {};
    gdxValues_t Vals {};
    library::ShortString_t Txt, ErrMsg, FileName, FileId;
@@ -459,9 +463,11 @@ void SymbolList_t::WriteNameList()
    const std::string BASE_NAME { "Merged_set_" };
    library::ShortString_t SetName;
    int N, SyNr, TextNr;
+
    gdxStrIndex_t AIndex {};
    gdxStrIndexPtrs_t AIndexPtrs;
    GDXSTRINDEXPTRS_INIT( AIndex, AIndexPtrs );
+
    gdxValues_t AVals {};
 
    // Find unique name for the merged set
