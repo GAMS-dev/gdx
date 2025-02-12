@@ -408,9 +408,8 @@ test-gdxtools-wei:
     - $gmsdirname = Get-Content mygmsdir.tmp -Raw
     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
     - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
-    # - $env:GAMSDIR = "$GAMS_PATH;$GAMS_PATH\gbin"
     - python -m venv .\venv
-    - .\venv\bin\Activate.ps1
+    - .\venv\Scripts\Activate.ps1
     - python -m pip install --upgrade pip
     - python -m pip install -r .\src\tools\tests\environment\requirements.txt
     - python .\src\tools\tests\main.py
