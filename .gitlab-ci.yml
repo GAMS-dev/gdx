@@ -348,7 +348,7 @@ test-gdxtools-leg:
     - python3 -m venv ./venv
     - source ./venv/bin/activate
     - python3 -m pip install --upgrade pip
-    - python3 -m pip install -r ./requirements.txt
+    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
     - python3 ./src/tools/tests/main.py
 
 test-gdxtools-lag:
@@ -366,7 +366,7 @@ test-gdxtools-lag:
     - python3 -m venv ./venv
     - source ./venv/bin/activate
     - python3 -m pip install --upgrade pip
-    - python3 -m pip install -r ./requirements.txt
+    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
     - python3 ./src/tools/tests/main.py
 
 
@@ -382,7 +382,7 @@ test-gdxtools-deg:
     - python3 -m venv ./venv
     - source ./venv/bin/activate
     - python3 -m pip install --upgrade pip
-    - python3 -m pip install -r ./requirements.txt
+    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
     - python3 ./src/tools/tests/main.py
 
 test-gdxtools-dac:
@@ -397,7 +397,7 @@ test-gdxtools-dac:
     - python3 -m venv ./venv
     - source ./venv/bin/activate
     - python3 -m pip install --upgrade pip
-    - python3 -m pip install -r ./requirements.txt
+    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
     - python3 ./src/tools/tests/main.py
 
 test-gdxtools-wei:
@@ -416,7 +416,7 @@ test-gdxtools-wei:
     - python3 -m venv .\venv
     - .\venv\bin\Activate.ps1
     - python3 -m pip install --upgrade pip
-    - python3 -m pip install -r .\requirements.txt
+    - python3 -m pip install -r .\src\tools\tests\environment\requirements.txt
     - python3 .\src\tools\tests\main.py
 
 #=======================================================================================================================
