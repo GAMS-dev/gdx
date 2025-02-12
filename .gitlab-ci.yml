@@ -345,11 +345,11 @@ test-gdxtools-leg:
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
     # - PATH="$GAMS_PATH:$PATH"
-    - python3 -m venv ./venv
+    - python -m venv ./venv
     - source ./venv/bin/activate
-    - python3 -m pip install --upgrade pip
-    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - python3 ./src/tools/tests/main.py
+    - python -m pip install --upgrade pip
+    - python -m pip install -r ./src/tools/tests/environment/requirements.txt
+    - python ./src/tools/tests/main.py
 
 test-gdxtools-lag:
   stage: test-gdxtools
@@ -363,11 +363,11 @@ test-gdxtools-lag:
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
     # - PATH="$GAMS_PATH:$PATH"
-    - python3 -m venv ./venv
+    - python -m venv ./venv
     - source ./venv/bin/activate
-    - python3 -m pip install --upgrade pip
-    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - python3 ./src/tools/tests/main.py
+    - python -m pip install --upgrade pip
+    - python -m pip install -r ./src/tools/tests/environment/requirements.txt
+    - python ./src/tools/tests/main.py
 
 
 test-gdxtools-deg:
@@ -413,11 +413,11 @@ test-gdxtools-wei:
     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
     - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
     # - $env:GAMSDIR = "$GAMS_PATH;$GAMS_PATH\gbin"
-    - python3 -m venv .\venv
+    - python -m venv .\venv
     - .\venv\bin\Activate.ps1
-    - python3 -m pip install --upgrade pip
-    - python3 -m pip install -r .\src\tools\tests\environment\requirements.txt
-    - python3 .\src\tools\tests\main.py
+    - python -m pip install --upgrade pip
+    - python -m pip install -r .\src\tools\tests\environment\requirements.txt
+    - python .\src\tools\tests\main.py
 
 #=======================================================================================================================
 
