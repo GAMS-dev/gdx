@@ -344,11 +344,11 @@ test-gdxtools-leg:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - python -m venv ./venv
+    - python3 -m venv ./venv
     - source ./venv/bin/activate
-    - python -m pip install --upgrade pip
-    - python -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - PATH="$GAMS_PATH:$PATH" python ./src/tools/tests/main.py
+    - python3 -m pip install --upgrade pip
+    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
+    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
 
 test-gdxtools-lag:
   stage: test-gdxtools
@@ -361,11 +361,11 @@ test-gdxtools-lag:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - python -m venv ./venv
+    - python3 -m venv ./venv
     - source ./venv/bin/activate
-    - python -m pip install --upgrade pip
-    - python -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - PATH="$GAMS_PATH:$PATH" python ./src/tools/tests/main.py
+    - python3 -m pip install --upgrade pip
+    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
+    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
 
 
 test-gdxtools-deg:
