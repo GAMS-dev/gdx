@@ -1,9 +1,10 @@
 import gams.transfer as gt
+from os import environ
 import pandas as pd
 
 
 def create_small_example_changed_data(file_path: str) -> None:
-    m = gt.Container()
+    m = gt.Container(system_directory=environ.get('GAMS_SYSTEM_DIRECTORY'))
 
     # create the sets i, j
     i = gt.Set(m, 'i', records=['seattle', 'san-diego'], description='supply')

@@ -107,7 +107,10 @@ class TestGdxMerge(unittest.TestCase):
         symbols: dict[str, list[list[str | float]]],
         file_names: list[str]
     ) -> None:
-        container = gt.Container(load_from=self.FILE_PATHS['merge_file'])
+        container = gt.Container(
+            system_directory=os.environ.get('GAMS_SYSTEM_DIRECTORY'),
+            load_from=self.FILE_PATHS['merge_file']
+        )
         self.check_gdx_file_symbols(container, list(symbols.keys()))
         for symbol_name in symbols:
             self.check_gdx_file_values(container, symbol_name, symbols[symbol_name])

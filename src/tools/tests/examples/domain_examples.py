@@ -1,8 +1,9 @@
 import gams.transfer as gt
+from os import environ
 
 
 def create_domain_example_1(file_path: str) -> None:
-    m = gt.Container()
+    m = gt.Container(system_directory=environ.get('GAMS_SYSTEM_DIRECTORY'))
 
     i = gt.Set(m, 'i', records=['i1', 'i2'])
     gt.Variable(m, 'a', domain=[i])
@@ -11,7 +12,7 @@ def create_domain_example_1(file_path: str) -> None:
 
 
 def create_domain_example_2(file_path: str) -> None:
-    m = gt.Container()
+    m = gt.Container(system_directory=environ.get('GAMS_SYSTEM_DIRECTORY'))
 
     j = gt.Set(m, 'j', records=['i1', 'i2'])
     gt.Variable(m, 'a', domain=[j])

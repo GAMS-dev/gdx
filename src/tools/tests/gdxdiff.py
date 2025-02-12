@@ -127,7 +127,10 @@ class TestGdxDiff(unittest.TestCase):
         self,
         symbols: dict[str, list[list[str | float]]]
     ) -> None:
-        container = gt.Container(load_from=self.FILE_PATHS['diff_file'])
+        container = gt.Container(
+            system_directory=os.environ.get('GAMS_SYSTEM_DIRECTORY'),
+            load_from=self.FILE_PATHS['diff_file']
+        )
         self.check_gdx_file_symbols(container, list(symbols.keys()))
         for symbol_name in symbols:
             self.check_gdx_file_values(container, symbol_name, symbols[symbol_name])

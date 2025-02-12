@@ -1,8 +1,9 @@
 import gams.transfer as gt
+from os import environ
 
 
 def create_description_example_1(file_path: str) -> None:
-    m = gt.Container()
+    m = gt.Container(system_directory=environ.get('GAMS_SYSTEM_DIRECTORY'))
 
     gt.Set(m, 'i', records=[('seattle', 'text 1'), ('san-diego', 'text 2')])
 
@@ -10,7 +11,7 @@ def create_description_example_1(file_path: str) -> None:
 
 
 def create_description_example_2(file_path: str) -> None:
-    m = gt.Container()
+    m = gt.Container(system_directory=environ.get('GAMS_SYSTEM_DIRECTORY'))
 
     gt.Set(m, 'i', records=[('seattle', 'text 3'), ('san-diego', 'text 4')])
 
