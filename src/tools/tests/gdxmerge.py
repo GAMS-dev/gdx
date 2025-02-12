@@ -119,7 +119,10 @@ class TestGdxMerge(unittest.TestCase):
         first = symbol.records.values.tolist()
         second: list[list[str]] = []
         for i in range(len(file_names)):
-            second.append([file_names[i], f'{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[i]}.gdx'])
+            second.append([
+                file_names[i],
+                f'{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[i]}.gdx'
+            ])
         self.assertEqual(len(first), len(file_names))
         for item in first:
             self.assertEqual(len(item), 2)
