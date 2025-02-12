@@ -412,7 +412,7 @@ test-gdxtools-wei:
     - python -m pip install --upgrade pip
     - python -m pip install -r .\src\tools\tests\environment\requirements.txt
     - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
-    - $env:GAMSDIR = "$GAMS_PATH;$GAMS_PATH\gbin"
+    - $env:GAMS_SYSTEM_DIRECTORY = "$GAMS_PATH;$GAMS_PATH\gbin"
     - python .\src\tools\tests\main.py
 
 #=======================================================================================================================
