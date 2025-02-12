@@ -344,12 +344,11 @@ test-gdxtools-leg:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    # - PATH="$GAMS_PATH:$PATH"
     - python -m venv ./venv
     - source ./venv/bin/activate
     - python -m pip install --upgrade pip
     - python -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - python ./src/tools/tests/main.py
+    - PATH="$GAMS_PATH:$PATH" python ./src/tools/tests/main.py
 
 test-gdxtools-lag:
   stage: test-gdxtools
@@ -362,12 +361,11 @@ test-gdxtools-lag:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    # - PATH="$GAMS_PATH:$PATH"
     - python -m venv ./venv
     - source ./venv/bin/activate
     - python -m pip install --upgrade pip
     - python -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - python ./src/tools/tests/main.py
+    - PATH="$GAMS_PATH:$PATH" python ./src/tools/tests/main.py
 
 
 test-gdxtools-deg:
@@ -378,12 +376,11 @@ test-gdxtools-deg:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-deg ]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
-    # - PATH="$GAMS_PATH:$PATH"
     - python3 -m venv ./venv
     - source ./venv/bin/activate
     - python3 -m pip install --upgrade pip
     - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - python3 ./src/tools/tests/main.py
+    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
 
 test-gdxtools-dac:
   stage: test-gdxtools
@@ -393,12 +390,11 @@ test-gdxtools-dac:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-dac ]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
-    # - PATH="$GAMS_PATH:$PATH"
     - python3 -m venv ./venv
     - source ./venv/bin/activate
     - python3 -m pip install --upgrade pip
     - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - python3 ./src/tools/tests/main.py
+    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
 
 test-gdxtools-wei:
   stage: test-gdxtools
