@@ -37,6 +37,9 @@
 #if !defined(_WIN32)
 #include <sys/errno.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#else
+#include <direct.h>
 #endif
 
 namespace rtl::p3io
@@ -472,5 +475,18 @@ void P3WriteFS(P3File *fil, const char *s)
       std::putc(s[i],f);
 }
 #endif
+
+/**
+ * Create a directory
+ * @param s name of the directory
+ * @return true on success and false on failure
+ */
+bool mkdir(const std::string& s) {
+#if defined(_WIN32)
+   return !_mkdir( s.c_str() );
+#else
+   return !::mkdir( s.c_str(), 0777 );
+#endif
+}
 
 }// namespace rtl::p3io

@@ -84,4 +84,6 @@ void P3FileOpn( P3File *fil, uint8_t status, P3FileType type, uint32_t block_siz
 void P3FileOpn(P3File *fil, const char *s);
 #endif
 
+bool mkdir( const std::string &s );
+
 }// namespace rtl::p3io
