@@ -159,6 +159,8 @@ void Sleep( uint32_t milliseconds );
 std::string IntToStr(int64_t N);
 void IntToStr(int64_t N, char *res, size_t &len );
 
+std::string FloatToStr( double V );
+
 double FileDateToDateTime( int fd );
 int DateTimeToFileDate( double dt );
 

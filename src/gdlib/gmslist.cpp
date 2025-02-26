@@ -978,6 +978,18 @@ void TGmsList::SetLinesPerPage( int n )
    if( FLinesOnPage >= FLinesPerPage ) FDoPageHeader = true;
 }
 
+void TGmsList::SetLeftMargin( int n )
+{
+   if( n < 1 ) n = 1;
+
+   if( n + 20 < FRightMargin )
+   {
+      FLeftMargin = n - 1;
+      if( LineIsEmpty() )
+         CalcCharsLeft();
+   }
+}
+
 void TGmsList::SetRightMargin( int n )
 {
    if( FLeftMargin + 20 < n )

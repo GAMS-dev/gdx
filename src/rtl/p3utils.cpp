@@ -41,6 +41,7 @@
 #include "math_p3.hpp"               // for IntPower
 #include "p3platform.hpp"            // for tOSPlatform, OSPlatform, OSFileType
 #include "sysutils_p3.hpp"           // for ExtractFilePath, ExcludeTrailingPa...
+#include "p3io.hpp"
 
 #if defined(_WIN32)
    // Windows
@@ -78,6 +79,7 @@
    #include <unistd.h>
    #include <poll.h>
 #endif
+#include "dtoaLoc.h"
 
 using namespace rtl::sysutils_p3;
 using namespace rtl::p3platform;
@@ -844,7 +846,7 @@ double RealTrunc( double x )
    return static_cast<int>( x );
 }
 
-double ReadRound( double x )
+double RealRound( double x )
 {
    return static_cast<int>( x + 0.5 * ( x >= 0 ? 1.0 : -1.0 ) );
 }
@@ -868,10 +870,15 @@ bool delphiGetDecDigits( double y, int mode, int nDigits, std::string &digits, i
 
 bool p3GetDecDigits( double y, int mode, int nDigits, std::string &digits, int &decPos, int &minusCnt )
 {
-   // ...
-   // TODO: Implement me!
-   STUBWARN();
-   return false;
+   std::array<char, 256> buf;
+   char *pend;
+   auto p = (char *) dtoaLoc( y, mode, nDigits, (char *) buf.data(), buf.size()*sizeof(char), &decPos, &minusCnt, (char **) &pend );
+   if( !p )
+      return false;
+   int totdig = pend - p;
+   minusCnt = !!( minusCnt );// 1 if negative, 0 otherwise
+   digits.assign( p );
+   return true;
 }
 
 std::string p3FloatToEfmt( double x, int width, int decimals )
@@ -908,7 +915,7 @@ T myMin( T a, T b )
 }
 
 // FIXME: AS: This seems slow.
-std::string FloatToE( double y, int decimals )
+std::string FloatToE( const double y, int decimals )
 {
    auto myRoundTo = []( const double x, const int i ) -> double {
       const double zeroFive = 0.5 * ( x > 0.0 ? 1.0 : -1.0 );
@@ -916,10 +923,10 @@ std::string FloatToE( double y, int decimals )
       if( i > 0 )
       {
          // use positive power of 10 to avoid roundoff error in z
-         const double z { rtl::math_p3::IntPower( 10, i ) };
-         return static_cast<int>( x * z + zeroFive ) * z;
+         const double z { math_p3::IntPower( 10, i ) };
+         return static_cast<int>( x * z + zeroFive ) / z;
       }
-      const double z { rtl::math_p3::IntPower( 10, -i ) };
+      const double z { math_p3::IntPower( 10, -i ) };
       return static_cast<int>( x / z + zeroFive ) * z;
    };
 
@@ -929,7 +936,7 @@ std::string FloatToE( double y, int decimals )
    if( x != 0.0 )
    {
       int n {};
-      while( x >= 1.0 )
+      while( x >= 10.0 )
       {
          n++;
          x /= 10.0;
@@ -939,9 +946,13 @@ std::string FloatToE( double y, int decimals )
          n--;
          x *= 10.0;
       }
-      x = myRoundTo( x, decimals ) * rtl::math_p3::IntPower( 10.0, n );
+      x = myRoundTo( x, decimals ) * math_p3::IntPower( 10.0, n );
    }
-   std::string s { gdlib::strutilx::DblToStr( x ) };
+   //std::string s { gdlib::strutilx::DblToStr( x ) };
+   std::array<char, 255> sbuf {};
+   size_t eLen;
+   p3io::P3_Str_dd0( x, sbuf.data(), 255, &eLen );
+   std::string s { sbuf.data() };
 
    // edit and fix sign
    int k = LastDelimiter( "+-", s );
@@ -953,7 +964,7 @@ std::string FloatToE( double y, int decimals )
    int e, i;
    utils::val( s.substr( k, 5 ), e, i );
    e = std::abs( e );
-   return res + s.substr( s.length() - 2, 2 );
+   return res + ( e > 99 ? IntToStr( e ) : s.substr( s.length() - 2, 2 ) );
 }
 
 std::string ParamStrZero()
@@ -1112,11 +1123,11 @@ int xGetExecName( std::string &execName, std::string &msg )
    }
    else
    {
-      ssz = std::min<decltype(ssz)>( execBuf.size() - 1, ssz );
+      ssz = std::min<decltype( ssz )>( execBuf.size() - 1, ssz );
       rc = 0;
    }
 #elif defined( _WIN32 )
-   if( const auto k = GetModuleFileNameA( nullptr, execBuf.data(), static_cast<DWORD>(sizeof( char ) * execBuf.size()) ); !k )
+   if( const auto k = GetModuleFileNameA( nullptr, execBuf.data(), static_cast<DWORD>( sizeof( char ) * execBuf.size() ) ); !k )
    {
       msg = "GetModuleFileName() failure: rc="s + IntToStr( k );
       execName.clear();
@@ -1772,6 +1783,7 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse, int *retCode )
    SOCKADDR_IN addr;
    (void) std::memset( &addr, 0, sizeof( addr ) );
    addr.sin_family = AF_INET;
+   // Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
    addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
    //InetPtonA( AF_INET, "127.0.0.1", &addr );
    addr.sin_port = htons( port );
@@ -1864,5 +1876,14 @@ int p3SockGetPort( T_P3SOCKET s, int &res )
    return result;
 }
 #endif // __IN_CPPMEX__
+
+int p3SomeIOResult()
+{
+#if defined(_WIN32)
+   return ERROR_OPEN_FAILED;
+#else
+   return 0;
+#endif
+}
 
 }// namespace rtl::p3utils

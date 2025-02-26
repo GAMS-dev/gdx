@@ -267,6 +267,10 @@ bool statusErrorNextVar( int &col )
 {
    return GMSStatusObj->StatusErrorNextVar( col );
 }
+bool statusErrorNextEqu( int &row )
+{
+   return GMSStatusObj->StatusErrorNextEqu( row );
+}
 
 bool statusErrorNextJac( int &row, int &col )
 {
@@ -283,11 +287,16 @@ void statusErrorFree()
    GMSStatusObj->StatusErrorFree();
 }
 
+void statusSetRowCol( const int rowmax, const int colmax )
+{
+   GMSStatusObj->StatusSetRowCol( rowmax, colmax );
+}
+
 void initialization()
 {
    // Maybe put on stack?
-   GMSLogObj = new gdlib::statlibobj::TGMSLogStream { msg };
-   GMSStatusObj = new gdlib::statlibobj::TGMSStatusStream { msg };
+   GMSLogObj = new statlibobj::TGMSLogStream { msg };
+   GMSStatusObj = new statlibobj::TGMSStatusStream { msg };
 }
 
 void finalization()

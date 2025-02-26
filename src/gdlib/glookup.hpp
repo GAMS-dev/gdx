@@ -483,4 +483,23 @@ public:
    }
 };
 
+template<typename T>
+class TConstPool
+{
+   TBucketPtrArray<T> HashTable;
+   unsigned int HashSize {};
+   int ReHashCnt {};
+   TBucketArray<double> RecList;
+
+public:
+   TConstPool(gmsheapnew::THeapMgr &Amyheap) : HashTable{ Amyheap }, RecList{Amyheap, 1}
+   {
+      STUBWARN();
+   }
+
+   int GetCount() {
+      return RecList.GetCount();
+   }
+};
+
 }// namespace gdlib::glookup

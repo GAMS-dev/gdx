@@ -54,29 +54,29 @@ using TStrIndex = std::array<std::string, MaxDim>;
 using PTIndex = TIndex *;
 
 // old values up to 133
-const double old_valund = 1.0e30; // undefined
-const double old_valna = 2.0e30;  // not available/applicable
-const double old_valpin = 3.0e30; // plus infinity
-const double old_valmin = 4.0e30; // minus infinity
-const double old_valeps = 5.0e30; // epsilon
-const double old_valacr = 10.0e30;// potential/real acronym
+constexpr double old_valund = 1.0e30; // undefined
+constexpr double old_valna = 2.0e30;  // not available/applicable
+constexpr double old_valpin = 3.0e30; // plus infinity
+constexpr double old_valmin = 4.0e30; // minus infinity
+constexpr double old_valeps = 5.0e30; // epsilon
+constexpr double old_valacr = 10.0e30;// potential/real acronym
 
 // new values starting with 134
-const double valund = 1.0e300; // undefined
-const double valna = 2.0e300;  // not available/applicable
-const double valpin = 3.0e300; // plus infinity
-const double valmin = 4.0e300; // minus infinity
-const double valeps = 5.0e300; // epsilon
-const double valacr = 10.0e300;// potential/real acronym
+constexpr double valund = 1.0e300; // undefined
+constexpr double valna = 2.0e300;  // not available/applicable
+constexpr double valpin = 3.0e300; // plus infinity
+constexpr double valmin = 4.0e300; // minus infinity
+constexpr double valeps = 5.0e300; // epsilon
+constexpr double valacr = 10.0e300;// potential/real acronym
 
-const int valnaint = 2100000000;// not available/applicable
+constexpr int valnaint = 2100000000;// not available/applicable
 
-const double valiup = 3.0e300;   // upper bound for integers
-const double valbig = 1.0e299;   // big positive number
-const double valsmall = -1.0e299;// big negative number
-const double valtiny = 1.0e-250; // everything smaller could be zero
+constexpr double valiup = 3.0e300;   // upper bound for integers
+constexpr double valbig = 1.0e299;   // big positive number
+constexpr double valsmall = -1.0e299;// big negative number
+constexpr double valtiny = 1.0e-250; // everything smaller could be zero
 
-const double defiterlim = 2.0e9;//default iterlim
+constexpr double defiterlim = 2.0e9;//default iterlim
 
 // Brief:
 //   Enumerated type for special values
@@ -110,15 +110,15 @@ enum TgdxDataType : uint8_t
    dt_alias// 4: Aliased set
 };
 
-const int gms_sv_valund = 0,// TgdxSpecialValue
+constexpr int gms_sv_valund = 0,// TgdxSpecialValue
         gms_sv_valna = 1,
-          gms_sv_valpin = 2,
-          gms_sv_valmin = 3,
-          gms_sv_valeps = 4,
-          gms_sv_normal = 5,
-          gms_sv_acronym = 6;
+              gms_sv_valpin = 2,
+              gms_sv_valmin = 3,
+              gms_sv_valeps = 4,
+              gms_sv_normal = 5,
+              gms_sv_acronym = 6;
 
-const int gms_dt_set = 0,// TgdxDataType
+constexpr int gms_dt_set = 0,// TgdxDataType
         gms_dt_par = 1,
           gms_dt_var = 2,
           gms_dt_equ = 3,
@@ -173,7 +173,7 @@ enum tsetstyp : uint8_t
 const utils::bsSet<tvarstyp, stypsemiint+1>  varstypX { styppos, stypneg, stypfre },
                                              varstypI { stypbin, stypint, stypsos1, stypsos2, stypsemi, stypsemiint };
 
-const std::array varstyptxt {
+const std::array<std::string, 10> varstyptxt {
         "unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint " };
 
 enum tequstyp : uint8_t
@@ -202,29 +202,29 @@ enum tvarvaltype : uint8_t
 
 using tvarreca = std::array<double, valscale+1>;
 
-const std::array<std::string, valscale+1> sufftxt { "L", "M", "LO", "UP", "SCALE" };
+const std::array<std::string, valscale + 1> sufftxt { "L", "M", "LO", "UP", "SCALE" };
 
-const int nlconst_one = 1,
-          nlconst_ten = 2,
-          nlconst_tenth = 3,
-          nlconst_quarter = 4,
-          nlconst_half = 5,
-          nlconst_two = 6,
-          nlconst_four = 7,
-          nlconst_zero = 8,
-          nlconst_oosqrt2pi = 9,// 1/sqrt(2*pi)
-          nlconst_ooln10 = 10,    // 1/ln(10)
-          nlconst_ooln2 = 11,     // 1/ln(2)
-          nlconst_pi = 12,        // pi
-          nlconst_pihalf = 13,    // pi/2
-          nlconst_Sqrt2 = 14,     // sqrt(2)
-          nlconst_three = 15,
-          nlconst_five = 16;
+constexpr int nlconst_one = 1,
+              nlconst_ten = 2,
+              nlconst_tenth = 3,
+              nlconst_quarter = 4,
+              nlconst_half = 5,
+              nlconst_two = 6,
+              nlconst_four = 7,
+              nlconst_zero = 8,
+              nlconst_oosqrt2pi = 9,// 1/sqrt(2*pi)
+        nlconst_ooln10 = 10,        // 1/ln(10)
+        nlconst_ooln2 = 11,         // 1/ln(2)
+        nlconst_pi = 12,            // pi
+        nlconst_pihalf = 13,        // pi/2
+        nlconst_Sqrt2 = 14,         // sqrt(2)
+        nlconst_three = 15,
+              nlconst_five = 16;
 
-const int EQU_USERINFO_BASE = 53;
+constexpr int EQU_USERINFO_BASE = 53;
 
 // check loadAll in utilcomp.pas when this gets extended
-const int   equ_E = 0,
+constexpr int   equ_E = 0,
             equ_G = 1,
             equ_L = 2,
             equ_N = 3,
@@ -243,27 +243,34 @@ const std::array<std::string, 7> equstyp {
 };
 
 const std::array<char, 7> equctyp {
-        'E', 'G', 'L', 'N', 'X', 'C', 'B'
-};
+        'E', 'G', 'L', 'N', 'X', 'C', 'B' };
 
-const int   var_X  = 0,
-            var_B  = 1,
-            var_I  = 2,
-            var_S1 = 3,
-            var_S2 = 4,
-            var_SC = 5;
+constexpr int var_X = 0,
+              var_B = 1,
+              var_I = 2,
+              var_S1 = 3,
+              var_S2 = 4,
+              var_SC = 5;
 
-const int numsolm = 13;   // number of solver status messages
-const int nummodm = 19;   // number of model status messages
-const int numsolprint = 5;// following four from 0...numxxxx
+constexpr int numsolm = 13;   // number of solver status messages
+constexpr int nummodm = 19;   // number of model status messages
+constexpr int numsolprint = 5;// following four from 0...numxxxx
 
-const int numhandlestat = 3;
-const int numsolvelink = 7;
-const int numsolveopt = 2;
-const int numplatformcode = 5;
+constexpr int numhandlestat = 3;
+constexpr int numsolvelink = 7;
+constexpr int numsolveopt = 2;
+constexpr int numplatformcode = 5;
 
 #if defined(__IN_CPPMEX__)
    #include "../generated/gmsspecs.inc.h"
 #endif
+
+constexpr std::array modelsolution
+//  1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9
+   {1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,0,0};
+
+// *trigger will cause the status file to be listed vernatim
+constexpr std::array<int, numsolm> solvetrigger {0,0,0,0,0,0,0,0,0,1,1,0,1};
+constexpr std::array<int, nummodm> modeltrigger {0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0};
 
 }// namespace global::gmsspecs

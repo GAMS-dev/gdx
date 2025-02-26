@@ -982,6 +982,8 @@ bool TGMSStatusStream::StatusProcessNext( stattypes::tstatusproc &statusproc, st
    while( !feof(Ffstat) )
    {
       std::string line = utils::getline( Ffstat );
+      if( !line.empty() && line.back() == '\n' ) // Delphi didn't capture newline
+         line.pop_back();
       msg1.clear();
       msg2.clear();
       num = 0;
@@ -1283,7 +1285,7 @@ bool TGMSStatusStream::StatusErrorDetail( int &cnt, std::string &msg )
    return true;
 }
 
-void TGMSStatusStream::StatusSetRowCol( int rowmax, int colmax )
+void TGMSStatusStream::StatusSetRowCol( const int rowmax, const int colmax )
 {
    Fmodelrows = rowmax;
    Fmodelcolumns = colmax;

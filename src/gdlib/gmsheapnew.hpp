@@ -154,6 +154,12 @@ public:
       return static_cast<T *>( XAllocMem( sizeof( T ) ) );
    }
 
+   template<typename T>
+   T *XAllocMemVec( const int Count )
+   {
+      return static_cast<T *>( XAllocMem( sizeof( T ) * Count ) );
+   }
+
    // Use XAllocMemZero when type T has no constructor defined
    template<typename T>
    inline T *XAllocMemCreat()
@@ -189,6 +195,13 @@ public:
       T *res { XGetMem64Vec<T>(sizeof(T)*Count) };
       std::memset(res, 0, sizeof(T) * Count);
       return res;
+   }
+
+   // Use perfect forwarding for arguments to T's constructor
+   template<typename T, typename... Args>
+   inline T *XGetMem64Creat( Args &&...args )
+   {
+      return new( XGetMem64<T>() ) T( std::forward<Args>( args )... );
    }
 
    void *XAllocMem64( int64_t Size );
