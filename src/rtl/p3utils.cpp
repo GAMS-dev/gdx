@@ -868,15 +868,15 @@ bool delphiGetDecDigits( double y, int mode, int nDigits, std::string &digits, i
    return false;
 }
 
-bool p3GetDecDigits( double y, int mode, int nDigits, std::string &digits, int &decPos, int &minusCnt )
+bool p3GetDecDigits( const double y, const int mode, const int nDigits, std::string &digits, int &decPos, int &minusCnt )
 {
    std::array<char, 256> buf;
    char *pend;
-   auto p = (char *) dtoaLoc( y, mode, nDigits, (char *) buf.data(), buf.size()*sizeof(char), &decPos, &minusCnt, (char **) &pend );
+   const auto p = dtoaLoc( y, mode, nDigits, buf.data(), buf.size() * sizeof( char ), &decPos, &minusCnt, &pend );
    if( !p )
       return false;
-   int totdig = pend - p;
-   minusCnt = !!( minusCnt );// 1 if negative, 0 otherwise
+   //int totdig = pend - p;
+   minusCnt = !!minusCnt;// 1 if negative, 0 otherwise
    digits.assign( p );
    return true;
 }
