@@ -123,7 +123,7 @@ int TScratchGdx::ReadColumnSol( int &cstat, int &stat, double &level, double &ma
    }
 
    jcol++;
-   cstat = std::round(Vals[vallevel]);
+   cstat = utils::round<int>(Vals[vallevel]);
    stat = 0;
    level = 0.0;
    marginal = 0.0;
@@ -135,7 +135,7 @@ int TScratchGdx::ReadColumnSol( int &cstat, int &stat, double &level, double &ma
       switch(Keys[2])
       {
          case 2:
-            stat = std::round(Vals[vallevel]);
+            stat = utils::round<int>(Vals[vallevel]);
             break;
          case 3:
             level = Vals[vallevel];
@@ -181,7 +181,7 @@ int TScratchGdx::ReadRowSol( int &cstat, int &stat, double &level, double &margi
    }
 
    irow++;
-   cstat = std::round(Vals[vallevel]);
+   cstat = utils::round<int>(Vals[vallevel]);
    stat = 0;
    level = 0.0;
    marginal = 0.0;
@@ -197,7 +197,7 @@ int TScratchGdx::ReadRowSol( int &cstat, int &stat, double &level, double &margi
       switch(Keys[2])
       {
          case 2:
-            stat = std::round(Vals[vallevel]);
+            stat = utils::round<int>(Vals[vallevel]);
             break;
          case 3:
             level = Vals[vallevel];
