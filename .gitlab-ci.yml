@@ -541,7 +541,7 @@ deploy-gitlab-github:
       -d "${GDX_DESCRIPTION}"
       -n "${GDX_RELEASE_NAME}"
     - sleep 10s # make sure the release is available to reference
-    - cp gdxcclib64.dll apifiles/*.h apifiles/*.hpp apifiles/*.c apifiles/*.cpp .
+    - cp apifiles/*.h apifiles/*.hpp apifiles/*.c apifiles/*.cpp .
     - cp gdx-static.lib libgdx-windows.lib
     - |
       for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib libgdx-macos.a libgdx-linux.a libgdx-windows.lib gclgms.h gcmutex.h gdxcc.h gdxcc.c gdxcwrap.h gdxcclib.cpp
