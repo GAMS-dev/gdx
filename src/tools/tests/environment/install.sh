@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ENVIRONMENT_DIRECTORY="$(dirname $0)"
+ENVIRONMENT_DIRECTORY="$(dirname "$0")"
 GDX_DIRECTORY="$ENVIRONMENT_DIRECTORY/../../../.."
 
 python3 -m venv "$GDX_DIRECTORY/venv"
