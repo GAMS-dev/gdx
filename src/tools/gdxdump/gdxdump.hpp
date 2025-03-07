@@ -11,7 +11,7 @@
 namespace gdxdump
 {
 
-enum class TOutFormat : uint8_t
+enum class OutFormat_t : uint8_t
 {
    fmt_none,
    fmt_normal,
@@ -19,7 +19,7 @@ enum class TOutFormat : uint8_t
    fmt_csv
 };
 
-enum class TDblFormat : uint8_t
+enum class DblFormat_t : uint8_t
 {
    dbl_none,
    dbl_normal,
@@ -58,7 +58,7 @@ void WriteSymbolsAsSet( bool DomInfo );
 void WriteSymbol( int SyNr );
 
 // Auxiliary function for WriteSymbolCSV and WriteSetText
-int64_t delphiRound( double x );
+int64_t DelphiRound( double x );
 
 void WriteSymbolCSV( int SyNr );
 
@@ -68,7 +68,7 @@ void WriteDomainInfo();
 
 void WriteSetText();
 
-void Usage(const library::AuditLine &AuditLine);
+void Usage( const library::AuditLine_t &AuditLine );
 
 std::string NextParam();
 

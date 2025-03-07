@@ -7,7 +7,9 @@
 namespace library
 {
 
-void printErrorMessage( const std::string &message, bool printError = false );
+void printErrorMessage( const std::string &message );
+
+void printErrorMessageWithError( const std::string &message );
 
 void assertWithMessage( bool expression, const std::string &message );
 
@@ -29,15 +31,19 @@ bool canBeQuoted( const char *s, size_t slen );
 
 bool goodUELString( const char *s, size_t slen );
 
-class AuditLine
+class AuditLine_t
 {
-   std::string system_name;
-   std::string audit_line;
+   std::string
+           system_name,
+           audit_line;
+
    void setAuditLine();
 
 public:
-   AuditLine( const std::string &system_name );
+   AuditLine_t( const std::string &system_name );
+
    void setSystemName( const std::string &system_name );
+
    std::string getAuditLine() const;
 };
 

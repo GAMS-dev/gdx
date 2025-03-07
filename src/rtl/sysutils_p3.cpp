@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 #include <string> // for string
 #include <cstring> // for strerror, size_t, strcmp, strcpy
 
+#include "p3io.hpp"
 #include "sysutils_p3.hpp"
 #include "p3platform.hpp"// for OSFileType, tOSFileType
 
@@ -688,6 +689,66 @@ void IntToStr( int64_t n, char *res, size_t &len )
       res[w2++] = res[w++];
    len = static_cast<size_t>( w2 );
    res[len] = '\0';
+}
+
+// this is VERY ugly, edit the str() ShortString
+std::string FloatToStr( double v )
+{
+   STUBWARN();
+   // TODO: Unfinished!
+
+   std::array<char, 64> sbuf {};
+
+   if (v == 0.0)
+      return "0"s;
+
+   size_t eLen;
+   rtl::p3io::P3_Str_dd0( v, sbuf.data(), 64, &eLen );
+   std::string s { sbuf.data() };
+   if( v < 0.0 )
+      v = -v;
+   int k = LastDelimiter( "+-"s, s );
+   int j = utils::pos( '.', s );
+   if (v >= 1e-4 && v < 1e15)
+   {
+      int i, e;
+      utils::val( s.substr( k, 5 ), e, i );
+      for( i = k - 1; i <= static_cast<int>(s.length()); i++ )
+         s[i] = '0';
+      if (e >= 0)
+      {
+         for (i = j + 1; i <= j + e; i++) {
+            s[i - 1] = s[i];
+         }
+         s[j + e] = '.';
+         for (i = (int)s.length(); i >= j + e + 1; i--) {
+            s[i] = ' ';
+            if( i == j + e + 1 )
+               s[j + e] = ' ';
+            else
+               break;
+         }
+      }
+      else {
+
+      }
+   }
+   else {
+
+   }
+
+   // only for short strings
+   j = 0;
+   std::array<char, 256> res {'\0'};
+   for (int i{}; i < static_cast<int>(s.length()); i++)
+   {
+      if (s[i] != ' ')
+      {
+         j++;
+         res[j] = s[i];
+      }
+   }
+   return { res.data() };
 }
 
 double EncodeTime( const uint16_t hour, const uint16_t min, const uint16_t sec, const uint16_t msec) {

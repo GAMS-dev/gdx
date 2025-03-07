@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -315,7 +315,7 @@ public:
    /// @{
    /**
     * @brief Retrieve the domain of a symbol. Returns zero if the operation is not possible.
-    * @param SyNr The index number of the symbol (range 1..NrSymbols); SyNr = 0 reads universe.
+    * @param SyNr The index number of the symbol (must be in range 1..NrSymbols).
     * @param DomainSyNrs Array (length=symbol dim) returning the set identifiers or "*"; DomainSyNrs[D] will contain the
     *   index number of the one dimensional set or alias used as the domain for index position D. A value of
     *   zero represents the universe "*".
@@ -328,7 +328,7 @@ public:
    /**
     * @brief Retrieve the domain of a symbol (using relaxed or domain information). Returns zero if the operation
     *   is not possible.
-    * @param SyNr The index number of the symbol (range 1..NrSymbols); SyNr = 0 reads universe.
+    * @param SyNr The index number of the symbol (must be in range 1..NrSymbols).
     * @param DomainIDs DomainIDs[D] will contain the strings as they were stored with the call gdxSymbolSetDomainX. If
     *   gdxSymbolSetDomainX was never called, but gdxSymbolSetDomain was called, that information will be
     *   used instead. Length of this array should by dimensionality of the symbol. The special domain name

@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -480,6 +480,25 @@ public:
       if( N >= this->FCount ) AddItem( p );
       else
          *reinterpret_cast<T **>( TBucketArray<T>::ItemPtr( N ) ) = p;
+   }
+};
+
+template<typename T>
+class TConstPool
+{
+   TBucketPtrArray<T> HashTable;
+   unsigned int HashSize {};
+   int ReHashCnt {};
+   TBucketArray<double> RecList;
+
+public:
+   TConstPool(gmsheapnew::THeapMgr &Amyheap) : HashTable{ Amyheap }, RecList{Amyheap, 1}
+   {
+      STUBWARN();
+   }
+
+   int GetCount() {
+      return RecList.GetCount();
    }
 };
 

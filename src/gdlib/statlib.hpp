@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -111,6 +111,7 @@ bool statusProcessNext( stattypes::tstatusproc &statusproc, std::string &msg1, s
 void statusErrorFirst();
 bool statusErrorNext( int &row, int &col );
 bool statusErrorNextVar( int &col );
+bool statusErrorNextEqu(int &row);
 bool statusErrorNextJac( int &row, int &col );
 bool statusErrorDetail( int &cnt, std::string &msg );
 void statusErrorFree();

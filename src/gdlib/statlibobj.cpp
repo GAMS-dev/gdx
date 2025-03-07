@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -982,6 +982,8 @@ bool TGMSStatusStream::StatusProcessNext( stattypes::tstatusproc &statusproc, st
    while( !feof(Ffstat) )
    {
       std::string line = utils::getline( Ffstat );
+      if( !line.empty() && line.back() == '\n' ) // Delphi didn't capture newline
+         line.pop_back();
       msg1.clear();
       msg2.clear();
       num = 0;
@@ -1283,7 +1285,7 @@ bool TGMSStatusStream::StatusErrorDetail( int &cnt, std::string &msg )
    return true;
 }
 
-void TGMSStatusStream::StatusSetRowCol( int rowmax, int colmax )
+void TGMSStatusStream::StatusSetRowCol( const int rowmax, const int colmax )
 {
    Fmodelrows = rowmax;
    Fmodelcolumns = colmax;

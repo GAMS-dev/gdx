@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ using DoubleArray = double[global::gmsspecs::BigIndex+1]; //std::array<double, g
 using PDoubleArray = DoubleArray *;
 using PTextFile = rtl::p3io::P3File *;
 
-using LongIntArray = int[global::gmsspecs::BigIndex+1]; //std::array<int, global::gmsspecs::BigIndex>;
+using LongIntArray = int32_t[global::gmsspecs::BigIndex+1]; //std::array<int32_t, global::gmsspecs::BigIndex>;
 using PLongIntArray = LongIntArray *;
 
 using TBooleanArray = bool[global::gmsspecs::BigIndex+1]; // std::array<bool, global::gmsspecs::BigIndex>;

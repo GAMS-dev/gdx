@@ -16,15 +16,22 @@ std::ostream &errorStream { std::cout };
 // TODO: Possible improvement for later, but currently results in problems with the tests
 // std::ostream &errorStream { std::cerr };
 
-void printErrorMessage( const std::string &message, const bool printError )
+void printErrorMessage( const std::string &message )
 {
-   if( printError ) errorStream << "Error: ";
    errorStream << message << std::endl;
 }
 
+void printErrorMessageWithError( const std::string &message )
+{
+   errorStream << "Error: " << message << std::endl;
+}
+
+// TODO: Make this a no-op in release mode builds (NDEBUG set)
+// The assert checks in Delphi/P3 will be removed in debug builds
 void assertWithMessage( const bool expression, const std::string &message )
 {
-   if( !expression ) printErrorMessage( message );
+   if( !expression )
+      printErrorMessage( message );
    assert( expression );
 }
 
@@ -159,7 +166,7 @@ bool goodUELString( const char *s, const size_t slen )
    return slen < GLOBAL_UEL_IDENT_SIZE && canBeQuoted( s, slen );
 }
 
-void AuditLine::setAuditLine()
+void AuditLine_t::setAuditLine()
 {
    std::string
            GDL_REL_PLT,
@@ -167,7 +174,7 @@ void AuditLine::setAuditLine()
    bool auditreldates_header_file_found {};
 
    audit_line = system_name;
-   this->audit_line.resize( 17, ' ' );
+   audit_line.resize( 17, ' ' );
 
 #if defined( _WIN32 )
    GDL_REL_PLT = "x86 64bit/MS Windows";
@@ -194,7 +201,10 @@ void AuditLine::setAuditLine()
 #if __has_include( "../../../../../../../btree/global/auditreldates.h" )
 #include "../../../../../../../btree/global/auditreldates.h"
    auditreldates_header_file_found = true;
-   audit_line += std::to_string( GDL_REL_MAJ ) + '.' + std::to_string( GDL_REL_MIN ) + '.' + std::to_string( GDL_REL_GOLD ) + ' ' + GDL_REVISION + ' ' + GDL_REL_DAT;
+   audit_line += std::to_string( GDL_REL_MAJ ) + '.' +
+                 std::to_string( GDL_REL_MIN ) + '.' +
+                 std::to_string( GDL_REL_GOLD ) + ' ' +
+                 GDL_REVISION + ' ' + GDL_REL_DAT;
 #endif
 #endif
 
@@ -202,8 +212,10 @@ void AuditLine::setAuditLine()
    {
       std::time_t time { std::time( nullptr ) };
       std::tm *localtime { std::localtime( &time ) };
+
       std::stringstream date;
       date << std::put_time( localtime, "%b %d, %Y" );
+
       audit_line += "??.?.? ???????? " + date.str();
    }
 
@@ -211,18 +223,18 @@ void AuditLine::setAuditLine()
    audit_line += GDL_BLD_COD + ' ' + GDL_REL_PLT;
 }
 
-AuditLine::AuditLine( const std::string &system_name )
+AuditLine_t::AuditLine_t( const std::string &system_name )
 {
    setSystemName( system_name );
 }
 
-void AuditLine::setSystemName( const std::string &system_name )
+void AuditLine_t::setSystemName( const std::string &system_name )
 {
    this->system_name = system_name;
    setAuditLine();
 }
 
-std::string AuditLine::getAuditLine() const
+std::string AuditLine_t::getAuditLine() const
 {
    return audit_line;
 }

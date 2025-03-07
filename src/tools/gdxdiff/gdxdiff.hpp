@@ -17,7 +17,7 @@ namespace gdxdiff
 
 using namespace std::literals::string_literals;
 
-enum class ErrorCode : uint8_t
+enum class ErrorCode_t : uint8_t
 {
    ERR_DIFFERENT = 1,
    ERR_USAGE,
@@ -28,7 +28,7 @@ enum class ErrorCode : uint8_t
    ERR_RENAME
 };
 
-enum class FldOnly : uint8_t
+enum class FldOnly_t : uint8_t
 {
    fld_maybe,
    fld_yes,
@@ -36,7 +36,7 @@ enum class FldOnly : uint8_t
    fld_never
 };
 
-enum class TStatusCode : uint8_t
+enum class StatusCode_t : uint8_t
 {
    sc_same,
    sc_notf1,
@@ -83,13 +83,10 @@ constexpr std::array StatusText {
         "Domains are different" };
 
 const std::string
-        c_ins1 = "ins1",
-        c_ins2 = "ins2",
-        c_dif1 = "dif1",
-        c_dif2 = "dif2";
-
-// Size of gdx::tvarvaltype
-constexpr int tvarvaltype_size { 5 };
+        c_ins1 { "ins1" },
+        c_ins2 { "ins2" },
+        c_dif1 { "dif1" },
+        c_dif2 { "dif2" };
 
 // Names of gdx::tvarvaltype(s)
 const std::array GamsFieldNames {
@@ -109,19 +106,19 @@ void FatalError2( const std::string &Msg1, const std::string &Msg2, int ErrNr );
 
 void CheckGDXError( const gdxHandle_t &PGX );
 
-void OpenGDX( const library::short_string &fn, gdxHandle_t &PGX );
+void OpenGDX( const library::ShortString_t &fn, gdxHandle_t &PGX );
 
-void registerDiffUELs();
+void RegisterDiffUELs();
 
 void CompareSy( int Sy1, int Sy2 );
 
-bool GetAsDouble( const library::short_string &S, double &V );
+bool GetAsDouble( const library::ShortString_t &S, double &V );
 
-void Usage( const library::AuditLine &AuditLine );
+void Usage( const library::AuditLine_t &AuditLine );
 
 // void CopyAcronyms( const gdxHandle_t &PGX );
 
-void CheckFile( library::short_string &fn );
+void CheckFile( library::ShortString_t &fn );
 
 int main( int argc, const char *argv[] );
 

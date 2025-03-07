@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -158,6 +158,8 @@ void Sleep( uint32_t milliseconds );
 
 std::string IntToStr(int64_t N);
 void IntToStr(int64_t N, char *res, size_t &len );
+
+std::string FloatToStr( double V );
 
 double FileDateToDateTime( int fd );
 int DateTimeToFileDate( double dt );

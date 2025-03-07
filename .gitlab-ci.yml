@@ -97,8 +97,9 @@ build-leg:
     - !reference [.get-gams]
     - !reference [.gams-folder-leg]
     - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
-    - cmake --build . 2>&1 | tee build_log.txt
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
     - mkdir -p ./build
@@ -121,14 +122,40 @@ build-debug-leg:
     - !reference [.get-gams]
     - !reference [.gams-folder-leg]
     - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
-    - cmake --build . 2>&1
+    - cmake --build . -- -j$(nproc) 2>&1
     - mv gdxtest gdxtest_dbg
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-debug-leg
     paths: [gdxtest_dbg]
     expire_in: 2 hours
+
+build-lag:
+  stage: build
+  tags: [linux-arm64]
+  image:
+    name: $MACHINES_CONTAINER_REG/lag/builder-devel:latest
+    entrypoint: [""]
+  script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-leg]
+    - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
+    - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
+    - mv libgdx-static.a libgdx-linux.a
+    - mkdir -p ./build
+    - mv {gdxdump,gdxdiff,gdxmerge} ./build
+  needs: [fetch-ci-scripts,apigenerator]
+  artifacts:
+    name: gdx-lag
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a,build]
+    expire_in: 2 hours
+    reports:
+      junit: warnings.xml
 
 build-deg:
   stage: build
@@ -138,7 +165,7 @@ build-deg:
     - !reference [.gams-folder-deg]
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
-    - cmake --build . 2>&1 | tee build_log.txt
+    - cmake --build . -- -j$(sysctl -n hw.ncpu) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-macos.a
     - mkdir -p ./build
@@ -161,7 +188,7 @@ build-dac:
     - mv libgdx-macos.a libgdx-macos-deg.a
     - cp apifiles/* src/
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
-    - cmake --build . 2>&1 | tee build_log.txt
+    - cmake --build . -- -j$(sysctl -n hw.ncpu) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdxcclib64.dylib libgdxcclib64_dac.dylib
     - mv libgdx-static.a libgdx-macos-dac.a
@@ -186,13 +213,14 @@ build-wei:
     - !reference [.get-gams-wei]
     - !reference [.gams-folder-wei]
     - cp apifiles/* src/
-    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
-    - cmake --build  . --config Release -- -m | Tee-Object -FilePath 'build_log.txt'
+    - $env:SCCACHE_DIR="C:\Cache\sccache"
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -G Ninja CMakeLists.txt
+    - cmake --build  . --config Release 2>&1 | Tee-Object -FilePath 'build_log.txt'
     - python ciscripts/report_for_log.py msvc build_log.txt warnings.xml
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-wei
-    paths: [Release]
+    paths: [gdx*.exe,xp_*.exe,gdx*.lib,gdx*.dll]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -221,14 +249,34 @@ test-leg:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_linux.xml
-    - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_linux.xml
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_leg.xml
+    - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_leg.xml
   artifacts:
-    name: unittest-results-linux
+    name: unittest-results-leg
     paths: [./*.xml]
     expire_in: 2 hours
     reports:
-      junit: doctest_results_*linux.xml
+      junit: doctest_results_*leg.xml
+
+test-lag:
+  stage: test
+  tags: [linux-arm64]
+  image:
+    name: $MACHINES_CONTAINER_REG/lag/builder-devel:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-lag]
+  script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-leg ]
+    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_lag.xml
+    - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_lag.xml
+  artifacts:
+    name: unittest-results-lag
+    paths: [./*.xml]
+    expire_in: 2 hours
+    reports:
+      junit: doctest_results_*lag.xml
 
 test-deg:
   stage: test
@@ -275,13 +323,13 @@ test-wei:
     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
     - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
     - $env:GAMSDIR = "$GAMS_PATH;$GAMS_PATH\gbin"
-    - ./Release/gdxtest --reporters=junit --out=doctest_results_windows.xml
-    - ./Release/gdxwraptest --reporters=junit --out=doctest_results_wrap_windows.xml
+    - ./gdxtest --reporters=junit --out=doctest_results_wei.xml
+    - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_wei.xml
   artifacts:
-    name: unittest-results-windows
+    name: unittest-results-wei
     paths: [./*.xml]
     reports:
-      junit: doctest_results_*windows.xml
+      junit: doctest_results_*wei.xml
 
 #=======================================================================================================================
 
@@ -451,7 +499,7 @@ doxygen-html:
   stage: docs
   tags: [linux]
   image:
-    name: $MACHINES_CONTAINER_REG/leg/builder-devel:latest
+    name: $MACHINES_CONTAINER_REG/leg/builder-devel:dist48
     entrypoint: [""]
   script:
     - python3 ci/readme_filter.py
@@ -493,8 +541,8 @@ deploy-gitlab-github:
       -d "${GDX_DESCRIPTION}"
       -n "${GDX_RELEASE_NAME}"
     - sleep 10s # make sure the release is available to reference
-    - cp Release/gdxcclib64.dll apifiles/*.h apifiles/*.hpp apifiles/*.c apifiles/*.cpp .
-    - cp Release/gdx-static.lib libgdx-windows.lib
+    - cp gdxcclib64.dll apifiles/*.h apifiles/*.hpp apifiles/*.c apifiles/*.cpp .
+    - cp gdx-static.lib libgdx-windows.lib
     - |
       for fn in libgdxcclib64.so gdxcclib64.dll libgdxcclib64.dylib libgdx-macos.a libgdx-linux.a libgdx-windows.lib gclgms.h gcmutex.h gdxcc.h gdxcc.c gdxcwrap.h gdxcclib.cpp
       do

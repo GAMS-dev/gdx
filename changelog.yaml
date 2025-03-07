@@ -1,4 +1,9 @@
 ---
+- 7.11.13:
+    - Fixed the processing of commands via a text file (`@filename`) in `gdxmerge`.
+    - Corrected documentation of `SyNr` argument of `gdxSymbolGetDomain(X)`.
+    - Updated copyright notices in source file headers.
+    - Miscellaneous changes in shared infrastructure code triggered by other GAMS projects.
 - 7.11.12:
     - Added internal codes for arm64 architecture on Linux (previously only available for macOS)
 - 7.11.11:

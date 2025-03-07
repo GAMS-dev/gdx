@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -83,5 +83,7 @@ extern uint8_t SYSTEM_filemode;
 void P3FileOpn( P3File *fil, uint8_t status, P3FileType type, uint32_t block_size );
 void P3FileOpn(P3File *fil, const char *s);
 #endif
+
+bool mkdir( const std::string &s );
 
 }// namespace rtl::p3io

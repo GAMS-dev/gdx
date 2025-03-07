@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@
 
 namespace gdlib::gamsdirs
 {
-const int NGMSLocNames = rtl::p3utils::NLocNames + 2;
+constexpr int NGMSLocNames = rtl::p3utils::NLocNames + 2;
 using TGMSLocNames = std::vector<std::string>;
 const std::string INCLIBDIR = "inclib", EXTEQUDIR = "external_equations", EXTRFUNCDIR = "extrinsic_functions";
 

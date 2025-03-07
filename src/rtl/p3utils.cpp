@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@
 #include "math_p3.hpp"               // for IntPower
 #include "p3platform.hpp"            // for tOSPlatform, OSPlatform, OSFileType
 #include "sysutils_p3.hpp"           // for ExtractFilePath, ExcludeTrailingPa...
+#include "p3io.hpp"
 
 #if defined(_WIN32)
    // Windows
@@ -78,6 +79,7 @@
    #include <unistd.h>
    #include <poll.h>
 #endif
+#include "dtoaLoc.h"
 
 using namespace rtl::sysutils_p3;
 using namespace rtl::p3platform;
@@ -844,7 +846,7 @@ double RealTrunc( double x )
    return static_cast<int>( x );
 }
 
-double ReadRound( double x )
+double RealRound( double x )
 {
    return static_cast<int>( x + 0.5 * ( x >= 0 ? 1.0 : -1.0 ) );
 }
@@ -866,12 +868,17 @@ bool delphiGetDecDigits( double y, int mode, int nDigits, std::string &digits, i
    return false;
 }
 
-bool p3GetDecDigits( double y, int mode, int nDigits, std::string &digits, int &decPos, int &minusCnt )
+bool p3GetDecDigits( const double y, const int mode, const int nDigits, std::string &digits, int &decPos, int &minusCnt )
 {
-   // ...
-   // TODO: Implement me!
-   STUBWARN();
-   return false;
+   std::array<char, 256> buf;
+   char *pend;
+   const auto p = dtoaLoc( y, mode, nDigits, buf.data(), buf.size() * sizeof( char ), &decPos, &minusCnt, &pend );
+   if( !p )
+      return false;
+   //int totdig = pend - p;
+   minusCnt = !!minusCnt;// 1 if negative, 0 otherwise
+   digits.assign( p );
+   return true;
 }
 
 std::string p3FloatToEfmt( double x, int width, int decimals )
@@ -908,7 +915,7 @@ T myMin( T a, T b )
 }
 
 // FIXME: AS: This seems slow.
-std::string FloatToE( double y, int decimals )
+std::string FloatToE( const double y, int decimals )
 {
    auto myRoundTo = []( const double x, const int i ) -> double {
       const double zeroFive = 0.5 * ( x > 0.0 ? 1.0 : -1.0 );
@@ -916,10 +923,10 @@ std::string FloatToE( double y, int decimals )
       if( i > 0 )
       {
          // use positive power of 10 to avoid roundoff error in z
-         const double z { rtl::math_p3::IntPower( 10, i ) };
-         return static_cast<int>( x * z + zeroFive ) * z;
+         const double z { math_p3::IntPower( 10, i ) };
+         return static_cast<int>( x * z + zeroFive ) / z;
       }
-      const double z { rtl::math_p3::IntPower( 10, -i ) };
+      const double z { math_p3::IntPower( 10, -i ) };
       return static_cast<int>( x / z + zeroFive ) * z;
    };
 
@@ -929,7 +936,7 @@ std::string FloatToE( double y, int decimals )
    if( x != 0.0 )
    {
       int n {};
-      while( x >= 1.0 )
+      while( x >= 10.0 )
       {
          n++;
          x /= 10.0;
@@ -939,9 +946,13 @@ std::string FloatToE( double y, int decimals )
          n--;
          x *= 10.0;
       }
-      x = myRoundTo( x, decimals ) * rtl::math_p3::IntPower( 10.0, n );
+      x = myRoundTo( x, decimals ) * math_p3::IntPower( 10.0, n );
    }
-   std::string s { gdlib::strutilx::DblToStr( x ) };
+   //std::string s { gdlib::strutilx::DblToStr( x ) };
+   std::array<char, 255> sbuf {};
+   size_t eLen;
+   p3io::P3_Str_dd0( x, sbuf.data(), 255, &eLen );
+   std::string s { sbuf.data() };
 
    // edit and fix sign
    int k = LastDelimiter( "+-", s );
@@ -953,7 +964,7 @@ std::string FloatToE( double y, int decimals )
    int e, i;
    utils::val( s.substr( k, 5 ), e, i );
    e = std::abs( e );
-   return res + s.substr( s.length() - 2, 2 );
+   return res + ( e > 99 ? IntToStr( e ) : s.substr( s.length() - 2, 2 ) );
 }
 
 std::string ParamStrZero()
@@ -1112,11 +1123,11 @@ int xGetExecName( std::string &execName, std::string &msg )
    }
    else
    {
-      ssz = std::min<decltype(ssz)>( execBuf.size() - 1, ssz );
+      ssz = std::min<decltype( ssz )>( execBuf.size() - 1, ssz );
       rc = 0;
    }
 #elif defined( _WIN32 )
-   if( const auto k = GetModuleFileNameA( nullptr, execBuf.data(), static_cast<DWORD>(sizeof( char ) * execBuf.size()) ); !k )
+   if( const auto k = GetModuleFileNameA( nullptr, execBuf.data(), static_cast<DWORD>( sizeof( char ) * execBuf.size() ) ); !k )
    {
       msg = "GetModuleFileName() failure: rc="s + IntToStr( k );
       execName.clear();
@@ -1167,6 +1178,8 @@ int p3GetExecName( std::string &execName, std::string &msg )
 }
 
 #ifdef __IN_CPPMEX__
+// Get the first MAC address as a shortstring, in form aa:bb:1f:0a:b1:22
+// returns true on success, false on failure
 bool p3GetFirstMACAddress( std::string &mac )
 {
 #if defined( __linux__ )
@@ -1354,6 +1367,7 @@ static void mkInvalidSock(T_P3SOCKET &s)
 #endif
 }
 
+// returns the canonical but OS-specific INVALID SOCKET
 T_P3SOCKET p3SockGetInvalid()
 {
    T_P3SOCKET res {};
@@ -1361,6 +1375,7 @@ T_P3SOCKET p3SockGetInvalid()
    return res;
 }
 
+// returns true if s is an invalid socket, false if s is valid
 bool p3SockIsInvalid( T_P3SOCKET s )
 {
 #if defined(_WIN32)
@@ -1370,6 +1385,8 @@ bool p3SockIsInvalid( T_P3SOCKET s )
 #endif
 }
 
+// close an open socket
+// returns 0 on success, -1 on failure
 int p3SockClose( T_P3SOCKET &s )
 {
    int res;
@@ -1382,6 +1399,8 @@ int p3SockClose( T_P3SOCKET &s )
    return res;
 }
 
+// create a connected socket by hitting the server on the given port
+// returns the socket on success, invalid socket on failure
 T_P3SOCKET p3SockCreateConnectedClient( int port )
 {
    T_P3SOCKET res {};
@@ -1414,18 +1433,84 @@ T_P3SOCKET p3SockCreateConnectedClient( int port )
 #endif
 }
 
+// control the nonblocking bit for the socket s
+// mode=false: --> NONBLOCK bit is disabled (this is the default on socket creation)
+// mode= true: --> NONBLOCK bit is enabled
+// returns true if the operation succeeded, false o/w
+bool p3SockSetNonBlockingMode(const T_P3SOCKET s, bool mode)
+{
+#if defined(_WIN32)
+   auto u {mode ? 1ul : 0};
+   return NO_ERROR == ioctlsocket( s.wsocket, FIONBIO, &u);
+#else
+   const int fd = s.socketfd;
+   int flags { fcntl( fd, F_GETFL, 0 ) };
+   if( flags < 0 )// error, should never happen
+      return false;
+   if( mode )
+   {
+      if( flags & O_NONBLOCK )
+         return true;// already set
+      flags |= O_NONBLOCK;
+   }
+   else
+   {
+      if( !( flags & O_NONBLOCK ) )
+         return true;// already not set
+      flags &= ~O_NONBLOCK;
+   }
+   return !fcntl( fd, F_SETFL, flags );
+#endif
+}
+
 bool p3SockSendEx(T_P3SOCKET s, const char *buf, int count, int &res, bool pollFirst, int timeOut);
 
+// sends the data in buf via s.  At most count bytes will be sent
+// normal sockets can block on write.  Non-blocking sockets will not block
+// RETURNS
+//   TRUE on success: no-write-because-WOULDBLOCK, or a successful write
+//   FALSE on failure: e.g. waiting interrupted by signal
+// if the function returns TRUE:
+//   *res >= 0: the number of bytes written
+//   *res  < 0: no write was attempted because sufficient space was not available (i.e. WOULDBLOCK)
+// if the function returns FALSE:
+//   *res: errno or GetLastError value
 bool p3SockSend( const T_P3SOCKET s, const char *buf, int count, int &res )
 {
    return p3SockSendEx( s, buf, count, res, false, 0 );
 }
 
+// sends the data in buf via s.  At most count bytes will be sent
+// Prior to reading the socket, we poll the socket (i.e. wait at most timeOut millisecs
+// for some space to become available)
+// RETURNS
+//   TRUE on success: timeout with nothing available, or a successful write
+//   FALSE on failure: e.g. waiting interrupted by signal
+// if the function returns TRUE:
+//   *res >= 0: the number of bytes written
+//   *res  < 0: timeout reached while waiting - no write was attempted because a write would block
+// if the function returns FALSE:
+//   *res: errno or GetLastError value
 bool p3SockSendTimeout( T_P3SOCKET s, const char *buf, const int count, int &res, const int timeOut )
 {
    return p3SockSendEx( s, buf, count, res, true, timeOut );
 }
 
+// sends the data in buf via s.  At most count bytes will be sent
+// if pollFirst is true,
+//   wait/poll at most timeout milliseconds for the socket to be ready before returning
+//   if timeout <= 0, wait/poll returns immediately
+// else
+//   do not wait/poll, but instead immediately make the (potentially blocking) recv call
+// RETURNS
+//   TRUE on success: timeout with no write, or no-write-because-WOULDBLOCK, or a successful write
+//   FALSE on failure: e.g. waiting interrupted by signal
+// if the function returns TRUE:
+//   *res >= 0: the number of bytes written (not necessarily count!!)
+//   *res  < 0: wait/poll called timed out, or no-write-because-WOULDBLOCK
+//              nothing written because the write call would block
+// if the function returns FALSE:
+//   *res: errno or GetLastError value
 bool p3SockSendEx(T_P3SOCKET s, const char *buf, int count, int &res, bool pollFirst, const int timeOut)
 {
    // do not call it this way!!
@@ -1509,6 +1594,21 @@ void p3SockCleanUp()
 #endif
 }
 
+// receives data via s, returning the result in buf.  At most count bytes are read
+// if pollFirst is true,
+//   wait/poll at most timeout milliseconds for the socket to contain data before returning
+//   if timeout <= 0, wait/poll returns immediately
+// else
+//   do not wait/poll, but instead immediately make the (potentially blocking) recv call
+// RETURNS
+//   TRUE on success: timeout with no read, or no-read-because-WOULDBLOCK, or a successful read
+//   FALSE on failure: e.g. waiting interrupted by signal
+// if the function returns TRUE:
+//   *res >= 0: the number of bytes read (zero means end-of-file or end-of-stream)
+//   *res  < 0: wait/poll called timed out, or no-read-because-WOULDBLOCK
+//              nothing read because nothing is available
+// if the function returns FALSE:
+//   *res: errno or GetLastError value
 static bool p3SockRecvEx( const T_P3SOCKET s, char *buf, int count, int &res, bool pollFirst, const int timeOut )
 {
    if( count <= 0 )// do not call it this way!!
@@ -1584,11 +1684,32 @@ static bool p3SockRecvEx( const T_P3SOCKET s, char *buf, int count, int &res, bo
    return true;
 }
 
+// receives data via s, returning the result in buf.  At most count bytes are read
+// normal sockets can block on read.  Non-blocking sockets will not block
+// RETURNS
+//   TRUE on success: no-read-because-WOULDBLOCK, or a successful read
+//   FALSE on failure: e.g. waiting interrupted by signal
+// if the function returns TRUE:
+//   *res >= 0: the number of bytes read (zero means end-of-file or end-of-stream)
+//   *res  < 0: no read was attempted because nothing was available (i.e. WOULDBLOCK)
+// if the function returns FALSE:
+//   *res: errno or GetLastError value
 bool p3SockRecv( const T_P3SOCKET s, char *buf, const int count, int &res )
 {
    return p3SockRecvEx( s, buf, count, res, false, 0 );
 }
 
+// receives data via s, returning the result in buf.  At most count bytes are read
+// Prior to reading the socket, we poll the socket (i.e. wait at most timeOut millisecs
+// for some data to arrive that we can read)
+// RETURNS
+//   TRUE on success: timeout with nothing available, or a successful read
+//   FALSE on failure: e.g. waiting interrupted by signal
+// if the function returns TRUE:
+//   *res >= 0: the number of bytes read (zero means end-of-file or end-of-stream)
+//   *res  < 0: timout reached - no read was attempted because nothing is available
+// if the function returns FALSE:
+//   *res: errno or GetLastError value
 bool p3SockRecvTimeout( const T_P3SOCKET s, char *buf, const int count, int &res, const int timeOut )
 {
    return p3SockRecvEx( s, buf, count, res, true, timeOut );
@@ -1596,19 +1717,39 @@ bool p3SockRecvTimeout( const T_P3SOCKET s, char *buf, const int count, int &res
 
 // wait for / accept a client connection to the server socket
 // returns the connected socket on success, invalid sockwet on failure
-T_P3SOCKET p3SockAcceptClientConn( T_P3SOCKET srvSock )
+// timeOut = 0 means no timeout, otherwise it is the timeout in milliseconds
+T_P3SOCKET p3SockAcceptClientConn( T_P3SOCKET srvSock, const uint32_t timeOut )
 {
    T_P3SOCKET res {};
    mkInvalidSock( res );
+#if defined(_WIN32)
+   const auto &listenSock {srvSock.wsocket};
+   constexpr int selectSock {0};
+#else
+   const auto &listenSock {srvSock.socketfd};
+   const int selectSock {listenSock+1};
+#endif
+   if( timeOut )
+   {
+      fd_set readfds;
+      FD_ZERO( &readfds );
+      FD_SET( listenSock, &readfds );
+      timeval timeout {};
+      timeout.tv_sec = static_cast<long>( timeOut / 1000 );
+      timeout.tv_usec = static_cast<long>( timeOut % 1000 * 1000 );
+      if( const int rc { select( selectSock, &readfds, nullptr, nullptr, &timeout ) };
+          rc <= 0 || !FD_ISSET( listenSock, &readfds ) )
+         return res;// invalid sock
+   }
 #if defined( _WIN32 )
-   res.wsocket = accept( (SOCKET) srvSock.wsocket, nullptr, nullptr );
+   res.wsocket = accept( srvSock.wsocket, nullptr, nullptr );
 #else
    sockaddr_in cli {};
    // Accept the client connection request
    socklen_t len { sizeof( cli ) };
    const int connfd {accept(srvSock.socketfd, reinterpret_cast<sockaddr *>( &cli ), &len)};
    if(connfd < 0)
-      return res;
+      return res;// invalid sock
    assert(len <= sizeof(cli));
    res.socketfd = connfd;
 #endif
@@ -1642,6 +1783,7 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse, int *retCode )
    SOCKADDR_IN addr;
    (void) std::memset( &addr, 0, sizeof( addr ) );
    addr.sin_family = AF_INET;
+   // Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
    addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
    //InetPtonA( AF_INET, "127.0.0.1", &addr );
    addr.sin_port = htons( port );
@@ -1734,5 +1876,14 @@ int p3SockGetPort( T_P3SOCKET s, int &res )
    return result;
 }
 #endif // __IN_CPPMEX__
+
+int p3SomeIOResult()
+{
+#if defined(_WIN32)
+   return ERROR_OPEN_FAILED;
+#else
+   return 0;
+#endif
+}
 
 }// namespace rtl::p3utils

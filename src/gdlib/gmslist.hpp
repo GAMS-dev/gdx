@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2024 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2024 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -130,9 +130,18 @@ public:
    [[nodiscard]] int GetRightMargin() const;
 
    void WrStrLn( std::string_view s );
+   void WrStrLn( const char c )
+   {
+      WrStrLn(std::string_view{&c, 1});
+   }
    void WrStrBlock( std::string_view s );
    void WrInt( int n );
    void WrStr( std::string_view s );
+
+   void WrStr(char s) {
+      WrStr( std::string_view { &s, 1 } );
+   }
+
    void WrStrInt( std::string_view s, int N );
    void WrDblFmt( double d, int m, int n );
    void WrIntFmt( int N, int D );
@@ -160,6 +169,7 @@ public:
    [[nodiscard]] std::string GetTitleLastWritten() const;
    [[nodiscard]] std::string GetSubTitleLastWritten() const;
    [[nodiscard]] int GetLinesOnPage() const;
+   [[nodiscard]] int GetLinesPerPage() const { return FLinesPerPage; }
 
    [[nodiscard]] bool LineIsEmpty() const;
 
@@ -183,6 +193,7 @@ public:
 
    void SetLineNumber( int n );
 
+   void SetLeftMargin( int n );
    void SetRightMargin( int n );
 
    void SetLinesPerPage( int n );

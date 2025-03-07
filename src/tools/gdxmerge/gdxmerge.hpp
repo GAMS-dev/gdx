@@ -22,7 +22,7 @@ namespace gdxmerge
 
 constexpr std::array DataTypSize { 1, 1, 5, 5, 0 };
 
-enum class TProcessPass : uint8_t
+enum class ProcessPass_t : uint8_t
 {
    RpDoAll,
    RpScan,
@@ -31,28 +31,28 @@ enum class TProcessPass : uint8_t
    RpTooBig
 };
 
-struct TGAMSSymbol {
+struct GAMSSymbol_t {
    int SyDim, SySubTyp;
    gdxSyType SyTyp;
    std::unique_ptr<gdlib::gmsdata::TTblGamsData<double>> SyData;
-   library::short_string SyExplTxt;
+   library::ShortString_t SyExplTxt;
    int64_t SySize {}, SyMemory {};
    bool SySkip {};
 
-   TGAMSSymbol( int ADim, gdxSyType AType, int ASubTyp );
+   GAMSSymbol_t( int ADim, gdxSyType AType, int ASubTyp );
 
    // void SetCurrentFile( const std::string &S );
 };
 
-struct TGDXFileEntry {
+struct GDXFileEntry_t {
    std::string FFileName, FFileId, FFileInfo;
 
-   TGDXFileEntry( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
+   GDXFileEntry_t( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
 };
 
 template<typename T>
-struct TFileList final : public gdlib::gmsobj::TXList<T> {
-   ~TFileList() override;
+struct FileList_t final : public gdlib::gmsobj::TXList<T> {
+   ~FileList_t() override;
    void Clear() override;
    void AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
    std::string FileName( int Index );
@@ -60,29 +60,29 @@ struct TFileList final : public gdlib::gmsobj::TXList<T> {
    std::string FileInfo( int Index );
 };
 
-class TSymbolList : public gdlib::gmsobj::TXHashedStringList<TGAMSSymbol>
+class SymbolList_t : public gdlib::gmsobj::TXHashedStringList<GAMSSymbol_t>
 {
-   std::unique_ptr<gdlib::gmsobj::TXStrPool<library::short_string>> StrPool;
+   std::unique_ptr<gdlib::gmsobj::TXStrPool<library::ShortString_t>> StrPool;
    int FErrorCount {}, NextAcroNr {};
-   std::unique_ptr<TFileList<TGDXFileEntry>> FileList;
+   std::unique_ptr<FileList_t<GDXFileEntry_t>> FileList;
    std::vector<std::string> IncludeList, ExcludeList;
 
 public:
-   TSymbolList();
-   ~TSymbolList() override;
+   SymbolList_t();
+   ~SymbolList_t() override;
    void Clear() override;
 
-   static void OpenOutput( const library::short_string &AFileName, int &ErrNr );
-   static int AddUEL( const library::short_string &S );
+   static void OpenOutput( const library::ShortString_t &AFileName, int &ErrNr );
+   static int AddUEL( const library::ShortString_t &S );
    int AddSymbol( const std::string &AName, int ADim, gdxSyType AType, int ASubTyp );
-   void AddPGXFile( int FNr, TProcessPass Pass );
+   void AddPGXFile( int FNr, ProcessPass_t Pass );
    bool CollectBigOne( int SyNr );
    bool FindGDXFiles( const std::string &Path );
-   void WritePGXFile( int SyNr, TProcessPass Pass );
+   void WritePGXFile( int SyNr, ProcessPass_t Pass );
    void WriteNameList();
    void KeepNewAcronyms( const gdxHandle_t &PGX );
    void ShareAcronyms( const gdxHandle_t &PGX );
-   int FindAcronym( const library::short_string &Id );
+   int FindAcronym( const library::ShortString_t &Id );
 
    int GetFErrorCount() const;
    int GetFileListSize() const;
@@ -97,7 +97,7 @@ std::string FormatDateTime( uint16_t Year, uint16_t Month, uint16_t Day,
 
 bool GetParameters( int argc, const char *argv[] );
 
-void Usage( const library::AuditLine &AuditLine );
+void Usage( const library::AuditLine_t &AuditLine );
 
 int main( int argc, const char *argv[] );
 
