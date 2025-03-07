@@ -32,7 +32,7 @@
 
 namespace gdlib::gamsdirs
 {
-const int NGMSLocNames = rtl::p3utils::NLocNames + 2;
+constexpr int NGMSLocNames = rtl::p3utils::NLocNames + 2;
 using TGMSLocNames = std::vector<std::string>;
 const std::string INCLIBDIR = "inclib", EXTEQUDIR = "external_equations", EXTRFUNCDIR = "extrinsic_functions";
 

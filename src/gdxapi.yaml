@@ -1131,7 +1131,7 @@ functions:
       parameters:
       - SyNr:
           type: int
-          description: The index number of the symbol (range 1..NrSymbols); SyNr = 0 reads universe.
+          description: The index number of the symbol (must be in range 1..NrSymbols).
       - DomainSyNrs:
           type: vII
           description: Array (length=symbol dim) returning the set identifiers or "*"; DomainSyNrs[D] will contain the index number of the one dimensional set or alias used as the domain for index position D. A value of zero represents the universe "*".
@@ -1144,7 +1144,7 @@ functions:
       parameters:
       - SyNr:
           type: int
-          description: The index number of the symbol (range 1..NrSymbols); SyNr = 0 reads universe.
+          description: The index number of the symbol (must be in range 1..NrSymbols).
       - DomainIDs:
           type: oSI
           description: DomainIDs[D] will contain the strings as they were stored with the call gdxSymbolSetDomainX. If gdxSymbolSetDomainX was never called, but gdxSymbolSetDomain was called, that information will be used instead. Length of this array should by dimensionality of the symbol. The special domain name "*" denotes the universe domain (all known UELs).

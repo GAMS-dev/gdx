@@ -31,13 +31,15 @@
 
 #ifndef STUBWARN
 #define STUBWARN()                                                                                                                                                       \
+   global::modhead::SWStream::ping(); \
    if( global::modhead::stubofs.is_open() )                                                                                                                              \
    {                                                                                                                                                                     \
       global::modhead::stubofs << "WARNING: Calling stub method " << __FUNCTION__ << " in line " << __LINE__ << " of file " << __FILE__ << ":" << __LINE__ << std::endl; \
       global::modhead::stubofs.flush();                                                                                                                                  \
    }
 
-#define STUBWARN_MSG( msg )                                                                                                                                                                  \
+#define STUBWARN_MSG( msg )        \
+   global::modhead::SWStream::ping(); \
    global::modhead::stubofs << "WARNING: " << ( msg ) << " when calling stub method " << __FUNCTION__ << " in line " << __LINE__ << " of file " << __FILE__ << ":" << __LINE__ << std::endl; \
    global::modhead::stubofs.flush();
 #endif
@@ -59,6 +61,9 @@ class SWStream final : public std::ofstream
 public:
    SWStream();
    ~SWStream() override;
+   static void ping() {
+      printf(" ");
+   }
 };
 extern SWStream stubofs;
 #else

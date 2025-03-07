@@ -27,7 +27,7 @@
 
 #pragma once
 
-// This is a drop-in replacement for gdx.h
+// This is a drop-in replacement for gdx.hpp
 // in order to make gxfiletests.cpp also useful
 // for testing the wrapped GDX DLL
 

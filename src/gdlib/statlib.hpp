@@ -111,6 +111,7 @@ bool statusProcessNext( stattypes::tstatusproc &statusproc, std::string &msg1, s
 void statusErrorFirst();
 bool statusErrorNext( int &row, int &col );
 bool statusErrorNextVar( int &col );
+bool statusErrorNextEqu(int &row);
 bool statusErrorNextJac( int &row, int &col );
 bool statusErrorDetail( int &cnt, std::string &msg );
 void statusErrorFree();

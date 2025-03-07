@@ -41,7 +41,7 @@ using DoubleArray = double[global::gmsspecs::BigIndex+1]; //std::array<double, g
 using PDoubleArray = DoubleArray *;
 using PTextFile = rtl::p3io::P3File *;
 
-using LongIntArray = int[global::gmsspecs::BigIndex+1]; //std::array<int, global::gmsspecs::BigIndex>;
+using LongIntArray = int32_t[global::gmsspecs::BigIndex+1]; //std::array<int32_t, global::gmsspecs::BigIndex>;
 using PLongIntArray = LongIntArray *;
 
 using TBooleanArray = bool[global::gmsspecs::BigIndex+1]; // std::array<bool, global::gmsspecs::BigIndex>;
