@@ -243,7 +243,7 @@ bool CmdParams_t::AddParameters( const int AInsP, const std::string &CmdLine, co
             while( getline( fi, line ) )
             {
                std::vector<std::string> strings = library::splitString( line, ' ' );
-               if( strings.front().empty() || strings.front().front() == '*' )
+               if( !strings.empty() && ( strings.front().empty() || strings.front().front() == '*' ) )
                   continue;
                for( size_t k {}; k < strings.size(); k++ )
                {
@@ -252,7 +252,7 @@ bool CmdParams_t::AddParameters( const int AInsP, const std::string &CmdLine, co
                   Dest.append( " " + strings[k] );
                }
                // TODO: Check whether this if is still necessary
-               if( strings.back().length() == 255 )
+               if( !strings.empty() && strings.back().length() == 255 )
                {
                   library::printErrorMessage( "**** Input line longer than " + std::to_string( MAXBUF * 255 ) + " characters" );
                   result = false;
