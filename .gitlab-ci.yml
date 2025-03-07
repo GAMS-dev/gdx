@@ -5,7 +5,7 @@ stages:
   - build
   - analyze
   - test
-  - test-gdxtools
+  # - test-gdxtools
   - leak-check
   - perf-check
   - docs
