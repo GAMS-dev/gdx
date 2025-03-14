@@ -717,7 +717,7 @@ bool TGMSStatusStream::checkfile( std::string &msg )
 {
    if( Fstatusopen )
    {
-      fclose(Ffstat);
+      std::fclose(Ffstat);
       Ffstat = nullptr;
       Fstatusopen = false;
       msg.clear();
@@ -901,7 +901,8 @@ bool TGMSStatusStream::StatusDumpNext( std::string &msg )
 
    if( feof(Ffstat) )
    {
-      fclose(Ffstat);
+      std::fclose(Ffstat);
+      Ffstat = nullptr;
       Fstatusopen = false;
       msg.clear();
       return false;
@@ -1017,7 +1018,8 @@ bool TGMSStatusStream::StatusProcessNext( stattypes::tstatusproc &statusproc, st
             case '3':
                statusproc = stattypes::statusEOF;
                msg1 = "End-of-File request";
-               fclose( Ffstat );
+               std::fclose( Ffstat );
+               Ffstat = nullptr;
                Fstatusopen = false;
                return false;
 
@@ -1154,7 +1156,8 @@ bool TGMSStatusStream::StatusProcessNext( stattypes::tstatusproc &statusproc, st
    msg1 = "End-of-File reached";
    msg2.clear();
    num = 0;
-   fclose( Ffstat );
+   std::fclose( Ffstat );
+   Ffstat = nullptr;
    Fstatusopen = false;
    return false;
 }
@@ -1163,7 +1166,8 @@ void TGMSStatusStream::StatusSetFilename( const std::string &fn )
 {
    if( Fstatusopen )
    {
-      fclose( Ffstat );
+      std::fclose( Ffstat );
+      Ffstat = nullptr;
       Fstatusopen = false;
       StatusErrorFree();
    }
@@ -1183,7 +1187,8 @@ bool TGMSStatusStream::StatusDummy( std::string &msg )
    writeln_gf( "**** SOLVER DID NOT WRITE A STATUS FILE ****" );
    writeln_gf( "" );
    writeln_gf( "=3" );
-   fclose( Ffstat );
+   std::fclose( Ffstat );
+   Ffstat = nullptr;
    Fstatusopen = false;
    msg.clear();
    return true;
@@ -1295,7 +1300,8 @@ void TGMSStatusStream::StatusClose()
 {
    if( Fstatusopen )
    {
-      fclose( Ffstat );
+      std::fclose( Ffstat );
+      Ffstat = nullptr;
       Fstatusopen = false;
    }
 }
@@ -1322,19 +1328,22 @@ bool TGMSStatusStream::StatusFileOpen( const tfileaction AAction, std::string &m
       //  012345
       // '**** SOLVER DID NOT WRITE A STATUS FILE'
       newstat = s.substr(5, 14) == "SOLVER DID NOT"s;
-      fclose( Ffstat );
+      std::fclose( Ffstat );
+      Ffstat = nullptr;
+      Fstatusopen = false;
    } else newstat = true;
    //delete Ffstat;
 
    // FIXME: Finish porting!
+   // ...
+   STUBWARN();
+   // TODO: Implement me!
 
    if(!newstat && AAction == forAppend) {
    }
    return false;
 
-   // ...
-   STUBWARN();
-   // TODO: Implement me!
+
 }
 
 void TGMSStatusStream::StatusWriteLn( const std::string &s ) const
