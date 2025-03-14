@@ -149,7 +149,7 @@ void gstatReOpen();
 void gstatMemory(double M);
 void gstatErrorCnt( int N );
 
-void gstatSetOpt14(bool v);
+void gstatSetOpt14( int *v );
 
 // check if the log is "fresh enough", update if not
 void gstatFreshen();
