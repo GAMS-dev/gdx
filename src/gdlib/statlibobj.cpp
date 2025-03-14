@@ -549,7 +549,7 @@ void TGMSLogStream::ShowStatLine()
          FMemory = static_cast<double>( rss ) / 1e6;
       else if( FShowOSMem == 2 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) )
          FMemory = static_cast<double>( vss ) / 1e6;
-      s += " "s + IntToStr( utils::round<int>( FMemory ) ) + " Mb"s;
+      s += " "s + IntToStr( utils::round<int>( sys14 ? 0.0 : FMemory ) ) + " Mb"s;
       if( FErrorCnt > 0 )
       {
          s += " "s + IntToStr( FErrorCnt ) + " "s;
