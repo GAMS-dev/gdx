@@ -509,7 +509,7 @@ void TGMSLogStream::Flush()
    FLastIsMsg = false;
 }
 
-void TGMSLogStream::setSys14( int *v ) { sys14 = v; }
+void TGMSLogStream::setSys14( int *v ) { Fsys14 = v; }
 
 void TGMSLogStream::doFileAnchor( const bool err, const std::string &fn, const int line, const int col )
 {
@@ -551,7 +551,7 @@ void TGMSLogStream::ShowStatLine()
          FMemory = static_cast<double>( rss ) / 1e6;
       else if( FShowOSMem == 2 && rtl::p3utils::p3GetMemoryInfo( rss, vss ) )
          FMemory = static_cast<double>( vss ) / 1e6;
-      s += " "s + IntToStr( utils::round<int>( sys14  && *sys14 ? 0.0 : FMemory ) ) + " Mb"s;
+      s += " "s + IntToStr( utils::round<int>( Fsys14  && *Fsys14 ? 0.0 : FMemory ) ) + " Mb"s;
       if( FErrorCnt > 0 )
       {
          s += " "s + IntToStr( FErrorCnt ) + " "s;

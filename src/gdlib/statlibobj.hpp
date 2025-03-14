@@ -65,7 +65,7 @@ class TGMSLogStream
    std::string FSaveAfn;
    int FSaveAstat {};
    std::string FRedirFileName;
-   int *sys14 {};
+   int *Fsys14 {};
 
 #ifdef METER
    // measure the calls made to this object
