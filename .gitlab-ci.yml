@@ -34,20 +34,20 @@ variables:
 build-leg-image:
   extends: .build-leg-image
   script:
-    - docker build -t registry.gams.com/devel/gdx/leg/builder-gdx:latest ci/images/leg
-    - docker push registry.gams.com/devel/gdx/leg/builder-gdx:latest
+    - docker build -t $DEVEL_CONTAINER_REG/gdx/leg/builder-gdx:latest ci/images/leg
+    - docker push $DEVEL_CONTAINER_REG/gdx/leg/builder-gdx:latest
 
 build-leg-analyze-image:
   extends: .build-leg-image
   script:
-    - docker build -t registry.gams.com/devel/gdx/leg/builder-analyze:latest ci/images/leg-analyze
-    - docker push registry.gams.com/devel/gdx/leg/builder-analyze:latest
+    - docker build -t $DEVEL_CONTAINER_REG/gdx/leg/builder-analyze:latest ci/images/leg-analyze
+    - docker push $DEVEL_CONTAINER_REG/gdx/leg/builder-analyze:latest
 
 build-leg-deploy-image:
   extends: .build-leg-image
   script:
-    - docker build -t registry.gams.com/devel/gdx/leg/builder-deploy:latest ci/images/leg-deploy
-    - docker push registry.gams.com/devel/gdx/leg/builder-deploy:latest
+    - docker build -t $DEVEL_CONTAINER_REG/gdx/leg/builder-deploy:latest ci/images/leg-deploy
+    - docker push $DEVEL_CONTAINER_REG/gdx/leg/builder-deploy:latest
 
 #=======================================================================================================================
 
@@ -56,7 +56,7 @@ apigenerator:
   tags: [linux]
   dependencies: []
   image:
-    name: registry.gams.com/devel/gdx/leg/builder-gdx:latest
+    name: $DEVEL_CONTAINER_REG/gdx/leg/builder-gdx:latest
     entrypoint: [ "" ]
   script:
     - mkdir -p apifiles
@@ -420,7 +420,7 @@ leak-check-leg:
   stage: leak-check
   tags: [linux]
   image:
-    name: registry.gams.com/devel/ciscripts/leg/builder-valgrind-codequality:latest
+    name: $DEVEL_CONTAINER_REG/ciscripts/leg/builder-valgrind-codequality:latest
     entrypoint: [""]
   when: manual # FIXME: resolve GLIBC_2.* not found!
   needs: [fetch-ci-scripts,build-debug-leg]
@@ -523,7 +523,7 @@ deploy-gitlab-github:
   tags: [linux]
   needs: [build-leg,build-dac,build-wei,apigenerator]
   image:
-    name: registry.gams.com/devel/gdx/leg/builder-deploy:latest
+    name: $DEVEL_CONTAINER_REG/gdx/leg/builder-deploy:latest
     entrypoint: [""]   # prevent startup.sh
   script:
     - GDX_TAG_NAME="`python3 ci/changelog_head.py tag_name`"
