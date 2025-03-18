@@ -753,8 +753,6 @@ inline auto ord( const char c )
    return static_cast<unsigned char>( c );
 }
 
-inline auto b2i(const bool x) { return x ? 1 : 0; }
-
 inline int pos( const char c, const std::string &s )
 {
    const auto p { s.find( c ) };
