@@ -203,7 +203,7 @@ void gstatErrorCnt( const int N )
    return GMSLogObj->LogErrrorCnt( N );
 }
 
-void gstatSetOpt14( int *v )
+void gstatSetOpt14( const bool v )
 {
    if(GMSLogObj)
       GMSLogObj->setSys14( v );

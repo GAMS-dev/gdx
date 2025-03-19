@@ -65,7 +65,7 @@ class TGMSLogStream
    std::string FSaveAfn;
    int FSaveAstat {};
    std::string FRedirFileName;
-   int *sys14 {};
+   bool sys14 {};
 
 #ifdef METER
    // measure the calls made to this object
@@ -123,7 +123,7 @@ public:
 
    void Flush();
 
-   void setSys14( int *v );
+   void setSys14( bool v ) { sys14 = v;  }
 };
 
 struct rcerrtxt {
