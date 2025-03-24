@@ -95,6 +95,9 @@ std::string ExtractFileExt( const std::string &FileName )
 bool FileExists( const std::string &FileName )
 {
 #if defined(_WIN32)
+   // put \\?\ in front of long absolute paths
+   if(FileName.length() > MAX_PATH && std::isalpha(FileName.front()) && FileName[1] == ':')
+      return !_access((R"(\\?\)"+FileName).c_str(), 0);
    return !_access(FileName.c_str(), 0);
 #else
    return !access(FileName.c_str(), F_OK);
@@ -450,7 +453,11 @@ int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
 #if defined(_WIN32)
    HANDLE fHandle;
    F.FindData = new _WIN32_FIND_DATAA{}; // will be freed in F destructor
-   F.FindHandle = fHandle = FindFirstFileA(Path.c_str(), F.FindData );
+   if(Path.length() > MAX_PATH && std::isalpha(Path.front()) && Path[1] == ':')
+      fHandle = FindFirstFileA((R"(\\?\)"+Path).c_str(), F.FindData );
+   else
+      fHandle = FindFirstFileA(Path.c_str(), F.FindData );
+   F.FindHandle = fHandle;
    if (INVALID_HANDLE_VALUE != fHandle) {
       auto res = FindMatchingFile(F);
       if (res != 0)
