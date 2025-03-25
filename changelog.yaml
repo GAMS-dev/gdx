@@ -1,4 +1,6 @@
 ---
+- 7.11.14:
+    - Correctly deal with GDX files that have long absolute paths (>260 characters) in GDX library and all tools (`gdxdump`, `gdxdiff`, `gdxmerge`).
 - 7.11.13:
     - Fixed the processing of commands via a text file (`@filename`) in `gdxmerge`.
     - Corrected documentation of `SyNr` argument of `gdxSymbolGetDomain(X)`.
