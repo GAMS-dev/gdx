@@ -37,7 +37,7 @@
 #include "../../rtl/sysutils_p3.hpp"
 
 // TODO: Disable at some point?
-#define OLD_MEMORY_CHECK
+// #define OLD_MEMORY_CHECK
 
 namespace gdxmerge
 {
