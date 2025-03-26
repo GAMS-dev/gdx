@@ -1,4 +1,6 @@
 ---
+- 7.11.15:
+    - Fixed an issue where `gdxmerge` would fail with a "Symbol is too large" error when merging GDX files containing large symbols.
 - 7.11.14:
     - Correctly deal with GDX files that have long absolute paths (>260 characters) in GDX library and all tools (`gdxdump`, `gdxdiff`, `gdxmerge`).
 - 7.11.13:
