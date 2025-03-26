@@ -31,6 +31,8 @@
 #include <filesystem>
 #include <algorithm>
 
+
+
 using namespace std::literals::string_literals;
 using namespace rtl::sysutils_p3;
 
@@ -191,6 +193,37 @@ TEST_CASE("Test Find{First,Next,Close}")
       REQUIRE(std::find(collectedFiles.begin(), collectedFiles.end(), fn) != collectedFiles.end());
       std::filesystem::remove( fn );
    }
+}
+
+TEST_CASE( "Test file exists" )
+{
+   char sep = '/';
+#if defined( _WIN32 )
+   sep = '\\';
+#endif
+   std::string foldername( 100, '\0' );
+   for( int i {}; i < static_cast<int>( foldername.length() ); i++ )
+      foldername[i] = static_cast<char>( '0' + i % 10 );
+   std::filesystem::create_directory( foldername );
+   std::filesystem::create_directory( foldername + sep + foldername );
+   std::string gdxFn { GetCurrentDir() + sep + foldername + sep + foldername + sep + foldername + ".gdx"s },
+           longGdxFn { gdxFn };
+#if defined( _WIN32 )
+   longGdxFn = R"(\\?\)" + gdxFn;
+#endif
+   std::ofstream ofs { longGdxFn };
+   ofs.close();
+
+   REQUIRE( FileExists( gdxFn ) );
+
+   std::filesystem::remove( longGdxFn );
+   REQUIRE_FALSE( FileExists( gdxFn ) );
+
+   std::filesystem::remove( foldername + sep + foldername );
+   REQUIRE_FALSE( FileExists( foldername + sep + foldername ) );
+
+   std::filesystem::remove( foldername );
+   REQUIRE_FALSE( FileExists( foldername ) );
 }
 
 TEST_SUITE_END();

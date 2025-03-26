@@ -131,7 +131,7 @@ void CheckGDXError( const gdxHandle_t &PGX )
    }
 }
 
-void OpenGDX( const library::ShortString_t &fn, gdxHandle_t &PGX )
+void OpenGDX( const std::string &fn, gdxHandle_t &PGX )
 {
    if( !rtl::sysutils_p3::FileExists( fn ) )
       FatalError( "Input file not found " + fn, static_cast<int>( ErrorCode_t::ERR_NOFILE ) );
@@ -739,7 +739,7 @@ void Usage( const library::AuditLine_t &AuditLine )
 // Function is empty in Delphi code
 // void CopyAcronyms( const gdxHandle_t &PGX ) {}
 
-void CheckFile( library::ShortString_t &fn )
+void CheckFile( std::string &fn )
 {
    if( !rtl::sysutils_p3::FileExists( fn ) && gdlib::strutilx::ExtractFileExtEx( fn ).empty() )
       fn = gdlib::strutilx::ChangeFileExtEx( fn, ".gdx" );
@@ -748,7 +748,8 @@ void CheckFile( library::ShortString_t &fn )
 int main( const int argc, const char *argv[] )
 {
    int ErrorCode, ErrNr, Dim, iST, StrNr;
-   library::ShortString_t S, ID, InFile1, InFile2, DiffFileName;
+   library::ShortString_t S, ID, DiffFileName;
+   std::string InFile1, InFile2;
    std::map<library::ShortString_t, int> IDTable;
    bool UsingIDE, RenameOK;
 

@@ -106,7 +106,7 @@ void FatalError2( const std::string &Msg1, const std::string &Msg2, int ErrNr );
 
 void CheckGDXError( const gdxHandle_t &PGX );
 
-void OpenGDX( const library::ShortString_t &fn, gdxHandle_t &PGX );
+void OpenGDX( const std::string &fn, gdxHandle_t &PGX );
 
 void RegisterDiffUELs();
 
@@ -118,7 +118,7 @@ void Usage( const library::AuditLine_t &AuditLine );
 
 // void CopyAcronyms( const gdxHandle_t &PGX );
 
-void CheckFile( library::ShortString_t &fn );
+void CheckFile( std::string &fn );
 
 int main( int argc, const char *argv[] );
 

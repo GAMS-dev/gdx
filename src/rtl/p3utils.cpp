@@ -353,10 +353,9 @@ static inline bool p3IsValidHandle(const Tp3FileHandle h) {
 int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle &h )
 {
 #if defined(_WIN32)
-   DWORD lowMode;
-   HANDLE hFile;
+   HANDLE hFile {};
 
-   lowMode = mode & 3;
+   const DWORD lowMode = mode & 3;
    if (3 == lowMode) {
       h = INVALID_HANDLE_VALUE;
       return ERROR_INVALID_PARAMETER;
@@ -373,20 +372,30 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
       }
    }
    else
-      hFile = CreateFileA (fName.c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
+   {
+      bool longAbsPath {};
+#if defined(_WIN32)
+      longAbsPath = fName.length() > MAX_PATH && std::isalpha(fName.front()) && fName[1] == ':';
+#endif
+      if(longAbsPath)
+         hFile = CreateFileA ((R"(\\?\)"+fName).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
                           createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
-   if (INVALID_HANDLE_VALUE == hFile) {
+      else
+         hFile = CreateFileA (fName.c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
+                          createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
+   }
+   if( INVALID_HANDLE_VALUE == hFile )
+   {
       h = INVALID_HANDLE_VALUE;
-      int result = win2c(static_cast<int>(GetLastError()));
-      if (0 == result) { /* ouch: just pick a likely but non-specific code */
+      int result = win2c( static_cast<int>( GetLastError() ) );
+      if( 0 == result )
+      { /* ouch: just pick a likely but non-specific code */
          result = EACCES;
       }
       return result;
    }
-   else {
-      h = hFile;
-      return 0;
-   }
+   h = hFile;
+   return 0;
 #else
    if (fName.empty()) {
       if (mode == Tp3FileOpenAction::p3OpenRead)

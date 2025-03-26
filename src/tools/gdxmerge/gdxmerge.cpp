@@ -151,7 +151,8 @@ int SymbolList_t::AddSymbol( const std::string &AName, const int ADim, const gdx
 void SymbolList_t::AddPGXFile( const int FNr, const ProcessPass_t Pass )
 {
    bool FrstError;
-   library::ShortString_t SyName, FileName;
+   library::ShortString_t SyName;
+   std::string FileName;
 
    auto CheckError = [&]( const bool Cnd, const std::string &Msg ) -> bool {
       bool Result { !Cnd };
