@@ -37,7 +37,6 @@
 #include "../gdlib/strutilx.hpp"     // for DblToStr
 #include "../gdlib/utils.hpp"        // for in, trim, val
 
-#include "global/modhead.hpp"        // for STUBWARN
 #include "math_p3.hpp"               // for IntPower
 #include "p3platform.hpp"            // for tOSPlatform, OSPlatform, OSFileType
 #include "sysutils_p3.hpp"           // for ExtractFilePath, ExcludeTrailingPa...
@@ -873,7 +872,7 @@ bool delphiGetDecDigits( double y, int mode, int nDigits, std::string &digits, i
 {
    // ...
    // TODO: Implement me!
-   STUBWARN();
+   throw std::runtime_error("Not fully implemented yet!");
    return false;
 }
 
@@ -894,7 +893,7 @@ std::string p3FloatToEfmt( double x, int width, int decimals )
 {
    // ...
    // TODO: Implement me!
-   STUBWARN();
+   throw std::runtime_error("Not fully implemented yet!");
    return {};
 }
 

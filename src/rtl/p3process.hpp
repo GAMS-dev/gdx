@@ -28,7 +28,7 @@
 #include <string>
 
 
-#include "../global/delphitypes.hpp"
+#include "delphitypes.hpp"
 
 namespace rtl::p3process
 {

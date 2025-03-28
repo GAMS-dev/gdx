@@ -28,7 +28,7 @@
 #include <iostream>
 #include <limits>
 
-#include "rtl/p3io.hpp"
+#include "p3io.hpp"
 #include "../doctest.hpp"
 
 using namespace std::literals::string_literals;

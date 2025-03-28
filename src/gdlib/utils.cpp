@@ -26,8 +26,8 @@
 // FIXME: Get rid of too many "const std::string &" processing functions and use "std::string_view" or "const char *" instead!
 
 #include "utils.hpp"
-#include "rtl/p3io.hpp"
-#include "rtl/sysutils_p3.hpp"
+#include "p3io.hpp"
+#include "sysutils_p3.hpp"
 
 #include <algorithm>
 #include <cstdint>

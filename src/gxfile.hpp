@@ -28,12 +28,12 @@
 // Description:
 //  This unit defines the GDX Object as a C++ object.
 
-#include "gdlib/datastorage.hpp"   // for TLinkedData
+#include "datastorage.hpp"   // for TLinkedData
 #include <gclgms.h>        // for GLOBAL_MAX_INDEX_DIM, GMS_MAX_INDEX_DIM
-#include "gdlib/gmsdata.hpp"       // for TTblGamsData
-#include "gdlib/gmsobj.hpp"        // for TBooleanBitArray, TXList, TXStrings
-#include "gdlib/strhash.hpp"       // for TXCSStrHashList, TXStrHashList
-#include "gdlib/utils.hpp"
+#include "gmsdata.hpp"       // for TTblGamsData
+#include "gmsobj.hpp"        // for TBooleanBitArray, TXList, TXStrings
+#include "strhash.hpp"       // for TXCSStrHashList, TXStrHashList
+#include "utils.hpp"
 #include <array>           // for array
 #include <cstdint>         // for int64_t, uint8_t
 #include <cstring>         // for size_t
