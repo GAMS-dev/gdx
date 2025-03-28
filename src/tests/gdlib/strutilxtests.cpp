@@ -23,8 +23,8 @@
 * SOFTWARE.
 */
 
-#include "gdlib/strutilx.hpp"
-#include "gdlib/utils.hpp"
+#include "strutilx.hpp"
+#include "utils.hpp"
 #include "../doctest.hpp"
 
 using namespace std::literals::string_literals;

@@ -23,7 +23,7 @@
  * SOFTWARE.
  */
 
-#include "gdlib/gmsobj.hpp"// for TXStrPool, TBooleanBitArray, TXList, TXCustom...
+#include "gmsobj.hpp"// for TXStrPool, TBooleanBitArray, TXList, TXCustom...
 #include "tests/doctest.hpp"  // for ResultBuilder, REQUIRE_EQ, Expression_lhs
 #include <array>      // for array
 #include <list>       // for list, operator!=, _List_iterator

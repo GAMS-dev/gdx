@@ -23,7 +23,7 @@
 * SOFTWARE.
 */
 
-#include "rtl/p3utils.hpp"
+#include "p3utils.hpp"
 #include "../doctest.hpp"
 #include <string>
 

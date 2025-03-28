@@ -27,7 +27,7 @@
 #include <numeric>
 #include <string>
 
-#include "gdlib/strhash.hpp"
+#include "strhash.hpp"
 #include "tests/doctest.hpp"
 
 using namespace std::literals::string_literals;

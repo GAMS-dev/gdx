@@ -51,7 +51,7 @@
 #include <cassert>
 
 #include "gdxtests.hpp"
-#include "gdlib/strindexbuf.hpp"
+#include "strindexbuf.hpp"
 
 using namespace std::literals::string_literals;
 using namespace gdx;

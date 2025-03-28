@@ -38,8 +38,8 @@
 
 #include "../rtl/sysutils_p3.hpp"  // for IntToStr
 #include "gclgms.h"              // for GMS_SV_ACR, GMS_SV_UNDEF, GMS_SV_EPS
-#include "global/delphitypes.hpp"// for Bounded
-#include "rtl/p3utils.hpp"         // for Tp3FileOpenAction, p3FileRead, p3Fil...
+#include "delphitypes.hpp"// for Bounded
+#include "p3utils.hpp"         // for Tp3FileOpenAction, p3FileRead, p3Fil...
 #include "utils.hpp"               // for in, ord, checkBOMOffset, constructStr
 
 // only supported by MSVC so far :(

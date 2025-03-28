@@ -61,8 +61,6 @@ if (UNIX)
 	endif ()
 endif (UNIX)
 
-include(base-units.cmake)
-
 set(zlib-units
 		# ZLIB modules
 		# missing? run in project root: git clone https://github.com/madler/zlib zlib
@@ -103,34 +101,6 @@ set(gdx-core
 		${zlib-units}
 )
 
-set(test-deps
-		# runtime library
-		src/rtl/p3library.cpp
-		src/rtl/p3library.hpp
-		src/rtl/stdthread.cpp
-		src/rtl/stdthread.hpp
-
-		# global
-		src/global/gmslibname.cpp
-		src/global/gmslibname.hpp
-
-		# gdlib
-		src/gdlib/charmaps.cpp
-		src/gdlib/charmaps.hpp
-		src/gdlib/gmacro.cpp
-		src/gdlib/gmacro.hpp
-		src/gdlib/gmsheapnew.cpp
-		src/gdlib/gmsheapnew.hpp
-		src/gdlib/gmsonly.hpp
-		src/gdlib/gmsonly.cpp
-		src/gdlib/obfuscatestr.cpp
-		src/gdlib/obfuscatestr.hpp
-		src/gdlib/strhash.hpp
-		src/gdlib/strhash.cpp
-		src/gdlib/xcompress.cpp
-		src/gdlib/xcompress.hpp
-)
-
 set(tests
 		src/tests/doctestmain.cpp
 
@@ -138,25 +108,18 @@ set(tests
 		src/tests/gdxtests.cpp
 		src/tests/gxfiletests.cpp
 
-		src/tests/gdlib/datastoragetests.cpp
-		src/tests/gdlib/glookuptests.cpp
-		src/tests/gdlib/gmacrotests.cpp
 		src/tests/gdlib/gmsdatatests.cpp
-		src/tests/gdlib/gmsheapnewtests.cpp
 		src/tests/gdlib/gmsobjtests.cpp
 		src/tests/gdlib/gmsstrmtests.cpp
-		src/tests/gdlib/obfuscatestrtests.cpp
 		src/tests/gdlib/strhashtests.cpp
 		src/tests/gdlib/strutilxtests.cpp
 		src/tests/gdlib/utilstests.cpp
-		src/tests/gdlib/xcompresstests.cpp
 
 		src/tests/rtl/p3iotests.cpp
 		src/tests/rtl/p3utilstests.cpp
-		src/tests/rtl/stdthreadtests.cpp
 		src/tests/rtl/sysutilsp3tests.cpp
 )
 
-set(inc-dirs zlib src generated)
+set(inc-dirs zlib src generated src/gdlib src/global src/rtl)
 
 include(targets.cmake)

@@ -27,7 +27,7 @@
 #include <fstream>
 #include <filesystem>
 
-#include "gdlib/utils.hpp"
+#include "utils.hpp"
 
 #include "tests/doctest.hpp"
 

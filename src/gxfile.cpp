@@ -23,11 +23,11 @@
  * SOFTWARE.
  */
 
-#include "gdlib/gmsstrm.hpp" // for TMiBufferedStream, TXStream, File...
-#include "rtl/sysutils_p3.hpp" // for IntToStr
+#include "gmsstrm.hpp" // for TMiBufferedStream, TXStream, File...
+#include "sysutils_p3.hpp" // for IntToStr
 
 #include "gdx.hpp"      // for TGXFileObj, TGXFileObj::stat_write
-#include "gdlib/utils.hpp" // for in, debugStream, arrayWithValue
+#include "utils.hpp" // for in, debugStream, arrayWithValue
 #include <algorithm>// for fill_n, max, fill, sort
 #include <cassert>  // for assert
 #include <cmath>    // for round, isinf, isnan, isnormal, abs
