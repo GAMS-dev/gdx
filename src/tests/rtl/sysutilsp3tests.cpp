@@ -207,7 +207,11 @@ TEST_CASE( "Test file exists" )
    const std::string pathRoot = R"(\\?\C:\tmp\)";
 #else
    constexpr char sep {'/'};
-   const std::string pathRoot = "/tmp/";
+   #if defined( __APPLE__ )
+   const std::string pathRoot = ""s + getenv( "TMPDIR" ) + '/';
+   #else
+   const std::string pathRoot = "/tmp/"s;
+   #endif
 #endif
 
    const std::string fileLocation {pathRoot + foldername + sep + foldername};
