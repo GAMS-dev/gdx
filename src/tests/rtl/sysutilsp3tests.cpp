@@ -32,6 +32,10 @@
 #include <algorithm>
 #include <fstream>
 
+#if defined(_WIN32)
+#include <windows.h>
+#undef max
+#endif
 
 
 using namespace std::literals::string_literals;
@@ -204,7 +208,9 @@ TEST_CASE( "Test file exists" )
 
 #if defined( _WIN32 )
    constexpr char sep {'\\'};
-   const std::string pathRoot = R"(\\?\C:\tmp\)";
+   std::array<char, MAX_PATH> tmpDirBuf;
+   GetTempPathA(tmpDirBuf.size(), tmpDirBuf.data());
+   const std::string pathRoot = "\\\\?\\"s + tmpDirBuf.data();
 #else
    constexpr char sep {'/'};
    #if defined( __APPLE__ )
