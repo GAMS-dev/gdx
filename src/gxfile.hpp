@@ -130,7 +130,7 @@ struct TgdxSymbRecord {
    gdxSyType SDataType;
    int SUserInfo;
    bool SSetText;
-   std::array<char, GMS_SSSIZE> SExplTxt;
+   utils::sstring SExplTxt;
    bool SIsCompressed;
    bool SScalarFrst;                  // not stored
    std::unique_ptr<int[]> SDomSymbols,// real domain info

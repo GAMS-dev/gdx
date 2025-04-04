@@ -29,6 +29,7 @@
 
 using namespace std::literals::string_literals;
 using namespace gdlib::strutilx;
+using namespace utils;
 
 namespace tests::gdlibtests::strutilxtests
 {
@@ -91,7 +92,7 @@ TEST_CASE( "Convert double to string" )
    REQUIRE_EQ( "3.1415926", DblToStrSep( 3.1415926, '.' ) );
    REQUIRE_EQ( "0.141592653589793", DblToStrSep( 0.14159265358979312, '.' ) );
 
-   std::array<char, 256> buf{};
+   sstring buf{};
    DblToStr(23, buf.data());
    REQUIRE(!std::strcmp(buf.data(), "23"));
 
@@ -149,7 +150,7 @@ TEST_CASE( "Test converting char buffer string with C-style layout (PChar) to a 
    REQUIRE_EQ( 's', buf[3] );
 
    // More difficult: A string with full length of 255 actual characters
-   std::array<char, 256> bufMaxSize {};
+   sstring bufMaxSize {};
    bufMaxSize.fill( 'X' );
    bufMaxSize.back() = '\0';
    strConvCtoDelphi( bufMaxSize.data() );
@@ -166,7 +167,7 @@ TEST_CASE( "Test converting char buffer string with C-style layout (PChar) to a 
    REQUIRE_NE( 'X', bufTooBig[1] );
    std::string msg;
    msg.assign( &bufTooBig[1] );
-   REQUIRE( utils::posOfSubstr( "Error", msg ) != -1 );
+   REQUIRE( posOfSubstr( "Error", msg ) != -1 );
 }
 
 TEST_CASE( "Test converting char buffer with Delphi short string layout to C-style string (PChar)" )
@@ -184,7 +185,7 @@ TEST_CASE( "Test converting char buffer with Delphi short string layout to C-sty
    REQUIRE_EQ( '\0', buf[3] );
 
    // Full length string
-   std::array<char, 256> bufMaxSize {};
+   sstring bufMaxSize {};
    bufMaxSize.fill( 'X' );
    bufMaxSize.front() = static_cast<uint8_t>( 255 );
    strConvDelphiToC( bufMaxSize.data() );
@@ -205,7 +206,7 @@ TEST_CASE( "Test converting char buffer with Delphi short string layout to C++ s
    REQUIRE_EQ( "yes"s, s );
 
    // Full length string
-   std::array<char, 256> bufMaxSize {};
+   sstring bufMaxSize {};
    bufMaxSize.fill( 'X' );
    bufMaxSize.front() = static_cast<uint8_t>( 255 );
    const std::string sMaxSize { strConvDelphiToCpp( bufMaxSize.data() ) };
@@ -225,7 +226,7 @@ TEST_CASE( "Test converting C++ standard library string to char buffer with Delp
 
    // Full length string
    std::string sMaxSize( 255, 'X' );
-   std::array<char, 256> bufMaxSize {};
+   sstring bufMaxSize {};
    strConvCppToDelphi( sMaxSize, bufMaxSize.data() );
    REQUIRE_EQ( 255, static_cast<uint8_t>( bufMaxSize.front() ) );
    for( int i { 1 }; i < (int)bufMaxSize.size(); i++ )
@@ -239,7 +240,7 @@ TEST_CASE( "Test converting C++ standard library string to char buffer with Delp
    REQUIRE_NE( 'X', bufTooBig[1] );
    std::string msg;
    msg.assign( &bufTooBig[1] );
-   REQUIRE( utils::posOfSubstr( "Error", msg ) != -1 );
+   REQUIRE( posOfSubstr( "Error", msg ) != -1 );
 }
 
 TEST_SUITE_END();

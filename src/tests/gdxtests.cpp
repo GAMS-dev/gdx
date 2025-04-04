@@ -55,6 +55,7 @@
 
 using namespace std::literals::string_literals;
 using namespace gdx;
+using namespace utils;
 using namespace gdlib::strindexbuf;
 
 namespace gdx::tests::gdxtests
@@ -173,7 +174,7 @@ TEST_CASE( "Simple setup and teardown of a GDX object" )
 TEST_CASE( "Check DLL version" )
 {
    basicTest( []( TGXFileObj &pgx ) {
-      std::array<char, GMS_SSSIZE> versionStr {};
+      sstring versionStr {};
       REQUIRE( pgx.gdxGetDLLVersion( versionStr.data() ) );
       std::string expectedPrefix { "GDX Library"s };
       versionStr[expectedPrefix.length()] = '\0';
@@ -205,7 +206,7 @@ TEST_CASE( "Just create a file" )
       REQUIRE_EQ( 7, fileVer );
       REQUIRE_EQ( 0, comprLev );
 
-      std::array<char, GMS_SSSIZE> fileStr {}, producerStr {};
+      sstring fileStr {}, producerStr {};
       REQUIRE( pgx.gdxFileVersion( fileStr.data(), producerStr.data() ) );
       std::string fs { fileStr.data() }, ps { producerStr.data() }, expFsPrefix { "GDX Library" };
       REQUIRE_EQ( "gdxtest"s, ps );
@@ -1075,7 +1076,7 @@ TEST_CASE( "Test adding a set alias" )
       REQUIRE( pgx.gdxFindSymbol( aliasName.c_str(), aliasIx ) );
       REQUIRE_EQ( aliasSymNr, aliasIx );
       int numRecords, userInfo, dim, typ;
-      std::array<char, GMS_SSSIZE> explText {}, symbolName {};
+      sstring explText {}, symbolName {};
       REQUIRE( pgx.gdxSymbolInfoX( aliasSymNr, numRecords, userInfo, explText.data() ) );
       REQUIRE( pgx.gdxSymbolInfo( aliasSymNr, symbolName.data(), dim, typ ) );
       REQUIRE_EQ( 0, numRecords );
@@ -2039,7 +2040,7 @@ TEST_CASE("Test filter example from README")
       REQUIRE( gdx.gdxUMUelInfo( NrUnMapped, LastMapped ) );
       int SyNr;
       REQUIRE( gdx.gdxFindSymbol( "A", SyNr ) );
-      std::array<char, GMS_SSSIZE> SyName {};
+      sstring SyName {};
       int SyDim, SyTyp;
       REQUIRE( gdx.gdxSymbolInfo( SyNr, SyName.data(), SyDim, SyTyp ) );
       REQUIRE_EQ( SyDim, 2 );
@@ -2062,7 +2063,7 @@ TEST_CASE("Test filter example from README")
       {
          for( int N { LastMapped + 1 }; N <= NewLastMapped; N++ )
          {
-            std::array<char, GMS_SSSIZE> S {};
+            sstring S {};
             REQUIRE( gdx.gdxGetUEL( N, S.data() ) );
             //std::cout << "New element " << N << " = " << S.data() << '\n';
          }
@@ -2473,7 +2474,7 @@ TEST_CASE("Debug terrible file") {
    testRead(fn, []( TGXFileObj &obj )
    {
       int numRecs, dimFrst, dim, typ, xSyNr;
-      std::array<char, 256> name {};
+      sstring name {};
       obj.gdxFindSymbol( "X", xSyNr );
       obj.gdxSymbolInfo( xSyNr, name.data(), dim, typ );
       obj.gdxDataReadRawStart( xSyNr, numRecs );
@@ -2700,7 +2701,7 @@ TEST_CASE("Test having UEL numbers without labels")
       REQUIRE_EQ(pgx.gdxErrorCount(), 1);
       int lastErr { pgx.gdxGetLastError() };
       REQUIRE_EQ(-100004 /*ERR_BADELEMENTINDEX*/, lastErr);
-      std::array<char, 256> errMsg {};
+      sstring errMsg {};
       REQUIRE(pgx.gdxErrorStr( lastErr, errMsg.data() ));
       REQUIRE_EQ("Bad UEL Nr"s, std::string{errMsg.data()});
       REQUIRE_FALSE(pgx.gdxDataReadMap( 2, keys.data(), values.data(), dimFrst ));
