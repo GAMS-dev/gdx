@@ -53,8 +53,16 @@ class TXStream;
 namespace gdx
 {
 
-using TgdxUELIndex = std::array<int, GMS_MAX_INDEX_DIM>;
-using TgdxValues = std::array<double, GMS_VAL_SCALE + 1>;
+class TgdxUELIndex : public std::array<int, GMS_MAX_INDEX_DIM> {
+public:
+   constexpr operator int*() noexcept { return data(); }
+   constexpr operator const int*() const noexcept { return data(); }
+};
+class TgdxValues : public std::array<double, GMS_VAL_SCALE + 1> {
+public:
+   constexpr operator double*() noexcept { return data(); }
+   constexpr operator const double*() const noexcept { return data(); }
+};
 
 using TDomainIndexProc_t = void ( * )( int RawIndex, int MappedIndex, void *Uptr );
 using TDataStoreProc_t = void ( * )( const int *Indx, const double *Vals );

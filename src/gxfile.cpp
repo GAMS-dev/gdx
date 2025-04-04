@@ -3280,7 +3280,7 @@ int TGXFileObj::gdxFileInfo( int &FileVer, int &ComprLev ) const
 int TGXFileObj::gdxDataReadSliceStart( int SyNr, int *ElemCounts )
 {
    //-- Note: PrepareSymbolRead checks for the correct status
-   TgdxUELIndex XDomains = arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED );
+   auto XDomains = arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED );
    SliceSyNr = SyNr;
    PrepareSymbolRead( "DataReadSliceStart"s, SliceSyNr, XDomains.data(), fr_raw_data );
 
@@ -3341,7 +3341,7 @@ int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataSt
    }
    fmode = fr_init;
    if( !GoodIndx ) return false;
-   TgdxUELIndex XDomains = arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED );
+   auto XDomains = arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED );
    PrepareSymbolRead( "DataReadSlice"s, SliceSyNr, XDomains.data(), fr_slice );
    TgdxValues Values;
    TgdxUELIndex HisIndx;
