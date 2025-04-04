@@ -649,7 +649,7 @@ TBufferedFileStream::TBufferedFileStream( const std::string &FileName, uint16_t 
       NrRead {},
       NrWritten {},
       BufSize { BufferSize },
-      CBufSize {  round<uint32_t>( static_cast<double>( BufferSize ) * 12.0 / 10.0 ) + 20 },
+      CBufSize {  utils::round<uint32_t>( static_cast<double>( BufferSize ) * 12.0 / 10.0 ) + 20 },
       BufPtr( BufferSize ),
       CBufPtr { static_cast<PCompressBuffer>( malloc( sizeof( TCompressHeader ) + CBufSize ) ) },
       FCompress {},
@@ -905,7 +905,7 @@ static tgmsvalue mapval( double x )
    if( x < GMS_SV_UNDEF ) return xvreal;
    if( x >= GMS_SV_ACR ) return xvacr;
    x /= GMS_SV_UNDEF;
-   const int k = round<int>( x );
+   const int k = utils::round<int>( x );
    if( std::abs( k - x ) > 1.0e-5 )
       return xvund;
    constexpr std::array<tgmsvalue, 5> kToRetMapping = {
@@ -934,7 +934,7 @@ void TMiBufferedStream::WriteGmsDouble( double D )
    if( B )
    {
       Write( &B, 1 );
-      if( gv == xvacr ) WriteGmsInteger( round<int>( D / GMS_SV_ACR ) );
+      if( gv == xvacr ) WriteGmsInteger( utils::round<int>( D / GMS_SV_ACR ) );
       return;
    }
    uint8_t C {};
