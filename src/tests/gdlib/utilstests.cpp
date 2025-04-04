@@ -430,13 +430,13 @@ TEST_CASE( "Test rounding to n-digits" )
 
 TEST_CASE( "Test double to integral type rounding function that should mimic System.Round Delphi behavior" )
 {
-   REQUIRE_EQ(0, round<int>(0.45));
-   REQUIRE_EQ(0, round<int>(-0.45));
+   REQUIRE_EQ(0, utils::round<int>(0.45));
+   REQUIRE_EQ(0, utils::round<int>(-0.45));
    // round tie away from 0
-   REQUIRE_EQ(-1, round<int>(-0.5));
-   REQUIRE_EQ(1, round<int>(0.5));
-   REQUIRE_EQ(-3, round<int>(-2.5));
-   REQUIRE_EQ(3, round<int>(2.5));
+   REQUIRE_EQ(-1, utils::round<int>(-0.5));
+   REQUIRE_EQ(1, utils::round<int>(0.5));
+   REQUIRE_EQ(-3, utils::round<int>(-2.5));
+   REQUIRE_EQ(3, utils::round<int>(2.5));
 }
 
 TEST_CASE( "Test replacing specific char with another one in a string (in place)" )

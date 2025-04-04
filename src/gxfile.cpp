@@ -1366,7 +1366,7 @@ bool TGXFileObj::DoWrite( const int *AElements, const double *AVals )
          {
             FFile->WriteDouble( X );
             if( X >= Zvalacr )
-               AcronymList->CheckEntry( round<int>( X / Zvalacr ) );
+               AcronymList->CheckEntry( utils::round<int>( X / Zvalacr ) );
          }
       }
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
@@ -1461,7 +1461,7 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
       {// remap settext number
          // NOTE: Not covered by unit tests yet.
          const double X { AVals[GMS_VAL_LEVEL] };
-         if( const int D { ( round<int>( X ) ) };
+         if( const int D { ( utils::round<int>( X ) ) };
             std::abs( X - D ) < 1e-12 && D >= 0 && D <= SetTextList->GetCapacity() )
             AVals[GMS_VAL_LEVEL] = MapSetText[D];
       }
@@ -1477,7 +1477,7 @@ double TGXFileObj::AcronymRemap( double V )
       if(MapAcrToNaN)
          return intlValueMapDbl[GMS_SVIDX_NA];
 
-      const int orgIndx { ( round<int>( v / Zvalacr ) ) };
+      const int orgIndx { ( utils::round<int>( v / Zvalacr ) ) };
       int newIndx {};
       if( int N { AcronymList->FindEntry( orgIndx ) }; N < 0 )
       {// not found
@@ -3223,7 +3223,7 @@ int TGXFileObj::gdxAcronymAdd( const char *AName, const char *Txt, int AIndx )
 
 int TGXFileObj::gdxAcronymIndex( double V ) const
 {
-   return V < Zvalacr ? 0 : round<int>( V / Zvalacr );
+   return V < Zvalacr ? 0 : utils::round<int>( V / Zvalacr );
 }
 
 int TGXFileObj::gdxAcronymName( double V, char *AName )
