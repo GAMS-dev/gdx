@@ -52,6 +52,7 @@
 
 #include "gdxtests.hpp"
 #include "strindexbuf.hpp"
+#include "utils.hpp"
 
 using namespace std::literals::string_literals;
 using namespace gdx;
