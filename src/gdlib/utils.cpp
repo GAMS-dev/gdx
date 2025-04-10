@@ -740,7 +740,7 @@ void getline( FILE *f, std::string &s )
 std::string getline( FILE *f )
 {
    constexpr int bsize {512};
-   std::array<char, bsize> buf;
+   std::array<char, bsize> buf {};
    if(!std::fgets( buf.data(), bsize, f ) && std::ferror(f))
       return {};
    return buf.data();
