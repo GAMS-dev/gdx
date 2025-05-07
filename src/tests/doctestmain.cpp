@@ -25,3 +25,31 @@
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "doctest.hpp"
+
+/*
+#define DOCTEST_CONFIG_IMPLEMENT
+#include "doctest.hpp"
+#include <string>
+#include <chrono>
+#include "gdx.hpp"
+
+int main(int argc, char** argv)
+{
+   std::string ErrMsg;
+   gdx::TGXFileObj pgx { ErrMsg };
+   int ErrNr;
+   const auto filename { R"(C:\Users\aschn\Downloads\model\MJjacobian_red2.gdx)" };
+
+   const auto start = std::chrono::high_resolution_clock::now();
+
+   for( int i {}; i < 10; i++ )
+   {
+      pgx.gdxOpenRead( filename, ErrNr );
+      pgx.gdxClose();
+   }
+
+   const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( std::chrono::high_resolution_clock::now() - start );
+   std::cout << "Execution time: " << duration.count() << " ms" << std::endl;
+
+   return 0;
+}*/

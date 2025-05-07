@@ -287,7 +287,7 @@ public:
 #else
       PHashBucket<T> PBuck = new THashBucket<T> {};
 #endif
-      Buckets.push_back( PBuck );
+      Buckets.emplace_back( PBuck );
       PBuck->NextBucket = nullptr;
       PBuck->StrNr = FCount;// before it was added!
       int res { FCount + ( OneBased ? 1 : 0 ) };
@@ -324,7 +324,7 @@ public:
 #else
       PBuck = new THashBucket<T> {};
 #endif
-      Buckets.push_back( PBuck );
+      Buckets.emplace_back( PBuck );
       PBuck->NextBucket = GetBucketByHash( HV );
       ( *PHashTable )[HV] = PBuck;
       PBuck->StrNr = FCount;// before it was added! zero based
@@ -358,7 +358,7 @@ public:
    int IndexOf( const char *s )
    {
       if( !PHashTable ) HashAll();
-      int HV { Hash( s ) };
+      const int HV { Hash( s ) };
       PHashBucket<T> PBuck = GetBucketByHash( HV );
       while( PBuck )
       {
@@ -373,9 +373,14 @@ public:
    void LoadFromStream( T2 &s )
    {
       Clear();
-      int Cnt { s.ReadInteger() };
+      const int Cnt { s.ReadInteger() };
+      SetCapacity( Cnt );
       for( int N {}; N < Cnt; N++ )
-         StoreObject( s.ReadString(), nullptr );
+      {
+         uint8_t slen;
+         const char * str {s.ReadSString(slen)};
+         StoreObject( str, slen, nullptr );
+      }
    }
 
    template<typename T2>
@@ -429,7 +434,7 @@ public:
       SetString( N + 1, s, std::strlen( s ) );
    }
 
-   T *operator[]( int N )
+   T *operator[]( const int N )
    {
       return GetObject( N );
    }
@@ -439,7 +444,7 @@ public:
       return *GetObject( IndexOf( key ) );
    }
 
-   T *GetSortedObject( int N )
+   T *GetSortedObject( const int N )
    {
       if( !FSorted ) Sort();
       return Buckets[( *SortMap )[N - ( OneBased ? 1 : 0 )]].Obj;
@@ -455,7 +460,7 @@ public:
       return GetString( N );
    }
 
-   void SetString( int N, const char *s, size_t slen )
+   void SetString( const int N, const char *s, size_t slen )
    {
       auto bucket = Buckets[N - ( OneBased ? 1 : 0 )];
 #ifdef TSH_BATCH_ALLOCS
@@ -468,7 +473,7 @@ public:
       utils::assignPCharToBuf( s, slen, bucket->StrP );
    }
 
-   [[nodiscard]] char *GetSortedString( int N ) const
+   [[nodiscard]] char *GetSortedString( const int N ) const
    {
       if( !FSorted ) Sort();
       return Buckets[( *SortMap )[N - ( OneBased ? 1 : 0 )]]->StrP;
@@ -489,9 +494,16 @@ public:
       return !FCount;
    }
 
-   void SetCapacity( int n )
+   void SetCapacity( int n, size_t strBytes = 0 )
    {
+      if( n <= 0 ) return;
       Buckets.reserve( n );
+#ifdef TSH_BATCH_ALLOCS
+      batchAllocator.SetFirstBatchSize( sizeof( THashBucket<T> ) * n );
+      // how to estimate the length of the UEL labels?
+      // using lower bound now: UEL must have at least 1 char + 1 extra byte
+      batchStrAllocator.SetFirstBatchSize( !strBytes ? sizeof(char) * 2 * n : strBytes );
+#endif
    }
 
    int GetCapacity()
@@ -515,14 +527,17 @@ inline int TXStrHashList<int>::Add( const char *s, size_t slen )
 
 template<>
 template<typename T2>
-inline void TXStrHashList<uint8_t>::LoadFromStream( T2 &s )
+void TXStrHashList<uint8_t>::LoadFromStream( T2 &s )
 {
    Clear();
-   int Cnt { s.ReadInteger() };
+   const int Cnt { s.ReadInteger() };
+   SetCapacity( Cnt );
    for( int N {}; N < Cnt; N++ )
    {
-      auto str { s.ReadString() };
-      StoreObject( str.c_str(), str.length(), 0 );
+      char sbuf[256];
+      uint8_t slen;
+      s.ReadSString( sbuf, slen );
+      StoreObject( sbuf, slen, 0 );
    }
 }
 
@@ -531,11 +546,14 @@ template<typename T2>
 inline void TXStrHashList<int>::LoadFromStream( T2 &s )
 {
    Clear();
-   int Cnt { s.ReadInteger() };
+   const int Cnt { s.ReadInteger() };
+   SetCapacity( Cnt );
    for( int N {}; N < Cnt; N++ )
    {
-      auto str { s.ReadString() };
-      StoreObject( str.c_str(), str.length(), 0 );
+      uint8_t slen;
+      char sbuf[256];
+      s.ReadSString( sbuf, slen );
+      StoreObject( sbuf, slen, 0 );
    }
 }
 
