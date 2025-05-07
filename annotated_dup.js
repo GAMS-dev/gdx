@@ -7,6 +7,8 @@ var annotated_dup =
       [ "TDomain", "structgdx_1_1TDomain.html", null ],
       [ "TFilterList", "classgdx_1_1TFilterList.html", null ],
       [ "TgdxSymbRecord", "structgdx_1_1TgdxSymbRecord.html", null ],
+      [ "TgdxUELIndex", "classgdx_1_1TgdxUELIndex.html", null ],
+      [ "TgdxValues", "classgdx_1_1TgdxValues.html", null ],
       [ "TGXFileObj", "classgdx_1_1TGXFileObj.html", "classgdx_1_1TGXFileObj" ],
       [ "TgxModeSet", "classgdx_1_1TgxModeSet.html", null ],
       [ "TI64Rec", "uniongdx_1_1TI64Rec.html", null ],

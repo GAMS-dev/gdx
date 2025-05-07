@@ -1,5 +1,9 @@
 var hierarchy =
 [
+    [ "std::array", null, [
+      [ "gdx::TgdxUELIndex", "classgdx_1_1TgdxUELIndex.html", null ],
+      [ "gdx::TgdxValues", "classgdx_1_1TgdxValues.html", null ]
+    ] ],
     [ "utils::IContainsPredicate", null, [
       [ "gdx::TgxModeSet", "classgdx_1_1TgxModeSet.html", null ]
     ] ],
