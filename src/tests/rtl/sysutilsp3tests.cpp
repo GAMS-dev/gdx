@@ -23,14 +23,19 @@
 * SOFTWARE.
 */
 
-#include "rtl/sysutils_p3.hpp"
-#include "gdlib/utils.hpp"
+#include "sysutils_p3.hpp"
+#include "utils.hpp"
 #include "../doctest.hpp"
 #include <string>
 #include <chrono>
 #include <filesystem>
 #include <algorithm>
+#include <fstream>
 
+#if defined(_WIN32)
+#include <windows.h>
+#undef max
+#endif
 
 
 using namespace std::literals::string_literals;
@@ -197,32 +202,33 @@ TEST_CASE("Test Find{First,Next,Close}")
 
 TEST_CASE( "Test file exists" )
 {
-   char sep = '/';
-#if defined( _WIN32 )
-   sep = '\\';
-#endif
    std::string foldername( 100, '\0' );
    for( int i {}; i < static_cast<int>( foldername.length() ); i++ )
       foldername[i] = static_cast<char>( '0' + i % 10 );
-   std::filesystem::create_directory( foldername );
-   std::filesystem::create_directory( foldername + sep + foldername );
-   std::string gdxFn { GetCurrentDir() + sep + foldername + sep + foldername + sep + foldername + ".gdx"s },
-           longGdxFn { gdxFn };
-#if defined( _WIN32 )
-   longGdxFn = R"(\\?\)" + gdxFn;
-#endif
-   std::ofstream ofs { longGdxFn };
-   ofs.close();
 
+#if defined( _WIN32 )
+   constexpr char sep {'\\'};
+   std::array<char, MAX_PATH> tmpDirBuf;
+   GetTempPathA(tmpDirBuf.size(), tmpDirBuf.data());
+   const std::string pathRoot = "\\\\?\\"s + tmpDirBuf.data();
+#else
+   constexpr char sep {'/'};
+   #if defined( __APPLE__ )
+   const std::string pathRoot = ""s + getenv( "TMPDIR" ) + '/';
+   #else
+   const std::string pathRoot = "/tmp/"s;
+   #endif
+#endif
+
+   const std::string fileLocation {pathRoot + foldername + sep + foldername};
+   const std::string gdxFn { fileLocation + sep + foldername + ".gdx"s };
+
+   std::filesystem::create_directories( fileLocation );
+   std::ofstream ofs { gdxFn };
+   ofs.close();
    REQUIRE( FileExists( gdxFn ) );
 
-   std::filesystem::remove( longGdxFn );
-   REQUIRE_FALSE( FileExists( gdxFn ) );
-
-   std::filesystem::remove( foldername + sep + foldername );
-   REQUIRE_FALSE( FileExists( foldername + sep + foldername ) );
-
-   std::filesystem::remove( foldername );
+   std::filesystem::remove_all( foldername );
    REQUIRE_FALSE( FileExists( foldername ) );
 }
 

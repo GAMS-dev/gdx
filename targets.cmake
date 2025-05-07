@@ -14,13 +14,6 @@ endif ()
 target_link_libraries(gdxcclib64 ${mylibs} ${cclib-link-options})
 set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-# Check compilation of unused infrastructure units
-set(BASE_ALL OFF CACHE BOOL "Check compilation of unused infrastructure units")
-if(BASE_ALL)
-    add_library(base-units-all STATIC ${base-units-all})
-    target_include_directories(base-units-all PRIVATE ${inc-dirs})
-endif()
-
 # Static library
 add_library(gdx-static STATIC ${gdx-core})
 target_include_directories(gdx-static PRIVATE ${inc-dirs})
@@ -36,7 +29,7 @@ target_link_libraries(gdxtest gdx-static ${mylibs})
 # Unit test suite (against GDX dynamic library)
 add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp generated/gdxcc.c)
 target_link_libraries(gdxwraptest ${mylibs})
-target_include_directories(gdxwraptest PRIVATE src generated)
+target_include_directories(gdxwraptest PRIVATE src generated src/gdlib)
 target_compile_options(gdxwraptest PRIVATE -DGXFILE_CPPWRAP -DGC_NO_MUTEX)
 endif()
 
@@ -102,13 +95,18 @@ if(NOT NO_TOOLS)
 add_library(gdxtools-library
     generated/gdxcc.h
     generated/gdxcc.c
+
+    src/gdlib/dblutil.hpp
+    src/gdlib/dblutil.cpp
+    src/gdlib/gmsobj.hpp
+    src/gdlib/gmsobj.cpp
+
     src/tools/library/common.hpp
     src/tools/library/common.cpp
     src/tools/library/short_string.hpp
     src/tools/library/short_string.cpp
     src/tools/library/cmdpar.hpp
     src/tools/library/cmdpar.cpp
-    ${base-units-all}
 )
 target_include_directories(gdxtools-library PRIVATE ${inc-dirs})
 target_link_libraries(gdxtools-library gdx-static)
@@ -128,6 +126,7 @@ target_link_libraries(gdxdump gdxtools-library)
 add_executable(gdxdiff
     src/tools/gdxdiff/gdxdiff.hpp
     src/tools/gdxdiff/gdxdiff.cpp
+    src/rtl/p3process.cpp
 )
 target_include_directories(gdxdiff PRIVATE ${inc-dirs})
 target_link_libraries(gdxdiff gdxtools-library)

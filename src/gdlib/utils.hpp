@@ -795,4 +795,19 @@ auto ui32(const T x)
    return static_cast<uint32_t>( x );
 }
 
+class sstring : public std::array<char, 256> {
+   public:
+      std::string str() const { return { data() }; }
+      std::string_view sview() const { return { data() };  }
+      constexpr const char *c_str() const noexcept { return data(); }
+      constexpr explicit operator char *() noexcept { return data();  }
+      constexpr operator std::string_view() noexcept { return { data() }; }
+      size_t len() const { return std::strlen( data() ); }
+      char last() const { return ( *this )[len() - 1];  }
+      template<typename T>
+      bool equals( const T &s ) const { return !std::strcmp(data(), s.c_str()); }
+      template<typename T>
+      bool sameText( const T &s ) const { return utils::sameText( data(), s.c_str() ); }
+};
+
 }// namespace utils

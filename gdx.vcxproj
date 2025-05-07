@@ -19,62 +19,34 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\gdlib\charmaps.cpp" />
-    <ClCompile Include="src\gdlib\cmdpar.cpp" />
     <ClCompile Include="src\gdlib\datastorage.cpp" />
     <ClCompile Include="src\gdlib\dblutil.cpp" />
-    <ClCompile Include="src\gdlib\gamsdirs.cpp" />
-    <ClCompile Include="src\gdlib\gfileopen.cpp" />
-    <ClCompile Include="src\gdlib\glookup.cpp" />
-    <ClCompile Include="src\gdlib\gmacro.cpp" />
     <ClCompile Include="src\gdlib\gmsdata.cpp" />
-    <ClCompile Include="src\gdlib\gmsglob.cpp" />
-    <ClCompile Include="src\gdlib\gmsheapnew.cpp" />
-    <ClCompile Include="src\gdlib\gmslist.cpp" />
     <ClCompile Include="src\gdlib\gmsobj.cpp" />
-    <ClCompile Include="src\gdlib\gmsonly.cpp" />
     <ClCompile Include="src\gdlib\gmsstrm.cpp" />
-    <ClCompile Include="src\gdlib\obfuscatestr.cpp" />
-    <ClCompile Include="src\gdlib\runner.cpp" />
-    <ClCompile Include="src\gdlib\statlib.cpp" />
-    <ClCompile Include="src\gdlib\statlibobj.cpp" />
     <ClCompile Include="src\gdlib\strhash.cpp" />
     <ClCompile Include="src\gdlib\strutilx.cpp" />
     <ClCompile Include="src\gdlib\utils.cpp" />
-    <ClCompile Include="src\gdlib\xcompress.cpp" />
-    <ClCompile Include="src\global\ctvproc.cpp" />
-    <ClCompile Include="src\global\gmslibname.cpp" />
-    <ClCompile Include="src\global\gmsspecs.cpp" />
-    <ClCompile Include="src\global\modhead.cpp" />
     <ClCompile Include="src\gxfile.cpp" />
     <ClCompile Include="src\rtl\dtoaLoc.c" />
-    <ClCompile Include="src\rtl\idglobal_p3.cpp" />
     <ClCompile Include="src\rtl\math_p3.cpp" />
     <ClCompile Include="src\rtl\p3io.cpp" />
-    <ClCompile Include="src\rtl\p3library.cpp" />
     <ClCompile Include="src\rtl\p3platform.cpp" />
     <ClCompile Include="src\rtl\p3process.cpp" />
     <ClCompile Include="src\rtl\p3utils.cpp" />
-    <ClCompile Include="src\rtl\stdthread.cpp" />
     <ClCompile Include="src\rtl\sysutils_p3.cpp" />
     <ClCompile Include="src\tests\doctestmain.cpp" />
     <ClCompile Include="src\tests\gdlib\datastoragetests.cpp" />
-    <ClCompile Include="src\tests\gdlib\glookuptests.cpp" />
-    <ClCompile Include="src\tests\gdlib\gmacrotests.cpp" />
     <ClCompile Include="src\tests\gdlib\gmsdatatests.cpp" />
-    <ClCompile Include="src\tests\gdlib\gmsheapnewtests.cpp" />
     <ClCompile Include="src\tests\gdlib\gmsobjtests.cpp" />
     <ClCompile Include="src\tests\gdlib\gmsstrmtests.cpp" />
-    <ClCompile Include="src\tests\gdlib\obfuscatestrtests.cpp" />
     <ClCompile Include="src\tests\gdlib\strhashtests.cpp" />
     <ClCompile Include="src\tests\gdlib\strutilxtests.cpp" />
     <ClCompile Include="src\tests\gdlib\utilstests.cpp" />
-    <ClCompile Include="src\tests\gdlib\xcompresstests.cpp" />
     <ClCompile Include="src\tests\gdxtests.cpp" />
     <ClCompile Include="src\tests\gxfiletests.cpp" />
     <ClCompile Include="src\tests\rtl\p3iotests.cpp" />
     <ClCompile Include="src\tests\rtl\p3utilstests.cpp" />
-    <ClCompile Include="src\tests\rtl\stdthreadtests.cpp" />
     <ClCompile Include="src\tests\rtl\sysutilsp3tests.cpp" />
     <ClCompile Include="zlib\adler32.c" />
     <ClCompile Include="zlib\compress.c" />
@@ -94,48 +66,25 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\gdlib\batchalloc.hpp" />
-    <ClInclude Include="src\gdlib\charmaps.hpp" />
-    <ClInclude Include="src\gdlib\cmdpar.hpp" />
     <ClInclude Include="src\gdlib\datastorage.hpp" />
     <ClInclude Include="src\gdlib\dblutil.hpp" />
-    <ClInclude Include="src\gdlib\gamsdirs.hpp" />
-    <ClInclude Include="src\gdlib\gfileopen.hpp" />
-    <ClInclude Include="src\gdlib\glookup.hpp" />
-    <ClInclude Include="src\gdlib\gmacro.hpp" />
     <ClInclude Include="src\gdlib\gmsdata.hpp" />
-    <ClInclude Include="src\gdlib\gmsgen.hpp" />
-    <ClInclude Include="src\gdlib\gmsglob.hpp" />
-    <ClInclude Include="src\gdlib\gmsheapnew.hpp" />
-    <ClInclude Include="src\gdlib\gmslist.hpp" />
     <ClInclude Include="src\gdlib\gmsobj.hpp" />
-    <ClInclude Include="src\gdlib\gmsonly.hpp" />
     <ClInclude Include="src\gdlib\gmsstrm.hpp" />
-    <ClInclude Include="src\gdlib\obfuscatestr.hpp" />
-    <ClInclude Include="src\gdlib\runner.hpp" />
-    <ClInclude Include="src\gdlib\statlib.hpp" />
-    <ClInclude Include="src\gdlib\statlibobj.hpp" />
-    <ClInclude Include="src\gdlib\stattypes.hpp" />
     <ClInclude Include="src\gdlib\strhash.hpp" />
     <ClInclude Include="src\gdlib\strutilx.hpp" />
     <ClInclude Include="src\gdlib\utils.hpp" />
-    <ClInclude Include="src\gdlib\xcompress.hpp" />
     <ClInclude Include="src\gdx.hpp" />
-    <ClInclude Include="src\global\ctvproc.hpp" />
     <ClInclude Include="src\global\delphitypes.hpp" />
-    <ClInclude Include="src\global\gmslibname.hpp" />
-    <ClInclude Include="src\global\gmsspecs.hpp" />
-    <ClInclude Include="src\global\modhead.hpp" />
     <ClInclude Include="src\global\unit.h" />
     <ClInclude Include="src\gxfile.hpp" />
     <ClInclude Include="src\rtl\dtoaLoc.h" />
     <ClInclude Include="src\rtl\idglobal_p3.hpp" />
     <ClInclude Include="src\rtl\math_p3.hpp" />
     <ClInclude Include="src\rtl\p3io.hpp" />
-    <ClInclude Include="src\rtl\p3library.hpp" />
     <ClInclude Include="src\rtl\p3platform.hpp" />
     <ClInclude Include="src\rtl\p3process.hpp" />
     <ClInclude Include="src\rtl\p3utils.hpp" />
-    <ClInclude Include="src\rtl\stdthread.hpp" />
     <ClInclude Include="src\rtl\sysutils_p3.hpp" />
     <ClInclude Include="src\tests\doctest.hpp" />
     <ClInclude Include="src\tests\gdxtests.hpp" />
@@ -206,10 +155,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>src;generated;zlib;$(IncludePath)</IncludePath>
+    <IncludePath>src;generated;zlib;src/gdlib;src/rtl;src/global;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>src;generated;zlib;$(IncludePath)</IncludePath>
+    <IncludePath>src;generated;zlib;src/gdlib;src/rtl;src/global;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

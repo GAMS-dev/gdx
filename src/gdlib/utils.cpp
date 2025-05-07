@@ -26,8 +26,8 @@
 // FIXME: Get rid of too many "const std::string &" processing functions and use "std::string_view" or "const char *" instead!
 
 #include "utils.hpp"
-#include "rtl/p3io.hpp"
-#include "rtl/sysutils_p3.hpp"
+#include "p3io.hpp"
+#include "sysutils_p3.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -421,7 +421,7 @@ std::list<std::string> split( const std::string_view s, char sep )
 std::list<std::string> splitWithQuotedItems( const std::string_view s )
 {
    constexpr char sep = ' ';
-   const utils::charset quoteChars { '\"', '\'' };
+   const charset quoteChars { '\"', '\'' };
    std::list<std::string> res;
    std::string cur;
    bool inQuote {};
@@ -740,7 +740,7 @@ void getline( FILE *f, std::string &s )
 std::string getline( FILE *f )
 {
    constexpr int bsize {512};
-   std::array<char, bsize> buf;
+   std::array<char, bsize> buf {};
    if(!std::fgets( buf.data(), bsize, f ) && std::ferror(f))
       return {};
    return buf.data();

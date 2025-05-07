@@ -1,4 +1,7 @@
 ---
+- 7.11.16:
+    - Drastically improve performance of `gdxOpenRead` for GDX files with many UELs by reducing the memory allocation count.
+    - Drop many GAMS infrastructure source files not actively used by GDX library.
 - 7.11.15:
     - Fixed an issue where `gdxmerge` would fail with a "Symbol is too large" error when merging GDX files containing large symbols.
 - 7.11.14:

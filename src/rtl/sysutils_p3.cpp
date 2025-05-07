@@ -30,9 +30,9 @@
 #include "sysutils_p3.hpp"
 #include "p3platform.hpp"// for OSFileType, tOSFileType
 
-#include "global/unit.h" // for UNIT_INIT_FINI
+#include "unit.h" // for UNIT_INIT_FINI
 
-#include "gdlib/utils.hpp" // for ui16
+#include "utils.hpp" // for ui16
 
 #if defined( _WIN32 )
    #include <Windows.h>
@@ -701,7 +701,7 @@ void IntToStr( int64_t n, char *res, size_t &len )
 // this is VERY ugly, edit the str() ShortString
 std::string FloatToStr( double v )
 {
-   STUBWARN();
+   throw std::runtime_error("Not fully implemented yet!");
    // TODO: Unfinished!
 
    std::array<char, 64> sbuf {};

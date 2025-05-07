@@ -50,6 +50,8 @@ public:
    }
 };
 
+bool sameTextSR( const DelphiStrRef &sr, const std::string &s );
+
 std::string UpperCase( std::string_view s );
 std::string LowerCase( std::string_view s );
 

@@ -2,11 +2,30 @@ cmake_minimum_required(VERSION 3.16)
 project(gdx)
 set(CMAKE_CXX_STANDARD 17)
 
-find_program(CCACHE_FOUND ccache)
-if (CCACHE_FOUND)
-	set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-	set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif (CCACHE_FOUND)
+# ccache and sccache
+if(NOT DEFINED CMAKE_C_COMPILER_LAUNCHER AND NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
+	find_program(CCACHE_FOUND ccache)
+	find_program(SCCACHE_FOUND sccache)
+	if (SCCACHE_FOUND) # using sccache on Windows for MSVC cl.exe compatibility!
+		message("-- Found sccache at: ${SCCACHE_FOUND}")
+		set(CMAKE_C_COMPILER_LAUNCHER ${SCCACHE_FOUND})
+		set(CMAKE_CXX_COMPILER_LAUNCHER ${SCCACHE_FOUND})
+		if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+			string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+			string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
+		elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+			string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+			string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
+		elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+			string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+			string(REPLACE "/Zi" "/Z7" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
+		endif()
+	elseif(CCACHE_FOUND)
+		message("-- Found ccache at: ${CCACHE_FOUND}")
+		set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_FOUND})
+		set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_FOUND})
+	endif()
+endif()
 
 set(mylibs ${CMAKE_DL_LIBS} pthread m)
 
@@ -61,8 +80,6 @@ if (UNIX)
 	endif ()
 endif (UNIX)
 
-include(base-units.cmake)
-
 set(zlib-units
 		# ZLIB modules
 		# missing? run in project root: git clone https://github.com/madler/zlib zlib
@@ -103,34 +120,6 @@ set(gdx-core
 		${zlib-units}
 )
 
-set(test-deps
-		# runtime library
-		src/rtl/p3library.cpp
-		src/rtl/p3library.hpp
-		src/rtl/stdthread.cpp
-		src/rtl/stdthread.hpp
-
-		# global
-		src/global/gmslibname.cpp
-		src/global/gmslibname.hpp
-
-		# gdlib
-		src/gdlib/charmaps.cpp
-		src/gdlib/charmaps.hpp
-		src/gdlib/gmacro.cpp
-		src/gdlib/gmacro.hpp
-		src/gdlib/gmsheapnew.cpp
-		src/gdlib/gmsheapnew.hpp
-		src/gdlib/gmsonly.hpp
-		src/gdlib/gmsonly.cpp
-		src/gdlib/obfuscatestr.cpp
-		src/gdlib/obfuscatestr.hpp
-		src/gdlib/strhash.hpp
-		src/gdlib/strhash.cpp
-		src/gdlib/xcompress.cpp
-		src/gdlib/xcompress.hpp
-)
-
 set(tests
 		src/tests/doctestmain.cpp
 
@@ -138,25 +127,18 @@ set(tests
 		src/tests/gdxtests.cpp
 		src/tests/gxfiletests.cpp
 
-		src/tests/gdlib/datastoragetests.cpp
-		src/tests/gdlib/glookuptests.cpp
-		src/tests/gdlib/gmacrotests.cpp
 		src/tests/gdlib/gmsdatatests.cpp
-		src/tests/gdlib/gmsheapnewtests.cpp
 		src/tests/gdlib/gmsobjtests.cpp
 		src/tests/gdlib/gmsstrmtests.cpp
-		src/tests/gdlib/obfuscatestrtests.cpp
 		src/tests/gdlib/strhashtests.cpp
 		src/tests/gdlib/strutilxtests.cpp
 		src/tests/gdlib/utilstests.cpp
-		src/tests/gdlib/xcompresstests.cpp
 
 		src/tests/rtl/p3iotests.cpp
 		src/tests/rtl/p3utilstests.cpp
-		src/tests/rtl/stdthreadtests.cpp
 		src/tests/rtl/sysutilsp3tests.cpp
 )
 
-set(inc-dirs zlib src generated)
+set(inc-dirs zlib src generated src/gdlib src/global src/rtl)
 
 include(targets.cmake)

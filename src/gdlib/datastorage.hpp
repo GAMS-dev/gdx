@@ -31,8 +31,6 @@
 #include <optional>
 #include <cstdint>
 
-#include "gmsheapnew.hpp"
-
 // Batch allocations
 // When TLD_DYN_ARRAYS is active: No single item #TotalSize-bytes new allocations
 // but instead allocate big blocks (potentially wasting a couple bytes if items don't fit tightly)
@@ -47,6 +45,7 @@
 #endif
 
 #if defined( __IN_CPPMEX__ )
+#include "gmsheapnew.hpp"
 // Instead of using builtin C++ heap functionality new/delete, use custom GAMS big block heap from gdlib/gmsheapnew
 #define USE_GMSHEAP
 #endif
@@ -83,7 +82,7 @@ class TLinkedData final
 #if defined( USE_GMSHEAP )
    gdlib::gmsheapnew::THeapMgr MyHeap { "TLinkedData" };
 #elif defined( TSH_BATCH_ALLOCS )
-   batchalloc::BatchAllocator<960> batchAllocator;
+   batchalloc::BatchAllocator<960, 8> batchAllocator;
 #endif
 
    bool IsSorted()
