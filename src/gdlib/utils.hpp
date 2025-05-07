@@ -800,7 +800,7 @@ class sstring : public std::array<char, 256> {
       std::string str() const { return { data() }; }
       std::string_view sview() const { return { data() };  }
       constexpr const char *c_str() const noexcept { return data(); }
-      constexpr operator char *() noexcept { return data();  }
+      constexpr explicit operator char *() noexcept { return data();  }
       constexpr operator std::string_view() noexcept { return { data() }; }
       size_t len() const { return std::strlen( data() ); }
       char last() const { return ( *this )[len() - 1];  }

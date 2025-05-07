@@ -82,7 +82,7 @@ class TLinkedData final
 #if defined( USE_GMSHEAP )
    gdlib::gmsheapnew::THeapMgr MyHeap { "TLinkedData" };
 #elif defined( TSH_BATCH_ALLOCS )
-   batchalloc::BatchAllocator<960> batchAllocator;
+   batchalloc::BatchAllocator<960, 8> batchAllocator;
 #endif
 
    bool IsSorted()

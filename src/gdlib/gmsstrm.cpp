@@ -357,6 +357,18 @@ std::string TXStream::ReadString()
    return s;
 }
 
+void TXStream::ReadSString(char *s, uint8_t &len)
+{
+   if( Paranoid ) ParCheck( RWType::rw_string );
+   if( !Read( &len, 1 ) || !len )
+   {
+      s[0] = '\0';
+      return;
+   }
+   Read( s, len );
+   s[len] = '\0';
+}
+
 double TXStream::ReadDouble()
 {
    return ReadValue<double>( RWType::rw_double );
@@ -1111,7 +1123,7 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
       const std::string src = FS->ReadString();
       sstring targBuf {};
       FS->ApplyPassWord( src.c_str(), targBuf.data(), (int) src.length(), verify_offset );
-      if( gdlib::gmsstrm::TBufferedFileStream::RandString( static_cast<int>( src.length() ) ) != std::string(targBuf.data()) ) return;
+      if( TBufferedFileStream::RandString( static_cast<int>( src.length() ) ) != std::string(targBuf.data()) ) return;
    }
 
    FRewindPoint = FS->GetPosition();

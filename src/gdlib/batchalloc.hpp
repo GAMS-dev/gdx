@@ -33,22 +33,26 @@
 namespace gdlib::batchalloc
 {
 
-struct DataBatch {
-   DataBatch *next;
-   uint8_t *ptr;
-   explicit DataBatch( const size_t count ) : next {}, ptr { new uint8_t[count] } {}
-   ~DataBatch()
-   {
-      delete[] ptr;
-   }
-};
-
-template<int batchSize>
+template<size_t batchSize, int byteAlign = 1>
 class BatchAllocator
 {
-   DataBatch *head {}, *tail {};
-   size_t offsetInTail {};
+   struct DataBatch {
+      DataBatch *next;
+      uint8_t *ptr;
+   
+      explicit DataBatch( const size_t count ) : next {}, ptr { new uint8_t[count] }
+      {
+         assert(count % byteAlign == 0);
+      }
+   
+      ~DataBatch()
+      {
+         delete[] ptr;
+      }
+   };
 
+   DataBatch *head {}, *tail {};
+   size_t offsetInTail {}, firstBatchSize {batchSize};
 public:
    BatchAllocator() = default;
 
@@ -61,7 +65,7 @@ public:
    {
       if( !head ) return;
       DataBatch *next;
-      for( DataBatch *it = head; it; it = next )
+      for( const DataBatch *it = head; it; it = next )
       {
          next = it->next;
          delete it;
@@ -69,28 +73,40 @@ public:
       head = tail = nullptr;
    }
 
+   // Use different buffer size for first batch
+   // In case we know lots of data will be requested first
+   void SetFirstBatchSize(size_t s) {
+      if( const auto fbs = ( s + ( byteAlign - 1 ) ) & ~( byteAlign - 1 );
+         fbs > batchSize && fbs < 0x10000000000)
+         firstBatchSize = fbs;
+   }
+
    uint8_t *GetBytes( size_t count )
    {
-      static_assert(batchSize % 8 == 0);
+      static_assert(batchSize % byteAlign == 0);
       // add padding after block if its byte count doesn't align with 8 byte (64 bit)
-      constexpr int byteAlign {8};
-      if(count % byteAlign)
-         count = ((int)(count / byteAlign) + 1) * byteAlign;
+      count = (count + ( byteAlign - 1 )) & ~( byteAlign - 1 );
       assert( count <= batchSize );
       if( !head )
       {
-         head = tail = new DataBatch { batchSize };
+         head = tail = new DataBatch { firstBatchSize };
          offsetInTail = 0;
       }
-      else if( batchSize - offsetInTail < count )
+      else if( ( head == tail ? firstBatchSize : batchSize ) - offsetInTail < count )
       {
          tail->next = new DataBatch { batchSize };
          tail = tail->next;
          offsetInTail = 0;
       }
-      auto res { tail->ptr + offsetInTail };
+      const auto res { tail->ptr + offsetInTail };
       offsetInTail += count;
       return res;
+   }
+
+   template<typename T>
+   T *GetBytes()
+   {
+      return reinterpret_cast<T *>( GetBytes( sizeof( T ) ) );
    }
 };
 

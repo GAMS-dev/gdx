@@ -55,13 +55,13 @@ namespace gdx
 
 class TgdxUELIndex : public std::array<int, GMS_MAX_INDEX_DIM> {
 public:
-   constexpr operator int*() noexcept { return data(); }
-   constexpr operator const int*() const noexcept { return data(); }
+   constexpr explicit operator int *() noexcept { return data(); }
+   constexpr explicit operator const int *() const noexcept { return data(); }
 };
 class TgdxValues : public std::array<double, GMS_VAL_SCALE + 1> {
 public:
-   constexpr operator double*() noexcept { return data(); }
-   constexpr operator const double*() const noexcept { return data(); }
+   constexpr explicit operator double*() noexcept { return data(); }
+   constexpr explicit operator const double *() const noexcept { return data(); }
 };
 
 using TDomainIndexProc_t = void ( * )( int RawIndex, int MappedIndex, void *Uptr );
@@ -84,7 +84,7 @@ const std::string BADUEL_PREFIX = "?L__",
                   strGDXCOMPRESS = "GDXCOMPRESS",
                   strGDXCONVERT = "GDXCONVERT";
 
-struct TDFilter {
+struct TDFilter final {
    int FiltNumber {}, FiltMaxUel {};
    gdlib::gmsobj::TBooleanBitArray FiltMap {};
    bool FiltSorted {};
@@ -131,7 +131,7 @@ using TDomainList = std::array<TDomain, GLOBAL_MAX_INDEX_DIM>;
 
 using TCommentsList = gdlib::gmsobj::TXStrings;
 
-struct TgdxSymbRecord {
+struct TgdxSymbRecord final {
    int SSyNr;
    int64_t SPosition;
    int SDim, SDataCount, SErrors;
@@ -187,7 +187,7 @@ enum TgxFileMode : uint8_t
    tgxfilemode_count
 };
 
-class TgxModeSet : public utils::IContainsPredicate<TgxFileMode>
+class TgxModeSet final : public utils::IContainsPredicate<TgxFileMode>
 {
    std::array<bool, tgxfilemode_count> modeActive {};
    uint8_t count {};
@@ -279,7 +279,7 @@ public:
 
 int MakeGoodExplText( char *s );
 
-struct TAcronym {
+struct TAcronym final {
    std::string AcrName, AcrText;
    int AcrMap {}, AcrReadMap { -1 };
    bool AcrAutoGen {};
@@ -287,18 +287,21 @@ struct TAcronym {
    TAcronym( const char *Name, const char *Text, int Map );
    explicit TAcronym( gdlib::gmsstrm::TXStream &S );
    TAcronym() = default;
-   virtual ~TAcronym() = default;
+   ~TAcronym() = default;
    [[nodiscard]] int MemoryUsed() const;
    void SaveToStream( gdlib::gmsstrm::TXStream &S ) const;
    void SetNameAndText( const char *Name, const char *Text );
 };
 
-class TAcronymList
+class TAcronymList final
 {
+   bool useBatchAlloc {};
    gdlib::gmsobj::TXList<TAcronym> FList;
+   gdlib::batchalloc::BatchAllocator<sizeof(TAcronym)> batchAlloc;
 
 public:
    TAcronymList() = default;
+   explicit TAcronymList(bool _useBatchAlloc) : useBatchAlloc{_useBatchAlloc} {}
    ~TAcronymList();
    int FindEntry( int Map );
    int FindName( const char *Name );
@@ -311,7 +314,7 @@ public:
    TAcronym &operator[]( int Index );
 };
 
-class TFilterList
+class TFilterList final
 {
    gdlib::gmsobj::TXList<TDFilter> FList;
 

@@ -177,6 +177,7 @@ public:
    void WritePChar( const char *s, int L );
 
    std::string ReadString();
+   void ReadSString(char *s, uint8_t &len);
    virtual double ReadDouble();
    virtual int ReadInteger();
    uint8_t ReadByte();

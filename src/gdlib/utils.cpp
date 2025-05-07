@@ -421,7 +421,7 @@ std::list<std::string> split( const std::string_view s, char sep )
 std::list<std::string> splitWithQuotedItems( const std::string_view s )
 {
    constexpr char sep = ' ';
-   const utils::charset quoteChars { '\"', '\'' };
+   const charset quoteChars { '\"', '\'' };
    std::list<std::string> res;
    std::string cur;
    bool inQuote {};
