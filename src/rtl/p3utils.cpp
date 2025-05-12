@@ -851,12 +851,12 @@ int p3Chmod( const std::string &path, int mode )
 
 double RealTrunc( double x )
 {
-   return static_cast<int>( x );
+   return std::trunc( x );
 }
 
 double RealRound( double x )
 {
-   return static_cast<int>( x + 0.5 * ( x >= 0 ? 1.0 : -1.0 ) );
+   return std::trunc( x + 0.5 * ( x >= 0 ? 1.0 : -1.0 ) );
 }
 
 //constexpr int MAXDIGITS = 17;// at most this many decimal digits from a double
@@ -927,15 +927,15 @@ std::string FloatToE( const double y, int decimals )
 {
    auto myRoundTo = []( const double x, const int i ) -> double {
       const double zeroFive = 0.5 * ( x > 0.0 ? 1.0 : -1.0 );
-      if( !i ) return static_cast<int>( x + zeroFive );
+      if( !i ) return std::trunc( x + zeroFive );
       if( i > 0 )
       {
          // use positive power of 10 to avoid roundoff error in z
          const double z { math_p3::IntPower( 10, i ) };
-         return static_cast<int>( x * z + zeroFive ) / z;
+         return std::trunc( x * z + zeroFive ) / z;
       }
       const double z { math_p3::IntPower( 10, -i ) };
-      return static_cast<int>( x / z + zeroFive ) * z;
+      return std::trunc( x / z + zeroFive ) * z;
    };
 
    /* FloatToE */

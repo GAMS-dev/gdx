@@ -39,7 +39,7 @@ namespace gdlib::dblutil
 double gdRoundTo( const double x, const int i )
 {
    if( !i )
-      return static_cast<int>( x + 0.5 * ( x > 0 ? 1 : -1 ) );
+      return std::trunc( x + 0.5 * ( x > 0 ? 1 : -1 ) );
    // use positive power of 10 to avoid roundoff error in z
    const double z { rtl::math_p3::IntPower( 10, std::abs( i ) ) };
    const double zReciprocal = i > 0 ? z : 1.0 / z;
