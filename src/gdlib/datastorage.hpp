@@ -214,15 +214,15 @@ public:
       // Perform radix sort
       for( int D { FDimension - 1 }; D >= 0; D-- )
       {
-         RecType *R = FHead;
-         while( R )
+         RecType *R;
+         for( R = FHead; R; R = R->RecNext )
          {
             int Key { R->RecKeys[AMap ? AMap[D] : D] - KeyBase };
-            if( !Head[Key] ) Head[Key] = R;
+            if( !Head[Key] )
+               Head[Key] = R;
             else
                Tail[Key]->RecNext = R;
             Tail[Key] = R;
-            R = R->RecNext;
          }
          R = nullptr;
          for( int Key { FMaxKey - KeyBase }; Key >= 0; Key-- )
