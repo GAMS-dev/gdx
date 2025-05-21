@@ -1,10 +1,9 @@
 import gams.transfer as gt
-from os import environ
 import pandas as pd
 
 
 def create_special_values_example(file_path: str) -> None:
-    m = gt.Container(system_directory=environ.get('GAMS_SYSTEM_DIRECTORY'))
+    m = gt.Container()
 
     # create the sets i, j
     i = gt.Set(m, 'i', records=['seattle', 'san-diego'], description='supply')

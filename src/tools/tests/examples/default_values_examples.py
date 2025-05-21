@@ -1,10 +1,9 @@
 import gams.transfer as gt
-from os import environ
 import pandas as pd
 
 
 def create_default_values_example_1(file_path: str) -> None:
-    m = gt.Container(system_directory=environ.get('GAMS_SYSTEM_DIRECTORY'))
+    m = gt.Container()
 
     gt.Variable(
         m,
@@ -21,7 +20,7 @@ def create_default_values_example_1(file_path: str) -> None:
 
 
 def create_default_values_example_2(file_path: str) -> None:
-    m = gt.Container(system_directory=environ.get('GAMS_SYSTEM_DIRECTORY'))
+    m = gt.Container()
 
     v = gt.Variable(
         m,
