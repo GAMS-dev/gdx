@@ -140,12 +140,12 @@ set(tests
 )
 
 set(inc-dirs
-	zlib
-	src
-	generated
-	src/gdlib
-	src/global
-	src/rtl
+	${CMAKE_SOURCE_DIR}/zlib
+	${CMAKE_SOURCE_DIR}/src
+	${CMAKE_SOURCE_DIR}/generated
+	${CMAKE_SOURCE_DIR}/src/gdlib
+	${CMAKE_SOURCE_DIR}/src/global
+	${CMAKE_SOURCE_DIR}/src/rtl
 )
 
 include(targets.cmake)
