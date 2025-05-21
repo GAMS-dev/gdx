@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "library/short_string.hpp"
+#include "short_string.hpp"
 
 // Description:
 //   Object that handles command line parameters
