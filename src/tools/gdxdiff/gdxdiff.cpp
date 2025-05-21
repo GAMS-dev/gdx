@@ -52,18 +52,18 @@ namespace gdxdiff {
 
 using tvarvaltype = uint8_t;
 
-library::ShortString_t DiffTmpName;
+library::ShortString DiffTmpName;
 gdxHandle_t PGX1, PGX2, PGXDIF;
 bool diffUELsRegistered;
 // TODO: Use the correct type instead of nullptr type?
 std::unique_ptr<gdlib::strhash::TXStrHashList<std::nullptr_t>> UELTable;
 int staticUELNum;
 double EpsAbsolute, EpsRelative;
-std::map<library::ShortString_t, StatusCode_t> StatusTable;
-std::unique_ptr<library::cmdpar::CmdParams_t> CmdParams;
+std::map<library::ShortString, StatusCode> StatusTable;
+std::unique_ptr<library::cmdpar::CmdParams> CmdParams;
 utils::bsSet<tvarvaltype, GMS_VAL_MAX> ActiveFields;
-FldOnly_t FldOnly;
-tvarvaltype FldOnlyFld;
+FldOnly fldOnly;
+tvarvaltype fldOnlyFld;
 bool DiffOnly, CompSetText, matrixFile, ignoreOrder;
 std::unique_ptr<gdlib::gmsobj::TXStrings> IDsOnly;
 std::unique_ptr<gdlib::gmsobj::TXStrings> SkipIDs;
@@ -71,7 +71,7 @@ bool ShowDefRec, CompDomains;
 
 std::string ValAsString(const gdxHandle_t &PGX, const double V) {
   constexpr int WIDTH{14};
-  library::ShortString_t result;
+  library::ShortString result;
   if (gdxAcronymName(PGX, V, result.data()) == 0) {
     int iSV;
     gdxMapValue(PGX, V, &iSV);
@@ -114,7 +114,7 @@ void FatalError2(const std::string &Msg1, const std::string &Msg2, const int Err
 void CheckGDXError(const gdxHandle_t &PGX) {
   int ErrNr{gdxGetLastError(PGX)};
   if (ErrNr != 0) {
-    library::ShortString_t S;
+    library::ShortString S;
     gdxErrorStr(PGX, ErrNr, S.data());
     library::printErrorMessage("GDXDIFF GDX Error: " + S);
   }
@@ -122,17 +122,17 @@ void CheckGDXError(const gdxHandle_t &PGX) {
 
 void OpenGDX(const std::string &fn, gdxHandle_t &PGX) {
   if (!rtl::sysutils_p3::FileExists(fn))
-    FatalError("Input file not found " + fn, static_cast<int>(ErrorCode_t::ERR_NOFILE));
+    FatalError("Input file not found " + fn, static_cast<int>(ErrorCode::ERR_NOFILE));
 
-  library::ShortString_t S;
+  library::ShortString S;
   if (!gdxCreate(&PGX, S.data(), S.length()))
-    FatalError("Cannot load GDX library " + S, static_cast<int>(ErrorCode_t::ERR_LOADDLL));
+    FatalError("Cannot load GDX library " + S, static_cast<int>(ErrorCode::ERR_LOADDLL));
 
   int ErrNr;
   gdxOpenRead(PGX, fn.data(), &ErrNr);
   if (ErrNr != 0) {
     gdxErrorStr(PGX, ErrNr, S.data());
-    FatalError2("Problem reading GDX file + " + fn, S, static_cast<int>(ErrorCode_t::ERR_READGDX));
+    FatalError2("Problem reading GDX file + " + fn, S, static_cast<int>(ErrorCode::ERR_READGDX));
   }
 
   int NrElem, HighV;
@@ -140,7 +140,7 @@ void OpenGDX(const std::string &fn, gdxHandle_t &PGX) {
   gdxUELRegisterMapStart(PGX);
   for (int N{1}; N <= NrElem; N++) {
     int NN;
-    library::ShortString_t UEL;
+    library::ShortString UEL;
     gdxUMUelGet(PGX, N, UEL.data(), &NN);
     NN = UELTable->Add(UEL.data(), UEL.length());
     gdxUELRegisterMap(PGX, NN, UEL.data());
@@ -168,18 +168,18 @@ void RegisterDiffUELs() {
 void CompareSy(const int Sy1, const int Sy2) {
   int Dim, VarEquType;
   gdxSyType ST;
-  library::ShortString_t ID;
+  library::ShortString ID;
   bool SymbOpen{};
-  StatusCode_t Status;
+  StatusCode Status;
   gdxValues_t DefValues{};
 
   auto CheckSymbOpen = [&]() -> bool {
     RegisterDiffUELs();
-    if (Status == StatusCode_t::sc_dim10)
-      Status = StatusCode_t::sc_dim10_diff;
-    if (!SymbOpen && Status != StatusCode_t::sc_dim10_diff) {
-      if (FldOnly == FldOnly_t::fld_yes && (ST == dt_var || ST == dt_equ)) {
-        library::ShortString_t ExplTxt{"Differences Field = " + GamsFieldNames[FldOnlyFld]};
+    if (Status == StatusCode::sc_dim10)
+      Status = StatusCode::sc_dim10_diff;
+    if (!SymbOpen && Status != StatusCode::sc_dim10_diff) {
+      if (fldOnly == FldOnly::fld_yes && (ST == dt_var || ST == dt_equ)) {
+        library::ShortString ExplTxt{"Differences Field = " + GamsFieldNames[fldOnlyFld]};
         gdxDataWriteStrStart(PGXDIF, ID.data(), ExplTxt.data(), Dim + 1, static_cast<int>(dt_par), 0);
       } else if (DiffOnly && (ST == dt_var || ST == dt_equ))
         gdxDataWriteStrStart(PGXDIF, ID.data(), "Differences Only", Dim + 2, static_cast<int>(dt_par), 0);
@@ -229,14 +229,14 @@ void CompareSy(const int Sy1, const int Sy2) {
     std::cout << std::endl;
 #endif
 
-    if (FldOnly == FldOnly_t::fld_yes && (ST == dt_var || ST == dt_equ)) {
-      Vals2[GMS_VAL_LEVEL] = Vals[FldOnlyFld];
+    if (fldOnly == FldOnly::fld_yes && (ST == dt_var || ST == dt_equ)) {
+      Vals2[GMS_VAL_LEVEL] = Vals[fldOnlyFld];
       gdxDataWriteStr(PGXDIF, const_cast<const char **>(StrKeysPtrs), Vals2);
     } else
       gdxDataWriteStr(PGXDIF, const_cast<const char **>(StrKeysPtrs), Vals);
   };
 
-  auto WriteSetDiff = [&](const std::string &Act, const gdxUelIndex_t &Keys, const library::ShortString_t &S) -> void {
+  auto WriteSetDiff = [&](const std::string &Act, const gdxUelIndex_t &Keys, const library::ShortString &S) -> void {
     gdxStrIndex_t StrKeys{};
     gdxStrIndexPtrs_t StrKeysPtrs;
     GDXSTRINDEXPTRS_INIT(StrKeys, StrKeysPtrs);
@@ -299,7 +299,7 @@ void CompareSy(const int Sy1, const int Sy2) {
     gdxMapValue(PGX2, V2, &iSV2);
 
     bool result;
-    library::ShortString_t S1, S2;
+    library::ShortString S1, S2;
     double AbsDiff;
     if (iSV1 == sv_normal) {
       if (iSV2 == sv_normal) {
@@ -329,8 +329,8 @@ void CompareSy(const int Sy1, const int Sy2) {
     bool result{true};
     if (ST == dt_par)
       result = DoublesEqual(V1[GMS_VAL_LEVEL], V2[GMS_VAL_LEVEL]);
-    else if (FldOnly == FldOnly_t::fld_yes)
-      result = DoublesEqual(V1[FldOnlyFld], V2[FldOnlyFld]);
+    else if (fldOnly == FldOnly::fld_yes)
+      result = DoublesEqual(V1[fldOnlyFld], V2[fldOnlyFld]);
     else {
       for (int T{}; T < GMS_VAL_MAX; T++) {
         if (ActiveFields.contains(static_cast<tvarvaltype>(T)) && !DoublesEqual(V1[T], V2[T])) {
@@ -372,7 +372,7 @@ void CompareSy(const int Sy1, const int Sy2) {
   };
 
   auto CheckSetDifference = [&](const gdxUelIndex_t &Keys, const int txt1, const int txt2) -> bool {
-    library::ShortString_t S1, S2;
+    library::ShortString S1, S2;
     int iNode;
     if (txt1 == 0)
       S1.clear();
@@ -428,12 +428,12 @@ void CompareSy(const int Sy1, const int Sy2) {
     if (Eq && !ShowDefRec)
       return;
 
-    if (Status == StatusCode_t::sc_same)
-      Status = StatusCode_t::sc_key;
-    if (Status == StatusCode_t::sc_dim10)
-      Status = StatusCode_t::sc_dim10_diff;
+    if (Status == StatusCode::sc_same)
+      Status = StatusCode::sc_key;
+    if (Status == StatusCode::sc_dim10)
+      Status = StatusCode::sc_dim10_diff;
 
-    if (Status == StatusCode_t::sc_dim10_diff || !CheckSymbOpen())
+    if (Status == StatusCode::sc_dim10_diff || !CheckSymbOpen())
       return;
 
 #if VERBOSE >= 2
@@ -441,7 +441,7 @@ void CompareSy(const int Sy1, const int Sy2) {
 #endif
 
     if (ST == dt_set && Vals[GMS_VAL_LEVEL] != 0) {
-      library::ShortString_t stxt;
+      library::ShortString stxt;
       int N;
       gdxGetElemText(Act == c_ins1 ? PGX1 : PGX2, static_cast<int>(round(Vals[GMS_VAL_LEVEL])), stxt.data(), &N);
       gdxAddSetText(PGXDIF, stxt.data(), &N);
@@ -466,7 +466,7 @@ void CompareSy(const int Sy1, const int Sy2) {
   bool Flg1, Flg2, Eq, DomFlg;
   gdxUelIndex_t Keys1{}, Keys2{};
   gdxValues_t Vals1{}, Vals2{};
-  library::ShortString_t stxt;
+  library::ShortString stxt;
 
   gdxStrIndex_t DomSy1{};
   gdxStrIndexPtrs_t DomSy1Ptrs;
@@ -488,18 +488,18 @@ void CompareSy(const int Sy1, const int Sy2) {
   ST2 = static_cast<gdxSyType>(iST2);
   if (ST2 == dt_alias)
     ST2 = dt_set;
-  Status = StatusCode_t::sc_same;
+  Status = StatusCode::sc_same;
 
   if (Dim != Dim2 || ST != ST2) {
     std::cout << "*** symbol = " << ID << " cannot be compared\n";
     if (ST != ST2) {
       std::cout << "Typ1 = " << library::gdxDataTypStrL(ST) << ", Typ2 = " << library::gdxDataTypStrL(ST2) << '\n';
-      Status = StatusCode_t::sc_typ;
+      Status = StatusCode::sc_typ;
     }
     if (Dim != Dim2) {
       std::cout << "Dim1 = " << Dim << ", Dim2 = " << Dim2 << std::endl;
-      if (Status == StatusCode_t::sc_same)
-        Status = StatusCode_t::sc_dim;
+      if (Status == StatusCode::sc_same)
+        Status = StatusCode::sc_dim;
     }
     goto label999;
   }
@@ -515,7 +515,7 @@ void CompareSy(const int Sy1, const int Sy2) {
         break;
       }
     if (DomFlg) {
-      Status = StatusCode_t::sc_domain;
+      Status = StatusCode::sc_domain;
 
 #if VERBOSE >= 1
       std::cout << "Domain differences for symbol = " << ID << '\n';
@@ -544,7 +544,7 @@ void CompareSy(const int Sy1, const int Sy2) {
   }
 
   if (Dim >= GMS_MAX_INDEX_DIM || (DiffOnly && Dim - 1 >= GMS_MAX_INDEX_DIM))
-    Status = StatusCode_t::sc_dim10;
+    Status = StatusCode::sc_dim10;
 
   if (matrixFile) {
     Flg1 = gdxDataReadRawStart(PGX1, Sy1, &R1Last) != 0;
@@ -582,8 +582,8 @@ void CompareSy(const int Sy1, const int Sy2) {
       } else
         Eq = CheckParDifference(Keys1, Vals1, Vals2);
 
-      if (!Eq && Status == StatusCode_t::sc_same)
-        Status = StatusCode_t::sc_data;
+      if (!Eq && Status == StatusCode::sc_same)
+        Status = StatusCode::sc_data;
 
       if (matrixFile) {
         Flg1 = gdxDataReadRaw(PGX1, Keys1, Vals1, &AFDim) != 0;
@@ -628,11 +628,11 @@ void CompareSy(const int Sy1, const int Sy2) {
   SymbClose();
 
 label999:
-  if (!(Status == StatusCode_t::sc_same || Status == StatusCode_t::sc_dim10))
+  if (!(Status == StatusCode::sc_same || Status == StatusCode::sc_dim10))
     StatusTable.insert({ID, Status});
 }
 
-bool GetAsDouble(const library::ShortString_t &S, double &V) {
+bool GetAsDouble(const library::ShortString &S, double &V) {
   int k;
   utils::val(S, V, k);
   bool result{k == 0 && V >= 0};
@@ -641,9 +641,9 @@ bool GetAsDouble(const library::ShortString_t &S, double &V) {
   return result;
 }
 
-void Usage(const library::AuditLine_t &AuditLine) {
+void Usage(const library::AuditLine &auditLine) {
   std::cout << "gdxdiff: GDX file differ\n"
-            << AuditLine.getAuditLine() << "\n\n"
+            << auditLine.getAuditLine() << "\n\n"
             << "Usage: \n"
             << "   gdxdiff file1.gdx file2.gdx [diffile.gdx] [options]\n"
             << "   Options:\n"
@@ -672,9 +672,9 @@ void CheckFile(std::string &fn) {
 
 int main(const int argc, const char *argv[]) {
   int ErrorCode, ErrNr, Dim, iST, StrNr;
-  library::ShortString_t S, ID, DiffFileName;
+  library::ShortString S, ID, DiffFileName;
   std::string InFile1, InFile2;
-  std::map<library::ShortString_t, int> IDTable;
+  std::map<library::ShortString, int> IDTable;
   bool UsingIDE, RenameOK;
 
   gdxStrIndex_t StrKeys{};
@@ -683,16 +683,16 @@ int main(const int argc, const char *argv[]) {
 
   gdxValues_t StrVals{};
 
-  library::AuditLine_t AuditLine{"GDXDIFF"};
+  library::AuditLine auditLine{"GDXDIFF"};
   if (argc > 1 && gdlib::strutilx::StrUEqual(argv[1], "AUDIT")) {
-    std::cout << AuditLine.getAuditLine() << std::endl;
+    std::cout << auditLine.getAuditLine() << std::endl;
     return 0;
   }
 
   // So we can check later
   DiffTmpName.clear();
 
-  CmdParams = std::make_unique<library::cmdpar::CmdParams_t>();
+  CmdParams = std::make_unique<library::cmdpar::CmdParams>();
 
   CmdParams->AddParam(static_cast<int>(library::cmdpar::CmdParamStatus::kp_input), "I");
   CmdParams->AddParam(static_cast<int>(library::cmdpar::CmdParamStatus::kp_input), "Input");
@@ -714,8 +714,8 @@ int main(const int argc, const char *argv[]) {
   CmdParams->AddKeyWord(static_cast<int>(KP::kp_ignoreOrd), "IgnoreOrder");
 
   if (!CmdParams->CrackCommandLine(argc, argv)) {
-    Usage(AuditLine);
-    return static_cast<int>(ErrorCode_t::ERR_USAGE);
+    Usage(auditLine);
+    return static_cast<int>(ErrorCode::ERR_USAGE);
   }
 
   ErrorCode = 0;
@@ -723,7 +723,7 @@ int main(const int argc, const char *argv[]) {
   matrixFile = false;
   diffUELsRegistered = false;
 
-  library::cmdpar::ParamRec_t Parameter{CmdParams->GetParams(0)};
+  library::cmdpar::ParamRec Parameter{CmdParams->GetParams(0)};
   if (Parameter.Key == static_cast<int>(library::cmdpar::CmdParamStatus::kp_input))
     InFile1 = Parameter.KeyS;
   // else
@@ -777,7 +777,7 @@ int main(const int argc, const char *argv[]) {
   }
 
   DiffOnly = CmdParams->HasKey(static_cast<int>(KP::kp_diffonly));
-  FldOnly = FldOnly_t::fld_no;
+  fldOnly = FldOnly::fld_no;
   matrixFile = CmdParams->HasKey(static_cast<int>(KP::kp_matrixfile));
   ignoreOrder = CmdParams->HasKey(static_cast<int>(KP::kp_ignoreOrd));
 
@@ -787,32 +787,32 @@ int main(const int argc, const char *argv[]) {
     if (gdlib::strutilx::StrUEqual(S.data(), "All"))
       ActiveFields = {GMS_VAL_LEVEL, GMS_VAL_MARGINAL, GMS_VAL_LOWER, GMS_VAL_UPPER, GMS_VAL_SCALE};
     else if (gdlib::strutilx::StrUEqual(S.data(), "L")) {
-      FldOnlyFld = GMS_VAL_LEVEL;
-      FldOnly = FldOnly_t::fld_maybe;
+      fldOnlyFld = GMS_VAL_LEVEL;
+      fldOnly = FldOnly::fld_maybe;
     } else if (gdlib::strutilx::StrUEqual(S.data(), "M")) {
-      FldOnlyFld = GMS_VAL_MARGINAL;
-      FldOnly = FldOnly_t::fld_maybe;
+      fldOnlyFld = GMS_VAL_MARGINAL;
+      fldOnly = FldOnly::fld_maybe;
     } else if (gdlib::strutilx::StrUEqual(S.data(), "Up")) {
-      FldOnlyFld = GMS_VAL_UPPER;
-      FldOnly = FldOnly_t::fld_maybe;
+      fldOnlyFld = GMS_VAL_UPPER;
+      fldOnly = FldOnly::fld_maybe;
     } else if (gdlib::strutilx::StrUEqual(S.data(), "Lo")) {
-      FldOnlyFld = GMS_VAL_LOWER;
-      FldOnly = FldOnly_t::fld_maybe;
+      fldOnlyFld = GMS_VAL_LOWER;
+      fldOnly = FldOnly::fld_maybe;
     } else if (gdlib::strutilx::StrUEqual(S.data(), "Prior") || gdlib::strutilx::StrUEqual(S.data(), "Scale")) {
-      FldOnlyFld = GMS_VAL_SCALE;
-      FldOnly = FldOnly_t::fld_maybe;
+      fldOnlyFld = GMS_VAL_SCALE;
+      fldOnly = FldOnly::fld_maybe;
     } else {
       std::cout << "Bad field name = " << S << std::endl;
       ErrorCode = 4;
     }
 
-    if (FldOnly == FldOnly_t::fld_maybe)
-      ActiveFields = {FldOnlyFld};
+    if (fldOnly == FldOnly::fld_maybe)
+      ActiveFields = {fldOnlyFld};
   }
 
   if (CmdParams->HasKey(static_cast<int>(KP::kp_fldonly))) {
-    if (FldOnly == FldOnly_t::fld_maybe) {
-      FldOnly = FldOnly_t::fld_yes;
+    if (fldOnly == FldOnly::fld_maybe) {
+      fldOnly = FldOnly::fld_yes;
       if (DiffOnly) {
         // TODO: Change combines to combined?
         std::cout << "Diff only cannot be combined with FldOnly" << std::endl;
@@ -893,11 +893,11 @@ int main(const int argc, const char *argv[]) {
   if (ErrorCode > 0) {
     // TODO: Remove?
     // std::cout << std::endl;
-    Usage(AuditLine);
-    return static_cast<int>(ErrorCode_t::ERR_USAGE);
+    Usage(auditLine);
+    return static_cast<int>(ErrorCode::ERR_USAGE);
   }
 
-  std::cout << AuditLine.getAuditLine() << std::endl;
+  std::cout << auditLine.getAuditLine() << std::endl;
 
   CheckFile(InFile1);
   CheckFile(InFile2);
@@ -919,9 +919,9 @@ int main(const int argc, const char *argv[]) {
     std::cout << std::endl;
   }
 
-  library::ShortString_t S2;
+  library::ShortString S2;
   if (!gdxCreate(&PGXDIF, S2.data(), S2.length()))
-    FatalError("Unable to load GDX library: " + S2, static_cast<int>(ErrorCode_t::ERR_LOADDLL));
+    FatalError("Unable to load GDX library: " + S2, static_cast<int>(ErrorCode::ERR_LOADDLL));
 
   // Temporary file name
   for (int N{1}; N <= std::numeric_limits<int>::max(); N++) {
@@ -935,7 +935,7 @@ int main(const int argc, const char *argv[]) {
     int N{gdxGetLastError(PGXDIF)};
     // Nil is used instead of PGXDIF in Delphi code
     gdxErrorStr(PGXDIF, N, S.data());
-    FatalError2("Cannot create file: " + DiffTmpName, S, static_cast<int>(ErrorCode_t::ERR_WRITEGDX));
+    FatalError2("Cannot create file: " + DiffTmpName, S, static_cast<int>(ErrorCode::ERR_WRITEGDX));
   }
 
   UELTable = std::make_unique<gdlib::strhash::TXStrHashList<std::nullptr_t>>();
@@ -972,7 +972,7 @@ int main(const int argc, const char *argv[]) {
     if (gdxFindSymbol(PGX2, pair.first.data(), &NN) != 0)
       CompareSy(pair.second, NN);
     else
-      StatusTable.insert({pair.first, StatusCode_t::sc_notf2});
+      StatusTable.insert({pair.first, StatusCode::sc_notf2});
   }
 
   // Find symbols in file 2 that are not in file 1
@@ -987,7 +987,7 @@ int main(const int argc, const char *argv[]) {
   for (const auto &pair : IDTable) {
     int NN;
     if (gdxFindSymbol(PGX1, pair.first.data(), &NN) == 0)
-      StatusTable.insert({pair.first, StatusCode_t::sc_notf1});
+      StatusTable.insert({pair.first, StatusCode::sc_notf1});
   }
 
   if (StatusTable.empty())
@@ -1065,7 +1065,7 @@ int main(const int argc, const char *argv[]) {
   if (!RenameOK) {
     std::cout << "Could not rename " << DiffTmpName << " to " << DiffFileName << std::endl;
     DiffFileName = DiffTmpName;
-    ExitCode = static_cast<int>(ErrorCode_t::ERR_RENAME);
+    ExitCode = static_cast<int>(ErrorCode::ERR_RENAME);
   }
   std::cout << "Output: " << DiffFileName << std::endl;
 
@@ -1076,7 +1076,7 @@ int main(const int argc, const char *argv[]) {
   // FreeAndNil( UELTable );
 
   if (ExitCode == 0 && !StatusTable.empty())
-    return static_cast<int>(ErrorCode_t::ERR_DIFFERENT);
+    return static_cast<int>(ErrorCode::ERR_DIFFERENT);
 
   return ExitCode;
 }

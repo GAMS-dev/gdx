@@ -10,14 +10,14 @@
 
 namespace gdxdump {
 
-enum class OutFormat_t : uint8_t {
+enum class OutFormat : uint8_t {
   fmt_none,
   fmt_normal,
   fmt_gamsbas,
   fmt_csv
 };
 
-enum class DblFormat_t : uint8_t {
+enum class DblFormat : uint8_t {
   dbl_none,
   dbl_normal,
   dbl_hexponential,
@@ -65,7 +65,7 @@ void WriteDomainInfo();
 
 void WriteSetText();
 
-void Usage(const library::AuditLine_t &AuditLine);
+void Usage(const library::AuditLine &auditLine);
 
 std::string NextParam();
 

@@ -14,16 +14,16 @@
 namespace library::cmdpar {
 
 // Parameter record
-struct ParamRec_t {
+struct ParamRec {
   int Key{};        // key number
   std::string KeyS; // key value
 };
-using PParamRec = ParamRec_t *;
+using PParamRec = ParamRec *;
 
 // Class to handle command line parameters
-class CmdParams_t {
+class CmdParams {
   std::vector<std::pair<std::string, int>> FKeyList;
-  std::map<int, ParamRec_t> FParList;
+  std::map<int, ParamRec> FParList;
 
   void ClearParams();
   void AddVS(int v, const std::string &s);
@@ -34,10 +34,10 @@ public:
   bool AddParameters(int AInsP, const std::string &CmdLine, int ParamCount, const char *ParamStr[]);
   void AddKeyWord(int v, const std::string &s);
   void AddParam(int v, const std::string &s);
-  bool HasParam(int v, library::ShortString_t &s);
+  bool HasParam(int v, library::ShortString &s);
   bool HasKey(int v);
 
-  ParamRec_t GetParams(int n);
+  ParamRec GetParams(int n);
   [[nodiscard]] int GetParamCount() const;
   [[nodiscard]] std::string GetParamText(int key) const;
 };

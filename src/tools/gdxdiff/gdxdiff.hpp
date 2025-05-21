@@ -16,7 +16,7 @@ namespace gdxdiff {
 
 using namespace std::literals::string_literals;
 
-enum class ErrorCode_t : uint8_t {
+enum class ErrorCode : uint8_t {
   ERR_DIFFERENT = 1,
   ERR_USAGE,
   ERR_NOFILE,
@@ -26,14 +26,14 @@ enum class ErrorCode_t : uint8_t {
   ERR_RENAME
 };
 
-enum class FldOnly_t : uint8_t {
+enum class FldOnly : uint8_t {
   fld_maybe,
   fld_yes,
   fld_no,
   fld_never
 };
 
-enum class StatusCode_t : uint8_t {
+enum class StatusCode : uint8_t {
   sc_same,
   sc_notf1,
   sc_notf2,
@@ -107,9 +107,9 @@ void RegisterDiffUELs();
 
 void CompareSy(int Sy1, int Sy2);
 
-bool GetAsDouble(const library::ShortString_t &S, double &V);
+bool GetAsDouble(const library::ShortString &S, double &V);
 
-void Usage(const library::AuditLine_t &AuditLine);
+void Usage(const library::AuditLine &auditLine);
 
 // void CopyAcronyms( const gdxHandle_t &PGX );
 

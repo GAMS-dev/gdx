@@ -52,8 +52,8 @@ std::ofstream OutputFile;
 gdxHandle_t PGX;
 char Delim, DecimalSep;
 bool ShowHdr, ShowData, CDim, FilterDef, bEpsOut, bNaOut, bPinfOut, bMinfOut, bUndfOut, bZeroOut, bHeader, bFullEVRec, bCSVSetText;
-OutFormat_t OutFormat;
-DblFormat_t dblFormat;
+OutFormat outFormat;
+DblFormat dblFormat;
 int LineCount;
 std::string EpsOut, NaOut, PinfOut, MinfOut, UndfOut, ZeroOut, Header;
 
@@ -133,7 +133,7 @@ void WriteUEL(const std::string &S) {
 void WriteUELTable(const std::string &name) {
   int N, NrUel;
   gdxSystemInfo(PGX, &N, &NrUel);
-  if (OutFormat != OutFormat_t::fmt_csv) {
+  if (outFormat != OutFormat::fmt_csv) {
     if (NrUel > 0)
       fo << "Set " << name << " /\n";
     else {
@@ -143,12 +143,12 @@ void WriteUELTable(const std::string &name) {
     }
   }
   for (N = 1; N <= NrUel; N++) {
-    library::ShortString_t s;
+    library::ShortString s;
     int UMap;
     gdxUMUelGet(PGX, N, s.data(), &UMap);
     fo << "  ";
     WriteUEL(s.data());
-    if (OutFormat == OutFormat_t::fmt_csv)
+    if (outFormat == OutFormat::fmt_csv)
       fo << '\n';
     else
       fo << (N < NrUel ? " ," : " /;") << '\n';
@@ -156,7 +156,7 @@ void WriteUELTable(const std::string &name) {
 }
 
 void WrVal(const double V) {
-  library::ShortString_t acrname;
+  library::ShortString acrname;
   if (gdxAcronymName(PGX, V, acrname.data()) != 0)
     fo << acrname.data();
   else {
@@ -179,15 +179,15 @@ void WrVal(const double V) {
       fo << ZeroOut;
     else
       switch (dblFormat) {
-      case DblFormat_t::dbl_normal:
+      case DblFormat::dbl_normal:
         fo << gdlib::strutilx::DblToStrSep(V, DecimalSep);
         break;
 
-      case DblFormat_t::dbl_hexBytes:
+      case DblFormat::dbl_hexBytes:
         fo << gdlib::dblutil::dblToStrHex(V);
         break;
 
-      case DblFormat_t::dbl_hexponential:
+      case DblFormat::dbl_hexponential:
         fo << gdlib::dblutil::dblToStrHexponential(V);
         break;
 
@@ -200,7 +200,7 @@ void WrVal(const double V) {
 int BadUELs{};
 
 std::string GetUELAsString(const int N) {
-  library::ShortString_t res;
+  library::ShortString res;
   int IDum;
   if (!gdxUMUelGet(PGX, N, res.data(), &IDum)) {
     BadUELs++;
@@ -215,11 +215,11 @@ std::string GetUel4CSV(const int N) {
 
 bool WriteSymbolAsItem(const int SyNr, const bool DomInfo) {
   bool result = true;
-  library::ShortString_t SyId;
+  library::ShortString SyId;
   int SyDim, SyTyp;
   gdxSymbolInfo(PGX, SyNr, SyId.data(), &SyDim, &SyTyp);
   int SyCnt, SyUser;
-  library::ShortString_t SyTxt;
+  library::ShortString SyTxt;
   gdxSymbolInfoX(PGX, SyNr, &SyCnt, &SyUser, SyTxt.data());
   fo << '\"' << SyId.data() << "\"." << SyDim << ".\"" << library::gdxDataTypStr(SyTyp) << '\"';
   if (DomInfo) {
@@ -271,7 +271,7 @@ void WriteSymbolsAsSet(const bool DomInfo) {
 }
 
 void WriteSymbol(const int SyNr) {
-  library::ShortString_t SyName, S;
+  library::ShortString SyName, S;
   std::string SubTypeName;
   int ADim, iATyp, ACount, AUser, IDum, NRec, FDim;
   gdxSyType ATyp;
@@ -287,27 +287,27 @@ void WriteSymbol(const int SyNr) {
       return;
     if (FrstWrite)
       FrstWrite = false;
-    else if (OutFormat == OutFormat_t::fmt_gamsbas)
+    else if (outFormat == OutFormat::fmt_gamsbas)
       fo << " ;\n";
     else {
       fo << ", ";
       if (!((ATyp == dt_var || ATyp == dt_equ) && ADim == 0))
         fo << '\n';
     }
-    if (OutFormat == OutFormat_t::fmt_gamsbas) {
+    if (outFormat == OutFormat::fmt_gamsbas) {
       if (LineCount == 6)
         fo << "$offListing\n";
       fo << ' ' << SyName.data() << '.' << library::valTypStr(ValNr) << ' ';
     }
     if (ADim > 0) {
-      if (OutFormat == OutFormat_t::fmt_gamsbas)
+      if (outFormat == OutFormat::fmt_gamsbas)
         fo << '(';
       for (int D{}; D < ADim; D++) {
         WriteUEL(GetUELAsString(Keys[D]));
         if (D < ADim - 1)
           fo << Delim;
       }
-      if (OutFormat == OutFormat_t::fmt_gamsbas)
+      if (outFormat == OutFormat::fmt_gamsbas)
         fo << ')';
     }
     switch (ATyp) {
@@ -325,7 +325,7 @@ void WriteSymbol(const int SyNr) {
 
     case dt_equ:
     case dt_var:
-      if (OutFormat == OutFormat_t::fmt_gamsbas)
+      if (outFormat == OutFormat::fmt_gamsbas)
         fo << " = ";
       else {
         if (ADim > 0)
@@ -344,7 +344,7 @@ void WriteSymbol(const int SyNr) {
   };
 
   auto WriteComments = [&]() {
-    library::ShortString_t S;
+    library::ShortString S;
     for (int N{1}; N <= std::numeric_limits<int>::max(); N++) {
       if (gdxSymbolGetComment(PGX, SyNr, N, S.data()) == 0)
         break;
@@ -358,12 +358,12 @@ void WriteSymbol(const int SyNr) {
   gdxStrIndexPtrs_t DomainIDsPtrs;
   GDXSTRINDEXPTRS_INIT(DomainIDs, DomainIDsPtrs);
 
-  library::ShortString_t A2Name, setName;
+  library::ShortString A2Name, setName;
   int A2Dim, iA2Typ, setDim, setType;
 
   gdxSymbolInfo(PGX, SyNr, SyName.data(), &ADim, &iATyp);
   ATyp = static_cast<gdxSyType>(iATyp);
-  if ((ATyp == dt_set || ATyp == dt_par) && OutFormat == OutFormat_t::fmt_gamsbas)
+  if ((ATyp == dt_set || ATyp == dt_par) && outFormat == OutFormat::fmt_gamsbas)
     return;
   if (ShowHdr)
     fo << '\n';
@@ -471,8 +471,8 @@ void WriteSymbol(const int SyNr) {
       gdxDataReadRawStart(PGX, SyNr, &NRec);
       FrstWrite = true;
       while (gdxDataReadRaw(PGX, Keys, Vals, &FDim) != 0) {
-        switch (OutFormat) {
-        case OutFormat_t::fmt_gamsbas:
+        switch (outFormat) {
+        case OutFormat::fmt_gamsbas:
           if (ATyp == dt_equ)
             WriteItem(GMS_VAL_MARGINAL);
           else {
@@ -481,11 +481,11 @@ void WriteSymbol(const int SyNr) {
           }
           break;
 
-        case OutFormat_t::fmt_csv:
+        case OutFormat::fmt_csv:
           library::assertWithMessage(false, "No CSV processing");
           break;
 
-        case OutFormat_t::fmt_normal:
+        case OutFormat::fmt_normal:
           WriteItem(GMS_VAL_LEVEL);
           if (ATyp == dt_var || ATyp == dt_equ) {
             WriteItem(GMS_VAL_MARGINAL);
@@ -503,7 +503,7 @@ void WriteSymbol(const int SyNr) {
         }
       }
       gdxDataReadDone(PGX);
-      if (OutFormat == OutFormat_t::fmt_gamsbas)
+      if (outFormat == OutFormat::fmt_gamsbas)
         fo << " ;\n";
       else if (ShowHdr)
         fo << " /;\n";
@@ -531,7 +531,7 @@ void WriteSymbolCSV(const int SyNr) {
     gdxStrIndexPtrs_t gdxDomSPtrs;
     GDXSTRINDEXPTRS_INIT(gdxDomS, gdxDomSPtrs);
 
-    library::ShortString_t s;
+    library::ShortString s;
     bool Done;
     int Nr;
 
@@ -560,7 +560,7 @@ void WriteSymbolCSV(const int SyNr) {
     }
   };
 
-  library::ShortString_t SyName, S;
+  library::ShortString SyName, S;
   int iATyp, NRec, FDim, IDum, Col, ColCnt, NrSymb, NrUEL, HighIndex, Indx;
   gdxSyType ATyp;
   std::unique_ptr<bool[]> CSVCols;
@@ -729,8 +729,8 @@ void WriteSymbolCSV(const int SyNr) {
 
 void WriteSymbolInfo() {
   int ADim, iATyp, NrSy, NrUel, w1, w2, w3, ACount, AUserInfo;
-  library::ShortString_t AName, AExplText;
-  std::map<library::ShortString_t, int> SL;
+  library::ShortString AName, AExplText;
+  std::map<library::ShortString, int> SL;
 
   gdxSystemInfo(PGX, &NrSy, &NrUel);
   w1 = gdlib::strutilx::IntegerWidth(NrSy);
@@ -765,9 +765,9 @@ void WriteSymbolInfo() {
 void WriteDomainInfo() {
   constexpr std::array StrDInfo{"N/A", "None", "Relaxed", "Regular"};
 
-  library::ShortString_t AName;
+  library::ShortString AName;
   int ADim, iATyp, NrSy, NrUel, w1, dinfo;
-  std::map<library::ShortString_t, int> SL;
+  std::map<library::ShortString, int> SL;
 
   gdxStrIndex_t DomainIDs{};
   gdxStrIndexPtrs_t DomainIDsPtrs;
@@ -804,7 +804,7 @@ void WriteDomainInfo() {
 // Write out the set text in the GDX file
 void WriteSetText() {
   int nText, lo, hi, mid, idummy, rc, textIdx, mxTextIdx, nSyms, symDim, symTyp, nRecs, fDim;
-  library::ShortString_t s;
+  library::ShortString s;
   gdxUelIndex_t keys{};
   gdxValues_t vals{};
 
@@ -854,9 +854,9 @@ void WriteSetText() {
   }
 }
 
-void Usage(const library::AuditLine_t &AuditLine) {
+void Usage(const library::AuditLine &auditLine) {
   std::cout << "gdxdump: Write GDX file in ASCII\n"
-            << AuditLine.getAuditLine() << "\n\n"
+            << auditLine.getAuditLine() << "\n\n"
             << "Usage:\n"
             << "gdxdump <filename> <options>\n"
             << "<options>\n"
@@ -925,7 +925,7 @@ std::string NextParam() {
 
 void WriteAcronyms() {
   int Cnt, Indx;
-  library::ShortString_t sName, sText;
+  library::ShortString sName, sText;
 
   Cnt = gdxAcronymCount(PGX);
   if (Cnt <= 0)
@@ -942,7 +942,7 @@ void WriteAcronyms() {
 }
 
 int main(const int argc, const char *argv[]) {
-  library::ShortString_t s, Symb;
+  library::ShortString s, Symb;
   std::string InputFile, DLLStr, UELSetName, OutputName;
   int ErrNr, ExitCode;
   bool ListAllSymbols, ListSymbolsAsSet, ListSymbolsAsSetDI, UsingIDE, VersionOnly, DomainInfo, showSetText;
@@ -953,9 +953,9 @@ int main(const int argc, const char *argv[]) {
   ParamCount = argc - 1;
   ParamStr = argv;
 
-  library::AuditLine_t AuditLine{"GDXDUMP"};
+  library::AuditLine auditLine{"GDXDUMP"};
   if (ParamCount > 0 && gdlib::strutilx::StrUEqual(ParamStr[1], "AUDIT")) {
-    std::cout << AuditLine.getAuditLine() << std::endl;
+    std::cout << auditLine.getAuditLine() << std::endl;
     return 0;
   }
 
@@ -968,9 +968,9 @@ int main(const int argc, const char *argv[]) {
   ListSymbolsAsSetDI = false;
   DomainInfo = false;
   showSetText = false;
-  OutFormat = OutFormat_t::fmt_none;
+  outFormat = OutFormat::fmt_none;
   CDim = false;
-  dblFormat = DblFormat_t::dbl_none;
+  dblFormat = DblFormat::dbl_none;
   UsingIDE = false;
   ExitCode = 0;
   VersionOnly = false;
@@ -1105,7 +1105,7 @@ int main(const int argc, const char *argv[]) {
         continue;
       }
       if (s == "FORMAT" || s == "FORMAT=") {
-        if (OutFormat != OutFormat_t::fmt_none) {
+        if (outFormat != OutFormat::fmt_none) {
           library::printErrorMessage("Only one format can be specified");
           ExitCode = 1;
           break;
@@ -1113,11 +1113,11 @@ int main(const int argc, const char *argv[]) {
         s = NextParam();
         s.to_upper_case();
         if (s == "NORMAL")
-          OutFormat = OutFormat_t::fmt_normal;
+          outFormat = OutFormat::fmt_normal;
         else if (s == "GAMSBAS")
-          OutFormat = OutFormat_t::fmt_gamsbas;
+          outFormat = OutFormat::fmt_gamsbas;
         else if (s == "CSV")
-          OutFormat = OutFormat_t::fmt_csv;
+          outFormat = OutFormat::fmt_csv;
         else {
           library::printErrorMessage("Unrecognized format");
           ExitCode = 1;
@@ -1126,7 +1126,7 @@ int main(const int argc, const char *argv[]) {
         continue;
       }
       if (s == "DFORMAT" || s == "DFORMAT=") {
-        if (dblFormat != DblFormat_t::dbl_none) {
+        if (dblFormat != DblFormat::dbl_none) {
           library::printErrorMessage("Only one dformat can be specified");
           ExitCode = 1;
           break;
@@ -1134,11 +1134,11 @@ int main(const int argc, const char *argv[]) {
         s = NextParam();
         s.to_upper_case();
         if (s == "NORMAL")
-          dblFormat = DblFormat_t::dbl_none;
+          dblFormat = DblFormat::dbl_none;
         else if (s == "HEXBYTES")
-          dblFormat = DblFormat_t::dbl_hexBytes;
+          dblFormat = DblFormat::dbl_hexBytes;
         else if (s == "HEXPONENTIAL")
-          dblFormat = DblFormat_t::dbl_hexponential;
+          dblFormat = DblFormat::dbl_hexponential;
         else {
           library::printErrorMessage("Unrecognized dformat");
           ExitCode = 1;
@@ -1236,30 +1236,30 @@ int main(const int argc, const char *argv[]) {
   }
 
   if (ExitCode != 0) {
-    Usage(AuditLine);
+    Usage(auditLine);
     goto End;
   }
 
-  if (OutFormat == OutFormat_t::fmt_none)
-    OutFormat = OutFormat_t::fmt_normal;
-  if (dblFormat == DblFormat_t::dbl_none)
-    dblFormat = DblFormat_t::dbl_normal;
+  if (outFormat == OutFormat::fmt_none)
+    outFormat = OutFormat::fmt_normal;
+  if (dblFormat == DblFormat::dbl_none)
+    dblFormat = DblFormat::dbl_normal;
   if (Delim == '\0') {
-    if (OutFormat == OutFormat_t::fmt_csv)
+    if (outFormat == OutFormat::fmt_csv)
       Delim = ',';
     else
       Delim = '.';
   }
   if (DecimalSep == '\0')
     DecimalSep = '.';
-  if (OutFormat == OutFormat_t::fmt_csv)
+  if (outFormat == OutFormat::fmt_csv)
     ShowData = true;
   if (Delim == DecimalSep && Delim != '.') {
     library::printErrorMessage("Delimiter and Decimal separator characters should be different");
     ExitCode = 1;
     goto End;
   }
-  if (OutFormat == OutFormat_t::fmt_csv && Symb.empty()) {
+  if (outFormat == OutFormat::fmt_csv && Symb.empty()) {
     library::printErrorMessage("Symbol not specified when writing a CSV file");
     ExitCode = 1;
     goto End;
@@ -1277,13 +1277,13 @@ int main(const int argc, const char *argv[]) {
 
   if (Symb.empty())
     ShowHdr = true;
-  if (OutFormat == OutFormat_t::fmt_gamsbas) {
+  if (outFormat == OutFormat::fmt_gamsbas) {
     ShowHdr = false;
     ShowData = true;
   }
 
   {
-    library::ShortString_t error_message;
+    library::ShortString error_message;
 
     if (!gdxGetReady(error_message.data(), error_message.length())) {
       library::printErrorMessage("Error loading GDX library: " + error_message);
@@ -1315,7 +1315,7 @@ int main(const int argc, const char *argv[]) {
   }
 
   if (VersionOnly) {
-    library::ShortString_t FileStr, ProduceStr;
+    library::ShortString FileStr, ProduceStr;
     gdxFileVersion(PGX, FileStr.data(), ProduceStr.data());
     int NrSy, NrUel, FileVer, ComprLev;
     gdxSystemInfo(PGX, &NrSy, &NrUel);
@@ -1344,10 +1344,10 @@ int main(const int argc, const char *argv[]) {
   if (!ShowData) {
     fo << "\n$gdxIn " << InputFile << '\n';
   }
-  if (OutFormat != OutFormat_t::fmt_csv)
+  if (outFormat != OutFormat::fmt_csv)
     WriteAcronyms();
   if (!UELSetName.empty()) {
-    if (OutFormat == OutFormat_t::fmt_csv) {
+    if (outFormat == OutFormat::fmt_csv) {
       WriteUELTable({});
       goto AllDone;
     }
@@ -1379,7 +1379,7 @@ int main(const int argc, const char *argv[]) {
   if (!Symb.empty()) {
     int N;
     if (gdxFindSymbol(PGX, Symb.data(), &N) != 0) {
-      if (OutFormat == OutFormat_t::fmt_csv)
+      if (outFormat == OutFormat::fmt_csv)
         WriteSymbolCSV(N);
       else {
         WriteSymbol(N);
@@ -1391,7 +1391,7 @@ int main(const int argc, const char *argv[]) {
       ExitCode = 6;
     }
   } else {
-    if (OutFormat == OutFormat_t::fmt_normal)
+    if (outFormat == OutFormat::fmt_normal)
       ShowHdr = true;
     fo << "$onEmpty\n";
     if (!ShowData) {
@@ -1404,7 +1404,7 @@ int main(const int argc, const char *argv[]) {
       WriteSymbol(N);
     fo << "\n$offEmpty\n";
   }
-  if (OutFormat == OutFormat_t::fmt_gamsbas && LineCount > 6)
+  if (outFormat == OutFormat::fmt_gamsbas && LineCount > 6)
     fo << "$onListing\n";
 
 AllDone:

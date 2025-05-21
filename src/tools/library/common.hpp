@@ -30,7 +30,7 @@ bool canBeQuoted(const char *s, size_t slen);
 
 bool goodUELString(const char *s, size_t slen);
 
-class AuditLine_t {
+class AuditLine {
   std::string
       system_name,
       audit_line;
@@ -38,7 +38,7 @@ class AuditLine_t {
   void setAuditLine();
 
 public:
-  AuditLine_t(const std::string &system_name);
+  AuditLine(const std::string &system_name);
 
   void setSystemName(const std::string &system_name);
 

@@ -137,7 +137,7 @@ bool goodUELString(const char *s, const size_t slen) {
   return slen < GLOBAL_UEL_IDENT_SIZE && canBeQuoted(s, slen);
 }
 
-void AuditLine_t::setAuditLine() {
+void AuditLine::setAuditLine() {
   std::string
       GDL_REL_PLT,
       GDL_BLD_COD;
@@ -192,16 +192,16 @@ void AuditLine_t::setAuditLine() {
   audit_line += GDL_BLD_COD + ' ' + GDL_REL_PLT;
 }
 
-AuditLine_t::AuditLine_t(const std::string &system_name) {
+AuditLine::AuditLine(const std::string &system_name) {
   setSystemName(system_name);
 }
 
-void AuditLine_t::setSystemName(const std::string &system_name) {
+void AuditLine::setSystemName(const std::string &system_name) {
   this->system_name = system_name;
   setAuditLine();
 }
 
-std::string AuditLine_t::getAuditLine() const {
+std::string AuditLine::getAuditLine() const {
   return audit_line;
 }
 
