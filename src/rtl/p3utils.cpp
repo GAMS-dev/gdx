@@ -37,7 +37,6 @@
 #include "../gdlib/strutilx.hpp"     // for DblToStr
 #include "../gdlib/utils.hpp"        // for in, trim, val
 
-#include "global/modhead.hpp"        // for STUBWARN
 #include "math_p3.hpp"               // for IntPower
 #include "p3platform.hpp"            // for tOSPlatform, OSPlatform, OSFileType
 #include "sysutils_p3.hpp"           // for ExtractFilePath, ExcludeTrailingPa...
@@ -852,12 +851,12 @@ int p3Chmod( const std::string &path, int mode )
 
 double RealTrunc( double x )
 {
-   return static_cast<int>( x );
+   return std::trunc( x );
 }
 
 double RealRound( double x )
 {
-   return static_cast<int>( x + 0.5 * ( x >= 0 ? 1.0 : -1.0 ) );
+   return std::trunc( x + 0.5 * ( x >= 0 ? 1.0 : -1.0 ) );
 }
 
 //constexpr int MAXDIGITS = 17;// at most this many decimal digits from a double
@@ -873,7 +872,7 @@ bool delphiGetDecDigits( double y, int mode, int nDigits, std::string &digits, i
 {
    // ...
    // TODO: Implement me!
-   STUBWARN();
+   throw std::runtime_error("Not fully implemented yet!");
    return false;
 }
 
@@ -894,7 +893,7 @@ std::string p3FloatToEfmt( double x, int width, int decimals )
 {
    // ...
    // TODO: Implement me!
-   STUBWARN();
+   throw std::runtime_error("Not fully implemented yet!");
    return {};
 }
 
@@ -928,15 +927,15 @@ std::string FloatToE( const double y, int decimals )
 {
    auto myRoundTo = []( const double x, const int i ) -> double {
       const double zeroFive = 0.5 * ( x > 0.0 ? 1.0 : -1.0 );
-      if( !i ) return static_cast<int>( x + zeroFive );
+      if( !i ) return std::trunc( x + zeroFive );
       if( i > 0 )
       {
          // use positive power of 10 to avoid roundoff error in z
          const double z { math_p3::IntPower( 10, i ) };
-         return static_cast<int>( x * z + zeroFive ) / z;
+         return std::trunc( x * z + zeroFive ) / z;
       }
       const double z { math_p3::IntPower( 10, -i ) };
-      return static_cast<int>( x / z + zeroFive ) * z;
+      return std::trunc( x / z + zeroFive ) * z;
    };
 
    /* FloatToE */

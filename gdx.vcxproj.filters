@@ -44,25 +44,13 @@
     <ClCompile Include="src\tests\gdlib\datastoragetests.cpp">
       <Filter>tests\gdlib</Filter>
     </ClCompile>
-    <ClCompile Include="src\tests\gdlib\glookuptests.cpp">
-      <Filter>tests\gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\tests\gdlib\gmacrotests.cpp">
-      <Filter>tests\gdlib</Filter>
-    </ClCompile>
     <ClCompile Include="src\tests\gdlib\gmsdatatests.cpp">
-      <Filter>tests\gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\tests\gdlib\gmsheapnewtests.cpp">
       <Filter>tests\gdlib</Filter>
     </ClCompile>
     <ClCompile Include="src\tests\gdlib\gmsobjtests.cpp">
       <Filter>tests\gdlib</Filter>
     </ClCompile>
     <ClCompile Include="src\tests\gdlib\gmsstrmtests.cpp">
-      <Filter>tests\gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\tests\gdlib\obfuscatestrtests.cpp">
       <Filter>tests\gdlib</Filter>
     </ClCompile>
     <ClCompile Include="src\tests\gdlib\strhashtests.cpp">
@@ -74,26 +62,14 @@
     <ClCompile Include="src\tests\gdlib\utilstests.cpp">
       <Filter>tests\gdlib</Filter>
     </ClCompile>
-    <ClCompile Include="src\tests\gdlib\xcompresstests.cpp">
-      <Filter>tests\gdlib</Filter>
-    </ClCompile>
     <ClCompile Include="src\tests\rtl\p3iotests.cpp">
       <Filter>tests\rtl</Filter>
     </ClCompile>
     <ClCompile Include="src\tests\rtl\p3utilstests.cpp">
       <Filter>tests\rtl</Filter>
     </ClCompile>
-    <ClCompile Include="src\tests\rtl\stdthreadtests.cpp">
-      <Filter>tests\rtl</Filter>
-    </ClCompile>
     <ClCompile Include="src\tests\rtl\sysutilsp3tests.cpp">
       <Filter>tests\rtl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\charmaps.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\cmdpar.cpp">
-      <Filter>gdlib</Filter>
     </ClCompile>
     <ClCompile Include="src\gdlib\datastorage.cpp">
       <Filter>gdlib</Filter>
@@ -101,46 +77,10 @@
     <ClCompile Include="src\gdlib\dblutil.cpp">
       <Filter>gdlib</Filter>
     </ClCompile>
-    <ClCompile Include="src\gdlib\gamsdirs.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\gfileopen.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\glookup.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\gmacro.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
     <ClCompile Include="src\gdlib\gmsdata.cpp">
       <Filter>gdlib</Filter>
     </ClCompile>
-    <ClCompile Include="src\gdlib\gmsglob.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\gmsheapnew.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\gmslist.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
     <ClCompile Include="src\gdlib\gmsobj.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\gmsonly.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\obfuscatestr.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\runner.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\statlib.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gdlib\statlibobj.cpp">
       <Filter>gdlib</Filter>
     </ClCompile>
     <ClCompile Include="src\gdlib\strhash.cpp">
@@ -149,22 +89,13 @@
     <ClCompile Include="src\gdlib\strutilx.cpp">
       <Filter>gdlib</Filter>
     </ClCompile>
-    <ClCompile Include="src\gdlib\xcompress.cpp">
-      <Filter>gdlib</Filter>
-    </ClCompile>
     <ClCompile Include="src\rtl\dtoaLoc.c">
-      <Filter>rtl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\rtl\idglobal_p3.cpp">
       <Filter>rtl</Filter>
     </ClCompile>
     <ClCompile Include="src\rtl\math_p3.cpp">
       <Filter>rtl</Filter>
     </ClCompile>
     <ClCompile Include="src\rtl\p3io.cpp">
-      <Filter>rtl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\rtl\p3library.cpp">
       <Filter>rtl</Filter>
     </ClCompile>
     <ClCompile Include="src\rtl\p3platform.cpp">
@@ -176,23 +107,8 @@
     <ClCompile Include="src\rtl\p3utils.cpp">
       <Filter>rtl</Filter>
     </ClCompile>
-    <ClCompile Include="src\rtl\stdthread.cpp">
-      <Filter>rtl</Filter>
-    </ClCompile>
     <ClCompile Include="src\rtl\sysutils_p3.cpp">
       <Filter>rtl</Filter>
-    </ClCompile>
-    <ClCompile Include="src\global\ctvproc.cpp">
-      <Filter>global</Filter>
-    </ClCompile>
-    <ClCompile Include="src\global\gmslibname.cpp">
-      <Filter>global</Filter>
-    </ClCompile>
-    <ClCompile Include="src\global\gmsspecs.cpp">
-      <Filter>global</Filter>
-    </ClCompile>
-    <ClCompile Include="src\global\modhead.cpp">
-      <Filter>global</Filter>
     </ClCompile>
     <ClCompile Include="zlib\adler32.c">
       <Filter>zlib</Filter>
@@ -243,9 +159,6 @@
   <ItemGroup>
     <ClInclude Include="src\gxfile.hpp">
     </ClInclude>
-    <ClInclude Include="src\tests\doctest.h">
-      <Filter>tests</Filter>
-    </ClInclude>
     <ClInclude Include="src\tests\gdxtests.hpp">
       <Filter>tests</Filter>
     </ClInclude>
@@ -259,64 +172,16 @@
     <ClInclude Include="src\gdlib\batchalloc.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\charmaps.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\cmdpar.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
     <ClInclude Include="src\gdlib\datastorage.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
     <ClInclude Include="src\gdlib\dblutil.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gamsdirs.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\gfileopen.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\glookup.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\gmacro.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
     <ClInclude Include="src\gdlib\gmsdata.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\gmsgen.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\gmsglob.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\gmsheapnew.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\gmslist.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
     <ClInclude Include="src\gdlib\gmsobj.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\gmsonly.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\obfuscatestr.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\runner.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\statlib.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\statlibobj.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gdlib\stattypes.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
     <ClInclude Include="src\gdlib\strhash.hpp">
@@ -325,22 +190,13 @@
     <ClInclude Include="src\gdlib\strutilx.hpp">
       <Filter>gdlib</Filter>
     </ClInclude>
-    <ClInclude Include="src\gdlib\xcompress.hpp">
-      <Filter>gdlib</Filter>
-    </ClInclude>
     <ClInclude Include="src\rtl\dtoaLoc.h">
-      <Filter>rtl</Filter>
-    </ClInclude>
-    <ClInclude Include="src\rtl\idglobal_p3.h">
       <Filter>rtl</Filter>
     </ClInclude>
     <ClInclude Include="src\rtl\math_p3.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
     <ClInclude Include="src\rtl\p3io.hpp">
-      <Filter>rtl</Filter>
-    </ClInclude>
-    <ClInclude Include="src\rtl\p3library.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
     <ClInclude Include="src\rtl\p3platform.hpp">
@@ -352,25 +208,10 @@
     <ClInclude Include="src\rtl\p3utils.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\rtl\stdthread.hpp">
-      <Filter>rtl</Filter>
-    </ClInclude>
     <ClInclude Include="src\rtl\sysutils_p3.hpp">
       <Filter>rtl</Filter>
     </ClInclude>
-    <ClInclude Include="src\global\ctvproc.hpp">
-      <Filter>global</Filter>
-    </ClInclude>
     <ClInclude Include="src\global\delphitypes.hpp">
-      <Filter>global</Filter>
-    </ClInclude>
-    <ClInclude Include="src\global\gmslibname.hpp">
-      <Filter>global</Filter>
-    </ClInclude>
-    <ClInclude Include="src\global\gmsspecs.hpp">
-      <Filter>global</Filter>
-    </ClInclude>
-    <ClInclude Include="src\global\modhead.hpp">
       <Filter>global</Filter>
     </ClInclude>
     <ClInclude Include="src\global\unit.h">
@@ -409,5 +250,7 @@
     <ClInclude Include="zlib\zutil.h">
       <Filter>zlib</Filter>
     </ClInclude>
+    <ClInclude Include="src\rtl\idglobal_p3.hpp" />
+    <ClInclude Include="src\tests\doctest.hpp" />
   </ItemGroup>
 </Project>

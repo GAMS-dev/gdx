@@ -38,8 +38,8 @@
 
 #include "../rtl/sysutils_p3.hpp"  // for IntToStr
 #include "gclgms.h"              // for GMS_SV_ACR, GMS_SV_UNDEF, GMS_SV_EPS
-#include "global/delphitypes.hpp"// for Bounded
-#include "rtl/p3utils.hpp"         // for Tp3FileOpenAction, p3FileRead, p3Fil...
+#include "delphitypes.hpp"// for Bounded
+#include "p3utils.hpp"         // for Tp3FileOpenAction, p3FileRead, p3Fil...
 #include "utils.hpp"               // for in, ord, checkBOMOffset, constructStr
 
 // only supported by MSVC so far :(
@@ -47,7 +47,7 @@
 
 using namespace std::literals::string_literals;
 using namespace rtl::p3utils;
-using utils::ui8, utils::ui16, utils::ui32;
+using namespace utils;
 
 #if defined(__IN_CPPMEX__)
 #include "../gdlib/statlib.hpp"
@@ -62,7 +62,7 @@ namespace gdlib::gmsstrm
 std::string SysErrorMessage( int errorCode )
 {
 #if defined( _WIN32 )
-   static std::array<char, 256> errMsgBuf;
+   static sstring errMsgBuf;
    strerror_s( errMsgBuf.data(), (int) errMsgBuf.size(), errorCode );
    char *errMsg = errMsgBuf.data();
 #else
@@ -186,7 +186,7 @@ uint32_t TGZipInputStream::Read( void *buffer, uint32_t Count )
 void TGZipInputStream::ReadLine( std::string &buffer, int MaxInp, char &LastChar )
 {
    buffer.clear();
-   while( !utils::in<char>( LastChar, '\r', '\n', substChar ) || static_cast<int>( buffer.size() ) == MaxInp )
+   while( !in<char>( LastChar, '\r', '\n', substChar ) || static_cast<int>( buffer.size() ) == MaxInp )
    {
       buffer.push_back( LastChar );
       if( NrLoaded - NrRead >= 1 )
@@ -199,7 +199,7 @@ void TGZipInputStream::ReadLine( std::string &buffer, int MaxInp, char &LastChar
 void TGZipInputStream::ReadLine( std::vector<uint8_t> &buffer, int MaxInp, char &LastChar )
 {
    buffer.clear();
-   while( !utils::in<char>( LastChar, '\r', '\n', substChar ) || static_cast<int>( buffer.size() ) == MaxInp )
+   while( !in<char>( LastChar, '\r', '\n', substChar ) || static_cast<int>( buffer.size() ) == MaxInp )
    {
       buffer.push_back( LastChar );
       if( NrLoaded - NrRead >= 1 )
@@ -212,7 +212,7 @@ void TGZipInputStream::ReadLine( std::vector<uint8_t> &buffer, int MaxInp, char 
 void TGZipInputStream::ReadLine( char *buffer, int MaxInp, char &LastChar, int &Len )
 {
    Len = 0;
-   while( !utils::in<char>( LastChar, '\r', '\n', substChar ) || static_cast<int>( Len ) == MaxInp )
+   while( !in<char>( LastChar, '\r', '\n', substChar ) || static_cast<int>( Len ) == MaxInp )
    {
       buffer[Len++] = LastChar;
       if( NrLoaded - NrRead >= 1 )
@@ -247,9 +247,9 @@ void TXStream::WriteString( const std::string_view s )
       *fstext << "WriteString@" << GetPosition() << "#" << ++cnt << ": " << s << "\n";
    }
 #endif
-   static std::array<char, 256> buf {};
+   static sstring buf {};
    if( Paranoid ) ParWrite( RWType::rw_string );
-   utils::strConvCppToDelphi( s, buf.data() );
+   strConvCppToDelphi( s, buf.data() );
    Write( buf.data(), static_cast<uint32_t>( s.length() ) + 1 );
 }
 
@@ -259,7 +259,7 @@ void TXStream::WriteDouble( double x )
    if( fstext )
    {
       static int cnt {};
-      *fstext << "WriteDouble@" << GetPosition() << "#" << ++cnt << ": " << utils::asdelphifmt( x, 12 ) << '\n';
+      *fstext << "WriteDouble@" << GetPosition() << "#" << ++cnt << ": " << asdelphifmt( x, 12 ) << '\n';
    }
 #endif
    WriteValue( RWType::rw_double, x );
@@ -355,6 +355,18 @@ std::string TXStream::ReadString()
    if(len != s.size())
       s.resize( len );
    return s;
+}
+
+void TXStream::ReadSString(char *s, uint8_t &len)
+{
+   if( Paranoid ) ParCheck( RWType::rw_string );
+   if( !Read( &len, 1 ) || !len )
+   {
+      s[0] = '\0';
+      return;
+   }
+   Read( s, len );
+   s[len] = '\0';
 }
 
 double TXStream::ReadDouble()
@@ -468,7 +480,7 @@ std::string TXFileStream::RandString( int L )
       return static_cast<char>( Seed & 0xFF );
    };
    Seed = 1234 * L;
-   return utils::constructStr( L, [&]( int i ) { return RandCh(); } );
+   return constructStr( L, [&]( int i ) { return RandCh(); } );
 }
 
 int64_t TXFileStream::GetSize()
@@ -918,7 +930,7 @@ void TMiBufferedStream::WriteGmsDouble( double D )
 #ifdef WF_TEXT
    static int cnt {};
    if( fstext )
-      *fstext << "WriteGmsDouble@" << GetPosition() << "#" << ++cnt << ": " << utils::asdelphifmt( D ) << '\n';
+      *fstext << "WriteGmsDouble@" << GetPosition() << "#" << ++cnt << ": " << asdelphifmt( D ) << '\n';
 #endif
 
    const tgmsvalue gv = mapval( D );
@@ -1057,9 +1069,9 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
    if( B1 == signature_header ) Read( srcBuf.data(), B2 );
    if( B1 != signature_header || srcBuf != signature_gams )
    {// nothing special
-      const utils::tBomIndic fileStart { B1, B2, FS->ReadByte(), FS->ReadByte() };
+      const tBomIndic fileStart { B1, B2, FS->ReadByte(), FS->ReadByte() };
       int BOMOffset;
-      if( !utils::checkBOMOffset( fileStart, BOMOffset, errMsg ) )
+      if( !checkBOMOffset( fileStart, BOMOffset, errMsg ) )
       {
          ErrNr = strmErrorEncoding;
          return;
@@ -1074,7 +1086,7 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
    }
    ErrNr = strmErrorGAMSHeader;
    errMsg = "GAMS header not found";
-   FFileSignature = static_cast<TFileSignature>( FS->ReadByte() - utils::ord('A') );
+   FFileSignature = static_cast<TFileSignature>( FS->ReadByte() - ord('A') );
    FS->ReadString();
    FMajorVersionRead = FS->ReadByte();
    FMinorVersionRead = FS->ReadByte();
@@ -1109,9 +1121,9 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
    {
       FS->SetPassWord( PassWord );
       const std::string src = FS->ReadString();
-      std::array<char, 256> targBuf {};
+      sstring targBuf {};
       FS->ApplyPassWord( src.c_str(), targBuf.data(), (int) src.length(), verify_offset );
-      if( gdlib::gmsstrm::TBufferedFileStream::RandString( static_cast<int>( src.length() ) ) != std::string(targBuf.data()) ) return;
+      if( TBufferedFileStream::RandString( static_cast<int>( src.length() ) ) != std::string(targBuf.data()) ) return;
    }
 
    FRewindPoint = FS->GetPosition();
@@ -1130,7 +1142,7 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
    {
       FS->WriteByte( signature_header );
       FS->WriteString( signature_gams );
-      FS->WriteByte( signature + utils::ord('A') );
+      FS->WriteByte( signature + ord('A') );
       FS->WriteString( Producer );
       FS->WriteByte( 1 );// version
       FS->WriteByte( 1 );// sub-version
@@ -1141,7 +1153,7 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
          FS->FlushBuffer();
          FS->SetPassWord( PassWord );
          std::string src = gdlib::gmsstrm::TBufferedFileStream::RandString( (int) PassWord.length() );
-         std::array<char, 256> targBuf {};
+         sstring targBuf {};
          FS->ApplyPassWord( src.c_str(), targBuf.data(), (int) src.length(), verify_offset );
          FS->SetPassWord( "" );
          FS->WriteString( targBuf.data() );
@@ -1192,7 +1204,7 @@ void TBinaryTextFileIO::ReadLine( std::vector<uint8_t> &Buffer, int &Len, int Ma
    else
    {
       Buffer.clear();
-      while( !( utils::in( LastChar, substChar, '\n', '\r' ) || static_cast<int>( Buffer.size() ) == MaxInp ) )
+      while( !( in( LastChar, substChar, '\n', '\r' ) || static_cast<int>( Buffer.size() ) == MaxInp ) )
       {
          Buffer.push_back( LastChar );
          if( FS->NrLoaded - FS->NrRead >= 1 )
@@ -1243,7 +1255,7 @@ void TBinaryTextFileIO::ReadLine( std::string &StrBuffer, int &Len, const int Ma
       return;
    }
    StrBuffer.clear();
-   while( !( utils::in( LastChar, substChar, '\n', '\r' ) || static_cast<int>( StrBuffer.size() ) == MaxInp ) )
+   while( !( in( LastChar, substChar, '\n', '\r' ) || static_cast<int>( StrBuffer.size() ) == MaxInp ) )
    {
       StrBuffer.push_back( LastChar );
       // the simple case

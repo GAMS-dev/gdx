@@ -578,7 +578,7 @@ TGXFileObj gdx;
 TgdxUELIndex UELS;
 TgdxValues Vals;
 int FDim, N, NrRecs, ErrNr, acrindx;
-std::array<char, GMS_SSIZE> ErrMsg, acrtext, acrname;
+std::array<char, GMS_SSSIZE> ErrMsg, acrtext, acrname;
 //Check the library
 if(!gdxGetReadyX(ErrMsg)) {
    std::cout << "Error loading GDX library, msg = " << ErrMsg << std::endl;

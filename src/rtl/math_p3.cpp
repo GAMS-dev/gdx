@@ -26,7 +26,7 @@
 #include "math_p3.hpp"
 #include <cstdlib>              // for abs
 #include <cmath>                // for log1p
-#include "../global/modhead.hpp"  // for STUBWARN
+#include <stdexcept>
 
 namespace rtl::math_p3
 {
@@ -56,13 +56,12 @@ double LnXP1( double x )
 TFPUExceptionMask GetExceptionMask()
 {
    // ...
-   STUBWARN();
-   return {};
+   throw std::runtime_error("Not implemented yet!");
 }
 
 TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
 {
-   STUBWARN();
+   throw std::runtime_error("Not implemented yet!");
    // ...
    return {};
 }
@@ -74,7 +73,7 @@ void SetExceptionMask2P3()
 
 void ClearExceptions()
 {
-   STUBWARN();
+   throw std::runtime_error("Not implemented yet!");
    // ...
 }
 

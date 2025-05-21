@@ -14,13 +14,6 @@ endif ()
 target_link_libraries(gdxcclib64 ${mylibs} ${cclib-link-options})
 set_property(TARGET gdxcclib64 PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-# Check compilation of unused infrastructure units
-set(BASE_ALL OFF CACHE BOOL "Check compilation of unused infrastructure units")
-if(BASE_ALL)
-    add_library(base-units-all STATIC ${base-units-all})
-    target_include_directories(base-units-all PRIVATE ${inc-dirs})
-endif()
-
 # Static library
 add_library(gdx-static STATIC ${gdx-core})
 target_include_directories(gdx-static PRIVATE ${inc-dirs})
@@ -36,7 +29,7 @@ target_link_libraries(gdxtest gdx-static ${mylibs})
 # Unit test suite (against GDX dynamic library)
 add_executable(gdxwraptest src/tests/doctestmain.cpp src/tests/gdxtests.cpp generated/gdxcc.c)
 target_link_libraries(gdxwraptest ${mylibs})
-target_include_directories(gdxwraptest PRIVATE src generated)
+target_include_directories(gdxwraptest PRIVATE src generated src/gdlib)
 target_compile_options(gdxwraptest PRIVATE -DGXFILE_CPPWRAP -DGC_NO_MUTEX)
 endif()
 
