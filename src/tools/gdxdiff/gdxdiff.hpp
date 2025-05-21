@@ -6,11 +6,11 @@
 #include <cstdint>
 #include <string_view>
 
-#include "../library/common.hpp"
-#include "../library/short_string.hpp"
+#include "library/common.hpp"
+#include "library/short_string.hpp"
 
 // GDX library interface
-#include "../../../generated/gdxcc.h"
+#include "generated/gdxcc.h"
 
 namespace gdxdiff
 {

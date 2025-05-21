@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string>
 
-#include "../../../generated/gclgms.h"
+#include "generated/gclgms.h"
 
 namespace library
 {

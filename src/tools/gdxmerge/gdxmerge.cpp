@@ -31,10 +31,10 @@
 #include <cmath>
 
 #include "gdxmerge.hpp"
-#include "../library/cmdpar.hpp"
-#include "../../gdlib/utils.hpp"
-#include "../../gdlib/strutilx.hpp"
-#include "../../rtl/sysutils_p3.hpp"
+#include "library/cmdpar.hpp"
+#include "gdlib/utils.hpp"
+#include "gdlib/strutilx.hpp"
+#include "rtl/sysutils_p3.hpp"
 
 // #define OLD_MEMORY_CHECK
 

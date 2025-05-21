@@ -7,7 +7,7 @@
 
 #include "common.hpp"
 // Global constants
-#include "../../../generated/gclgms.h"
+#include "generated/gclgms.h"
 
 namespace library
 {

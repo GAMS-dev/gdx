@@ -32,16 +32,16 @@
 #include <string_view>
 
 #include "gdxdump.hpp"
-#include "../library/short_string.hpp"
-#include "../../gdlib/utils.hpp"
-#include "../../gdlib/strutilx.hpp"
-#include "../../gdlib/dblutil.hpp"
-#include "../../rtl/sysutils_p3.hpp"
+#include "library/short_string.hpp"
+#include "gdlib/utils.hpp"
+#include "gdlib/strutilx.hpp"
+#include "gdlib/dblutil.hpp"
+#include "rtl/sysutils_p3.hpp"
 
 // Global constants
-#include "../../../generated/gclgms.h"
+#include "generated/gclgms.h"
 // GDX library interface
-#include "../../../generated/gdxcc.h"
+#include "generated/gdxcc.h"
 
 namespace gdxdump
 {

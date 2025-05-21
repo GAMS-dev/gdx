@@ -3,7 +3,7 @@
 #include <cassert>
 
 #include "short_string.hpp"
-#include "../../gdlib/utils.hpp"
+#include "gdlib/utils.hpp"
 
 // #define ENABLE_ASSERTIONS
 

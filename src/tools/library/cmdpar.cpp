@@ -3,8 +3,8 @@
 
 #include "cmdpar.hpp"
 #include "common.hpp"
-#include "../../gdlib/utils.hpp"
-#include "../../gdlib/strutilx.hpp"
+#include "gdlib/utils.hpp"
+#include "gdlib/strutilx.hpp"
 
 namespace library::cmdpar
 {

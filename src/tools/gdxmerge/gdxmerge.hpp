@@ -7,15 +7,15 @@
 #include <cstdint>
 #include <memory>
 
-#include "../library/common.hpp"
-#include "../library/short_string.hpp"
-#include "../../gdlib/gmsdata.hpp"
-#include "../../gdlib/gmsobj.hpp"
+#include "library/common.hpp"
+#include "library/short_string.hpp"
+#include "gdlib/gmsdata.hpp"
+#include "gdlib/gmsobj.hpp"
 
 // GDX library interface
-#include "../../../generated/gdxcc.h"
+#include "generated/gdxcc.h"
 // Global constants
-#include "../../../generated/gclgms.h"
+#include "generated/gclgms.h"
 
 namespace gdxmerge
 {

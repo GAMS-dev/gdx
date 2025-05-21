@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <array>
 
-#include "../library/common.hpp"
+#include "library/common.hpp"
 
 namespace gdxdump
 {
