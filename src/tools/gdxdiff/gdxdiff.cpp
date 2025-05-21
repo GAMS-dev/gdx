@@ -951,7 +951,8 @@ int main( const int argc, const char *argv[] )
    ShowDefRec = CmdParams->HasKey( static_cast<int>( KP::kp_showdef ) );
    CompDomains = CmdParams->HasKey( static_cast<int>( KP::kp_cmpdomain ) );
 
-   auto populateListFromParams = [&]( const gdxdiff::KP paramKey, std::unique_ptr<gdlib::gmsobj::TXStrings> &idList ) {
+   auto populateListFromParams = [&]( const gdxdiff::KP paramKey,
+                                      std::unique_ptr<gdlib::gmsobj::TXStrings> &idList ) {
       if( CmdParams->HasParam( static_cast<int>( paramKey ), S ) )
       {
          idList = std::make_unique<gdlib::gmsobj::TXStrings>();

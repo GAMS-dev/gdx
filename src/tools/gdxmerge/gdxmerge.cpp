@@ -227,7 +227,7 @@ void SymbolList_t::AddPGXFile( const int FNr, const ProcessPass_t Pass )
       }
 
       SyObj = gdlib::gmsobj::TXHashedStringList<GAMSSymbol_t>::GetObject( SyIndx );
-      if( SyObj->SyData == nullptr )
+      if( !SyObj->SyData )
          continue;
       if( SyObj->SySkip )
          continue;
@@ -321,7 +321,7 @@ bool SymbolList_t::CollectBigOne( const int SyNr )
    library::ShortString_t Txt, ErrMsg, FileName, FileId;
 
    SyObj = gdlib::gmsobj::TXHashedStringList<GAMSSymbol_t>::GetObject( SyNr );
-   if( SyObj->SyData == nullptr )
+   if( !SyObj->SyData )
       return false;
 
    // Replaced '\r' with '\n' here:
@@ -435,7 +435,7 @@ void SymbolList_t::WritePGXFile( const int SyNr, const ProcessPass_t Pass )
    library::ShortString_t Txt;
 
    SyObj = gdlib::gmsobj::TXHashedStringList<GAMSSymbol_t>::GetObject( SyNr );
-   if( SyObj->SyData == nullptr )
+   if( !SyObj->SyData )
       return;
    if( Pass == ProcessPass_t::RpSmall && SyObj->SySize >= SizeCutOff )
       return;
