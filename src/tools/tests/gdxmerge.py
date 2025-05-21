@@ -13,6 +13,7 @@ from examples.small_example_changed_data import create_small_example_changed_dat
 
 class TestGdxMerge(unittest.TestCase):
     TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
+    GDX_DIRECTORY_PATH = os.path.join(TESTS_DIRECTORY_PATH, '..', '..', '..')
     DIRECTORY_PATHS = {
         'examples': os.path.join(TESTS_DIRECTORY_PATH, 'examples'),
         'output': os.path.join(TESTS_DIRECTORY_PATH, 'output', 'gdxmerge')
@@ -49,9 +50,10 @@ class TestGdxMerge(unittest.TestCase):
         if platform.system() == 'Windows':
             EXECUTABLE_PATH = ['Release', f'{EXECUTABLE_NAME}.exe']
         else:
-            EXECUTABLE_PATH = ['build', EXECUTABLE_NAME]
+            os.environ["DYLD_LIBRARY_PATH"] = os.path.join(cls.GDX_DIRECTORY_PATH, 'build')
+            EXECUTABLE_PATH = ['build', 'src', 'tools', EXECUTABLE_NAME, EXECUTABLE_NAME]
         return subprocess.run(
-            [os.path.join(cls.TESTS_DIRECTORY_PATH, '..', '..', '..', *EXECUTABLE_PATH), *command],
+            [os.path.join(cls.GDX_DIRECTORY_PATH, *EXECUTABLE_PATH), *command],
             capture_output=True,
             text=True
         )

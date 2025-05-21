@@ -8,6 +8,7 @@ from examples.full_example import create_full_example
 
 
 TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
+GDX_DIRECTORY_PATH = os.path.join(TESTS_DIRECTORY_PATH, '..', '..', '..', '..')
 DIRECTORY_PATHS = {
     'examples': os.path.join(TESTS_DIRECTORY_PATH, 'examples'),
     'results': os.path.join(TESTS_DIRECTORY_PATH, 'results')
@@ -30,7 +31,8 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
     if platform.system() == 'Windows':
         EXECUTABLE_PATH = ['Release', f'{executable_name}.exe']
     else:
-        EXECUTABLE_PATH = ['build', executable_name]
+        os.environ["DYLD_LIBRARY_PATH"] = os.path.join(GDX_DIRECTORY_PATH, 'build')
+        EXECUTABLE_PATH = ['build', 'src', 'tools', executable_name, executable_name]
     os.makedirs(DIRECTORY_PATHS['results'], exist_ok=True)
     full_command = [
         'hyperfine',
@@ -43,7 +45,7 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
         ),
         '--command-name', f'{executable_name} (C++)',
         ' '.join([
-            os.path.join(TESTS_DIRECTORY_PATH, '..', '..', '..', *EXECUTABLE_PATH),
+            os.path.join(GDX_DIRECTORY_PATH, *EXECUTABLE_PATH),
             *command
         ]),
         '--command-name', f'{executable_name} (Delphi)',
