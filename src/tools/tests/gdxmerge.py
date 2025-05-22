@@ -706,13 +706,13 @@ class TestGdxMerge(unittest.TestCase):
 
     def test_commands_from_file(self) -> None:
         for separator in [' ', '\t', '\n']:
-            with tempfile.NamedTemporaryFile(suffix='.txt') as temporary_file:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.txt') as temporary_file:
                 temporary_file.write(
-                    str.encode(separator.join([
+                    separator.join([
                         self.FILE_PATHS['small_example'],
                         self.FILE_PATHS['full_example'],
                         f'Output={self.FILE_PATHS['merge_file']}'
-                    ]))
+                    ])
                 )
                 temporary_file.flush()
                 output = self.run_gdxmerge([f'@{temporary_file.name}'])

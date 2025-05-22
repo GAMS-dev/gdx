@@ -106,7 +106,7 @@ class TestGdxDump(unittest.TestCase):
         self.check_output(output)
 
     def test_full_example_output(self) -> None:
-        with tempfile.NamedTemporaryFile(suffix='.txt') as temporary_file:
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt') as temporary_file:
             output = self.run_gdxdump([
                 self.FILE_PATHS['full_example'],
                 f'Output={temporary_file.name}'
