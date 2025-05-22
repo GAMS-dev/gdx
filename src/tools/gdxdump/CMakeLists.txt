@@ -3,4 +3,6 @@ add_executable(gdxdump
     ${CMAKE_CURRENT_SOURCE_DIR}/gdxdump.cpp
 )
 
-target_link_libraries(gdxdump gdxtools-library)
+target_link_libraries(gdxdump PRIVATE
+    gdxtools-library
+)

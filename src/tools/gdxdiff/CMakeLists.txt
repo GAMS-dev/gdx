@@ -3,4 +3,6 @@ add_executable(gdxdiff
     ${CMAKE_CURRENT_SOURCE_DIR}/gdxdiff.cpp
 )
 
-target_link_libraries(gdxdiff gdxtools-library)
+target_link_libraries(gdxdiff PRIVATE
+    gdxtools-library
+)

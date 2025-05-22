@@ -12,7 +12,11 @@ target_include_directories(gdxtools-library PUBLIC
     ${inc-dirs}
 )
 
-target_link_libraries(gdxtools-library gdx-static)
+target_link_libraries(gdxtools-library PUBLIC
+    gdx-static
+)
 if(UNIX)
-    target_link_libraries(gdxtools-library ${CMAKE_DL_LIBS})
+    target_link_libraries(gdxtools-library PUBLIC
+        ${CMAKE_DL_LIBS}
+    )
 endif()
