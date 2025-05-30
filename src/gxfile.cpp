@@ -1707,10 +1707,13 @@ const std::map<int, std::string> errorCodeToStr {
         { ERR_CANNOT_DELETE, "GDXCOPY: Cannot delete file"s },
         { ERR_CANNOT_RENAME, "GDXCOPY: Cannot rename file"s } };
 
-int TGXFileObj::gdxErrorStr( int ErrNr, char *ErrMsg )
+int TGXFileObj::gdxErrorStr( int ErrNr, char *ErrMsg ) const
 {
    const auto it = errorCodeToStr.find( ErrNr );
-   assignStrToBuf( it == errorCodeToStr.end() ? SysErrorMessage( ErrNr ) : it->second, ErrMsg, GMS_SSSIZE );
+   std::string msg {it == errorCodeToStr.end() ? SysErrorMessage( ErrNr ) : it->second};
+   if(ErrNr == 2 && !lastFileName.empty()) // No such file or directory <- append path!
+      msg += ": \""s + lastFileName + '\"';
+   assignStrToBuf(msg, ErrMsg, GMS_SSSIZE );
    return true;
 }
 
@@ -1885,6 +1888,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
       return FileNoGood();
    }
    FFile = std::make_unique<TMiBufferedStream>( Afn, filemode );
+   lastFileName = Afn;
    ErrNr = FFile->GetLastIOResult();
    if( ErrNr ) return FileNoGood();
    if( FFile->GoodByteOrder() )
@@ -2283,16 +2287,13 @@ int TGXFileObj::gdxGetLastError()
       LastError = ERR_NOERROR;
       return le;
    }
-   else
+   int res { FFile->GetLastIOResult() };
+   if( res == ERR_NOERROR )
    {
-      int res { FFile->GetLastIOResult() };
-      if( res == ERR_NOERROR )
-      {
-         res = LastError;
-         LastError = ERR_NOERROR;
-      }
-      return res;
+      res = LastError;
+      LastError = ERR_NOERROR;
    }
+   return res;
 }
 
 int TGXFileObj::gdxGetSpecialValues( double *AVals )
@@ -3688,7 +3689,7 @@ int TGXFileObj::gdxDataReadRawFastEx( int SyNr, TDataStoreExProc_t DP, int &NrRe
    if( gdxDataReadRawFastEx_DP_CallByRef )
    {
       // NOTE: Not covered by unit tests yet.
-      TDataStoreExProc_F local_DP { reinterpret_cast<TDataStoreExProc_F>( DP ) };
+      const auto local_DP { reinterpret_cast<TDataStoreExProc_F>( DP ) };
       uInt64 local_Uptr {};
       local_Uptr.i = 0;
       local_Uptr.p = Uptr;
@@ -3709,7 +3710,7 @@ void TGXFileObj::gdxGetDomainElements_DP_FC( int RawIndex, int MappedIndex, void
    // NOTE: Not covered by unit tests yet.
    if( gdxGetDomainElements_DP_CallByRef )
    {
-      TDomainIndexProc_F local_gdxGetDomainElements_DP { (TDomainIndexProc_F) gdxGetDomainElements_DP };
+      const auto local_gdxGetDomainElements_DP { reinterpret_cast<TDomainIndexProc_F>( gdxGetDomainElements_DP ) };
       uInt64 local_Uptr;
       local_Uptr.i = 0;
       local_Uptr.p = Uptr;
@@ -3724,7 +3725,7 @@ int TGXFileObj::gdxDataReadRawFastFilt_DP_FC( const int *Indx, const double *Val
    if( gdxDataReadRawFastFilt_DP_CallByRef )
    {
       // NOTE: Not covered by unit tests yet.
-      TDataStoreFiltProc_F local_gdxDataReadRawFastFilt_DP { (TDataStoreFiltProc_F) gdxDataReadRawFastFilt_DP };
+      const auto local_gdxDataReadRawFastFilt_DP { reinterpret_cast<TDataStoreFiltProc_F>( gdxDataReadRawFastFilt_DP ) };
       uInt64 local_Uptr;
       local_Uptr.i = 0;
       local_Uptr.p = Uptr;

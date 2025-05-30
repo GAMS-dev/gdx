@@ -695,6 +695,7 @@ functions:
   - gdxGetDLLVersion:
       type: int
       static: True
+      const: False
       parameters:
       - V:
           type: oSS
@@ -712,7 +713,8 @@ functions:
       group: Errors
   - gdxErrorStr:
       type: int
-      static: True
+      static: False
+      const: True
       parameters:
       - ErrNr:
           type: int

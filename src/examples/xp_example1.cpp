@@ -47,7 +47,7 @@ class SimpleWriteReadExample
    gdxStrIndex_t IndxXXX {};
    gdxValues_t Values {};
 
-   void ReportGDXError();
+   void ReportGDXError( TGXFileObj &pgx );
    void WriteData( const char *s, double V );
    static void ReportIOError( int N, const std::string &msg );
 
@@ -61,11 +61,11 @@ public:
    void readFromFile( const std::string &gdxInputFilename );
 };
 
-void SimpleWriteReadExample::ReportGDXError()
+void SimpleWriteReadExample::ReportGDXError( TGXFileObj &pgx )
 {
    std::array<char, GMS_SSSIZE> S {};
    std::string ostr = "**** Fatal GDX Error\n"s;
-   TGXFileObj::gdxErrorStr( pgx.gdxGetLastError(), S.data() );
+   pgx.gdxErrorStr( pgx.gdxGetLastError(), S.data() );
    ostr += "**** "s + S.data();
    throw std::runtime_error( ostr );
 }
@@ -107,11 +107,11 @@ void SimpleWriteReadExample::writeDemandData()
    pgx.gdxOpenWrite( "demanddata.gdx", "xp_example1", ErrNr );
    if( ErrNr ) ReportIOError( ErrNr, "gdxOpenWrite" );
    if( !pgx.gdxDataWriteStrStart( "Demand", "Demand data", 1, GMS_DT_PAR, 0 ) )
-      ReportGDXError();
+      ReportGDXError( pgx );
    WriteData( "New-York", 324.0 );
    WriteData( "Chicago", 299.0 );
    WriteData( "Topeka", 274.0 );
-   if( !pgx.gdxDataWriteDone() ) ReportGDXError();
+   if( !pgx.gdxDataWriteDone() ) ReportGDXError( pgx );
    std::cout << "Demand data written by example1" << std::endl;
 }
 
@@ -143,7 +143,7 @@ void SimpleWriteReadExample::readFromFile( const std::string &gdxInputFilename )
    }
 
    int NrRecs, N;
-   if( !pgx.gdxDataReadStrStart( VarNr, NrRecs ) ) ReportGDXError();
+   if( !pgx.gdxDataReadStrStart( VarNr, NrRecs ) ) ReportGDXError( pgx );
    std::cout << "Variable X has " << NrRecs << " records" << std::endl;
    while( pgx.gdxDataReadStr( Indx, Values, N ) )
    {
