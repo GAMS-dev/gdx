@@ -422,7 +422,7 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
    // before calling this a success, check for directory on read-only
    struct stat statBuf {};
    if (p3OpenRead == mode) {
-      if ( const int rc = fstat( fd, &statBuf ) )
+      if ( fstat( fd, &statBuf ) )
          result = errno;
       else if (S_ISDIR(statBuf.st_mode))
          result = EISDIR;

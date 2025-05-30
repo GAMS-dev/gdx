@@ -70,7 +70,7 @@ std::map<std::vector<std::string>, double> loadXLevelMapFromGDX( const std::stri
    if( !rc || errNr != 0 )
    {
       std::array<char, GMS_SSSIZE> msgBuf {};
-      gdx::TGXFileObj::gdxErrorStr( errNr, msgBuf.data() );
+      gdx.gdxErrorStr( errNr, msgBuf.data() );
       throw std::runtime_error( "*** Error opening trnsport.gdx: "s + msgBuf.data() );
    }
 

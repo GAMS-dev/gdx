@@ -321,9 +321,9 @@ public:
      return ::gdxDataWriteStrStart( pgx, SyId, ExplTxt, Dimen, Typ, UserInfo );
    }
 
-   int gdxGetDLLVersion( char *V )
+   static int gdxGetDLLVersion( char *V )
    {
-     return ::gdxGetDLLVersion( pgx, V );
+     return ::gdxGetDLLVersion( nullptr, V );
    }
 
    int gdxErrorCount() const
@@ -331,9 +331,9 @@ public:
      return ::gdxErrorCount( pgx );
    }
 
-   static int gdxErrorStr( int ErrNr, char *ErrMsg )
+   int gdxErrorStr( int ErrNr, char *ErrMsg ) const
    {
-     return ::gdxErrorStr( nullptr, ErrNr, ErrMsg );
+     return ::gdxErrorStr( pgx, ErrNr, ErrMsg );
    }
 
    int gdxFileInfo( int &FileVer, int &ComprLev ) const
@@ -589,11 +589,6 @@ public:
    int gdxUELMaxLength()
    {
       return ::gdxUELMaxLength( pgx );
-   }
-
-   int gdxGetDLLVersion( char *V ) const
-   {
-      return ::gdxGetDLLVersion( pgx, V );
    }
 };
 

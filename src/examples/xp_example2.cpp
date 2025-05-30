@@ -58,7 +58,7 @@ class WriteSolveReadExample
 
    std::array<char, GMS_SSSIZE> msg {};
 
-   void throwGDXError( int i, const std::string &s );
+   void throwGDXError( const TGXFileObj &gdx, int i, const std::string &s );
 
 public:
    explicit WriteSolveReadExample( const std::string &sysdir );
@@ -67,9 +67,9 @@ public:
    int ReadSolutionData( const char *fngdxfile );
 };
 
-void WriteSolveReadExample::throwGDXError( int i, const std::string &s )
+void WriteSolveReadExample::throwGDXError( const TGXFileObj &gdx, int i, const std::string &s )
 {
-   TGXFileObj::gdxErrorStr( i, msg.data() );
+   gdx.gdxErrorStr( i, msg.data() );
    throw std::runtime_error( s + "% failed: "s + msg.data() );
 }
 
@@ -87,13 +87,13 @@ int WriteSolveReadExample::WriteModelData( const std::string &gdxOutFileName )
    pgdx.gdxOpenWrite( gdxOutFileName.c_str(), "xp_Example2", status );
    if( status )
    {
-      throwGDXError( status, "gdxOpenWrite" );
+      throwGDXError( pgdx, status, "gdxOpenWrite" );
       return 1;
    }
 
    if( !pgdx.gdxDataWriteStrStart( "Demand", "Demand Data", 1, GMS_DT_PAR, 0 ) )
    {
-      throwGDXError( pgdx.gdxGetLastError(), "gdxDataWriteStrStart" );
+      throwGDXError( pgdx, pgdx.gdxGetLastError(), "gdxDataWriteStrStart" );
       return 1;
    }
 
@@ -116,13 +116,13 @@ int WriteSolveReadExample::WriteModelData( const std::string &gdxOutFileName )
 
    if( !pgdx.gdxDataWriteDone() )
    {
-      throwGDXError( pgdx.gdxGetLastError(), "gdxDataWriteDone" );
+      throwGDXError( pgdx, pgdx.gdxGetLastError(), "gdxDataWriteDone" );
       return 1;
    }
 
    if( pgdx.gdxClose() )
    {
-      throwGDXError( pgdx.gdxGetLastError(), "gdxClose" );
+      throwGDXError( pgdx, pgdx.gdxGetLastError(), "gdxClose" );
       return 1;
    }
 
@@ -154,7 +154,7 @@ int WriteSolveReadExample::ReadSolutionData( const char *fngdxfile )
    int status;
    pgdx.gdxOpenRead( fngdxfile, status );
    if( status )
-      throwGDXError( status, "gdxOpenRead" );
+      throwGDXError( pgdx, status, "gdxOpenRead" );
 
    std::array<char, GMS_SSSIZE> VarName {};
    std::strcpy( VarName.data(), "result" );
@@ -175,7 +175,7 @@ int WriteSolveReadExample::ReadSolutionData( const char *fngdxfile )
 
    int NrRecs;
    if( !pgdx.gdxDataReadStrStart( VarNr, NrRecs ) )
-      throwGDXError( pgdx.gdxGetLastError(), "gdxDataReadStrStart" );
+      throwGDXError( pgdx, pgdx.gdxGetLastError(), "gdxDataReadStrStart" );
 
    // Initialize some GDX data structure
    gdxStrIndex_t strIndex;
@@ -197,10 +197,10 @@ int WriteSolveReadExample::ReadSolutionData( const char *fngdxfile )
    pgdx.gdxDataReadDone();
 
    if( ( status = pgdx.gdxGetLastError() ) )
-      throwGDXError( status, "GDX" );
+      throwGDXError( pgdx, status, "GDX" );
 
    if( pgdx.gdxClose() )
-      throwGDXError( pgdx.gdxGetLastError(), "gdxClose" );
+      throwGDXError( pgdx, pgdx.gdxGetLastError(), "gdxClose" );
 
    return 0;
 }
