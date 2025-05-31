@@ -42,7 +42,7 @@ var searchData=
   ['gdxdatawritestr_39',['gdxDataWriteStr',['../classgdx_1_1TGXFileObj.html#a1fdceb4091918007f4a4ca7819a43c20',1,'gdx::TGXFileObj']]],
   ['gdxdatawritestrstart_40',['gdxDataWriteStrStart',['../classgdx_1_1TGXFileObj.html#a638d737c0364437390d5ffc731b31066',1,'gdx::TGXFileObj']]],
   ['gdxerrorcount_41',['gdxErrorCount',['../classgdx_1_1TGXFileObj.html#ae3d45de882c24b8d2acdd47417bfc561',1,'gdx::TGXFileObj']]],
-  ['gdxerrorstr_42',['gdxErrorStr',['../classgdx_1_1TGXFileObj.html#a02cfa59bcabe31a143079f5dbd1fd3d6',1,'gdx::TGXFileObj']]],
+  ['gdxerrorstr_42',['gdxErrorStr',['../classgdx_1_1TGXFileObj.html#af0509905e788762cffb3a456d0c48c7c',1,'gdx::TGXFileObj']]],
   ['gdxfileinfo_43',['gdxFileInfo',['../classgdx_1_1TGXFileObj.html#aed2e8aa58d63ae1d7b7f89b517280355',1,'gdx::TGXFileObj']]],
   ['gdxfileversion_44',['gdxFileVersion',['../classgdx_1_1TGXFileObj.html#a76137ca3e23d4e34e0cce16ffb34845a',1,'gdx::TGXFileObj']]],
   ['gdxfilterexists_45',['gdxFilterExists',['../classgdx_1_1TGXFileObj.html#aba34d285a642dcc849a40ec08846b714',1,'gdx::TGXFileObj']]],

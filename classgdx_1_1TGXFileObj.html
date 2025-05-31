@@ -201,6 +201,16 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>SetTraceLevel</b> (Tr
 <tr class="memitem:a44fec2813995c0fa49b83a0838faf4ff"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a44fec2813995c0fa49b83a0838faf4ff">gdxGetDomainElements</a> (int SyNr, int DimPos, int FilterNr, TDomainIndexProc_t DP, int &amp;NrElem, void *Uptr)</td></tr>
 <tr class="memdesc:a44fec2813995c0fa49b83a0838faf4ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the unique elements for a given dimension of a given symbol.  <a href="classgdx_1_1TGXFileObj.html#a44fec2813995c0fa49b83a0838faf4ff">More...</a><br /></td></tr>
 <tr class="separator:a44fec2813995c0fa49b83a0838faf4ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Errors</div></td></tr>
+<tr class="memitem:ae3d45de882c24b8d2acdd47417bfc561"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#ae3d45de882c24b8d2acdd47417bfc561">gdxErrorCount</a> () const</td></tr>
+<tr class="memdesc:ae3d45de882c24b8d2acdd47417bfc561"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of errors.  <a href="classgdx_1_1TGXFileObj.html#ae3d45de882c24b8d2acdd47417bfc561">More...</a><br /></td></tr>
+<tr class="separator:ae3d45de882c24b8d2acdd47417bfc561"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0509905e788762cffb3a456d0c48c7c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#af0509905e788762cffb3a456d0c48c7c">gdxErrorStr</a> (int ErrNr, char *ErrMsg) const</td></tr>
+<tr class="memdesc:af0509905e788762cffb3a456d0c48c7c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the text for a given error number. Always non-zero.  <a href="classgdx_1_1TGXFileObj.html#af0509905e788762cffb3a456d0c48c7c">More...</a><br /></td></tr>
+<tr class="separator:af0509905e788762cffb3a456d0c48c7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35273506e085ef6d885f94724ca02b86"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a35273506e085ef6d885f94724ca02b86">gdxGetLastError</a> ()</td></tr>
+<tr class="memdesc:a35273506e085ef6d885f94724ca02b86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the last error number or zero if there was no error. Calling this function will clear the last error stored.  <a href="classgdx_1_1TGXFileObj.html#a35273506e085ef6d885f94724ca02b86">More...</a><br /></td></tr>
+<tr class="separator:a35273506e085ef6d885f94724ca02b86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">File (Open/Close)</div></td></tr>
 <tr class="memitem:a871263601526037bc936b71389813e0b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a871263601526037bc936b71389813e0b">gdxClose</a> ()</td></tr>
 <tr class="memdesc:a871263601526037bc936b71389813e0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close a GDX file that was previously opened for reading or writing. Before the file is closed, any pending write operations will be finished. This does not free the GDX in-memory object. This method will automatically be called when the GDX object lifetime ends (e.g. being out of scope).  <a href="classgdx_1_1TGXFileObj.html#a871263601526037bc936b71389813e0b">More...</a><br /></td></tr>
@@ -421,17 +431,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>gdxDataReadRawFastFil
 <tr class="memitem:aa301ba783de393af58382b881fef421b"><td class="memItemLeft" align="right" valign="top"><a id="aa301ba783de393af58382b881fef421b" name="aa301ba783de393af58382b881fef421b"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>gdxDataReadRawFastEx_DP_CallByRef</b> {}</td></tr>
 <tr class="separator:aa301ba783de393af58382b881fef421b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader">Errors</h2></td></tr>
-<tr class="memitem:ae3d45de882c24b8d2acdd47417bfc561"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#ae3d45de882c24b8d2acdd47417bfc561">gdxErrorCount</a> () const</td></tr>
-<tr class="memdesc:ae3d45de882c24b8d2acdd47417bfc561"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of errors.  <a href="classgdx_1_1TGXFileObj.html#ae3d45de882c24b8d2acdd47417bfc561">More...</a><br /></td></tr>
-<tr class="separator:ae3d45de882c24b8d2acdd47417bfc561"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35273506e085ef6d885f94724ca02b86"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a35273506e085ef6d885f94724ca02b86">gdxGetLastError</a> ()</td></tr>
-<tr class="memdesc:a35273506e085ef6d885f94724ca02b86"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the last error number or zero if there was no error. Calling this function will clear the last error stored.  <a href="classgdx_1_1TGXFileObj.html#a35273506e085ef6d885f94724ca02b86">More...</a><br /></td></tr>
-<tr class="separator:a35273506e085ef6d885f94724ca02b86"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a02cfa59bcabe31a143079f5dbd1fd3d6"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a02cfa59bcabe31a143079f5dbd1fd3d6">gdxErrorStr</a> (int ErrNr, char *ErrMsg)</td></tr>
-<tr class="memdesc:a02cfa59bcabe31a143079f5dbd1fd3d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the text for a given error number. Always non-zero.  <a href="classgdx_1_1TGXFileObj.html#a02cfa59bcabe31a143079f5dbd1fd3d6">More...</a><br /></td></tr>
-<tr class="separator:a02cfa59bcabe31a143079f5dbd1fd3d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader">Version/Information</h2></td></tr>
 <tr class="memitem:a76137ca3e23d4e34e0cce16ffb34845a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a76137ca3e23d4e34e0cce16ffb34845a">gdxFileVersion</a> (char *FileStr, char *ProduceStr) const</td></tr>
@@ -2335,14 +2334,11 @@ Make sure values does not contain more than 5 entries.  <b> See: </b> <a href="#
 
 </div>
 </div>
-<a id="a02cfa59bcabe31a143079f5dbd1fd3d6" name="a02cfa59bcabe31a143079f5dbd1fd3d6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a02cfa59bcabe31a143079f5dbd1fd3d6">&#9670;&#160;</a></span>gdxErrorStr()</h2>
+<a id="af0509905e788762cffb3a456d0c48c7c" name="af0509905e788762cffb3a456d0c48c7c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af0509905e788762cffb3a456d0c48c7c">&#9670;&#160;</a></span>gdxErrorStr()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">int gdx::TGXFileObj::gdxErrorStr </td>
@@ -2359,14 +2355,9 @@ Make sure values does not contain more than 5 entries.  <b> See: </b> <a href="#
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
 <p>Returns the text for a given error number. Always non-zero. </p>
@@ -2719,7 +2710,7 @@ When the symbol is not found, the function returns zero and SyNr is set to -1.  
 <div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Get domain count = &quot;</span> &lt;&lt; cnt &lt;&lt; std::endl;</div>
 <div class="line">pgx.gdxGetDomainElements(1, 1, 7, DataDomainCB, cnt);</div>
 <div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Using filter 7; number of records in error list = &quot;</span> &lt;&lt; <a class="code hl_function" href="classgdx_1_1TGXFileObj.html#aaae21ed2293db76cdbd05dd06a94a775">gdxDataErrorCount</a>(PGX) &lt;&lt; std::endl;</div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_aaae21ed2293db76cdbd05dd06a94a775"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#aaae21ed2293db76cdbd05dd06a94a775">gdx::TGXFileObj::gdxDataErrorCount</a></div><div class="ttdeci">int gdxDataErrorCount() const</div><div class="ttdoc">Query the number of error records.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:2151</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_aaae21ed2293db76cdbd05dd06a94a775"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#aaae21ed2293db76cdbd05dd06a94a775">gdx::TGXFileObj::gdxDataErrorCount</a></div><div class="ttdeci">int gdxDataErrorCount() const</div><div class="ttdoc">Query the number of error records.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:2155</div></div>
 </div><!-- fragment --> </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a36c5e9b87188458bfca1d08e4595f4d7" title="Retrieve an error record. Non-zero if the record number is valid.">gdxDataErrorRecord</a> </dd></dl>
 
@@ -3033,7 +3024,7 @@ When reading a GDX file, the index is returned as the level value when reading a
 <div class="line"><span class="keywordflow">if</span>(ErrCode) {</div>
 <div class="line">  [ ... ]</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a52f09635e83e11b65dcfdcbd617f0600"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a52f09635e83e11b65dcfdcbd617f0600">gdx::TGXFileObj::gdxOpenAppend</a></div><div class="ttdeci">int gdxOpenAppend(const char *FileName, const char *Producer, int &amp;ErrNr)</div><div class="ttdoc">Open an existing GDX file for output. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:3437</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a52f09635e83e11b65dcfdcbd617f0600"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a52f09635e83e11b65dcfdcbd617f0600">gdx::TGXFileObj::gdxOpenAppend</a></div><div class="ttdeci">int gdxOpenAppend(const char *FileName, const char *Producer, int &amp;ErrNr)</div><div class="ttdoc">Open an existing GDX file for output. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:3438</div></div>
 </div><!-- fragment --> </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a4a3b3e0ffdf3bbb17070e43ba7e98408" title="Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.">gdxOpenRead</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#ae53f311244734378f4de7c9c7eafdf67" title="Open a new GDX file for output. Non-zero if the file can be opened, zero otherwise.">gdxOpenWrite</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#a3a1538da866ff406cc50477f6bcdc63c" title="Create a GDX file for writing with explicitly given compression flag. Non-zero if the file can be ope...">gdxOpenWriteEx</a> </dd></dl>
 
@@ -3079,7 +3070,7 @@ When reading a GDX file, the index is returned as the level value when reading a
 <div class="line"><span class="keywordflow">if</span>(ErrNr) {</div>
 <div class="line">  [...]</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a4a3b3e0ffdf3bbb17070e43ba7e98408"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a4a3b3e0ffdf3bbb17070e43ba7e98408">gdx::TGXFileObj::gdxOpenRead</a></div><div class="ttdeci">int gdxOpenRead(const char *FileName, int &amp;ErrNr)</div><div class="ttdoc">Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:1717</div></div>
+<div class="ttc" id="aclassgdx_1_1TGXFileObj_html_a4a3b3e0ffdf3bbb17070e43ba7e98408"><div class="ttname"><a href="classgdx_1_1TGXFileObj.html#a4a3b3e0ffdf3bbb17070e43ba7e98408">gdx::TGXFileObj::gdxOpenRead</a></div><div class="ttdeci">int gdxOpenRead(const char *FileName, int &amp;ErrNr)</div><div class="ttdoc">Open a GDX file for reading. Non-zero if the file can be opened, zero otherwise.</div><div class="ttdef"><b>Definition:</b> gxfile.cpp:1720</div></div>
 </div><!-- fragment --> </dd></dl>
 <dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#ae53f311244734378f4de7c9c7eafdf67" title="Open a new GDX file for output. Non-zero if the file can be opened, zero otherwise.">gdxOpenWrite</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#a35273506e085ef6d885f94724ca02b86" title="Returns the last error number or zero if there was no error. Calling this function will clear the las...">gdxGetLastError</a> </dd></dl>
 
