@@ -189,7 +189,7 @@ void SymbolList_t::AddPGXFile( const int FNr, const ProcessPass_t Pass )
    gdxOpenRead( PGX, FileName.data(), &ErrNr );
    if( ErrNr != 0 )
    {
-      gdxErrorStr( nullptr, ErrNr, ErrMsg.data() );
+      gdxErrorStr( PGX, ErrNr, ErrMsg.data() );
       library::printErrorMessage( "\nError reading file, message: " + ErrMsg );
       return;
    }
@@ -335,7 +335,7 @@ bool SymbolList_t::CollectBigOne( const int SyNr )
       gdxOpenRead( PGX, FileName.data(), &ErrNr );
       if( ErrNr != 0 )
       {
-         gdxErrorStr( nullptr, ErrNr, ErrMsg.data() );
+         gdxErrorStr( PGX, ErrNr, ErrMsg.data() );
          library::printErrorMessage( "Error reading file, message: " + ErrMsg );
          return false;
       }
@@ -799,7 +799,7 @@ int main( const int argc, const char *argv[] )
    if( ErrNr != 0 )
    {
       library::printErrorMessage( "*** Error  : Cannot write to output file, Error Nr = " + std::to_string( ErrNr ) );
-      gdxErrorStr( nullptr, ErrNr, Msg.data() );
+      gdxErrorStr( PGXMerge, ErrNr, Msg.data() );
       library::printErrorMessage( "*** Message: " + Msg );
       return 1;
    }

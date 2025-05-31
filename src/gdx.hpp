@@ -433,7 +433,7 @@ public:
     * @return Always returns non-zero.
     * @see gdxGetLastError
     */
-   static int gdxErrorStr( int ErrNr, char *ErrMsg );
+   int gdxErrorStr( int ErrNr, char *ErrMsg ) const;
 
    /**
     * @brief Returns the last error number or zero if there was no error. Calling this function will clear the
@@ -1746,6 +1746,7 @@ public:
 
 private:
 std::unique_ptr<gdlib::gmsstrm::TMiBufferedStream> FFile;
+std::string lastFileName {};
 TgxFileMode fmode { f_not_open }, fmode_AftReg { f_not_open };
 enum : uint8_t
 {
