@@ -773,6 +773,61 @@ bool PStrEqual( const std::string_view P1, const std::string_view P2 )
    return true;
 }
 
+// Brief:
+//  Search for a substring in a string from a starting position
+// Arguments:
+//  Pat: Substring to search for
+//  S: String to be searched (n characters)
+//  Sp: Starting position (0...n-1)
+// Returns:
+//  Location of the substring when found; -1 otherwise
+int LStrPosSp( const std::string &pat, const std::string &s, const int sp )
+{
+   const size_t lp { pat.length() };
+   if( const size_t ls { s.length() };
+      !lp || !ls || sp < 0 || sp + lp > ls )
+      return -1;
+   const char pat1 { pat.front() };
+   if(lp == 1)
+   {
+      for(int p{sp}; p<s.length(); p++)
+         if(s[p] == pat1)
+            return p;
+   }
+   else
+   {
+      for(int p{sp}; p<=s.length()-lp; p++)
+      {
+         if(s[p] != pat1)
+            continue;
+         int res {p};
+         for(int k{1}; k<lp; k++)
+         {
+            if(pat[k] != s[p+k])
+            {
+               res = -1;
+               break;
+            }
+         }
+         if(res > -1)
+            return res;
+      }
+   }
+   return -1;
+}
+
+// Brief:
+//  Search for a substring in a string
+// Arguments:
+//  Pat: Substring to search for
+//  S: String to be searched
+// Returns:
+//  Location of the substring when found; zero otherwise
+int LStrPos( const std::string &Pat, const std::string &S )
+{
+   return LStrPosSp(Pat, S, 0);
+}
+
 int StrUCmp( const DelphiStrRef &S1, const DelphiStrRef &S2 )
 {
    auto L = S1.length;

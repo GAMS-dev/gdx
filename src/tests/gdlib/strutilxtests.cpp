@@ -243,6 +243,32 @@ TEST_CASE( "Test converting C++ standard library string to char buffer with Delp
    REQUIRE( posOfSubstr( "Error", msg ) != -1 );
 }
 
+TEST_CASE( "Find position of substring in string starting from an offset position")
+{
+   const std::string s {"wherever you go, there you are"s}, sub {", there"s};
+
+   // special case: substring is a single character
+   REQUIRE_EQ(10, LStrPos( "o"s, s ));
+   REQUIRE_EQ(24, LStrPosSp("o"s, s, 22 ));
+   REQUIRE_EQ(-1, LStrPosSp("o"s, s, 27 ));
+   REQUIRE_EQ(-1, LStrPos("x"s, s));
+
+   // find "wherever" at the start
+   REQUIRE_EQ(0, LStrPosSp( "wherever"s, s, 0 ));
+   REQUIRE_EQ(0, LStrPos( "wherever"s, s ));
+
+   // find ", there" in the middle
+   REQUIRE_EQ(15, LStrPosSp( sub, s, 0 ));
+   REQUIRE_EQ(15, LStrPosSp( sub, s, 15 ));
+   REQUIRE_EQ(15, LStrPos(sub, s));
+
+   // not found case
+   REQUIRE_EQ(-1, LStrPosSp( "wherever"s, s, 1 ));
+   REQUIRE_EQ(-1, LStrPosSp( sub, s, 16 ));
+   REQUIRE_EQ(-1, LStrPosSp( "invalid-substring"s, s, 0 ));
+   REQUIRE_EQ(-1, LStrPos( "invalid-substring"s, s ));
+}
+
 TEST_SUITE_END();
 
 }

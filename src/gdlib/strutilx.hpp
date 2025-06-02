@@ -128,4 +128,8 @@ int StrUCmp( std::string_view S1, std::string_view S2 );
 int StrUCmp( const DelphiStrRef &S1, const DelphiStrRef &S2 );
 bool PStrEqual( std::string_view P1, std::string_view P2 );
 
+int LStrPosSp(const std::string &pat, const std::string &s, int sp);
+int LStrPos(const std::string &Pat, const std::string &S);
+
+
 }// namespace gdlib::strutilx
