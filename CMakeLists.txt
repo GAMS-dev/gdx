@@ -99,6 +99,8 @@ set(gdx-core
 		src/rtl/p3utils.cpp
 		src/rtl/sysutils_p3.hpp
 		src/rtl/sysutils_p3.cpp
+		src/rtl/system_p3.hpp
+		src/rtl/system_p3.cpp
 		src/rtl/p3platform.hpp
 		src/rtl/p3platform.cpp
 		src/rtl/math_p3.hpp
