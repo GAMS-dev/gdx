@@ -269,6 +269,37 @@ TEST_CASE( "Find position of substring in string starting from an offset positio
    REQUIRE_EQ(-1, LStrPos( "invalid-substring"s, s ));
 }
 
+TEST_CASE( "Test using gsgetchar to get a char with index from string" )
+{
+   REQUIRE_EQ( gsgetchar( " ? ", 2 ), '?' );
+   REQUIRE( !gsgetchar( "x", -1 ) );
+   REQUIRE( !gsgetchar( "x", 2 ) );
+}
+
+TEST_CASE("Test cleaning a path")
+{
+#if defined(_WIN32)
+   // One dot gets crushed
+   std::string oneDot {R"(\abc\.\)"};
+   cleanpath(oneDot, '\\');
+   REQUIRE_EQ("\\abc\\"s, oneDot);
+   // Two dots go one level up
+   std::string twoDots {R"(\abc\def\..\)"};
+   cleanpath(twoDots, '\\');
+   REQUIRE_EQ("\\abc\\"s, twoDots);
+#else
+   // One dot gets crushed
+   auto oneDot {"/abc/./"s};
+   cleanpath(oneDot, '/');
+   REQUIRE_EQ("/abc/"s, oneDot);
+   // Two dots go one level up
+   auto twoDots {"/abc/def/../"s};
+   cleanpath(twoDots, '/');
+   REQUIRE_EQ("/abc/"s, twoDots);
+#endif
+   // TODO: Extend unit test!
+}
+
 TEST_SUITE_END();
 
 }
