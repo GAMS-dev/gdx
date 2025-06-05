@@ -7,6 +7,7 @@ FROM ubuntu:24.04
 RUN apt-get update &&                                   \
     DEBIAN_FRONTEND=noninteractive apt-get install -yq  \
       apt-utils                     \
+      unzip                         \
       git                           \
       curl                          \
       ninja-build                   \
