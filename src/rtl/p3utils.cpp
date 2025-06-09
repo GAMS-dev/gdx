@@ -192,7 +192,7 @@ bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss )
    if( !fp )
       return false; /* failure */
    /* first two are VmSize, VmRSS */
-   unsigned long urss, uvss;
+   unsigned long urss = 0, uvss = 0;
    const int n = fscanf( fp, "%lu %lu", &uvss, &urss );
    std::fclose( fp );
    if( 2 != n )
