@@ -579,7 +579,7 @@ std::string CompleteDirEx( const std::string &dir1, const std::string &dir2, int
             && gsgetchar( res, 2 ) == ':'
             && !( utils::in( gsgetchar( res, 3 ), '\\', '/' ) ) )
          {
-            int drivenum = gsgetchar( res, 1 ) - 'A' + 1;
+            //int drivenum = gsgetchar( res, 1 ) - 'A' + 1;
             std::string temp = IncludeTrailingPathDelimiterEx(GetCurrentDir());
             // assume d:.\ ...
             if( gsgetchar( res, 3 ) == '.' )
@@ -618,7 +618,7 @@ std::string CompleteDirEx( const std::string &dir1, const std::string &dir2, int
 // curdir must be a full path including the drive:
 // drive:\path\ for example
 //
-void XXXexpand( const std::string &dirspc, const std::string &fname, bool relPath, std::string &fullname )
+static void XXXexpand( const std::string &dirspc, const std::string &fname, bool relPath, std::string &fullname )
 {
    bool noexpansion {};
 
