@@ -1064,18 +1064,18 @@ int LStrPosSp( const std::string &pat, const std::string &s, const int sp )
    const char pat1 { pat.front() };
    if(lp == 1)
    {
-      for(int p{sp}; p<s.length(); p++)
+      for(int p{sp}; p<static_cast<int>(s.length()); p++)
          if(s[p] == pat1)
             return p;
    }
    else
    {
-      for(int p{sp}; p<=s.length()-lp; p++)
+      for(int p{sp}; p<=static_cast<int>(s.length()-lp); p++)
       {
          if(s[p] != pat1)
             continue;
          int res {p};
-         for(int k{1}; k<lp; k++)
+         for(int k{1}; k<static_cast<int>(lp); k++)
          {
             if(pat[k] != s[p+k])
             {
