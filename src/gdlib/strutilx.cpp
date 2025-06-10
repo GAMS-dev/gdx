@@ -55,14 +55,14 @@ namespace gdlib::strutilx
 const auto MAXINT_S = "maxint"s, MININT_S = "minint"s;
 const auto MAXDOUBLE_S = "maxdouble"s, EPSDOUBLE_S = "eps"s, MINDOUBLE_S = "mindouble"s;
 
-/*static bool sameTextSR( const DelphiStrRef &sr, const std::string &s )
+bool sameTextSR( const DelphiStrRef &sr, const std::string &s )
 {
    if( s.length() != sr.length ) return false;
    for( int i {}; i < sr.length; i++ )
       if( tolower( sr.chars[i] ) != tolower(s[i]) )
          return false;
    return true;
-}*/
+}
 
 std::string UpperCase( const std::string_view s )
 {
