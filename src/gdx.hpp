@@ -1208,10 +1208,9 @@ public:
    /// \name Text for UELs
    /// @{
    /**
-    * @brief Register a string in the string table Register a string in the string table and return the integer
-    *   number assigned to this string. The integer value can be used to set the associated text of a set
-    *   element. The string must follow the GAMS syntax rules for explanatory text e.g. not longer than 255
-    *   characters.
+    * @brief Register a string in the string table and return the integer number assigned to this string. The
+    *   integer value can be used to set the associated text of a set element. The string must follow the
+    *   GAMS syntax rules for explanatory text e.g. not longer than 255 characters.
     * @param Txt The string to be registered (must not exceed 255 characters).
     * @param TxtNr The index number assigned to this string (output argument).
     * @attention Mixing of single- and double-quotes in the explanatory text will be resolved by replacing all quote
