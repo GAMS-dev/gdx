@@ -1,4 +1,6 @@
 ---
+- 7.11.17:
+    - Include path to file that cannot be opened in error message after gdxOpenRead* failed due to missing file.
 - 7.11.16:
     - Drastically improve performance of `gdxOpenRead` for GDX files with many UELs by reducing the memory allocation count.
     - Drop many GAMS infrastructure source files not actively used by GDX library.

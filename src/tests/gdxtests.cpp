@@ -254,9 +254,9 @@ TEST_CASE( "Test trying to open a file for reading that does not exist" )
    basicTest( [&]( TGXFileObj &pgx ) {
       auto checksAfterOpenAttempt = [&]( int ErrNr ) {
          REQUIRE_EQ( 2, ErrNr );
-         char errMsg[GMS_SSSIZE];
-         REQUIRE( pgx.gdxErrorStr( ErrNr, errMsg ) );
-         REQUIRE( !strcmp( "No such file or directory", errMsg ) );
+         sstring errMsg;
+         REQUIRE( pgx.gdxErrorStr( ErrNr, errMsg.data() ) );
+         REQUIRE( "No such file or directory: \"doesNotExist\""s == errMsg.str() );
          pgx.gdxClose();
       };
       int ErrNr;
@@ -1528,7 +1528,7 @@ TEST_CASE( "Test writing a duplicate uel in string mode" )
       REQUIRE( pgx.gdxDataWriteDone() );
       REQUIRE_EQ( 1, pgx.gdxErrorCount() );
       char msg[GMS_SSSIZE];
-      TGXFileObj::gdxErrorStr( pgx.gdxGetLastError(), msg );
+      pgx.gdxErrorStr( pgx.gdxGetLastError(), msg );
       REQUIRE( !strcmp( "Duplicate keys", msg ) );
       pgx.gdxClose();
       std::filesystem::remove( fn );

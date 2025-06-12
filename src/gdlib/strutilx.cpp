@@ -24,6 +24,7 @@
  */
 
 #include "strutilx.hpp"
+
 #include <algorithm>             // for min, transform, find
 #include <array>                 // for array
 #include <cassert>               // for assert
@@ -32,9 +33,12 @@
 #include <limits>                // for numeric_limits
 #include <stdexcept>             // for runtime_error
 #include <string>                // for basic_string, string, operator+, all...
+
 #include "../rtl/p3io.hpp"         // for P3_Str_dd0
 #include "../rtl/p3platform.hpp"   // for OSFileType, tOSFileType
 #include "../rtl/sysutils_p3.hpp"  // for LastDelimiter, PathDelim, ExtractSho...
+#include "../rtl/system_p3.hpp"
+
 #include "utils.hpp"               // for toupper, sameText, ord, in, val, cha...
 
 using namespace std::literals::string_literals;
@@ -225,14 +229,19 @@ int LChSetPos( const char *Cs, const char *S, const int slen )
 //  Location of the character when found; -1 otherwise
 int RChSetPos( const char *Cs, const char *S, const int slen )
 {
-   const char *c {Cs};
-   for( int k {slen-1}; k >= 0; k-- )
+   const char *c { Cs };
+   for( int k { slen - 1 }; k >= 0; k-- )
    {
-      while(*c)
-         if(*c++ == S[k]) return k;
+      while( *c )
+         if( *c++ == S[k] ) return k;
       c = Cs;
    }
    return -1;
+}
+
+char gsgetchar( const std::string &s, int p )
+{
+   return p > 0 && p <= static_cast<int>( s.length() ) ? s[p - 1] : static_cast<char>( 0 );
 }
 
 static uint8_t DblToStrSepCore(double V, const char DecimalSep, char *s)
@@ -415,6 +424,261 @@ std::string ExcludeTrailingPathDelimiterEx( const std::string &S )
    return !S.empty() && ( S.back() == PathDelim || (OSFileType() == OSFileWIN && S.back() == '/') ) ? std::string{S.begin(), S.end()-1} : S;
 }
 
+static void fileCase( const int fc, std::string &gs )
+{
+   switch( fc )
+   {
+      // Causes GAMS to upper case file names including the path of the file
+      case 1:
+         gs = UpperCase( gs );
+         break;
+         // Causes GAMS to lower case file names including the path of the file
+      case 2:
+         gs = LowerCase( gs );
+         break;
+         // Causes GAMS to upper case file names only (leave the path alone)
+      case 3:
+         gs = ExtractFilePathEx( gs ) + UpperCase( ExtractFileNameEx( gs ) );
+         break;
+         // Causes GAMS to lower case file names only (leave the path alone)
+      case 4:
+         gs = ExtractFilePathEx( gs ) + LowerCase( ExtractFileName( gs ) );
+         break;
+      default:
+         break;
+   }
+}
+
+static int gsposchar( const std::string &s, int p, const char c )
+{
+   // TODO: Replace gsposchar calls in cleanpath and XXXexpand with LChPosSp
+   if( p <= 0 ) p = 1;
+   const auto res = s.find( c, p - 1 );
+   return res == std::string::npos ? 0 : static_cast<int>( res + 1 );
+};
+
+static int gsnegchar( const std::string &s, int p, const char c )
+{
+   // TODO: Replace gsnegchar calls in cleanpath and XXXexpand with RChPosSp
+   if( p <= 0 ) p = 1;
+   const auto res = s.find_last_of( c, p - 1 );
+   return res == std::string::npos ? 0 : static_cast<int>( res ) + 1;
+};
+
+/*
+        Note: - The comments mostly use '\' as path delimiter, though it is actually
+          delim sent to this function
+        - Windows accepts both '\' and '/' as delimiters. First step in this
+          function is to replace '/' by '\' in path to have it consistent.
+        - Always keep a . when a dot was the first char
+        - Get rid of all .\ following the first \
+        - Change all \.\ to \ and all \*\..\ to \
+    */
+void cleanpath( std::string &path, const char delim )
+{
+   // Replace forward '/' by backward slashes '\'
+   if( OSFileType() == OSFileWIN )
+      path = ReplaceChar( utils::charset { '/' }, PathDelim, path );
+
+   auto del = []( std::string &s, int off, int count ) {
+      s.erase( off - 1, count );
+   };
+
+   /* Change \.\ into \  and \\ into \ */
+   for( int pos2 = gsposchar( path, 2, delim ); pos2; )
+   {
+      if( gsgetchar( path, pos2 + 1 ) == '.' && gsgetchar( path, pos2 + 2 ) == delim )
+         del( path, pos2, 2 ); /* \.\ into \ */
+      else if( gsgetchar( path, pos2 + 1 ) == delim )
+         del( path, pos2, 1 ); /* \\ into \ */
+      else
+         pos2 = gsposchar( path, pos2 + 1, delim ); // skip to next delim index (or 0 if it was the last)
+   }
+
+   /* Change \*\..\  into \ */
+   for( int pos2 = gsposchar( path, 1, delim ); pos2; )
+   {
+      if( gsgetchar( path, pos2 + 1 ) == '.' && gsgetchar( path, pos2 + 2 ) == '.' && gsgetchar( path, pos2 + 3 ) == delim )
+      {                                                 // potential
+         int pos1 = gsnegchar( path, pos2 - 1, delim ); /* find \ to the left */
+         if( !pos1 )
+         {
+            /* .\..\xx abcd\..\ ..\..\ a:\..\  */
+            /*   ..\xx          ..\..\ a:\..\  */
+            if( pos2 == 2 )                                       /* possible .\..\ */
+               pos1 = gsgetchar( path, pos2 - 1 ) == '.' ? 2 : 5; /* go .\..\xxx or x\..\xxx */
+            else if( pos2 == 3 )
+            {                                                                                          /* possible ..\..\ and c:\..\ */
+               pos1 = ( ( gsgetchar( path, pos2 - 1 ) == '.' && gsgetchar( path, pos2 - 2 ) == '.' ) ||// nothing
+                        ( OSFileType() == OSFileWIN && gsgetchar( path, pos2 - 1 ) == ':' ) )
+                              ? 0
+                              : 6;
+               /* c:\..\ or xx\..\ */
+            }
+            else /* xxx\..\xxx */
+               pos1 = pos2 + 3;
+            del( path, 1, pos1 );
+            pos2 = gsposchar( path, pos2 - pos1 + 1, delim );
+         }
+         /* yyyy\xxxx\..\ */
+         else if( gsgetchar( path, pos2 - 1 ) == '.' && gsgetchar( path, pos2 - 2 ) == '.' ) // skip
+            pos2 = gsposchar( path, pos2 + 3, delim );
+         else
+         {
+            del( path, pos1 + 1, pos2 - pos1 + 3 );
+            pos2 = pos1;
+         }
+      }// look for the next one
+      else
+         pos2 = gsposchar( path, pos2 + 1, delim );
+   }
+}
+
+std::string CompleteDirEx( const std::string &dir1, const std::string &dir2, int fc, bool relPath )
+{
+   /*
+   complete d2 with information from dir1
+   if pfinteger[pfrelpath] != this routine does nothing
+   otherwise complete result with dir1, we assume dir1 is a syntactically correct
+   if result is null and we don't complet we return null?
+   */
+
+   // pfrelpath works only with UNIX and DOS
+   std::string res { dir2 };
+   bool noexpansion {};
+
+   switch( OSFileType() )
+   {
+      case OSFileWIN:
+         /*
+         xxx[\]    \yy\yy[\]         d:\yy\yy\
+                    yy\yy[\]         xxx\yy\yy\
+                     d:yy[\]         d:\yy\  ???????  not good
+                    d:\yy[\]         unchanged
+                       empty          xxx\
+         */
+         if( !res.empty() )
+            res = IncludeTrailingPathDelimiterEx( res );
+         // could be a UNC name
+         if( gsgetchar( res, 2 ) == ':'
+            || (gsgetchar( res, 1 ) == '\\' && gsgetchar( res, 2 ) == '\\')
+            || ( relPath && gsgetchar(res, 1 ) == '.' ) )
+            noexpansion = true;
+
+         if( !noexpansion )
+         {
+            // combine
+            if( utils::in( gsgetchar( res, 1 ), '\\', '/' ) ) // \xxx | /xxx
+               res = dir1.substr( 0, 2 ) + res; // assumes dir1 is a:
+            else
+               res = IncludeTrailingPathDelimiterEx( dir1 ) + res;
+         }
+
+         // d:xxxxx
+         if( !relPath
+            && gsgetchar( res, 2 ) == ':'
+            && !( utils::in( gsgetchar( res, 3 ), '\\', '/' ) ) )
+         {
+            //int drivenum = gsgetchar( res, 1 ) - 'A' + 1;
+            std::string temp = IncludeTrailingPathDelimiterEx(GetCurrentDir());
+            // assume d:.\ ...
+            if( gsgetchar( res, 3 ) == '.' )
+               res.erase( 0, 4 );
+            // assume d:name
+            else
+               res.erase( 0, 2 );
+            res = temp + res;
+         }
+         res = IncludeTrailingPathDelimiterEx( res );
+         cleanpath( res, '\\');
+         break;
+      case OSFileUNIX:
+         /*
+           1. add trailing / to dir1 and result if not already there
+           2. if result=/xxx  => done
+              if result=xxx   => result := dir1 // result
+         */
+         if( !res.empty() )
+            res = IncludeTrailingPathDelimiterEx( res );
+         if( gsgetchar( res, 1 ) == '/' || ( relPath && gsgetchar( res, 1 ) == '.' ) )
+            noexpansion = true;
+         if( !noexpansion )
+            res = IncludeTrailingPathDelimiterEx( dir1 ) + res;
+         res = IncludeTrailingPathDelimiterEx( res );
+         cleanpath( res, '/' );
+         break;
+      default:
+         throw std::runtime_error("Unknown operating system!"s);
+   }
+   fileCase( fc, res );
+   return res;
+}
+
+// assumes all different strings
+// curdir must be a full path including the drive:
+// drive:\path\ for example
+//
+static void XXXexpand( const std::string &dirspc, const std::string &fname, bool relPath, std::string &fullname )
+{
+   bool noexpansion {};
+
+   switch( OSFileType() )
+   {
+      case OSFileWIN:
+         noexpansion = gsposchar( fname, 1, ':' ) > 0 ||
+            (gsgetchar( fname, 1 ) == '\\' && gsgetchar(fname, 2) == '\\') ||
+            (relPath && gsgetchar(fname, 1) == '.');
+         if( noexpansion ) fullname = fname;
+         else {
+            if( utils::in( gsgetchar( fname, 1 ), '\\', '/' ) )// add current drive to fname
+            {
+               int colonpos = gsposchar( dirspc, 1, ':' );
+               if( colonpos > 0 )
+                  fullname = dirspc.substr( 0, colonpos ) + fname;
+            }
+            else // combine curdir with fname
+               fullname = dirspc + fname;
+            // below ???
+            if( gsgetchar( fullname, static_cast<int>(fullname.length()) ) == ':' )
+               fullname.pop_back();
+         }
+
+         // process current drives
+         // 1. process d:.\ or d:name
+         if( !relPath && gsgetchar( fullname, 2 ) == ':' )
+         {
+            if (!utils::in(gsgetchar(fullname, 3), '\\', '/')) {
+               const int drivenum { utils::toupper( gsgetchar( fullname, 1 ) ) - static_cast<int>( 'A' )  + 1};
+               std::string temp1;
+               rtl::system_p3::getdir( drivenum, temp1 );
+               if (drivenum == utils::toupper(gsgetchar(temp1, 1)) - static_cast<int>( 'A' ) + 1) {
+                  temp1 = IncludeTrailingPathDelimiterEx( temp1 );
+                  if( gsgetchar( fullname, 3 ) == '.' )
+                     fullname.erase( 0, 4 );
+                  else
+                     fullname.erase( 0, 2 );
+                  fullname = temp1 + fullname;
+               }
+            }
+         }
+         cleanpath( fullname, '\\' );
+         break;
+      case OSFileUNIX:
+         /*
+         * Unix file specs are always of form:
+            /pc1/pc2/pc3/..../pcn/fn.ext  or
+            /pc1/pc2/pc3/..../pcn/fn
+            no leading device - devices are treated like path components
+         */
+         noexpansion = fname[0] == '/' || ( relPath && fname[0] == '.' );
+         fullname = noexpansion ? fname : dirspc + ( dirspc[dirspc.length() - 1] != '/' ? "/"s : ""s ) + fname;
+         cleanpath( fullname, '/' );
+         break;
+      default:
+         break;
+   }
+}
+
 std::string ExtractFileNameEx( const std::string &FileName )
 {
    const static auto Delims {""s + PathDelim + ( OSFileType() == OSFileWIN ? "/" : "" ) + DriveDelim};
@@ -570,7 +834,17 @@ std::string ChangeFileExtEx( const std::string &FileName, const std::string &Ext
 std::string ExtractFileExtEx( const std::string &FileName )
 {
    const int I { LastDelimiter( OSFileType() == OSFileWIN ? "\\/:." : "/.", FileName ) };
-   return I >= 0 && FileName[I] == '.' ? std::string{ FileName.begin() + I, FileName.end() } : ""s;
+   return I >= 0 && FileName[I] == '.' ? std::string { FileName.begin() + I, FileName.end() } : ""s;
+}
+
+std::string CompleteFileNameEx( const std::string &directory, const std::string &filename, int fc, bool relPath )
+{
+   if(directory.empty() || filename.front() == '@')
+      return filename;
+   std::string res;
+   XXXexpand( directory, filename, relPath, res );
+   fileCase(fc, res);
+   return res;
 }
 
 bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
@@ -771,6 +1045,61 @@ bool PStrEqual( const std::string_view P1, const std::string_view P2 )
          return false;
    }
    return true;
+}
+
+// Brief:
+//  Search for a substring in a string from a starting position
+// Arguments:
+//  Pat: Substring to search for
+//  S: String to be searched (n characters)
+//  Sp: Starting position (0...n-1)
+// Returns:
+//  Location of the substring when found; -1 otherwise
+int LStrPosSp( const std::string &pat, const std::string &s, const int sp )
+{
+   const size_t lp { pat.length() };
+   if( const size_t ls { s.length() };
+      !lp || !ls || sp < 0 || sp + lp > ls )
+      return -1;
+   const char pat1 { pat.front() };
+   if(lp == 1)
+   {
+      for(int p{sp}; p<static_cast<int>(s.length()); p++)
+         if(s[p] == pat1)
+            return p;
+   }
+   else
+   {
+      for(int p{sp}; p<=static_cast<int>(s.length()-lp); p++)
+      {
+         if(s[p] != pat1)
+            continue;
+         int res {p};
+         for(int k{1}; k<static_cast<int>(lp); k++)
+         {
+            if(pat[k] != s[p+k])
+            {
+               res = -1;
+               break;
+            }
+         }
+         if(res > -1)
+            return res;
+      }
+   }
+   return -1;
+}
+
+// Brief:
+//  Search for a substring in a string
+// Arguments:
+//  Pat: Substring to search for
+//  S: String to be searched
+// Returns:
+//  Location of the substring when found; zero otherwise
+int LStrPos( const std::string &Pat, const std::string &S )
+{
+   return LStrPosSp(Pat, S, 0);
 }
 
 int StrUCmp( const DelphiStrRef &S1, const DelphiStrRef &S2 )

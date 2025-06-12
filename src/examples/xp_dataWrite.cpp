@@ -68,7 +68,7 @@ class worker
 
    static void ReportIOError( int N, const std::string &msg );
 
-   void ReportGDXError() const;
+   void ReportGDXError(gdx::TGXFileObj &gdx) const;
 
    void ReportGMDError() const;
 
@@ -92,11 +92,11 @@ void worker::ReportIOError( int N, const std::string &msg )
    exit( 1 );
 }
 
-void worker::ReportGDXError() const
+void worker::ReportGDXError(gdx::TGXFileObj &gdx) const
 {
    char s[GMS_SSSIZE];
    std::cout << "**** Fatal GDX Error" << std::endl;
-   gdx::TGXFileObj::gdxErrorStr( gdx->gdxGetLastError(), s );
+   gdx.gdxErrorStr( gdx.gdxGetLastError(), s );
    std::cout << "**** " << s << std::endl;
    exit( 1 );
 }
@@ -152,16 +152,16 @@ void worker::useStr( const std::string &fileName, const std::string &txt, writeM
    gdx->gdxOpenWrite( fileName.c_str(), "example", ErrNr );
    if( ErrNr ) ReportIOError( ErrNr, "gdxOpenWrite" );
 
-   if( !gdx->gdxUELRegisterStrStart() ) ReportGDXError();
+   if( !gdx->gdxUELRegisterStrStart() ) ReportGDXError(*gdx);
    for( const auto &i: iarrayC )
-      if( !gdx->gdxUELRegisterStr( i, dummy ) ) ReportGDXError();
+      if( !gdx->gdxUELRegisterStr( i, dummy ) ) ReportGDXError(*gdx);
    for( const auto &j: jarrayC )
-      if( !gdx->gdxUELRegisterStr( j, dummy ) ) ReportGDXError();
+      if( !gdx->gdxUELRegisterStr( j, dummy ) ) ReportGDXError(*gdx);
    for( const auto &k: karrayC )
-      if( !gdx->gdxUELRegisterStr( k, dummy ) ) ReportGDXError();
-   if( !gdx->gdxUELRegisterDone() ) ReportGDXError();
+      if( !gdx->gdxUELRegisterStr( k, dummy ) ) ReportGDXError(*gdx);
+   if( !gdx->gdxUELRegisterDone() ) ReportGDXError(*gdx);
 
-   if( !gdx->gdxDataWriteStrStart( "Demand", "Demand data", 3, GMS_DT_PAR, 0 ) ) ReportGDXError();
+   if( !gdx->gdxDataWriteStrStart( "Demand", "Demand data", 3, GMS_DT_PAR, 0 ) ) ReportGDXError(*gdx);
 
    switch( mode )
    {
@@ -176,7 +176,7 @@ void worker::useStr( const std::string &fileName, const std::string &txt, writeM
                for( auto &k: karrayC )
                {
                   strcpy( IndxC[2], k );
-                  if( !gdx->gdxDataWriteStr( (const char **) IndxCPtrs, Values ) ) ReportGDXError();
+                  if( !gdx->gdxDataWriteStr( (const char **) IndxCPtrs, Values ) ) ReportGDXError(*gdx);
                }
             }
          }
@@ -192,14 +192,14 @@ void worker::useStr( const std::string &fileName, const std::string &txt, writeM
                {
                   strcpy( IndxC[2], karrayC[k] );
                   if( i + j + k > 0 )
-                     if( !gdx->gdxDataWriteStr( (const char **) IndxCPtrs, Values ) ) ReportGDXError();
+                     if( !gdx->gdxDataWriteStr( (const char **) IndxCPtrs, Values ) ) ReportGDXError(*gdx);
                }
             }
          }
          strcpy( IndxC[0], iarrayC[0] );
          strcpy( IndxC[1], jarrayC[0] );
          strcpy( IndxC[2], karrayC[0] );
-         if( !gdx->gdxDataWriteStr( (const char **) IndxCPtrs, Values ) ) ReportGDXError();
+         if( !gdx->gdxDataWriteStr( (const char **) IndxCPtrs, Values ) ) ReportGDXError(*gdx);
          break;
       case reversed:
          for( int i = size - 1; i > -1; i-- )
@@ -211,7 +211,7 @@ void worker::useStr( const std::string &fileName, const std::string &txt, writeM
                for( int k = size - 1; k > -1; k-- )
                {
                   strcpy( IndxC[2], karrayC[k] );
-                  if( !gdx->gdxDataWriteStr( (const char **) IndxCPtrs, Values ) ) ReportGDXError();
+                  if( !gdx->gdxDataWriteStr( (const char **) IndxCPtrs, Values ) ) ReportGDXError(*gdx);
                }
             }
          }
@@ -220,7 +220,7 @@ void worker::useStr( const std::string &fileName, const std::string &txt, writeM
 
    PrintDiff( "Before Done (" + txt + "): ", clock() );
 
-   if( !gdx->gdxDataWriteDone() ) ReportGDXError();
+   if( !gdx->gdxDataWriteDone() ) ReportGDXError(*gdx);
    ErrNr = gdx->gdxClose();
    if( ErrNr ) ReportIOError( ErrNr, "gdxClose" );
 
@@ -236,16 +236,16 @@ void worker::useRaw( const std::string &fileName, const std::string &txt )
    gdx->gdxOpenWrite( fileName.c_str(), "example", ErrNr );
    if( ErrNr ) ReportIOError( ErrNr, "gdxOpenWrite" );
 
-   if( !gdx->gdxUELRegisterRawStart() ) ReportGDXError();
+   if( !gdx->gdxUELRegisterRawStart() ) ReportGDXError(*gdx);
    for( auto &i: iarrayC )
-      if( !gdx->gdxUELRegisterRaw( i ) ) ReportGDXError();
+      if( !gdx->gdxUELRegisterRaw( i ) ) ReportGDXError(*gdx);
    for( auto &j: jarrayC )
-      if( !gdx->gdxUELRegisterRaw( j ) ) ReportGDXError();
+      if( !gdx->gdxUELRegisterRaw( j ) ) ReportGDXError(*gdx);
    for( auto &k: karrayC )
-      if( !gdx->gdxUELRegisterRaw( k ) ) ReportGDXError();
-   if( !gdx->gdxUELRegisterDone() ) ReportGDXError();
+      if( !gdx->gdxUELRegisterRaw( k ) ) ReportGDXError(*gdx);
+   if( !gdx->gdxUELRegisterDone() ) ReportGDXError(*gdx);
 
-   if( !gdx->gdxDataWriteRawStart( "Demand", "Demand data", 3, GMS_DT_PAR, 0 ) ) ReportGDXError();
+   if( !gdx->gdxDataWriteRawStart( "Demand", "Demand data", 3, GMS_DT_PAR, 0 ) ) ReportGDXError(*gdx);
 
    for( int i = 0; i < size; i++ )
    {
@@ -256,14 +256,14 @@ void worker::useRaw( const std::string &fileName, const std::string &txt )
          for( int k = 0; k < size; k++ )
          {
             IndxI[2] = 2 * size + k + 1;
-            if( !gdx->gdxDataWriteRaw( IndxI, Values ) ) ReportGDXError();
+            if( !gdx->gdxDataWriteRaw( IndxI, Values ) ) ReportGDXError(*gdx);
          }
       }
    }
 
    PrintDiff( "Before Done (" + txt + "): ", clock() );
 
-   if( !gdx->gdxDataWriteDone() ) ReportGDXError();
+   if( !gdx->gdxDataWriteDone() ) ReportGDXError(*gdx);
    ErrNr = gdx->gdxClose();
    if( ErrNr ) ReportIOError( ErrNr, "gdxClose" );
 
@@ -279,16 +279,16 @@ void worker::useMap( const std::string &fileName, const std::string &txt, writeM
    gdx->gdxOpenWrite( fileName.c_str(), "example", ErrNr );
    if( ErrNr ) ReportIOError( ErrNr, "gdxOpenWrite" );
 
-   if( !gdx->gdxUELRegisterMapStart() ) ReportGDXError();
+   if( !gdx->gdxUELRegisterMapStart() ) ReportGDXError(*gdx);
    for( int i = 0; i < size; i++ )
-      if( !gdx->gdxUELRegisterMap( i, iarrayC[i] ) ) ReportGDXError();
+      if( !gdx->gdxUELRegisterMap( i, iarrayC[i] ) ) ReportGDXError(*gdx);
    for( int j = 0; j < size; j++ )
-      if( !gdx->gdxUELRegisterMap( size + j, jarrayC[j] ) ) ReportGDXError();
+      if( !gdx->gdxUELRegisterMap( size + j, jarrayC[j] ) ) ReportGDXError(*gdx);
    for( int k = 0; k < size; k++ )
-      if( !gdx->gdxUELRegisterMap( 2 * size + k, karrayC[k] ) ) ReportGDXError();
-   if( !gdx->gdxUELRegisterDone() ) ReportGDXError();
+      if( !gdx->gdxUELRegisterMap( 2 * size + k, karrayC[k] ) ) ReportGDXError(*gdx);
+   if( !gdx->gdxUELRegisterDone() ) ReportGDXError(*gdx);
 
-   if( !gdx->gdxDataWriteMapStart( "Demand", "Demand data", 3, GMS_DT_PAR, 0 ) ) ReportGDXError();
+   if( !gdx->gdxDataWriteMapStart( "Demand", "Demand data", 3, GMS_DT_PAR, 0 ) ) ReportGDXError(*gdx);
 
    switch( mode )
    {
@@ -302,7 +302,7 @@ void worker::useMap( const std::string &fileName, const std::string &txt, writeM
                for( int k = 0; k < size; k++ )
                {
                   IndxI[2] = 2 * size + k;
-                  if( !gdx->gdxDataWriteMap( IndxI, Values ) ) ReportGDXError();
+                  if( !gdx->gdxDataWriteMap( IndxI, Values ) ) ReportGDXError(*gdx);
                }
             }
          }
@@ -318,7 +318,7 @@ void worker::useMap( const std::string &fileName, const std::string &txt, writeM
                {
                   IndxI[2] = 2 * size + k;
                   if( i + j + k > 0 )
-                     if( !gdx->gdxDataWriteMap( IndxI, Values ) ) ReportGDXError();
+                     if( !gdx->gdxDataWriteMap( IndxI, Values ) ) ReportGDXError(*gdx);
                }
             }
          }
@@ -326,7 +326,7 @@ void worker::useMap( const std::string &fileName, const std::string &txt, writeM
          IndxI[0] = 0;
          IndxI[1] = 0;
          IndxI[2] = 0;
-         if( !gdx->gdxDataWriteMap( IndxI, Values ) ) ReportGDXError();
+         if( !gdx->gdxDataWriteMap( IndxI, Values ) ) ReportGDXError(*gdx);
          break;
       case reversed:
          for( int i = size - 1; i > -1; i-- )
@@ -338,7 +338,7 @@ void worker::useMap( const std::string &fileName, const std::string &txt, writeM
                for( int k = size - 1; k > -1; k-- )
                {
                   IndxI[2] = 2 * size + k;
-                  if( !gdx->gdxDataWriteMap( IndxI, Values ) ) ReportGDXError();
+                  if( !gdx->gdxDataWriteMap( IndxI, Values ) ) ReportGDXError(*gdx);
                }
             }
          }
@@ -347,7 +347,7 @@ void worker::useMap( const std::string &fileName, const std::string &txt, writeM
 
    PrintDiff( "Before Done (" + txt + "): ", clock() );
 
-   if( !gdx->gdxDataWriteDone() ) ReportGDXError();
+   if( !gdx->gdxDataWriteDone() ) ReportGDXError(*gdx);
    ErrNr = gdx->gdxClose();
    if( ErrNr ) ReportIOError( ErrNr, "gdxClose" );
 

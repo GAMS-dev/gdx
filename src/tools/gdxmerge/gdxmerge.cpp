@@ -172,7 +172,7 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
   gdxCreate(&PGX, ErrMsg.data(), ErrMsg.length());
   gdxOpenRead(PGX, FileName.data(), &ErrNr);
   if (ErrNr != 0) {
-    gdxErrorStr(nullptr, ErrNr, ErrMsg.data());
+    gdxErrorStr(PGX, ErrNr, ErrMsg.data());
     library::printErrorMessage("\nError reading file, message: " + ErrMsg);
     return;
   }
@@ -309,7 +309,7 @@ bool SymbolList::CollectBigOne(const int SyNr) {
     gdxCreate(&PGX, ErrMsg.data(), ErrMsg.length());
     gdxOpenRead(PGX, FileName.data(), &ErrNr);
     if (ErrNr != 0) {
-      gdxErrorStr(nullptr, ErrNr, ErrMsg.data());
+      gdxErrorStr(PGX, ErrNr, ErrMsg.data());
       library::printErrorMessage("Error reading file, message: " + ErrMsg);
       return false;
     }
@@ -718,7 +718,7 @@ int main(const int argc, const char *argv[]) {
   std::cout << "Output file: " << OutFile << std::endl;
   if (ErrNr != 0) {
     library::printErrorMessage("*** Error  : Cannot write to output file, Error Nr = " + std::to_string(ErrNr));
-    gdxErrorStr(nullptr, ErrNr, Msg.data());
+    gdxErrorStr(PGXMerge, ErrNr, Msg.data());
     library::printErrorMessage("*** Message: " + Msg);
     return 1;
   }

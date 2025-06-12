@@ -34,6 +34,7 @@
     <ClCompile Include="src\rtl\p3platform.cpp" />
     <ClCompile Include="src\rtl\p3process.cpp" />
     <ClCompile Include="src\rtl\p3utils.cpp" />
+    <ClCompile Include="src\rtl\system_p3.cpp" />
     <ClCompile Include="src\rtl\sysutils_p3.cpp" />
     <ClCompile Include="src\tests\doctestmain.cpp" />
     <ClCompile Include="src\tests\gdlib\datastoragetests.cpp" />
@@ -85,6 +86,7 @@
     <ClInclude Include="src\rtl\p3platform.hpp" />
     <ClInclude Include="src\rtl\p3process.hpp" />
     <ClInclude Include="src\rtl\p3utils.hpp" />
+    <ClInclude Include="src\rtl\system_p3.hpp" />
     <ClInclude Include="src\rtl\sysutils_p3.hpp" />
     <ClInclude Include="src\tests\doctest.hpp" />
     <ClInclude Include="src\tests\gdxtests.hpp" />

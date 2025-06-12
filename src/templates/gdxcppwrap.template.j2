@@ -112,7 +112,7 @@ public:
 {% for function in obj.functions -%}
 {%- set fobj = function.items()|first -%}
 {%- set fvals = fobj|last -%}
-   {% set is_static = fvals.static and fobj|first == 'gdxErrorStr' %}
+   {% set is_static = fvals.static %}
    {% if is_static %}static {% endif %}{{ map_type(fobj|first, fvals.type) }}{{ fobj|first }}({% if fvals.parameters %}{{' '}}{% endif %}
           {%- for parm in fvals.parameters -%}
           {%- set parm_vals = parm.values()|first -%}
@@ -128,11 +128,6 @@ public:
    int gdxUELMaxLength()
    {
       return ::gdxUELMaxLength( pgx );
-   }
-
-   int gdxGetDLLVersion( char *V ) const
-   {
-      return ::gdxGetDLLVersion( pgx, V );
    }
 };
 

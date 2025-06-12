@@ -66,8 +66,9 @@ if (UNIX)
 	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wconversion -funsigned-char") # aggressive signage warnings
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZ_HAVE_UNISTD_H")
 	if (NOT APPLE AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-truncation=0 -Wno-cast-function-type")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-truncation=0")
 	endif ()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-cast-function-type")
 	# strictly handle alignment and structure padding around flexible arrays (only newer compilers)
 	if ((CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16) OR
 	(CMAKE_CXX_COMPILER_ID MATCHES "GCC" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13))
@@ -98,6 +99,8 @@ set(gdx-core
 	src/rtl/p3utils.cpp
 	src/rtl/sysutils_p3.hpp
 	src/rtl/sysutils_p3.cpp
+	src/rtl/system_p3.hpp
+	src/rtl/system_p3.cpp
 	src/rtl/p3platform.hpp
 	src/rtl/p3platform.cpp
 	src/rtl/math_p3.hpp
