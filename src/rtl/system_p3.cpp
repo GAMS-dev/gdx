@@ -13,7 +13,7 @@ void getdir(uint8_t d, std::string &s)
 #if defined(_WIN32)
    char Drive[3], DirBuf[MAX_PATH], SaveBuf[MAX_PATH];
    if (d) {
-      Drive[0] = 'A' + d - 1;
+      Drive[0] = static_cast<char>('A' + d - 1);
       Drive[1] = ':';
       Drive[2] = '\0';
       GetCurrentDirectoryA(sizeof(SaveBuf), SaveBuf);

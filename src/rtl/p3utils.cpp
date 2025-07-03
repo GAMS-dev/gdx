@@ -372,12 +372,23 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
    }
    else
    {
-      bool longAbsPath {};
-#if defined(_WIN32)
-      longAbsPath = fName.length() > MAX_PATH && std::isalpha(fName.front()) && fName[1] == ':';
-#endif
-      if(longAbsPath)
-         hFile = CreateFileA ((R"(\\?\)"+fName).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
+      const bool
+         isLong { fName.length() > MAX_PATH },
+         isAbs {std::isalpha(fName.front()) && fName[1] == ':'};
+      std::string fNameBuf;
+      if(isLong && !isAbs)
+      {
+         // make path absolute to make the long path prefix work
+         if( const DWORD len { GetCurrentDirectoryA( 0, nullptr ) }; len > 0)
+         {
+            std::vector<char> buffer(len);
+            GetCurrentDirectoryA( len, &buffer[0] );
+            fNameBuf = ""s + buffer.data() + '\\' + fName;
+         }
+      }
+      const std::string &fNameRef {fNameBuf.empty() ? fName : fNameBuf};
+      if(isLong)
+         hFile = CreateFileA ((R"(\\?\)"+ fNameRef).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
                           createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
       else
          hFile = CreateFileA (fName.c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
