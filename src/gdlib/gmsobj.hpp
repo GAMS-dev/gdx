@@ -797,8 +797,6 @@ public:
 template<typename T>
 class TXSortedStringList final : public TXCustomStringList<T>
 {
-   using super = TXCustomStringList<T>;
-
    int FUpdateCount {};
    bool FSorted { true };
 
@@ -806,11 +804,11 @@ public:
    bool Find( const char *S, const size_t slen, int &Index )
    {
       bool res {};
-      int L {}, H { super::FCount - 1 };
+      int L {}, H { this->FCount - 1 };
       while( L <= H )
       {
          int I { ( L + H ) >> 1 };
-         if( const int C { strutilx::PStrUCmp( S, super::FList[I].FString ) }; C > 0 )
+         if( const int C { strutilx::PStrUCmp( S, this->FList[I].FString ) }; C > 0 )
             L = I + 1;
          else
          {
@@ -822,7 +820,7 @@ public:
             }
          }
       }
-      Index = L + utils::ord( super::OneBased );
+      Index = L + utils::ord( this->OneBased );
       return res;
    }
 
@@ -834,21 +832,21 @@ public:
    int AddObject( const char *S, const size_t slen, T *APointer ) override
    {
       int res {};
-      if( FUpdateCount || !super::FCount )
+      if( FUpdateCount || !this->FCount )
       {
-         res = super::FCount + utils::ord(super::OneBased);
+         res = this->FCount + utils::ord(this->OneBased);
          FSorted = false;
       }
       else
          Find(S, slen, res );
-      super::InsertItem(res, S, slen, APointer );
+      this->InsertItem(res, S, slen, APointer );
       return res;
    }
 
    int IndexOf( const char *S, const size_t slen )
    {
       int res;
-      return !FSorted ? super::IndexOf( S, slen ) : !Find( S, slen, res ) ? -1 : res;
+      return !FSorted ? this->IndexOf( S, slen ) : !Find( S, slen, res ) ? -1 : res;
    }
 
    void BeginUpdate()
@@ -870,7 +868,7 @@ public:
       if( FSorted != Value )
       {
          if( Value )
-            SortN( super::FCount );
+            this->SortN( this->FCount );
          FSorted = Value;
       }
    }
