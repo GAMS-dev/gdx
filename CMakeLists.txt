@@ -123,6 +123,11 @@ set(gdx-core
 		${zlib-units}
 )
 
+set(test-deps
+		src/gdlib/gmsobj.hpp
+		src/gdlib/gmsobj.cpp
+)
+
 set(tests
 		src/tests/doctestmain.cpp
 
