@@ -374,9 +374,10 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
    {
       const bool
          isLong { fName.length() > MAX_PATH },
-         isAbs {std::isalpha(fName.front()) && fName[1] == ':'};
+         isAbs { std::isalpha(fName.front()) && fName[1] == ':' },
+         hasLongPathPrefix { fName[0] == '\\' && fName[1] == '\\' && fName[2] == '?' && fName[3] == '\\' };
       std::string fNameBuf;
-      if(isLong && !isAbs)
+      if(isLong && !hasLongPathPrefix && !isAbs)
       {
          // make path absolute to make the long path prefix work
          if( const DWORD len { GetCurrentDirectoryA( 0, nullptr ) }; len > 0)
@@ -388,8 +389,11 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
       }
       const std::string &fNameRef {fNameBuf.empty() ? fName : fNameBuf};
       if(isLong)
-         hFile = CreateFileA ((R"(\\?\)"+ fNameRef).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
+      {
+         const std::string forcedPrefix {hasLongPathPrefix ? ""s : R"(\\?\)"};
+         hFile = CreateFileA ((forcedPrefix+ fNameRef).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
                           createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
+      }
       else
          hFile = CreateFileA (fName.c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
                           createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
