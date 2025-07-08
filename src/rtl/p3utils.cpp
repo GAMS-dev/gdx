@@ -349,6 +349,29 @@ static inline bool p3IsValidHandle(const Tp3FileHandle h) {
 #endif
 }
 
+#if defined(_WIN32)
+std::string tryFixingLongPath(const std::string &fName)
+{
+   const bool
+         isAbs { std::isalpha(fName.front()) && fName[1] == ':' },
+         hasLongPathPrefix { fName[0] == '\\' && fName[1] == '\\' && fName[2] == '?' && fName[3] == '\\' };
+   std::string fNameBuf;
+   if(!hasLongPathPrefix && !isAbs)
+   {
+      // make path absolute to make the long path prefix work
+      if( const DWORD len { GetCurrentDirectoryA( 0, nullptr ) }; len > 0)
+      {
+         std::vector<char> buffer(len);
+         GetCurrentDirectoryA( len, &buffer[0] );
+         fNameBuf = ""s + buffer.data() + '\\' + fName;
+      }
+   }
+   const std::string &fNameRef {fNameBuf.empty() ? fName : fNameBuf};
+   const std::string forcedPrefix {hasLongPathPrefix ? ""s : R"(\\?\)"};
+   return forcedPrefix + fNameRef;
+}
+#endif
+
 int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle &h )
 {
 #if defined(_WIN32)
@@ -372,31 +395,8 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
    }
    else
    {
-      const bool
-         isLong { fName.length() > MAX_PATH },
-         isAbs { std::isalpha(fName.front()) && fName[1] == ':' },
-         hasLongPathPrefix { fName[0] == '\\' && fName[1] == '\\' && fName[2] == '?' && fName[3] == '\\' };
-      std::string fNameBuf;
-      if(isLong && !hasLongPathPrefix && !isAbs)
-      {
-         // make path absolute to make the long path prefix work
-         if( const DWORD len { GetCurrentDirectoryA( 0, nullptr ) }; len > 0)
-         {
-            std::vector<char> buffer(len);
-            GetCurrentDirectoryA( len, &buffer[0] );
-            fNameBuf = ""s + buffer.data() + '\\' + fName;
-         }
-      }
-      const std::string &fNameRef {fNameBuf.empty() ? fName : fNameBuf};
-      if(isLong)
-      {
-         const std::string forcedPrefix {hasLongPathPrefix ? ""s : R"(\\?\)"};
-         hFile = CreateFileA ((forcedPrefix+ fNameRef).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
-                          createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
-      }
-      else
-         hFile = CreateFileA (fName.c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
-                          createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
+      hFile = CreateFileA ((fName.length() > MAX_PATH ? tryFixingLongPath( fName ) : fName).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
+                       createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
    }
    if( INVALID_HANDLE_VALUE == hFile )
    {

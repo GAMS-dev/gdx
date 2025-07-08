@@ -29,6 +29,7 @@
 #include "p3io.hpp"
 #include "sysutils_p3.hpp"
 #include "p3platform.hpp"// for OSFileType, tOSFileType
+#include "p3utils.hpp"
 
 #include "unit.h" // for UNIT_INIT_FINI
 
@@ -46,6 +47,7 @@
 
 
 using namespace rtl::p3platform;
+using namespace rtl::p3utils;
 using namespace std::literals::string_literals;
 
 using utils::ui16;
@@ -95,10 +97,7 @@ std::string ExtractFileExt( const std::string &FileName )
 bool FileExists( const std::string &FileName )
 {
 #if defined(_WIN32)
-   // put \\?\ in front of long absolute paths
-   if(FileName.length() > MAX_PATH && std::isalpha(FileName.front()) && FileName[1] == ':')
-      return !_access((R"(\\?\)"+FileName).c_str(), 0);
-   return !_access(FileName.c_str(), 0);
+   return !_access((FileName.length() > MAX_PATH ? tryFixingLongPath(FileName) : FileName).c_str(), 0);
 #else
    return !access(FileName.c_str(), F_OK);
 #endif
@@ -220,7 +219,7 @@ std::string GetCurrentDir()
 bool DirectoryExists( const std::string &Directory )
 {
 #if defined( _WIN32 )
-   const int attribs = GetFileAttributesA(Directory.c_str());
+   const int attribs = GetFileAttributesA((Directory.size() > MAX_PATH ? tryFixingLongPath( Directory ) : Directory).c_str());
    return -1 != attribs && (attribs & FILE_ATTRIBUTE_DIRECTORY);
 #else
    struct stat statBuf;
