@@ -2744,7 +2744,8 @@ TEST_CASE("Test opening 100 char long name GDX file inside two 100 char long nam
       gdxTargetFilenameBase { nested + sep + longName + ".gdx"s },
       gdxTargetFilename { (onWindows ? windowsLongPathPrefix : ""s) + gdxTargetFilenameBase };
 
-   REQUIRE(fs::create_directories(nested));
+   if(!fs::is_directory( nested ))
+      REQUIRE(fs::create_directories(nested));
    fs::rename( gdxFilename, gdxTargetFilename );
    REQUIRE(fs::is_regular_file( gdxTargetFilename ));
 
