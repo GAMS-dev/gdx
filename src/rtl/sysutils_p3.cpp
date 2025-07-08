@@ -29,7 +29,6 @@
 #include "p3io.hpp"
 #include "sysutils_p3.hpp"
 #include "p3platform.hpp"// for OSFileType, tOSFileType
-#include "p3utils.hpp"
 
 #include "unit.h" // for UNIT_INIT_FINI
 
@@ -47,7 +46,6 @@
 
 
 using namespace rtl::p3platform;
-using namespace rtl::p3utils;
 using namespace std::literals::string_literals;
 
 using utils::ui16;
@@ -93,6 +91,29 @@ std::string ExtractFileExt( const std::string &FileName )
    const auto I { LastDelimiter(ExtStopper, FileName)};
    return I > 0 && FileName[I] == '.' ? std::string {FileName.begin()+I, FileName.end()} : ""s;
 }
+
+#if defined(_WIN32)
+std::string tryFixingLongPath(const std::string &fName)
+{
+   const bool
+         isAbs { std::isalpha(fName.front()) && fName[1] == ':' },
+         hasLongPathPrefix { fName[0] == '\\' && fName[1] == '\\' && fName[2] == '?' && fName[3] == '\\' };
+   std::string fNameBuf;
+   if(!hasLongPathPrefix && !isAbs)
+   {
+      // make path absolute to make the long path prefix work
+      if( const DWORD len { GetCurrentDirectoryA( 0, nullptr ) }; len > 0)
+      {
+         std::vector<char> buffer(len);
+         GetCurrentDirectoryA( len, &buffer[0] );
+         fNameBuf = ""s + buffer.data() + '\\' + fName;
+      }
+   }
+   const std::string &fNameRef {fNameBuf.empty() ? fName : fNameBuf};
+   const std::string forcedPrefix {hasLongPathPrefix ? ""s : R"(\\?\)"};
+   return forcedPrefix + fNameRef;
+}
+#endif
 
 bool FileExists( const std::string &FileName )
 {

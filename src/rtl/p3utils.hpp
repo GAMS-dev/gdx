@@ -166,9 +166,5 @@ int p3SomeIOResult();
 double RealTrunc( double x );
 double RealRound( double x );
 
-#if defined(_WIN32)
-std::string tryFixingLongPath(const std::string &fName);
-#endif
-
 
 }// namespace rtl::p3utils
