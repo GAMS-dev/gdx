@@ -1757,11 +1757,8 @@ T_P3SOCKET p3SockAcceptClientConn( T_P3SOCKET srvSock, const uint32_t timeOut )
 }
 
 // create a server socket listening on localhost
-// if resuse is true,
-//    set the SO_REUSEADDR option on the socket.  This prevents the socket from
-//    entering the TIME_WAIT state when it is closed
 // returns the socket on success, invalid socket on failure
-T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse, int *retCode )
+T_P3SOCKET p3SockCreateServerSocket( int port, int *retCode )
 {
    if(retCode)
       *retCode = 0;
@@ -1771,15 +1768,6 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse, int *retCode )
    const auto acceptSocket { socket( AF_INET, SOCK_STREAM, IPPROTO_TCP ) };
    if( INVALID_SOCKET == acceptSocket )
       return res;
-   if( reuse )
-   {
-      int enable { 1 };
-      // without this magic Windows will bar connections to this port for a small-time window
-      // after the socket is closed to avoid delayed packets from a previous connection going to
-      // any new connections
-      if( setsockopt( acceptSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<char *>( &enable ), sizeof( int ) ) )
-         return res;
-   }
    SOCKADDR_IN addr;
    (void) std::memset( &addr, 0, sizeof( addr ) );
    addr.sin_family = AF_INET;
@@ -1808,15 +1796,6 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse, int *retCode )
    sockaddr_in servaddr {};
    const int sockfd { socket( AF_INET, SOCK_STREAM, 0 ) };
    if( sockfd == -1 ) return res;
-   if( reuse )
-   {
-      int enable { 1 };
-      // without this magic Linux/Mac will bar connections to this port for a small-time window
-      // after the socket is closed to avoid delayed packets from a previous connection going to
-      // any new connections
-      if( setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof( enable ) ) )
-         return res;
-   }
    (void) std::memset( &servaddr, 0, sizeof( servaddr ) );
    // assign IP, PORT
    servaddr.sin_family = AF_INET;

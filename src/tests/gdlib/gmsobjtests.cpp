@@ -122,6 +122,18 @@ TEST_CASE( "Simple use of TXStrings" )
    REQUIRE_EQ( "First"s, lst[0] );
 }
 
+TEST_CASE("Simple use of TXSortedStringList")
+{
+   TXSortedStringList<int> lst;
+   lst.Add( "Third", 5 );
+   lst.Add( "Second", 6 );
+   lst.Add( "First", 5 );
+   REQUIRE_FALSE(lst.GetSorted());
+   lst.SetSorted( true );
+   REQUIRE(lst.GetSorted());
+   REQUIRE(!std::strcmp("First", lst.GetName( 0 )));
+}
+
 TEST_SUITE_END();
 
 }// namespace gdx::tests::gmsobjtests
