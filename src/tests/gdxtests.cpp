@@ -2738,11 +2738,13 @@ TEST_CASE("Test opening 100 char long name GDX file inside two 100 char long nam
       longName[i] = static_cast<char>('0' + i % 10);
 
    const std::string
-      nested {longName + sep + longName},
-      gdxFilename { acquireGDXforModel( "trnsport"s ) },
       windowsLongPathPrefix { R"(\\?\)"s + fs::current_path().string() + sep },
-      gdxTargetFilenameBase { nested + sep + longName + ".gdx"s },
-      gdxTargetFilename { (onWindows ? windowsLongPathPrefix : ""s) + gdxTargetFilenameBase };
+      pf {onWindows ? windowsLongPathPrefix : ""s },
+      nestedBase { longName + sep + longName },
+      nested { pf + nestedBase },
+      gdxFilename { acquireGDXforModel( "trnsport"s ) },
+      gdxTargetFilenameBase { nestedBase + sep + longName + ".gdx"s },
+      gdxTargetFilename { pf + gdxTargetFilenameBase };
 
    if(!fs::is_directory( nested ))
       REQUIRE(fs::create_directories(nested));
