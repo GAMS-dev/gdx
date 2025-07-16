@@ -171,4 +171,8 @@ union LongRec {
    uint8_t bytes[4];
 };
 
+#if defined(_WIN32)
+std::string tryFixingLongPath(const std::string &fName);
+#endif
+
 }// namespace rtl::sysutils_p3

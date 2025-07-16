@@ -372,16 +372,8 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
    }
    else
    {
-      bool longAbsPath {};
-#if defined(_WIN32)
-      longAbsPath = fName.length() > MAX_PATH && std::isalpha(fName.front()) && fName[1] == ':';
-#endif
-      if(longAbsPath)
-         hFile = CreateFileA ((R"(\\?\)"+fName).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
-                          createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
-      else
-         hFile = CreateFileA (fName.c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
-                          createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
+      hFile = CreateFileA ((fName.length() > MAX_PATH ? tryFixingLongPath( fName ) : fName).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
+                       createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
    }
    if( INVALID_HANDLE_VALUE == hFile )
    {

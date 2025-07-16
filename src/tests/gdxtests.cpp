@@ -59,6 +59,8 @@ using namespace gdx;
 using namespace utils;
 using namespace gdlib::strindexbuf;
 
+namespace fs = std::filesystem;
+
 namespace gdx::tests::gdxtests
 {
 TEST_SUITE_BEGIN( "GDX object tests" );
@@ -68,13 +70,13 @@ static std::string gamsToolCall( const std::string &toolName )
    std::string pf, sf;
    // when running in "gms test" directory (in nightly build) the executable is located inside the system directory
 #if defined( _WIN32 )
-   if( std::filesystem::exists( toolName + ".exe"s ) )
+   if( fs::exists( toolName + ".exe"s ) )
    {
       pf = ".\\"s;
       sf = ".exe"s;
    }
 #else
-   if( std::filesystem::exists( toolName ) )
+   if( fs::exists( toolName ) )
       pf = "./"s;
 #endif
    return pf + toolName + sf;
@@ -84,9 +86,9 @@ static bool hasGAMSinstalled()
 {
    const int rc { std::system( ( gamsToolCall( "gamslib"s ) + " -q trnsport"s ).c_str() ) };
    std::cout << "gamslib RC="s << rc << std::endl;
-   if( std::filesystem::exists( "trnsport.gms" ) )
+   if( fs::exists( "trnsport.gms" ) )
    {
-      std::filesystem::remove( "trnsport.gms" );
+      fs::remove( "trnsport.gms" );
       return true;
    }
    return false;
@@ -214,9 +216,9 @@ TEST_CASE( "Just create a file" )
       REQUIRE_EQ( expFsPrefix, fs.substr( 0, expFsPrefix.length() ) );
 
       pgx.gdxClose();
-      REQUIRE( std::filesystem::exists( fn ) );
+      REQUIRE( fs::exists( fn ) );
 
-      std::filesystem::remove( fn );
+      fs::remove( fn );
       REQUIRE( pgx.gdxOpenWriteEx( fn.c_str(), "gdxtest", 1, ErrNr ) );
       REQUIRE_FALSE( ErrNr );
       REQUIRE_EQ( 0, pgx.gdxErrorCount() );
@@ -228,13 +230,13 @@ TEST_CASE( "Just create a file" )
       REQUIRE_EQ( 1, comprLev );
 
       pgx.gdxClose();
-      REQUIRE( std::filesystem::exists( fn ) );
+      REQUIRE( fs::exists( fn ) );
 
       REQUIRE( pgx.gdxFileInfo( fileVer, comprLev ) );
       REQUIRE_EQ( 0, fileVer );
       REQUIRE_EQ( 0, comprLev );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Creating a file should also work when closing was forgotten" )
@@ -245,8 +247,8 @@ TEST_CASE( "Creating a file should also work when closing was forgotten" )
       TGXFileObj pgx { ErrMsg };
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxtest", ErrNr ) );
    }
-   REQUIRE( std::filesystem::exists( fn ) );
-   std::filesystem::remove( fn );
+   REQUIRE( fs::exists( fn ) );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test trying to open a file for reading that does not exist" )
@@ -303,7 +305,7 @@ TEST_CASE( "Test renaming an UEL" )
 
       pgx.gdxClose();
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test get current active symbol dimension" )
@@ -318,7 +320,7 @@ TEST_CASE( "Test get current active symbol dimension" )
       REQUIRE_EQ( 5, pgx.gdxSymbMaxLength() );
       pgx.gdxClose();
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test adding uels (raw mode)" )
@@ -355,7 +357,7 @@ TEST_CASE( "Test adding uels (raw mode)" )
       REQUIRE_EQ( 2, uelNr );
       REQUIRE_EQ( -1, uelMap );
    } );
-   std::filesystem::remove( filename );
+   fs::remove( filename );
 }
 
 TEST_CASE( "Test adding uels (string mode)" )
@@ -383,7 +385,7 @@ TEST_CASE( "Test adding uels (string mode)" )
       REQUIRE_FALSE( pgx.gdxGetUEL( 1, uel ) );
       REQUIRE( strcmp( "TheOnlyUEL", uel ) );
    } );
-   std::filesystem::remove( filename );
+   fs::remove( filename );
 }
 
 TEST_CASE( "Test adding uels (mapped mode)" )
@@ -426,7 +428,7 @@ TEST_CASE( "Test adding uels (mapped mode)" )
       REQUIRE( pgx.gdxGetUEL( 3, uel ) );
       REQUIRE( !strcmp( "TheOnlyUEL", uel ) );
    } );
-   std::filesystem::remove( filename );
+   fs::remove( filename );
 }
 
 TEST_CASE( "Test write and read record raw" )
@@ -614,7 +616,7 @@ TEST_CASE( "Test write and read record raw" )
       REQUIRE_EQ( 1, NrRecs );
       REQUIRE( pgx.gdxDataReadDone() );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE("Test write and read empty variable with custom special value mapping") {
@@ -649,7 +651,7 @@ TEST_CASE("Test write and read empty variable with custom special value mapping"
       REQUIRE_EQ( std::array { 0.0, 0.0, -100.0, 100.0, 1.0 }, values );
       REQUIRE( pgx.gdxDataReadDone() );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test write and read record in string mode" )
@@ -730,7 +732,7 @@ TEST_CASE( "Test write and read record in string mode" )
       REQUIRE_EQ( 255, std::strlen( ExplTxt ) );
       REQUIRE_EQ( "String overflow: a"s + std::string( 255 - "String overflow: a..."s.length(), 'b' ) + "..."s, ExplTxt );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test getting special values" )
@@ -795,7 +797,7 @@ TEST_CASE( "Test writing mapped records out of order" )
 {
    std::string fn { "mapped_outoforder.gdx" };
    testWrite( fn, writeMappedRecordsOutOfOrder );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test write and read record mapped - out of order" )
@@ -895,7 +897,7 @@ TEST_CASE( "Test write and read record mapped - out of order" )
       std::string tooLong( 64, 'x' );
       REQUIRE_FALSE( pgx.gdxUELRegisterMap( 6, tooLong.c_str() ) );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test write and read record mapped - in order" )
@@ -963,7 +965,7 @@ TEST_CASE( "Test write and read record mapped - in order" )
       REQUIRE_EQ( 0, pgx.gdxDataErrorCount() );
       REQUIRE( pgx.gdxDataReadDone() );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 void domainSetGetTestSetupPrefix( TGXFileObj &pgx )
@@ -1058,7 +1060,7 @@ void commonSetGetDomainTests( const std::vector<std::string> &domainNames,
    } );
 
    for( const auto &fn: fns )
-      std::filesystem::remove( fn );
+      fs::remove( fn );
 }
 
 TEST_CASE( "Test writing with set/get domain normal and variant" )
@@ -1148,7 +1150,7 @@ TEST_CASE( "Test adding a set alias" )
       REQUIRE( pgx.gdxDataReadDone() );
    } );
 
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test creating and querying element text for sets" )
@@ -1205,7 +1207,7 @@ TEST_CASE( "Test creating and querying element text for sets" )
       REQUIRE_EQ( "set text"s, elemTxt );
       REQUIRE_EQ( 0, elemNode );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test invalid raw writing error processing" )
@@ -1214,8 +1216,8 @@ TEST_CASE( "Test invalid raw writing error processing" )
    int key;
    TgdxValues values {};
    basicTest( [&]( TGXFileObj &pgx ) {
-      if( std::filesystem::exists( fn ) )
-         std::filesystem::remove( fn );
+      if( fs::exists( fn ) )
+         fs::remove( fn );
       int errNr;
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxinterfacetests", errNr ) );
       REQUIRE( pgx.gdxUELRegisterRawStart() );
@@ -1241,7 +1243,7 @@ TEST_CASE( "Test invalid raw writing error processing" )
       REQUIRE_EQ( "Data not sorted when writing raw"s, errMsg );
       pgx.gdxClose();
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 std::string acquireGDXforModel( const std::string &model )
@@ -1251,13 +1253,13 @@ std::string acquireGDXforModel( const std::string &model )
    std::string gdxfn = model + ".gdx"s;// non-const so we get automatic move
    int rc = std::system( ( gamsToolCall( "gamslib"s ) + " -q "s + model ).c_str() );
    REQUIRE_FALSE( rc );
-   REQUIRE( std::filesystem::exists( model_fn ) );
+   REQUIRE( fs::exists( model_fn ) );
    rc = std::system( ( gamsToolCall( "gams"s ) + " "s + model_fn + " gdx=default lo=0 o=lf > " + log_fn ).c_str() );
    REQUIRE_FALSE( rc );
-   std::filesystem::remove( log_fn );
-   std::filesystem::remove( model_fn );
-   std::filesystem::remove( "lf" );
-   REQUIRE( std::filesystem::exists( gdxfn ) );
+   fs::remove( log_fn );
+   fs::remove( model_fn );
+   fs::remove( "lf" );
+   REQUIRE( fs::exists( gdxfn ) );
    return gdxfn;
 }
 
@@ -1270,7 +1272,7 @@ void testReadModelGDX( const std::string &model, const std::function<void( TGXFi
    }
    const std::string gdxfn = acquireGDXforModel( model );
    testRead( gdxfn, func );
-   std::filesystem::remove( gdxfn );
+   fs::remove( gdxfn );
 }
 
 TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
@@ -1385,7 +1387,7 @@ TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
 
       REQUIRE_EQ( 6, pgx.gdxSymbMaxLength() );
    } );
-   std::filesystem::remove( gdxfn );
+   fs::remove( gdxfn );
 }
 
 TEST_CASE( "Tests related to universe" )
@@ -1448,7 +1450,7 @@ TEST_CASE( "Tests related to universe" )
 
       pgx.gdxClose();
 
-      std::filesystem::remove( fn );
+      fs::remove( fn );
    } );
 }
 
@@ -1505,7 +1507,7 @@ TEST_CASE( "Test domain checking for subset" )
       REQUIRE_EQ( "not_in_i"s, uelNotInSuperset );
       pgx.gdxClose();
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test writing a duplicate uel in string mode" )
@@ -1531,7 +1533,7 @@ TEST_CASE( "Test writing a duplicate uel in string mode" )
       pgx.gdxErrorStr( pgx.gdxGetLastError(), msg );
       REQUIRE( !strcmp( "Duplicate keys", msg ) );
       pgx.gdxClose();
-      std::filesystem::remove( fn );
+      fs::remove( fn );
    } );
 }
 
@@ -1691,7 +1693,7 @@ TEST_CASE( "Test acronym facilities" )
       readMagicParameter( pgx, 82 );
    } );
 
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test comments addition and querying" )
@@ -1712,7 +1714,7 @@ TEST_CASE( "Test comments addition and querying" )
       REQUIRE( pgx.gdxSymbolGetComment( 1, 1, commentStrGot ) );
       REQUIRE_EQ( commentStrExp, commentStrGot );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test writing and reading set element texts more exhaustively" )
@@ -1739,7 +1741,7 @@ TEST_CASE( "Test writing and reading set element texts more exhaustively" )
       REQUIRE_FALSE( pgx.gdxGetElemText( hi, txt, node ) );
       REQUIRE_FALSE( pgx.gdxGetElemText( 1, txt, node ) );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Debug issue with SymbolSetDomain and write raw domain check uncovered by emp_oa_gams_jams test" )
@@ -1770,7 +1772,7 @@ TEST_CASE( "Debug issue with SymbolSetDomain and write raw domain check uncovere
       REQUIRE( pgx.gdxDataWriteRaw( &key, vals.data() ) );
       REQUIRE( pgx.gdxDataWriteDone() );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test writing and reading some special value scalars" )
@@ -1794,7 +1796,7 @@ TEST_CASE( "Test writing and reading some special value scalars" )
       REQUIRE_LT( 1e+300 - undef, 0.1 );
    } );
 
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test open append to rename a single uel" )
@@ -1819,7 +1821,7 @@ TEST_CASE( "Test open append to rename a single uel" )
       REQUIRE_EQ( "b"s, uelStr );
       pgx.gdxClose();
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 void testWithCompressConvert( bool compress, const std::string &convert )
@@ -1838,7 +1840,7 @@ void testWithCompressConvert( bool compress, const std::string &convert )
       REQUIRE( pgx.gdxDataWriteRaw( nullptr, vals.data() ) );
       REQUIRE( pgx.gdxDataWriteDone() );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
    unsetEnvironmentVar( "GDXCOMPRESS" );
    unsetEnvironmentVar( "GDXCONVERT" );
 }
@@ -1892,7 +1894,7 @@ TEST_CASE( "Test simple write/read with compression activated" )
       REQUIRE( pgx.gdxDataReadDone() );
    } );
    unsetEnvironmentVar( "GDXCOMPRESS" );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test opening a file for reading and then deleting (while it is open)")
@@ -1903,14 +1905,14 @@ TEST_CASE( "Test opening a file for reading and then deleting (while it is open)
       pgx.gdxDataWriteDone();
    });
    testRead( fn, [&](TGXFileObj &pgx) {
-      std::filesystem::remove(fn); // this is mean. :)
+      fs::remove(fn); // this is mean. :)
       int nrRecs;
       // should fail now!
       REQUIRE(pgx.gdxDataReadRawStart( 1, nrRecs ));
       int key, dimFrst;
       double val;
       REQUIRE_FALSE(pgx.gdxDataReadRaw( &key, &val, dimFrst ));
-      REQUIRE_FALSE(std::filesystem::exists( fn ));
+      REQUIRE_FALSE(fs::exists( fn ));
    } );
 }
 
@@ -2023,9 +2025,9 @@ TEST_CASE("Test filter example from README")
 
    auto rc = std::system( ( gamsToolCall( "gams"s ) + " "s + fn + " gdx=default lo=0 o=lf > " + log_fn ).c_str() );
    REQUIRE_FALSE( rc );
-   std::filesystem::remove( fn );
-   std::filesystem::remove( log_fn );
-   std::filesystem::remove( "lf" );
+   fs::remove( fn );
+   fs::remove( log_fn );
+   fs::remove( "lf" );
    // Roughly the example for the filter usage from the README.md comes here...
    testRead( gdx_fn, []( TGXFileObj &gdx ) {
       REQUIRE(gdx.gdxUELRegisterMapStart());
@@ -2070,7 +2072,7 @@ TEST_CASE("Test filter example from README")
          }
       }
    });
-   std::filesystem::remove( gdx_fn );
+   fs::remove( gdx_fn );
 }
 
 TEST_CASE( "Test setting trace level" )
@@ -2090,7 +2092,7 @@ TEST_CASE( "Test setting trace level" )
       REQUIRE( pgx.gdxDataWriteRawStart( "myscalar", "This is a scalar!", 0, dt_par, 0 ) );
       REQUIRE( pgx.gdxDataWriteDone() );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test classifying a map value as potential specval" )
@@ -2135,7 +2137,7 @@ TEST_CASE( "Test setting/getting auto convert flag" )
       pgx.gdxClose();
       unsetEnvironmentVar( "GDXCOMPRESS" );
       unsetEnvironmentVar( "GDXCONVERT" );
-      std::filesystem::remove( fn );
+      fs::remove( fn );
    } );
 }
 
@@ -2228,7 +2230,7 @@ TEST_CASE( "Test reading methods with slices" )
 
       REQUIRE( pgx.gdxDataReadDone() );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test domain violations more extensively" )
@@ -2260,7 +2262,7 @@ TEST_CASE( "Test domain violations more extensively" )
       for( int i {}; i < paramDim; i++ )
          REQUIRE_EQ( -2, errorKeys[i] );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 
@@ -2331,8 +2333,8 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
       if( !rc )
       {
          const auto convertedGDXfn { modelName + "_"s + versSuff + ".gdx"s };
-         std::filesystem::rename( outDir + "/"s + modelName + ".gdx"s, convertedGDXfn );
-         std::filesystem::remove( outDir );
+         fs::rename( outDir + "/"s + modelName + ".gdx"s, convertedGDXfn );
+         fs::remove( outDir );
          std::string ErrMsg;
          TGXFileObj pgx { ErrMsg };
          int ErrNr;
@@ -2342,10 +2344,10 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
          REQUIRE_GT( syCnt, 0 );
          REQUIRE_GT( uelCnt, 0 );
          pgx.gdxClose();
-         std::filesystem::remove( convertedGDXfn );
+         fs::remove( convertedGDXfn );
       }
    }
-   std::filesystem::remove( "trnsport.gdx" );
+   fs::remove( "trnsport.gdx" );
 }
 
 TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
@@ -2407,7 +2409,7 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
       REQUIRE_EQ( 1, ctr );
       REQUIRE( pgx.gdxDataReadDone() );
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Open append should report error for old GDX file versions" )
@@ -2440,7 +2442,7 @@ TEST_CASE( "Open append should report error for old GDX file versions" )
       REQUIRE_EQ( -100060, pgx.gdxGetLastError() );
    }
 
-   std::filesystem::remove( "f.gdx" );
+   fs::remove( "f.gdx" );
 }
 
 TEST_CASE("Attempting writing relaxed domains as normal ones should not cause -1 domain indices") {
@@ -2466,12 +2468,12 @@ TEST_CASE("Attempting writing relaxed domains as normal ones should not cause -1
       REQUIRE_EQ("i"s, relaxedDomainNames[0].str());
       REQUIRE_EQ("j"s, relaxedDomainNames[1].str());
    });
-   std::filesystem::remove( "relaxedDomains.gdx" );
+   fs::remove( "relaxedDomains.gdx" );
 }
 
 TEST_CASE("Debug terrible file") {
    std::string fn {R"(C:\dockerhome\bau_p.gdx)"};
-   if(!std::filesystem::exists(fn)) return;
+   if(!fs::exists(fn)) return;
    testRead(fn, []( TGXFileObj &obj )
    {
       int numRecs, dimFrst, dim, typ, xSyNr;
@@ -2524,7 +2526,7 @@ TEST_CASE( "Zero is special (no-mapping)" )
       REQUIRE_EQ( +0.0, vals[0] ); // vm_zero is always +0
       obj.gdxDataReadDone();
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Zero is special (map -0 to eps)" )
@@ -2571,7 +2573,7 @@ TEST_CASE( "Zero is special (map -0 to eps)" )
       REQUIRE_EQ( +0.0, vals[0] ); // vm_zero
       obj.gdxDataReadDone();
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test correct behavior of allow bogus domain flag" ) {
@@ -2615,7 +2617,7 @@ TEST_CASE( "Test correct behavior of allow bogus domain flag" ) {
       REQUIRE_EQ(ERR_NOERROR, obj.gdxGetLastError());
       obj.gdxDataWriteDone();
    });
-   std::filesystem::remove( fn );
+   fs::remove( fn );
 }
 
 TEST_CASE( "Test option to map acronym indices to NaN" )
@@ -2649,7 +2651,7 @@ TEST_CASE( "Test option to map acronym indices to NaN" )
       REQUIRE_EQ(NaN, values[GMS_VAL_LEVEL]);
       REQUIRE(pgx.gdxDataReadDone());
    });
-   std::filesystem::remove(fn);
+   fs::remove(fn);
 }
 
 TEST_CASE( "Test writing in raw mode with known UEL index bounds" )
@@ -2674,7 +2676,7 @@ TEST_CASE( "Test writing in raw mode with known UEL index bounds" )
       }
       REQUIRE(pgx.gdxDataWriteDone());
    });
-   std::filesystem::remove(fn);
+   fs::remove(fn);
 }
 
 TEST_CASE("Test having UEL numbers without labels")
@@ -2713,7 +2715,52 @@ TEST_CASE("Test having UEL numbers without labels")
       REQUIRE_EQ("Bad UEL Nr"s, std::string{errMsg.data()});
       REQUIRE(pgx.gdxDataReadDone());
    } );
-   std::filesystem::remove( fn );
+   fs::remove( fn );
+}
+
+TEST_CASE("Test opening 100 char long name GDX file inside two 100 char long name directories")
+{
+   if( !hasGAMSinstalled() )
+   {
+      std::cout << "Skipping test since GAMS system is not found!" << std::endl;
+      return;
+   }
+
+   bool onWindows {};
+#if defined(_WIN32)
+   onWindows = true;
+#endif
+
+   constexpr char sep {fs::path::preferred_separator};
+
+   std::string longName(100, '\0');
+   for(int i{}; i<static_cast<int>(longName.size()); i++)
+      longName[i] = static_cast<char>('0' + i % 10);
+
+   const std::string
+      windowsLongPathPrefix { R"(\\?\)"s + fs::current_path().string() + sep },
+      pf {onWindows ? windowsLongPathPrefix : ""s },
+      nestedBase { longName + sep + longName },
+      nested { pf + nestedBase },
+      gdxFilename { acquireGDXforModel( "trnsport"s ) },
+      gdxTargetFilenameBase { nestedBase + sep + longName + ".gdx"s },
+      gdxTargetFilename { pf + gdxTargetFilenameBase };
+
+   if(!fs::is_directory( nested ))
+      REQUIRE(fs::create_directories(nested));
+   fs::rename( gdxFilename, gdxTargetFilename );
+   REQUIRE(fs::is_regular_file( gdxTargetFilename ));
+
+   {
+      std::string ErrMsg;
+      TGXFileObj gdx {ErrMsg};
+      int ErrNr;
+      REQUIRE_GE(gdxTargetFilenameBase.length(), 100 + 1 + 100 + 1 + 100 + 4); // >= 306 (long dirname + sep + long dirname + sep + long name + ".gdx")
+      REQUIRE(gdx.gdxOpenRead( gdxTargetFilenameBase.c_str(), ErrNr ));
+   }
+
+   REQUIRE(fs::remove( gdxTargetFilename));
+   REQUIRE(fs::remove_all( longName));
 }
 
 }// namespace gdx::tests::gdxtests
