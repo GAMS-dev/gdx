@@ -728,6 +728,16 @@ void trimLeft( std::string &s )
    s.erase( 0, i );
 }
 
+double truncToZero( const double x )
+{
+   return x >= 0 ? std::floor( x ) : std::ceil( x );
+}
+
+double frac( const double x )
+{
+   return x - ( x >= 0 ? std::floor( x ) : std::ceil( x ) );
+}
+
 void getline( FILE *f, std::string &s )
 {
    constexpr int bsize {512};
