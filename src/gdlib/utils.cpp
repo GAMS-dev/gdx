@@ -269,7 +269,7 @@ std::vector<size_t> substrPositions( const std::string_view s, const std::string
 
 std::string replaceSubstrs( const std::string_view s, const std::string_view substr, const std::string_view replacement )
 {
-   if( substr == replacement ) return std::string { s };
+   if( substr == replacement || substr.empty() ) return std::string { s };
    std::string out {};
    const int ssl = static_cast<int>( substr.length() );
    const auto positions = substrPositions( s, substr );
@@ -715,7 +715,8 @@ void trimLeft( std::string &s )
 {
    size_t i;
    for( i = 0; i < s.length(); i++ )
-      if( s[i] != ' ' ) break;
+      if( !std::isspace( s[i] ) )
+         break;
    s.erase( 0, i );
 }
 
@@ -728,18 +729,27 @@ void getline( FILE *f, std::string &s )
 {
    constexpr int bsize {512};
    std::array<char, bsize> buf;
-   if(!std::fgets( buf.data(), bsize, f ) && std::ferror(f))
-      return;
-   s.assign( buf.data() );
+   s.clear();
+   while(std::fgets( buf.data(), bsize, f )  && !ferror( f ))
+   {
+      s += buf.data();
+      if(!s.empty() && s.back() == '\n')
+         break;
+   }
 }
 
 std::string getline( FILE *f )
 {
    constexpr int bsize {512};
    std::array<char, bsize> buf {};
-   if(!std::fgets( buf.data(), bsize, f ) && std::ferror(f))
-      return {};
-   return buf.data();
+   std::string s;
+   while(std::fgets( buf.data(), bsize, f ) && !ferror( f ))
+   {
+      s += buf.data();
+      if(!s.empty() && s.back() == '\n')
+         break;
+   }
+   return s;
 }
 
 std::string strInflateWidth( const int num, const int targetStrLen, const char inflateChar )
