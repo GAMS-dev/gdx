@@ -712,7 +712,7 @@ int main(const int argc, const char *argv[]) {
 
   if (!SyList->IsIncludeListEmpty() && !SyList->IsExcludeListEmpty()) {
     // TODO: Use four stars here instead of the usual three?
-    library::printErrorMessage("**** The options \"ID\" and \"Exclude\" are mutual exclusive");
+    library::printErrorMessage(R"(**** The options "ID" and "Exclude" are mutual exclusive)");
     return 1;
   }
 
