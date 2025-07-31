@@ -61,16 +61,14 @@ bool anychar( const std::function<bool( char )> &predicate, const std::string_vi
 
 int indexOf( const std::string &s, const char c )
 {
-   for( size_t i {}; i < s.length(); i++ )
-      if( s[i] == c )
-         return static_cast<int>(i);
-   return -1;
+   const auto p { s.find(c) };
+   return p == std::string::npos ? -1 : static_cast<int>( p );
 }
 
 void permutAssign( std::string &lhs, const std::string &rhs,
                    const std::vector<int> &writeIndices, const std::vector<int> &readIndices )
 {
-   for( int i = 0; i < (int) writeIndices.size(); i++ )
+   for( int i = 0; i < static_cast<int>( writeIndices.size() ); i++ )
    {
       lhs[writeIndices[i]] = rhs[readIndices[i]];
    }
@@ -104,7 +102,7 @@ bool sameTextInvariant( const std::string_view a,
    if( b.length() != a.length() ) return false;
    for( size_t i {}; i < l; i++ )
    {
-      if( tolower( a[i] ) != tolower( b[i] ) )
+      if( a[i] != b[i] && tolower( a[i] ) != tolower( b[i] ) )
          return false;
    }
    return true;
@@ -113,17 +111,9 @@ bool sameTextInvariant( const std::string_view a,
 std::string_view trim( const std::string_view s )
 {
    if( s.empty() ) return {};
-   int firstNonBlank { -1 }, lastNonBlank {};
-   for( int i {}; i < static_cast<int>( s.length() ); i++ )
-   {
-      if( static_cast<unsigned char>( s[i] ) > 32 )
-      {
-         if( firstNonBlank == -1 ) firstNonBlank = i;
-         lastNonBlank = i;
-      }
-   }
-   if( firstNonBlank == -1 ) return {};
-   return s.substr( firstNonBlank, lastNonBlank - firstNonBlank + 1 );
+   const auto firstNonBlank = s.find_first_not_of( " \t\n\r" );
+   const auto lastNonBlank = s.find_last_not_of( " \t\n\r" );
+   return s.substr( firstNonBlank, ( lastNonBlank - firstNonBlank ) + 1 );
 }
 
 std::string getLineWithSep( std::istream &fs )
@@ -153,8 +143,8 @@ bool hasNonBlank( const std::string_view s )
 std::string trim( const std::string &s )
 {
    if( s.empty() ) return s;
-   if( !hasNonBlank( s ) ) return ""s;
    const auto firstNonBlank = s.find_first_not_of( " \t\n\r" );
+   if(firstNonBlank == std::string::npos) return ""s;
    const auto lastNonBlank = s.find_last_not_of( " \t\n\r" );
    return s.substr( firstNonBlank, ( lastNonBlank - firstNonBlank ) + 1 );
 }
@@ -163,6 +153,7 @@ std::string trimRight( const std::string &s )
 {
    if( s.empty() || !isblank( s.back() ) ) return s;
    const auto lastNonBlank = s.find_last_not_of( " \t" );
+   if(lastNonBlank == std::string::npos) return ""s;
    return s.substr( 0, lastNonBlank + 1 );
 }
 
@@ -189,12 +180,16 @@ void trimRight( const std::string &s, std::string &storage )
       return;
    }
    const auto ub = s.find_last_not_of( " \t" ) + 1;
-   //storage = s.substr(0, ub);
+   if(ub == std::string::npos)
+   {
+      storage.clear();
+      return;
+   }
    storage.replace( 0, ub, s, 0, ub );
    storage.resize( ub );
 }
 
-std::string trimZeroesRight( const std::string &s, char DecimalSep )
+std::string trimZeroesRight( const std::string &s, const char DecimalSep )
 {
    if( s.find( DecimalSep ) == std::string::npos ) return s;
    int i { static_cast<int>( s.length() ) - 1 };
@@ -216,10 +211,7 @@ double round( const double n, const int ndigits )
 void replaceChar( char a, char b, std::string &s )
 {
    if( a == b ) return;
-   std::replace_if(
-           s.begin(), s.end(), [a]( char i ) { return i == a; }, b );
-   /*for(char &i : s)
-            if(i == a) i = b;*/
+   std::replace_if(s.begin(), s.end(), [a]( char i ) { return i == a; }, b );
 }
 
 std::string quoteWhitespace( const std::string &s,
@@ -234,13 +226,12 @@ int strCompare( const char *S1,
 {
    if( S1[0] == '\0' || S2[0] == '\0' )
       return ( S1[0] != '\0' ? 1 : 0 ) - ( S2[0] != '\0' ? 1 : 0 );
-   size_t K;
-   for( K = 0; S1[K] != '\0' && S2[K] != '\0'; K++ )
+   for( size_t K = 0; S1[K] != '\0' && S2[K] != '\0'; K++ )
    {
-      int c1 = static_cast<unsigned char>( caseInsensitive ? toupper( S1[K] ) : S1[K] );
-      int c2 = static_cast<unsigned char>( caseInsensitive ? toupper( S2[K] ) : S2[K] );
-      int d = c1 - c2;
-      if( d ) return d;
+      const int c1 = static_cast<unsigned char>( caseInsensitive ? toupper( S1[K] ) : S1[K] );
+      const int c2 = static_cast<unsigned char>( caseInsensitive ? toupper( S2[K] ) : S2[K] );
+      if( const int d = c1 - c2 )
+         return d;
    }
    return static_cast<int>( std::strlen( S1 ) - std::strlen( S2 ) );
 }
@@ -374,7 +365,7 @@ int strLenNoWhitespace( const std::string_view s )
 char &getCharAtIndexOrAppend( std::string &s, int ix )
 {
    const auto l = s.length();
-   assert( ix >= 0 && ix <= (int) l && "Index not in valid range" );
+   assert( ix >= 0 && ix <= static_cast<int>( l ) && "Index not in valid range" );
    if( static_cast<size_t>( ix ) == l ) s.push_back( '\0' );
    return s[ix];
 }
@@ -387,7 +378,7 @@ bool strContains( const std::string_view s, char c )
 bool strContains( const std::string_view s, const std::initializer_list<char> &cs )
 {
    return std::any_of( std::cbegin( s ), std::cend( s ),
-                       [&cs]( char c ) { return std::find( cs.begin(), cs.end(), c ) != cs.end(); } );
+                       [&cs]( const char c ) { return std::find( cs.begin(), cs.end(), c ) != cs.end(); } );
 }
 
 bool excl_or( bool a, bool b )
@@ -397,15 +388,15 @@ bool excl_or( bool a, bool b )
 
 int posOfSubstr( const std::string_view sub, const std::string_view s )
 {
-   const auto pos = s.find( sub );
-   return pos == std::string::npos ? -1 : (int) pos;
+   const auto p = s.find( sub );
+   return p == std::string::npos ? -1 : static_cast<int>( p );
 }
 
 std::list<std::string> split( const std::string_view s, char sep )
 {
    std::list<std::string> res;
    std::string cur;
-   for( char c: s )
+   for( const char c : s )
    {
       if( c != sep ) cur += c;
       else if( !cur.empty() )
