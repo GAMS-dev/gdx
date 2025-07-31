@@ -217,16 +217,16 @@ void CompareSy(const int Sy1, const int Sy2) {
     for (int D{}; D < Dim; D++) {
       // TODO: Improve this check (especially the else case)
       if (Keys[D] < UELTable->Count()) {
-        strcpy(StrKeysPtrs[D], UELTable->GetString(Keys[D]));
+        std::strcpy(StrKeysPtrs[D], UELTable->GetString(Keys[D]));
       } else {
-        snprintf(StrKeysPtrs[D], GMS_SSSIZE, "L__%d", Keys[D]);
+        std::snprintf(StrKeysPtrs[D], GMS_SSSIZE, "L__%d", Keys[D]);
       }
     }
     if (!DiffOnly || (ST != dt_var && ST != dt_equ)) {
-      strcpy(StrKeysPtrs[Dim], Act.data());
+      std::strcpy(StrKeysPtrs[Dim], Act.data());
     } else {
-      strcpy(StrKeysPtrs[Dim], FldName.data());
-      strcpy(StrKeysPtrs[Dim + 1], Act.data());
+      std::strcpy(StrKeysPtrs[Dim], FldName.data());
+      std::strcpy(StrKeysPtrs[Dim + 1], Act.data());
     }
 
 #if VERBOSE >= 3
@@ -257,9 +257,9 @@ void CompareSy(const int Sy1, const int Sy2) {
 
     RegisterDiffUELs();
     for (int D{}; D < Dim; D++) {
-      strcpy(StrKeysPtrs[D], UELTable->GetString(Keys[D]));
+      std::strcpy(StrKeysPtrs[D], UELTable->GetString(Keys[D]));
     }
-    strcpy(StrKeysPtrs[Dim], Act.data());
+    std::strcpy(StrKeysPtrs[Dim], Act.data());
     gdxAddSetText(PGXDIF, S.data(), &iNode);
     Vals[GMS_VAL_LEVEL] = iNode;
     gdxDataWriteStr(PGXDIF, const_cast<const char **>(StrKeysPtrs), Vals);
@@ -1111,11 +1111,11 @@ int main(const int argc, const char *argv[]) {
   }
 
   gdxDataWriteStrStart(PGXDIF, ID.data(), {}, 1, static_cast<int>(dt_set), 0);
-  strcpy(StrKeysPtrs[0], "File1");
+  std::strcpy(StrKeysPtrs[0], "File1");
   gdxAddSetText(PGXDIF, InFile1.data(), &StrNr);
   StrVals[GMS_VAL_LEVEL] = StrNr;
   gdxDataWriteStr(PGXDIF, const_cast<const char **>(StrKeysPtrs), StrVals);
-  strcpy(StrKeysPtrs[0], "File2");
+  std::strcpy(StrKeysPtrs[0], "File2");
   gdxAddSetText(PGXDIF, InFile2.data(), &StrNr);
   StrVals[GMS_VAL_LEVEL] = StrNr;
   gdxDataWriteStr(PGXDIF, const_cast<const char **>(StrKeysPtrs), StrVals);

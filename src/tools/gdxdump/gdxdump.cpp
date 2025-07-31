@@ -458,10 +458,10 @@ void WriteSymbol(const int SyNr) {
         gdxSymbolGetDomain(PGX, SyNr, DomainNrs);
         for (int D{}; D < ADim; D++) {
           if (DomainNrs[D] <= 0) {
-            strcpy(DomainIDsPtrs[D], "*");
+            std::strcpy(DomainIDsPtrs[D], "*");
           } else {
             gdxSymbolInfo(PGX, DomainNrs[D], setName.data(), &setDim, &setType);
-            strcpy(DomainIDsPtrs[D], setName.data());
+            std::strcpy(DomainIDsPtrs[D], setName.data());
           }
         }
         fo << '(';
@@ -577,7 +577,7 @@ void WriteSymbolCSV(const int SyNr) {
       s = gdxDomSPtrs[D];
       if (s == "*") {
         s = "Dim" + std::to_string(D + 1);
-        strcpy(gdxDomSPtrs[D], s.data());
+        std::strcpy(gdxDomSPtrs[D], s.data());
       }
       while (true) {
         Done = true;
@@ -593,7 +593,7 @@ void WriteSymbolCSV(const int SyNr) {
         s = std::string{gdxDomS[D]} + '_' + std::to_string(Nr);
         Nr++;
       }
-      strcpy(DomSPtrs[D], s.data());
+      std::strcpy(DomSPtrs[D], s.data());
     }
   };
 

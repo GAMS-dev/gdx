@@ -467,7 +467,7 @@ void SymbolList::WriteNameList() {
   for (N = 0; N < fileList->size(); N++) {
     gdxAddSetText(PGXMerge, fileList->FileInfo(N).data(), &TextNr);
     AVals[GMS_VAL_LEVEL] = TextNr;
-    strcpy(AIndexPtrs[0], fileList->FileId(N).data());
+    std::strcpy(AIndexPtrs[0], fileList->FileId(N).data());
     gdxDataWriteStr(PGXMerge, const_cast<const char **>(AIndexPtrs), AVals);
   }
   gdxDataWriteDone(PGXMerge);
