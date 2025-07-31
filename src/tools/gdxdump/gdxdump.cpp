@@ -209,7 +209,7 @@ int BadUELs{};
 std::string GetUELAsString(const int N) {
   library::ShortString res;
   int IDum;
-  if (!gdxUMUelGet(PGX, N, res.data(), &IDum)) {
+  if (gdxUMUelGet(PGX, N, res.data(), &IDum) == 0) {
     BadUELs++;
     return "L__" + std::to_string(N);
   }
@@ -1357,13 +1357,13 @@ int main(const int argc, const char *argv[]) {
   {
     library::ShortString error_message;
 
-    if (!gdxGetReady(error_message.data(), error_message.length())) {
+    if (gdxGetReady(error_message.data(), error_message.length()) == 0) {
       library::printErrorMessage("Error loading GDX library: " + error_message);
       ExitCode = 3;
       goto End;
     }
 
-    if (!gdxCreate(&PGX, error_message.data(), error_message.length())) {
+    if (gdxCreate(&PGX, error_message.data(), error_message.length()) == 0) {
       library::printErrorMessage("Error using GDX library: " + error_message);
       ExitCode = 3;
       goto End;

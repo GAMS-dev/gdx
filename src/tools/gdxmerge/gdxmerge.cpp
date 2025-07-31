@@ -113,7 +113,7 @@ void SymbolList::Clear() {
 
 void SymbolList::OpenOutput(const library::ShortString &AFileName, int &ErrNr) {
   gdxOpenWrite(PGXMerge, AFileName.data(), "gdxmerge", &ErrNr);
-  gdxStoreDomainSetsSet(PGXMerge, false);
+  gdxStoreDomainSetsSet(PGXMerge, 0);
 }
 
 int SymbolList::AddUEL(const library::ShortString &S) {
@@ -714,7 +714,7 @@ int main(const int argc, const char *argv[]) {
     return {};
   }
 
-  if (!gdxGetReady(Msg.data(), Msg.length())) {
+  if (gdxGetReady(Msg.data(), Msg.length()) == 0) {
     library::printErrorMessage("*** Error: Unable to load gdx library, message:\n" + Msg);
     return 1;
   }

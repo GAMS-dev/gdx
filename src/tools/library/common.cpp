@@ -135,9 +135,10 @@ std::vector<std::string> splitString(const std::string &string, const char delim
 }
 
 bool canBeQuoted(const char *s, const size_t slen) {
-  if (!s) {
+  if (s == nullptr) {
     return false;
   }
+
   bool saw_single{}, saw_double{};
   for (int i{}; i < (int)slen; i++) {
     char Ch{s[i]};
@@ -155,6 +156,7 @@ bool canBeQuoted(const char *s, const size_t slen) {
       return false;
     }
   }
+
   return true;
 }
 

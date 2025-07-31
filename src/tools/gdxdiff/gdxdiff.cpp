@@ -92,7 +92,7 @@ std::string ValAsString(const gdxHandle_t &PGX, const double V) {
 
 void FatalErrorExit(const int ErrNr) {
   if (!DiffTmpName.empty() && rtl::sysutils_p3::FileExists(DiffTmpName)) {
-    if (PGXDIF) {
+    if (PGXDIF != nullptr) {
       gdxClose(PGXDIF);
       gdxFree(&PGXDIF);
     }
@@ -127,7 +127,7 @@ void OpenGDX(const std::string &fn, gdxHandle_t &PGX) {
   }
 
   library::ShortString S;
-  if (!gdxCreate(&PGX, S.data(), S.length())) {
+  if (gdxCreate(&PGX, S.data(), S.length()) == 0) {
     FatalError("Cannot load GDX library " + S, static_cast<int>(ErrorCode::ERR_LOADDLL));
   }
 
@@ -994,7 +994,7 @@ int main(const int argc, const char *argv[]) {
   }
 
   library::ShortString S2;
-  if (!gdxCreate(&PGXDIF, S2.data(), S2.length())) {
+  if (gdxCreate(&PGXDIF, S2.data(), S2.length()) == 0) {
     FatalError("Unable to load GDX library: " + S2, static_cast<int>(ErrorCode::ERR_LOADDLL));
   }
 
@@ -1016,7 +1016,7 @@ int main(const int argc, const char *argv[]) {
 
   UELTable = std::make_unique<gdlib::strhash::TXStrHashList<std::nullptr_t>>();
   // UELTable->OneBased = true;
-  gdxStoreDomainSetsSet(PGXDIF, false);
+  gdxStoreDomainSetsSet(PGXDIF, 0);
 
   UELTable->Add(c_ins1.data(), c_ins1.length());
   UELTable->Add(c_ins2.data(), c_ins2.length());
