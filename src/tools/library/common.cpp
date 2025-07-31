@@ -35,8 +35,9 @@ std::string gdxSpecialValuesStr(const int i) {
   if (i < 0 || i >= GMS_SVIDX_MAX) {
     assertWithMessage(false, "Unknown type");
     return "Unknown";
-  } else
-    return gmsSVText[i];
+  }
+
+  return gmsSVText[i];
 }
 
 std::string gdxDataTypStr(const int i) {
@@ -61,58 +62,59 @@ std::string gdxDataTypStrL(const int i) {
   if (i < 0 || i >= GMS_DT_MAX) {
     assertWithMessage(false, "Unknown type");
     return "Unknown";
-  } else
-    return gmsGdxTypeText[i];
+  }
+
+  return gmsGdxTypeText[i];
 }
 
 std::string valTypStr(const int i) {
   if (i < 0 || i >= GMS_VAL_MAX) {
     assertWithMessage(false, "Unknown type");
     return "Unknown";
-  } else {
-    constexpr std::array valsTypTxt{"L", "M", "LO", "UP", "SCALE"};
-    return valsTypTxt[i];
-
-    // std::string result{gmsValTypeText[i]};
-    // result.erase(0, 1);
-    // for (char &c : result)
-    //   c = static_cast<char>(toupper(c));
-    // return result;
   }
+
+  constexpr std::array valsTypTxt{"L", "M", "LO", "UP", "SCALE"};
+  return valsTypTxt[i];
+
+  // std::string result{gmsValTypeText[i]};
+  // result.erase(0, 1);
+  // for (char &c : result)
+  //   c = static_cast<char>(toupper(c));
+  // return result;
 }
 
 std::string varTypStr(const int i) {
   if (i < 0 || i >= GMS_VARTYPE_MAX) {
     assertWithMessage(false, "Unknown type");
     return "Unknown";
-  } else {
-    constexpr std::array varsTypTxt{
-        "unknown ",
-        "binary  ",
-        "integer ",
-        "positive",
-        "negative",
-        "free    ",
-        "sos1    ",
-        "sos2    ",
-        "semicont",
-        "semiint "};
-    return varsTypTxt[i];
-
-    // return gmsVarTypeText[i];
   }
+
+  constexpr std::array varsTypTxt{
+      "unknown ",
+      "binary  ",
+      "integer ",
+      "positive",
+      "negative",
+      "free    ",
+      "sos1    ",
+      "sos2    ",
+      "semicont",
+      "semiint "};
+  return varsTypTxt[i];
+
+  // return gmsVarTypeText[i];
 }
 
 std::string specialValueStr(const int i) {
   if (i < 0 || i >= GMS_SVIDX_MAX) {
     assertWithMessage(false, "Unknown type");
     return "Unknown";
-  } else {
-    constexpr std::array svTxt{"Undf", "NA", "+Inf", "-Inf", "Eps", "0", "AcroN"};
-    return svTxt[i];
-
-    // return gmsSVText[i];
   }
+
+  constexpr std::array svTxt{"Undf", "NA", "+Inf", "-Inf", "Eps", "0", "AcroN"};
+  return svTxt[i];
+
+  // return gmsSVText[i];
 }
 
 std::vector<std::string> splitString(const std::string &string, const char delimiter) {

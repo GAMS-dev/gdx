@@ -78,13 +78,12 @@ std::string ValAsString(const gdxHandle_t &PGX, const double V) {
     gdxMapValue(PGX, V, &iSV);
     if (iSV != sv_normal)
       return gdlib::strutilx::PadLeft(library::gdxSpecialValuesStr(iSV), WIDTH);
-    else {
-      // TODO: Improve this conversion
-      std::ostringstream oss;
-      oss << std::fixed << std::setprecision(5) << V;
-      result = oss.str();
-      return gdlib::strutilx::PadLeft(result, WIDTH);
-    }
+
+    // TODO: Improve this conversion
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(5) << V;
+    result = oss.str();
+    return gdlib::strutilx::PadLeft(result, WIDTH);
   }
   // Empty string will be returned
   return {};

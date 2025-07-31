@@ -704,8 +704,9 @@ int main(const int argc, const char *argv[]) {
     if (StrictMode) {
       library::printErrorMessage("*** Error  : Output file \"" + OutFile + "\" already exists (strict mode)");
       return 1;
-    } else
-      rtl::sysutils_p3::DeleteFileFromDisk(OutFile);
+    }
+
+    rtl::sysutils_p3::DeleteFileFromDisk(OutFile);
   }
 
   if (!SyList->IsIncludeListEmpty() && !SyList->IsExcludeListEmpty()) {
@@ -769,8 +770,9 @@ int main(const int argc, const char *argv[]) {
     if (StrictMode) {
       library::printErrorMessage("*** Error  : No valid input files specified (strict mode)");
       return 1;
-    } else
-      std::cout << "No valid input files specified\n";
+    }
+
+    std::cout << "No valid input files specified\n";
   } else
     std::cout << "Merge complete, " << InputFilesRead << " input files merged\n";
 

@@ -95,37 +95,38 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
     std::string T{NextToken()};
     if (T.empty())
       return static_cast<int>(CmdParamStatus::ke_empty);
-    else {
-      int result{-1};
-      for (const auto &pair : FKeyList)
-        if (gdlib::strutilx::UpperCase(pair.first) == gdlib::strutilx::UpperCase(T)) {
-          result = pair.second;
-          break;
-        }
-      if (result < 0) {
-        if (T.front() == '@') {
-          s = T.substr(1);
-          return static_cast<int>(CmdParamStatus::ke_badfile);
-        } else {
-          s = T;
-          return static_cast<int>(CmdParamStatus::ke_unknown);
-        }
-      } else if (result >= static_cast<int>(CmdParamStatus::kk_big)) {
-        result -= static_cast<int>(CmdParamStatus::kk_big);
-        SkipBl();
-        if (xr <= maxr && FParams.at(xr) == '=')
-          xr++;
-        s = NextToken();
-        if (s.empty())
-          return static_cast<int>(CmdParamStatus::ke_noparam);
-        else {
-          int k{static_cast<int>(s.length())};
-          if (k >= 2 && s.front() == '\'' && s.back() == '\'')
-            s = s.substr(1, k - 2);
-        }
+
+    int result{-1};
+    for (const auto &pair : FKeyList)
+      if (gdlib::strutilx::UpperCase(pair.first) == gdlib::strutilx::UpperCase(T)) {
+        result = pair.second;
+        break;
       }
-      return result;
+
+    if (result < 0) {
+      if (T.front() == '@') {
+        s = T.substr(1);
+        return static_cast<int>(CmdParamStatus::ke_badfile);
+      }
+
+      s = T;
+      return static_cast<int>(CmdParamStatus::ke_unknown);
     }
+
+    if (result >= static_cast<int>(CmdParamStatus::kk_big)) {
+      result -= static_cast<int>(CmdParamStatus::kk_big);
+      SkipBl();
+      if (xr <= maxr && FParams.at(xr) == '=')
+        xr++;
+      s = NextToken();
+      if (s.empty())
+        return static_cast<int>(CmdParamStatus::ke_noparam);
+
+      const int k{static_cast<int>(s.length())};
+      if (k >= 2 && s.front() == '\'' && s.back() == '\'')
+        s = s.substr(1, k - 2);
+    }
+    return result;
   };
 
   auto ExpandCommandLine = [&]() -> std::string {
@@ -293,8 +294,8 @@ bool CmdParams::HasKey(int v) {
 ParamRec CmdParams::GetParams(int n) {
   if (n >= 0 && n < static_cast<int>(FParList.size()))
     return FParList[n];
-  else
-    return ParamRec{static_cast<int>(CmdParamStatus::ke_empty), {}};
+
+  return ParamRec{static_cast<int>(CmdParamStatus::ke_empty), {}};
 }
 
 int CmdParams::GetParamCount() const {
