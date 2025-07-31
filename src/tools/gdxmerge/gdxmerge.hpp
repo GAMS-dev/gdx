@@ -45,7 +45,7 @@ struct GAMSSymbol {
 struct GDXFileEntry {
   std::string FFileName, FFileId, FFileInfo;
 
-  GDXFileEntry(const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo);
+  GDXFileEntry(std::string AFileName, std::string AFileId, std::string AFileInfo);
 };
 
 template <typename T>

@@ -28,6 +28,7 @@
 #include <iostream>
 #include <limits>
 #include <sstream>
+#include <utility>
 
 #include "gdlib/strutilx.hpp"
 #include "gdlib/utils.hpp"
@@ -51,8 +52,8 @@ GAMSSymbol::GAMSSymbol(const int ADim, const gdxSyType AType, const int ASubTyp)
     : SyDim(ADim), SySubTyp(ASubTyp), SyTyp(AType),
       SyData(std::make_unique<gdlib::gmsdata::TTblGamsData<double>>(ADim, DataTypSize.at(AType) * sizeof(double))) {}
 
-GDXFileEntry::GDXFileEntry(const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo)
-    : FFileName(AFileName), FFileId(AFileId), FFileInfo(AFileInfo) {}
+GDXFileEntry::GDXFileEntry(std::string AFileName, std::string AFileId, std::string AFileInfo)
+    : FFileName(std::move(AFileName)), FFileId(std::move(AFileId)), FFileInfo(std::move(AFileInfo)) {}
 
 template <typename T>
 FileList<T>::~FileList() {
