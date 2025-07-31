@@ -972,7 +972,7 @@ std::string NextParam() {
       result.erase(k + 1);
     } else if (ParamNr <= ParamCount) {
       std::string nextParam = ParamStr[ParamNr];
-      if (nextParam.length() > 0 && nextParam.front() == '=') {
+      if (!nextParam.empty() && nextParam.front() == '=') {
         result += '=';
         ParamHold = nextParam.substr(1);
         ParamNr++;
