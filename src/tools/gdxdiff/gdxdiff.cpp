@@ -227,7 +227,7 @@ void CompareSy(const int Sy1, const int Sy2) {
       if (D < Dim + 1)
         std::cout << ", ";
     }
-    std::cout << std::endl;
+    std::cout << '\n';
 #endif
 
     if (fldOnly == FldOnly::fld_yes && (ST == dt_var || ST == dt_equ)) {
@@ -262,13 +262,13 @@ void CompareSy(const int Sy1, const int Sy2) {
       break;
 
     case dt_par:
-      std::cout << ValAsString(PGX, Vals[GMS_VAL_LEVEL]) << std::endl;
+      std::cout << ValAsString(PGX, Vals[GMS_VAL_LEVEL]) << '\n';
       break;
 
     default:
       for (int T{}; T < GMS_VAL_MAX; T++)
         std::cout << ValAsString(PGX, Vals[T]) << ' ';
-      std::cout << std::endl;
+      std::cout << '\n';
       break;
     }
   };
@@ -344,7 +344,7 @@ void CompareSy(const int Sy1, const int Sy2) {
 #if VERBOSE >= 2
       std::cout << "Different ";
       WriteKeys(Keys);
-      std::cout << std::endl;
+      std::cout << '\n';
       WriteValues(PGX1, V1);
       WriteValues(PGX2, V2);
 #endif
@@ -389,9 +389,9 @@ void CompareSy(const int Sy1, const int Sy2) {
 #if VERBOSE >= 2
       std::cout << "Associated text is different ";
       WriteKeys(Keys);
-      std::cout << std::endl;
-      std::cout << S1 << std::endl;
-      std::cout << S2 << std::endl;
+      std::cout << '\n'
+                << S1 << '\n'
+                << S2 << '\n';
 #endif
 
       if (!CheckSymbOpen())
@@ -500,7 +500,7 @@ void CompareSy(const int Sy1, const int Sy2) {
       Status = StatusCode::sc_typ;
     }
     if (Dim != Dim2) {
-      std::cout << "Dim1 = " << Dim << ", Dim2 = " << Dim2 << std::endl;
+      std::cout << "Dim1 = " << Dim << ", Dim2 = " << Dim2 << '\n';
       if (Status == StatusCode::sc_same)
         Status = StatusCode::sc_dim;
     }
@@ -527,7 +527,7 @@ void CompareSy(const int Sy1, const int Sy2) {
           continue;
         std::cout << gdlib::strutilx::PadRight(std::to_string(D), 2) << ' ' << DomSy1[D] << ' ' << DomSy2[D] << '\n';
       }
-      std::cout << std::endl;
+      std::cout << '\n';
 #endif
 
       goto label999;
@@ -535,7 +535,7 @@ void CompareSy(const int Sy1, const int Sy2) {
   }
 
 #if VERBOSE >= 1
-  std::cout << library::gdxDataTypStrL(ST) << ' ' << ID << std::endl;
+  std::cout << library::gdxDataTypStrL(ST) << ' ' << ID << '\n';
 #endif
 
   // Create default record for this type
@@ -692,7 +692,7 @@ int main(const int argc, const char *argv[]) {
 
   library::AuditLine auditLine{"GDXDIFF"};
   if (argc > 1 && gdlib::strutilx::StrUEqual(argv[1], "AUDIT")) {
-    std::cout << auditLine.getAuditLine() << std::endl;
+    std::cout << auditLine.getAuditLine() << '\n';
     return 0;
   }
 
@@ -763,11 +763,11 @@ int main(const int argc, const char *argv[]) {
     EpsAbsolute = 0;
   else if (GetAsDouble(S, EpsAbsolute)) {
     if (EpsAbsolute < 0) {
-      std::cout << "Eps cannot be negative" << std::endl;
+      std::cout << "Eps cannot be negative\n";
       ErrorCode = 2;
     }
   } else {
-    std::cout << "Bad value for Eps = " << S << std::endl;
+    std::cout << "Bad value for Eps = " << S << '\n';
     ErrorCode = 2;
   }
 
@@ -775,11 +775,11 @@ int main(const int argc, const char *argv[]) {
     EpsRelative = 0;
   else if (GetAsDouble(S, EpsRelative)) {
     if (EpsRelative < 0) {
-      std::cout << "RelEps cannot be negative" << std::endl;
+      std::cout << "RelEps cannot be negative\n";
       ErrorCode = 2;
     }
   } else {
-    std::cout << "Bad value for RelEps = " << S << std::endl;
+    std::cout << "Bad value for RelEps = " << S << '\n';
     ErrorCode = 2;
   }
 
@@ -809,7 +809,7 @@ int main(const int argc, const char *argv[]) {
       fldOnlyFld = GMS_VAL_SCALE;
       fldOnly = FldOnly::fld_maybe;
     } else {
-      std::cout << "Bad field name = " << S << std::endl;
+      std::cout << "Bad field name = " << S << '\n';
       ErrorCode = 4;
     }
 
@@ -822,11 +822,11 @@ int main(const int argc, const char *argv[]) {
       fldOnly = FldOnly::fld_yes;
       if (DiffOnly) {
         // TODO: Change combines to combined?
-        std::cout << "Diff only cannot be combined with FldOnly" << std::endl;
+        std::cout << "Diff only cannot be combined with FldOnly\n";
         ErrorCode = 4;
       }
     } else {
-      std::cout << "FldOnly option used with a single field comparison" << std::endl;
+      std::cout << "FldOnly option used with a single field comparison\n";
       ErrorCode = 4;
     }
   }
@@ -844,7 +844,7 @@ int main(const int argc, const char *argv[]) {
     else if (S.empty() || S == "1" || S == "Y" || S == "T")
       CompSetText = true;
     else {
-      std::cout << "Bad value for CompSetText = " << S << std::endl;
+      std::cout << "Bad value for CompSetText = " << S << '\n';
       ErrorCode = 4;
     }
   }
@@ -859,7 +859,7 @@ int main(const int argc, const char *argv[]) {
       for (int N{}; N < CmdParams->GetParamCount(); N++)
         if (CmdParams->GetParams(N).Key == static_cast<int>(paramKey)) {
           S = utils::trim(CmdParams->GetParams(N).KeyS);
-          // std::cout << S << std::endl;
+          // std::cout << S << '\n';
           while (!S.empty()) {
             int k{gdlib::strutilx::LChSetPos(
                 ", ",
@@ -877,7 +877,7 @@ int main(const int argc, const char *argv[]) {
             if (!ID.empty()) {
               if (idList->IndexOf(ID.data()) < 0)
                 idList->Add(ID.data(), ID.length());
-              // std::cout << "Include ID: " << ID << std::endl;
+              // std::cout << "Include ID: " << ID << '\n';
             }
           }
         }
@@ -899,31 +899,32 @@ int main(const int argc, const char *argv[]) {
   // Parameter errors
   if (ErrorCode > 0) {
     // TODO: Remove?
-    // std::cout << std::endl;
+    // std::cout << '\n';
     Usage(auditLine);
     return static_cast<int>(ErrorCode::ERR_USAGE);
   }
 
-  std::cout << auditLine.getAuditLine() << std::endl;
+  std::cout << auditLine.getAuditLine() << '\n';
 
   CheckFile(InFile1);
   CheckFile(InFile2);
 
-  std::cout << "File1 : " << InFile1 << std::endl;
-  std::cout << "File2 : " << InFile2 << std::endl;
+  std::cout
+      << "File1 : " << InFile1 << '\n'
+      << "File2 : " << InFile2 << '\n';
 
   if (IDsOnly) {
     std::cout << "ID    :";
     for (int N{}; N < IDsOnly->GetCount(); N++)
       std::cout << ' ' << IDsOnly->GetConst(N);
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 
   if (SkipIDs) {
     std::cout << "SkipID:";
     for (int N{}; N < SkipIDs->GetCount(); N++)
       std::cout << ' ' << SkipIDs->GetConst(N);
-    std::cout << std::endl;
+    std::cout << '\n';
   }
 
   library::ShortString S2;
@@ -998,9 +999,9 @@ int main(const int argc, const char *argv[]) {
   }
 
   if (StatusTable.empty())
-    std::cout << "No differences found" << std::endl;
+    std::cout << "No differences found\n";
   else {
-    std::cout << "Summary of differences:" << std::endl;
+    std::cout << "Summary of differences:\n";
     // Find longest ID
     int NN{1};
     for (const auto &pair : StatusTable)
@@ -1008,7 +1009,7 @@ int main(const int argc, const char *argv[]) {
         NN = static_cast<int>(pair.first.length());
     for (const auto &pair : StatusTable)
       std::cout << gdlib::strutilx::PadLeft(pair.first, NN) << "   "
-                << StatusText.at(static_cast<int>(pair.second)) << std::endl;
+                << StatusText.at(static_cast<int>(pair.second)) << '\n';
   }
 
   // CopyAcronyms( PGX1 );
@@ -1070,16 +1071,16 @@ int main(const int argc, const char *argv[]) {
 
   int ExitCode{};
   if (!RenameOK) {
-    std::cout << "Could not rename " << DiffTmpName << " to " << DiffFileName << std::endl;
+    std::cout << "Could not rename " << DiffTmpName << " to " << DiffFileName << '\n';
     DiffFileName = DiffTmpName;
     ExitCode = static_cast<int>(ErrorCode::ERR_RENAME);
   }
-  std::cout << "Output: " << DiffFileName << std::endl;
+  std::cout << "Output: " << DiffFileName << '\n';
 
   // UnloadGDXLibrary;
   if (UsingIDE)
-    std::cout << "GDXDiff file written: " << DiffFileName << "[FIL:\"" << DiffFileName << "\",0,0]" << std::endl;
-  std::cout << "GDXDiff finished" << std::endl;
+    std::cout << "GDXDiff file written: " << DiffFileName << "[FIL:\"" << DiffFileName << "\",0,0]\n";
+  std::cout << "GDXDiff finished\n";
   // FreeAndNil( UELTable );
 
   if (ExitCode == 0 && !StatusTable.empty())

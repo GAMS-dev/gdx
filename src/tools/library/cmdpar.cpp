@@ -86,7 +86,7 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
         xr += xk;
       }
     }
-    // std::cout << "token = |" << result << '|' << std::endl;
+    // std::cout << "token = |" << result << "|\n";
     return result;
   };
 

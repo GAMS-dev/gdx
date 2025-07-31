@@ -944,15 +944,15 @@ int main(const int argc, const char *argv[]) {
   int ErrNr, ExitCode;
   bool ListAllSymbols, ListSymbolsAsSet, ListSymbolsAsSetDI, UsingIDE, VersionOnly, DomainInfo, showSetText;
 
-  // for( int N {}; N < argc; N++ )
-  //    std::cout << "Parameter " << N << ": |" << argv[N] << '|' << std::endl;
+  // for (int N{}; N < argc; N++)
+  //   std::cout << "Parameter " << N << ": |" << argv[N] << "|\n";
 
   ParamCount = argc - 1;
   ParamStr = argv;
 
   library::AuditLine auditLine{"GDXDUMP"};
   if (ParamCount > 0 && gdlib::strutilx::StrUEqual(ParamStr[1], "AUDIT")) {
-    std::cout << auditLine.getAuditLine() << std::endl;
+    std::cout << auditLine.getAuditLine() << '\n';
     return 0;
   }
 
@@ -1322,7 +1322,7 @@ int main(const int argc, const char *argv[]) {
               << "*  File format    : " << gdlib::strutilx::IntToNiceStrW(FileVer, 4).data() << '\n'
               << "*  Compression    : " << gdlib::strutilx::IntToNiceStrW(ComprLev, 4).data() << '\n'
               << "*  Symbols        : " << gdlib::strutilx::IntToNiceStrW(NrSy, 4).data() << '\n'
-              << "*  Unique Elements: " << gdlib::strutilx::IntToNiceStrW(NrUel, 4).data() << std::endl;
+              << "*  Unique Elements: " << gdlib::strutilx::IntToNiceStrW(NrUel, 4).data() << '\n';
     goto AllDone;
   }
 
@@ -1409,7 +1409,7 @@ AllDone:
   gdxFree(&PGX);
 
   if (UsingIDE && !OutputName.empty())
-    std::cout << "GDXDump file written: " << OutputName << "[FIL:\"" << OutputName << "\",0,0]" << std::endl;
+    std::cout << "GDXDump file written: " << OutputName << "[FIL:\"" << OutputName << "\",0,0]\n";
 
 End:
   if (OutputFile.is_open())

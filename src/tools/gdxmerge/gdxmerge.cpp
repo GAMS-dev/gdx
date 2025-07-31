@@ -167,7 +167,7 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
   FileName = fileList->FileName(FNr);
   FileId = fileList->FileId(FNr);
 
-  std::cout << "Reading file: " << FileName << std::endl;
+  std::cout << "Reading file: " << FileName << '\n';
   gdxCreate(&PGX, ErrMsg.data(), ErrMsg.length());
   gdxOpenRead(PGX, FileName.data(), &ErrNr);
   if (ErrNr != 0) {
@@ -354,7 +354,7 @@ bool SymbolList::FindGDXFiles(const std::string &Path) {
       if (Rec.Name == "." || Rec.Name == "..")
         continue;
       if (OutFile == BPath + Rec.Name) {
-        std::cout << "Cannot use " << OutFile << " as input file and output file, skipped it as input" << std::endl;
+        std::cout << "Cannot use " << OutFile << " as input file and output file, skipped it as input\n";
         Result = false;
         continue;
       }
@@ -364,7 +364,7 @@ bool SymbolList::FindGDXFiles(const std::string &Path) {
         NewName = "File_" + std::to_string(fileList->size() + 1);
         std::cout << "*** Filename cannot be used as a valid UEL\n"
                   << "    Existing name: " << ShortName << '\n'
-                  << "    Replaced with: " << NewName << std::endl;
+                  << "    Replaced with: " << NewName << '\n';
         ShortName = NewName;
       }
 
@@ -379,7 +379,7 @@ bool SymbolList::FindGDXFiles(const std::string &Path) {
     } while (FindNext(Rec) == 0);
     FindClose(Rec);
   } else {
-    std::cout << '"' << Path << "\" is no valid pattern for an existing input file name, skipped it as input" << std::endl;
+    std::cout << '"' << Path << "\" is no valid pattern for an existing input file name, skipped it as input\n";
     Result = false;
   }
 
@@ -607,10 +607,10 @@ bool GetParameters(const int argc, const char *argv[]) {
           Id = utils::trim(Id);
           if (!Id.empty()) {
             if (KW == static_cast<int>(KP::Id)) {
-              std::cout << "Include Id: " << Id << std::endl;
+              std::cout << "Include Id: " << Id << '\n';
               SyList->AddToIncludeList(utils::trim(Id));
             } else {
-              std::cout << "Exclude Id: " << Id << std::endl;
+              std::cout << "Exclude Id: " << Id << '\n';
               SyList->AddToExcludeList(utils::trim(Id));
             }
           }
@@ -678,7 +678,7 @@ int main(const int argc, const char *argv[]) {
 
   library::AuditLine auditLine{"GDXMERGE"};
   if (argc > 1 && gdlib::strutilx::StrUEqual(argv[1], "AUDIT")) {
-    std::cout << auditLine.getAuditLine() << std::endl;
+    std::cout << auditLine.getAuditLine() << '\n';
     return {};
   }
 
@@ -715,7 +715,7 @@ int main(const int argc, const char *argv[]) {
   }
 
   SyList->OpenOutput(OutFile, ErrNr);
-  std::cout << "Output file: " << OutFile << std::endl;
+  std::cout << "Output file: " << OutFile << '\n';
   if (ErrNr != 0) {
     library::printErrorMessage("*** Error  : Cannot write to output file, Error Nr = " + std::to_string(ErrNr));
     gdxErrorStr(PGXMerge, ErrNr, Msg.data());
@@ -757,10 +757,10 @@ int main(const int argc, const char *argv[]) {
   gdxClose(PGXMerge);
   gdxFree(&PGXMerge);
 
-  std::cout << std::endl;
+  std::cout << '\n';
 
   if (SyList->GetFErrorCount() > 0)
-    std::cout << "Number of errors reported = " << SyList->GetFErrorCount() << std::endl;
+    std::cout << "Number of errors reported = " << SyList->GetFErrorCount() << '\n';
 
   SyList->Clear();
   // UnloadGDXLibrary();
@@ -770,9 +770,9 @@ int main(const int argc, const char *argv[]) {
       library::printErrorMessage("*** Error  : No valid input files specified (strict mode)");
       return 1;
     } else
-      std::cout << "No valid input files specified" << std::endl;
+      std::cout << "No valid input files specified\n";
   } else
-    std::cout << "Merge complete, " << InputFilesRead << " input files merged" << std::endl;
+    std::cout << "Merge complete, " << InputFilesRead << " input files merged\n";
 
   return {};
 }

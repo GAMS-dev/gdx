@@ -16,11 +16,11 @@ std::ostream &errorStream{std::cout};
 // std::ostream &errorStream { std::cerr };
 
 void printErrorMessage(const std::string &message) {
-  errorStream << message << std::endl;
+  errorStream << message << '\n';
 }
 
 void printErrorMessageWithError(const std::string &message) {
-  errorStream << "Error: " << message << std::endl;
+  errorStream << "Error: " << message << '\n';
 }
 
 // TODO: Make this a no-op in release mode builds (NDEBUG set)
