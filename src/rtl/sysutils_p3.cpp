@@ -92,13 +92,33 @@ std::string ExtractFileExt( const std::string &FileName )
    return I > 0 && FileName[I] == '.' ? std::string {FileName.begin()+I, FileName.end()} : ""s;
 }
 
+#if defined(_WIN32)
+std::string tryFixingLongPath(const std::string &fName)
+{
+   const bool
+         isAbs { std::isalpha(fName.front()) && fName[1] == ':' },
+         hasLongPathPrefix { fName[0] == '\\' && fName[1] == '\\' && fName[2] == '?' && fName[3] == '\\' };
+   std::string fNameBuf;
+   if(!hasLongPathPrefix && !isAbs)
+   {
+      // make path absolute to make the long path prefix work
+      if( const DWORD len { GetCurrentDirectoryA( 0, nullptr ) }; len > 0)
+      {
+         std::vector<char> buffer(len);
+         GetCurrentDirectoryA( len, &buffer[0] );
+         fNameBuf = ""s + buffer.data() + '\\' + fName;
+      }
+   }
+   const std::string &fNameRef {fNameBuf.empty() ? fName : fNameBuf};
+   const std::string forcedPrefix {hasLongPathPrefix ? ""s : R"(\\?\)"};
+   return forcedPrefix + fNameRef;
+}
+#endif
+
 bool FileExists( const std::string &FileName )
 {
 #if defined(_WIN32)
-   // put \\?\ in front of long absolute paths
-   if(FileName.length() > MAX_PATH && std::isalpha(FileName.front()) && FileName[1] == ':')
-      return !_access((R"(\\?\)"+FileName).c_str(), 0);
-   return !_access(FileName.c_str(), 0);
+   return !_access((FileName.length() > MAX_PATH ? tryFixingLongPath(FileName) : FileName).c_str(), 0);
 #else
    return !access(FileName.c_str(), F_OK);
 #endif
@@ -220,7 +240,7 @@ std::string GetCurrentDir()
 bool DirectoryExists( const std::string &Directory )
 {
 #if defined( _WIN32 )
-   const int attribs = GetFileAttributesA(Directory.c_str());
+   const int attribs = GetFileAttributesA((Directory.size() > MAX_PATH ? tryFixingLongPath( Directory ) : Directory).c_str());
    return -1 != attribs && (attribs & FILE_ATTRIBUTE_DIRECTORY);
 #else
    struct stat statBuf;

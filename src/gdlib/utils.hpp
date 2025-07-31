@@ -810,4 +810,7 @@ class sstring : public std::array<char, 256> {
       bool sameText( const T &s ) const { return utils::sameText( data(), s.c_str() ); }
 };
 
+// Signed fraction; frac(x) = x - int(x)// Truncate towards zero
+double frac( double x );
+
 }// namespace utils
