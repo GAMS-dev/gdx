@@ -79,7 +79,7 @@ public:
   void WriteNameList();
   void KeepNewAcronyms(const gdxHandle_t &PGX);
   void ShareAcronyms(const gdxHandle_t &PGX);
-  int FindAcronym(const library::ShortString &Id);
+  static int FindAcronym(const library::ShortString &Id);
 
   int GetFErrorCount() const;
   int GetFileListSize() const;
