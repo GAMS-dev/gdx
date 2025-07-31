@@ -230,8 +230,8 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
       SyObj->SyMemory +=
           XCount *
           static_cast<int64_t>(
-              SyObj->SyDim * sizeof(int) +
-              RecLen * sizeof(double));
+              (SyObj->SyDim * sizeof(int)) +
+              (RecLen * sizeof(double)));
 
       if (CheckError(
               SyObj->SyData->GetCount() + XCount <= std::numeric_limits<int>::max(),
