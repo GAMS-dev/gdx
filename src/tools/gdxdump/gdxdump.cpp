@@ -23,6 +23,7 @@
  * SOFTWARE.
  */
 
+#include <algorithm>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -699,9 +700,7 @@ void WriteSymbolCSV(const int SyNr) {
       if (!CSVCols[Indx - 1]) {
         CSVCols[Indx - 1] = true;
         ColCnt++;
-        if (Indx > HighIndex) {
-          HighIndex = Indx;
-        }
+        HighIndex = std::max(HighIndex, Indx);
       }
     }
     gdxDataReadDone(PGX);
@@ -793,9 +792,7 @@ void WriteSymbolInfo() {
     if (static_cast<int>(AName.length()) > w2) {
       w2 = AName.length();
     }
-    if (gdlib::strutilx::IntegerWidth(ACount) > w3) {
-      w3 = gdlib::strutilx::IntegerWidth(ACount);
-    }
+    w3 = std::max(w3, gdlib::strutilx::IntegerWidth(ACount));
     SL.insert({AName, N});
   }
   fo << gdlib::strutilx::PadLeft(" ", w1) << ' '
@@ -828,9 +825,7 @@ void WriteDomainInfo() {
 
   gdxSystemInfo(PGX, &NrSy, &NrUel);
   w1 = gdlib::strutilx::IntegerWidth(NrSy);
-  if (w1 < 4) {
-    w1 = 4;
-  }
+  w1 = std::max(w1, 4);
   fo << gdlib::strutilx::PadLeft("SyNr", w1)
      << "  Type" << "  DomInf " << "Symbol\n";
   for (int N{1}; N <= NrSy; N++) {
@@ -894,9 +889,7 @@ void WriteSetText() {
     gdxDataReadRawStart(PGX, iSym, &nRecs);
     while (gdxDataReadRaw(PGX, keys, vals, &fDim) != 0) {
       textIdx = utils::round<int>(vals[GMS_VAL_LEVEL]);
-      if (mxTextIdx < textIdx) {
-        mxTextIdx = textIdx;
-      }
+      mxTextIdx = std::max(mxTextIdx, textIdx);
     }
     gdxDataReadDone(PGX);
   }
