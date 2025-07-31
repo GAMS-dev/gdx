@@ -443,7 +443,9 @@ void CompareSy(const int Sy1, const int Sy2) {
     if (ST == dt_set && Vals[GMS_VAL_LEVEL] != 0) {
       library::ShortString stxt;
       int N;
-      gdxGetElemText(Act == c_ins1 ? PGX1 : PGX2, static_cast<int>(std::round(Vals[GMS_VAL_LEVEL])), stxt.data(), &N);
+      gdxGetElemText(
+          Act == c_ins1 ? PGX1 : PGX2,
+          utils::round<int>(Vals[GMS_VAL_LEVEL]), stxt.data(), &N);
       gdxAddSetText(PGXDIF, stxt.data(), &N);
       Vals[GMS_VAL_LEVEL] = N;
     }
@@ -576,7 +578,10 @@ void CompareSy(const int Sy1, const int Sy2) {
     if (C == 0) {
       if (ST == dt_set) {
         if (CompSetText)
-          Eq = CheckSetDifference(Keys1, static_cast<int>(std::round(Vals1[GMS_VAL_LEVEL])), static_cast<int>(std::round(Vals2[GMS_VAL_LEVEL])));
+          Eq = CheckSetDifference(
+              Keys1,
+              utils::round<int>(Vals1[GMS_VAL_LEVEL]),
+              utils::round<int>(Vals2[GMS_VAL_LEVEL]));
         else
           Eq = true;
       } else

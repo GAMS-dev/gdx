@@ -23,7 +23,6 @@
  * SOFTWARE.
  */
 
-#include <cmath>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -314,7 +313,7 @@ void WriteSymbol(const int SyNr) {
     switch (ATyp) {
     case dt_set:
       if (Vals[GMS_VAL_LEVEL] != 0) {
-        gdxGetElemText(PGX, static_cast<int>(std::round(Vals[GMS_VAL_LEVEL])), S.data(), &IDum);
+        gdxGetElemText(PGX, utils::round<int>(Vals[GMS_VAL_LEVEL]), S.data(), &IDum);
         WriteQUELText(S.data());
       }
       break;
@@ -633,7 +632,7 @@ void WriteSymbolCSV(const int SyNr) {
             }
           } else if (bCSVSetText) {
             if (Vals[GMS_VAL_LEVEL] != 0) {
-              gdxGetElemText(PGX, static_cast<int>(std::round(Vals[GMS_VAL_LEVEL])), S.data(), &IDum);
+              gdxGetElemText(PGX, utils::round<int>(Vals[GMS_VAL_LEVEL]), S.data(), &IDum);
               fo << Delim << QQCSV(S.data());
             } else
               fo << Delim;
@@ -832,7 +831,7 @@ void WriteSetText() {
     // fo << "Found set " << s << '\n';
     gdxDataReadRawStart(PGX, iSym, &nRecs);
     while (gdxDataReadRaw(PGX, keys, vals, &fDim) != 0) {
-      textIdx = static_cast<int>(std::round(vals[GMS_VAL_LEVEL]));
+      textIdx = utils::round<int>(vals[GMS_VAL_LEVEL]);
       if (mxTextIdx < textIdx)
         mxTextIdx = textIdx;
     }

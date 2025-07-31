@@ -23,7 +23,6 @@
  * SOFTWARE.
  */
 
-#include <cmath>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
@@ -264,7 +263,7 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
         for (D = FDim - 1; D < Dim; D++)
           IndxI[D + 1] = AddUEL(library::ShortString{IndxSPtrs[D]});
       if (SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0) {
-        gdxGetElemText(PGX, static_cast<int>(std::round(Vals[GMS_VAL_LEVEL])), Txt.data(), &INode);
+        gdxGetElemText(PGX, utils::round<int>(Vals[GMS_VAL_LEVEL]), Txt.data(), &INode);
         Vals[GMS_VAL_LEVEL] = StrPool->Add(Txt.data(), Txt.length());
       }
       SyObj->SyData->AddRecord(IndxI, Vals);
@@ -323,7 +322,7 @@ bool SymbolList::CollectBigOne(const int SyNr) {
         for (D = FDim - 1; D <= SyObj->SyDim; D++)
           IndxI[D + 1] = AddUEL(library::ShortString{IndxSPtrs[D]});
         if (SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0) {
-          gdxGetElemText(PGX, static_cast<int>(std::round(Vals[GMS_VAL_LEVEL])), Txt.data(), &INode);
+          gdxGetElemText(PGX, utils::round<int>(Vals[GMS_VAL_LEVEL]), Txt.data(), &INode);
           Vals[GMS_VAL_LEVEL] = StrPool->Add(Txt.data(), Txt.length());
         }
         SyObj->SyData->AddRecord(IndxI, Vals);
@@ -405,7 +404,7 @@ void SymbolList::WritePGXFile(const int SyNr, const ProcessPass Pass) {
   for (R = 0; R < SyObj->SyData->GetCount(); R++) {
     SyObj->SyData->GetRecord(R, IndxI, Vals);
     if (SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0) {
-      Txt = StrPool->GetString(static_cast<int>(std::round(Vals[GMS_VAL_LEVEL])));
+      Txt = StrPool->GetString(utils::round<int>(Vals[GMS_VAL_LEVEL]));
       gdxAddSetText(PGXMerge, Txt.data(), &INode);
       Vals[GMS_VAL_LEVEL] = INode;
     }
