@@ -140,7 +140,7 @@ void ShortString::operator+=(const std::string &s) {
 
 void ShortString::to_upper_case() {
   for (uint8_t i{}; buffer.at(i) != '\0'; i++) {
-    buffer[i] = static_cast<char>(utils::toupper(buffer[i]));
+    buffer[i] = utils::toupper(buffer[i]);
   }
 }
 
