@@ -210,10 +210,7 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
     }
 
     SyObj = gdlib::gmsobj::TXHashedStringList<GAMSSymbol>::GetObject(SyIndx);
-    if (!SyObj->SyData) {
-      continue;
-    }
-    if (SyObj->SySkip) {
+    if (!SyObj->SyData || SyObj->SySkip) {
       continue;
     }
 
@@ -231,11 +228,13 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
     if (Pass == ProcessPass::RpScan || Pass == ProcessPass::RpDoAll) {
       SyObj->SySize += Size;
       SyObj->SyMemory += XCount * (SyObj->SyDim * sizeof(int) + RecLen * sizeof(double));
+
       if (CheckError(SyObj->SyData->GetCount() + XCount <= std::numeric_limits<int>::max(), "Element count for symbol > maxint")) {
         SyObj->SySkip = true;
         SyObj->SyData.reset();
         continue;
       }
+
 #if defined(OLD_MEMORY_CHECK)
       if (CheckError(SyObj->SyMemory <= std::numeric_limits<int>::max(), "Symbol is too large")) {
         SyObj->SySkip = true;
@@ -245,24 +244,13 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
 #endif
     }
 
-    if (Pass == ProcessPass::RpScan) {
-      continue;
-    }
-
-    if (Pass == ProcessPass::RpSmall && SyObj->SySize >= SizeCutOff) {
-      continue;
-    }
-    if (Pass == ProcessPass::RpBig && SyObj->SySize < SizeCutOff) {
-      continue;
-    }
-
-    if (CheckError(Dim + 1 == SyObj->SyDim, "Dimensions do not match")) {
-      continue;
-    }
-    if (CheckError(SyTyp == SyObj->SyTyp, "Types do not match")) {
-      continue;
-    }
-    if ((SyTyp == dt_var || SyTyp == dt_equ) && CheckError(SySubTyp == SyObj->SySubTyp, "Var/Equ subtypes do not match")) {
+    if (Pass == ProcessPass::RpScan ||
+        (Pass == ProcessPass::RpSmall && SyObj->SySize >= SizeCutOff) ||
+        (Pass == ProcessPass::RpBig && SyObj->SySize < SizeCutOff) ||
+        CheckError(Dim + 1 == SyObj->SyDim, "Dimensions do not match") ||
+        CheckError(SyTyp == SyObj->SyTyp, "Types do not match") ||
+        ((SyTyp == dt_var || SyTyp == dt_equ) &&
+         CheckError(SySubTyp == SyObj->SySubTyp, "Var/Equ subtypes do not match"))) {
       continue;
     }
 
@@ -374,6 +362,7 @@ bool SymbolList::FindGDXFiles(const std::string &Path) {
       if (Rec.Name == "." || Rec.Name == "..") {
         continue;
       }
+
       if (OutFile == BPath + Rec.Name) {
         std::cout << "Cannot use " << OutFile << " as input file and output file, skipped it as input\n";
         Result = false;
@@ -415,15 +404,20 @@ void SymbolList::WritePGXFile(const int SyNr, const ProcessPass Pass) {
   library::ShortString Txt;
 
   SyObj = gdlib::gmsobj::TXHashedStringList<GAMSSymbol>::GetObject(SyNr);
-  if (!SyObj->SyData) {
+  if (!SyObj->SyData ||
+      (Pass == ProcessPass::RpSmall && SyObj->SySize >= SizeCutOff)) {
     return;
   }
-  if (Pass == ProcessPass::RpSmall && SyObj->SySize >= SizeCutOff) {
-    return;
-  }
-
   SyObj->SyData->Sort();
-  gdxDataWriteRawStart(PGXMerge, gdlib::gmsobj::TXHashedStringList<GAMSSymbol>::GetString(SyNr), SyObj->SyExplTxt.data(), SyObj->SyDim, static_cast<int>(SyObj->SyTyp), SyObj->SySubTyp);
+
+  gdxDataWriteRawStart(
+      PGXMerge,
+      gdlib::gmsobj::TXHashedStringList<GAMSSymbol>::GetString(SyNr),
+      SyObj->SyExplTxt.data(),
+      SyObj->SyDim,
+      static_cast<int>(SyObj->SyTyp),
+      SyObj->SySubTyp);
+
   for (R = 0; R < SyObj->SyData->GetCount(); R++) {
     SyObj->SyData->GetRecord(R, IndxI, Vals);
     if (SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0) {
@@ -433,6 +427,7 @@ void SymbolList::WritePGXFile(const int SyNr, const ProcessPass Pass) {
     }
     gdxDataWriteRaw(PGXMerge, IndxI, Vals);
   }
+
   gdxDataWriteDone(PGXMerge);
   SyObj->SyData->Clear();
   SyObj->SyData.reset();
@@ -519,9 +514,11 @@ void SymbolList::ShareAcronyms(const gdxHandle_t &PGX) {
   for (int N{1}; N <= gdxAcronymCount(PGX); N++) {
     gdxAcronymGetInfo(PGX, N, AName.data(), AText.data(), &AIndx);
     NM = FindAcronym(AName);
+
     if (NM <= 0) {
       continue;
     }
+
     gdxAcronymGetInfo(PGXMerge, NM, ANameM.data(), ATextM.data(), &AIndxM);
     library::assertWithMessage(AIndxM > 0, "ShareAcronyms-1");
     gdxAcronymSetInfo(PGX, N, AName.data(), AText.data(), AIndxM);
@@ -673,7 +670,6 @@ bool GetParameters(const int argc, const char *argv[]) {
       default:
         FilePatterns->Add(KS.data(), KS.length());
         // SyList->FindGDXFiles( KS );
-        break;
       }
     } while (ParNr < CmdParams->GetParamCount());
   }

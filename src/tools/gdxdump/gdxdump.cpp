@@ -295,6 +295,7 @@ void WriteSymbol(const int SyNr) {
         !(ATyp == dt_equ && (ValNr == GMS_VAL_LOWER || ValNr == GMS_VAL_UPPER))) {
       return;
     }
+
     if (FrstWrite) {
       FrstWrite = false;
     } else if (outFormat == OutFormat::fmt_gamsbas) {
@@ -325,6 +326,7 @@ void WriteSymbol(const int SyNr) {
         fo << ')';
       }
     }
+
     switch (ATyp) {
     case dt_set:
       if (Vals[GMS_VAL_LEVEL] != 0) {
@@ -353,8 +355,8 @@ void WriteSymbol(const int SyNr) {
 
     default:
       fo << "Oops";
-      break;
     }
+
     ACount--;
     LineCount++;
   };
@@ -380,18 +382,24 @@ void WriteSymbol(const int SyNr) {
 
   gdxSymbolInfo(PGX, SyNr, SyName.data(), &ADim, &iATyp);
   ATyp = static_cast<gdxSyType>(iATyp);
+
   if ((ATyp == dt_set || ATyp == dt_par) && outFormat == OutFormat::fmt_gamsbas) {
     return;
   }
+
   if (ShowHdr) {
     fo << '\n';
   }
-  // if (false)
+  // if (false) {
   //   fo << "$onText\n";
+  // }
+
   BadUELs = 0;
   IsScalar = ADim == 0 && ATyp == dt_par;
+
   gdxSymbolInfoX(PGX, SyNr, &ACount, &AUser, S.data());
   // fo << "The sub-type = " << AUser << '\n';
+
   switch (ATyp) {
   case dt_set:
     DefaultValues[GMS_VAL_LEVEL] = 0;
@@ -422,8 +430,8 @@ void WriteSymbol(const int SyNr) {
 
   default:
     DefaultValues[GMS_VAL_LEVEL] = 0;
-    break;
   }
+
   if (ShowHdr) {
     if (IsScalar) {
       fo << "Scalar";
@@ -538,8 +546,9 @@ void WriteSymbol(const int SyNr) {
       }
     }
   }
-  // if (false)
+  // if (false) {
   //   fo << "$offText\n";
+  // }
   if (BadUELs > 0) {
     fo << "**** " << BadUELs << " reference(s) to unique elements without a string representation";
   }
@@ -880,6 +889,7 @@ void WriteSetText() {
     if (static_cast<gdxSyType>(symTyp) != dt_set) {
       continue;
     }
+
     // fo << "Found set " << s << '\n';
     gdxDataReadRawStart(PGX, iSym, &nRecs);
     while (gdxDataReadRaw(PGX, keys, vals, &fDim) != 0) {
@@ -1001,8 +1011,9 @@ int main(const int argc, const char *argv[]) {
   int ErrNr, ExitCode;
   bool ListAllSymbols, ListSymbolsAsSet, ListSymbolsAsSetDI, UsingIDE, VersionOnly, DomainInfo, showSetText;
 
-  // for (int N{}; N < argc; N++)
+  // for (int N{}; N < argc; N++) {
   //   std::cout << "Parameter " << N << ": |" << argv[N] << "|\n";
+  // }
 
   ParamCount = argc - 1;
   ParamStr = argv;

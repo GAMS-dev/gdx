@@ -142,11 +142,14 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
 
   auto ExpandCommandLine = [&]() -> std::string {
     std::string result;
+
     for (int N{1}; N < ParamCount; N++) {
       std::string S{ParamStr[N]};
+
       if (S.empty()) {
         continue;
       }
+
       if (S.find(' ') == std::string::npos) {
         result.append(' ' + S);
       } else {
@@ -164,6 +167,7 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
         }
       }
     }
+
     return result;
   };
 
@@ -218,6 +222,7 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
       if (gdlib::strutilx::ExtractFileExtEx(fname).empty()) {
         fname = gdlib::strutilx::ChangeFileExtEx(fname, ".txt");
       }
+
       std::ifstream fi(fname);
       if (!fi.is_open()) {
         library::printErrorMessage("**** could not open file: " + fname);
@@ -226,15 +231,18 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
         std::string line;
         while (getline(fi, line)) {
           std::vector<std::string> strings = library::splitString(line, ' ');
+
           if (!strings.empty() && (strings.front().empty() || strings.front().front() == '*')) {
             continue;
           }
+
           for (size_t k{}; k < strings.size(); k++) {
             if (strings[k].empty()) {
               break;
             }
             Dest.append(" " + strings[k]);
           }
+
           // TODO: Check whether this if is still necessary
           if (!strings.empty() && strings.back().length() == 255) {
             library::printErrorMessage("**** Input line longer than " + std::to_string(MAXBUF * 255) + " characters");

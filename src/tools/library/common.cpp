@@ -45,14 +45,19 @@ std::string gdxDataTypStr(const int i) {
   switch (i) {
   case 0:
     return "Set";
+
   case 1:
     return "Par";
+
   case 2:
     return "Var";
+
   case 3:
     return "Equ";
+
   case 4:
     return "Alias";
+
   default:
     assertWithMessage(false, "Unknown type");
     return "Unknown";
@@ -79,8 +84,9 @@ std::string valTypStr(const int i) {
 
   // std::string result{gmsValTypeText[i]};
   // result.erase(0, 1);
-  // for (char &c : result)
+  // for (char &c : result) {
   //   c = static_cast<char>(toupper(c));
+  // }
   // return result;
 }
 

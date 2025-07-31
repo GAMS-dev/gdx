@@ -15,9 +15,11 @@ ShortString::ShortString() {
 
 ShortString::ShortString(const char *s) {
   const size_t s_length{std::strlen(s)};
+
 #if defined(ENABLE_ASSERTIONS)
   assert(s_length < GMS_SSSIZE);
 #endif
+
   std::memcpy(buffer.data(), s, s_length);
   buffer[s_length] = '\0';
 }
@@ -46,28 +48,34 @@ uint8_t ShortString::length() const {
 
 char ShortString::front() const {
   const char c{buffer.front()};
+
 #if defined(ENABLE_ASSERTIONS)
   assert(c != '\0');
 #endif
+
   return c;
 }
 
 char ShortString::back() const {
   const uint8_t length{this->length()};
+
 #if defined(ENABLE_ASSERTIONS)
   assert(length > 0);
 #endif
+
   return buffer[length - 1];
 }
 
 char ShortString::at(const uint8_t i) const {
 #if defined(ENABLE_ASSERTIONS)
   [[maybe_unused]] const uint8_t length{this->length()};
-  if (i > 0)
+  if (i > 0) {
     assert(i < length);
-  else
+  } else {
     assert(i <= length);
+  }
 #endif
+
   return buffer[i];
 }
 
@@ -85,9 +93,11 @@ void ShortString::clear() {
 
 void ShortString::append(const char c) {
   const uint8_t length{this->length()};
+
 #if defined(ENABLE_ASSERTIONS)
   assert(length + 1 < GMS_SSSIZE);
 #endif
+
   buffer[length] = c;
   buffer[length + 1] = '\0';
 }
@@ -95,9 +105,11 @@ void ShortString::append(const char c) {
 void ShortString::append(const char *s) {
   const uint8_t length{this->length()};
   const size_t s_length{std::strlen(s)};
+
 #if defined(ENABLE_ASSERTIONS)
   assert(length + s_length < GMS_SSSIZE);
 #endif
+
   std::memcpy(buffer.data() + length, s, s_length);
   buffer[length + s_length] = '\0';
 }
@@ -134,9 +146,11 @@ void ShortString::to_upper_case() {
 
 ShortString &ShortString::operator=(const std::string &s) {
   const size_t s_length{s.length()};
+
 #if defined(ENABLE_ASSERTIONS)
   assert(s_length < GMS_SSSIZE);
 #endif
+
   std::memcpy(buffer.data(), s.data(), s_length);
   buffer[s_length] = '\0';
   return *this;

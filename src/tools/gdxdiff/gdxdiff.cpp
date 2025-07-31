@@ -232,8 +232,9 @@ void CompareSy(const int Sy1, const int Sy2) {
 #if VERBOSE >= 3
     for (int D{}; D < Dim + 1; D++) {
       std::cout << StrKeys[D];
-      if (D < Dim + 1)
+      if (D < Dim + 1) {
         std::cout << ", ";
+      }
     }
     std::cout << '\n';
 #endif
@@ -276,10 +277,10 @@ void CompareSy(const int Sy1, const int Sy2) {
       break;
 
     default:
-      for (int T{}; T < GMS_VAL_MAX; T++)
+      for (int T{}; T < GMS_VAL_MAX; T++) {
         std::cout << ValAsString(PGX, Vals[T]) << ' ';
+      }
       std::cout << '\n';
-      break;
     }
   };
 
@@ -287,8 +288,9 @@ void CompareSy(const int Sy1, const int Sy2) {
     RegisterDiffUELs();
     for (int D{}; D < Dim; D++) {
       std::cout << ' ' << UELTable->GetString(Keys[D]);
-      if (D < Dim)
+      if (D < Dim) {
         std::cout << " .";
+      }
     }
   };
 #endif
@@ -299,10 +301,7 @@ void CompareSy(const int Sy1, const int Sy2) {
     };
 
     // auto DMax = [](const double a, const double b) -> double {
-    //   if (a >= b)
-    //     return a;
-    //   else
-    //     return b;
+    //   return a >= b ? a : b;
     // };
 
     int iSV1, iSV2;
@@ -365,15 +364,14 @@ void CompareSy(const int Sy1, const int Sy2) {
       if (!CheckSymbOpen()) {
         return {};
       }
+
       if (!(DiffOnly && (ST == dt_var || ST == dt_equ))) {
         WriteDiff(c_dif1, {}, Keys, V1);
         WriteDiff(c_dif2, {}, Keys, V2);
       } else {
         for (int T{}; T < GMS_VAL_MAX; T++) {
-          if (!ActiveFields.contains(static_cast<tvarvaltype>(T))) {
-            continue;
-          }
-          if (DoublesEqual(V1[T], V2[T])) {
+          if (!ActiveFields.contains(static_cast<tvarvaltype>(T)) ||
+              DoublesEqual(V1[T], V2[T])) {
             continue;
           }
 
@@ -415,6 +413,7 @@ void CompareSy(const int Sy1, const int Sy2) {
       if (!CheckSymbOpen()) {
         return {};
       }
+
       WriteSetDiff(c_dif1, Keys, S1);
       WriteSetDiff(c_dif2, Keys, S2);
     }
@@ -424,6 +423,7 @@ void CompareSy(const int Sy1, const int Sy2) {
   auto ShowInsert = [&](const std::string &Act, const gdxUelIndex_t &Keys, gdxValues_t &Vals) -> void {
     // We check if this insert has values we want to ignore
     bool Eq{};
+
     switch (ST) {
     case dt_par:
       Eq = DoublesEqual(Vals[GMS_VAL_LEVEL], 0);
@@ -441,7 +441,6 @@ void CompareSy(const int Sy1, const int Sy2) {
       break;
 
     default:
-      // TODO: Print error message?
       break;
     }
 
@@ -456,7 +455,8 @@ void CompareSy(const int Sy1, const int Sy2) {
       Status = StatusCode::sc_dim10_diff;
     }
 
-    if (Status == StatusCode::sc_dim10_diff || !CheckSymbOpen()) {
+    if (Status == StatusCode::sc_dim10_diff ||
+        !CheckSymbOpen()) {
       return;
     }
 
@@ -482,6 +482,7 @@ void CompareSy(const int Sy1, const int Sy2) {
         if (!ActiveFields.contains(static_cast<tvarvaltype>(T))) {
           continue;
         }
+
         Vals2[GMS_VAL_LEVEL] = Vals[T];
         WriteDiff(Act, GamsFieldNames[T], Keys, Vals2);
       }
@@ -551,9 +552,12 @@ void CompareSy(const int Sy1, const int Sy2) {
 #if VERBOSE >= 1
       std::cout << "Domain differences for symbol = " << ID << '\n';
       for (int D{}; D < Dim; D++) {
-        if (gdlib::strutilx::StrUEqual(DomSy1[D], DomSy2[D]))
+        if (gdlib::strutilx::StrUEqual(DomSy1[D], DomSy2[D])) {
           continue;
-        std::cout << gdlib::strutilx::PadRight(std::to_string(D), 2) << ' ' << DomSy1[D] << ' ' << DomSy2[D] << '\n';
+        }
+
+        std::cout << gdlib::strutilx::PadRight(std::to_string(D), 2)
+                  << ' ' << DomSy1[D] << ' ' << DomSy2[D] << '\n';
       }
       std::cout << '\n';
 #endif
@@ -779,15 +783,17 @@ int main(const int argc, const char *argv[]) {
   if (Parameter.Key == static_cast<int>(library::cmdpar::CmdParamStatus::kp_input)) {
     InFile1 = Parameter.KeyS;
   }
-  // else
+  // else {
   //   InFile1.clear();
+  // }
 
   Parameter = CmdParams->GetParams(1);
   if (Parameter.Key == static_cast<int>(library::cmdpar::CmdParamStatus::ke_unknown)) {
     InFile2 = Parameter.KeyS;
   }
-  // else
+  // else {
   //   InFile2.clear();
+  // }
 
   if (InFile1.empty() || InFile2.empty()) {
     ErrorCode = 1;
@@ -798,8 +804,9 @@ int main(const int argc, const char *argv[]) {
     if (Parameter.Key == static_cast<int>(library::cmdpar::CmdParamStatus::ke_unknown)) {
       DiffFileName = Parameter.KeyS;
     }
-    // else
+    // else {
     //   DiffFileName.clear();
+    // }
   }
 
   if (DiffFileName.empty()) {
@@ -941,15 +948,17 @@ int main(const int argc, const char *argv[]) {
 
   populateListFromParams(KP::kp_id, IDsOnly);
 
-  // if (IDsOnly && IDsOnly->GetCount() == 0)
+  // if (IDsOnly && IDsOnly->GetCount() == 0) {
   //   // Like ID = "" (or ID.empty())
   //   FreeAndNil(IDsOnly);
+  // }
 
   populateListFromParams(KP::kp_skip_id, SkipIDs);
 
   // We removed this but not sure why
-  // if (rtl::sysutils_p3::FileExists(DiffFileName))
+  // if (rtl::sysutils_p3::FileExists(DiffFileName)) {
   //   rtl::sysutils_p3::DeleteFileFromDisk(DiffFileName);
+  // }
 
   // Parameter errors
   if (ErrorCode > 0) {
@@ -1120,11 +1129,13 @@ int main(const int argc, const char *argv[]) {
     RenameOK = true;
   } else {
     RenameOK = rtl::sysutils_p3::DeleteFileFromDisk(DiffFileName);
+
 #if defined(_WIN32)
     if (!RenameOK) {
       int ShellCode;
-      if (rtl::p3process::P3ExecP("IDECmds.exe ViewClose \"" + DiffFileName + "\"", ShellCode) == 0)
+      if (rtl::p3process::P3ExecP("IDECmds.exe ViewClose \"" + DiffFileName + "\"", ShellCode) == 0) {
         RenameOK = rtl::sysutils_p3::DeleteFileFromDisk(DiffFileName);
+      }
     }
 #endif
   }
