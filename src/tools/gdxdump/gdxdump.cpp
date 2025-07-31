@@ -1000,7 +1000,8 @@ void WriteAcronyms() {
 
 int main(const int argc, const char *argv[]) {
   library::ShortString s, Symb;
-  std::string InputFile, DLLStr, UELSetName, OutputName;
+  // std::string DLLStr;
+  std::string InputFile, UELSetName, OutputName;
   int ErrNr, ExitCode;
   bool ListAllSymbols, ListSymbolsAsSet, ListSymbolsAsSetDI, UsingIDE, VersionOnly, DomainInfo, showSetText;
 
