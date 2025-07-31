@@ -227,16 +227,24 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
 
     if (Pass == ProcessPass::RpScan || Pass == ProcessPass::RpDoAll) {
       SyObj->SySize += Size;
-      SyObj->SyMemory += XCount * (SyObj->SyDim * sizeof(int) + RecLen * sizeof(double));
+      SyObj->SyMemory +=
+          XCount *
+          static_cast<int64_t>(
+              SyObj->SyDim * sizeof(int) +
+              RecLen * sizeof(double));
 
-      if (CheckError(SyObj->SyData->GetCount() + XCount <= std::numeric_limits<int>::max(), "Element count for symbol > maxint")) {
+      if (CheckError(
+              SyObj->SyData->GetCount() + XCount <= std::numeric_limits<int>::max(),
+              "Element count for symbol > maxint")) {
         SyObj->SySkip = true;
         SyObj->SyData.reset();
         continue;
       }
 
 #if defined(OLD_MEMORY_CHECK)
-      if (CheckError(SyObj->SyMemory <= std::numeric_limits<int>::max(), "Symbol is too large")) {
+      if (CheckError(
+              SyObj->SyMemory <= std::numeric_limits<int>::max(),
+              "Symbol is too large")) {
         SyObj->SySkip = true;
         SyObj->SyData.reset();
         continue;
