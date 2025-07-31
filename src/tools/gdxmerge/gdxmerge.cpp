@@ -742,7 +742,7 @@ int main(const int argc, const char *argv[]) {
     return 1;
   }
 
-  SyList->OpenOutput(OutFile, ErrNr);
+  gdxmerge::SymbolList::OpenOutput(OutFile, ErrNr);
   std::cout << "Output file: " << OutFile << '\n';
   if (ErrNr != 0) {
     library::printErrorMessage("*** Error  : Cannot write to output file, Error Nr = " + std::to_string(ErrNr));
