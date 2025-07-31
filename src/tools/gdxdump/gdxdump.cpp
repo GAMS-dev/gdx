@@ -516,10 +516,6 @@ void WriteSymbol(const int SyNr) {
     fo << "**** " << BadUELs << " reference(s) to unique elements without a string representation";
 }
 
-int64_t DelphiRound(const double x) {
-  return static_cast<int64_t>(x >= 0 ? x + 0.5 : x - 0.5);
-}
-
 void WriteSymbolCSV(const int SyNr) {
   int ADim;
 
@@ -637,7 +633,7 @@ void WriteSymbolCSV(const int SyNr) {
             }
           } else if (bCSVSetText) {
             if (Vals[GMS_VAL_LEVEL] != 0) {
-              gdxGetElemText(PGX, static_cast<int>(DelphiRound(Vals[GMS_VAL_LEVEL])), S.data(), &IDum);
+              gdxGetElemText(PGX, static_cast<int>(std::round(Vals[GMS_VAL_LEVEL])), S.data(), &IDum);
               fo << Delim << QQCSV(S.data());
             } else
               fo << Delim;
@@ -836,7 +832,7 @@ void WriteSetText() {
     // fo << "Found set " << s << '\n';
     gdxDataReadRawStart(PGX, iSym, &nRecs);
     while (gdxDataReadRaw(PGX, keys, vals, &fDim) != 0) {
-      textIdx = static_cast<int>(DelphiRound(vals[GMS_VAL_LEVEL]));
+      textIdx = static_cast<int>(std::round(vals[GMS_VAL_LEVEL]));
       if (mxTextIdx < textIdx)
         mxTextIdx = textIdx;
     }
