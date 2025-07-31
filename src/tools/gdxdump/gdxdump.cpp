@@ -23,6 +23,7 @@
  * SOFTWARE.
  */
 
+#include <cmath>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -313,7 +314,7 @@ void WriteSymbol(const int SyNr) {
     switch (ATyp) {
     case dt_set:
       if (Vals[GMS_VAL_LEVEL] != 0) {
-        gdxGetElemText(PGX, static_cast<int>(Vals[GMS_VAL_LEVEL]), S.data(), &IDum);
+        gdxGetElemText(PGX, static_cast<int>(std::round(Vals[GMS_VAL_LEVEL])), S.data(), &IDum);
         WriteQUELText(S.data());
       }
       break;
