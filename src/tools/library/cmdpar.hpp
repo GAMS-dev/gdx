@@ -1,5 +1,4 @@
-#ifndef GDX_CMDPAR_H
-#define GDX_CMDPAR_H
+#pragma once
 
 #include <cstdint>
 #include <map>
@@ -52,5 +51,3 @@ enum class CmdParamStatus : int16_t {
 };
 
 } // namespace library::cmdpar
-
-#endif // GDX_CMDPAR_H

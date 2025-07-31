@@ -1,5 +1,4 @@
-#ifndef GDX_GDXDUMP_H
-#define GDX_GDXDUMP_H
+#pragma once
 
 #include <array>
 #include <cstdint>
@@ -71,5 +70,3 @@ void WriteAcronyms();
 int main(int argc, const char *argv[]);
 
 } // namespace gdxdump
-
-#endif // GDX_GDXDUMP_H

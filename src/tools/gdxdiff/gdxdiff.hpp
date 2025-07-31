@@ -1,5 +1,4 @@
-#ifndef GDX_GDXDIFF_H
-#define GDX_GDXDIFF_H
+#pragma once
 
 #include <array>
 #include <cstdint>
@@ -118,5 +117,3 @@ void CheckFile(std::string &fn);
 int main(int argc, const char *argv[]);
 
 } // namespace gdxdiff
-
-#endif // GDX_GDXDIFF_H

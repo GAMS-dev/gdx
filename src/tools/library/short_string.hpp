@@ -1,5 +1,4 @@
-#ifndef GDX_SHORT_STRING_H
-#define GDX_SHORT_STRING_H
+#pragma once
 
 #include <array>
 #include <cstdint>
@@ -64,5 +63,3 @@ public:
 };
 
 } // namespace library
-
-#endif // GDX_SHORT_STRING_H

@@ -1,5 +1,4 @@
-#ifndef GDX_LIBRARY_H
-#define GDX_LIBRARY_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -46,5 +45,3 @@ public:
 };
 
 } // namespace library
-
-#endif // GDX_LIBRARY_H

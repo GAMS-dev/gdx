@@ -1,5 +1,4 @@
-#ifndef GDX_GDXMERGE_H
-#define GDX_GDXMERGE_H
+#pragma once
 
 #include <array>
 #include <cstdint>
@@ -99,5 +98,3 @@ void Usage(const library::AuditLine &auditLine);
 int main(int argc, const char *argv[]);
 
 } // namespace gdxmerge
-
-#endif // GDX_GDXMERGE_H
