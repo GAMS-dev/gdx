@@ -222,7 +222,7 @@ void CompareSy(const int Sy1, const int Sy2) {
         snprintf(StrKeysPtrs[D], GMS_SSSIZE, "L__%d", Keys[D]);
       }
     }
-    if (!(DiffOnly && (ST == dt_var || ST == dt_equ))) {
+    if (!DiffOnly || (ST != dt_var && ST != dt_equ)) {
       strcpy(StrKeysPtrs[Dim], Act.data());
     } else {
       strcpy(StrKeysPtrs[Dim], FldName.data());
@@ -365,7 +365,7 @@ void CompareSy(const int Sy1, const int Sy2) {
         return {};
       }
 
-      if (!(DiffOnly && (ST == dt_var || ST == dt_equ))) {
+      if (!DiffOnly || (ST != dt_var && ST != dt_equ)) {
         WriteDiff(c_dif1, {}, Keys, V1);
         WriteDiff(c_dif2, {}, Keys, V2);
       } else {
@@ -474,7 +474,7 @@ void CompareSy(const int Sy1, const int Sy2) {
       Vals[GMS_VAL_LEVEL] = N;
     }
 
-    if (!(DiffOnly && (ST == dt_var || ST == dt_equ))) {
+    if (!DiffOnly || (ST != dt_var && ST != dt_equ)) {
       WriteDiff(Act, {}, Keys, Vals);
     } else {
       gdxValues_t Vals2{};
@@ -680,7 +680,8 @@ void CompareSy(const int Sy1, const int Sy2) {
   SymbClose();
 
 label999:
-  if (!(Status == StatusCode::sc_same || Status == StatusCode::sc_dim10)) {
+  if (Status != StatusCode::sc_same &&
+      Status != StatusCode::sc_dim10) {
     StatusTable.insert({ID, Status});
   }
 }

@@ -292,7 +292,7 @@ void WriteSymbol(const int SyNr) {
   auto WriteItem = [&](const uint8_t &ValNr) {
     if (!IsScalar && ATyp != dt_set &&
         (FilterDef && Vals[ValNr] == DefaultValues[ValNr]) &&
-        !(ATyp == dt_equ && (ValNr == GMS_VAL_LOWER || ValNr == GMS_VAL_UPPER))) {
+        (ATyp != dt_equ || (ValNr != GMS_VAL_LOWER && ValNr != GMS_VAL_UPPER))) {
       return;
     }
 
@@ -302,7 +302,7 @@ void WriteSymbol(const int SyNr) {
       fo << " ;\n";
     } else {
       fo << ", ";
-      if (!((ATyp == dt_var || ATyp == dt_equ) && ADim == 0)) {
+      if ((ATyp != dt_var && ATyp != dt_equ) || ADim != 0) {
         fo << '\n';
       }
     }
@@ -625,7 +625,7 @@ void WriteSymbolCSV(const int SyNr) {
             fo << Delim;
           }
         }
-        if (!(ATyp == dt_set || ATyp == dt_alias)) {
+        if (ATyp != dt_set && ATyp != dt_alias) {
           if (ADim == 0) {
             fo << QQCSV("Val");
           } else {
@@ -662,7 +662,7 @@ void WriteSymbolCSV(const int SyNr) {
           fo << GetUel4CSV(Keys[D]);
           if (D < ADim - 1) {
             fo << Delim;
-          } else if (!(ATyp == dt_set || ATyp == dt_alias)) {
+          } else if (ATyp != dt_set && ATyp != dt_alias) {
             fo << Delim;
             WrVal(Vals[GMS_VAL_LEVEL]);
             if ((ATyp == dt_var || ATyp == dt_equ) && bFullEVRec) {
