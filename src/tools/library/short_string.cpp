@@ -10,7 +10,7 @@
 namespace library {
 
 ShortString::ShortString() {
-  buffer.front() = '\0';
+  buffer[0] = '\0';
 }
 
 ShortString::ShortString(const char *s) {
@@ -24,7 +24,8 @@ ShortString::ShortString(const char *s) {
   buffer[s_length] = '\0';
 }
 
-ShortString::ShortString(const std::string &s) : ShortString(s.data()) {}
+ShortString::ShortString(const std::string &s)
+    : ShortString(s.data()) {}
 
 char *ShortString::data() {
   return buffer.data();
@@ -47,13 +48,11 @@ uint8_t ShortString::length() const {
 }
 
 char ShortString::front() const {
-  const char c{buffer.front()};
-
 #if defined(ENABLE_ASSERTIONS)
-  assert(c != '\0');
+  assert(buffer[0] != '\0');
 #endif
 
-  return c;
+  return buffer[0];
 }
 
 char ShortString::back() const {
@@ -68,7 +67,8 @@ char ShortString::back() const {
 
 char ShortString::at(const uint8_t i) const {
 #if defined(ENABLE_ASSERTIONS)
-  [[maybe_unused]] const uint8_t length{this->length()};
+  const uint8_t length{this->length()};
+
   if (i > 0) {
     assert(i < length);
   } else {
@@ -84,11 +84,11 @@ char ShortString::operator[](const uint8_t i) const {
 }
 
 bool ShortString::empty() const {
-  return buffer.front() == '\0';
+  return buffer[0] == '\0';
 }
 
 void ShortString::clear() {
-  buffer.front() = '\0';
+  buffer[0] = '\0';
 }
 
 void ShortString::append(const char c) {
@@ -139,7 +139,7 @@ void ShortString::operator+=(const std::string &s) {
 }
 
 void ShortString::to_upper_case() {
-  for (uint8_t i{}; buffer.at(i) != '\0'; i++) {
+  for (uint8_t i{}; buffer[i] != '\0'; i++) {
     buffer[i] = utils::toupper(buffer[i]);
   }
 }
