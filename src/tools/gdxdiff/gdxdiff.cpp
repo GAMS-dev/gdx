@@ -25,6 +25,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
@@ -97,7 +98,7 @@ void FatalErrorExit(const int ErrNr) {
     }
     rtl::sysutils_p3::DeleteFileFromDisk(DiffTmpName);
   }
-  exit(ErrNr);
+  std::exit(ErrNr);
 }
 
 void FatalError(const std::string &Msg, const int ErrNr) {
