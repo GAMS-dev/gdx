@@ -73,9 +73,10 @@ std::string valTypStr(const int i) {
     constexpr std::array valsTypTxt{"L", "M", "LO", "UP", "SCALE"};
     return valsTypTxt[i];
 
-    // std::string result { gmsValTypeText[i] };
-    // result.erase( 0, 1 );
-    // for( char &c: result ) c = static_cast<char>( toupper( c ) );
+    // std::string result{gmsValTypeText[i]};
+    // result.erase(0, 1);
+    // for (char &c : result)
+    //   c = static_cast<char>(toupper(c));
     // return result;
   }
 }
@@ -85,7 +86,17 @@ std::string varTypStr(const int i) {
     assertWithMessage(false, "Unknown type");
     return "Unknown";
   } else {
-    constexpr std::array varsTypTxt{"unknown ", "binary  ", "integer ", "positive", "negative", "free    ", "sos1    ", "sos2    ", "semicont", "semiint "};
+    constexpr std::array varsTypTxt{
+        "unknown ",
+        "binary  ",
+        "integer ",
+        "positive",
+        "negative",
+        "free    ",
+        "sos1    ",
+        "sos2    ",
+        "semicont",
+        "semiint "};
     return varsTypTxt[i];
 
     // return gmsVarTypeText[i];

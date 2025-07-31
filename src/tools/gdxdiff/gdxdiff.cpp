@@ -288,11 +288,11 @@ void CompareSy(const int Sy1, const int Sy2) {
       return a <= b ? a : b;
     };
 
-    // auto DMax = []( const double a, const double b ) -> double {
-    //    if( a >= b )
-    //       return a;
-    //    else
-    //       return b;
+    // auto DMax = [](const double a, const double b) -> double {
+    //   if (a >= b)
+    //     return a;
+    //   else
+    //     return b;
     // };
 
     int iSV1, iSV2;
@@ -734,13 +734,13 @@ int main(const int argc, const char *argv[]) {
   if (Parameter.Key == static_cast<int>(library::cmdpar::CmdParamStatus::kp_input))
     InFile1 = Parameter.KeyS;
   // else
-  //    InFile1.clear();
+  //   InFile1.clear();
 
   Parameter = CmdParams->GetParams(1);
   if (Parameter.Key == static_cast<int>(library::cmdpar::CmdParamStatus::ke_unknown))
     InFile2 = Parameter.KeyS;
   // else
-  //    InFile2.clear();
+  //   InFile2.clear();
 
   if (InFile1.empty() || InFile2.empty())
     ErrorCode = 1;
@@ -750,7 +750,7 @@ int main(const int argc, const char *argv[]) {
     if (Parameter.Key == static_cast<int>(library::cmdpar::CmdParamStatus::ke_unknown))
       DiffFileName = Parameter.KeyS;
     // else
-    //    DiffFileName.clear();
+    //   DiffFileName.clear();
   }
 
   if (DiffFileName.empty())
@@ -886,15 +886,15 @@ int main(const int argc, const char *argv[]) {
 
   populateListFromParams(KP::kp_id, IDsOnly);
 
-  // if( IDsOnly && IDsOnly->GetCount() == 0 )
-  //    // Like ID = "" (or ID.empty())
-  //    FreeAndNil( IDsOnly );
+  // if (IDsOnly && IDsOnly->GetCount() == 0)
+  //   // Like ID = "" (or ID.empty())
+  //   FreeAndNil(IDsOnly);
 
   populateListFromParams(KP::kp_skip_id, SkipIDs);
 
   // We removed this but not sure why
-  // if( rtl::sysutils_p3::FileExists( DiffFileName ) )
-  //    rtl::sysutils_p3::DeleteFileFromDisk( DiffFileName );
+  // if (rtl::sysutils_p3::FileExists(DiffFileName))
+  //   rtl::sysutils_p3::DeleteFileFromDisk(DiffFileName);
 
   // Parameter errors
   if (ErrorCode > 0) {
@@ -1012,8 +1012,8 @@ int main(const int argc, const char *argv[]) {
                 << StatusText.at(static_cast<int>(pair.second)) << '\n';
   }
 
-  // CopyAcronyms( PGX1 );
-  // CopyAcronyms( PGX2 );
+  // CopyAcronyms(PGX1);
+  // CopyAcronyms(PGX2);
 
   // Write the two filenames used as explanatory texts
   {
@@ -1081,7 +1081,7 @@ int main(const int argc, const char *argv[]) {
   if (UsingIDE)
     std::cout << "GDXDiff file written: " << DiffFileName << "[FIL:\"" << DiffFileName << "\",0,0]\n";
   std::cout << "GDXDiff finished\n";
-  // FreeAndNil( UELTable );
+  // FreeAndNil(UELTable);
 
   if (ExitCode == 0 && !StatusTable.empty())
     return static_cast<int>(ErrorCode::ERR_DIFFERENT);

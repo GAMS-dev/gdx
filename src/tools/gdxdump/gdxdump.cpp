@@ -81,9 +81,8 @@ std::string QQCSV(const std::string &s) {
 }
 
 // Function is commented out in the Delphi source code
-// std::string QUEL( const std::string &S )
-// {
-//    return {};
+// std::string QUEL(const std::string &S) {
+//   return {};
 // }
 
 void WriteQuotedCommon(const std::string &S, const std::function<bool(char)> &isSpecialPredicate, const int i, bool G) {
@@ -367,8 +366,8 @@ void WriteSymbol(const int SyNr) {
     return;
   if (ShowHdr)
     fo << '\n';
-  // if( false )
-  //    fo << "$onText\n";
+  // if (false)
+  //   fo << "$onText\n";
   BadUELs = 0;
   IsScalar = ADim == 0 && ATyp == dt_par;
   gdxSymbolInfoX(PGX, SyNr, &ACount, &AUser, S.data());
@@ -489,8 +488,7 @@ void WriteSymbol(const int SyNr) {
           WriteItem(GMS_VAL_LEVEL);
           if (ATyp == dt_var || ATyp == dt_equ) {
             WriteItem(GMS_VAL_MARGINAL);
-            // if( true )
-            // {
+            // if (true) {
             WriteItem(GMS_VAL_LOWER);
             WriteItem(GMS_VAL_UPPER);
             // }
@@ -509,8 +507,8 @@ void WriteSymbol(const int SyNr) {
         fo << " /;\n";
     }
   }
-  // if( false )
-  //    fo << "$offText\n";
+  // if (false)
+  //   fo << "$offText\n";
   if (BadUELs > 0)
     fo << "**** " << BadUELs << " reference(s) to unique elements without a string representation";
 }
