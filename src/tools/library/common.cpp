@@ -26,8 +26,9 @@ void printErrorMessageWithError(const std::string &message) {
 // TODO: Make this a no-op in release mode builds (NDEBUG set)
 // The assert checks in Delphi/P3 will be removed in debug builds
 void assertWithMessage(const bool expression, const std::string &message) {
-  if (!expression)
+  if (!expression) {
     printErrorMessage(message);
+  }
   assert(expression);
 }
 
@@ -121,27 +122,32 @@ std::vector<std::string> splitString(const std::string &string, const char delim
   std::vector<std::string> tokens;
   std::istringstream iss(string);
   std::string token;
-  while (getline(iss, token, delimiter))
+  while (getline(iss, token, delimiter)) {
     tokens.emplace_back(token);
+  }
   return tokens;
 }
 
 bool canBeQuoted(const char *s, const size_t slen) {
-  if (!s)
+  if (!s) {
     return false;
+  }
   bool saw_single{}, saw_double{};
   for (int i{}; i < (int)slen; i++) {
     char Ch{s[i]};
     if (Ch == '\'') {
-      if (saw_double)
+      if (saw_double) {
         return false;
+      }
       saw_single = true;
     } else if (Ch == '\"') {
-      if (saw_single)
+      if (saw_single) {
         return false;
+      }
       saw_double = true;
-    } else if (static_cast<unsigned char>(Ch) < ' ')
+    } else if (static_cast<unsigned char>(Ch) < ' ') {
       return false;
+    }
   }
   return true;
 }

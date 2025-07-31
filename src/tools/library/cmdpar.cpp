@@ -14,17 +14,21 @@ void CmdParams::ClearParams() {
 }
 
 void CmdParams::AddVS(int v, const std::string &s) {
-  for (const auto &pair : FKeyList)
-    if (gdlib::strutilx::UpperCase(pair.first) == gdlib::strutilx::UpperCase(s))
+  for (const auto &pair : FKeyList) {
+    if (gdlib::strutilx::UpperCase(pair.first) == gdlib::strutilx::UpperCase(s)) {
       library::assertWithMessage(false, "Duplicate keyword!");
+    }
+  }
   FKeyList.emplace_back(s, v);
 }
 
 // Search from the end so the LAST value will be used
 int CmdParams::FindKeyV(int V) {
-  for (int N{GetParamCount() - 1}; N >= 0; N--)
-    if (GetParams(N).Key == V)
+  for (int N{GetParamCount() - 1}; N >= 0; N--) {
+    if (GetParams(N).Key == V) {
       return N;
+    }
+  }
   return -1;
 }
 
@@ -56,8 +60,9 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
   int xr, maxr;
 
   auto SkipBl = [&]() {
-    while (xr <= maxr && FParams.at(xr) <= ' ')
+    while (xr <= maxr && FParams.at(xr) <= ' ') {
       xr++;
+    }
   };
 
   auto NextToken = [&]() -> std::string {
@@ -65,19 +70,20 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
     SkipBl();
     if (xr <= maxr) {
       std::vector<char> StopSet;
-      if (FParams.at(xr) != '"')
+      if (FParams.at(xr) != '"') {
         StopSet = {' ', '\t'};
-      else {
+      } else {
         StopSet = {'"'};
         xr++;
       }
       StopSet.emplace_back('=');
       int xk{};
-      for (int k{1}; k <= maxr - xr + 1; k++)
+      for (int k{1}; k <= maxr - xr + 1; k++) {
         if (utils::in(FParams.at(xr + k - 1), StopSet)) {
           xk = k;
           break;
         }
+      }
       if (xk == 0) {
         result.append(FParams.substr(xr, FParams.length() - xr));
         xr = maxr + 1;
@@ -93,15 +99,17 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
   auto NextKey = [&](std::string &s) -> int {
     s.clear();
     std::string T{NextToken()};
-    if (T.empty())
+    if (T.empty()) {
       return static_cast<int>(CmdParamStatus::ke_empty);
+    }
 
     int result{-1};
-    for (const auto &pair : FKeyList)
+    for (const auto &pair : FKeyList) {
       if (gdlib::strutilx::UpperCase(pair.first) == gdlib::strutilx::UpperCase(T)) {
         result = pair.second;
         break;
       }
+    }
 
     if (result < 0) {
       if (T.front() == '@') {
@@ -116,15 +124,18 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
     if (result >= static_cast<int>(CmdParamStatus::kk_big)) {
       result -= static_cast<int>(CmdParamStatus::kk_big);
       SkipBl();
-      if (xr <= maxr && FParams.at(xr) == '=')
+      if (xr <= maxr && FParams.at(xr) == '=') {
         xr++;
+      }
       s = NextToken();
-      if (s.empty())
+      if (s.empty()) {
         return static_cast<int>(CmdParamStatus::ke_noparam);
+      }
 
       const int k{static_cast<int>(s.length())};
-      if (k >= 2 && s.front() == '\'' && s.back() == '\'')
+      if (k >= 2 && s.front() == '\'' && s.back() == '\'') {
         s = s.substr(1, k - 2);
+      }
     }
     return result;
   };
@@ -133,18 +144,20 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
     std::string result;
     for (int N{1}; N < ParamCount; N++) {
       std::string S{ParamStr[N]};
-      if (S.empty())
+      if (S.empty()) {
         continue;
-      if (S.find(' ') == std::string::npos)
+      }
+      if (S.find(' ') == std::string::npos) {
         result.append(' ' + S);
-      else {
+      } else {
         size_t k{S.find('=')};
         if (k == std::string::npos) {
-          if (S.front() != '@')
+          if (S.front() != '@') {
             result.append(" \"" + S + '"');
-          else
+          } else {
             // Keep double-quote after @ sign
             result.append(" @\"" + S.substr(1) + '"');
+          }
         } else {
           result.append(' ' + S.substr(0, k + 1));
           result.append(" \"" + S.substr(k + 1) + '"');
@@ -161,11 +174,12 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
     int sp{};
     do {
       int fnd{-1};
-      for (int k{sp}; k < static_cast<int>(Src.length()); k++)
+      for (int k{sp}; k < static_cast<int>(Src.length()); k++) {
         if (Src[k] == '@') {
           fnd = k;
           break;
         }
+      }
       if (fnd == -1) {
         Dest.append(Src.substr(sp, Src.length() - sp + 2));
         break;
@@ -177,9 +191,9 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
         break;
       }
       char Brk;
-      if (Src.at(sp) != '"')
+      if (Src.at(sp) != '"') {
         Brk = ' ';
-      else {
+      } else {
         sp++;
         Brk = '"';
       }
@@ -187,8 +201,9 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
       std::string fname;
       {
         int k{sp};
-        while (k >= 0 && k < static_cast<int>(Src.length()) && Src[k] != Brk)
+        while (k >= 0 && k < static_cast<int>(Src.length()) && Src[k] != Brk) {
           k++;
+        }
         if (k > static_cast<int>(Src.length())) {
           result = false;
           break;
@@ -197,10 +212,12 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
         sp = k;
       }
 
-      if (sp >= 0 && sp < static_cast<int>(Src.length()) && Src[sp] == '"')
+      if (sp >= 0 && sp < static_cast<int>(Src.length()) && Src[sp] == '"') {
         sp++;
-      if (gdlib::strutilx::ExtractFileExtEx(fname).empty())
+      }
+      if (gdlib::strutilx::ExtractFileExtEx(fname).empty()) {
         fname = gdlib::strutilx::ChangeFileExtEx(fname, ".txt");
+      }
       std::ifstream fi(fname);
       if (!fi.is_open()) {
         library::printErrorMessage("**** could not open file: " + fname);
@@ -209,11 +226,13 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
         std::string line;
         while (getline(fi, line)) {
           std::vector<std::string> strings = library::splitString(line, ' ');
-          if (!strings.empty() && (strings.front().empty() || strings.front().front() == '*'))
+          if (!strings.empty() && (strings.front().empty() || strings.front().front() == '*')) {
             continue;
+          }
           for (size_t k{}; k < strings.size(); k++) {
-            if (strings[k].empty())
+            if (strings[k].empty()) {
               break;
+            }
             Dest.append(" " + strings[k]);
           }
           // TODO: Check whether this if is still necessary
@@ -247,14 +266,16 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
   do {
     std::string ks;
     const int kw = NextKey(ks);
-    if (kw == static_cast<int>(CmdParamStatus::ke_empty))
+    if (kw == static_cast<int>(CmdParamStatus::ke_empty)) {
       break;
+    }
     FParList.insert({Insp, ParamRec{kw, ks}});
     Insp++;
   } while (true);
 
-  if (!HasKey(static_cast<int>(CmdParamStatus::kp_input)) && GetParams(0).Key == static_cast<int>(CmdParamStatus::ke_unknown))
+  if (!HasKey(static_cast<int>(CmdParamStatus::kp_input)) && GetParams(0).Key == static_cast<int>(CmdParamStatus::ke_unknown)) {
     FParList.at(0).Key = static_cast<int>(CmdParamStatus::kp_input);
+  }
 
   return result;
 }
@@ -274,10 +295,11 @@ void CmdParams::AddParam(int v, const std::string &s) {
 bool CmdParams::HasParam(int v, library::ShortString &s) {
   int N = FindKeyV(v);
   bool result = N >= 0;
-  if (!result)
+  if (!result) {
     s.clear();
-  else
+  } else {
     s = GetParams(N).KeyS;
+  }
   return result;
 }
 
@@ -292,8 +314,9 @@ bool CmdParams::HasKey(int v) {
 }
 
 ParamRec CmdParams::GetParams(int n) {
-  if (n >= 0 && n < static_cast<int>(FParList.size()))
+  if (n >= 0 && n < static_cast<int>(FParList.size())) {
     return FParList[n];
+  }
 
   return ParamRec{static_cast<int>(CmdParamStatus::ke_empty), {}};
 }
@@ -303,9 +326,11 @@ int CmdParams::GetParamCount() const {
 }
 
 std::string CmdParams::GetParamText(int key) const {
-  for (const auto &pair : FKeyList)
-    if (pair.second == key)
+  for (const auto &pair : FKeyList) {
+    if (pair.second == key) {
       return pair.first;
+    }
+  }
   return "?" + std::to_string(key) + "?";
 }
 

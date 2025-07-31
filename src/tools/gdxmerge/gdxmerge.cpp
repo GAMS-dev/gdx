@@ -62,8 +62,9 @@ FileList<T>::~FileList() {
 
 template <typename T>
 void FileList<T>::Clear() {
-  for (int i{}; i < this->GetCount(); i++)
+  for (int i{}; i < this->GetCount(); i++) {
     delete (*this)[i];
+  }
   gdlib::gmsobj::TXList<T>::Clear();
 }
 
@@ -104,8 +105,9 @@ SymbolList::~SymbolList() {
 // TODO: AS: The whole TX*List destruction and element deletion mechanism is not ideal now
 // and requires duplicated code (see FileList destructor and clear)
 void SymbolList::Clear() {
-  for (int i{}; i < FCount; i++)
+  for (int i{}; i < FCount; i++) {
     delete GetObject(i);
+  }
   TXHashedStringList::Clear();
 }
 
@@ -126,8 +128,9 @@ int SymbolList::AddSymbol(const std::string &AName, const int ADim, const gdxSyT
   };
 
   if ((!IncludeList.empty() && !is_in_list(IncludeList, AName)) ||
-      (!ExcludeList.empty() && is_in_list(ExcludeList, AName)))
+      (!ExcludeList.empty() && is_in_list(ExcludeList, AName))) {
     return -1;
+  }
 
   return TXHashedStringList::AddObject(AName.data(), AName.length(), new GAMSSymbol(ADim, AType, ASubTyp));
 }
@@ -187,8 +190,9 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
   for (N = 1; N <= NrSy; N++) {
     gdxSymbolInfo(PGX, N, SyName.data(), &Dim, &SyITyp);
     gdxSymbolInfoX(PGX, N, &DummyCount, &SySubTyp, SyText.data());
-    if (CheckError(Dim < GMS_MAX_INDEX_DIM, "Dimension too large"))
+    if (CheckError(Dim < GMS_MAX_INDEX_DIM, "Dimension too large")) {
       continue;
+    }
 
     SyTyp = gdxSyType(SyITyp);
     if (SyITyp == GMS_DT_ALIAS) {
@@ -200,23 +204,27 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
     SyIndx = gdlib::gmsobj::TXHashedStringList<GAMSSymbol>::IndexOf(SyName.data());
     if (SyIndx < 0) {
       SyIndx = AddSymbol(SyName.data(), Dim + 1, SyTyp, SySubTyp);
-      if (SyIndx < 0)
+      if (SyIndx < 0) {
         continue;
+      }
     }
 
     SyObj = gdlib::gmsobj::TXHashedStringList<GAMSSymbol>::GetObject(SyIndx);
-    if (!SyObj->SyData)
+    if (!SyObj->SyData) {
       continue;
-    if (SyObj->SySkip)
+    }
+    if (SyObj->SySkip) {
       continue;
+    }
 
     // 64 bit
     XCount = static_cast<int64_t>(DummyCount);
     Size = XCount * SyObj->SyDim;
-    if (SyTyp == dt_var || SyTyp == dt_equ)
+    if (SyTyp == dt_var || SyTyp == dt_equ) {
       RecLen = 4;
-    else
+    } else {
       RecLen = 1;
+    }
 
     Size = Size * RecLen;
 
@@ -237,32 +245,41 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
 #endif
     }
 
-    if (Pass == ProcessPass::RpScan)
+    if (Pass == ProcessPass::RpScan) {
       continue;
+    }
 
-    if (Pass == ProcessPass::RpSmall && SyObj->SySize >= SizeCutOff)
+    if (Pass == ProcessPass::RpSmall && SyObj->SySize >= SizeCutOff) {
       continue;
-    if (Pass == ProcessPass::RpBig && SyObj->SySize < SizeCutOff)
+    }
+    if (Pass == ProcessPass::RpBig && SyObj->SySize < SizeCutOff) {
       continue;
+    }
 
-    if (CheckError(Dim + 1 == SyObj->SyDim, "Dimensions do not match"))
+    if (CheckError(Dim + 1 == SyObj->SyDim, "Dimensions do not match")) {
       continue;
-    if (CheckError(SyTyp == SyObj->SyTyp, "Types do not match"))
+    }
+    if (CheckError(SyTyp == SyObj->SyTyp, "Types do not match")) {
       continue;
-    if ((SyTyp == dt_var || SyTyp == dt_equ) && CheckError(SySubTyp == SyObj->SySubTyp, "Var/Equ subtypes do not match"))
+    }
+    if ((SyTyp == dt_var || SyTyp == dt_equ) && CheckError(SySubTyp == SyObj->SySubTyp, "Var/Equ subtypes do not match")) {
       continue;
+    }
 
-    if (SyObj->SyExplTxt.empty())
+    if (SyObj->SyExplTxt.empty()) {
       SyObj->SyExplTxt = SyText;
-    else if (!SyText.empty())
+    } else if (!SyText.empty()) {
       CheckError(SyObj->SyExplTxt == SyText, "Explanatory text is different");
+    }
 
     IndxI[0] = AddUEL(FileId);
     gdxDataReadStrStart(PGX, N, &NrRecs);
     while (gdxDataReadStr(PGX, IndxSPtrs, Vals, &FDim) != 0) {
-      if (Dim > 0)
-        for (D = FDim - 1; D < Dim; D++)
+      if (Dim > 0) {
+        for (D = FDim - 1; D < Dim; D++) {
           IndxI[D + 1] = AddUEL(library::ShortString{IndxSPtrs[D]});
+        }
+      }
       if (SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0) {
         gdxGetElemText(PGX, utils::round<int>(Vals[GMS_VAL_LEVEL]), Txt.data(), &INode);
         Vals[GMS_VAL_LEVEL] = StrPool->Add(Txt.data(), Txt.length());
@@ -293,8 +310,9 @@ bool SymbolList::CollectBigOne(const int SyNr) {
   library::ShortString Txt, ErrMsg, FileName, FileId;
 
   SyObj = gdlib::gmsobj::TXHashedStringList<GAMSSymbol>::GetObject(SyNr);
-  if (!SyObj->SyData)
+  if (!SyObj->SyData) {
     return false;
+  }
 
   // Replaced '\r' with '\n' here:
   std::cout << "\nlooking for symbol "
@@ -320,8 +338,9 @@ bool SymbolList::CollectBigOne(const int SyNr) {
       IndxI[0] = AddUEL(FileId);
       gdxDataReadStrStart(PGX, N, &NrRecs);
       while (gdxDataReadStr(PGX, IndxSPtrs, Vals, &FDim) != 0) {
-        for (D = FDim - 1; D <= SyObj->SyDim; D++)
+        for (D = FDim - 1; D <= SyObj->SyDim; D++) {
           IndxI[D + 1] = AddUEL(library::ShortString{IndxSPtrs[D]});
+        }
         if (SyObj->SyTyp == dt_set && Vals[GMS_VAL_LEVEL] != 0) {
           gdxGetElemText(PGX, utils::round<int>(Vals[GMS_VAL_LEVEL]), Txt.data(), &INode);
           Vals[GMS_VAL_LEVEL] = StrPool->Add(Txt.data(), Txt.length());
@@ -352,8 +371,9 @@ bool SymbolList::FindGDXFiles(const std::string &Path) {
   BPath = gdlib::strutilx::ExtractFilePathEx(WPath);
   if (FindFirst(WPath, rtl::sysutils_p3::faAnyFile, Rec) == 0) {
     do {
-      if (Rec.Name == "." || Rec.Name == "..")
+      if (Rec.Name == "." || Rec.Name == "..") {
         continue;
+      }
       if (OutFile == BPath + Rec.Name) {
         std::cout << "Cannot use " << OutFile << " as input file and output file, skipped it as input\n";
         Result = false;
@@ -395,10 +415,12 @@ void SymbolList::WritePGXFile(const int SyNr, const ProcessPass Pass) {
   library::ShortString Txt;
 
   SyObj = gdlib::gmsobj::TXHashedStringList<GAMSSymbol>::GetObject(SyNr);
-  if (!SyObj->SyData)
+  if (!SyObj->SyData) {
     return;
-  if (Pass == ProcessPass::RpSmall && SyObj->SySize >= SizeCutOff)
+  }
+  if (Pass == ProcessPass::RpSmall && SyObj->SySize >= SizeCutOff) {
     return;
+  }
 
   SyObj->SyData->Sort();
   gdxDataWriteRawStart(PGXMerge, gdlib::gmsobj::TXHashedStringList<GAMSSymbol>::GetString(SyNr), SyObj->SyExplTxt.data(), SyObj->SyDim, static_cast<int>(SyObj->SyTyp), SyObj->SySubTyp);
@@ -432,8 +454,9 @@ void SymbolList::WriteNameList() {
   do {
     SetName = BASE_NAME + std::to_string(N);
     gdxFindSymbol(PGXMerge, SetName.data(), &SyNr);
-    if (SyNr < 0)
+    if (SyNr < 0) {
       break;
+    }
     N++;
   } while (true);
 
@@ -449,8 +472,9 @@ void SymbolList::WriteNameList() {
 
 void SymbolList::KeepNewAcronyms(const gdxHandle_t &PGX) {
   int NN{gdxAcronymNextNr(PGX, -1)};
-  if (NN <= NextAcroNr)
+  if (NN <= NextAcroNr) {
     return;
+  }
 
   int OrgIndx, NewIndx, AutoIndx, AIndx;
   library::ShortString AName, AText;
@@ -462,8 +486,9 @@ void SymbolList::KeepNewAcronyms(const gdxHandle_t &PGX) {
         // Should not happen
         for (int K{1}; K <= std::numeric_limits<int>::max(); K++) {
           AName = "Acronym_Auto_" + std::to_string(K);
-          if (FindAcronym(AName) < 0)
+          if (FindAcronym(AName) < 0) {
             break;
+          }
         }
         AText = "GDX file did not have a name for acronym";
       }
@@ -494,8 +519,9 @@ void SymbolList::ShareAcronyms(const gdxHandle_t &PGX) {
   for (int N{1}; N <= gdxAcronymCount(PGX); N++) {
     gdxAcronymGetInfo(PGX, N, AName.data(), AText.data(), &AIndx);
     NM = FindAcronym(AName);
-    if (NM <= 0)
+    if (NM <= 0) {
       continue;
+    }
     gdxAcronymGetInfo(PGXMerge, NM, ANameM.data(), ATextM.data(), &AIndxM);
     library::assertWithMessage(AIndxM > 0, "ShareAcronyms-1");
     gdxAcronymSetInfo(PGX, N, AName.data(), AText.data(), AIndxM);
@@ -507,8 +533,9 @@ int SymbolList::FindAcronym(const library::ShortString &Id) {
   int AIndx;
   for (int N{1}; N <= gdxAcronymCount(PGXMerge); N++) {
     gdxAcronymGetInfo(PGXMerge, N, AName.data(), AText.data(), &AIndx);
-    if (gdlib::strutilx::StrUEqual(Id.data(), AName.data()))
+    if (gdlib::strutilx::StrUEqual(Id.data(), AName.data())) {
       return N;
+    }
   }
   return {};
 }
@@ -622,20 +649,22 @@ bool GetParameters(const int argc, const char *argv[]) {
         DoBigSymbols = true;
         if (!KS.empty()) {
           utils::val(KS, X, K);
-          if (K == 0)
+          if (K == 0) {
             SizeCutOff = X;
+          }
         }
         break;
 
       case KP::Strict:
-        if (gdlib::strutilx::StrUEqual(KS, "true"))
+        if (gdlib::strutilx::StrUEqual(KS, "true")) {
           StrictMode = true;
+        }
         break;
 
       case KP::Output:
-        if (OutFile.empty())
+        if (OutFile.empty()) {
           OutFile = KS;
-        else {
+        } else {
           library::printErrorMessage("*** Error: Only one output file can be specified");
           Result = false;
         }
@@ -649,10 +678,11 @@ bool GetParameters(const int argc, const char *argv[]) {
     } while (ParNr < CmdParams->GetParamCount());
   }
 
-  if (OutFile.empty())
+  if (OutFile.empty()) {
     OutFile = "merged.gdx";
-  else if (gdlib::strutilx::ExtractFileExtEx(OutFile).empty())
+  } else if (gdlib::strutilx::ExtractFileExtEx(OutFile).empty()) {
     OutFile = gdlib::strutilx::ChangeFileExtEx(OutFile, ".gdx");
+  }
 
   return Result;
 }
@@ -725,33 +755,41 @@ int main(const int argc, const char *argv[]) {
     return 1;
   }
 
-  for (N = 0; N < FilePatterns->GetCount(); N++)
+  for (N = 0; N < FilePatterns->GetCount(); N++) {
     if (!SyList->FindGDXFiles(FilePatterns->GetConst(N)) && StrictMode) {
       library::printErrorMessage("*** Error  : Issue with file name \"" + std::string{FilePatterns->GetConst(N)} + "\" (strict mode)");
       return 1;
     }
+  }
   FilePatterns->Clear();
 
   InputFilesRead = 0;
   if (!DoBigSymbols) {
-    for (N = 0; N < SyList->GetFileListSize(); N++)
+    for (N = 0; N < SyList->GetFileListSize(); N++) {
       SyList->AddPGXFile(N, ProcessPass::RpDoAll);
+    }
 
-    for (N = 0; N < SyList->size(); N++)
+    for (N = 0; N < SyList->size(); N++) {
       SyList->WritePGXFile(N, ProcessPass::RpDoAll);
+    }
   } else {
-    for (N = 0; N < SyList->GetFileListSize(); N++)
+    for (N = 0; N < SyList->GetFileListSize(); N++) {
       SyList->AddPGXFile(N, ProcessPass::RpScan);
+    }
 
-    for (N = 0; N < SyList->GetFileListSize(); N++)
+    for (N = 0; N < SyList->GetFileListSize(); N++) {
       SyList->AddPGXFile(N, ProcessPass::RpSmall);
+    }
 
-    for (N = 0; N < SyList->size(); N++)
+    for (N = 0; N < SyList->size(); N++) {
       SyList->WritePGXFile(N, ProcessPass::RpSmall);
+    }
 
-    for (N = 0; N < SyList->size(); N++)
-      if (SyList->CollectBigOne(N))
+    for (N = 0; N < SyList->size(); N++) {
+      if (SyList->CollectBigOne(N)) {
         SyList->WritePGXFile(N, ProcessPass::RpBig);
+      }
+    }
   }
 
   SyList->WriteNameList();
@@ -761,8 +799,9 @@ int main(const int argc, const char *argv[]) {
 
   std::cout << '\n';
 
-  if (SyList->GetFErrorCount() > 0)
+  if (SyList->GetFErrorCount() > 0) {
     std::cout << "Number of errors reported = " << SyList->GetFErrorCount() << '\n';
+  }
 
   SyList->Clear();
   // UnloadGDXLibrary();
@@ -774,8 +813,9 @@ int main(const int argc, const char *argv[]) {
     }
 
     std::cout << "No valid input files specified\n";
-  } else
+  } else {
     std::cout << "Merge complete, " << InputFilesRead << " input files merged\n";
+  }
 
   return {};
 }
