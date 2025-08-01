@@ -1,5 +1,6 @@
 import gams.transfer as gt
 import pandas as pd
+import os
 
 
 def get_test_string(count=255) -> str:
@@ -7,7 +8,7 @@ def get_test_string(count=255) -> str:
 
 
 def create_label_example(file_path: str) -> None:
-    m = gt.Container()
+    m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     # create the set i
     i = gt.Set(

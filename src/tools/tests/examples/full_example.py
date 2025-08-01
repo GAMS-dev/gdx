@@ -1,10 +1,11 @@
 import gams.transfer as gt
 import pandas as pd
+import os
 
 
 def create_full_example(file_path: str) -> None:
     # create an empty Container object
-    m = gt.Container()
+    m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     # add sets
     i = gt.Set(m, "i", records=["seattle", "san-diego"], description="supply")

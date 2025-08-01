@@ -1,9 +1,10 @@
 import gams.transfer as gt
 import pandas as pd
+import os
 
 
 def create_element_text_example(file_path: str) -> None:
-    m = gt.Container()
+    m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     # create the sets i, j
     i = gt.Set(
