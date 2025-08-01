@@ -365,6 +365,9 @@ test-gdxtools-lag:
     name: $MACHINES_CONTAINER_REG/lag/builder-full:latest
     entrypoint: [""]
   needs: [fetch-ci-scripts,build-lag]
+  before_script:
+    - dnf -y install python3.12 > /dev/null
+    - dnf clean all > /dev/null
   script:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]
