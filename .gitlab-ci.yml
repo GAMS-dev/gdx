@@ -217,8 +217,11 @@ build-wei:
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -G Ninja CMakeLists.txt
     - cmake --build  . --config Release 2>&1 | Tee-Object -FilePath 'build_log.txt'
     - python ciscripts/report_for_log.py msvc build_log.txt warnings.xml
-    - mkdir -p .\gdxtools
-    - for tool in gdxdump gdxdiff gdxmerge; do mv .\src\tools\$tool\$tool.exe .\gdxtools; done
+    - New-Item -ItemType 'Directory' -Path '.\gdxtools'
+    - |
+      'gdxdump', 'gdxdiff', 'gdxmerge' | ForEach-Object {
+        Move-Item -Path ".\src\tools\$_\$_.exe" -Destination '.\gdxtools'
+      }
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-wei
