@@ -25,7 +25,9 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
         EXECUTABLE_PATH = ["Release", f"{executable_name}.exe"]
     else:
         build_directory_exists = os.path.isdir("build")
-        os.environ["DYLD_LIBRARY_PATH"] = (
+        os.environ[
+            "LD_LIBRARY_PATH" if platform.system() == "Linux" else "DYLD_LIBRARY_PATH"
+        ] = (
             os.path.join(GDX_DIRECTORY_PATH, "build")
             if build_directory_exists
             else GDX_DIRECTORY_PATH

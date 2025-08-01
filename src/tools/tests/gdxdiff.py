@@ -88,7 +88,11 @@ class TestGdxDiff(unittest.TestCase):
             EXECUTABLE_PATH = ["Release", f"{EXECUTABLE_NAME}.exe"]
         else:
             build_directory_exists = os.path.isdir("build")
-            os.environ["DYLD_LIBRARY_PATH"] = (
+            os.environ[
+                "LD_LIBRARY_PATH"
+                if platform.system() == "Linux"
+                else "DYLD_LIBRARY_PATH"
+            ] = (
                 os.path.join(cls.GDX_DIRECTORY_PATH, "build")
                 if build_directory_exists
                 else cls.GDX_DIRECTORY_PATH
