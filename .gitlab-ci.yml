@@ -406,24 +406,24 @@ test-gdxtools-dac:
     - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
     - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
 
-# test-gdxtools-wei:
-#   stage: test-gdxtools
-#   tags: [windows]
-#   image:
-#     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
-#   needs: [fetch-ci-scripts,build-wei]
-#   script:
-#     - !reference [ .get-gams-wei ]
-#     - !reference [ .gams-folder-wei ]
-#     - $gmsdirname = Get-Content mygmsdir.tmp -Raw
-#     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
-#     - python -m venv .\venv
-#     - .\venv\Scripts\Activate.ps1
-#     - python -m pip install --upgrade pip
-#     - python -m pip install -r .\src\tools\tests\environment\requirements.txt
-#     - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
-#     - $env:GAMS_SYSTEM_DIRECTORY = "$GAMS_PATH"
-#     - python .\src\tools\tests\main.py
+test-gdxtools-wei:
+  stage: test-gdxtools
+  tags: [windows]
+  image:
+    name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
+  needs: [fetch-ci-scripts,build-wei]
+  script:
+    - !reference [ .get-gams-wei ]
+    - !reference [ .gams-folder-wei ]
+    - $gmsdirname = Get-Content mygmsdir.tmp -Raw
+    - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
+    - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
+    - $env:GAMS_SYSTEM_DIRECTORY = "$GAMS_PATH;$GAMS_PATH\gbin"
+    - python -m venv .\venv
+    - .\venv\Scripts\Activate.ps1
+    - python -m pip install --upgrade pip | Out-Null
+    - python -m pip install -r .\src\tools\tests\environment\requirements.txt
+    - python .\src\tools\tests\main.py
 
 #=======================================================================================================================
 
