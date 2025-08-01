@@ -22,7 +22,11 @@ FILE_PATHS = {
 
 def benchmark_executable(executable_name: str, command: list[str]) -> None:
     if platform.system() == "Windows":
-        EXECUTABLE_PATH = ["Release", f"{executable_name}.exe"]
+        EXECUTABLE_PATH = (
+            ["Release", f"{executable_name}.exe"]
+            if os.path.isdir("Release")
+            else ["gdxtools", f"{executable_name}.exe"]
+        )
     else:
         build_directory_exists = os.path.isdir("build")
         os.environ[
