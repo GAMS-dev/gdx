@@ -345,6 +345,7 @@ test-gdxtools-leg:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
   needs: [fetch-ci-scripts,build-leg]
+  before_script: dnf -y install python3.12 && dnf clean all
   script:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]

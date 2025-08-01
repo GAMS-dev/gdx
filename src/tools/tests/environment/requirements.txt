@@ -1,1 +1,1 @@
-gamsapi[transfer]
+gamsapi[transfer]==50.2.0
