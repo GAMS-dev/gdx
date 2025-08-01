@@ -217,7 +217,7 @@ build-wei:
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -G Ninja CMakeLists.txt
     - cmake --build  . --config Release 2>&1 | Tee-Object -FilePath 'build_log.txt'
     - python ciscripts/report_for_log.py msvc build_log.txt warnings.xml
-    - New-Item -ItemType 'Directory' -Path '.\gdxtools'
+    - New-Item -ItemType 'Directory' -Path '.\gdxtools' | Out-Null
     - |
       'gdxdump', 'gdxdiff', 'gdxmerge' | ForEach-Object {
         Move-Item -Path ".\src\tools\$_\$_.exe" -Destination '.\gdxtools'
