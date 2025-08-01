@@ -24,10 +24,15 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
     if platform.system() == "Windows":
         EXECUTABLE_PATH = ["Release", f"{executable_name}.exe"]
     else:
-        os.environ["DYLD_LIBRARY_PATH"] = os.path.join(GDX_DIRECTORY_PATH, "build")
+        build_directory_exists = os.path.isdir("build")
+        os.environ["DYLD_LIBRARY_PATH"] = (
+            os.path.join(GDX_DIRECTORY_PATH, "build")
+            if build_directory_exists
+            else GDX_DIRECTORY_PATH
+        )
         EXECUTABLE_PATH = (
             ["build", "src", "tools", executable_name, executable_name]
-            if os.path.isdir("build")
+            if build_directory_exists
             else ["gdxtools", executable_name]
         )
     os.makedirs(DIRECTORY_PATHS["results"], exist_ok=True)
