@@ -960,6 +960,10 @@ class TestGdxMerge(unittest.TestCase):
             symbols, ["small_example", "small_example_changed_data", "full_example"]
         )
 
+    @unittest.skipIf(
+        platform.system() == "Windows",
+        "Skipped on Windows due to temporary file behavior",
+    )
     def test_commands_from_file(self) -> None:
         for separator in [" ", "\t", "\n"]:
             with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as temporary_file:

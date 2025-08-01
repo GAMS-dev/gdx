@@ -120,6 +120,10 @@ class TestGdxDump(unittest.TestCase):
         output = self.run_gdxdump([self.FILE_PATHS["full_example"]])
         self.check_output(output)
 
+    @unittest.skipIf(
+        platform.system() == "Windows",
+        "Skipped on Windows due to temporary file behavior",
+    )
     def test_full_example_output(self) -> None:
         with tempfile.NamedTemporaryFile(mode="w", suffix=".txt") as temporary_file:
             output = self.run_gdxdump(
