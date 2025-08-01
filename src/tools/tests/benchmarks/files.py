@@ -14,7 +14,11 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
     else:
         if platform.system() == "Darwin":
             os.environ["DYLD_LIBRARY_PATH"] = os.path.join(GDX_DIRECTORY_PATH, "build")
-        EXECUTABLE_PATH = ["build", "src", "tools", executable_name, executable_name]
+        EXECUTABLE_PATH = (
+            ["build", "src", "tools", executable_name, executable_name]
+            if os.path.isdir("build")
+            else ["gdxtools", executable_name]
+        )
     full_command = [
         "hyperfine",
         "--shell=none",

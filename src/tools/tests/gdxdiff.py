@@ -91,13 +91,11 @@ class TestGdxDiff(unittest.TestCase):
                 os.environ["DYLD_LIBRARY_PATH"] = os.path.join(
                     cls.GDX_DIRECTORY_PATH, "build"
                 )
-            EXECUTABLE_PATH = [
-                "build",
-                "src",
-                "tools",
-                EXECUTABLE_NAME,
-                EXECUTABLE_NAME,
-            ]
+            EXECUTABLE_PATH = (
+                ["build", "src", "tools", EXECUTABLE_NAME, EXECUTABLE_NAME]
+                if os.path.isdir("build")
+                else ["gdxtools", EXECUTABLE_NAME]
+            )
         return subprocess.run(
             [os.path.join(cls.GDX_DIRECTORY_PATH, *EXECUTABLE_PATH), *command],
             capture_output=True,
