@@ -50,7 +50,8 @@ class TestGdxMerge(unittest.TestCase):
         if platform.system() == 'Windows':
             EXECUTABLE_PATH = ['Release', f'{EXECUTABLE_NAME}.exe']
         else:
-            os.environ["DYLD_LIBRARY_PATH"] = os.path.join(cls.GDX_DIRECTORY_PATH, 'build')
+            if platform.system() == 'Darwin':
+                os.environ["DYLD_LIBRARY_PATH"] = os.path.join(cls.GDX_DIRECTORY_PATH, 'build')
             EXECUTABLE_PATH = ['build', 'src', 'tools', EXECUTABLE_NAME, EXECUTABLE_NAME]
         return subprocess.run(
             [os.path.join(cls.GDX_DIRECTORY_PATH, *EXECUTABLE_PATH), *command],
