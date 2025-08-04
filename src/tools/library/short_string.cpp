@@ -44,7 +44,8 @@ ShortString::operator std::string() const {
 }
 
 uint8_t ShortString::length() const {
-  return static_cast<uint8_t>(strlen(buffer.data()));
+  return static_cast<uint8_t>(
+      std::strlen(buffer.data()));
 }
 
 char ShortString::front() const {
@@ -157,7 +158,7 @@ ShortString &ShortString::operator=(const std::string &s) {
 }
 
 bool ShortString::operator==(const char *s) const {
-  return strcmp(buffer.data(), s) == 0;
+  return std::strcmp(buffer.data(), s) == 0;
 }
 
 bool ShortString::operator==(const ShortString &s) const {
@@ -169,7 +170,7 @@ bool ShortString::operator==(const std::string &s) const {
 }
 
 bool ShortString::operator<(const ShortString &s) const {
-  return strcmp(buffer.data(), s.data()) < 0;
+  return std::strcmp(buffer.data(), s.data()) < 0;
 }
 
 std::ostream &operator<<(std::ostream &os, const ShortString &s) {
