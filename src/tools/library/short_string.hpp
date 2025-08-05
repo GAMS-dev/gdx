@@ -9,7 +9,7 @@
 namespace library {
 
 class ShortString {
-  std::array<char, GMS_SSSIZE> buffer{};
+  std::array<char, GMS_SSSIZE> buffer;
 
 public:
   ShortString();
