@@ -5,7 +5,7 @@ stages:
   - build
   - analyze
   - test
-  # - test-gdxtools
+  - test-gdxtools
   - leak-check
   - perf-check
   - docs
@@ -102,12 +102,12 @@ build-leg:
     - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
-    - mkdir -p ./build
-    - mv {gdxdump,gdxdiff,gdxmerge} ./build
+    - mkdir -p ./gdxtools
+    - for tool in gdxdump gdxdiff gdxmerge; do mv ./src/tools/$tool/$tool ./gdxtools; done
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-leg
-    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a,build]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a,gdxtools]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -147,12 +147,12 @@ build-lag:
     - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-linux.a
-    - mkdir -p ./build
-    - mv {gdxdump,gdxdiff,gdxmerge} ./build
+    - mkdir -p ./gdxtools
+    - for tool in gdxdump gdxdiff gdxmerge; do mv ./src/tools/$tool/$tool ./gdxtools; done
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-lag
-    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a,build]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a,gdxtools]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -168,12 +168,12 @@ build-deg:
     - cmake --build . -- -j$(sysctl -n hw.ncpu) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-macos.a
-    - mkdir -p ./build
-    - mv {gdxdump,gdxdiff,gdxmerge} ./build
+    - mkdir -p ./gdxtools
+    - for tool in gdxdump gdxdiff gdxmerge; do mv ./src/tools/$tool/$tool ./gdxtools; done
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-deg
-    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib,libgdx-macos.a,build]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib,libgdx-macos.a,gdxtools]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -194,12 +194,12 @@ build-dac:
     - mv libgdx-static.a libgdx-macos-dac.a
     - lipo -create libgdxcclib64_deg.dylib libgdxcclib64_dac.dylib -output libgdxcclib64.dylib
     - lipo -create libgdx-macos-deg.a libgdx-macos-dac.a -output libgdx-macos.a
-    - mkdir -p ./build
-    - mv {gdxdump,gdxdiff,gdxmerge} ./build
+    - mkdir -p ./gdxtools
+    - for tool in gdxdump gdxdiff gdxmerge; do mv ./src/tools/$tool/$tool ./gdxtools; done
   needs: [fetch-ci-scripts,apigenerator,build-deg]
   artifacts:
     name: gdx-dac
-    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib,libgdx-macos.a,build]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.dylib,libgdx-macos.a,gdxtools]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -217,10 +217,15 @@ build-wei:
     - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -G Ninja CMakeLists.txt
     - cmake --build  . --config Release 2>&1 | Tee-Object -FilePath 'build_log.txt'
     - python ciscripts/report_for_log.py msvc build_log.txt warnings.xml
+    - New-Item -ItemType 'Directory' -Path '.\gdxtools' | Out-Null
+    - |
+      'gdxdump', 'gdxdiff', 'gdxmerge' | ForEach-Object {
+        Move-Item -Path ".\src\tools\$_\$_.exe" -Destination '.\gdxtools'
+      }
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-wei
-    paths: [gdx*.exe,xp_*.exe,gdx*.lib,gdx*.dll]
+    paths: [gdx*.exe,xp_*.exe,gdx*.lib,gdx*.dll,gdxtools]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
@@ -333,86 +338,92 @@ test-wei:
 
 #=======================================================================================================================
 
-# test-gdxtools-leg:
-#   stage: test-gdxtools
-#   tags: [linux]
-#   image:
-#     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
-#     entrypoint: [""]
-#   needs: [fetch-ci-scripts,build-leg]
-#   script:
-#     - !reference [ .get-gams ]
-#     - !reference [ .gams-folder-leg ]
-#     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-#     - PATH="$GAMS_PATH:$PATH"
-#     - mkdir -p ~/miniconda3
-#     - curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o ~/miniconda3/miniconda.sh
-#     - bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
-#     - rm -rf ~/miniconda3/miniconda.sh
-#     - ~/miniconda3/bin/conda init bash
-#     - source ~/.bashrc
-#     - ./src/tools/tests/environments/conda/install.sh
-#     - conda activate gdxtools
-#     - python3 ./src/tools/tests/main.py
+test-gdxtools-leg:
+  stage: test-gdxtools
+  tags: [linux]
+  image:
+    name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-leg]
+  before_script:
+    - dnf -y install python3.12 > /dev/null
+    - dnf clean all > /dev/null
+  script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-leg ]
+    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
+    - python3 -m venv ./venv
+    - source ./venv/bin/activate
+    - python3 -m pip install --upgrade pip > /dev/null
+    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
+    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
 
-# test-gdxtools-deg:
-#   stage: test-gdxtools
-#   tags: [macos]
-#   needs: [fetch-ci-scripts,build-deg]
-#   script:
-#     - !reference [ .get-gams ]
-#     - !reference [ .gams-folder-deg ]
-#     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
-#     - PATH="$GAMS_PATH:$PATH"
-#     - mkdir -p ~/miniconda3
-#     - curl https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -o ~/miniconda3/miniconda.sh
-#     - bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
-#     - rm -rf ~/miniconda3/miniconda.sh
-#     - ~/miniconda3/bin/conda init bash
-#     - source ~/.bashrc
-#     - ./src/tools/tests/environments/conda/install.sh
-#     - conda activate gdxtools
-#     - python3 ./src/tools/tests/main.py
+test-gdxtools-lag:
+  stage: test-gdxtools
+  tags: [linux-arm64]
+  image:
+    name: $MACHINES_CONTAINER_REG/lag/builder-full:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-lag]
+  before_script:
+    - dnf -y install python3.12 > /dev/null
+    - dnf clean all > /dev/null
+  script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-leg ]
+    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
+    - python3 -m venv ./venv
+    - source ./venv/bin/activate
+    - python3 -m pip install --upgrade pip > /dev/null
+    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
+    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
 
-# test-gdxtools-dac:
-#   stage: test-gdxtools
-#   tags: [macos-arm64]
-#   needs: [fetch-ci-scripts,build-dac]
-#   script:
-#     - !reference [ .get-gams ]
-#     - !reference [ .gams-folder-dac ]
-#     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
-#     - PATH="$GAMS_PATH:$PATH"
-#     - mkdir -p ~/miniconda3
-#     - curl https://repo.anaconda.com/miniconda/Miniconda3-latest-MacOSX-arm64.sh -o ~/miniconda3/miniconda.sh
-#     - bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
-#     - rm -rf ~/miniconda3/miniconda.sh
-#     - ~/miniconda3/bin/conda init bash
-#     - source ~/.bashrc
-#     - ./src/tools/tests/environments/conda/install.sh
-#     - conda activate gdxtools
-#     - python3 ./src/tools/tests/main.py
+test-gdxtools-deg:
+  stage: test-gdxtools
+  tags: [macos]
+  needs: [fetch-ci-scripts,build-deg]
+  script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-deg ]
+    - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
+    - python3 -m venv ./venv
+    - source ./venv/bin/activate
+    - python3 -m pip install --upgrade pip > /dev/null
+    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
+    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
 
-# test-gdxtools-wei:
-#   stage: test-gdxtools
-#   tags: [windows]
-#   image:
-#     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
-#   needs: [fetch-ci-scripts,build-wei]
-#   script:
-#     - !reference [ .get-gams-wei ]
-#     - !reference [ .gams-folder-wei ]
-#     - $gmsdirname = Get-Content mygmsdir.tmp -Raw
-#     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
-#     - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
-#     # - $env:GAMSDIR = "$GAMS_PATH;$GAMS_PATH\gbin"
-#     - curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe -o miniconda.exe
-#     - start /wait "" miniconda.exe /S
-#     - del miniconda.exe
-#     # - Update-SessionEnvironment
-#     - .\src\tools\tests\environments\conda\install.sh
-#     - conda activate gdxtools
-#     - python3 .\src\tools\tests\main.py
+test-gdxtools-dac:
+  stage: test-gdxtools
+  tags: [macos-arm64]
+  needs: [fetch-ci-scripts,build-dac]
+  script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-dac ]
+    - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
+    - python3 -m venv ./venv
+    - source ./venv/bin/activate
+    - python3 -m pip install --upgrade pip > /dev/null
+    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
+    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
+
+test-gdxtools-wei:
+  stage: test-gdxtools
+  tags: [windows]
+  image:
+    name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
+  needs: [fetch-ci-scripts,build-wei]
+  script:
+    - !reference [ .get-gams-wei ]
+    - !reference [ .gams-folder-wei ]
+    - $gmsdirname = Get-Content mygmsdir.tmp -Raw
+    - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
+    - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
+    - $env:GAMS_SYSTEM_DIRECTORY = $GAMS_PATH
+    - python -m venv .\venv
+    - .\venv\Scripts\Activate.ps1
+    - python -m pip install --upgrade pip | Out-Null
+    - python -m pip install -r .\src\tools\tests\environment\requirements.txt
+    - python .\src\tools\tests\main.py
 
 #=======================================================================================================================
 
