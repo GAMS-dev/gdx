@@ -5,22 +5,22 @@ import subprocess
 import inspect
 import gams.transfer as gt
 
-from examples.small_example import create_small_example
-from examples.full_example import create_full_example
-from examples.small_example_changed_data import create_small_example_changed_data
-from examples.full_example_changed_variables import (
+from .examples.small_example import create_small_example
+from .examples.full_example import create_full_example
+from .examples.small_example_changed_data import create_small_example_changed_data
+from .examples.full_example_changed_variables import (
     create_full_example_changed_variables,
 )
-from examples.full_example_changed_data_and_variables import (
+from .examples.full_example_changed_data_and_variables import (
     create_full_example_changed_data_and_variables,
 )
-from examples.default_values_examples import (
+from .examples.default_values_examples import (
     create_default_values_example_1,
     create_default_values_example_2,
 )
-from examples.domain_examples import create_domain_example_1, create_domain_example_2
-from examples.order_examples import create_order_example_1, create_order_example_2
-from examples.description_examples import (
+from .examples.domain_examples import create_domain_example_1, create_domain_example_2
+from .examples.order_examples import create_order_example_1, create_order_example_2
+from .examples.description_examples import (
     create_description_example_1,
     create_description_example_2,
 )
