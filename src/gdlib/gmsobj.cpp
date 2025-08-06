@@ -90,15 +90,15 @@ int getSCHashSize( int itemCount )
 
 //faster than move for <= 32 bytes,
 // NO OVERLAP ETC.
-void CMove( const void *src, void *dest, int len )
+void CMove( const void *src, void *dest, const int len )
 {
    if( len > 32 )
    {
       std::memcpy( dest, src, len );
       return;
    }
-   auto psrc { reinterpret_cast<const uint8_t *>(src) };
-   auto pdest { reinterpret_cast<uint8_t *>(dest) };
+   const auto psrc { static_cast<const uint8_t *>(src) };
+   const auto pdest { static_cast<uint8_t *>(dest) };
    switch (len)
    {
       case 0:

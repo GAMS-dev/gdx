@@ -134,6 +134,15 @@ TEST_CASE("Simple use of TXSortedStringList")
    REQUIRE(!std::strcmp("First", lst.GetName( 0 )));
 }
 
+TEST_CASE("Test CMove")
+{
+   constexpr std::array bufA { 1, 2, 3, 4, 5 };
+   std::array<int, 32> bufB {};
+   CMove( bufA.data(), bufB.data(), sizeof(int)*bufA.size() );
+   for(int i{}; i<bufA.size(); i++)
+      REQUIRE( bufB[i] == i+1 );
+}
+
 TEST_SUITE_END();
 
 }// namespace gdx::tests::gmsobjtests
