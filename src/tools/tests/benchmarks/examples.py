@@ -3,8 +3,8 @@ import subprocess
 import os
 import sys
 
-from examples.small_example import create_small_example
-from examples.full_example import create_full_example
+from ..examples.small_example import create_small_example
+from ..examples.full_example import create_full_example
 
 
 TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))

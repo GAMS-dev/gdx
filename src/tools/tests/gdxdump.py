@@ -5,11 +5,11 @@ import subprocess
 import tempfile
 import inspect
 
-from examples.small_example import create_small_example
-from examples.full_example import create_full_example
-from examples.element_text_example import create_element_text_example
-from examples.special_values_example import create_special_values_example
-from examples.label_example import create_label_example
+from .examples.small_example import create_small_example
+from .examples.full_example import create_full_example
+from .examples.element_text_example import create_element_text_example
+from .examples.special_values_example import create_special_values_example
+from .examples.label_example import create_label_example
 
 
 class TestGdxDump(unittest.TestCase):
