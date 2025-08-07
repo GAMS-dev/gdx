@@ -23,12 +23,12 @@
  * SOFTWARE.
  */
 
-#include "gmsobj.hpp"// for TXStrPool, TBooleanBitArray, TXList, TXCustom...
-#include "tests/doctest.hpp"  // for ResultBuilder, REQUIRE_EQ, Expression_lhs
-#include <array>      // for array
-#include <list>       // for list, operator!=, _List_iterator
-#include <string>     // for operator+, to_string, string, operator""s
-#include <vector>     // for vector, vector<>::reference
+#include "gmsobj.hpp"       // for TXStrPool, TBooleanBitArray, TXList, TXCustom...
+#include "tests/doctest.hpp"// for ResultBuilder, REQUIRE_EQ, Expression_lhs
+#include <array>            // for array
+#include <list>             // for list, operator!=, _List_iterator
+#include <string>           // for operator+, to_string, string, operator""s
+#include <vector>           // for vector, vector<>::reference
 
 using namespace std::literals::string_literals;
 using namespace gdlib::gmsobj;
@@ -122,27 +122,27 @@ TEST_CASE( "Simple use of TXStrings" )
    REQUIRE_EQ( "First"s, lst[0] );
 }
 
-TEST_CASE("Simple use of TXSortedStringList")
+TEST_CASE( "Simple use of TXSortedStringList" )
 {
    TXSortedStringList<int> lst;
    lst.Add( "Third", 5 );
    lst.Add( "Second", 6 );
    lst.Add( "First", 5 );
-   REQUIRE_FALSE(lst.GetSorted());
+   REQUIRE_FALSE( lst.GetSorted() );
    lst.SetSorted( true );
-   REQUIRE(lst.GetSorted());
-   REQUIRE(!std::strcmp("First", lst.GetName( 0 )));
+   REQUIRE( lst.GetSorted() );
+   REQUIRE( !std::strcmp( "First", lst.GetName( 0 ) ) );
 }
 
-TEST_CASE("Test CMove")
+TEST_CASE( "Test CMove" )
 {
    constexpr std::array bufA { 1, 2, 3, 4, 5 };
    std::array<int, 32> bufB {};
-   CMove( bufA.data(), bufB.data(), sizeof(int)*bufA.size() );
-   for(int i{}; i<bufA.size(); i++)
-      REQUIRE( bufB[i] == i+1 );
+   CMove( bufA.data(), bufB.data(), sizeof( int ) * bufA.size() );
+   for( int i {}; i < static_cast<int>( bufA.size() ); i++ )
+      REQUIRE_EQ( bufB[i], i + 1 );
 }
 
 TEST_SUITE_END();
 
-}// namespace gdx::tests::gmsobjtests
+}// namespace tests::gdlibtests::gmsobjtests
