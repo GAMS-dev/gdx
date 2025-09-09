@@ -2760,7 +2760,7 @@ TEST_CASE("Test opening 100 char long name GDX file inside two 100 char long nam
    }
 
    REQUIRE(fs::remove( gdxTargetFilename));
-   REQUIRE(fs::remove_all( longName));
+   REQUIRE(fs::remove_all( pf + longName));
 }
 
 }// namespace gdx::tests::gdxtests
