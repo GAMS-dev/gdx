@@ -993,7 +993,7 @@ std::string p3FloatToEfmt( double x, int width, int decimals )
    else // see if we can pack it in by cutting corners
    {
       res += digits[0] + "E"s + ( eValNeg ? '-' : '+' ) + eDigits;
-      if( res.length() <= width )
+      if( static_cast<int>( res.length() ) <= width )
          result = res;
    }
    return result;
