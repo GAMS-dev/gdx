@@ -883,7 +883,7 @@ bool p3GetDecDigits( const double y, const int mode, const int nDigits, std::str
 
 // given a positive double y = d.dddEs{eval} (s = +/-)
 // return count of digits required to display exponent eval
-int getCntGuess(double y)
+static int getCntGuess(double y)
 {
    if( y >= 1e100 )
       return 3;
@@ -898,7 +898,7 @@ int getCntGuess(double y)
 // and also the digits themselves in s
 // minLen is the minimum number of digits to generate
 // E is assumed to be non-negative
-int digitRep(int E, int minLen, std::string& s)
+static int digitRep( int E, int minLen, std::string &s )
 {
    int k {E};
    s.clear();
@@ -956,7 +956,7 @@ std::string p3FloatToEfmt( double x, int width, int decimals )
    int digMode { 4 };
    std::string digits;
    int decPos, minusCnt;
-   bool brc { p3GetDecDigits( xAbs, digMode, nDigits, digits, decPos, minusCnt ) };
+   [[maybe_unused]] bool brc { p3GetDecDigits( xAbs, digMode, nDigits, digits, decPos, minusCnt ) };
    assert( brc && "getDecDigits failed" );
    assert( decPos < 999 && "Input xAbs is not finite" );
    int digCnt { (int)digits.length() };
