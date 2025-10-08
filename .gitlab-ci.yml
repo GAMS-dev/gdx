@@ -74,15 +74,12 @@ apigenerator:
     - cp src/apigenerator/include/gc*.h apifiles
     - cp src/gdx.hpp generated/gdx.hpp
     - |
-      for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h" "gdxcwrap.h" "gdxcppwrap.hpp"; do
+      for f in "gdxcc.h" "gdxcc.c" "gdxcclib.cpp" "gclgms.h" "gdxcwrap.h" "gdxcppwrap.hpp" "gdx.hpp"; do
         echo "Diffing 'apifiles/$f' with 'generated/$f'"
         if ! diff -w --strip-trailing-cr apifiles/$f generated/$f; then
           echo "Warning: $f stored in repo and freshly generated differ!"
         fi
       done
-      if ! diff -w --strip-trailing-cr apifiles/gdx.hpp gdx.hpp; then
-        echo "Warning: gdx.hpp stored in repo and freshly generated differ!"
-      fi
   artifacts:
     name: apifiles
     expire_in: 2 hours
