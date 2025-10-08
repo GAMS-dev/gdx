@@ -44,7 +44,6 @@
 #include <iostream>  // for char_traits, operator<<
 #include <limits>    // for numeric_limits
 #include <list>      // for list, operator!=, _List...
-#include <map>       // for map, operator!=, _Rb_tr...
 #include <tuple>     // for tuple
 #include <utility>   // for pair
 #include <fstream>
@@ -140,8 +139,7 @@ void testRead( const std::string &filename, const std::function<void( TGXFileObj
    {
       std::string ErrMsg;
       TGXFileObj pgx { ErrMsg };
-      int ErrNr, rc;
-      rc = pgx.gdxOpenRead( filename.c_str(), ErrNr );
+      int ErrNr, rc = pgx.gdxOpenRead( filename.c_str(), ErrNr );
       REQUIRE( rc );
       cb( pgx );
       rc = pgx.gdxClose();
@@ -176,7 +174,7 @@ TEST_CASE( "Simple setup and teardown of a GDX object" )
 
 TEST_CASE( "Check DLL version" )
 {
-   basicTest( []( TGXFileObj &pgx ) {
+   basicTest( []( const TGXFileObj &pgx ) {
       sstring versionStr {};
       REQUIRE( pgx.gdxGetDLLVersion( versionStr.data() ) );
       std::string expectedPrefix { "GDX Library"s };
@@ -241,9 +239,10 @@ TEST_CASE( "Just create a file" )
 
 TEST_CASE( "Creating a file should also work when closing was forgotten" )
 {
-   std::string ErrMsg, fn { "tmp.gdx"s };
-   int ErrNr;
+   const auto fn { "tmp.gdx"s };
    {
+      std::string ErrMsg;
+      int ErrNr;
       TGXFileObj pgx { ErrMsg };
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxtest", ErrNr ) );
    }
@@ -436,7 +435,7 @@ TEST_CASE( "Test write and read record raw" )
    std::string fn { "rwrecordraw.gdx" };
    int key;
    TgdxValues values {};
-   const int nMany { 800 };
+   constexpr int nMany { 800 };
    testWrite( fn, [&]( TGXFileObj &pgx ) {
       REQUIRE( pgx.gdxUELRegisterRawStart() );
       // register UELs i1*i800
@@ -738,9 +737,9 @@ TEST_CASE( "Test write and read record in string mode" )
 TEST_CASE( "Test getting special values" )
 {
    std::array<double, GMS_SVIDX_MAX> specialValuesFromPort {};
-   std::string ErrMsg;
    {
-      gdx::TGXFileObj pgx { ErrMsg };
+      std::string ErrMsg;
+      TGXFileObj pgx { ErrMsg };
       REQUIRE( pgx.gdxGetSpecialValues( specialValuesFromPort.data() ) );
    }
 }
@@ -886,7 +885,7 @@ TEST_CASE( "Test write and read record mapped - out of order" )
       REQUIRE_EQ( 4, NrRecs );
       // unordered mapped write comes out ordered
       std::array<int, 4> expKey { 2, 3, 4, 5 };
-      for( int i { 1 }; i <= (int) expKey.size(); i++ )
+      for( int i { 1 }; i <= static_cast<int>( expKey.size() ); i++ )
       {
          REQUIRE( pgx.gdxDataReadMap( i, &key, values.data(), dimFrst ) );
          REQUIRE_EQ( expKey[i - 1], key );
@@ -955,8 +954,8 @@ TEST_CASE( "Test write and read record mapped - in order" )
       REQUIRE( pgx.gdxDataReadMapStart( 1, NrRecs ) );
       REQUIRE_EQ( 4, NrRecs );
       // should still be ordered
-      std::array<int, 4> expKey { 5, 6, 7, 8 };
-      for( int i { 1 }; i <= (int) expKey.size(); i++ )
+      constexpr std::array<int, 4> expKey { 5, 6, 7, 8 };
+      for( int i { 1 }; i <= static_cast<int>( expKey.size() ); i++ )
       {
          int dimFrst;
          REQUIRE( pgx.gdxDataReadMap( i, &key, values.data(), dimFrst ) );
@@ -1005,7 +1004,7 @@ void commonSetGetDomainTests( const std::vector<std::string> &domainNames,
 
    TgdxStrIndex newSymDomainNames {};
    std::array<int, 2> newSymDomainIndices {};
-   for( int i {}; i < (int) domainNames.size(); i++ )
+   for( int i {}; i < static_cast<int>( domainNames.size() ); i++ )
    {
       newSymDomainNames[i] = domainNames[i];
       newSymDomainIndices[i] = domainIndices[i];
@@ -1367,12 +1366,12 @@ TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
       REQUIRE_EQ( "j"s, domainIds[1].str() );
 
       auto domIndexCallback = []( int rawIndex, int mappedIndex, void *uptr ) {
-         ( (std::list<std::pair<int, int>> *) uptr )->emplace_back( rawIndex, mappedIndex );
+         static_cast<std::list<std::pair<int, int>> *>( uptr )->emplace_back( rawIndex, mappedIndex );
       };
 
       int nrElem {};
       std::list<std::pair<int, int>> callArgs {};
-      REQUIRE( pgx.gdxGetDomainElements( 5, 1, gdx::DOMC_EXPAND, domIndexCallback, nrElem, (void *) &callArgs ) );
+      REQUIRE( pgx.gdxGetDomainElements( 5, 1, gdx::DOMC_EXPAND, domIndexCallback, nrElem, &callArgs ) );
       const std::list<std::pair<int, int>> expectedCallArgs {
               { 1, 1 },
               { 2, 2 } };
@@ -1381,7 +1380,7 @@ TEST_CASE( "Test reading/extracting data from gamslib/trnsport example" )
 
       callArgs.clear();
       nrElem = 0;
-      REQUIRE( pgx.gdxGetDomainElements( 5, 1, gdx::DOMC_EXPAND, nullptr, nrElem, (void *) &callArgs ) );
+      REQUIRE( pgx.gdxGetDomainElements( 5, 1, gdx::DOMC_EXPAND, nullptr, nrElem, &callArgs ) );
       REQUIRE_EQ( 2, nrElem );
       REQUIRE( callArgs.empty() );
 
@@ -1462,7 +1461,7 @@ TEST_CASE( "Test domain checking for subset" )
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxinterfacetests", errnr ) );
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "expl", 1, dt_set, 0 ) );
       std::string key;
-      TgdxValues vals {};
+      constexpr TgdxValues vals {};
       for( int i {}; i < 6; i++ )
       {
          key = "i"s + std::to_string( i + 1 );
@@ -1868,7 +1867,7 @@ TEST_CASE( "Test convert and compress" )
 TEST_CASE( "Test simple write/read with compression activated" )
 {
    const auto fn { "rw_compression.gdx"s };
-   const int cardinality { 1024 };
+   constexpr int cardinality { 1024 };
    setEnvironmentVar( "GDXCOMPRESS", "1"s );
    TgdxValues vals {};
    StrIndexBuffers sib;
@@ -1929,7 +1928,7 @@ TEST_CASE( "Test symbol index max UEL length" )
 
 TEST_CASE( "Test UEL table get max uel length" )
 {
-   testReadModelGDX( "trnsport"s, [&]( TGXFileObj &pgx ) {
+   testReadModelGDX( "trnsport"s, [&]( const TGXFileObj &pgx ) {
       REQUIRE_EQ( 9, pgx.gdxUELMaxLength() );
    } );
 }
@@ -2038,7 +2037,7 @@ TEST_CASE("Test filter example from README")
       REQUIRE( gdx.gdxFilterRegister(1000) );
       REQUIRE( gdx.gdxFilterRegister(2000) );
       REQUIRE( gdx.gdxFilterRegisterDone() );
-      const std::array<int, 2> filterAction {123, gdx::DOMC_EXPAND};
+      constexpr std::array<int, 2> filterAction {123, gdx::DOMC_EXPAND};
       int NrUnMapped, LastMapped;
       REQUIRE( gdx.gdxUMUelInfo( NrUnMapped, LastMapped ) );
       int SyNr;
@@ -2079,7 +2078,7 @@ TEST_CASE( "Test setting trace level" )
 {
    std::string fn { "trace.gdx"s };
    testWrite( fn, [&]( TGXFileObj &pgx ) {
-      REQUIRE( pgx.gdxSetTraceLevel( (int) gdx::TGXFileObj::TraceLevels::trl_all, "tracestr" ) );
+      REQUIRE( pgx.gdxSetTraceLevel( static_cast<int>( gdx::TGXFileObj::TraceLevels::trl_all ), "tracestr" ) );
       REQUIRE( pgx.gdxUELRegisterRawStart() );
       REQUIRE( pgx.gdxUELRegisterRaw( "TheOnlyUEL" ) );
       REQUIRE( pgx.gdxUELRegisterDone() );
@@ -2244,7 +2243,7 @@ TEST_CASE( "Test domain violations more extensively" )
       REQUIRE( pgx.gdxDataWriteStr( &key, vals.data() ) );
       REQUIRE( pgx.gdxDataWriteDone() );
 
-      const int paramDim { 3 };
+      constexpr int paramDim { 3 };
       REQUIRE( pgx.gdxDataWriteStrStart( "p", "parameter", paramDim, dt_par, 0 ) );
       std::array<const char *, paramDim> domainIds {}, keys {};
       std::fill_n( domainIds.begin(), paramDim, key );
@@ -2355,7 +2354,7 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
    const auto fn { "twosets.gdx"s };
    testWrite( fn, []( TGXFileObj &pgx ) {
       StrIndexBuffers sib, sib2;
-      const TgdxValues values {};
+      constexpr TgdxValues values {};
 
       REQUIRE( pgx.gdxDataWriteStrStart( "k", "", 1, dt_set, 0 ) );
       for( int i {}; i < 6; i++ )
@@ -2430,7 +2429,7 @@ TEST_CASE( "Open append should report error for old GDX file versions" )
 #endif
 
    setEnvironmentVar( "GDXCONVERT", "v5" );
-   testWrite( "f.gdx", []( TGXFileObj &obj ) {} );
+   testWrite( "f.gdx", []( const TGXFileObj &obj ) {} );
    unsetEnvironmentVar( "GDXCONVERT" );
 
    {
@@ -2453,7 +2452,7 @@ TEST_CASE("Attempting writing relaxed domains as normal ones should not cause -1
       relaxedDomainNames[0] = "i"s;
       relaxedDomainNames[1] = "j"s;
       REQUIRE_FALSE(obj.gdxSymbolSetDomain(relaxedDomainNames.cptrs()));
-      const int ERR_UNKNOWNDOMAIN = -100052;
+      constexpr int ERR_UNKNOWNDOMAIN = -100052;
       REQUIRE_EQ(ERR_UNKNOWNDOMAIN, obj.gdxGetLastError());
       REQUIRE(obj.gdxDataWriteDone());
       REQUIRE(obj.gdxSymbolSetDomainX(1, relaxedDomainNames.cptrs()));
@@ -2667,7 +2666,7 @@ TEST_CASE( "Test writing in raw mode with known UEL index bounds" )
       std::array<int, 2> minUelIndices {1, 1}, maxUelIndices {1, 3};
       REQUIRE(pgx.gdxDataWriteRawStartKeyBounds("i", "a small set", 2, dt_set, 0, minUelIndices.data(), maxUelIndices.data()));
       std::array<int, GMS_MAX_INDEX_DIM> keys {};
-      const std::array<double, GMS_VAL_MAX> vals {};
+      constexpr std::array<double, GMS_VAL_MAX> vals {};
       keys.front() = 1;
       for(int i{}; i<3; i++)
       {
