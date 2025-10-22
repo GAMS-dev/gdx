@@ -51,7 +51,7 @@
 
 namespace gdxdiff {
 
-using tvarvaltype = uint8_t;
+using tvarvaltype = std::uint8_t;
 
 library::ShortString DiffTmpName;
 gdxHandle_t PGX1, PGX2, PGXDIF;

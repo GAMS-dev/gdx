@@ -9,14 +9,14 @@
 
 namespace gdxdump {
 
-enum class OutFormat : uint8_t {
+enum class OutFormat : std::uint8_t {
   fmt_none,
   fmt_normal,
   fmt_gamsbas,
   fmt_csv
 };
 
-enum class DblFormat : uint8_t {
+enum class DblFormat : std::uint8_t {
   dbl_none,
   dbl_normal,
   dbl_hexponential,

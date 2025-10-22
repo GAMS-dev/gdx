@@ -41,7 +41,7 @@ public:
   [[nodiscard]] std::string GetParamText(int key) const;
 };
 
-enum class CmdParamStatus : int16_t {
+enum class CmdParamStatus : std::int16_t {
   kp_input,
   ke_empty = -1,
   ke_unknown = -2,

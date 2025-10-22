@@ -20,7 +20,7 @@ namespace gdxmerge {
 
 constexpr std::array DataTypSize{1, 1, 5, 5, 0};
 
-enum class ProcessPass : uint8_t {
+enum class ProcessPass : std::uint8_t {
   RpDoAll,
   RpScan,
   RpSmall,
@@ -33,7 +33,7 @@ struct GAMSSymbol {
   gdxSyType SyTyp;
   std::unique_ptr<gdlib::gmsdata::TTblGamsData<double>> SyData;
   library::ShortString SyExplTxt;
-  int64_t SySize{}, SyMemory{};
+  std::int64_t SySize{}, SyMemory{};
   bool SySkip{};
 
   GAMSSymbol(int ADim, gdxSyType AType, int ASubTyp);
@@ -88,8 +88,8 @@ public:
   void AddToExcludeList(const std::string &item);
 };
 
-std::string FormatDateTime(uint16_t Year, uint16_t Month, uint16_t Day,
-                           uint16_t Hour, uint16_t Min, uint16_t Sec);
+std::string FormatDateTime(std::uint16_t Year, std::uint16_t Month, std::uint16_t Day,
+                           std::uint16_t Hour, std::uint16_t Min, std::uint16_t Sec);
 
 bool GetParameters(int argc, const char *argv[]);
 
