@@ -21,13 +21,13 @@ public:
   [[nodiscard]] std::string string() const;
   [[nodiscard]] operator std::string() const;
 
-  [[nodiscard]] uint8_t length() const;
+  [[nodiscard]] std::uint8_t length() const;
 
   [[nodiscard]] char front() const;
   [[nodiscard]] char back() const;
 
-  [[nodiscard]] char at(uint8_t i) const;
-  [[nodiscard]] char operator[](uint8_t i) const;
+  [[nodiscard]] char at(std::uint8_t i) const;
+  [[nodiscard]] char operator[](std::uint8_t i) const;
 
   [[nodiscard]] bool empty() const;
 
