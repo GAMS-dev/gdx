@@ -87,4 +87,45 @@ int getSCHashSize( int itemCount )
          res = schashSizes[i + 1];
    return res;
 }
+
+//faster than move for <= 32 bytes,
+// NO OVERLAP ETC.
+void CMove( const void *src, void *dest, const int len )
+{
+   if( len > 32 )
+   {
+      std::memcpy( dest, src, len );
+      return;
+   }
+   const auto psrc { static_cast<const uint8_t *>(src) };
+   const auto pdest { static_cast<uint8_t *>(dest) };
+   switch (len)
+   {
+      case 0:
+         break;
+      case 1:
+         pdest[0] = psrc[0];
+         break;
+      case 2:
+         pdest[0] = psrc[0];
+         pdest[1] = psrc[1];
+         break;
+      case 3:
+         pdest[0] = psrc[0];
+         pdest[1] = psrc[1];
+         pdest[2] = psrc[2];
+         break;
+      case 4:
+         pdest[0] = psrc[0];
+         pdest[1] = psrc[1];
+         pdest[2] = psrc[2];
+         pdest[3] = psrc[3];
+         break;
+      default:
+         for( int k {}; k < len; k++ )
+            pdest[k] = psrc[k];
+         break;
+   }
+}
+
 }// namespace gdlib::gmsobj

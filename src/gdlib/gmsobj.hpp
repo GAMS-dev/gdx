@@ -874,4 +874,6 @@ public:
    }
 };
 
+void CMove( const void *src, void *dest, int len );
+
 }// namespace gdlib::gmsobj

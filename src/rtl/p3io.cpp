@@ -179,6 +179,7 @@ void P3_Val_dd(const char *s, size_t slen, double *d, int *code)
 {
    std::array<char, 256> buffer;
    std::memcpy(buffer.data(), s, sizeof(char)*(slen+1));
+   buffer[slen] = '\0';
 
    // skip over blanks
    // - Kylix 3 does not treat any other chars as whitespace

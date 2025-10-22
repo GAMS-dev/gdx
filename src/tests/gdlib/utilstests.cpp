@@ -216,13 +216,6 @@ TEST_CASE( "Join multiple strings with separator. Inverse operation to split." )
    REQUIRE_EQ( "a;b;c"s, join( ';', { "a"s, "b"s, "c"s } ) );
 }
 
-TEST_CASE( "All positions (index) of substrings in a string" )
-{
-   REQUIRE_EQ( std::vector<size_t> { 5 }, substrPositions( "3.14e+01"s, "+"s ) );
-   REQUIRE_EQ( std::vector<size_t> { 0 }, substrPositions( "+3.14"s, "+"s ) );
-   REQUIRE_EQ( std::vector<size_t> { 0, 1, 3 }, substrPositions( "??x?x"s, "?"s ) );
-}
-
 TEST_CASE( "Test get line with separator" )
 {
    const std::string tmpfname = "tempfile";

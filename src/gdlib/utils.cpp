@@ -259,31 +259,24 @@ int strConvCppToDelphi( const std::string_view s,
    return 0;
 }
 
-std::vector<size_t> substrPositions( const std::string_view s, const std::string_view substr )
-{
-   std::vector<size_t> positions;
-   for( size_t p { s.find( substr ) }; p != std::string::npos; p = s.find( substr, p + substr.size() ) )
-      positions.push_back( p );
-   return positions;
-}
-
 std::string replaceSubstrs( const std::string_view s, const std::string_view substr, const std::string_view replacement )
 {
-   if( substr == replacement || substr.empty() ) return std::string { s };
-   std::string out {};
-   const int ssl = static_cast<int>( substr.length() );
-   const auto positions = substrPositions( s, substr );
-   for( int i = 0; i < (int) s.length(); i++ )
+   if( substr.empty() || substr == replacement )
+      return std::string { s };
+
+   std::string res;
+   res.reserve( s.length() );
+
+   size_t last_pos {}, find_pos;
+
+   while( ( find_pos = s.find( substr, last_pos ) ) != std::string_view::npos )
    {
-      if( in<size_t>( i, positions ) )
-      {
-         out += replacement;
-         i += ssl - 1;
-         continue;
-      }
-      out += s[i];
+      res.append( s.data() + last_pos, find_pos - last_pos );
+      res.append( replacement );
+      last_pos = find_pos + substr.length();
    }
-   return out;
+   res.append( s.data() + last_pos, s.length() - last_pos );
+   return res;
 }
 
 // Mimicks Delphi System.Val, see:

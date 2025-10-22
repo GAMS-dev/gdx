@@ -208,9 +208,9 @@ TEST_CASE( "Test file exists" )
 
 #if defined( _WIN32 )
    constexpr char sep {'\\'};
-   std::array<char, MAX_PATH> tmpDirBuf;
+   std::array<char, MAX_PATH> tmpDirBuf {};
    GetTempPathA(tmpDirBuf.size(), tmpDirBuf.data());
-   const std::string pathRoot = "\\\\?\\"s + tmpDirBuf.data();
+   const std::string pathRoot = R"(\\?\)"s + tmpDirBuf.data();
 #else
    constexpr char sep {'/'};
    #if defined( __APPLE__ )
@@ -228,8 +228,8 @@ TEST_CASE( "Test file exists" )
    ofs.close();
    REQUIRE( FileExists( gdxFn ) );
 
-   std::filesystem::remove_all( foldername );
-   REQUIRE_FALSE( FileExists( foldername ) );
+   std::filesystem::remove_all( pathRoot + foldername );
+   REQUIRE_FALSE( FileExists( pathRoot + foldername ) );
 }
 
 TEST_SUITE_END();
