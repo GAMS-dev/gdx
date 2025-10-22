@@ -1,4 +1,5 @@
 // #include <cassert>
+#include <cstddef>
 #include <cstring>
 #include <ostream>
 
@@ -14,7 +15,7 @@ ShortString::ShortString() {
 }
 
 ShortString::ShortString(const char *s) {
-  const size_t s_length{std::strlen(s)};
+  const std::size_t s_length{std::strlen(s)};
 
 #if defined(ENABLE_ASSERTIONS)
   assert(s_length < GMS_SSSIZE);
@@ -105,7 +106,7 @@ void ShortString::append(const char c) {
 
 void ShortString::append(const char *s) {
   const uint8_t length{this->length()};
-  const size_t s_length{std::strlen(s)};
+  const std::size_t s_length{std::strlen(s)};
 
 #if defined(ENABLE_ASSERTIONS)
   assert(length + s_length < GMS_SSSIZE);
@@ -146,7 +147,7 @@ void ShortString::to_upper_case() {
 }
 
 ShortString &ShortString::operator=(const std::string &s) {
-  const size_t s_length{s.length()};
+  const std::size_t s_length{s.length()};
 
 #if defined(ENABLE_ASSERTIONS)
   assert(s_length < GMS_SSSIZE);

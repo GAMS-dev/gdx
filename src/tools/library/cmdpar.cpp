@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <fstream>
 // #include <iostream>
 
@@ -153,7 +154,7 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
       if (S.find(' ') == std::string::npos) {
         result.append(' ' + S);
       } else {
-        size_t k{S.find('=')};
+        std::size_t k{S.find('=')};
         if (k == std::string::npos) {
           if (S.front() != '@') {
             result.append(" \"" + S + '"');
@@ -236,7 +237,7 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
             continue;
           }
 
-          for (size_t k{}; k < strings.size(); k++) {
+          for (std::size_t k{}; k < strings.size(); k++) {
             if (strings[k].empty()) {
               break;
             }
