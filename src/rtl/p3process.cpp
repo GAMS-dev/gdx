@@ -185,6 +185,143 @@ public:
 static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
                        int *coresPerSocket, int *threadsPerCore );
 
+//========================================================================================================
+
+std::string TExecArgList::Get( const int Index ) const
+{
+   return FList[Index];
+}
+
+std::string TExecArgList::GetLast() const
+{
+   return FList.back();
+}
+
+int TExecArgList::Count() const
+{
+   return static_cast<int>( FList.size() );
+}
+
+std::string TExecArgList::operator[]( const int Index ) const
+{
+   return Get( Index );
+}
+
+void TExecArgList::Put( const int Index, const std::string &Item )
+{
+   FList[Index] = Item;
+}
+
+int TExecArgList::GetCapacity() const
+{
+   return static_cast<int>( FList.capacity() );
+}
+
+static const char* GetParamShortStr(const char* p, std::string& param)
+{
+   static utils::sstring buf;
+   int len {};
+   char *r { buf.data() };
+   
+   auto pushChar = [&]( const char c ) {
+      if (len < (int)buf.size() - 1)
+      {
+         *r = c;
+         ++len;
+         ++r;
+      }
+   };
+
+   while (true)
+   {
+      while( *p != '\0' && *p <= ' ' )
+         p++;
+      const char *s = p;
+      ++s;
+      if( *p == '\"' && *s == '\"' )
+         p += 2;
+      else
+         break;
+   }
+
+   while (*p > ' ')
+   {
+      if (*p == '\"')
+      {
+         ++p;
+         while (*p != '\0' && *p != '\"')
+         {
+            pushChar( *p );
+            ++p;
+         }
+         if( *p != '\0' )
+            ++p;
+      }
+      else
+      {
+         pushChar( *p );
+         ++p;
+      }
+   }
+   buf[len] = '\0';
+   param = buf.data();
+   return p;
+}
+
+int TExecArgList::Split( const bool append, const std::string &s )
+{
+   std::string param;
+   int count {};
+   const char *p = s.c_str();
+   while (true)
+   {
+      p = GetParamShortStr( p, param );
+      if( param.empty() )
+         break;
+      if( append )
+         Add( param );
+      else
+         Insert( count, param );
+      count++;
+   }
+   return count;
+}
+
+TExecArgList::TExecArgList() = default;
+TExecArgList::~TExecArgList() = default;
+
+void TExecArgList::Clear()
+{
+   FList.clear();
+}
+void TExecArgList::Delete( const int Index )
+{
+   FList.erase( FList.begin() + Index );
+}
+
+void TExecArgList::Insert( const int Index, const std::string &Item )
+{
+   FList.insert( FList.begin() + Index, Item );
+}
+
+int TExecArgList::SplitAppend( const std::string &s )
+{
+   return Split( true, s );
+}
+
+int TExecArgList::SplitPrepend( const std::string &s )
+{
+   return Split( false, s );
+}
+
+int TExecArgList::Add( const std::string &Item )
+{
+   FList.emplace_back( Item );
+   return static_cast<int>( FList.size() - 1 );
+}
+
+//========================================================================================================
+
 // nSockets: count of physical sockets, aka packages
 // nCores:   count of cores, aka physical CPUs
 // nThreads: count of threads, aka logical CPUs or vCPUs.
@@ -859,6 +996,44 @@ int P3ExecP( const std::string &CmdPtr, int &ProgRC )
          break;
    }
    return res;
+}
+
+static std::string whatQuote(const std::string &arg)
+{
+   if( const std::string targ { utils::trim( arg ) };
+      targ.length() > 1 && targ.front() == '"' && targ.back() == '"')
+      return ""s; // already quoted, do not quote it again
+   if(arg.empty())
+      return "\""s;
+   for(int i{}; i<(int)arg.length(); i++)
+      if(arg[i] <= ' ') // found a space, quote the whole thing
+         return "\""s;
+   return ""s;
+}
+
+int P3SystemL( const std::string &ProgName, const TExecArgList &ProgParams, int &ProgRC )
+{
+   const bool allowStdHandles { ProgParams.fInheritedHandles };
+   std::string cmd { ProgName };
+   for(int i {}; i<ProgParams.Count(); i++)
+   {
+      const std::string quote = whatQuote(ProgParams[i]);
+      cmd += ' ';
+      cmd += quote;
+      cmd += ProgParams[i];
+      cmd += quote;
+   }
+   switch(OSFileType())
+   {
+      case OSFileWIN:
+         return System4Win( cmd, allowStdHandles, ProgRC );
+      case OSFileUNIX:
+         return System4Unix( cmd, ProgRC );
+      default:
+         break;
+   }
+   assert(false && "unimplemented P3systemL for OSFileType");
+   return 0;
 }
 
 int win32ASyncCreateProc( const char *exeName, char *cmdLine, int newConsole, int inheritedHandles, TProcInfo &procInfo );
