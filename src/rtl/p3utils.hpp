@@ -82,7 +82,7 @@ std::string P3GetEnv( const std::string &name );
 void P3UnSetEnv( const std::string &name );
 bool P3IsSetEnv( const std::string &name );
 
-bool P3SetEnvPC( const std::string &name, char *val );
+bool P3SetEnvPC( const std::string &name, const char *val );
 uint32_t P3GetEnvPC( const std::string &name, char *buf, uint32_t bufSize );
 
 int p3GetExecName( std::string &execName, std::string &msg );
@@ -94,6 +94,8 @@ void p3NoPopups();
 
 std::string p3GetUserName();
 std::string p3GetComputerName();
+
+bool p3SendDataMessage( bool broadcast, const std::string &winTitle, const std::string &data );
 
 #if defined(_WIN32)
 using Tp3FileHandle = void *; // from CreateFileA (fileapi.h)

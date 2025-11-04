@@ -142,9 +142,9 @@ void DecodeTime( const global::delphitypes::tDateTime DateTime, uint16_t &Hour, 
 
 void DivMod( const int Dividend, const uint16_t Divisor, uint16_t &Result, uint16_t &Remainder )
 {
-   const auto res = div( Dividend, Divisor );
-   Result = static_cast<uint16_t>(res.quot);
-   Remainder = static_cast<uint16_t>(res.rem);
+   const auto [quot, rem] = div( Dividend, Divisor );
+   Result = static_cast<uint16_t>(quot);
+   Remainder = static_cast<uint16_t>(rem);
 }
 
 double EncodeDate( uint16_t Year, uint16_t Month, const uint16_t Day )
@@ -251,7 +251,7 @@ bool DirectoryExists( const std::string &Directory )
 std::string SysErrorMessage( int errorCode )
 {
    const char *errMsg = strerror( errorCode );
-   if( !errMsg ) return "Unknown error " + rtl::sysutils_p3::IntToStr( errorCode );
+   if( !errMsg ) return "Unknown error " + IntToStr( errorCode );
    return errMsg;
 }
 
@@ -390,7 +390,7 @@ static int FindMatchingFile( TSearchRec &f )
          return static_cast<int>( GetLastError() );
    FILETIME lastWriteTime;
    FILETIME localFileTime;
-   std::memcpy( &lastWriteTime, &( f.FindData->ftLastWriteTime ), sizeof( FILETIME ) );
+   std::memcpy( &lastWriteTime, &f.FindData->ftLastWriteTime, sizeof( FILETIME ) );
    FileTimeToLocalFileTime( &lastWriteTime, &localFileTime );
    auto *wPtr = reinterpret_cast<WORD *>( &f.Time );
    FileTimeToDosDateTime( &localFileTime, wPtr + 1, wPtr );
@@ -479,7 +479,7 @@ int FindFirst(const std::string &Path, const int Attr, TSearchRec &F )
       fHandle = FindFirstFileA(Path.c_str(), F.FindData );
    F.FindHandle = fHandle;
    if (INVALID_HANDLE_VALUE != fHandle) {
-      auto res = FindMatchingFile(F);
+      const auto res = FindMatchingFile(F);
       if (res != 0)
          FindClose(F);
       return res;
@@ -650,7 +650,7 @@ bool RenameFile( const std::string &OldName, const std::string &NewName )
 #endif
 }
 
-void Sleep( uint32_t milliseconds )
+void Sleep( const uint32_t milliseconds )
 {
 #ifdef _WIN32
    ::Sleep( milliseconds );
@@ -719,36 +719,36 @@ void IntToStr( int64_t n, char *res, size_t &len )
 }
 
 // this is VERY ugly, edit the str() ShortString
+// FIXME: TODO: AS: Not yet really tested! Compare with p3 and parallel step through with Lazarus
 std::string FloatToStr( double v )
 {
-   throw std::runtime_error("Not fully implemented yet!");
-   // TODO: Unfinished!
-
    std::array<char, 64> sbuf {};
 
-   if (v == 0.0)
+   if( v == 0.0 )
       return "0"s;
 
    size_t eLen;
-   rtl::p3io::P3_Str_dd0( v, sbuf.data(), 64, &eLen );
+   p3io::P3_Str_dd0( v, sbuf.data(), 64, &eLen );
    std::string s { sbuf.data() };
    if( v < 0.0 )
       v = -v;
-   int k = LastDelimiter( "+-"s, s );
+   const int k = LastDelimiter( "+-"s, s );
    int j = utils::pos( '.', s );
-   if (v >= 1e-4 && v < 1e15)
+   if( v >= 1e-4 && v < 1e15 )
    {
       int i, e;
       utils::val( s.substr( k, 5 ), e, i );
-      for( i = k - 1; i <= static_cast<int>(s.length()); i++ )
+      for( i = k - 1; i <= static_cast<int>( s.length() ); i++ )
          s[i] = '0';
-      if (e >= 0)
+      if( e >= 0 )
       {
-         for (i = j + 1; i <= j + e; i++) {
+         for( i = j + 1; i <= j + e; i++ )
+         {
             s[i - 1] = s[i];
          }
          s[j + e] = '.';
-         for (i = (int)s.length(); i >= j + e + 1; i--) {
+         for( i = static_cast<int>( s.length() ); i >= j + e + 1; i-- )
+         {
             s[i] = ' ';
             if( i == j + e + 1 )
                s[j + e] = ' ';
@@ -756,20 +756,60 @@ std::string FloatToStr( double v )
                break;
          }
       }
-      else {
-
+      else
+      {
+         s[j] = s[j - 1];
+         s[j - 1] = '0';
+         e = -e;
+         s.resize( k + e - 2 );
+         for( i = k - 2; i >= j; i-- )
+            s[i + e] = s[i];
+         for( i = j + 1; i <= j + e - 1; i++ )
+            s[i] = '0';
+         s[j] = '.';
+         for( i = static_cast<int>( s.length() ); i >= j + e + 1; i-- )
+         {
+            if( s[i] == '0' )
+               s[i] = ' ';
+            else
+               break;
+         }
       }
    }
-   else {
-
+   else
+   {
+      if( s[k] == '+' )
+         s[k] = ' ';
+      for( int i = k + 1; i <= static_cast<int>(s.length()) - 1; i++ )
+      {
+         if( s[i] == '0' )
+         {
+            s[i] = ' ';
+            if( i == static_cast<int>(s.length()) )
+               s[k - 1] = ' ';
+         }
+         else
+            break;
+      }
+      for( int i { k - 2 }; i >= j + 1; i-- )
+      {
+         if( s[i] == '0' )
+         {
+            s[i] = ' ';
+            if( i == j + 1 )
+               s[j] = ' ';
+         }
+         else
+            break;
+      }
    }
 
    // only for short strings
    j = 0;
-   std::array<char, 256> res {'\0'};
-   for (int i{}; i < static_cast<int>(s.length()); i++)
+   std::array<char, 256> res { '\0' };
+   for( int i {}; i < static_cast<int>( s.length() ); i++ )
    {
-      if (s[i] != ' ')
+      if( s[i] != ' ' )
       {
          j++;
          res[j] = s[i];
@@ -785,7 +825,7 @@ double EncodeTime( const uint16_t hour, const uint16_t min, const uint16_t sec, 
 double FileDateToDateTime( int fd )
 {
 #if defined(_WIN32)
-   LongRec rec;
+   LongRec rec {};
    static_assert( sizeof( int ) == sizeof( LongRec ) );
    std::memcpy( &rec, &fd, sizeof( int ) );
    return EncodeDate( ( rec.parts.hi >> 9 ) + 1980, ( rec.parts.hi >> 5 ) & 15, rec.parts.hi & 31 ) +

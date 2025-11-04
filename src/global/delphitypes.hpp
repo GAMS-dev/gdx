@@ -193,7 +193,7 @@ public:
 
 inline double frac( const double v )
 {
-   return v - trunc( v );
+   return v - std::trunc( v );
 }
 
 }// namespace global::delphitypes

@@ -140,10 +140,10 @@ bool P3IsSetEnv( const std::string &name )
    return std::getenv( name.c_str() ) != nullptr;
 }
 
-/*static bool P3SetEnvPC( const std::string &name, const char *val )
+bool P3SetEnvPC( const std::string &name, const char *val )
 {
    return P3SetEnv( name, val );
-}*/
+}
 
 std::string P3GetEnv( const std::string &name )
 {
@@ -268,6 +268,21 @@ std::string p3GetComputerName()
    utsname uts {};
    const int rc = uname( &uts );
    return rc >= 0 ? uts.nodename : ""s;
+#endif
+}
+
+bool p3SendDataMessage( const bool broadcast, const std::string &winTitle, const std::string &data )
+{
+#if defined(_WIN32)
+   COPYDATASTRUCT cds { 0, static_cast<DWORD>( data.length() ) + 1, const_cast<char *>(data.c_str()) };
+   if( broadcast )
+      return SendMessageA( HWND_BROADCAST, WM_COPYDATA, 0, reinterpret_cast<LPARAM>( &cds ) );
+   if(winTitle.empty())
+      return false;
+   HWND receiver { FindWindowA( nullptr, winTitle.c_str() ) };
+   return receiver ? SendMessageA( receiver, WM_COPYDATA, 0, reinterpret_cast<LPARAM>( &cds ) ) : false;
+#else
+   return false;
 #endif
 }
 

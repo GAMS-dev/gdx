@@ -156,10 +156,10 @@ void FindClose( TSearchRec &F );
 
 void Sleep( uint32_t milliseconds );
 
-std::string IntToStr(int64_t N);
+std::string IntToStr(int64_t n);
 void IntToStr(int64_t N, char *res, size_t &len );
 
-std::string FloatToStr( double V );
+std::string FloatToStr( double v );
 
 double FileDateToDateTime( int fd );
 int DateTimeToFileDate( double dt );

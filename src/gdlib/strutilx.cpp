@@ -724,7 +724,7 @@ bool StrAsIntEx2( const std::string &s, int &v )
       {
          double intpart;
          res = d >= std::numeric_limits<int>::min() && d <= std::numeric_limits<int>::max() && std::modf( d, &intpart ) == 0.0;
-         if( res ) v = static_cast<int>( trunc( d ) );
+         if( res ) v = static_cast<int>( std::trunc( d ) );
       }
    }
    return res;
