@@ -140,10 +140,10 @@ bool P3IsSetEnv( const std::string &name )
    return std::getenv( name.c_str() ) != nullptr;
 }
 
-/*static bool P3SetEnvPC( const std::string &name, const char *val )
+bool P3SetEnvPC( const std::string &name, const char *val )
 {
    return P3SetEnv( name, val );
-}*/
+}
 
 std::string P3GetEnv( const std::string &name )
 {
@@ -192,7 +192,7 @@ bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss )
    if( !fp )
       return false; /* failure */
    /* first two are VmSize, VmRSS */
-   unsigned long urss, uvss;
+   unsigned long urss = 0, uvss = 0;
    const int n = fscanf( fp, "%lu %lu", &uvss, &urss );
    std::fclose( fp );
    if( 2 != n )
@@ -268,6 +268,21 @@ std::string p3GetComputerName()
    utsname uts {};
    const int rc = uname( &uts );
    return rc >= 0 ? uts.nodename : ""s;
+#endif
+}
+
+bool p3SendDataMessage( const bool broadcast, const std::string &winTitle, const std::string &data )
+{
+#if defined(_WIN32)
+   COPYDATASTRUCT cds { 0, static_cast<DWORD>( data.length() ) + 1, const_cast<char *>(data.c_str()) };
+   if( broadcast )
+      return SendMessageA( HWND_BROADCAST, WM_COPYDATA, 0, reinterpret_cast<LPARAM>( &cds ) );
+   if(winTitle.empty())
+      return false;
+   HWND receiver { FindWindowA( nullptr, winTitle.c_str() ) };
+   return receiver ? SendMessageA( receiver, WM_COPYDATA, 0, reinterpret_cast<LPARAM>( &cds ) ) : false;
+#else
+   return false;
 #endif
 }
 
@@ -372,16 +387,8 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
    }
    else
    {
-      bool longAbsPath {};
-#if defined(_WIN32)
-      longAbsPath = fName.length() > MAX_PATH && std::isalpha(fName.front()) && fName[1] == ':';
-#endif
-      if(longAbsPath)
-         hFile = CreateFileA ((R"(\\?\)"+fName).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
-                          createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
-      else
-         hFile = CreateFileA (fName.c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
-                          createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
+      hFile = CreateFileA ((fName.length() > MAX_PATH ? tryFixingLongPath( fName ) : fName).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
+                       createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
    }
    if( INVALID_HANDLE_VALUE == hFile )
    {
@@ -889,12 +896,122 @@ bool p3GetDecDigits( const double y, const int mode, const int nDigits, std::str
    return true;
 }
 
+// given a positive double y = d.dddEs{eval} (s = +/-)
+// return count of digits required to display exponent eval
+static int getCntGuess(double y)
+{
+   if( y >= 1e100 )
+      return 3;
+   // else if y >= 1e-99 then
+   if( y >= 1.0e-99 )
+      return 2;
+   return 3;
+}
+
+// produce info about the exponent in scientific notation
+// for given exponent E, return the number of base-10 digits representing E
+// and also the digits themselves in s
+// minLen is the minimum number of digits to generate
+// E is assumed to be non-negative
+static int digitRep( int E, int minLen, std::string &s )
+{
+   int k {E};
+   s.clear();
+   s += (char) ( '0' + k % 10 );
+   int result { 1 };
+   if( E < 10 && result >= minLen )
+      return result;
+   k /= 10;
+   s = ""s + (char)( '0' + k % 10 ) + s;
+   result++;
+   if( E < 100 && result >= minLen )
+      return result;
+   k /= 10;
+   s = ""s + (char) ( '0' + k % 10 ) + s;
+   result++;
+   return result;
+}
+
 std::string p3FloatToEfmt( double x, int width, int decimals )
 {
-   // ...
-   // TODO: Implement me!
-   throw std::runtime_error("Not fully implemented yet!");
-   return {};
+   std::string result { "*****"s }; // bad call
+   if (width < 6 || decimals < 0)
+   {
+      if( utils::in( width, 1, 4 ) )
+         result.resize( width );
+      return result;
+   }
+
+   if(x == 0.0)
+   {
+      int eDigCnt = 2;
+      int nDigits = std::min<int>( decimals + 1, width - 4 - eDigCnt );
+      nDigits = std::min<int>( nDigits, 16 );
+      return nDigits <= 0 ? " 0E+00"s : " 0."s + zeros.substr( 0, nDigits - 1 ) + "E+00"s;
+   }
+
+   std::string res;
+   double xAbs;
+
+   if (x < 0)
+   {
+      xAbs = -x;
+      res = "-"s;
+   }
+   else
+   {
+      xAbs = x;
+      res = " "s;
+   }
+
+   int   eDigCntGuess { getCntGuess( xAbs ) },
+         eDigCnt { eDigCntGuess },
+         nDigits { std::min<int>( decimals + 1, width - 4 - eDigCnt ) };
+   nDigits = std::min<int>( nDigits, 17 );
+   int digMode { 4 };
+   std::string digits;
+   int decPos, minusCnt;
+   [[maybe_unused]] bool brc { p3GetDecDigits( xAbs, digMode, nDigits, digits, decPos, minusCnt ) };
+   assert( brc && "getDecDigits failed" );
+   assert( decPos < 999 && "Input xAbs is not finite" );
+   int digCnt { (int)digits.length() };
+   int eVal { decPos - 1 };
+   bool eValNeg { eVal < 0 };
+   if( eValNeg )
+      eVal = -eVal;
+   std::string eDigits;
+   eDigCnt = digitRep( eVal, 2, eDigits );
+   if (eDigCntGuess != eDigCnt)
+   {
+      if (!eValNeg)
+      {
+         assert( eDigCntGuess + 1 == eDigCnt && "Bogus eDigCnt in positive eVal case" );
+         nDigits = std::min<int>( decimals + 1, width - 4 - eDigCnt );
+      }
+      else
+      {
+         assert( eDigCntGuess - 1 == eDigCnt && "Bogus eDigCnt in positive eVal case" );
+         nDigits = std::min<int>( decimals + 1, width - 4 - eDigCnt );
+      }
+   }
+
+   if( 17 == nDigits && digCnt < nDigits )
+      nDigits--;
+   if (nDigits > 0)
+   {
+      res += digits[0] + "."s + digits.substr( 1, digCnt );
+      if( nDigits > digCnt )
+         res += zeros.substr( 0, nDigits - digCnt );
+      res += "E"s + ( eValNeg ? '-' : '+' ) + eDigits;
+      result = res;
+   }
+   else // see if we can pack it in by cutting corners
+   {
+      res += digits[0] + "E"s + ( eValNeg ? '-' : '+' ) + eDigits;
+      if( static_cast<int>( res.length() ) <= width )
+         result = res;
+   }
+   return result;
 }
 
 // return digits of input i64, with trailing zeros removed
@@ -1765,11 +1882,8 @@ T_P3SOCKET p3SockAcceptClientConn( T_P3SOCKET srvSock, const uint32_t timeOut )
 }
 
 // create a server socket listening on localhost
-// if resuse is true,
-//    set the SO_REUSEADDR option on the socket.  This prevents the socket from
-//    entering the TIME_WAIT state when it is closed
 // returns the socket on success, invalid socket on failure
-T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse, int *retCode )
+T_P3SOCKET p3SockCreateServerSocket( int port, int *retCode )
 {
    if(retCode)
       *retCode = 0;
@@ -1779,15 +1893,6 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse, int *retCode )
    const auto acceptSocket { socket( AF_INET, SOCK_STREAM, IPPROTO_TCP ) };
    if( INVALID_SOCKET == acceptSocket )
       return res;
-   if( reuse )
-   {
-      int enable { 1 };
-      // without this magic Windows will bar connections to this port for a small-time window
-      // after the socket is closed to avoid delayed packets from a previous connection going to
-      // any new connections
-      if( setsockopt( acceptSocket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<char *>( &enable ), sizeof( int ) ) )
-         return res;
-   }
    SOCKADDR_IN addr;
    (void) std::memset( &addr, 0, sizeof( addr ) );
    addr.sin_family = AF_INET;
@@ -1816,15 +1921,6 @@ T_P3SOCKET p3SockCreateServerSocket( int port, bool reuse, int *retCode )
    sockaddr_in servaddr {};
    const int sockfd { socket( AF_INET, SOCK_STREAM, 0 ) };
    if( sockfd == -1 ) return res;
-   if( reuse )
-   {
-      int enable { 1 };
-      // without this magic Linux/Mac will bar connections to this port for a small-time window
-      // after the socket is closed to avoid delayed packets from a previous connection going to
-      // any new connections
-      if( setsockopt( sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof( enable ) ) )
-         return res;
-   }
    (void) std::memset( &servaddr, 0, sizeof( servaddr ) );
    // assign IP, PORT
    servaddr.sin_family = AF_INET;

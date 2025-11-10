@@ -50,11 +50,35 @@ struct TProcInfo {
    }
 };
 
+class TExecArgList final
+{
+   void Put(int Index, const std::string &Item);
+   int Split(bool append, const std::string &s);
+   std::vector<std::string> FList {};
+public:
+   [[maybe_unused]] bool fInheritedHandles {};
+   TExecArgList();
+   ~TExecArgList();
+   int Add(const std::string &Item );
+   void Clear();
+   void Delete(int Index);
+   void Insert(int Index, const std::string &Item);
+   int SplitAppend(const std::string &s);
+   int SplitPrepend(const std::string &s);
+   [[nodiscard]] int GetCapacity() const;
+   [[nodiscard]] std::string Get(int Index ) const;
+   [[nodiscard]] std::string GetLast() const;
+   [[nodiscard]] int Count() const;
+   std::string operator[]( int Index ) const;
+};
+
 bool p3GetCPUInfo( int &nSockets, int &nCores, int &nThreads, int &coresPerSocket, int &threadsPerCore );
 int p3GetNumberOfProcessors();
 
 int P3SystemP( const std::string &CmdPtr, int &ProgRC );
 int P3ExecP( const std::string &CmdPtr, int &ProgRC );
+
+int P3SystemL( const std::string &ProgName, const TExecArgList &ProgParams, int &ProgRC );
 
 int p3ASyncSystemP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInfo, std::string &msg );
 int p3ASyncExecP( const std::string &cmdPtr, bool newConsole, TProcInfo &procInfo, std::string &msg );

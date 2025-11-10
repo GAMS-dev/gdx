@@ -1,106 +1,100 @@
-#ifndef GDX_GDXMERGE_H
-#define GDX_GDXMERGE_H
+#pragma once
 
 #include <array>
-#include <vector>
-#include <string>
 #include <cstdint>
 #include <memory>
+#include <string>
+#include <vector>
 
-#include "../library/common.hpp"
-#include "../library/short_string.hpp"
-#include "../../gdlib/gmsdata.hpp"
-#include "../../gdlib/gmsobj.hpp"
+#include "gdlib/gmsdata.hpp"
+#include "gdlib/gmsobj.hpp"
+#include "library/common.hpp"
+#include "library/short_string.hpp"
 
 // GDX library interface
-#include "../../../generated/gdxcc.h"
+#include "generated/gdxcc.h"
 // Global constants
-#include "../../../generated/gclgms.h"
+#include "generated/gclgms.h"
 
-namespace gdxmerge
-{
+namespace gdxmerge {
 
-constexpr std::array DataTypSize { 1, 1, 5, 5, 0 };
+constexpr std::array DataTypSize{1, 1, 5, 5, 0};
 
-enum class ProcessPass_t : uint8_t
-{
-   RpDoAll,
-   RpScan,
-   RpSmall,
-   RpBig,
-   RpTooBig
+enum class ProcessPass : uint8_t {
+  RpDoAll,
+  RpScan,
+  RpSmall,
+  RpBig,
+  RpTooBig
 };
 
-struct GAMSSymbol_t {
-   int SyDim, SySubTyp;
-   gdxSyType SyTyp;
-   std::unique_ptr<gdlib::gmsdata::TTblGamsData<double>> SyData;
-   library::ShortString_t SyExplTxt;
-   int64_t SySize {}, SyMemory {};
-   bool SySkip {};
+struct GAMSSymbol {
+  int SyDim, SySubTyp;
+  gdxSyType SyTyp;
+  std::unique_ptr<gdlib::gmsdata::TTblGamsData<double>> SyData;
+  library::ShortString SyExplTxt;
+  int64_t SySize{}, SyMemory{};
+  bool SySkip{};
 
-   GAMSSymbol_t( int ADim, gdxSyType AType, int ASubTyp );
+  GAMSSymbol(int ADim, gdxSyType AType, int ASubTyp);
 
-   // void SetCurrentFile( const std::string &S );
+  // void SetCurrentFile( const std::string &S );
 };
 
-struct GDXFileEntry_t {
-   std::string FFileName, FFileId, FFileInfo;
+struct GDXFileEntry {
+  std::string FFileName, FFileId, FFileInfo;
 
-   GDXFileEntry_t( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
+  GDXFileEntry(std::string AFileName, std::string AFileId, std::string AFileInfo);
 };
 
-template<typename T>
-struct FileList_t final : public gdlib::gmsobj::TXList<T> {
-   ~FileList_t() override;
-   void Clear() override;
-   void AddFile( const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo );
-   std::string FileName( int Index );
-   std::string FileId( int Index );
-   std::string FileInfo( int Index );
+template <typename T>
+struct FileList final : public gdlib::gmsobj::TXList<T> {
+  ~FileList() override;
+  void Clear() override;
+  void AddFile(const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo);
+  std::string FileName(int Index);
+  std::string FileId(int Index);
+  std::string FileInfo(int Index);
 };
 
-class SymbolList_t : public gdlib::gmsobj::TXHashedStringList<GAMSSymbol_t>
-{
-   std::unique_ptr<gdlib::gmsobj::TXStrPool<library::ShortString_t>> StrPool;
-   int FErrorCount {}, NextAcroNr {};
-   std::unique_ptr<FileList_t<GDXFileEntry_t>> FileList;
-   std::vector<std::string> IncludeList, ExcludeList;
+class SymbolList : public gdlib::gmsobj::TXHashedStringList<GAMSSymbol> {
+  std::unique_ptr<gdlib::gmsobj::TXStrPool<library::ShortString>> StrPool;
+  int FErrorCount{}, NextAcroNr{};
+  std::unique_ptr<FileList<GDXFileEntry>> fileList;
+  std::vector<std::string> IncludeList, ExcludeList;
 
 public:
-   SymbolList_t();
-   ~SymbolList_t() override;
-   void Clear() override;
+  SymbolList();
+  ~SymbolList() override;
+  void Clear() override;
 
-   static void OpenOutput( const library::ShortString_t &AFileName, int &ErrNr );
-   static int AddUEL( const library::ShortString_t &S );
-   int AddSymbol( const std::string &AName, int ADim, gdxSyType AType, int ASubTyp );
-   void AddPGXFile( int FNr, ProcessPass_t Pass );
-   bool CollectBigOne( int SyNr );
-   bool FindGDXFiles( const std::string &Path );
-   void WritePGXFile( int SyNr, ProcessPass_t Pass );
-   void WriteNameList();
-   void KeepNewAcronyms( const gdxHandle_t &PGX );
-   void ShareAcronyms( const gdxHandle_t &PGX );
-   int FindAcronym( const library::ShortString_t &Id );
+  static void OpenOutput(const library::ShortString &AFileName, int &ErrNr);
+  static int AddUEL(const library::ShortString &S);
+  int AddSymbol(const std::string &AName, int ADim, gdxSyType AType, int ASubTyp);
+  void AddPGXFile(int FNr, ProcessPass Pass);
+  bool CollectBigOne(int SyNr);
+  bool FindGDXFiles(const std::string &Path);
+  void WritePGXFile(int SyNr, ProcessPass Pass);
+  void WriteNameList();
+  void KeepNewAcronyms(const gdxHandle_t &PGX);
+  void ShareAcronyms(const gdxHandle_t &PGX);
+  static int FindAcronym(const library::ShortString &Id);
 
-   int GetFErrorCount() const;
-   int GetFileListSize() const;
-   bool IsIncludeListEmpty() const;
-   bool IsExcludeListEmpty() const;
-   void AddToIncludeList( const std::string &item );
-   void AddToExcludeList( const std::string &item );
+  int GetFErrorCount() const;
+  int GetFileListSize() const;
+  bool IsIncludeListEmpty() const;
+  bool IsExcludeListEmpty() const;
+  void AddToIncludeList(const std::string &item);
+  void AddToExcludeList(const std::string &item);
 };
 
-std::string FormatDateTime( uint16_t Year, uint16_t Month, uint16_t Day,
-                            uint16_t Hour, uint16_t Min, uint16_t Sec );
+std::string FormatDateTime(uint16_t Year, uint16_t Month, uint16_t Day,
+                           uint16_t Hour, uint16_t Min, uint16_t Sec);
 
-bool GetParameters( int argc, const char *argv[] );
+bool GetParameters(int argc, const char *argv[]);
 
-void Usage( const library::AuditLine_t &AuditLine );
+void Usage(const library::AuditLine &auditLine);
 
-int main( int argc, const char *argv[] );
+int main(int argc, const char *argv[]);
 
-}// namespace gdxmerge
-
-#endif//GDX_GDXMERGE_H
+} // namespace gdxmerge

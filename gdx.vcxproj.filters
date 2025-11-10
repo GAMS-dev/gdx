@@ -155,6 +155,9 @@
     <ClCompile Include="zlib\zutil.c">
       <Filter>zlib</Filter>
     </ClCompile>
+    <ClCompile Include="src\rtl\system_p3.cpp">
+      <Filter>rtl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\gxfile.hpp">
@@ -252,5 +255,8 @@
     </ClInclude>
     <ClInclude Include="src\rtl\idglobal_p3.hpp" />
     <ClInclude Include="src\tests\doctest.hpp" />
+    <ClInclude Include="src\rtl\system_p3.hpp">
+      <Filter>rtl</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

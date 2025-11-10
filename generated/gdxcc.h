@@ -345,7 +345,7 @@ typedef int  (GDX_CALLCONV *gdxAddAlias_t) (gdxHandle_t pgdx, const char *Id1, c
 GDX_FUNCPTR(gdxAddAlias);
 
 typedef int  (GDX_CALLCONV *gdxAddSetText_t) (gdxHandle_t pgdx, const char *Txt, int *TxtNr);
-/** Register a string in the string table Register a string in the string table and return the integer number assigned to this string. The integer value can be used to set the associated text of a set element. The string must follow the GAMS syntax rules for explanatory text e.g. not longer than 255 characters.
+/** Register a string in the string table and return the integer number assigned to this string. The integer value can be used to set the associated text of a set element. The string must follow the GAMS syntax rules for explanatory text e.g. not longer than 255 characters.
  *
  * @param pgdx gdx object handle
  * @param Txt The string to be registered (must not exceed 255 characters).

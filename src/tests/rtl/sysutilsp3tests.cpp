@@ -26,14 +26,17 @@
 #include "sysutils_p3.hpp"
 #include "utils.hpp"
 #include "../doctest.hpp"
+
 #include <string>
 #include <chrono>
 #include <filesystem>
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 
 #if defined(_WIN32)
 #include <windows.h>
+#undef min
 #undef max
 #endif
 
@@ -208,9 +211,9 @@ TEST_CASE( "Test file exists" )
 
 #if defined( _WIN32 )
    constexpr char sep {'\\'};
-   std::array<char, MAX_PATH> tmpDirBuf;
-   GetTempPathA(tmpDirBuf.size(), tmpDirBuf.data());
-   const std::string pathRoot = "\\\\?\\"s + tmpDirBuf.data();
+   std::array<char, MAX_PATH> tmpDirBuf {};
+   GetTempPathA(static_cast<DWORD>(tmpDirBuf.size()), tmpDirBuf.data());
+   const std::string pathRoot = R"(\\?\)"s + tmpDirBuf.data();
 #else
    constexpr char sep {'/'};
    #if defined( __APPLE__ )
@@ -228,8 +231,43 @@ TEST_CASE( "Test file exists" )
    ofs.close();
    REQUIRE( FileExists( gdxFn ) );
 
-   std::filesystem::remove_all( foldername );
-   REQUIRE_FALSE( FileExists( foldername ) );
+   std::filesystem::remove_all( pathRoot + foldername );
+   REQUIRE_FALSE( FileExists( pathRoot + foldername ) );
+}
+
+TEST_CASE("Test floating point number to string conversion")
+{
+   const auto s = FloatToStr( 3.14 );
+   //std::cout << s << std::endl;
+}
+
+TEST_CASE("Test string to 64-bit integer conversion")
+{
+   REQUIRE_EQ(0, StrToInt64( ""s ));
+   REQUIRE_EQ(std::numeric_limits<int64_t>::min(), StrToInt64( "3.142" ) ); // error
+   REQUIRE_EQ(12345, StrToInt64( "12345" ) );
+   REQUIRE_EQ(-12345, StrToInt64( "-12345" ) );
+   REQUIRE_EQ(std::numeric_limits<int64_t>::max(), StrToInt64( std::to_string( std::numeric_limits<int64_t>::max() ) ) );
+   REQUIRE_EQ(std::numeric_limits<int64_t>::min(), StrToInt64( std::to_string( std::numeric_limits<int64_t>::min() ) ) );
+   REQUIRE_EQ(255, StrToInt64( "$FF" ) );
+   REQUIRE_EQ(255, StrToInt64( "$ff" ) );
+   REQUIRE_EQ(0, StrToInt64( "$00" ) );
+   REQUIRE_EQ(10, StrToInt64( "$A" ) );
+}
+
+TEST_CASE("Test integer to hex string conversion")
+{
+   REQUIRE_EQ("0"s, IntToHex( 0, 1 ));
+   REQUIRE_EQ("FF"s, IntToHex(255, 2));
+}
+
+TEST_CASE("Test get current directory")
+{
+#if defined(__IN_CPPMEX__)
+   REQUIRE( (GetCurrentDir().find( "CPPMEX"s ) != std::string::npos || GetCurrentDir().find( "cppmex"s ) != std::string::npos) );
+#else
+   REQUIRE( (GetCurrentDir().find( "gdx"s ) != std::string::npos) );
+#endif
 }
 
 TEST_SUITE_END();

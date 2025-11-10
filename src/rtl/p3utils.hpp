@@ -41,7 +41,7 @@ void initParamStr( int argc, const char **argv );
 int p3Chmod( const std::string &path, int mode );
 
 double RealTrunc( double x );
-double ReadRound( double x );
+double RealRound( double x );
 
 // delphiGetDecDigits is exposed so we can test it again p3GetDecDigits
 bool delphiGetDecDigits( double y, int mode, int nDigits, std::string &digits, int &decPos, int &minusCnt );
@@ -82,7 +82,7 @@ std::string P3GetEnv( const std::string &name );
 void P3UnSetEnv( const std::string &name );
 bool P3IsSetEnv( const std::string &name );
 
-bool P3SetEnvPC( const std::string &name, char *val );
+bool P3SetEnvPC( const std::string &name, const char *val );
 uint32_t P3GetEnvPC( const std::string &name, char *buf, uint32_t bufSize );
 
 int p3GetExecName( std::string &execName, std::string &msg );
@@ -95,9 +95,11 @@ void p3NoPopups();
 std::string p3GetUserName();
 std::string p3GetComputerName();
 
+bool p3SendDataMessage( bool broadcast, const std::string &winTitle, const std::string &data );
+
 #if defined(_WIN32)
 using Tp3FileHandle = void *; // from CreateFileA (fileapi.h)
-const Tp3FileHandle NullHandle = nullptr;
+constexpr Tp3FileHandle NullHandle { nullptr };
 #else
 using Tp3FileHandle = int; // from open (fcntl.h)
 const Tp3FileHandle NullHandle = 0;
@@ -152,7 +154,7 @@ bool p3SockRecv(T_P3SOCKET s, char *buf, int count, int &res);
 bool p3SockRecvTimeout(T_P3SOCKET s, char *buf, int count, int &res, int timeOut);
 
 T_P3SOCKET p3SockAcceptClientConn( T_P3SOCKET srvSock, uint32_t timeOut = 0 );
-T_P3SOCKET p3SockCreateServerSocket(int port, bool reuse, int *retCode = nullptr);
+T_P3SOCKET p3SockCreateServerSocket(int port, int *retCode = nullptr);
 
 int p3SockGetPort(T_P3SOCKET s, int &res);
 #endif // __IN_CPPMEX__
@@ -162,8 +164,5 @@ int p3SockGetPort(T_P3SOCKET s, int &res);
 int xGetExecName( std::string &execName, std::string &msg );
 
 int p3SomeIOResult();
-
-double RealTrunc( double x );
-double RealRound( double x );
 
 }// namespace rtl::p3utils

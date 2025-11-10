@@ -74,6 +74,8 @@ int LChPos( char Ch, const char *S );
 int LChSetPos( const char *Cs, const char *S, int slen );
 int RChSetPos( const char *Cs, const char *S, int slen );
 
+char gsgetchar( const std::string &s, int p );
+
 std::string DblToStrSep( double V, char DecimalSep );
 uint8_t DblToStrSep( double V, char DecimalSep, char *s );
 
@@ -92,6 +94,9 @@ bool StrUEqual( const DelphiStrRef &S1, std::string_view S2 );
 std::string IncludeTrailingPathDelimiterEx( const std::string &S );
 std::string ExcludeTrailingPathDelimiterEx( const std::string &S );
 
+void cleanpath(std::string &path, char delim);
+std::string CompleteDirEx( const std::string &dir1, const std::string &dir2, int fc, bool relPath );
+
 std::string ExtractFileNameEx( const std::string &FileName );
 
 std::string ExtractFilePathEx( const std::string &FileName );
@@ -106,6 +111,7 @@ int StrAsInt( const std::string &s );
 std::string ChangeFileExtEx( const std::string &FileName, const std::string &Extension );
 std::string CompleteFileExtEx( const std::string &FileName, const std::string &Extension );
 std::string ExtractFileExtEx( const std::string &FileName );
+std::string CompleteFileNameEx(const std::string &directory, const std::string &filename, int fc, bool relPath);
 
 constexpr int maxBOMLen { 4 };
 using tBomIndic = std::array<uint8_t, maxBOMLen>;
@@ -127,5 +133,9 @@ int PStrUCmp( std::string_view P1, std::string_view P2 );
 int StrUCmp( std::string_view S1, std::string_view S2 );
 int StrUCmp( const DelphiStrRef &S1, const DelphiStrRef &S2 );
 bool PStrEqual( std::string_view P1, std::string_view P2 );
+
+int LStrPosSp(const std::string &pat, const std::string &s, int sp);
+int LStrPos(const std::string &Pat, const std::string &S);
+
 
 }// namespace gdlib::strutilx

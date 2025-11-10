@@ -82,64 +82,78 @@ if (UNIX)
 endif (UNIX)
 
 set(zlib-units
-		# ZLIB modules
-		# missing? run in project root: git clone https://github.com/madler/zlib zlib
-		zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c
-		zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c
-		zlib/zutil.c
+	# ZLIB modules
+	# missing? run in project root: git clone https://github.com/madler/zlib zlib
+	zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c
+	zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c
+	zlib/zutil.c
 )
 
 set(gdx-core
-		# P3 runtime library
-		src/rtl/dtoaLoc.h
-		src/rtl/dtoaLoc.c
-		src/rtl/p3io.hpp
-		src/rtl/p3io.cpp
-		src/rtl/p3utils.hpp
-		src/rtl/p3utils.cpp
-		src/rtl/sysutils_p3.hpp
-		src/rtl/sysutils_p3.cpp
-		src/rtl/p3platform.hpp
-		src/rtl/p3platform.cpp
-		src/rtl/math_p3.hpp
-		src/rtl/math_p3.cpp
+	# P3 runtime library
+	src/rtl/dtoaLoc.h
+	src/rtl/dtoaLoc.c
+	src/rtl/p3io.hpp
+	src/rtl/p3io.cpp
+	src/rtl/p3utils.hpp
+	src/rtl/p3utils.cpp
+	src/rtl/sysutils_p3.hpp
+	src/rtl/sysutils_p3.cpp
+	src/rtl/system_p3.hpp
+	src/rtl/system_p3.cpp
+	src/rtl/p3platform.hpp
+	src/rtl/p3platform.cpp
+	src/rtl/math_p3.hpp
+	src/rtl/math_p3.cpp
 
-		# gdlib essential units
-		src/gdlib/gmsstrm.cpp
-		src/gdlib/gmsstrm.hpp
-		src/gdlib/utils.hpp
-		src/gdlib/utils.cpp
-		src/gdlib/strutilx.hpp
-		src/gdlib/strutilx.cpp
-		src/gdlib/strindexbuf.hpp
+	# gdlib essential units
+	src/gdlib/gmsstrm.cpp
+	src/gdlib/gmsstrm.hpp
+	src/gdlib/utils.hpp
+	src/gdlib/utils.cpp
+	src/gdlib/strutilx.hpp
+	src/gdlib/strutilx.cpp
+	src/gdlib/strindexbuf.hpp
 
-		# GDX specific units
-		src/gxfile.hpp
-		src/gxfile.cpp
-		src/gdx.hpp
+	# GDX specific units
+	src/gxfile.hpp
+	src/gxfile.cpp
+	src/gdx.hpp
 
-		${zlib-units}
+	${zlib-units}
+)
+
+set(test-deps
+	src/gdlib/gmsobj.hpp
+	src/gdlib/gmsobj.cpp
 )
 
 set(tests
-		src/tests/doctestmain.cpp
+	src/tests/doctestmain.cpp
 
-		src/tests/gdxtests.hpp
-		src/tests/gdxtests.cpp
-		src/tests/gxfiletests.cpp
+	src/tests/gdxtests.hpp
+	src/tests/gdxtests.cpp
+	src/tests/gxfiletests.cpp
 
-		src/tests/gdlib/gmsdatatests.cpp
-		src/tests/gdlib/gmsobjtests.cpp
-		src/tests/gdlib/gmsstrmtests.cpp
-		src/tests/gdlib/strhashtests.cpp
-		src/tests/gdlib/strutilxtests.cpp
-		src/tests/gdlib/utilstests.cpp
+	src/tests/gdlib/gmsdatatests.cpp
+	src/tests/gdlib/gmsobjtests.cpp
+	src/tests/gdlib/gmsstrmtests.cpp
+	src/tests/gdlib/strhashtests.cpp
+	src/tests/gdlib/strutilxtests.cpp
+	src/tests/gdlib/utilstests.cpp
 
-		src/tests/rtl/p3iotests.cpp
-		src/tests/rtl/p3utilstests.cpp
-		src/tests/rtl/sysutilsp3tests.cpp
+	src/tests/rtl/p3iotests.cpp
+	src/tests/rtl/p3utilstests.cpp
+	src/tests/rtl/sysutilsp3tests.cpp
 )
 
-set(inc-dirs zlib src generated src/gdlib src/global src/rtl)
+set(inc-dirs
+	${CMAKE_SOURCE_DIR}/zlib
+	${CMAKE_SOURCE_DIR}/src
+	${CMAKE_SOURCE_DIR}/generated
+	${CMAKE_SOURCE_DIR}/src/gdlib
+	${CMAKE_SOURCE_DIR}/src/global
+	${CMAKE_SOURCE_DIR}/src/rtl
+)
 
 include(targets.cmake)

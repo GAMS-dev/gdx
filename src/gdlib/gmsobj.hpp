@@ -30,6 +30,7 @@
 #include <cassert>
 #include <limits>
 #include "utils.hpp"
+#include "strutilx.hpp"
 
 // ==============================================================================================================
 // Interface
@@ -455,6 +456,11 @@ public:
       return FList[Index - ( OneBased ? 1 : 0 )].FObject;
    }
 
+   T **GetObjectAddr( const int Index )
+   {
+      return &FList[Index - ( OneBased ? 1 : 0 )].FObject;
+   }
+
    void PutObject( const int Index, T *AObject )
    {
       FList[Index - ( OneBased ? 1 : 0 )].FObject = AObject;
@@ -592,7 +598,7 @@ public:
    {
       const char *s1 = FList[Index1 - ( OneBased ? 1 : 0 )].FString;
       const char *s2 = FList[Index2 - ( OneBased ? 1 : 0 )].FString;
-      return utils::sameText( s1, s2 );
+      return strutilx::PStrUCmp( s1, s2 );
    }
 
    [[nodiscard]] int Count() const
@@ -786,5 +792,88 @@ public:
       return utils::sameTextPChar<false>( s1, s2 );
    }
 };
+
+// Implements a dynamic sorted list of strings each with an Object field
+template<typename T>
+class TXSortedStringList final : public TXCustomStringList<T>
+{
+   int FUpdateCount {};
+   bool FSorted { true };
+
+public:
+   bool Find( const char *S, const size_t slen, int &Index )
+   {
+      bool res {};
+      int L {}, H { this->FCount - 1 };
+      while( L <= H )
+      {
+         int I { ( L + H ) >> 1 };
+         if( const int C { strutilx::PStrUCmp( S, this->FList[I].FString ) }; C > 0 )
+            L = I + 1;
+         else
+         {
+            H = I - 1;
+            if( !C )
+            {
+               res = true;
+               L = I;
+            }
+         }
+      }
+      Index = L + utils::ord( this->OneBased );
+      return res;
+   }
+
+   int Add( const char *S, const size_t slen ) override
+   {
+      return AddObject( S, slen, nullptr );
+   }
+
+   int AddObject( const char *S, const size_t slen, T *APointer ) override
+   {
+      int res {};
+      if( FUpdateCount || !this->FCount )
+      {
+         res = this->FCount + utils::ord(this->OneBased);
+         FSorted = false;
+      }
+      else
+         Find(S, slen, res );
+      this->InsertItem(res, S, slen, APointer );
+      return res;
+   }
+
+   int IndexOf( const char *S, const size_t slen )
+   {
+      int res;
+      return !FSorted ? this->IndexOf( S, slen ) : !Find( S, slen, res ) ? -1 : res;
+   }
+
+   void BeginUpdate()
+   {
+      ++FUpdateCount;
+   }
+
+   void EndUpdate()
+   {
+      --FUpdateCount;
+      if( !FUpdateCount )
+         SetSorted( true );
+   }
+
+   [[nodiscard]] bool GetSorted() const { return FSorted; }
+
+   void SetSorted( const bool Value )
+   {
+      if( FSorted != Value )
+      {
+         if( Value )
+            this->SortN( this->FCount );
+         FSorted = Value;
+      }
+   }
+};
+
+void CMove( const void *src, void *dest, int len );
 
 }// namespace gdlib::gmsobj

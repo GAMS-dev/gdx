@@ -8,20 +8,18 @@ from gdxmerge import TestGdxMerge
 
 
 class TestGdxTools(unittest.TestCase):
-
     def test_gams_module(self) -> None:
-        self.assertTrue('gams' in sys.modules)
+        self.assertTrue("gams" in sys.modules)
 
     def test_gams_api(self) -> None:
         self.assertRegex(
-            f'API OK -- Version {gams.__version__}',
-            r'API OK -- Version \d+\.\d+\.\d+'
+            f"API OK -- Version {gams.__version__}", r"API OK -- Version \d+\.\d+\.\d+"
         )
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description='gdxtools tests')
-    parser.add_argument('-t', '--tool', help='specify the tool you want to test')
+    parser = argparse.ArgumentParser(description="gdxtools tests")
+    parser.add_argument("-t", "--tool", help="specify the tool you want to test")
     args = parser.parse_args()
 
     def suite() -> unittest.TestSuite:
@@ -31,13 +29,13 @@ def main() -> int:
         suite.addTests(loader.loadTestsFromTestCase(TestGdxTools))
 
         match args.tool:
-            case 'gdxdump' | 'dump':
+            case "gdxdump" | "dump":
                 suite.addTests(loader.loadTestsFromTestCase(TestGdxDump))
 
-            case 'gdxdiff' | 'diff':
+            case "gdxdiff" | "diff":
                 suite.addTests(loader.loadTestsFromTestCase(TestGdxDiff))
 
-            case 'gdxmerge' | 'merge':
+            case "gdxmerge" | "merge":
                 suite.addTests(loader.loadTestsFromTestCase(TestGdxMerge))
 
             case _:
@@ -56,5 +54,5 @@ def main() -> int:
         return 1
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main())
