@@ -263,7 +263,11 @@ TEST_CASE("Test integer to hex string conversion")
 
 TEST_CASE("Test get current directory")
 {
+#if defined(__IN_CPPMEX__)
+   REQUIRE( (GetCurrentDir().find( "CPPMEX"s ) != std::string::npos || GetCurrentDir().find( "cppmex"s ) != std::string::npos) );
+#else
    REQUIRE( (GetCurrentDir().find( "gdx"s ) != std::string::npos) );
+#endif
 }
 
 TEST_SUITE_END();
