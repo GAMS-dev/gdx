@@ -98,14 +98,23 @@ std::string lowercase( const std::string_view s )
 bool sameTextInvariant( const std::string_view a,
                         const std::string_view b )
 {
-   const auto l = a.length();
    if( b.length() != a.length() ) return false;
+#if defined(_WIN32)
+   // This appears to be still faster with MSVC and icl.exe
+   const auto l = a.length();
    for( size_t i {}; i < l; i++ )
    {
       if( a[i] != b[i] && tolower( a[i] ) != tolower( b[i] ) )
          return false;
    }
    return true;
+#else
+   // Much faster with GCC and Clang (and new Intel compiler)
+   return std::equal(a.begin(), a.end(), b.begin(),
+      []( const unsigned char c1, const unsigned char c2) {
+         return c1 == c2 || tolower(c1) == tolower(c2);
+   });
+#endif
 }
 
 std::string_view trim( const std::string_view s )
@@ -113,7 +122,7 @@ std::string_view trim( const std::string_view s )
    if( s.empty() ) return {};
    const auto firstNonBlank = s.find_first_not_of( " \t\n\r" );
    const auto lastNonBlank = s.find_last_not_of( " \t\n\r" );
-   return s.substr( firstNonBlank, ( lastNonBlank - firstNonBlank ) + 1 );
+   return s.substr( firstNonBlank, lastNonBlank - firstNonBlank + 1 );
 }
 
 std::string getLineWithSep( std::istream &fs )
@@ -135,7 +144,7 @@ bool sameTextPrefix( const std::string_view s, const std::string_view prefix )
 
 bool hasNonBlank( const std::string_view s )
 {
-   return std::any_of( s.begin(), s.end(), []( char c ) {
+   return std::any_of( s.begin(), s.end(), []( const char c ) {
       return !in( c, ' ', '\t', '\r', '\n' );
    } );
 }
@@ -146,7 +155,7 @@ std::string trim( const std::string &s )
    const auto firstNonBlank = s.find_first_not_of( " \t\n\r" );
    if(firstNonBlank == std::string::npos) return ""s;
    const auto lastNonBlank = s.find_last_not_of( " \t\n\r" );
-   return s.substr( firstNonBlank, ( lastNonBlank - firstNonBlank ) + 1 );
+   return s.substr( firstNonBlank, lastNonBlank - firstNonBlank + 1 );
 }
 
 std::string trimRight( const std::string &s )
@@ -200,7 +209,7 @@ std::string trimZeroesRight( const std::string &s, const char DecimalSep )
 
 bool hasCharLt( const std::string_view s, int n )
 {
-   return anychar( [&n]( char c ) { return (int) c < n; }, s );
+   return anychar( [&n]( const char c ) { return static_cast<int>( c ) < n; }, s );
 }
 
 double round( const double n, const int ndigits )
@@ -208,21 +217,18 @@ double round( const double n, const int ndigits )
    return std::round( n * std::pow( 10, ndigits ) ) * pow( 10, -ndigits );
 }
 
-void replaceChar( char a, char b, std::string &s )
+void replaceChar( const char a, const char b, std::string &s )
 {
    if( a == b ) return;
-   std::replace_if(s.begin(), s.end(), [a]( char i ) { return i == a; }, b );
+   std::replace_if(s.begin(), s.end(), [a]( const char i ) { return i == a; }, b );
 }
 
-std::string quoteWhitespace( const std::string &s,
-                             char quotechar )
+std::string quoteWhitespace( const std::string &s, char quotechar )
 {
    return s.find( ' ' ) != std::string::npos ? ""s + quotechar + s + quotechar : s;
 }
 
-int strCompare( const char *S1,
-                const char *S2,
-                bool caseInsensitive )
+int strCompare( const char *S1, const char *S2, const bool caseInsensitive )
 {
    if( S1[0] == '\0' || S2[0] == '\0' )
       return ( S1[0] != '\0' ? 1 : 0 ) - ( S2[0] != '\0' ? 1 : 0 );
@@ -244,8 +250,7 @@ int strCompare( const char *S1,
      **/
 
 // Convert C++ standard library string to Delphi short string
-int strConvCppToDelphi( const std::string_view s,
-                        char *delphistr )
+int strConvCppToDelphi( const std::string_view s, char *delphistr )
 {
    if( s.length() > std::numeric_limits<uint8_t>::max() )
    {
@@ -290,7 +295,7 @@ void val( const std::string &s, double &num, int &code )
 // Mimicks Delphi System.Val, see:
 // https://docwiki.embarcadero.com/Libraries/Sydney/en/System.Val
 // https://www.delphibasics.co.uk/RTL.php?Name=Val
-void val(const char* s, int slen, double& num, int& code)
+void val(const char* s, const int slen, double& num, int& code)
 {
    rtl::p3io::P3_Val_dd(s, slen, &num, &code);
 }
@@ -326,7 +331,7 @@ std::string zeros( const int n )
    return repeatChar( n, '0' );
 }
 
-int lastOccurence( std::string_view s, char c )
+int lastOccurence( const std::string_view s, const char c )
 {
    for( int i = static_cast<int>( s.length() ) - 1; i >= 0; i-- )
       if( s[i] == c ) return i;
@@ -355,7 +360,7 @@ int strLenNoWhitespace( const std::string_view s )
    } ) );
 }
 
-char &getCharAtIndexOrAppend( std::string &s, int ix )
+char &getCharAtIndexOrAppend( std::string &s, const int ix )
 {
    const auto l = s.length();
    assert( ix >= 0 && ix <= static_cast<int>( l ) && "Index not in valid range" );
@@ -363,7 +368,7 @@ char &getCharAtIndexOrAppend( std::string &s, int ix )
    return s[ix];
 }
 
-bool strContains( const std::string_view s, char c )
+bool strContains( const std::string_view s, const char c )
 {
    return s.find( c ) != std::string::npos;
 }
@@ -374,7 +379,7 @@ bool strContains( const std::string_view s, const std::initializer_list<char> &c
                        [&cs]( const char c ) { return std::find( cs.begin(), cs.end(), c ) != cs.end(); } );
 }
 
-bool excl_or( bool a, bool b )
+bool excl_or( const bool a, const bool b )
 {
    return ( a && !b ) || ( !a && b );
 }
@@ -385,7 +390,7 @@ int posOfSubstr( const std::string_view sub, const std::string_view s )
    return p == std::string::npos ? -1 : static_cast<int>( p );
 }
 
-std::list<std::string> split( const std::string_view s, char sep )
+std::list<std::string> split( const std::string_view s, const char sep )
 {
    std::list<std::string> res;
    std::string cur;
@@ -451,12 +456,12 @@ void assertOrMsg( bool condition, const std::string &msg )
 }
 
 // same as std::string::substr but silent when offset > input size
-std::string_view substr( const std::string_view s, int offset, int len )
+std::string_view substr( const std::string_view s, const int offset, const int len )
 {
-   return ( s.empty() || offset > (int) s.size() - 1 ) ? std::string_view {} : s.substr( offset, len );
+   return s.empty() || offset > static_cast<int>( s.size() ) - 1 ? std::string_view {} : s.substr( offset, len );
 }
 
-std::string constructStr( int size, const std::function<char( int )> &charForIndex )
+std::string constructStr( const int size, const std::function<char( int )> &charForIndex )
 {
    std::string s;
    s.resize( size );
@@ -465,10 +470,10 @@ std::string constructStr( int size, const std::function<char( int )> &charForInd
    return s;
 }
 
-std::string join( char sep, const std::initializer_list<std::string> &parts )
+std::string join( const char sep, const std::initializer_list<std::string> &parts )
 {
-   const int len = std::accumulate( parts.begin(), parts.end(), (int) parts.size() - 1,
-                                    []( int acc, const std::string &s ) -> int { return acc + (int) s.length(); } );
+   const int len = std::accumulate( parts.begin(), parts.end(), static_cast<int>( parts.size() ) - 1,
+                                    []( const int acc, const std::string &s ) -> int { return acc + static_cast<int>( s.length() ); } );
    std::string res( len, sep );
    int i {};
    for( const std::string &part: parts )
@@ -502,7 +507,7 @@ bool ends_with( const std::string &s, const std::string &suffix )
    return true;
 }
 
-std::string quoteWhitespaceDir( const std::string &s, char sep, char quotechar )
+std::string quoteWhitespaceDir( const std::string &s, const char sep, const char quotechar )
 {
    if( !strContains( s, ' ' ) ) return s;
    std::string s2 {};
@@ -575,10 +580,10 @@ int strCompare( const std::string_view S1, const std::string_view S2, const bool
    if( L > S2.length() ) L = S2.length();
    for( size_t K {}; K < L; K++ )
    {
-      const int c1 = caseInsensitive ? toupper( S1[K] ) : S1[K];
-      const int c2 = caseInsensitive ? toupper( S2[K] ) : S2[K];
-      const int d = c1 - c2;
-      if( d ) return d;
+      const int c1 = static_cast<unsigned char>(caseInsensitive ? toupper( S1[K] ) : S1[K]);
+      const int c2 = static_cast<unsigned char>(caseInsensitive ? toupper( S2[K] ) : S2[K]);
+      if( const int d = c1 - c2 )
+         return d;
    }
    return static_cast<int>( S1.length() - S2.length() );
 }
@@ -595,8 +600,8 @@ std::string *StringBuffer::getStr()
 
 int StringBuffer::getBufferSize() const { return bufferSize; }
 
-BinaryDiffMismatch::BinaryDiffMismatch( uint64_t offset, uint8_t lhs, uint8_t rhs ) : offset( offset ), lhs( lhs ),
-                                                                                      rhs( rhs ) {}
+BinaryDiffMismatch::BinaryDiffMismatch( const uint64_t offset, const uint8_t lhs, const uint8_t rhs )
+   : offset( offset ), lhs( lhs ), rhs( rhs ) {}
 
 bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
 {
@@ -661,7 +666,7 @@ int64_t queryPeakRSS()
    PROCESS_MEMORY_COUNTERS info;
    if( !GetProcessMemoryInfo( GetCurrentProcess(), &info, sizeof( info ) ) )
       return 0;
-   return (int64_t) info.PeakWorkingSetSize;
+   return static_cast<int64_t>( info.PeakWorkingSetSize );
 #elif defined( __linux )
    std::ifstream ifs { "/proc/self/status" };
    if( !ifs.is_open() ) return 0;
@@ -684,7 +689,7 @@ int64_t queryPeakRSS()
 void copy_to_uppercase( const std::string &s, char *buf )
 {
    int j {};
-   for( char c: s )
+   for( const char c : s )
       buf[j++] = toupper( c );
    buf[j] = '\0';
 }

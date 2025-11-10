@@ -82,7 +82,7 @@ public:
          hasSym.set( s );
    }
 
-   bool empty() const {
+   [[nodiscard]] bool empty() const {
       for( int s {}; s < card; s++ )
          if( hasSym[s] ) return false;
       return true;
@@ -213,7 +213,7 @@ inline charset unionOp(const charset &a, const charset &b) {
 
 inline void insertAllChars( charset &charset, const std::string_view chars )
 {
-   for(char c : chars)
+   for( const char c : chars)
       charset.insert(c);
 }
 
@@ -442,7 +442,7 @@ inline charset multiCharSetRanges( std::initializer_list<std::pair<char, char>> 
    return res;
 }
 
-std::string strInflateWidth( const int num, const int targetStrLen, const char inflateChar =  ' ');
+std::string strInflateWidth( int num, int targetStrLen, char inflateChar =  ' ');
 
 void removeTrailingCarriageReturnOrLineFeed( std::string &s );
 
