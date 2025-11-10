@@ -349,7 +349,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>SetTraceLevel</b> (Tr
 <tr class="separator:ade2bf255c16f8b630deffc448df61704"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Text for UELs</div></td></tr>
 <tr class="memitem:a1a35f810ade409dc201291bdb28c4ab2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#a1a35f810ade409dc201291bdb28c4ab2">gdxAddSetText</a> (const char *Txt, int &amp;TxtNr)</td></tr>
-<tr class="memdesc:a1a35f810ade409dc201291bdb28c4ab2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a string in the string table Register a string in the string table and return the integer number assigned to this string. The integer value can be used to set the associated text of a set element. The string must follow the GAMS syntax rules for explanatory text e.g. not longer than 255 characters.  <a href="classgdx_1_1TGXFileObj.html#a1a35f810ade409dc201291bdb28c4ab2">More...</a><br /></td></tr>
+<tr class="memdesc:a1a35f810ade409dc201291bdb28c4ab2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register a string in the string table and return the integer number assigned to this string. The integer value can be used to set the associated text of a set element. The string must follow the GAMS syntax rules for explanatory text e.g. not longer than 255 characters.  <a href="classgdx_1_1TGXFileObj.html#a1a35f810ade409dc201291bdb28c4ab2">More...</a><br /></td></tr>
 <tr class="separator:a1a35f810ade409dc201291bdb28c4ab2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada63dd0c8f185c863b19bd39304318d5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgdx_1_1TGXFileObj.html#ada63dd0c8f185c863b19bd39304318d5">gdxGetElemText</a> (int TxtNr, char *Txt, int &amp;Node)</td></tr>
 <tr class="memdesc:ada63dd0c8f185c863b19bd39304318d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the string and node number for an entry in the string table. Returns zero if the operation is not possible.  <a href="classgdx_1_1TGXFileObj.html#ada63dd0c8f185c863b19bd39304318d5">More...</a><br /></td></tr>
@@ -938,7 +938,7 @@ When reading a GDX file, this function is used to provide the acronym index, and
       </table>
 </div><div class="memdoc">
 
-<p>Register a string in the string table Register a string in the string table and return the integer number assigned to this string. The integer value can be used to set the associated text of a set element. The string must follow the GAMS syntax rules for explanatory text e.g. not longer than 255 characters. </p>
+<p>Register a string in the string table and return the integer number assigned to this string. The integer value can be used to set the associated text of a set element. The string must follow the GAMS syntax rules for explanatory text e.g. not longer than 255 characters. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">Txt</td><td>The string to be registered (must not exceed 255 characters). </td></tr>
@@ -2777,7 +2777,7 @@ When reading a GDX file, the index is returned as the level value when reading a
 <div class="line">   std::cout &lt;&lt; std::endl;</div>
 <div class="line">}</div>
 </div><!-- fragment --> </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a1a35f810ade409dc201291bdb28c4ab2" title="Register a string in the string table Register a string in the string table and return the integer nu...">gdxAddSetText</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#a2e17521127e04fb89454b49521c9be22" title="Set the Node number for an entry in the string table. After registering a string with AddSetText,...">gdxSetTextNodeNr</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a1a35f810ade409dc201291bdb28c4ab2" title="Register a string in the string table and return the integer number assigned to this string....">gdxAddSetText</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#a2e17521127e04fb89454b49521c9be22" title="Set the Node number for an entry in the string table. After registering a string with AddSetText,...">gdxSetTextNodeNr</a> </dd></dl>
 
 </div>
 </div>
@@ -3423,7 +3423,7 @@ When reading a GDX file, the index is returned as the level value when reading a
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Non-zero if the operation is possible, zero otherwise. </dd></dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a1a35f810ade409dc201291bdb28c4ab2" title="Register a string in the string table Register a string in the string table and return the integer nu...">gdxAddSetText</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#ada63dd0c8f185c863b19bd39304318d5" title="Retrieve the string and node number for an entry in the string table. Returns zero if the operation i...">gdxGetElemText</a> </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classgdx_1_1TGXFileObj.html#a1a35f810ade409dc201291bdb28c4ab2" title="Register a string in the string table and return the integer number assigned to this string....">gdxAddSetText</a>, <a class="el" href="classgdx_1_1TGXFileObj.html#ada63dd0c8f185c863b19bd39304318d5" title="Retrieve the string and node number for an entry in the string table. Returns zero if the operation i...">gdxGetElemText</a> </dd></dl>
 
 </div>
 </div>
