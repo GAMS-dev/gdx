@@ -270,6 +270,16 @@ TEST_CASE("Test get current directory")
 #endif
 }
 
+TEST_CASE("Test trim functions left/right/both")
+{
+   REQUIRE_EQ("abc"s, TrimLeft( "  abc"s ));
+   REQUIRE_EQ("abc  "s, TrimLeft( "  abc  "s ));
+   REQUIRE_EQ("abc"s, TrimRight( "abc  "s ));
+   REQUIRE_EQ("  abc"s, TrimRight( "  abc  "s ));
+   REQUIRE_EQ("abc"s, Trim( "  abc  "s ));
+   REQUIRE_EQ("abc abc"s, Trim( "  abc abc  "s ));
+}
+
 TEST_SUITE_END();
 
 }

@@ -809,23 +809,23 @@ void Sleep( const uint32_t milliseconds )
 #endif
 }
 
-std::string Trim( const std::string &S )
+std::string Trim( std::string_view S )
 {
-   const auto start = std::find_if_not( S.begin(), S.end(), []( const unsigned char c ) { return c < ' '; } );
-   const auto end = std::find_if_not( S.rbegin(), S.rend(), []( const unsigned char c ) { return c < ' '; } ).base();
-   return start < end ? std::string { start, end } : std::string {};
+   const auto firstNonBlank = std::find_if_not( S.begin(), S.end(), []( const unsigned char c ) { return c <= ' '; } );
+   const auto lastNonBlank = std::find_if_not( S.rbegin(), S.rend(), []( const unsigned char c ) { return c <= ' '; } ).base();
+   return firstNonBlank < lastNonBlank ? std::string { firstNonBlank, lastNonBlank } : std::string {};
 }
 
-std::string TrimLeft( const std::string &S )
+std::string TrimLeft( std::string_view S )
 {
-   const auto start = std::find_if_not( S.begin(), S.end(), []( const unsigned char c ) { return c < ' '; } );
-   return { start, S.end() };
+   const auto firstNonBlank =  std::find_if_not( S.begin(), S.end(), [](const unsigned char c) { return c <= ' '; } );
+   return std::string {firstNonBlank, S.end()};
 }
 
-std::string TrimRight( const std::string &S )
+std::string TrimRight( std::string_view S )
 {
-   const auto end = std::find_if_not( S.rbegin(), S.rend(), []( const unsigned char c ) { return c < ' '; } ).base();
-   return { S.begin(), end };
+   const auto lastNonBlank = std::find_if_not( S.rbegin(), S.rend(), []( const unsigned char c ) { return c <= ' '; } ).base();
+   return std::string { S.begin(), lastNonBlank };
 }
 
 // SSN changed this to accept int64 arg. 27 Apr 03.

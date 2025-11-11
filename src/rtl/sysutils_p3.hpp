@@ -38,6 +38,7 @@ struct _WIN32_FIND_DATAA;
 #include <cstdint>                 // for uint16_t, int64_t, uint32_t
 #include <array>                    // for array
 #include <string>                   // for string, basic_string
+#include <string_view>
 #include "delphitypes.hpp"// for tDateTime
 
 // ==============================================================================================================
@@ -116,9 +117,9 @@ std::string LowerCase(const std::string &S );
 int CompareStr(const std::string &S1, const std::string &S2);
 int CompareText(const std::string &S1, const std::string &S2);
 bool SameText( std::string_view S1, std::string_view S2);
-std::string Trim(const std::string &S);
-std::string TrimLeft(const std::string &S);
-std::string TrimRight(const std::string &S);
+std::string Trim(std::string_view S);
+std::string TrimLeft(std::string_view S);
+std::string TrimRight(std::string_view S);
 std::string IntToStr(int64_t n);
 void IntToStr(int64_t n, char *res, size_t &len );
 std::string IntToHex(int64_t v, int w);
