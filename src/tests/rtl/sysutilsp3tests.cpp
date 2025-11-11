@@ -278,6 +278,12 @@ TEST_CASE("Test trim functions left/right/both")
    REQUIRE_EQ("  abc"s, TrimRight( "  abc  "s ));
    REQUIRE_EQ("abc"s, Trim( "  abc  "s ));
    REQUIRE_EQ("abc abc"s, Trim( "  abc abc  "s ));
+   REQUIRE_EQ(""s, Trim("            "s));
+   REQUIRE_EQ(""s, TrimLeft("            "s));
+   REQUIRE_EQ(""s, TrimRight("            "s));
+   REQUIRE_EQ(""s, Trim(""s));
+   REQUIRE_EQ(""s, TrimLeft(""s));
+   REQUIRE_EQ(""s, TrimRight(""s));
 }
 
 TEST_SUITE_END();
