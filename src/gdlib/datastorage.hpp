@@ -204,6 +204,8 @@ public:
       const int KeyBase { FMinKey };
 #if !defined( USE_GMSHEAP )
       auto Head { new RecType *[AllocCount] }, Tail { new RecType *[AllocCount] };
+      std::memset( Head, 0, sizeof( RecType * ) * AllocCount );
+      std::memset( Tail, 0, sizeof( RecType * ) * AllocCount );
 #else
       //const int64_t AllocSize { static_cast<int64_t>( AllocCount * sizeof( RecType * ) ) };
       auto Head { MyHeap.XGetMem64VecZero<RecType *>( AllocCount ) };
