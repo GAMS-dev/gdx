@@ -654,7 +654,7 @@ int FindNext( TSearchRec &F )
 void FindClose( TSearchRec &F )
 {
 #if defined( _WIN32 )
-   if( INVALID_HANDLE_VALUE != F.FindHandle )
+   if( F.FindHandle && INVALID_HANDLE_VALUE != F.FindHandle )
    {
       ::FindClose( F.FindHandle );
       F.FindHandle = INVALID_HANDLE_VALUE;
