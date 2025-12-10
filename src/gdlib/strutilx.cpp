@@ -123,7 +123,7 @@ std::string IntToNiceStrW( int64_t n, int width )
    return res;
 }
 
-std::string IntToNiceStr( int N )
+std::string IntToNiceStr( int64_t N )
 {
    return IntToNiceStrW( N, 0 );
 }

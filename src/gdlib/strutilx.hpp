@@ -56,7 +56,7 @@ std::string UpperCase( std::string_view s );
 std::string LowerCase( std::string_view s );
 
 std::string IntToNiceStrW( int64_t N, int Width );
-std::string IntToNiceStr( int N );
+std::string IntToNiceStr( int64_t N );
 std::string BlankStr( unsigned int Len );
 
 // Excel column names
