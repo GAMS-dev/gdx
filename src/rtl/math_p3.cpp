@@ -55,15 +55,46 @@ double LnXP1( double x )
 
 TFPUExceptionMask GetExceptionMask()
 {
+#if defined(_WIN32)
+   std::set<rtl::math_p3::TFPUException> result {};
+   unsigned int cw = _control87( 0, 0 );
+   if( cw & _EM_INVALID ) result.insert( exInvalidOp );
+   if( cw & _EM_DENORMAL ) result.insert( exDenormalized );
+   if( cw & _EM_ZERODIVIDE ) result.insert( exZeroDivide );
+   if( cw & _EM_OVERFLOW ) result.insert( exOverflow );
+   if( cw & _EM_UNDERFLOW ) result.insert( exUnderflow );
+   if( cw & _EM_INEXACT ) result.insert( exPrecision );
+   return result;
+#else
    // ...
    throw std::runtime_error("Not implemented yet!");
+#endif
 }
 
 TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
 {
+#if defined(_WIN32)
+   unsigned int cw = _control87( 0, 0 );
+   std::set<rtl::math_p3::TFPUException> result {};
+   if( cw & _EM_INVALID ) result.insert( exInvalidOp );
+   if( cw & _EM_DENORMAL ) result.insert( exDenormalized );
+   if( cw & _EM_ZERODIVIDE ) result.insert( exZeroDivide );
+   if( cw & _EM_OVERFLOW ) result.insert( exOverflow );
+   if( cw & _EM_UNDERFLOW ) result.insert( exUnderflow );
+   if( cw & _EM_INEXACT ) result.insert( exPrecision );
+   unsigned int tcw {};
+   if( result.count(exInvalidOp) ) tcw |= _EM_INVALID;
+   if( result.count( exDenormalized ) ) tcw |= _EM_DENORMAL;
+   if( result.count( exZeroDivide ) ) tcw |= _EM_ZERODIVIDE;
+   if( result.count( exOverflow ) ) tcw |= _EM_OVERFLOW;
+   if( result.count( exUnderflow ) ) tcw |= _EM_UNDERFLOW;
+   if( result.count( exPrecision ) ) tcw |= _EM_INEXACT;
+   _control87( tcw, _MCW_EM );
+   return result;
+#else
    throw std::runtime_error("Not implemented yet!");
    // ...
-   return {};
+#endif
 }
 
 void SetExceptionMask2P3()
