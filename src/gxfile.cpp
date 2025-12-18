@@ -1446,7 +1446,7 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
          if (SV >= vm_count) {
             AVals[DV] = 0.0;
             if(verboseTrace && TraceLevel >= TraceLevels::trl_errors)
-                debugStream << "WARNING: Special value (" << BSV << ") byte out of range {0,...,10}!" << std::endl;
+                debugStream << "WARNING: Special value (" << BSV << ") byte out of range {0,...,10}!\n";
             continue;
          }
          AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap( FFile->ReadDouble() );
@@ -2745,6 +2745,7 @@ int TGXFileObj::gdxDataWriteMap( const int *KeyInt, const double *Values )
          debugStream << " " << rtl::sysutils_p3::IntToStr( KeyInt[D] );
          if( D + 1 < FCurrentDim ) debugStream << ",";
       }
+      debugStream << '\n';
    }
    for( int D {}; D < FCurrentDim; D++ )
    {
@@ -3212,7 +3213,7 @@ int TGXFileObj::gdxSetTraceLevel( int N, const char *s )
    //!! GetStdHandle(STD_OUTPUT_HANDLE) <> INVALID_HANDLE_VALUE;
    if( TraceLevel > TraceLevels::trl_errors )
    {
-      debugStream << std::endl;
+      debugStream << '\n';
       WriteTrace( "Tracing at level "s + rtl::sysutils_p3::IntToStr( (int) TraceLevel ) );
    }
    return true;
