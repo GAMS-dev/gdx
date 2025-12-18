@@ -2308,9 +2308,9 @@ int TGXFileObj::gdxGetSpecialValues( double *AVals )
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
    {
       // NOTE: Not covered by unit tests yet.
-      std::array svNames { "undef"s, "na"s, "posinf"s, "min"s, "eps"s };
-      std::array svIndices { sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps };
-      for( int i = 0; i < (int) svNames.size(); i++ )
+      const std::array svNames { "undef"s, "na"s, "posinf"s, "min"s, "eps"s };
+      constexpr std::array svIndices { sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps };
+      for( int i = 0; i < static_cast<int>( svNames.size() ); i++ )
          debugStream << svNames[i] << "="s << AVals[svIndices[i]] << '\n';
    }
 
@@ -2330,9 +2330,9 @@ int TGXFileObj::gdxSetSpecialValues( const double *AVals )
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
    {
       // NOTE: Not covered by unit tests yet.
-      std::array svNames { "undef"s, "na"s, "posinf"s, "min"s, "eps"s };
-      std::array svIndices { sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps };
-      for( int i = 0; i < (int) svNames.size(); i++ )
+      const std::array svNames { "undef"s, "na"s, "posinf"s, "min"s, "eps"s };
+      constexpr std::array svIndices { sv_valund, sv_valna, sv_valpin, sv_valmin, sv_valeps };
+      for( int i = 0; i < static_cast<int>( svNames.size() ); i++ )
          debugStream << svNames[i] << "="s << AVals[svIndices[i]] << '\n';
    }
 
@@ -2340,7 +2340,7 @@ int TGXFileObj::gdxSetSpecialValues( const double *AVals )
    copyIntlMapDblToI64( tmpDbl, tmpI64 );
 
    // check for duplicates using the int64 version of the map
-   const TgdxIntlValTyp stopper = vm_valeps;
+   constexpr TgdxIntlValTyp stopper = vm_valeps;
    for( int iv1 { vm_valund }; iv1 <= stopper; iv1++ )
    {
       for( int iv2 { iv1 + 1 }; iv2 <= stopper; iv2++ )
@@ -2442,20 +2442,17 @@ int TGXFileObj::gdxSymbolInfoX( int SyNr, int &RecCnt, int &UserInfo, char *Expl
       assignPCharToBuf( "Universe", ExplTxt, GMS_SSSIZE );
       return true;
    }
-   else if( !NameList || NameList->empty() || SyNr < 1 || SyNr > NameList->size() )
+   if( !NameList || NameList->empty() || SyNr < 1 || SyNr > NameList->size() )
    {
       RecCnt = UserInfo = 0;
       ExplTxt[0] = '\0';
       return false;
    }
-   else
-   {
-      const auto *obj = ( *NameList->GetObject( SyNr ) );
-      RecCnt = !obj->SDim ? 1 : obj->SDataCount;// scalar trick
-      UserInfo = obj->SUserInfo;
-      assignPCharToBuf( obj->SExplTxt.data(), ExplTxt, GMS_SSSIZE );
-      return true;
-   }
+   const auto *obj = ( *NameList->GetObject( SyNr ) );
+   RecCnt = !obj->SDim ? 1 : obj->SDataCount;// scalar trick
+   UserInfo = obj->SUserInfo;
+   assignPCharToBuf( obj->SExplTxt.data(), ExplTxt, GMS_SSSIZE );
+   return true;
 }
 
 int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
@@ -2553,7 +2550,7 @@ int TGXFileObj::gdxSymbolSetDomainX( int SyNr, const char **DomainIDs )
 {
    // check for write or append only
    if( ErrorCondition( SyNr >= 1 && SyNr <= NameList->size(), ERR_BADSYMBOLINDEX ) ) return false;
-   PgdxSymbRecord SyPtr = ( *NameList->GetObject( SyNr ) );
+   TgdxSymbRecord * const SyPtr = *NameList->GetObject( SyNr );
 
    if( verboseTrace && TraceLevel == TraceLevels::trl_all )
    {
@@ -2569,8 +2566,9 @@ int TGXFileObj::gdxSymbolSetDomainX( int SyNr, const char **DomainIDs )
          SyPtr->SDomStrings = std::make_unique<int[]>( SyPtr->SDim );
       for( int D {}; D < SyPtr->SDim; D++ )
       {
-         const char *S { DomainIDs[D] };
-         if( S[0] == '\0' || !strcmp( S, "*" ) || !IsGoodIdent( S ) ) SyPtr->SDomStrings[D] = 0;
+         if( const char *S { DomainIDs[D] };
+            S[0] == '\0' || !strcmp( S, "*" ) || !IsGoodIdent( S ) )
+            SyPtr->SDomStrings[D] = 0;
          else
          {
             SyPtr->SDomStrings[D] = DomainStrList->IndexOf( S );// one based
@@ -2627,11 +2625,12 @@ int TGXFileObj::gdxUELRegisterRawStart()
 int TGXFileObj::gdxUELRegisterStr( const char *Uel, int &UelNr )
 {
    if( ( TraceLevel >= TraceLevels::trl_all || fmode != f_str_elem ) && !CheckMode( "UELRegisterStr"s, f_str_elem ) )
-      return false;
+      return false; // not covered by unit test
    static sstring SVstorage;
    int svlen;
    const char *SV { trimRight( Uel, SVstorage.data(), svlen ) };
-   if( ErrorCondition( GoodUELString( SV, svlen ), ERR_BADUELSTR ) ) return false;
+   if( ErrorCondition( GoodUELString( SV, svlen ), ERR_BADUELSTR ) )
+      return false;
    UelNr = UELTable->AddUsrNew( SV, svlen );
    return true;
 }
@@ -2653,12 +2652,9 @@ int TGXFileObj::gdxUMUelGet( int UelNr, char *Uel, int &UelMap )
       UelMap = UELTable->GetUserMap( UelNr );
       return true;
    }
-   else
-   {
-      assignStrToBuf( BADUEL_PREFIX + rtl::sysutils_p3::IntToStr( UelNr ), Uel );
-      UelMap = -1;
-      return false;
-   }
+   assignStrToBuf( BADUEL_PREFIX + rtl::sysutils_p3::IntToStr( UelNr ), Uel );
+   UelMap = -1;
+   return false;
 }
 
 int TGXFileObj::gdxUMUelInfo( int &UelCnt, int &HighMap ) const
@@ -2668,12 +2664,9 @@ int TGXFileObj::gdxUMUelInfo( int &UelCnt, int &HighMap ) const
       UelCnt = HighMap = 0;
       return false;
    }
-   else
-   {
-      UelCnt = UELTable ? UELTable->size() : 0;
-      HighMap = UELTable->UsrUel2Ent->GetHighestIndex();// highest index
-      return true;
-   }
+   UelCnt = UELTable ? UELTable->size() : 0;
+   HighMap = UELTable->UsrUel2Ent->GetHighestIndex();// highest index
+   return true;
 }
 
 int TGXFileObj::gdxCurrentDim() const
@@ -2683,7 +2676,8 @@ int TGXFileObj::gdxCurrentDim() const
 
 int TGXFileObj::gdxRenameUEL( const char *OldName, const char *NewName )
 {
-   if( !UELTable ) return -1;
+   if( !UELTable )
+      return -1;
 
    int slen;
    sstring Sstorage;
@@ -2694,10 +2688,10 @@ int TGXFileObj::gdxRenameUEL( const char *OldName, const char *NewName )
 
    int oldNameLen;
    sstring oldNameStorage;
-   int N { UELTable->IndexOf( trimRight( OldName, oldNameStorage.data(), oldNameLen ) ) };
+   const int N { UELTable->IndexOf( trimRight( OldName, oldNameStorage.data(), oldNameLen ) ) };
    if( N < 0 )
       return 2;
-   else if( UELTable->IndexOf( S ) >= 0 )
+   if( UELTable->IndexOf( S ) >= 0 )
       return 3;
    UELTable->RenameEntry( N, S );
    return 0;
@@ -2715,7 +2709,7 @@ int TGXFileObj::gdxGetUEL( int uelNr, char *Uel ) const
       Uel[0] = '\0';
       return false;
    }
-   int EN = UELTable->UsrUel2Ent->GetMapping( uelNr );
+   const int EN = UELTable->UsrUel2Ent->GetMapping( uelNr );
    if( EN >= 1 ) assignPCharToBuf( ( *UELTable )[EN], Uel );
    else
       assignStrToBuf( BADUEL_PREFIX + rtl::sysutils_p3::IntToStr( uelNr ), Uel );
@@ -2752,7 +2746,6 @@ int TGXFileObj::gdxDataWriteMap( const int *KeyInt, const double *Values )
       const int KD = UELTable->UsrUel2Ent->GetMapping( KeyInt[D] );
       if( KD < 0 )
       {
-         // NOTE: Not covered by unit tests yet.
          ReportError( ERR_BADELEMENTINDEX );
          return false;
       }
@@ -2767,7 +2760,8 @@ int TGXFileObj::gdxDataWriteMap( const int *KeyInt, const double *Values )
 int TGXFileObj::gdxUELRegisterMapStart()
 {
    static const TgxModeSet AllowedModes { fr_init, fw_init };
-   if( !MajorCheckMode( "UELRegisterMapStart"s, AllowedModes ) ) return false;
+   if( !MajorCheckMode( "UELRegisterMapStart"s, AllowedModes ) )
+      return false;
    fmode_AftReg = fmode == fw_init ? fw_init : fr_init;
    fmode = f_map_elem;
    return true;
@@ -2781,11 +2775,13 @@ int TGXFileObj::gdxUELRegisterMap( int UMap, const char *Uel )
    if( TraceLevel >= TraceLevels::trl_all || fmode != f_map_elem )
    {
       // NOTE: Not covered by unit tests yet.
-      if( !CheckMode( "UELRegisterMap"s, f_map_elem ) ) return false;
+      if( !CheckMode( "UELRegisterMap"s, f_map_elem ) )
+         return false;
       debugStream << "   Enter UEL: " << SV << " with number " << UMap << "\n";
    }
    if( ErrorCondition( GoodUELString( SV, svLen ), ERR_BADUELSTR ) ||
-       ErrorCondition( UELTable->AddUsrIndxNew( SV, svLen, UMap ) >= 0, ERR_UELCONFLICT ) ) return false;
+       ErrorCondition( UELTable->AddUsrIndxNew( SV, svLen, UMap ) >= 0, ERR_UELCONFLICT ) )
+      return false;
    return true;
 }
 
@@ -2960,7 +2956,8 @@ again:
    return true;
 }
 
-void TGXFileObj::SetTraceLevel( TGXFileObj::TraceLevels tl )
+// NOTE: Not covered by unit tests yet.
+void TGXFileObj::SetTraceLevel( TraceLevels tl )
 {
    TraceLevel = tl;
 }
@@ -2987,7 +2984,7 @@ int TGXFileObj::gdxAcronymGetInfo( int N, char *AName, char *Txt, int &AIndx ) c
 
 int TGXFileObj::gdxAcronymSetInfo( int N, const char *AName, const char *Txt, int AIndx )
 {
-   auto MapIsUnique = [this]( int Indx ) {
+   auto MapIsUnique = [this]( const int Indx ) {
       for( int i {}; i < AcronymList->size(); i++ )
          if( ( *AcronymList )[i].AcrReadMap == Indx )
             return false;
@@ -2995,11 +2992,11 @@ int TGXFileObj::gdxAcronymSetInfo( int N, const char *AName, const char *Txt, in
    };
 
    if( TraceLevel >= TraceLevels::trl_some )
-      WriteTrace( "AcronymSetInfo: "s + AName + " index = " + rtl::sysutils_p3::IntToStr( AIndx ) );
+      WriteTrace( "AcronymSetInfo: "s + AName + " index = " + rtl::sysutils_p3::IntToStr( AIndx ) ); // NOTE: Not covered by unit tests yet.
 
    if( ErrorCondition( N >= 1 || N <= (int) AcronymList->size(), ERR_BADACRONUMBER ) ) return false;
-   auto &obj = ( *AcronymList )[N - 1];
-   if( in( fmode, AnyWriteMode ) || obj.AcrAutoGen )
+   if( auto &obj = ( *AcronymList )[N - 1];
+      in( fmode, AnyWriteMode ) || obj.AcrAutoGen )
    {
       if( ErrorCondition( IsGoodNewSymbol( AName ), ERR_BADACRONAME ) ) return false;
       if( obj.AcrAutoGen )
@@ -3009,7 +3006,7 @@ int TGXFileObj::gdxAcronymSetInfo( int N, const char *AName, const char *Txt, in
          obj.AcrAutoGen = false;
       }
       else if( ErrorCondition( AIndx == obj.AcrMap, ERR_BADACROINDEX ) )
-         return false;
+         return false; // NOTE: Not covered by unit tests yet.
 
       obj.SetNameAndText( AName, Txt );
    }
@@ -3032,7 +3029,7 @@ int TGXFileObj::gdxAcronymNextNr( int nv )
 int TGXFileObj::gdxAcronymGetMapping( int N, int &orgIndx, int &newIndx, int &autoIndex )
 {
    if( TraceLevel >= TraceLevels::trl_some )
-      WriteTrace( "AcronymGetMapping: N = "s + rtl::sysutils_p3::IntToStr( N ) );
+      WriteTrace( "AcronymGetMapping: N = "s + rtl::sysutils_p3::IntToStr( N ) ); // NOTE: Not covered by unit tests yet.
    if( ErrorCondition( N >= 1 || N <= (int) AcronymList->size(), ERR_BADACRONUMBER ) ) return false;
    const auto &obj = ( *AcronymList )[N - 1];
    orgIndx = obj.AcrMap;
@@ -3084,7 +3081,7 @@ int TGXFileObj::gdxFilterRegisterDone()
       int LV { -1 };
       for( int N { 1 }; N <= UELTable->size(); N++ )
       {
-         int V { UELTable->GetUserMap( N ) };
+         const int V { UELTable->GetUserMap( N ) };
          if( !CurFilter->InFilter( V ) ) continue;
          if( V <= LV )
          {
@@ -3199,9 +3196,11 @@ int TGXFileObj::gdxSetTraceLevel( int N, const char *s )
       switch( N )
       {
          case 1:
+            // not covered by unit tests yet!
             TraceLevel = TraceLevels::trl_errors;
             break;
          case 2:
+            // not covered by unit tests yet!
             TraceLevel = TraceLevels::trl_some;
             break;
          default:
@@ -3245,9 +3244,10 @@ int TGXFileObj::gdxAcronymIndex( double V ) const
 
 int TGXFileObj::gdxAcronymName( double V, char *AName )
 {
-   const int Indx { gdxAcronymIndex( V ) };
    //not an acronym
-   if( Indx <= 0 ) AName[0] = '\0';
+   if( const int Indx { gdxAcronymIndex( V ) };
+      Indx <= 0 )
+      AName[0] = '\0';
    else
    {
       const int N { AcronymList->FindEntry( Indx ) };
@@ -3338,7 +3338,7 @@ int TGXFileObj::gdxDataReadSliceStart( int SyNr, int *ElemCounts )
 int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataStoreProc_t DP )
 {
    if( !MajorCheckMode( "DataReadSlice"s, fr_slice ) )
-      return false;
+      return false; // not covered by unit tests yet!
    bool GoodIndx { true };
    Dimen = 0;
    TgdxUELIndex ElemNrs;
@@ -3421,11 +3421,11 @@ int TGXFileObj::gdxMapValue( double D, int &sv )
       i64 == intlValueMapI64[vm_valund] )
       sv = sv_valund;
    else if( i64 == intlValueMapI64[vm_valna] )
-      sv = sv_valna;
+      sv = sv_valna; // not covered by unit tests yet!
    else if( i64 == intlValueMapI64[vm_valpin] )
-      sv = sv_valpin;
+      sv = sv_valpin; // not covered by unit tests yet!
    else if( i64 == intlValueMapI64[vm_valmin] )
-      sv = sv_valmin;
+      sv = sv_valmin; // not covered by unit tests yet!
    else if( i64 == intlValueMapI64[vm_valeps] )
       sv = sv_valeps;
    else
@@ -3490,7 +3490,7 @@ int TGXFileObj::gdxSymbIndxMaxLength( int SyNr, int *LengthInfo )
 
    int NrRecs;
    if( ( ( TraceLevel >= TraceLevels::trl_some || fmode != fr_init ) && !CheckMode( "SymbIndxMaxLength"s, fr_init ) ) || ( SyNr < 0 || SyNr > NameList->size() ) || !gdxDataReadRawStart( SyNr, NrRecs ) )
-      return 0;
+      return 0; // not covered by unit tests yet!
 
    int res {};
    if( FCurrentDim > 0 )
@@ -3603,6 +3603,7 @@ void TGXFileObj::gdxAllowBogusDomainsSet( int flag )
    AllowBogusDomain = flag;
 }
 
+// not covered by unit tests yet!
 int TGXFileObj::gdxMapAcronymsToNaN() const
 {
    return MapAcrToNaN;
@@ -3740,6 +3741,7 @@ int TUELTable::size() const
    return FCount;
 }
 
+// not covered by unit tests yet!
 bool TUELTable::empty() const
 {
    return !FCount;
@@ -3849,9 +3851,9 @@ void TUELTable::SaveToStream( TXStream &S )
    TXStrHashListImpl<int>::SaveToStream( S );
 }
 
+// NOTE: Not covered by unit tests yet.
 void TUELTable::LoadFromStream( TXStream &S )
 {
-   // NOTE: Not covered by unit tests yet.
    TXStrHashListImpl<int>::LoadFromStream( S );
    if( UsrUel2Ent ) UsrUel2Ent = std::make_unique<TIntegerMapping>();
    for( int N { 1 }; N <= FCount; N++ )
@@ -3977,9 +3979,9 @@ void TAcronymList::LoadFromStream( TXStream &S )
    }
 }
 
+// NOTE: Not covered by unit tests yet.
 int TAcronymList::MemoryUsed()
 {
-   // NOTE: Not covered by unit tests yet.
    int res { static_cast<int>( FList.MemoryUsed() ) + FList.GetCount() * (int) sizeof( TAcronym ) };
    for( int N {}; N < FList.GetCount(); N++ )
       res += FList[N]->MemoryUsed();
@@ -4034,7 +4036,7 @@ size_t TFilterList::MemoryUsed() const
 {
    size_t res { FList.MemoryUsed() + FList.size() * sizeof( TDFilter ) };
    for( int N {}; N < FList.size(); N++ )
-      res += FList.GetConst( N )->MemoryUsed();
+      res += FList.GetConst( N )->MemoryUsed(); // not covered by unit tests, yet!
    return res;
 }
 
@@ -4126,6 +4128,7 @@ TAcronym::TAcronym( TXStream &S ) : AcrName { S.ReadString() },
 {
 }
 
+// not covered by unit tests, yet!
 int TAcronym::MemoryUsed() const
 {
    return 2 + static_cast<int>( AcrName.length() ) + static_cast<int>( AcrText.length() );
