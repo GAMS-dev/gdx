@@ -137,7 +137,11 @@ void P3UnSetEnv( const std::string &name )
 
 bool P3IsSetEnv( const std::string &name )
 {
+#if defined(_WIN32)
+   return GetEnvironmentVariableA( name.c_str(), NULL, 0 );
+#else
    return std::getenv( name.c_str() ) != nullptr;
+#endif
 }
 
 bool P3SetEnvPC( const std::string &name, const char *val )
