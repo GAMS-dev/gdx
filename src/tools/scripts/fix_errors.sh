@@ -2,35 +2,22 @@
 
 set -e
 
-ORIGINAL_DIRECTORY="$(pwd)"
-TOOLS_DIRECTORY="$(realpath "$(dirname "$0")")"
-GDX_DIRECTORY="$(realpath "$TOOLS_DIRECTORY/../..")"
+source "$(dirname "$0")/directories.sh"
 
-cd "$GDX_DIRECTORY"
+pushd "$GDX_DIRECTORY" > /dev/null
 
-cmake -B ./build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+"$SCRIPTS_DIRECTORY/configure.sh"
 
-cd "$TOOLS_DIRECTORY"
+pushd "$TOOLS_DIRECTORY" > /dev/null
 
-if [[ "$(uname)" == 'Linux' ]]; then
-  clang-tidy -p "$GDX_DIRECTORY/build" \
-    --fix-errors \
-    ./*/*.*pp
+clang-tidy -p "$GDX_DIRECTORY/build" \
+  --fix-errors \
+  ./*/*.*pp
 
-  # run-clang-tidy -p "$GDX_DIRECTORY/build" \
-  #   -fix -j 4 ./*/*.*pp
-
-elif [[ "$(uname)" == 'Darwin' ]]; then
-  # clang-tidy -p "$GDX_DIRECTORY/build" \
-  #   --extra-arg=-isysroot"$(xcrun --show-sdk-path)" \
-  #   --fix-errors \
-  #   ./*/*.*pp
-
-  run-clang-tidy -p "$GDX_DIRECTORY/build" \
-    -extra-arg=-isysroot"$(xcrun --show-sdk-path)" \
-    -fix -j 4 ./*/*.*pp
-fi
+# run-clang-tidy -p "$GDX_DIRECTORY/build" \
+#   -fix -j 4 ./*/*.*pp
 
 clang-format -i ./*/*.*pp
 
-cd "$ORIGINAL_DIRECTORY"
+popd > /dev/null
+popd > /dev/null
