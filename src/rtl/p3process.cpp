@@ -620,8 +620,6 @@ const std::string CMD_WINNT = R"(C:\winnt\system32\cmd.exe)";
 
 #if defined(_WIN32)
 static int wShowWindow {SW_SHOWNA};
-#else
-static int wShowWindow {};
 #endif
 
 static int CppCreateProc( const std::string &exeName, const std::string &cmdLine, bool allowStdHandles, int &exeRC )
