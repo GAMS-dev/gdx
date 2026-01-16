@@ -1,0 +1,23 @@
+[project]
+name = "gdx-tools"
+version = "0.0.1"
+# description = "Add description here"
+# readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "gamsapi[transfer]>=52.3.0",
+]
+
+[dependency-groups]
+dev = [
+    { include-group = "lint" },
+]
+lint = [
+    "clang-tidy>=21.1.6",
+    "cppcheck>=1.5.1",
+    "mypy>=1.19.1",
+    "ty>=0.0.9",
+]
+
+[tool.ruff.lint]
+extend-select = ["I"]
