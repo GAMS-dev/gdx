@@ -327,8 +327,8 @@ static char *winErrMsg( const int errNum, char *buf, int bufSiz )
    return buf;
 } /* winErrMsg */
 
-static bool allANSIchars( const WCHAR *s, const DWORD slen );
-static void cpW2A( char *dst, const WCHAR *src, const DWORD len );
+bool allANSIchars( const WCHAR *s, const DWORD slen );
+void cpW2A( char *dst, const WCHAR *src, const DWORD len );
 DWORD GetRobustShortPathW( const WCHAR *longPathW, WCHAR *shortPathW, const DWORD shortBufSiz );
 #endif
 
@@ -1064,16 +1064,26 @@ int DateTimeToFileDate( double dt )
 }
 
 #if defined(_WIN32)
-static bool allANSIchars (const WCHAR *s, const DWORD slen)
+// check if the wide-char string s contains only ANSI (8-bit) chars
+bool allANSIchars (const WCHAR *s, const DWORD slen)
 {
-   for ( DWORD i {}; i < slen;  i++)
-      if (s[i] > 0xff)
+   for ( const WCHAR *end = s + slen; s < end;  ++s)
+      if (*s > 0xff)
+         return false;
+   return true;
+}
+
+// check if the wide-char string s contains only ASCII (7-bit) chars
+bool allASCIIchars(const WCHAR *s, const DWORD slen)
+{
+   for( const WCHAR *end = s + slen; s < end; ++s)
+      if(*s > 0x7f)
          return false;
    return true;
 }
 
 // copy WCHAR string to ANSI: assumes dst is large enough
-static void cpW2A (char *dst, const WCHAR *src, const DWORD len)
+void cpW2A (char *dst, const WCHAR *src, const DWORD len)
 {
    DWORD i;
    for (i = 0;  i < len;  i++)
@@ -1088,12 +1098,21 @@ static constexpr bool IsPathSeparator( const WCHAR c) {
 }
 
 DWORD GetRobustShortPathW (const WCHAR* longPathW, WCHAR* shortPathW, const DWORD shortBufSiz) {
+   std::array<WCHAR, MAX_PATH> ansiBuf; // save feasible-not-optimal path name if found
+   ansiBuf[0] = L'\0';
    if ( const DWORD rc = GetShortPathNameW( longPathW, shortPathW, shortBufSiz );
       rc > 0 && rc < shortBufSiz && allANSIchars(shortPathW,rc))
-    return rc;
+   {
+      // shortPathW is acceptable: return it or cache it
+      if(allASCIIchars( shortPathW, rc ))
+         return rc;
+      if(MAX_PATH > rc)
+         wcscpy_s(ansiBuf.data(), MAX_PATH, shortPathW);
+   }
 
-  /* the easy way did not work: try the hard way (findFirstFile on components) */
+  // the easy way did not work: try the hard way (findFirstFile on components)
   std::wstring currentPath(longPathW), shortResult;
+   bool shortOK = true;
 
   // Ensure the path ends with a separator for processing
   if (! IsPathSeparator(currentPath.back())) {
@@ -1104,14 +1123,13 @@ DWORD GetRobustShortPathW (const WCHAR* longPathW, WCHAR* shortPathW, const DWOR
   if ( const size_t colonPos = currentPath.find( L':' );
      colonPos != std::wstring::npos) { // we found a colon
     shortResult += currentPath.substr(0, colonPos + 1); // e.g., "C:"
-    currentPath = currentPath.substr(colonPos + 2);     // Path without drive and leading separator
+    currentPath = currentPath.substr(colonPos + 2); // Path without drive and leading separator
     // Normalize: We expect that shortResult ends with a separator
     shortResult += L'\\';
   }
 
   // Split the remaining path into segments (directory names)
-  size_t start = 0;
-  size_t end = currentPath.find(L'\\');
+  size_t start = 0, end = currentPath.find(L'\\');
 
   while (end != std::wstring::npos) {
     std::wstring longSegment = currentPath.substr(start, end - start);
@@ -1130,7 +1148,11 @@ DWORD GetRobustShortPathW (const WCHAR* longPathW, WCHAR* shortPathW, const DWOR
       // Check if we got a short name aka cAlternateFileName)
       if (L'\0' != findData.cAlternateFileName[0]) {
         if (! allANSIchars(findData.cAlternateFileName, static_cast<DWORD>( wcslen( findData.cAlternateFileName ) ) ))
-          return 0; /* failure */
+        {
+           shortOK = false;
+           ::FindClose(hFind);
+           break;
+        }
         shortResult += findData.cAlternateFileName;
       }
       else {
@@ -1138,31 +1160,59 @@ DWORD GetRobustShortPathW (const WCHAR* longPathW, WCHAR* shortPathW, const DWOR
         // This is the fallback that leads to issues like "Ya?mur",
         // but is the best we can do with the API for this segment.
         if (! allANSIchars(longSegment.c_str(), static_cast<DWORD>( longSegment.length() ) ))
-          return 0; /* failure */
+        {
+           shortOK = false;
+           ::FindClose(hFind);
+           break;
+        }
         shortResult += longSegment;
       }
       ::FindClose(hFind);
     }
     else  // Handle directory not found or other errors
-      return 0;
+    {
+       shortOK = false;
+       break;
+    }
 
     shortResult += L'\\';
     start = end + 1;
     end = currentPath.find(L'\\', start);
   }
 
-  // Final clean-up: remove trailing backslash if it's not just the drive root
-  if (shortResult.length() > 3 && IsPathSeparator(shortResult.back())) {
-    shortResult.pop_back();
-  }
+   if(shortOK)
+   {
+      // Final cleanup: remove trailing backslash if it's not just the drive root
+      if (shortResult.length() > 3 && IsPathSeparator(shortResult.back())) {
+         shortResult.pop_back();
+      }
 
-  // Copy result back to the WCHAR buffer
-  if (shortResult.length() < shortBufSiz) {
-    wcscpy_s(shortPathW, shortBufSiz, shortResult.c_str());
-    return static_cast<DWORD>( shortResult.length() );
-  }
+      // what to return? First choice is an ASCII string
+      if(allASCIIchars( shortResult.c_str(), (DWORD)shortResult.length() ))
+      {
+         wcscpy_s(shortPathW, shortBufSiz, shortResult.c_str());
+         return (DWORD)shortResult.length();
+      }
+      // second choice: our cached result
+      if(L'\0' != ansiBuf[0])
+      {
+         wcscpy_s(shortPathW, shortBufSiz, ansiBuf.data());
+         return (DWORD)wcslen(shortPathW);
+      }
+      // third choice: the ANSI shortResult
+      if (shortResult.length() < shortBufSiz) {
+         wcscpy_s(shortPathW, shortBufSiz, shortResult.c_str());
+         return static_cast<DWORD>( shortResult.length() );
+      }
+   }
+   else if(ansiBuf.front() != L'\0')
+   {
+      // only available choice: our cached result
+      wcscpy_s(shortPathW, shortBufSiz, ansiBuf.data());
+      return (DWORD)wcslen(shortPathW);
+   }
 
-  return 0; // Buffer overflow or other failure
+  return 0; // failure
 }
 #endif
 

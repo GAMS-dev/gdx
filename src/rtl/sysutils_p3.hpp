@@ -200,4 +200,11 @@ std::string QueryEnvironmentVariable( const std::string &Name );
 int AssignEnvironmentVariable( const std::string &name, const std::string &value );
 void DropEnvironmentVariable( const std::string &name );
 
+#if defined(_WIN32)
+bool allASCIIchars(const wchar_t *s, unsigned long slen);
+bool allANSIchars(const wchar_t *s, unsigned long slen);
+void cpW2A (char *dst, const wchar_t *src, unsigned long len);
+unsigned long GetRobustShortPathW( const wchar_t *longPathW, wchar_t *shortPathW, unsigned long shortBufSiz );
+#endif
+
 }// namespace rtl::sysutils_p3
