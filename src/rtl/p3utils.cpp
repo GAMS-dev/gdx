@@ -1238,7 +1238,7 @@ followSymLink (char absPathName[], const size_t absPathSiz)
       }
       return errno;
    }
-   if( rc >= sizeof( newPathName ) )
+   if( rc >= (long int)sizeof( newPathName ) )
    { /* result buffer too small */
       return ENAMETOOLONG;
    }
@@ -1338,7 +1338,7 @@ static int unixGetModuleFileName(const char *prog, char *buf, const int bufSiz)
         return 0;
     }
     len = strlen (p);
-    if (len < bufSiz) {
+    if (len < (size_t)bufSiz) {
       (void) memcpy (buf, p, len);
       buf[len] = '\0';
     }
@@ -1372,7 +1372,7 @@ static int unixGetModuleFileName(const char *prog, char *buf, const int bufSiz)
         return 0;
     }
     len = strlen (p);
-    if (len < bufSiz) {
+    if (len < (size_t)bufSiz) {
       (void) memcpy (buf, p, len);
       buf[len] = '\0';
     }
@@ -1430,7 +1430,7 @@ static int unixGetModuleFileName(const char *prog, char *buf, const int bufSiz)
             goto wefail;
         }
         len = strlen (p);
-        if (len < bufSiz) {
+        if (len < (size_t)bufSiz) {
           (void) memcpy (buf, p, len);
           buf[len] = '\0';
         }
