@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -480,13 +480,13 @@ void P3WriteFS(P3File *fil, const char *s)
 /**
  * Create a directory
  * @param s name of the directory
- * @return true on success and false on failure
+ * @return 0 on success and !=0 on failure
  */
 bool mkdir(const std::string& s) {
 #if defined(_WIN32)
-   return !_mkdir( s.c_str() );
+   return _mkdir( s.c_str() );
 #else
-   return !::mkdir( s.c_str(), 0777 );
+   return ::mkdir( s.c_str(), 0777 );
 #endif
 }
 

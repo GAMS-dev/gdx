@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -184,6 +184,143 @@ public:
 
 static int getCPUInfo( int *nSockets, int *nCores, int *nThreads,
                        int *coresPerSocket, int *threadsPerCore );
+
+//========================================================================================================
+
+std::string TExecArgList::Get( const int Index ) const
+{
+   return FList[Index];
+}
+
+std::string TExecArgList::GetLast() const
+{
+   return FList.back();
+}
+
+int TExecArgList::Count() const
+{
+   return static_cast<int>( FList.size() );
+}
+
+std::string TExecArgList::operator[]( const int Index ) const
+{
+   return Get( Index );
+}
+
+void TExecArgList::Put( const int Index, const std::string &Item )
+{
+   FList[Index] = Item;
+}
+
+int TExecArgList::GetCapacity() const
+{
+   return static_cast<int>( FList.capacity() );
+}
+
+static const char* GetParamShortStr(const char* p, std::string& param)
+{
+   static utils::sstring buf;
+   int len {};
+   char *r { buf.data() };
+   
+   auto pushChar = [&]( const char c ) {
+      if (len < (int)buf.size() - 1)
+      {
+         *r = c;
+         ++len;
+         ++r;
+      }
+   };
+
+   while (true)
+   {
+      while( *p != '\0' && *p <= ' ' )
+         p++;
+      const char *s = p;
+      ++s;
+      if( *p == '\"' && *s == '\"' )
+         p += 2;
+      else
+         break;
+   }
+
+   while (*p > ' ')
+   {
+      if (*p == '\"')
+      {
+         ++p;
+         while (*p != '\0' && *p != '\"')
+         {
+            pushChar( *p );
+            ++p;
+         }
+         if( *p != '\0' )
+            ++p;
+      }
+      else
+      {
+         pushChar( *p );
+         ++p;
+      }
+   }
+   buf[len] = '\0';
+   param = buf.data();
+   return p;
+}
+
+int TExecArgList::Split( const bool append, const std::string &s )
+{
+   std::string param;
+   int count {};
+   const char *p = s.c_str();
+   while (true)
+   {
+      p = GetParamShortStr( p, param );
+      if( param.empty() )
+         break;
+      if( append )
+         Add( param );
+      else
+         Insert( count, param );
+      count++;
+   }
+   return count;
+}
+
+TExecArgList::TExecArgList() = default;
+TExecArgList::~TExecArgList() = default;
+
+void TExecArgList::Clear()
+{
+   FList.clear();
+}
+void TExecArgList::Delete( const int Index )
+{
+   FList.erase( FList.begin() + Index );
+}
+
+void TExecArgList::Insert( const int Index, const std::string &Item )
+{
+   FList.insert( FList.begin() + Index, Item );
+}
+
+int TExecArgList::SplitAppend( const std::string &s )
+{
+   return Split( true, s );
+}
+
+int TExecArgList::SplitPrepend( const std::string &s )
+{
+   return Split( false, s );
+}
+
+int TExecArgList::Add( const std::string &Item )
+{
+   FList.emplace_back( Item );
+   return static_cast<int>( FList.size() - 1 );
+}
+
+//========================================================================================================
 
 // nSockets: count of physical sockets, aka packages
 // nCores:   count of cores, aka physical CPUs
@@ -481,49 +618,68 @@ int p3GetNumberOfProcessors()
 const std::string CMD_WIN7 = R"(C:\windows\system32\cmd.exe)";
 const std::string CMD_WINNT = R"(C:\winnt\system32\cmd.exe)";
 
-int wShowWindow {};
+#if defined(_WIN32)
+static int wShowWindow {SW_SHOWNA};
+#endif
 
-static int CppCreateProc( const std::string &exeName, const std::string &cmdLine, bool inheritedHandles, int &exeRC )
+static int CppCreateProc( const std::string &exeName, const std::string &cmdLine, bool allowStdHandles, int &exeRC )
 {
-#if _WIN32 || _WIN64
-   STARTUPINFOA StartupInfo;
+#if defined(_WIN32)
    PROCESS_INFORMATION ProcessInformation;
-   DWORD exitcode;
-
-   ZeroMemory( &StartupInfo, sizeof( STARTUPINFOA ) );
-   StartupInfo.cb = sizeof( STARTUPINFOA );
    ZeroMemory( &ProcessInformation, sizeof( PROCESS_INFORMATION ) );
-
+   // Initialise the startup information to be the same as that of the
+   // calling application.  This is easier than initialising the many
+   // individual startup information fields and should be fine in most
+   // cases.
+   STARTUPINFOA StartupInfo;
    GetStartupInfoA( &StartupInfo );
+   StartupInfo.cbReserved2 = 0;
+   StartupInfo.lpReserved = nullptr;
+   StartupInfo.lpReserved2 = nullptr;
 
-   std::vector<char> cmdLineBuf( cmdLine.size() + 1 );
-   std::memcpy( cmdLineBuf.data(), cmdLine.c_str(), cmdLineBuf.size() );
+   // StartupInfo.wShowWindow determines whether the called application
+   // will be initially displayed normal, maximises, minimised or some
+   // other subtle variations
+   StartupInfo.wShowWindow = wShowWindow;
 
-   if( !CreateProcessA( exeName.empty() ? nullptr : exeName.c_str(), cmdLineBuf.data(), nullptr, nullptr, inheritedHandles, 0, nullptr, nullptr, &StartupInfo, &ProcessInformation ) )
+   // call with STARTF_USESTDHANDLES set only if inheritHandles is TRUE
+   if( !allowStdHandles )
+      StartupInfo.dwFlags &= ~STARTF_USESTDHANDLES;
+
+   std::vector<char> cmdLineBuf( cmdLine.length() + 1 );
+   std::memcpy( cmdLineBuf.data(), cmdLine.c_str(), cmdLine.length()+1 );
+
+   if( !CreateProcessA( exeName.empty() ? nullptr : exeName.c_str(), cmdLineBuf.data(), nullptr, nullptr, true, 0, nullptr, nullptr, &StartupInfo, &ProcessInformation ) )
    {
       exeRC = 0;
       return static_cast<int>(GetLastError());
    }
    WaitForSingleObject( ProcessInformation.hProcess, INFINITE );
-   GetExitCodeProcess( ProcessInformation.hProcess, &exitcode );
+   DWORD exitcode;
+   BOOL brc = GetExitCodeProcess( ProcessInformation.hProcess, &exitcode );
    CloseHandle( ProcessInformation.hThread );
    CloseHandle( ProcessInformation.hProcess );
-   exeRC = static_cast<int>( exitcode );
-   if( exeRC == 255 )
+   if (!brc || exitcode == 255) // failed call to GetExitCodeProcess
    {
       exeRC = 0;
       return 1;
    }
+   exeRC = static_cast<int>( exitcode );
    return 0;
 #else
+   exeRC = !exeName.empty() + !cmdLine.empty();
    return 1;
 #endif
 }
 
 static int System4Win( const std::string &CmdPtr, bool inheritedHandles, int &ProgRC )
 {
-   const auto cspec = getenv( "COMSPEC" );
-   std::string cs = cspec ? cspec : ""s;
+   // check if we have a command starting with "" and ending with " (and more than 2 chars)
+   static auto checkAddQuotes = []( const std::string &cp ) {
+      return cp.length() <= 2 || cp[0] != '\"' || cp[1] != '\"' || cp.back() != '\"';
+   };
+
+   std::string cs = rtl::sysutils_p3::QueryEnvironmentVariable( "COMSPEC" );
    if( cs.empty() )
    {
       if( FileExists( CMD_WIN7 ) )
@@ -533,7 +689,8 @@ static int System4Win( const std::string &CmdPtr, bool inheritedHandles, int &Pr
       else
          return 1;
    }
-   return CppCreateProc( cs, cs + " /C \""s + CmdPtr + '\"', inheritedHandles, ProgRC );
+   std::string arg = checkAddQuotes( CmdPtr ) ? cs + " /C \""s + CmdPtr + '\"' : cs + " /C "s + CmdPtr;
+   return CppCreateProc( cs, arg, inheritedHandles, ProgRC );
 }
 
 static int System4Unix( const std::string &CmdPtr, int &ProgRC )
@@ -859,6 +1016,44 @@ int P3ExecP( const std::string &CmdPtr, int &ProgRC )
          break;
    }
    return res;
+}
+
+static std::string whatQuote(const std::string &arg)
+{
+   if( const std::string targ { utils::trim( arg ) };
+      targ.length() > 1 && targ.front() == '"' && targ.back() == '"')
+      return ""s; // already quoted, do not quote it again
+   if(arg.empty())
+      return "\""s;
+   for(int i{}; i<(int)arg.length(); i++)
+      if(arg[i] <= ' ') // found a space, quote the whole thing
+         return "\""s;
+   return ""s;
+}
+
+int P3SystemL( const std::string &ProgName, const TExecArgList &ProgParams, int &ProgRC )
+{
+   const bool allowStdHandles { ProgParams.fInheritedHandles };
+   std::string cmd { ProgName };
+   for(int i {}; i<ProgParams.Count(); i++)
+   {
+      const std::string quote = whatQuote(ProgParams[i]);
+      cmd += ' ';
+      cmd += quote;
+      cmd += ProgParams[i];
+      cmd += quote;
+   }
+   switch(OSFileType())
+   {
+      case OSFileWIN:
+         return System4Win( cmd, allowStdHandles, ProgRC );
+      case OSFileUNIX:
+         return System4Unix( cmd, ProgRC );
+      default:
+         break;
+   }
+   assert(false && "unimplemented P3systemL for OSFileType");
+   return 0;
 }
 
 int win32ASyncCreateProc( const char *exeName, char *cmdLine, int newConsole, int inheritedHandles, TProcInfo &procInfo );

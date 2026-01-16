@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
 *
-* Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
-* Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
+* Copyright (c) 2017-2026 GAMS Software GmbH <support@gams.com>
+* Copyright (c) 2017-2026 GAMS Development Corp. <support@gams.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -2760,6 +2760,24 @@ TEST_CASE("Test opening 100 char long name GDX file inside two 100 char long nam
 
    REQUIRE(fs::remove( gdxTargetFilename));
    REQUIRE(fs::remove_all( pf + longName));
+}
+
+TEST_CASE("Mapped writing does not like UELs inserted raw")
+{
+   const std::string fn { "rawuels.gdx" };
+   testWrite( fn, [&]( TGXFileObj &pgx ) {
+      REQUIRE(pgx.gdxUELRegisterRawStart());
+      REQUIRE(pgx.gdxUELRegisterRaw( "uel1" ));
+      REQUIRE(pgx.gdxUELRegisterDone());
+      REQUIRE(pgx.gdxDataWriteMapStart( "sym", "", 1, dt_par, 0 ));
+      std::array<int, GMS_MAX_INDEX_DIM> keys {};
+      std::array<double, GMS_VAL_MAX> values {};
+      keys[0] = 1;
+      values[0] = 42.0;
+      REQUIRE_FALSE(pgx.gdxDataWriteMap( keys.data(), values.data() ));
+      REQUIRE_EQ(-100004, pgx.gdxGetLastError());
+   } );
+   fs::remove( fn );
 }
 
 }// namespace gdx::tests::gdxtests

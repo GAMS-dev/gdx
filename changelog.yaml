@@ -1,4 +1,10 @@
 ---
+- 7.11.18:
+    - Fixed duplicated text piece in description of gdxAddSetText.
+    - Many updates to shared internal infrastructure code (driven by static analysis).
+    - Restructure CMake project for GDX tools (diff, dump, merge) and adapt header paths.
+    - Added zlib as submodule.
+    - Increased performance of case-insensitive text comparison on Linux and macOS.
 - 7.11.17:
     - Include path to file that cannot be opened in error message after gdxOpenRead* failed due to missing file.
 - 7.11.16:
