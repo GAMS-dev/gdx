@@ -4,7 +4,7 @@ import platform
 import subprocess
 import unittest
 
-import gams.transfer as gt
+import gams.transfer as gt  # type: ignore
 
 from .examples.default_values_examples import (
     create_default_values_example_1,
@@ -154,7 +154,7 @@ class TestGdxDiff(unittest.TestCase):
     ) -> None:
         self.assertIn(symbol_name, container)
         symbol: gt.Parameter = container[symbol_name]  # type: ignore
-        values = symbol.records.values.tolist()
+        values = symbol.records.values.tolist()  # type: ignore
         self.assertEqual(values, expected_values)
 
     def check_gdx_file(self, symbols: dict[str, list[list[str | float]]]) -> None:
