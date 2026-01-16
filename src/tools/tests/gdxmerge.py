@@ -46,8 +46,9 @@ class TestGdxMerge(unittest.TestCase):
     @classmethod
     def run_gdxmerge(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
         EXECUTABLE_NAME = "gdxmerge"
+        executable_path: list[str]
         if platform.system() == "Windows":
-            EXECUTABLE_PATH = (
+            executable_path = (
                 ["Release", f"{EXECUTABLE_NAME}.exe"]
                 if os.path.isdir("Release")
                 else ["gdxtools", f"{EXECUTABLE_NAME}.exe"]
@@ -63,13 +64,13 @@ class TestGdxMerge(unittest.TestCase):
                 if build_directory_exists
                 else cls.GDX_DIRECTORY_PATH
             )
-            EXECUTABLE_PATH = (
+            executable_path = (
                 ["build", "src", "tools", EXECUTABLE_NAME, EXECUTABLE_NAME]
                 if build_directory_exists
                 else ["gdxtools", EXECUTABLE_NAME]
             )
         return subprocess.run(
-            [os.path.join(cls.GDX_DIRECTORY_PATH, *EXECUTABLE_PATH), *command],
+            [os.path.join(cls.GDX_DIRECTORY_PATH, *executable_path), *command],
             capture_output=True,
             text=True,
         )
@@ -77,7 +78,7 @@ class TestGdxMerge(unittest.TestCase):
     def check_output(
         self,
         output: subprocess.CompletedProcess[str],
-        return_code=0,
+        return_code: int = 0,
         file_name: str | None = None,
         first_offset: int | None = None,
         first_negative_offset: int | None = None,
