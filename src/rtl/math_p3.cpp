@@ -24,6 +24,8 @@
  */
 
 #include "math_p3.hpp"
+
+#include <cfenv>
 #include <cstdlib>              // for abs
 #include <cmath>                // for log1p
 #include <stdexcept>
@@ -55,8 +57,8 @@ double LnXP1( double x )
 
 TFPUExceptionMask GetExceptionMask()
 {
+   std::set<TFPUException> result {};
 #if defined(_WIN32)
-   std::set<rtl::math_p3::TFPUException> result {};
    unsigned int cw = _control87( 0, 0 );
    if( cw & _EM_INVALID ) result.insert( exInvalidOp );
    if( cw & _EM_DENORMAL ) result.insert( exDenormalized );
@@ -64,18 +66,34 @@ TFPUExceptionMask GetExceptionMask()
    if( cw & _EM_OVERFLOW ) result.insert( exOverflow );
    if( cw & _EM_UNDERFLOW ) result.insert( exUnderflow );
    if( cw & _EM_INEXACT ) result.insert( exPrecision );
-   return result;
+#elif defined(__linux)
+   std::fenv_t fenv;
+   (void)fegetenv(&fenv);
+   fesetenv(&fenv);
+   unsigned short ex = fenv.__control_word & FE_ALL_EXCEPT;
+   if(ex & FE_INVALID) result.insert( exInvalidOp );
+#if defined(FE_DENORMAL)
+   if(ex & FE_DENORMAL) result.insert(exDenormalized);
+#else
+   // assume always on if FE_DENORMAL not defined
+   result.insert( exDenormalized );
+#endif
+   if(ex & FE_DIVBYZERO) result.insert(exZeroDivide);
+   if(ex & FE_OVERFLOW) result.insert(exOverflow);
+   if(ex & FE_UNDERFLOW) result.insert(exUnderflow);
+   if(ex & FE_INEXACT) result.insert(exPrecision);
 #else
    // ...
-   throw std::runtime_error("Not implemented yet!");
+   #error "Function GetExceptionMask not implemented for this OS or compiler" is_not_implemented;
 #endif
+   return result;
 }
 
 TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
 {
+   std::set<TFPUException> result {};
 #if defined(_WIN32)
    unsigned int cw = _control87( 0, 0 );
-   std::set<rtl::math_p3::TFPUException> result {};
    if( cw & _EM_INVALID ) result.insert( exInvalidOp );
    if( cw & _EM_DENORMAL ) result.insert( exDenormalized );
    if( cw & _EM_ZERODIVIDE ) result.insert( exZeroDivide );
@@ -90,11 +108,28 @@ TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
    if( result.count( exUnderflow ) ) tcw |= _EM_UNDERFLOW;
    if( result.count( exPrecision ) ) tcw |= _EM_INEXACT;
    _control87( tcw, _MCW_EM );
-   return result;
+#elif defined(__linux)
+   std::fenv_t fenv;
+   (void)fegetenv(&fenv);
+   unsigned short oldcw = fenv.__control_word & FE_ALL_EXCEPT;
+   if(oldcw & FE_INVALID) result.insert( exInvalidOp );
+#if defined(FE_DENORMAL)
+   if(oldcw & FE_DENORMAL) result.insert( exDenormalized );
 #else
-   throw std::runtime_error("Not implemented yet!");
+   result.insert(exDenormalized);
+#endif
+   if(oldcw & FE_DIVBYZERO) result.insert(exZeroDivide);
+   if(oldcw & FE_OVERFLOW) result.insert(exOverflow);
+   if(oldcw & FE_UNDERFLOW) result.insert(exUnderflow);
+   if(oldcw & FE_INEXACT) result.insert(exPrecision);
+
+   unsigned short newcw = 0;
+   // ...
+#else
+   #error "function SetExceptionMask not implemented for this OS or compiler" is_not_implemented;
    // ...
 #endif
+   return result;
 }
 
 void SetExceptionMask2P3()
