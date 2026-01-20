@@ -1,9 +1,8 @@
 import os
-import platform
 import subprocess
 import sys
 
-from ..common import DIRECTORY_PATHS
+from ..common import DIRECTORY_PATHS, get_executable_path
 from ..examples.full_example import create_full_example
 from ..examples.small_example import create_small_example
 
@@ -15,28 +14,7 @@ FILE_PATHS = {
 
 
 def benchmark_executable(executable_name: str, command: list[str]) -> None:
-    executable_path: list[str]
-    if platform.system() == "Windows":
-        executable_path = (
-            ["Release", f"{executable_name}.exe"]
-            if os.path.isdir("Release")
-            else ["gdxtools", f"{executable_name}.exe"]
-        )
-    else:
-        build_directory_exists = os.path.isdir("build")
-        os.environ[
-            "LD_LIBRARY_PATH" if platform.system() == "Linux" else "DYLD_LIBRARY_PATH"
-        ] = (
-            os.path.join(DIRECTORY_PATHS.gdx, "build")
-            if build_directory_exists
-            else DIRECTORY_PATHS.gdx
-        )
-        executable_path = (
-            ["build", "src", "tools", executable_name, executable_name]
-            if build_directory_exists
-            else ["gdxtools", executable_name]
-        )
-    os.makedirs(DIRECTORY_PATHS.results, exist_ok=True)
+    executable_path = get_executable_path(executable_name)
     full_command = [
         "hyperfine",
         "--shell=none",
@@ -53,6 +31,7 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
         " ".join([executable_name, *command]),
     ]
     print(f"{' '.join(full_command)}\n")
+    os.makedirs(DIRECTORY_PATHS.results, exist_ok=True)
     subprocess.run(full_command)
 
 

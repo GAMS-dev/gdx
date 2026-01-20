@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import unittest
 
-from .common import DIRECTORY_PATHS
+from .common import DIRECTORY_PATHS, get_executable_path
 from .examples.element_text_example import create_element_text_example
 from .examples.full_example import create_full_example
 from .examples.label_example import create_label_example
@@ -43,30 +43,7 @@ class TestGdxDump(unittest.TestCase):
 
     @classmethod
     def run_gdxdump(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
-        EXECUTABLE_NAME = "gdxdump"
-        executable_path: list[str]
-        if platform.system() == "Windows":
-            executable_path = (
-                ["Release", f"{EXECUTABLE_NAME}.exe"]
-                if os.path.isdir("Release")
-                else ["gdxtools", f"{EXECUTABLE_NAME}.exe"]
-            )
-        else:
-            build_directory_exists = os.path.isdir("build")
-            os.environ[
-                "LD_LIBRARY_PATH"
-                if platform.system() == "Linux"
-                else "DYLD_LIBRARY_PATH"
-            ] = (
-                os.path.join(DIRECTORY_PATHS.gdx, "build")
-                if build_directory_exists
-                else DIRECTORY_PATHS.gdx
-            )
-            executable_path = (
-                ["build", "src", "tools", EXECUTABLE_NAME, EXECUTABLE_NAME]
-                if build_directory_exists
-                else ["gdxtools", EXECUTABLE_NAME]
-            )
+        executable_path = get_executable_path("gdxdump")
         return subprocess.run(
             [os.path.join(DIRECTORY_PATHS.gdx, *executable_path), *command],
             capture_output=True,
