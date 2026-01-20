@@ -7,7 +7,7 @@ import unittest
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
-from .common import DIRECTORY_PATHS
+from .common import DIRECTORY_PATHS, get_executable_path
 from .examples.full_example import create_full_example
 from .examples.small_example import create_small_example
 from .examples.small_example_changed_data import create_small_example_changed_data
@@ -40,30 +40,7 @@ class TestGdxMerge(unittest.TestCase):
 
     @classmethod
     def run_gdxmerge(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
-        EXECUTABLE_NAME = "gdxmerge"
-        executable_path: list[str]
-        if platform.system() == "Windows":
-            executable_path = (
-                ["Release", f"{EXECUTABLE_NAME}.exe"]
-                if os.path.isdir("Release")
-                else ["gdxtools", f"{EXECUTABLE_NAME}.exe"]
-            )
-        else:
-            build_directory_exists = os.path.isdir("build")
-            os.environ[
-                "LD_LIBRARY_PATH"
-                if platform.system() == "Linux"
-                else "DYLD_LIBRARY_PATH"
-            ] = (
-                os.path.join(DIRECTORY_PATHS.gdx, "build")
-                if build_directory_exists
-                else DIRECTORY_PATHS.gdx
-            )
-            executable_path = (
-                ["build", "src", "tools", EXECUTABLE_NAME, EXECUTABLE_NAME]
-                if build_directory_exists
-                else ["gdxtools", EXECUTABLE_NAME]
-            )
+        executable_path = get_executable_path("gdxmerge")
         return subprocess.run(
             [os.path.join(DIRECTORY_PATHS.gdx, *executable_path), *command],
             capture_output=True,
