@@ -1,6 +1,7 @@
-import gams.transfer as gt
-import pandas as pd
 import os
+
+import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
+import pandas as pd
 
 
 def create_special_values_example(file_path: str) -> None:
@@ -30,4 +31,4 @@ def create_special_values_example(file_path: str) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path, eps_to_zero=False)
+    m.write(file_path, eps_to_zero=False)  # pyright: ignore[reportUnknownMemberType]

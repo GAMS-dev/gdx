@@ -1,6 +1,7 @@
-import gams.transfer as gt
-import pandas as pd
 import os
+
+import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
+import pandas as pd
 
 
 def create_full_example_changed_variables(file_path: str) -> None:
@@ -48,8 +49,8 @@ def create_full_example_changed_variables(file_path: str) -> None:
     d.setRecords(dist)
 
     # c(i,j) = f * d(i,j) / 1000;
-    cost = d.records.copy(deep=True)
-    cost["value"] = f.records.loc[0, "value"] * cost["value"] / 1000
+    cost = d.records.copy(deep=True)  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
+    cost["value"] = f.records.loc[0, "value"] * cost["value"] / 1000  # pyright: ignore[reportUnknownMemberType]
     c.setRecords(cost)
 
     # add variables
@@ -89,7 +90,7 @@ def create_full_example_changed_variables(file_path: str) -> None:
     )
 
     # set equation records
-    cost.setRecords(
+    cost.setRecords(  # pyright: ignore[reportUnknownMemberType]
         pd.DataFrame(
             data=[[0, 1, 0, 0]], columns=["level", "marginal", "lower", "upper"]
         )
@@ -102,7 +103,7 @@ def create_full_example_changed_variables(file_path: str) -> None:
         ],
         columns=["from", "level", "marginal", "lower", "upper"],
     )
-    supply.setRecords(supplies)
+    supply.setRecords(supplies)  # pyright: ignore[reportUnknownMemberType]
 
     demands = pd.DataFrame(
         [
@@ -112,6 +113,6 @@ def create_full_example_changed_variables(file_path: str) -> None:
         ],
         columns=["from", "level", "marginal", "lower"],
     )
-    demand.setRecords(demands)
+    demand.setRecords(demands)  # pyright: ignore[reportUnknownMemberType]
 
-    m.write(file_path)
+    m.write(file_path)  # pyright: ignore[reportUnknownMemberType]

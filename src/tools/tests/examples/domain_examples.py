@@ -1,5 +1,6 @@
-import gams.transfer as gt
 import os
+
+import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
 
 def create_domain_example_1(file_path: str) -> None:
@@ -8,7 +9,7 @@ def create_domain_example_1(file_path: str) -> None:
     i = gt.Set(m, "i", records=["i1", "i2"])
     gt.Variable(m, "a", domain=[i])
 
-    m.write(file_path)
+    m.write(file_path)  # pyright: ignore[reportUnknownMemberType]
 
 
 def create_domain_example_2(file_path: str) -> None:
@@ -17,4 +18,4 @@ def create_domain_example_2(file_path: str) -> None:
     j = gt.Set(m, "j", records=["i1", "i2"])
     gt.Variable(m, "a", domain=[j])
 
-    m.write(file_path)
+    m.write(file_path)  # pyright: ignore[reportUnknownMemberType]

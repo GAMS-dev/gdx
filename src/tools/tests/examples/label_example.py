@@ -1,9 +1,10 @@
-import gams.transfer as gt
-import pandas as pd
 import os
 
+import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
+import pandas as pd
 
-def get_test_string(count=255) -> str:
+
+def get_test_string(count: int = 255) -> str:
     return f"|{'_' * (count - 2)}|"
 
 
@@ -51,4 +52,4 @@ def create_label_example(file_path: str) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path)
+    m.write(file_path)  # pyright: ignore[reportUnknownMemberType]
