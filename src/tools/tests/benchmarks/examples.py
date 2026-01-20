@@ -1,28 +1,23 @@
+import os
 import platform
 import subprocess
-import os
 import sys
 
-from ..examples.small_example import create_small_example
+from ..common import DIRECTORY_PATHS
 from ..examples.full_example import create_full_example
+from ..examples.small_example import create_small_example
 
-
-TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
-GDX_DIRECTORY_PATH = os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..", "..")
-DIRECTORY_PATHS = {
-    "examples": os.path.join(TESTS_DIRECTORY_PATH, "examples"),
-    "results": os.path.join(TESTS_DIRECTORY_PATH, "results"),
-}
 FILE_NAMES = ["small_example", "full_example", "diff_file", "merge_file"]
 FILE_PATHS = {
-    file_name: os.path.join(DIRECTORY_PATHS["examples"], f"{file_name}.gdx")
+    file_name: os.path.join(DIRECTORY_PATHS.examples, f"{file_name}.gdx")
     for file_name in FILE_NAMES
 }
 
 
 def benchmark_executable(executable_name: str, command: list[str]) -> None:
+    executable_path: list[str]
     if platform.system() == "Windows":
-        EXECUTABLE_PATH = (
+        executable_path = (
             ["Release", f"{executable_name}.exe"]
             if os.path.isdir("Release")
             else ["gdxtools", f"{executable_name}.exe"]
@@ -32,16 +27,16 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
         os.environ[
             "LD_LIBRARY_PATH" if platform.system() == "Linux" else "DYLD_LIBRARY_PATH"
         ] = (
-            os.path.join(GDX_DIRECTORY_PATH, "build")
+            os.path.join(DIRECTORY_PATHS.gdx, "build")
             if build_directory_exists
-            else GDX_DIRECTORY_PATH
+            else DIRECTORY_PATHS.gdx
         )
-        EXECUTABLE_PATH = (
+        executable_path = (
             ["build", "src", "tools", executable_name, executable_name]
             if build_directory_exists
             else ["gdxtools", executable_name]
         )
-    os.makedirs(DIRECTORY_PATHS["results"], exist_ok=True)
+    os.makedirs(DIRECTORY_PATHS.results, exist_ok=True)
     full_command = [
         "hyperfine",
         "--shell=none",
@@ -49,10 +44,10 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
         "5",
         "--ignore-failure",
         "--export-markdown",
-        os.path.join(DIRECTORY_PATHS["results"], f"{executable_name}.md"),
+        os.path.join(DIRECTORY_PATHS.results, f"{executable_name}.md"),
         "--command-name",
         f"{executable_name} (C++)",
-        " ".join([os.path.join(GDX_DIRECTORY_PATH, *EXECUTABLE_PATH), *command]),
+        " ".join([os.path.join(DIRECTORY_PATHS.gdx, *executable_path), *command]),
         "--command-name",
         f"{executable_name} (Delphi)",
         " ".join([executable_name, *command]),
