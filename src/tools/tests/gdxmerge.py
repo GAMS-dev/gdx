@@ -5,20 +5,15 @@ import subprocess
 import tempfile
 import unittest
 
-import gams.transfer as gt  # type: ignore
+import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
+from .common import DIRECTORY_PATHS
 from .examples.full_example import create_full_example
 from .examples.small_example import create_small_example
 from .examples.small_example_changed_data import create_small_example_changed_data
 
 
 class TestGdxMerge(unittest.TestCase):
-    TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
-    GDX_DIRECTORY_PATH = os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..")
-    DIRECTORY_PATHS = {
-        "examples": os.path.join(TESTS_DIRECTORY_PATH, "examples"),
-        "output": os.path.join(TESTS_DIRECTORY_PATH, "output", "gdxmerge"),
-    }
     FILE_NAMES = [
         "small_example",
         "full_example",
@@ -30,7 +25,7 @@ class TestGdxMerge(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.FILE_PATHS = {
-            file_name: os.path.join(cls.DIRECTORY_PATHS["examples"], f"{file_name}.gdx")
+            file_name: os.path.join(DIRECTORY_PATHS.examples, f"{file_name}.gdx")
             for file_name in cls.FILE_NAMES
         }
 
@@ -60,9 +55,9 @@ class TestGdxMerge(unittest.TestCase):
                 if platform.system() == "Linux"
                 else "DYLD_LIBRARY_PATH"
             ] = (
-                os.path.join(cls.GDX_DIRECTORY_PATH, "build")
+                os.path.join(DIRECTORY_PATHS.gdx, "build")
                 if build_directory_exists
-                else cls.GDX_DIRECTORY_PATH
+                else DIRECTORY_PATHS.gdx
             )
             executable_path = (
                 ["build", "src", "tools", EXECUTABLE_NAME, EXECUTABLE_NAME]
@@ -70,7 +65,7 @@ class TestGdxMerge(unittest.TestCase):
                 else ["gdxtools", EXECUTABLE_NAME]
             )
         return subprocess.run(
-            [os.path.join(cls.GDX_DIRECTORY_PATH, *executable_path), *command],
+            [os.path.join(DIRECTORY_PATHS.gdx, *executable_path), *command],
             capture_output=True,
             text=True,
         )
@@ -93,7 +88,9 @@ class TestGdxMerge(unittest.TestCase):
             del first[i]
         if file_name is None:
             file_name = f"{inspect.stack()[1].function.removeprefix('test_')}.txt"
-        with open(os.path.join(self.DIRECTORY_PATHS["output"], file_name), "r") as file:
+        with open(
+            os.path.join(DIRECTORY_PATHS.output.gdxmerge, file_name), "r"
+        ) as file:
             second = file.read().split("\n")[second_offset:second_negative_offset]
         for i in second_delete:
             del second[i]

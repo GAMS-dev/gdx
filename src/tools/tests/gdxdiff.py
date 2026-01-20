@@ -4,8 +4,9 @@ import platform
 import subprocess
 import unittest
 
-import gams.transfer as gt  # type: ignore
+import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
+from .common import DIRECTORY_PATHS
 from .examples.default_values_examples import (
     create_default_values_example_1,
     create_default_values_example_2,
@@ -28,12 +29,6 @@ from .examples.small_example_changed_data import create_small_example_changed_da
 
 
 class TestGdxDiff(unittest.TestCase):
-    TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
-    GDX_DIRECTORY_PATH = os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..")
-    DIRECTORY_PATHS = {
-        "examples": os.path.join(TESTS_DIRECTORY_PATH, "examples"),
-        "output": os.path.join(TESTS_DIRECTORY_PATH, "output", "gdxdiff"),
-    }
     FILE_NAMES = [
         "small_example",
         "full_example",
@@ -55,7 +50,7 @@ class TestGdxDiff(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.FILE_PATHS = {
-            file_name: os.path.join(cls.DIRECTORY_PATHS["examples"], f"{file_name}.gdx")
+            file_name: os.path.join(DIRECTORY_PATHS.examples, f"{file_name}.gdx")
             for file_name in cls.FILE_NAMES
         }
 
@@ -99,9 +94,9 @@ class TestGdxDiff(unittest.TestCase):
                 if platform.system() == "Linux"
                 else "DYLD_LIBRARY_PATH"
             ] = (
-                os.path.join(cls.GDX_DIRECTORY_PATH, "build")
+                os.path.join(DIRECTORY_PATHS.gdx, "build")
                 if build_directory_exists
-                else cls.GDX_DIRECTORY_PATH
+                else DIRECTORY_PATHS.gdx
             )
             executable_path = (
                 ["build", "src", "tools", EXECUTABLE_NAME, EXECUTABLE_NAME]
@@ -109,7 +104,7 @@ class TestGdxDiff(unittest.TestCase):
                 else ["gdxtools", EXECUTABLE_NAME]
             )
         return subprocess.run(
-            [os.path.join(cls.GDX_DIRECTORY_PATH, *executable_path), *command],
+            [os.path.join(DIRECTORY_PATHS.gdx, *executable_path), *command],
             capture_output=True,
             text=True,
         )
@@ -132,7 +127,7 @@ class TestGdxDiff(unittest.TestCase):
             del first[i]
         if file_name is None:
             file_name = f"{inspect.stack()[1].function.removeprefix('test_')}.txt"
-        with open(os.path.join(self.DIRECTORY_PATHS["output"], file_name), "r") as file:
+        with open(os.path.join(DIRECTORY_PATHS.output.gdxdiff, file_name), "r") as file:
             second = file.read().split("\n")[second_offset:second_negative_offset]
         for i in second_delete:
             del second[i]

@@ -1,16 +1,15 @@
+import os
 import platform
 import subprocess
-import os
 import sys
 
-
-TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
-GDX_DIRECTORY_PATH = os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..", "..")
+from ..common import DIRECTORY_PATHS, TESTS_DIRECTORY_PATH
 
 
 def benchmark_executable(executable_name: str, command: list[str]) -> None:
+    executable_path: list[str]
     if platform.system() == "Windows":
-        EXECUTABLE_PATH = (
+        executable_path = (
             ["Release", f"{executable_name}.exe"]
             if os.path.isdir("Release")
             else ["gdxtools", f"{executable_name}.exe"]
@@ -20,11 +19,11 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
         os.environ[
             "LD_LIBRARY_PATH" if platform.system() == "Linux" else "DYLD_LIBRARY_PATH"
         ] = (
-            os.path.join(GDX_DIRECTORY_PATH, "build")
+            os.path.join(DIRECTORY_PATHS.gdx, "build")
             if build_directory_exists
-            else GDX_DIRECTORY_PATH
+            else DIRECTORY_PATHS.gdx
         )
-        EXECUTABLE_PATH = (
+        executable_path = (
             ["build", "src", "tools", executable_name, executable_name]
             if build_directory_exists
             else ["gdxtools", executable_name]
@@ -39,7 +38,7 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
         os.path.join(TESTS_DIRECTORY_PATH, "results", f"{executable_name}.md"),
         "--command-name",
         f"{executable_name} (C++)",
-        " ".join([os.path.join(GDX_DIRECTORY_PATH, *EXECUTABLE_PATH), *command]),
+        " ".join([os.path.join(DIRECTORY_PATHS.gdx, *executable_path), *command]),
         "--command-name",
         f"{executable_name} (Delphi)",
         " ".join([executable_name, *command]),
