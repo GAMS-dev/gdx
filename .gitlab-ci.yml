@@ -433,7 +433,7 @@ test-gdxtools-wei:
     - $gmsdirname = Get-Content mygmsdir.tmp -Raw
     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
     - $env:PATH = "$GAMS_PATH;$GAMS_PATH\gbin;$env:PATH"
-    # - $env:GAMS_SYSTEM_DIRECTORY = $GAMS_PATH
+    - $env:GAMS_SYSTEM_DIRECTORY = $GAMS_PATH
     - python -m pip install uv
     - $env:UV_PROJECT_ENVIRONMENT = "$(Get-Location)\.venv"
     - uv run --directory .\src\tools -m tests
