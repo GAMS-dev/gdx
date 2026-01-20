@@ -19,6 +19,8 @@ class DirectoryPaths:
     results: str
 
 
+RUNNING_ON_WINDOWS = platform.system() == "Windows"
+
 TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
 GDX_DIRECTORY_PATH = os.path.realpath(
     os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..")
@@ -26,7 +28,9 @@ GDX_DIRECTORY_PATH = os.path.realpath(
 
 DIRECTORY_PATHS = DirectoryPaths(
     gdx=GDX_DIRECTORY_PATH,
-    build=os.path.join(GDX_DIRECTORY_PATH, "Release" if platform.system() == "Windows" else "build"),
+    build=os.path.join(
+        GDX_DIRECTORY_PATH, "Release" if RUNNING_ON_WINDOWS else "build"
+    ),
     examples=os.path.join(TESTS_DIRECTORY_PATH, "examples"),
     output=OutputPaths(
         gdxdump=os.path.join(TESTS_DIRECTORY_PATH, "output", "gdxdump"),
@@ -40,7 +44,7 @@ DIRECTORY_PATHS = DirectoryPaths(
 def get_executable_path(executable_name: str) -> list[str]:
     build_directory_exists = os.path.isdir(DIRECTORY_PATHS.build)
 
-    if platform.system() == "Windows":
+    if RUNNING_ON_WINDOWS:
         return (
             [DIRECTORY_PATHS.build, f"{executable_name}.exe"]
             if build_directory_exists

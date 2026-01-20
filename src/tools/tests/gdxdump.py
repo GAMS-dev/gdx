@@ -1,11 +1,10 @@
 import inspect
 import os
-import platform
 import subprocess
 import tempfile
 import unittest
 
-from .common import DIRECTORY_PATHS, get_executable_path
+from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, get_executable_path
 from .examples.element_text_example import create_element_text_example
 from .examples.full_example import create_full_example
 from .examples.label_example import create_label_example
@@ -94,7 +93,7 @@ class TestGdxDump(unittest.TestCase):
         self.check_output(output)
 
     @unittest.skipIf(
-        platform.system() == "Windows",
+        RUNNING_ON_WINDOWS,
         "Skipped on Windows due to temporary file behavior",
     )
     def test_full_example_output(self) -> None:
