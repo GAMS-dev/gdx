@@ -13,14 +13,20 @@ class OutputPaths:
 @dataclass(frozen=True)
 class DirectoryPaths:
     gdx: str
+    build: str
     examples: str
     output: OutputPaths
     results: str
 
 
 TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
+GDX_DIRECTORY_PATH = os.path.realpath(
+    os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..")
+)
+
 DIRECTORY_PATHS = DirectoryPaths(
-    gdx=os.path.realpath(os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..")),
+    gdx=GDX_DIRECTORY_PATH,
+    build=os.path.join(GDX_DIRECTORY_PATH, "Release" if platform.system() == "Windows" else "build"),
     examples=os.path.join(TESTS_DIRECTORY_PATH, "examples"),
     output=OutputPaths(
         gdxdump=os.path.join(TESTS_DIRECTORY_PATH, "output", "gdxdump"),
@@ -32,23 +38,21 @@ DIRECTORY_PATHS = DirectoryPaths(
 
 
 def get_executable_path(executable_name: str) -> list[str]:
+    build_directory_exists = os.path.isdir(DIRECTORY_PATHS.build)
+
     if platform.system() == "Windows":
         return (
-            ["Release", f"{executable_name}.exe"]
-            if os.path.isdir("Release")
-            else ["gdxtools", f"{executable_name}.exe"]
+            [DIRECTORY_PATHS.build, f"{executable_name}.exe"]
+            if build_directory_exists
+            else [DIRECTORY_PATHS.gdx, "gdxtools", f"{executable_name}.exe"]
         )
     else:
-        build_directory_exists = os.path.isdir("build")
         os.environ[
             "LD_LIBRARY_PATH" if platform.system() == "Linux" else "DYLD_LIBRARY_PATH"
-        ] = (
-            os.path.join(DIRECTORY_PATHS.gdx, "build")
-            if build_directory_exists
-            else DIRECTORY_PATHS.gdx
-        )
+        ] = DIRECTORY_PATHS.build if build_directory_exists else DIRECTORY_PATHS.gdx
+
         return (
-            ["build", "src", "tools", executable_name, executable_name]
+            [DIRECTORY_PATHS.build, "src", "tools", executable_name, executable_name]
             if build_directory_exists
-            else ["gdxtools", executable_name]
+            else [DIRECTORY_PATHS.gdx, "gdxtools", executable_name]
         )
