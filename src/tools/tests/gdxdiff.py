@@ -149,8 +149,8 @@ class TestGdxDiff(unittest.TestCase):
         expected_values: list[list[str | float]],
     ) -> None:
         self.assertIn(symbol_name, container)
-        symbol: gt.Parameter = container[symbol_name]  # type: ignore
-        values = symbol.records.values.tolist()  # type: ignore
+        symbol: gt.Parameter = container[symbol_name]  # pyright: ignore[reportAssignmentType]
+        values = symbol.records.values.tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
         self.assertEqual(values, expected_values)
 
     def check_gdx_file(self, symbols: dict[str, list[list[str | float]]]) -> None:
