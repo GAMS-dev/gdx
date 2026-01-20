@@ -17,7 +17,7 @@ def benchmark_executable(executable_name: str, command: list[str]) -> None:
         os.path.join(DIRECTORY_PATHS.results, f"{executable_name}.md"),
         "--command-name",
         f"{executable_name} (C++)",
-        " ".join([os.path.join(DIRECTORY_PATHS.gdx, *executable_path), *command]),
+        " ".join([os.path.join(*executable_path), *command]),
         "--command-name",
         f"{executable_name} (Delphi)",
         " ".join([executable_name, *command]),

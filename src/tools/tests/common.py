@@ -1,5 +1,6 @@
 import os
 import platform
+import subprocess
 from dataclasses import dataclass
 
 
@@ -60,3 +61,15 @@ def get_executable_path(executable_name: str) -> list[str]:
             if build_directory_exists
             else [DIRECTORY_PATHS.gdx, "gdxtools", executable_name]
         )
+
+
+def run_executable(
+    executable_name: str,
+    command: list[str],
+) -> subprocess.CompletedProcess[str]:
+    executable_path = get_executable_path(executable_name)
+    return subprocess.run(
+        [os.path.join(*executable_path), *command],
+        capture_output=True,
+        text=True,
+    )

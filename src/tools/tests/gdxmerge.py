@@ -6,7 +6,7 @@ import unittest
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
-from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, get_executable_path
+from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, run_executable
 from .examples.full_example import create_full_example
 from .examples.small_example import create_small_example
 from .examples.small_example_changed_data import create_small_example_changed_data
@@ -39,12 +39,7 @@ class TestGdxMerge(unittest.TestCase):
 
     @classmethod
     def run_gdxmerge(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
-        executable_path = get_executable_path("gdxmerge")
-        return subprocess.run(
-            [os.path.join(DIRECTORY_PATHS.gdx, *executable_path), *command],
-            capture_output=True,
-            text=True,
-        )
+        return run_executable("gdxmerge", command)
 
     def check_output(
         self,
@@ -88,7 +83,7 @@ class TestGdxMerge(unittest.TestCase):
         expected_values: list[list[str | float]],
     ) -> None:
         self.assertIn(symbol_name, container)
-        symbol: gt.Parameter = container[symbol_name] # pyright: ignore[reportAssignmentType]
+        symbol: gt.Parameter = container[symbol_name]  # pyright: ignore[reportAssignmentType]
         values = symbol.records.values.tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
         self.assertEqual(values, expected_values)
 
@@ -103,8 +98,8 @@ class TestGdxMerge(unittest.TestCase):
         for symbol_name in symbols:
             self.check_gdx_file_values(container, symbol_name, symbols[symbol_name])
 
-        symbol: gt.Parameter = container["Merged_set_1"] # pyright: ignore[reportAssignmentType]
-        first = symbol.records.values.tolist()   # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
+        symbol: gt.Parameter = container["Merged_set_1"]  # pyright: ignore[reportAssignmentType]
+        first = symbol.records.values.tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
         second: list[list[str]] = []
         for i in range(len(file_names)):
             second.append(
@@ -113,12 +108,12 @@ class TestGdxMerge(unittest.TestCase):
                     f"{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[i]}.gdx",
                 ]
             )
-        self.assertEqual(len(first), len(file_names)) # pyright: ignore[reportUnknownArgumentType]
-        for item in first: # pyright: ignore[reportUnknownVariableType]
-            self.assertEqual(len(item), 2) # pyright: ignore[reportUnknownArgumentType]
+        self.assertEqual(len(first), len(file_names))  # pyright: ignore[reportUnknownArgumentType]
+        for item in first:  # pyright: ignore[reportUnknownVariableType]
+            self.assertEqual(len(item), 2)  # pyright: ignore[reportUnknownArgumentType]
         for i in range(len(file_names)):
             self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])   # pyright: ignore[reportUnknownArgumentType]
+            self.assertRegex(first[i][1], second[i][1])  # pyright: ignore[reportUnknownArgumentType]
 
     def test_empty_command(self) -> None:
         output = self.run_gdxmerge([])
