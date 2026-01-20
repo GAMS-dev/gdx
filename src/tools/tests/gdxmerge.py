@@ -112,8 +112,8 @@ class TestGdxMerge(unittest.TestCase):
         expected_values: list[list[str | float]],
     ) -> None:
         self.assertIn(symbol_name, container)
-        symbol: gt.Parameter = container[symbol_name]  # type: ignore
-        values = symbol.records.values.tolist()  # type: ignore
+        symbol: gt.Parameter = container[symbol_name] # pyright: ignore[reportAssignmentType]
+        values = symbol.records.values.tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
         self.assertEqual(values, expected_values)
 
     def check_gdx_file(
@@ -127,8 +127,8 @@ class TestGdxMerge(unittest.TestCase):
         for symbol_name in symbols:
             self.check_gdx_file_values(container, symbol_name, symbols[symbol_name])
 
-        symbol: gt.Parameter = container["Merged_set_1"]  # type: ignore
-        first = symbol.records.values.tolist()  # type: ignore
+        symbol: gt.Parameter = container["Merged_set_1"] # pyright: ignore[reportAssignmentType]
+        first = symbol.records.values.tolist()   # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
         second: list[list[str]] = []
         for i in range(len(file_names)):
             second.append(
@@ -137,12 +137,12 @@ class TestGdxMerge(unittest.TestCase):
                     f"{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[i]}.gdx",
                 ]
             )
-        self.assertEqual(len(first), len(file_names))  # type: ignore
-        for item in first:  # type: ignore
-            self.assertEqual(len(item), 2)  # type: ignore
+        self.assertEqual(len(first), len(file_names)) # pyright: ignore[reportUnknownArgumentType]
+        for item in first: # pyright: ignore[reportUnknownVariableType]
+            self.assertEqual(len(item), 2) # pyright: ignore[reportUnknownArgumentType]
         for i in range(len(file_names)):
             self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])  # type: ignore
+            self.assertRegex(first[i][1], second[i][1])   # pyright: ignore[reportUnknownArgumentType]
 
     def test_empty_command(self) -> None:
         output = self.run_gdxmerge([])
