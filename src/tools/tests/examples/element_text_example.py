@@ -1,6 +1,7 @@
-import gams.transfer as gt
-import pandas as pd
 import os
+
+import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
+import pandas as pd
 
 
 def create_element_text_example(file_path: str) -> None:
@@ -40,4 +41,4 @@ def create_element_text_example(file_path: str) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path)
+    m.write(file_path)  # pyright: ignore[reportUnknownMemberType]
