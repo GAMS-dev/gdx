@@ -4,7 +4,7 @@ import subprocess
 import tempfile
 import unittest
 
-from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, get_executable_path
+from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, run_executable
 from .examples.element_text_example import create_element_text_example
 from .examples.full_example import create_full_example
 from .examples.label_example import create_label_example
@@ -42,12 +42,7 @@ class TestGdxDump(unittest.TestCase):
 
     @classmethod
     def run_gdxdump(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
-        executable_path = get_executable_path("gdxdump")
-        return subprocess.run(
-            [os.path.join(DIRECTORY_PATHS.gdx, *executable_path), *command],
-            capture_output=True,
-            text=True,
-        )
+        return run_executable("gdxdump", command)
 
     def check_output(
         self,

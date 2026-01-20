@@ -5,7 +5,7 @@ import unittest
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
-from .common import DIRECTORY_PATHS, get_executable_path
+from .common import DIRECTORY_PATHS, run_executable
 from .examples.default_values_examples import (
     create_default_values_example_1,
     create_default_values_example_2,
@@ -78,12 +78,7 @@ class TestGdxDiff(unittest.TestCase):
 
     @classmethod
     def run_gdxdiff(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
-        executable_path = get_executable_path("gdxdiff")
-        return subprocess.run(
-            [os.path.join(DIRECTORY_PATHS.gdx, *executable_path), *command],
-            capture_output=True,
-            text=True,
-        )
+        return run_executable("gdxdiff", command)
 
     def check_output(
         self,
