@@ -357,10 +357,12 @@ test-wei:
 
   variables:
     UV_BIN_DIR: "$CI_PROJECT_DIR/.bin"
+    UV_PYTHON_BIN_DIR: "$CI_PROJECT_DIR/.bin"
 
   before_script:
     - curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="$UV_BIN_DIR" sh
     - PATH="$UV_BIN_DIR:$PATH"
+    - uv python install --default
 
   after_script:
     - PATH="$UV_BIN_DIR:$PATH"
