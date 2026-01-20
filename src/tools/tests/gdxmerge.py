@@ -1,13 +1,12 @@
 import inspect
 import os
-import platform
 import subprocess
 import tempfile
 import unittest
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
-from .common import DIRECTORY_PATHS, get_executable_path
+from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, get_executable_path
 from .examples.full_example import create_full_example
 from .examples.small_example import create_small_example
 from .examples.small_example_changed_data import create_small_example_changed_data
@@ -937,7 +936,7 @@ class TestGdxMerge(unittest.TestCase):
         )
 
     @unittest.skipIf(
-        platform.system() == "Windows",
+        RUNNING_ON_WINDOWS,
         "Skipped on Windows due to temporary file behavior",
     )
     def test_commands_from_file(self) -> None:
