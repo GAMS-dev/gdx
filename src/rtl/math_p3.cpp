@@ -232,7 +232,7 @@ TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
 
       newcw = 0;
       if( !ISINMASK( exInvalidOp ) ) newcw |= __fpcr_trap_invalid;
-      if( !ISINMASK( MATH_P3_exdenormalized ) ) newcw |= __fpcr_trap_denormal;
+      if( !ISINMASK( exDenormalized ) ) newcw |= __fpcr_trap_denormal;
       if( !ISINMASK( exZeroDivide ) ) newcw |= __fpcr_trap_divbyzero;
       if( !ISINMASK( exOverflow ) ) newcw |= __fpcr_trap_overflow;
       if( !ISINMASK( exUnderflow ) ) newcw |= __fpcr_trap_underflow;
@@ -269,7 +269,7 @@ TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
 
       if( ISINMASK( exInvalidOp ) ) newcw |= FE_INVALID;
 #if defined( FE_DENORMAL )
-      if( ISINMASK( MATH_P3_exdenormalized ) ) newcw |= FE_DENORMAL;
+      if( ISINMASK( exDenormalized ) ) newcw |= FE_DENORMAL;
 #endif
       if( ISINMASK( exZeroDivide ) ) newcw |= FE_DIVBYZERO;
       if( ISINMASK( exOverflow ) ) newcw |= FE_OVERFLOW;
@@ -304,7 +304,7 @@ TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
       newcw = 0;
       if( ISINMASK( exInvalidOp ) ) newcw |= FE_INVALID;
 #if defined( FE_DENORMAL )
-      if( ISINMASK( MATH_P3_exdenormalized ) ) newcw |= FE_DENORMAL;
+      if( ISINMASK( exDenormalized ) ) newcw |= FE_DENORMAL;
 #endif
       if( ISINMASK( exZeroDivide ) ) newcw |= FE_DIVBYZERO;
       if( ISINMASK( exOverflow ) ) newcw |= FE_OVERFLOW;
