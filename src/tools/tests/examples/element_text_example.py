@@ -1,10 +1,11 @@
 import os
+from pathlib import Path
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 import pandas as pd
 
 
-def create_element_text_example(file_path: str) -> None:
+def create_element_text_example(file_path: Path) -> None:
     m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     # create the sets i, j

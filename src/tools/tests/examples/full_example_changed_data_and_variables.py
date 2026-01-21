@@ -1,10 +1,11 @@
 import os
+from pathlib import Path
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 import pandas as pd
 
 
-def create_full_example_changed_data_and_variables(file_path: str) -> None:
+def create_full_example_changed_data_and_variables(file_path: Path) -> None:
     # create an empty Container object
     m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
