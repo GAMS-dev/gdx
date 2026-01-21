@@ -3,6 +3,7 @@ import os
 import subprocess
 import tempfile
 import unittest
+from pathlib import Path
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
@@ -19,12 +20,12 @@ class TestGdxMerge(unittest.TestCase):
         "small_example_changed_data",
         "merge_file",
     ]
-    FILE_PATHS: dict[str, str]
+    FILE_PATHS: dict[str, Path]
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.FILE_PATHS = {
-            file_name: os.path.join(DIRECTORY_PATHS.examples, f"{file_name}.gdx")
+            file_name: DIRECTORY_PATHS.examples / f"{file_name}.gdx"
             for file_name in cls.FILE_NAMES
         }
 
@@ -38,8 +39,11 @@ class TestGdxMerge(unittest.TestCase):
             os.remove(file_path)
 
     @classmethod
-    def run_gdxmerge(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
-        return run_executable("gdxmerge", command)
+    def run_gdxmerge(
+        cls, command: list[str | Path]
+    ) -> subprocess.CompletedProcess[str]:
+        command_as_strings = [str(element) for element in command]
+        return run_executable("gdxmerge", command_as_strings)
 
     def check_output(
         self,
@@ -59,9 +63,7 @@ class TestGdxMerge(unittest.TestCase):
             del first[i]
         if file_name is None:
             file_name = f"{inspect.stack()[1].function.removeprefix('test_')}.txt"
-        with open(
-            os.path.join(DIRECTORY_PATHS.output.gdxmerge, file_name), "r"
-        ) as file:
+        with open(DIRECTORY_PATHS.output.gdxmerge / file_name, "r") as file:
             second = file.read().split("\n")[second_offset:second_negative_offset]
         for i in second_delete:
             del second[i]
@@ -940,8 +942,8 @@ class TestGdxMerge(unittest.TestCase):
                 temporary_file.write(
                     separator.join(
                         [
-                            self.FILE_PATHS["small_example"],
-                            self.FILE_PATHS["full_example"],
+                            str(self.FILE_PATHS["small_example"]),
+                            str(self.FILE_PATHS["full_example"]),
                             f"Output={self.FILE_PATHS['merge_file']}",
                         ]
                     )
