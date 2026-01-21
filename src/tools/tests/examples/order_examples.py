@@ -1,9 +1,10 @@
 import os
+from pathlib import Path
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
 
-def create_order_example_1(file_path: str) -> None:
+def create_order_example_1(file_path: Path) -> None:
     m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     gt.Set(m, "t1", records=[1987, 1988, 1989, 1990, 1991])
@@ -13,7 +14,7 @@ def create_order_example_1(file_path: str) -> None:
     m.write(file_path)  # pyright: ignore[reportUnknownMemberType]
 
 
-def create_order_example_2(file_path: str) -> None:
+def create_order_example_2(file_path: Path) -> None:
     m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     gt.Set(m, "t2", records=[1987, 1988, 1989, 1990, 1991])

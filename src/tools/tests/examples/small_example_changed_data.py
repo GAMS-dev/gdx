@@ -1,10 +1,11 @@
 import os
+from pathlib import Path
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 import pandas as pd
 
 
-def create_small_example_changed_data(file_path: str) -> None:
+def create_small_example_changed_data(file_path: Path) -> None:
     m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     # create the sets i, j
@@ -31,4 +32,4 @@ def create_small_example_changed_data(file_path: str) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path) # pyright: ignore[reportUnknownMemberType]
+    m.write(file_path)  # pyright: ignore[reportUnknownMemberType]
