@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-from ..common import DIRECTORY_PATHS
+from ..common import DIRECTORY_PATHS, ExecutableName
 from ..examples.full_example import create_full_example
 from ..examples.small_example import create_small_example
 from .common import benchmark_executable
@@ -22,7 +22,7 @@ def main() -> int:
     create_small_example(FILE_PATHS["small_example"])
     create_full_example(FILE_PATHS["full_example"])
 
-    commands: dict[str, list[str | Path]] = {
+    commands: dict[ExecutableName, list[str | Path]] = {
         "gdxdump": [
             FILE_PATHS["full_example"],
         ],

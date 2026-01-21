@@ -5,6 +5,7 @@ from pathlib import Path
 
 from .common import (
     DIRECTORY_PATHS,
+    ExecutableName,
     GamsSymbols,
     check_gdx_file,
     check_output,
@@ -32,7 +33,7 @@ from .examples.small_example_changed_data import create_small_example_changed_da
 
 
 class TestGdxDiff(unittest.TestCase):
-    EXECUTABLE_NAME = "gdxdiff"
+    EXECUTABLE_NAME: ExecutableName = "gdxdiff"
 
     FILE_NAMES = [
         "small_example",

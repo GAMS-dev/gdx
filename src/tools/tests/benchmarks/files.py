@@ -1,12 +1,12 @@
 import sys
 from pathlib import Path
 
-from ..common import TESTS_DIRECTORY_PATH
+from ..common import TESTS_DIRECTORY_PATH, ExecutableName
 from .common import benchmark_executable
 
 
 def main() -> int:
-    commands: dict[str, list[str | Path]] = {
+    commands: dict[ExecutableName, list[str | Path]] = {
         "gdxdump": [
             TESTS_DIRECTORY_PATH / "gdxfiles" / "large" / "20_front.gdx",
         ],

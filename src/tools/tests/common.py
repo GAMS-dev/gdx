@@ -5,6 +5,7 @@ import subprocess
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
@@ -42,8 +43,10 @@ DIRECTORY_PATHS = DirectoryPaths(
     results=TESTS_DIRECTORY_PATH / "results",
 )
 
+type ExecutableName = Literal["gdxdump", "gdxdiff", "gdxmerge"]
 
-def get_executable_path(executable_name: str) -> Path:
+
+def get_executable_path(executable_name: ExecutableName) -> Path:
     build_directory_exists = DIRECTORY_PATHS.build.is_dir()
 
     if RUNNING_ON_WINDOWS:
@@ -73,7 +76,7 @@ def get_executable_path(executable_name: str) -> Path:
 
 
 def run_executable(
-    executable_name: str,
+    executable_name: ExecutableName,
     command: list[str | Path],
 ) -> subprocess.CompletedProcess[str]:
     executable_path = get_executable_path(executable_name)
@@ -89,7 +92,7 @@ def run_executable(
 
 def check_output(
     test_instance: unittest.TestCase,
-    executable_name: str,
+    executable_name: ExecutableName,
     output: subprocess.CompletedProcess[str],
     return_code: int,
     file_name: str | None,
@@ -118,7 +121,7 @@ def check_output(
 
 def check_gdx_file_symbols(
     test_instance: unittest.TestCase,
-    executable_name: str,
+    executable_name: ExecutableName,
     container: gt.Container,
     symbol_names: list[str],
 ) -> None:
@@ -153,7 +156,7 @@ type GamsSymbols = dict[str, list[list[str | Path | float]]]
 
 def check_gdx_file(
     test_instance: unittest.TestCase,
-    executable_name: str,
+    executable_name: ExecutableName,
     file_path: Path,
     symbols: GamsSymbols,
 ) -> gt.Container:

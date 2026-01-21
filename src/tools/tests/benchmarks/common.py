@@ -2,10 +2,13 @@ import os
 import subprocess
 from pathlib import Path
 
-from ..common import DIRECTORY_PATHS, get_executable_path
+from ..common import DIRECTORY_PATHS, ExecutableName, get_executable_path
 
 
-def benchmark_executable(executable_name: str, command: list[str | Path]) -> None:
+def benchmark_executable(
+    executable_name: ExecutableName,
+    command: list[str | Path],
+) -> None:
     executable_path = get_executable_path(executable_name)
     command_as_strings = [str(element) for element in command]
 
