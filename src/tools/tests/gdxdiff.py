@@ -79,8 +79,7 @@ class TestGdxDiff(unittest.TestCase):
 
     @classmethod
     def run_gdxdiff(cls, command: list[str | Path]) -> subprocess.CompletedProcess[str]:
-        command_as_strings = [str(element) for element in command]
-        return run_executable("gdxdiff", command_as_strings)
+        return run_executable("gdxdiff", command)
 
     def check_output(
         self,

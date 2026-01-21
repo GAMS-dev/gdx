@@ -43,8 +43,7 @@ class TestGdxDump(unittest.TestCase):
 
     @classmethod
     def run_gdxdump(cls, command: list[str | Path]) -> subprocess.CompletedProcess[str]:
-        command_as_strings = [str(element) for element in command]
-        return run_executable("gdxdump", command_as_strings)
+        return run_executable("gdxdump", command)
 
     def check_output(
         self,
