@@ -4,7 +4,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, check_output, run_executable
+from .common import (
+    DIRECTORY_PATHS,
+    RUNNING_ON_WINDOWS,
+    ExecutableName,
+    check_output,
+    run_executable,
+)
 from .examples.element_text_example import create_element_text_example
 from .examples.full_example import create_full_example
 from .examples.label_example import create_label_example
@@ -13,7 +19,7 @@ from .examples.special_values_example import create_special_values_example
 
 
 class TestGdxDump(unittest.TestCase):
-    EXECUTABLE_NAME = "gdxdump"
+    EXECUTABLE_NAME: ExecutableName = "gdxdump"
 
     FILE_NAMES = [
         "small_example",

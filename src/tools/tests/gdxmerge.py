@@ -9,6 +9,7 @@ import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 from .common import (
     DIRECTORY_PATHS,
     RUNNING_ON_WINDOWS,
+    ExecutableName,
     GamsSymbols,
     check_gdx_file,
     check_output,
@@ -20,7 +21,7 @@ from .examples.small_example_changed_data import create_small_example_changed_da
 
 
 class TestGdxMerge(unittest.TestCase):
-    EXECUTABLE_NAME = "gdxmerge"
+    EXECUTABLE_NAME: ExecutableName = "gdxmerge"
 
     FILE_NAMES = [
         "small_example",
