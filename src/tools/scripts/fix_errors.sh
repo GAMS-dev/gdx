@@ -2,6 +2,7 @@
 
 set -e
 
+# shellcheck source=./src/tools/scripts/directories.sh
 source "$(dirname "$0")/directories.sh"
 
 pushd "$GDX_DIRECTORY" > /dev/null
