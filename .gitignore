@@ -16,8 +16,8 @@
 /src/gdxcc.h
 
 # Python
-/venv/**
-/.venv/**
+**/venv/**
+**/.venv/**
 **/__pycache__/**
 
 # IDEs
