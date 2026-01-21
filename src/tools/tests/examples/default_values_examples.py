@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
+import gams.transfer as gt  # type: ignore
 import pandas as pd
 
 
@@ -18,7 +18,7 @@ def create_default_values_example_1(file_path: Path) -> None:
         ),
     )
 
-    m.write(file_path)  # pyright: ignore[reportUnknownMemberType]
+    m.write(file_path) # type: ignore
 
 
 def create_default_values_example_2(file_path: Path) -> None:
@@ -33,6 +33,6 @@ def create_default_values_example_2(file_path: Path) -> None:
             data=[("i" + str(i), i) for i in range(5)], columns=["domain", "marginal"]
         ),
     )
-    v.records.drop(0, inplace=True)  # pyright: ignore[reportUnknownMemberType]
+    v.records.drop(0, inplace=True) # type: ignore
 
-    m.write(file_path)  # pyright: ignore[reportUnknownMemberType]
+    m.write(file_path) # type: ignore

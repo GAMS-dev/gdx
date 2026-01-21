@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
+import gams.transfer as gt  # type: ignore
 import pandas as pd
 
 
@@ -50,8 +50,8 @@ def create_full_example_changed_data_and_variables(file_path: Path) -> None:
     d.setRecords(dist)
 
     # c(i,j) = f * d(i,j) / 1000;
-    cost = d.records.copy(deep=True)  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
-    cost["value"] = f.records.loc[0, "value"] * cost["value"] / 1000  # pyright: ignore[reportUnknownMemberType]
+    cost = d.records.copy(deep=True)  # type: ignore
+    cost["value"] = f.records.loc[0, "value"] * cost["value"] / 1000  # type: ignore
     c.setRecords(cost)
 
     # add variables
@@ -91,7 +91,7 @@ def create_full_example_changed_data_and_variables(file_path: Path) -> None:
     )
 
     # set equation records
-    cost.setRecords(  # pyright: ignore[reportUnknownMemberType]
+    cost.setRecords(  # type: ignore
         pd.DataFrame(
             data=[[0, 1, 0, 0]], columns=["level", "marginal", "lower", "upper"]
         )
@@ -104,7 +104,7 @@ def create_full_example_changed_data_and_variables(file_path: Path) -> None:
         ],
         columns=["from", "level", "marginal", "lower", "upper"],
     )
-    supply.setRecords(supplies)  # pyright: ignore[reportUnknownMemberType]
+    supply.setRecords(supplies)  # type: ignore
 
     demands = pd.DataFrame(
         [
@@ -114,6 +114,6 @@ def create_full_example_changed_data_and_variables(file_path: Path) -> None:
         ],
         columns=["from", "level", "marginal", "lower"],
     )
-    demand.setRecords(demands)  # pyright: ignore[reportUnknownMemberType]
+    demand.setRecords(demands)  # type: ignore
 
-    m.write(file_path)  # pyright: ignore[reportUnknownMemberType]
+    m.write(file_path)  # type: ignore
