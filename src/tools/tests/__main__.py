@@ -1,10 +1,11 @@
-import sys
 import argparse
+import sys
 import unittest
-import gams
 
-from .gdxdump import TestGdxDump
+import gams  # pyright: ignore[reportMissingTypeStubs]
+
 from .gdxdiff import TestGdxDiff
+from .gdxdump import TestGdxDump
 from .gdxmerge import TestGdxMerge
 
 
