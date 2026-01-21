@@ -1,4 +1,3 @@
-import inspect
 import os
 import subprocess
 import unittest
@@ -6,7 +5,7 @@ from pathlib import Path
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
-from .common import DIRECTORY_PATHS, run_executable
+from .common import DIRECTORY_PATHS, check_output, run_executable
 from .examples.default_values_examples import (
     create_default_values_example_1,
     create_default_values_example_2,
@@ -29,6 +28,8 @@ from .examples.small_example_changed_data import create_small_example_changed_da
 
 
 class TestGdxDiff(unittest.TestCase):
+    EXECUTABLE_NAME = "gdxdiff"
+
     FILE_NAMES = [
         "small_example",
         "full_example",
@@ -79,7 +80,7 @@ class TestGdxDiff(unittest.TestCase):
 
     @classmethod
     def run_gdxdiff(cls, command: list[str | Path]) -> subprocess.CompletedProcess[str]:
-        return run_executable("gdxdiff", command)
+        return run_executable(cls.EXECUTABLE_NAME, command)
 
     def check_output(
         self,
@@ -93,18 +94,19 @@ class TestGdxDiff(unittest.TestCase):
         first_delete: list[int] = [],
         second_delete: list[int] = [],
     ) -> None:
-        self.assertEqual(output.returncode, return_code)
-        first = output.stdout.split("\n")[first_offset:first_negative_offset]
-        for i in first_delete:
-            del first[i]
-        if file_name is None:
-            file_name = f"{inspect.stack()[1].function.removeprefix('test_')}.txt"
-        with open(DIRECTORY_PATHS.output.gdxdiff / file_name, "r") as file:
-            second = file.read().split("\n")[second_offset:second_negative_offset]
-        for i in second_delete:
-            del second[i]
-        self.assertEqual(first, second)
-        self.assertEqual(output.stderr, "")
+        check_output(
+            self,
+            self.EXECUTABLE_NAME,
+            output,
+            return_code,
+            file_name,
+            first_offset,
+            first_negative_offset,
+            second_offset,
+            second_negative_offset,
+            first_delete,
+            second_delete,
+        )
 
     def check_gdx_file_symbols(
         self, container: gt.Container, symbol_names: list[str]

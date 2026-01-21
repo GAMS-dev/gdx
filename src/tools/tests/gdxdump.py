@@ -1,11 +1,10 @@
-import inspect
 import os
 import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
-from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, run_executable
+from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, check_output, run_executable
 from .examples.element_text_example import create_element_text_example
 from .examples.full_example import create_full_example
 from .examples.label_example import create_label_example
@@ -14,6 +13,8 @@ from .examples.special_values_example import create_special_values_example
 
 
 class TestGdxDump(unittest.TestCase):
+    EXECUTABLE_NAME = "gdxdump"
+
     FILE_NAMES = [
         "small_example",
         "full_example",
@@ -43,7 +44,7 @@ class TestGdxDump(unittest.TestCase):
 
     @classmethod
     def run_gdxdump(cls, command: list[str | Path]) -> subprocess.CompletedProcess[str]:
-        return run_executable("gdxdump", command)
+        return run_executable(cls.EXECUTABLE_NAME, command)
 
     def check_output(
         self,
@@ -57,18 +58,19 @@ class TestGdxDump(unittest.TestCase):
         first_delete: list[int] = [],
         second_delete: list[int] = [],
     ) -> None:
-        self.assertEqual(output.returncode, return_code)
-        first = output.stdout.split("\n")[first_offset:first_negative_offset]
-        for i in first_delete:
-            del first[i]
-        if file_name is None:
-            file_name = f"{inspect.stack()[1].function.removeprefix('test_')}.txt"
-        with open(DIRECTORY_PATHS.output.gdxdump / file_name, "r") as file:
-            second = file.read().split("\n")[second_offset:second_negative_offset]
-        for i in second_delete:
-            del second[i]
-        self.assertEqual(first, second)
-        self.assertEqual(output.stderr, "")
+        check_output(
+            self,
+            self.EXECUTABLE_NAME,
+            output,
+            return_code,
+            file_name,
+            first_offset,
+            first_negative_offset,
+            second_offset,
+            second_negative_offset,
+            first_delete,
+            second_delete,
+        )
 
     def test_empty_command(self) -> None:
         output = self.run_gdxdump([])

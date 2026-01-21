@@ -1,6 +1,8 @@
+import inspect
 import os
 import platform
 import subprocess
+import unittest
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -79,3 +81,32 @@ def run_executable(
         capture_output=True,
         text=True,
     )
+
+
+def check_output(
+    test_instance: unittest.TestCase,
+    executable_name: str,
+    output: subprocess.CompletedProcess[str],
+    return_code: int,
+    file_name: str | None,
+    first_offset: int | None,
+    first_negative_offset: int | None,
+    second_offset: int | None,
+    second_negative_offset: int | None,
+    first_delete: list[int],
+    second_delete: list[int],
+) -> None:
+    test_instance.assertEqual(output.returncode, return_code)
+    first = output.stdout.split("\n")[first_offset:first_negative_offset]
+    for i in first_delete:
+        del first[i]
+    if file_name is None:
+        file_name = f"{inspect.stack()[2].function.removeprefix('test_')}.txt"
+    with open(
+        getattr(DIRECTORY_PATHS.output, executable_name) / file_name, "r"
+    ) as file:
+        second = file.read().split("\n")[second_offset:second_negative_offset]
+    for i in second_delete:
+        del second[i]
+    test_instance.assertEqual(first, second)
+    test_instance.assertEqual(output.stderr, "")
