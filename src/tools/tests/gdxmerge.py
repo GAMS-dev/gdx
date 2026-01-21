@@ -6,7 +6,14 @@ from pathlib import Path
 
 import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
 
-from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, check_output, run_executable
+from .common import (
+    DIRECTORY_PATHS,
+    RUNNING_ON_WINDOWS,
+    GamsSymbols,
+    check_gdx_file,
+    check_output,
+    run_executable,
+)
 from .examples.full_example import create_full_example
 from .examples.small_example import create_small_example
 from .examples.small_example_changed_data import create_small_example_changed_data
@@ -71,35 +78,17 @@ class TestGdxMerge(unittest.TestCase):
             second_delete,
         )
 
-    def check_gdx_file_symbols(
-        self, container: gt.Container, symbol_names: list[str]
-    ) -> None:
-        for symbol_name in symbol_names:
-            with self.subTest(symbol_name=symbol_name):
-                self.assertIn(symbol_name, container)
-        self.assertEqual(len(container), len(symbol_names) + 1)
-
-    def check_gdx_file_values(
-        self,
-        container: gt.Container,
-        symbol_name: str,
-        expected_values: list[list[str | float]],
-    ) -> None:
-        self.assertIn(symbol_name, container)
-        symbol: gt.Parameter = container[symbol_name]  # pyright: ignore[reportAssignmentType]
-        values = symbol.records.values.tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
-        self.assertEqual(values, expected_values)
-
     def check_gdx_file(
-        self, symbols: dict[str, list[list[str | float]]], file_names: list[str]
+        self,
+        symbols: GamsSymbols,
+        file_names: list[str],
     ) -> None:
-        container = gt.Container(
-            system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"),
-            load_from=self.FILE_PATHS["merge_file"],
+        container = check_gdx_file(
+            self,
+            self.EXECUTABLE_NAME,
+            self.FILE_PATHS["merge_file"],
+            symbols,
         )
-        self.check_gdx_file_symbols(container, list(symbols.keys()))
-        for symbol_name in symbols:
-            self.check_gdx_file_values(container, symbol_name, symbols[symbol_name])
 
         symbol: gt.Parameter = container["Merged_set_1"]  # pyright: ignore[reportAssignmentType]
         first = symbol.records.values.tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
@@ -138,7 +127,7 @@ class TestGdxMerge(unittest.TestCase):
         )
         self.check_output(output, return_code=0, first_offset=3, second_offset=3)
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["small_example", "seattle", ""],
                 ["small_example", "san-diego", ""],
@@ -274,7 +263,7 @@ class TestGdxMerge(unittest.TestCase):
             output, return_code=0, first_delete=[1, 1, 1], second_delete=[1, 1, 1]
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["small_example", "seattle", ""],
                 ["small_example", "san-diego", ""],
@@ -298,7 +287,7 @@ class TestGdxMerge(unittest.TestCase):
             output, return_code=0, first_delete=[2, 2, 2], second_delete=[2, 2, 2]
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["small_example", "seattle", ""],
                 ["small_example", "san-diego", ""],
@@ -361,7 +350,7 @@ class TestGdxMerge(unittest.TestCase):
             output, return_code=0, first_delete=[1, 1, 1], second_delete=[1, 1, 1]
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "j": [
                 ["small_example", "new-york", ""],
                 ["small_example", "chicago", ""],
@@ -492,7 +481,7 @@ class TestGdxMerge(unittest.TestCase):
             output, return_code=0, first_delete=[2, 2, 2], second_delete=[2, 2, 2]
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "d": [
                 ["small_example", "seattle", "new-york", 2.5],
                 ["small_example", "seattle", "chicago", 1.7],
@@ -644,7 +633,7 @@ class TestGdxMerge(unittest.TestCase):
         )
         self.check_output(output, return_code=0, first_offset=5, second_offset=5)
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["small_example", "seattle", ""],
                 ["small_example", "san-diego", ""],
@@ -797,7 +786,7 @@ class TestGdxMerge(unittest.TestCase):
         )
         self.check_output(output, return_code=0, first_offset=4, second_offset=4)
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["small_example", "seattle", ""],
                 ["small_example", "san-diego", ""],
@@ -959,7 +948,7 @@ class TestGdxMerge(unittest.TestCase):
                     second_offset=3,
                 )
 
-                symbols: dict[str, list[list[str | float]]] = {
+                symbols: GamsSymbols = {
                     "i": [
                         ["small_example", "seattle", ""],
                         ["small_example", "san-diego", ""],

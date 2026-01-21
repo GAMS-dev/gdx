@@ -6,6 +6,8 @@ import unittest
 from dataclasses import dataclass
 from pathlib import Path
 
+import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
+
 
 @dataclass(frozen=True)
 class OutputPaths:
@@ -112,3 +114,67 @@ def check_output(
         del second[i]
     test_instance.assertEqual(first, second)
     test_instance.assertEqual(output.stderr, "")
+
+
+def check_gdx_file_symbols(
+    test_instance: unittest.TestCase,
+    executable_name: str,
+    container: gt.Container,
+    symbol_names: list[str],
+) -> None:
+    for symbol_name in symbol_names:
+        with test_instance.subTest(symbol_name=symbol_name):
+            test_instance.assertIn(symbol_name, container)
+
+    if executable_name == "gdxmerge":
+        test_instance.assertEqual(len(container), len(symbol_names) + 1)
+    else:
+        test_instance.assertEqual(len(container), len(symbol_names))
+
+
+def check_gdx_file_values(
+    test_instance: unittest.TestCase,
+    container: gt.Container,
+    symbol_name: str,
+    expected_values: list[list[str | Path | float]],
+) -> None:
+    path_values_as_strings: list[list[str | float]] = [
+        [str(value) if isinstance(value, Path) else value for value in values]
+        for values in expected_values
+    ]
+    test_instance.assertIn(symbol_name, container)
+    symbol: gt.Parameter = container[symbol_name]  # pyright: ignore[reportAssignmentType]
+    values = symbol.records.values.tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
+    test_instance.assertEqual(values, path_values_as_strings)
+
+
+type GamsSymbols = dict[str, list[list[str | Path | float]]]
+
+
+def check_gdx_file(
+    test_instance: unittest.TestCase,
+    executable_name: str,
+    file_path: Path,
+    symbols: GamsSymbols,
+) -> gt.Container:
+    container = gt.Container(
+        system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"),
+        load_from=file_path,
+    )
+
+    check_gdx_file_symbols(
+        test_instance,
+        executable_name,
+        container,
+        list(symbols.keys()),
+    )
+
+    for symbol_name in symbols:
+        check_gdx_file_values(
+            test_instance,
+            container,
+            symbol_name,
+            symbols[symbol_name],
+        )
+
+    return container
