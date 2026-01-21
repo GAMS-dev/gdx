@@ -2,65 +2,70 @@ import os
 import platform
 import subprocess
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass(frozen=True)
 class OutputPaths:
-    gdxdump: str
-    gdxdiff: str
-    gdxmerge: str
+    gdxdump: Path
+    gdxdiff: Path
+    gdxmerge: Path
 
 
 @dataclass(frozen=True)
 class DirectoryPaths:
-    gdx: str
-    build: str
-    examples: str
+    gdx: Path
+    build: Path
+    examples: Path
     output: OutputPaths
-    results: str
+    results: Path
 
 
 RUNNING_ON_WINDOWS = platform.system() == "Windows"
 
-TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
-GDX_DIRECTORY_PATH = os.path.realpath(
-    os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..")
-)
+TESTS_DIRECTORY_PATH = Path(__file__).resolve().parent
+GDX_DIRECTORY_PATH = TESTS_DIRECTORY_PATH.parents[2]
 
 DIRECTORY_PATHS = DirectoryPaths(
     gdx=GDX_DIRECTORY_PATH,
-    build=os.path.join(
-        GDX_DIRECTORY_PATH, "Release" if RUNNING_ON_WINDOWS else "build"
-    ),
-    examples=os.path.join(TESTS_DIRECTORY_PATH, "examples"),
+    build=GDX_DIRECTORY_PATH / ("Release" if RUNNING_ON_WINDOWS else "build"),
+    examples=TESTS_DIRECTORY_PATH / "examples",
     output=OutputPaths(
-        gdxdump=os.path.join(TESTS_DIRECTORY_PATH, "output", "gdxdump"),
-        gdxdiff=os.path.join(TESTS_DIRECTORY_PATH, "output", "gdxdiff"),
-        gdxmerge=os.path.join(TESTS_DIRECTORY_PATH, "output", "gdxmerge"),
+        gdxdump=TESTS_DIRECTORY_PATH / "output" / "gdxdump",
+        gdxdiff=TESTS_DIRECTORY_PATH / "output" / "gdxdiff",
+        gdxmerge=TESTS_DIRECTORY_PATH / "output" / "gdxmerge",
     ),
-    results=os.path.join(TESTS_DIRECTORY_PATH, "results"),
+    results=TESTS_DIRECTORY_PATH / "results",
 )
 
 
-def get_executable_path(executable_name: str) -> list[str]:
-    build_directory_exists = os.path.isdir(DIRECTORY_PATHS.build)
+def get_executable_path(executable_name: str) -> Path:
+    build_directory_exists = DIRECTORY_PATHS.build.is_dir()
 
     if RUNNING_ON_WINDOWS:
-        return (
-            [DIRECTORY_PATHS.build, f"{executable_name}.exe"]
-            if build_directory_exists
-            else [DIRECTORY_PATHS.gdx, "gdxtools", f"{executable_name}.exe"]
-        )
+        executable_name_with_suffix = f"{executable_name}.exe"
+        if build_directory_exists:
+            return DIRECTORY_PATHS.build / executable_name_with_suffix
+        else:
+            return DIRECTORY_PATHS.gdx / "gdxtools" / executable_name_with_suffix
     else:
-        os.environ[
+        environment_variable = (
             "LD_LIBRARY_PATH" if platform.system() == "Linux" else "DYLD_LIBRARY_PATH"
-        ] = DIRECTORY_PATHS.build if build_directory_exists else DIRECTORY_PATHS.gdx
-
-        return (
-            [DIRECTORY_PATHS.build, "src", "tools", executable_name, executable_name]
-            if build_directory_exists
-            else [DIRECTORY_PATHS.gdx, "gdxtools", executable_name]
         )
+        os.environ[environment_variable] = str(
+            DIRECTORY_PATHS.build if build_directory_exists else DIRECTORY_PATHS.gdx
+        )
+
+        if build_directory_exists:
+            return (
+                DIRECTORY_PATHS.build
+                / "src"
+                / "tools"
+                / executable_name
+                / executable_name
+            )
+        else:
+            return DIRECTORY_PATHS.gdx / "gdxtools" / executable_name
 
 
 def run_executable(
@@ -69,7 +74,7 @@ def run_executable(
 ) -> subprocess.CompletedProcess[str]:
     executable_path = get_executable_path(executable_name)
     return subprocess.run(
-        [os.path.join(*executable_path), *command],
+        [str(executable_path), *command],
         capture_output=True,
         text=True,
     )

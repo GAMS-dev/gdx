@@ -3,6 +3,7 @@ import os
 import subprocess
 import tempfile
 import unittest
+from pathlib import Path
 
 from .common import DIRECTORY_PATHS, RUNNING_ON_WINDOWS, run_executable
 from .examples.element_text_example import create_element_text_example
@@ -20,12 +21,12 @@ class TestGdxDump(unittest.TestCase):
         "special_values_example",
         "label_example",
     ]
-    FILE_PATHS: dict[str, str]
+    FILE_PATHS: dict[str, Path]
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.FILE_PATHS = {
-            file_name: os.path.join(DIRECTORY_PATHS.examples, f"{file_name}.gdx")
+            file_name: DIRECTORY_PATHS.examples / f"{file_name}.gdx"
             for file_name in cls.FILE_NAMES
         }
 
@@ -41,8 +42,9 @@ class TestGdxDump(unittest.TestCase):
             os.remove(file_path)
 
     @classmethod
-    def run_gdxdump(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
-        return run_executable("gdxdump", command)
+    def run_gdxdump(cls, command: list[str | Path]) -> subprocess.CompletedProcess[str]:
+        command_as_strings = [str(element) for element in command]
+        return run_executable("gdxdump", command_as_strings)
 
     def check_output(
         self,
@@ -62,7 +64,7 @@ class TestGdxDump(unittest.TestCase):
             del first[i]
         if file_name is None:
             file_name = f"{inspect.stack()[1].function.removeprefix('test_')}.txt"
-        with open(os.path.join(DIRECTORY_PATHS.output.gdxdump, file_name), "r") as file:
+        with open(DIRECTORY_PATHS.output.gdxdump / file_name, "r") as file:
             second = file.read().split("\n")[second_offset:second_negative_offset]
         for i in second_delete:
             del second[i]
@@ -99,9 +101,7 @@ class TestGdxDump(unittest.TestCase):
             self.assertEqual(output.returncode, 0)
             with open(temporary_file.name, "r") as file:
                 first = file.read().split("\n")
-            with open(
-                os.path.join(DIRECTORY_PATHS.output.gdxdump, "full_example.txt"), "r"
-            ) as file:
+            with open(DIRECTORY_PATHS.output.gdxdump / "full_example.txt", "r") as file:
                 second = file.read().split("\n")
             self.assertEqual(first, second)
             self.assertEqual(output.stdout, "")
