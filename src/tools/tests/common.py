@@ -43,6 +43,7 @@ DIRECTORY_PATHS = DirectoryPaths(
     results=TESTS_DIRECTORY_PATH / "results",
 )
 
+
 type ExecutableName = Literal["gdxdump", "gdxdiff", "gdxmerge"]
 
 
