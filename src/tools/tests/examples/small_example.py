@@ -32,4 +32,4 @@ def create_small_example(file_path: Path) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path) # pyright: ignore[reportUnknownMemberType]
+    m.write(file_path)  # pyright: ignore[reportUnknownMemberType]
