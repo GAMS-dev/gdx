@@ -70,11 +70,12 @@ def get_executable_path(executable_name: str) -> Path:
 
 def run_executable(
     executable_name: str,
-    command: list[str],
+    command: list[str | Path],
 ) -> subprocess.CompletedProcess[str]:
     executable_path = get_executable_path(executable_name)
+    command_as_strings = [str(element) for element in command]
     return subprocess.run(
-        [str(executable_path), *command],
+        [str(executable_path), *command_as_strings],
         capture_output=True,
         text=True,
     )

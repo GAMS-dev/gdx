@@ -42,8 +42,7 @@ class TestGdxMerge(unittest.TestCase):
     def run_gdxmerge(
         cls, command: list[str | Path]
     ) -> subprocess.CompletedProcess[str]:
-        command_as_strings = [str(element) for element in command]
-        return run_executable("gdxmerge", command_as_strings)
+        return run_executable("gdxmerge", command)
 
     def check_output(
         self,
