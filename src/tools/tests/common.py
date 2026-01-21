@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
+import gams.transfer as gt  # type: ignore
 
 
 @dataclass(frozen=True)
@@ -146,8 +146,8 @@ def check_gdx_file_values(
         for values in expected_values
     ]
     test_instance.assertIn(symbol_name, container)
-    symbol: gt.Parameter = container[symbol_name]  # pyright: ignore[reportAssignmentType]
-    values = symbol.records.values.tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
+    symbol: gt.Parameter = container[symbol_name]  # type: ignore
+    values = symbol.records.values.tolist()  # type: ignore
     test_instance.assertEqual(values, path_values_as_strings)
 
 

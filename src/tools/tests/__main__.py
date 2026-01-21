@@ -2,7 +2,7 @@ import argparse
 import sys
 import unittest
 
-import gams  # pyright: ignore[reportMissingTypeStubs]
+import gams  # type: ignore
 
 from .gdxdiff import TestGdxDiff
 from .gdxdump import TestGdxDump

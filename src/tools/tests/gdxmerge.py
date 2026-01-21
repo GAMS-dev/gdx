@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import gams.transfer as gt  # pyright: ignore[reportMissingTypeStubs]
+import gams.transfer as gt  # type: ignore
 
 from .common import (
     DIRECTORY_PATHS,
@@ -91,8 +91,8 @@ class TestGdxMerge(unittest.TestCase):
             symbols,
         )
 
-        symbol: gt.Parameter = container["Merged_set_1"]  # pyright: ignore[reportAssignmentType]
-        first = symbol.records.values.tolist()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
+        symbol: gt.Parameter = container["Merged_set_1"]  # type: ignore
+        first = symbol.records.values.tolist()  # type: ignore
         second: list[list[str]] = []
         for i in range(len(file_names)):
             second.append(
@@ -101,12 +101,12 @@ class TestGdxMerge(unittest.TestCase):
                     f"{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[i]}.gdx",
                 ]
             )
-        self.assertEqual(len(first), len(file_names))  # pyright: ignore[reportUnknownArgumentType]
-        for item in first:  # pyright: ignore[reportUnknownVariableType]
-            self.assertEqual(len(item), 2)  # pyright: ignore[reportUnknownArgumentType]
+        self.assertEqual(len(first), len(file_names))  # type: ignore
+        for item in first:  # type: ignore
+            self.assertEqual(len(item), 2)  # type: ignore
         for i in range(len(file_names)):
             self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])  # pyright: ignore[reportUnknownArgumentType]
+            self.assertRegex(first[i][1], second[i][1])  # type: ignore
 
     def test_empty_command(self) -> None:
         output = self.run_gdxmerge([])
