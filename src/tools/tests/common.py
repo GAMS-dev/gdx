@@ -75,7 +75,9 @@ def run_executable(
     command: list[str | Path],
 ) -> subprocess.CompletedProcess[str]:
     executable_path = get_executable_path(executable_name)
-    command_as_strings = [str(element) for element in command]
+    command_as_strings: list[str] = [
+        str(value) if isinstance(value, Path) else value for value in command
+    ]
     return subprocess.run(
         [str(executable_path), *command_as_strings],
         capture_output=True,
