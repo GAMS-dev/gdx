@@ -1186,7 +1186,7 @@ void TGXFileObj::InitDoWrite( int NrRecs )
 
 // we have to make these mask "constants" vars since we cannot
 // have large constants on input
-const int64_t
+constexpr int64_t
         signMask { (int64_t) 0x80000000 << 32 },
         expoMask { (int64_t) 0x7ff00000 << 32 },
         mantMask { ~( signMask | expoMask ) };

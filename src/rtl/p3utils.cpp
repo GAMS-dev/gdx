@@ -91,8 +91,7 @@ using utils::ui32;
 namespace rtl::p3utils
 {
 
-#if defined( _WIN32 )
-#else
+#if !defined( _WIN32 )
 static bool setEnvironmentVariableUnix( const std::string &name, const std::string &value = ""s )
 {
    if( name.empty() ) return false;
@@ -106,7 +105,7 @@ static bool setEnvironmentVariableUnix( const std::string &name, const std::stri
 }
 #endif
 
-static std::vector<std::string> paramstr;
+        static std::vector<std::string> paramstr;
 
 bool PrefixPath( const std::string &s )
 {
@@ -1189,7 +1188,9 @@ bool PrefixEnv( const std::string &dir, const std::string &evName )
 }
 
 #if !defined(_WIN32)
-/* Steve's routines from 23 Aug 2001 (3nd version)  */
+char *safecat( char *dst, size_t dstSiz, char *end, const char *src );
+
+// Steve's routines from 23 Aug 2001 (3nd version)
 
 /* Like strcat(dst, src), but with a size guard and some efficiency.
  * It returns a pointer to the terminating null byte, like stpcpy
@@ -1201,7 +1202,7 @@ bool PrefixEnv( const std::string &dir, const std::string &evName )
  * If strlen(dst) + strlen(src) + 1 > dstSiz, returns NULL
  * otherwise, does strcat(dst,src) and returns (dst + strlen(dst))
  */
-char *safecat (char *dst, size_t dstSiz, char *end, const char *src)
+char *safecat( char *dst, size_t dstSiz, char *end, const char *src )
 {
    size_t srcLen;
    size_t used;
