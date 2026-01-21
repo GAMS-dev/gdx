@@ -10,11 +10,18 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    # "detect-secrets>=1.5.0",
+    "pre-commit>=4.5.1",
+    # { include-group = "lint-cpp" },
+    { include-group = "lint-python" },
+]
+lint-cpp = [
     "clang-format>=21.1.8",
     "clang-tidy>=21.1.6",
     "cppcheck>=1.5.1",
+]
+lint-python = [
     "mypy>=1.19.1",
-    "pre-commit>=4.5.1",
     "ruff>=0.14.13",
     "ty>=0.0.9",
 ]
