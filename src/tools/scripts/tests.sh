@@ -6,4 +6,4 @@ set -e
 source "$(dirname "$0")/directories.sh"
 
 export UV_PROJECT_ENVIRONMENT="$VENV_DIRECTORY"
-uv run --directory "$TOOLS_DIRECTORY" -m tests
+uv run --directory "$TOOLS_DIRECTORY" -m tests --no-dev

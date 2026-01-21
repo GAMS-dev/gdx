@@ -381,7 +381,7 @@ test-gdxtools-leg:
     - !reference [.gams-folder-leg]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
     - export UV_PROJECT_ENVIRONMENT="$(pwd)/.venv"
-    - PATH="$GAMS_PATH:$PATH" uv run --directory ./src/tools -m tests
+    - PATH="$GAMS_PATH:$PATH" uv run --directory ./src/tools -m tests --no-dev
 
 test-gdxtools-lag:
   extends: .uv-installation
@@ -396,7 +396,7 @@ test-gdxtools-lag:
     - !reference [.gams-folder-leg]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
     - export UV_PROJECT_ENVIRONMENT="$(pwd)/.venv"
-    - PATH="$GAMS_PATH:$PATH" uv run --directory ./src/tools -m tests
+    - PATH="$GAMS_PATH:$PATH" uv run --directory ./src/tools -m tests --no-dev
 
 test-gdxtools-deg:
   extends: .uv-installation
@@ -408,7 +408,7 @@ test-gdxtools-deg:
     - !reference [.gams-folder-deg]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
     - export UV_PROJECT_ENVIRONMENT="$(pwd)/.venv"
-    - PATH="$GAMS_PATH:$PATH" uv run --directory ./src/tools -m tests
+    - PATH="$GAMS_PATH:$PATH" uv run --directory ./src/tools -m tests --no-dev
 
 test-gdxtools-dac:
   extends: .uv-installation
@@ -420,7 +420,7 @@ test-gdxtools-dac:
     - !reference [.gams-folder-dac]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
     - export UV_PROJECT_ENVIRONMENT="$(pwd)/.venv"
-    - PATH="$GAMS_PATH:$PATH" uv run --directory ./src/tools -m tests
+    - PATH="$GAMS_PATH:$PATH" uv run --directory ./src/tools -m tests --no-dev
 
 test-gdxtools-wei:
   extends: .uv-cache
@@ -438,7 +438,7 @@ test-gdxtools-wei:
     - $env:GAMS_SYSTEM_DIRECTORY = $GAMS_PATH
     - python -m pip install uv
     - $env:UV_PROJECT_ENVIRONMENT = "$(Get-Location)\.venv"
-    - uv run --directory .\src\tools -m tests
+    - uv run --directory .\src\tools -m tests --no-dev
 
 #=======================================================================================================================
 
