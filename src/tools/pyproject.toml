@@ -1,8 +1,8 @@
 [project]
 name = "gdx-tools"
 version = "0.0.1"
-# description = "Add description here"
-# readme = "README.md"
+description = "Command-line utilities for GDX files"
+readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "gamsapi[transfer]>=52.3.0",
