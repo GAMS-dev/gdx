@@ -24,6 +24,7 @@
  */
 
 #include <algorithm>
+#include <cstddef>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -107,7 +108,7 @@ void WriteQuotedCommon(const std::string &S, const std::function<bool(char)> &is
 
 // Write explanatory text with quotes if needed
 void WriteQText(const std::string &S, const bool checkParenthesis) {
-  size_t i{};
+  std::size_t i{};
   bool G{true};
 
   if (checkParenthesis) {
@@ -290,7 +291,7 @@ void WriteSymbol(const int SyNr) {
   gdxValues_t Vals{};
   std::array<double, GMS_VAL_MAX> DefaultValues{};
 
-  auto WriteItem = [&](const uint8_t &ValNr) {
+  auto WriteItem = [&](const std::uint8_t &ValNr) {
     if (!IsScalar && ATyp != dt_set &&
         (FilterDef && Vals[ValNr] == DefaultValues[ValNr]) &&
         (ATyp != dt_equ || (ValNr != GMS_VAL_LOWER && ValNr != GMS_VAL_UPPER))) {
@@ -958,7 +959,7 @@ std::string NextParam() {
   } else if (ParamNr <= ParamCount) {
     result = ParamStr[ParamNr];
     ParamNr++;
-    size_t k = result.find('=');
+    std::size_t k = result.find('=');
     if (k != std::string::npos) {
       ParamHold = result.substr(k + 1);
       // Keep the '=':

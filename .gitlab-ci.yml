@@ -338,92 +338,107 @@ test-wei:
 
 #=======================================================================================================================
 
+# https://docs.gitlab.com/ci/caching/examples/#python
+# https://docs.astral.sh/uv/guides/integration/gitlab/#caching
+
+.uv-cache:
+  variables:
+    UV_CACHE_DIR: "$CI_PROJECT_DIR/.cache/uv"
+
+  cache:
+    key:
+      files: [uv.lock]
+    paths: [.cache/uv]
+
+  after_script: uv cache prune --ci
+
+.uv-installation:
+  extends: .uv-cache
+
+  variables:
+    UV_BIN_DIR: "$CI_PROJECT_DIR/.bin"
+    UV_PYTHON_BIN_DIR: "$CI_PROJECT_DIR/.bin"
+
+  before_script:
+    - curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="$UV_BIN_DIR" sh
+    - PATH="$UV_BIN_DIR:$PATH"
+    - uv python install --default
+
+  after_script:
+    - PATH="$UV_BIN_DIR:$PATH"
+    - !reference [.uv-cache, after_script]
+
 test-gdxtools-leg:
+  extends: .uv-installation
   stage: test-gdxtools
   tags: [linux]
   image:
     name: $MACHINES_CONTAINER_REG/leg/builder-full:latest
     entrypoint: [""]
-  needs: [fetch-ci-scripts,build-leg]
-  before_script:
-    - dnf -y install python3.12 > /dev/null
-    - dnf clean all > /dev/null
+  needs: [fetch-ci-scripts, build-leg]
   script:
-    - !reference [ .get-gams ]
-    - !reference [ .gams-folder-leg ]
+    - !reference [.get-gams]
+    - !reference [.gams-folder-leg]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - python3 -m venv ./venv
-    - source ./venv/bin/activate
-    - python3 -m pip install --upgrade pip > /dev/null
-    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
+    - export UV_PROJECT_ENVIRONMENT="$(pwd)/.venv"
+    - PATH="$GAMS_PATH:$PATH" uv run --no-dev --directory ./src/tools -m tests
 
 test-gdxtools-lag:
+  extends: .uv-installation
   stage: test-gdxtools
   tags: [linux-arm64]
   image:
     name: $MACHINES_CONTAINER_REG/lag/builder-full:latest
     entrypoint: [""]
-  needs: [fetch-ci-scripts,build-lag]
-  before_script:
-    - dnf -y install python3.12 > /dev/null
-    - dnf clean all > /dev/null
+  needs: [fetch-ci-scripts, build-lag]
   script:
-    - !reference [ .get-gams ]
-    - !reference [ .gams-folder-leg ]
+    - !reference [.get-gams]
+    - !reference [.gams-folder-leg]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - python3 -m venv ./venv
-    - source ./venv/bin/activate
-    - python3 -m pip install --upgrade pip > /dev/null
-    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
+    - export UV_PROJECT_ENVIRONMENT="$(pwd)/.venv"
+    - PATH="$GAMS_PATH:$PATH" uv run --no-dev --directory ./src/tools -m tests
 
 test-gdxtools-deg:
+  extends: .uv-installation
   stage: test-gdxtools
   tags: [macos]
-  needs: [fetch-ci-scripts,build-deg]
+  needs: [fetch-ci-scripts, build-deg]
   script:
-    - !reference [ .get-gams ]
-    - !reference [ .gams-folder-deg ]
+    - !reference [.get-gams]
+    - !reference [.gams-folder-deg]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
-    - python3 -m venv ./venv
-    - source ./venv/bin/activate
-    - python3 -m pip install --upgrade pip > /dev/null
-    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
+    - export UV_PROJECT_ENVIRONMENT="$(pwd)/.venv"
+    - PATH="$GAMS_PATH:$PATH" uv run --no-dev --directory ./src/tools -m tests
 
 test-gdxtools-dac:
+  extends: .uv-installation
   stage: test-gdxtools
   tags: [macos-arm64]
-  needs: [fetch-ci-scripts,build-dac]
+  needs: [fetch-ci-scripts, build-dac]
   script:
-    - !reference [ .get-gams ]
-    - !reference [ .gams-folder-dac ]
+    - !reference [.get-gams]
+    - !reference [.gams-folder-dac]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
-    - python3 -m venv ./venv
-    - source ./venv/bin/activate
-    - python3 -m pip install --upgrade pip > /dev/null
-    - python3 -m pip install -r ./src/tools/tests/environment/requirements.txt
-    - PATH="$GAMS_PATH:$PATH" python3 ./src/tools/tests/main.py
+    - export UV_PROJECT_ENVIRONMENT="$(pwd)/.venv"
+    - PATH="$GAMS_PATH:$PATH" uv run --no-dev --directory ./src/tools -m tests
 
 test-gdxtools-wei:
+  extends: .uv-cache
   stage: test-gdxtools
   tags: [windows]
   image:
     name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
-  needs: [fetch-ci-scripts,build-wei]
+  needs: [fetch-ci-scripts, build-wei]
   script:
-    - !reference [ .get-gams-wei ]
-    - !reference [ .gams-folder-wei ]
+    - !reference [.get-gams-wei]
+    - !reference [.gams-folder-wei]
     - $gmsdirname = Get-Content mygmsdir.tmp -Raw
     - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
-    - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
+    - $env:PATH = "$GAMS_PATH;$GAMS_PATH\gbin;$env:PATH"
     - $env:GAMS_SYSTEM_DIRECTORY = $GAMS_PATH
-    - python -m venv .\venv
-    - .\venv\Scripts\Activate.ps1
-    - python -m pip install --upgrade pip | Out-Null
-    - python -m pip install -r .\src\tools\tests\environment\requirements.txt
-    - python .\src\tools\tests\main.py
+    - python -m pip install uv
+    - $env:UV_PROJECT_ENVIRONMENT = "$(Get-Location)\.venv"
+    - uv run --no-dev --directory .\src\tools -m tests
 
 #=======================================================================================================================
 

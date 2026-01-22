@@ -1,35 +1,40 @@
-import unittest
 import os
-import platform
 import subprocess
 import tempfile
-import inspect
-import gams.transfer as gt
+import unittest
+from pathlib import Path
 
-from examples.small_example import create_small_example
-from examples.full_example import create_full_example
-from examples.small_example_changed_data import create_small_example_changed_data
+import gams.transfer as gt  # type: ignore
+
+from .common import (
+    DIRECTORY_PATHS,
+    RUNNING_ON_WINDOWS,
+    ExecutableName,
+    GamsSymbols,
+    check_gdx_file,
+    check_output,
+    run_executable,
+)
+from .examples.full_example import create_full_example
+from .examples.small_example import create_small_example
+from .examples.small_example_changed_data import create_small_example_changed_data
 
 
 class TestGdxMerge(unittest.TestCase):
-    TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
-    GDX_DIRECTORY_PATH = os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..")
-    DIRECTORY_PATHS = {
-        "examples": os.path.join(TESTS_DIRECTORY_PATH, "examples"),
-        "output": os.path.join(TESTS_DIRECTORY_PATH, "output", "gdxmerge"),
-    }
+    EXECUTABLE_NAME: ExecutableName = "gdxmerge"
+
     FILE_NAMES = [
         "small_example",
         "full_example",
         "small_example_changed_data",
         "merge_file",
     ]
-    FILE_PATHS: dict[str, str]
+    FILE_PATHS: dict[str, Path]
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.FILE_PATHS = {
-            file_name: os.path.join(cls.DIRECTORY_PATHS["examples"], f"{file_name}.gdx")
+            file_name: DIRECTORY_PATHS.examples / f"{file_name}.gdx"
             for file_name in cls.FILE_NAMES
         }
 
@@ -43,40 +48,15 @@ class TestGdxMerge(unittest.TestCase):
             os.remove(file_path)
 
     @classmethod
-    def run_gdxmerge(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
-        EXECUTABLE_NAME = "gdxmerge"
-        if platform.system() == "Windows":
-            EXECUTABLE_PATH = (
-                ["Release", f"{EXECUTABLE_NAME}.exe"]
-                if os.path.isdir("Release")
-                else ["gdxtools", f"{EXECUTABLE_NAME}.exe"]
-            )
-        else:
-            build_directory_exists = os.path.isdir("build")
-            os.environ[
-                "LD_LIBRARY_PATH"
-                if platform.system() == "Linux"
-                else "DYLD_LIBRARY_PATH"
-            ] = (
-                os.path.join(cls.GDX_DIRECTORY_PATH, "build")
-                if build_directory_exists
-                else cls.GDX_DIRECTORY_PATH
-            )
-            EXECUTABLE_PATH = (
-                ["build", "src", "tools", EXECUTABLE_NAME, EXECUTABLE_NAME]
-                if build_directory_exists
-                else ["gdxtools", EXECUTABLE_NAME]
-            )
-        return subprocess.run(
-            [os.path.join(cls.GDX_DIRECTORY_PATH, *EXECUTABLE_PATH), *command],
-            capture_output=True,
-            text=True,
-        )
+    def run_gdxmerge(
+        cls, command: list[str | Path]
+    ) -> subprocess.CompletedProcess[str]:
+        return run_executable(cls.EXECUTABLE_NAME, command)
 
     def check_output(
         self,
         output: subprocess.CompletedProcess[str],
-        return_code=0,
+        return_code: int = 0,
         file_name: str | None = None,
         first_offset: int | None = None,
         first_negative_offset: int | None = None,
@@ -85,51 +65,34 @@ class TestGdxMerge(unittest.TestCase):
         first_delete: list[int] = [],
         second_delete: list[int] = [],
     ) -> None:
-        self.assertEqual(output.returncode, return_code)
-        first = output.stdout.split("\n")[first_offset:first_negative_offset]
-        for i in first_delete:
-            del first[i]
-        if file_name is None:
-            file_name = f"{inspect.stack()[1].function.removeprefix('test_')}.txt"
-        with open(os.path.join(self.DIRECTORY_PATHS["output"], file_name), "r") as file:
-            second = file.read().split("\n")[second_offset:second_negative_offset]
-        for i in second_delete:
-            del second[i]
-        self.assertEqual(first, second)
-        self.assertEqual(output.stderr, "")
-
-    def check_gdx_file_symbols(
-        self, container: gt.Container, symbol_names: list[str]
-    ) -> None:
-        for symbol_name in symbol_names:
-            with self.subTest(symbol_name=symbol_name):
-                self.assertIn(symbol_name, container)
-        self.assertEqual(len(container), len(symbol_names) + 1)
-
-    def check_gdx_file_values(
-        self,
-        container: gt.Container,
-        symbol_name: str,
-        expected_values: list[list[str | float]],
-    ) -> None:
-        self.assertIn(symbol_name, container)
-        symbol: gt.Parameter = container[symbol_name]  # type: ignore
-        values = symbol.records.values.tolist()
-        self.assertEqual(values, expected_values)
+        check_output(
+            self,
+            self.EXECUTABLE_NAME,
+            output,
+            return_code,
+            file_name,
+            first_offset,
+            first_negative_offset,
+            second_offset,
+            second_negative_offset,
+            first_delete,
+            second_delete,
+        )
 
     def check_gdx_file(
-        self, symbols: dict[str, list[list[str | float]]], file_names: list[str]
+        self,
+        symbols: GamsSymbols,
+        file_names: list[str],
     ) -> None:
-        container = gt.Container(
-            system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"),
-            load_from=self.FILE_PATHS["merge_file"],
+        container = check_gdx_file(
+            self,
+            self.EXECUTABLE_NAME,
+            self.FILE_PATHS["merge_file"],
+            symbols,
         )
-        self.check_gdx_file_symbols(container, list(symbols.keys()))
-        for symbol_name in symbols:
-            self.check_gdx_file_values(container, symbol_name, symbols[symbol_name])
 
         symbol: gt.Parameter = container["Merged_set_1"]  # type: ignore
-        first = symbol.records.values.tolist()
+        first = symbol.records.values.tolist()  # type: ignore
         second: list[list[str]] = []
         for i in range(len(file_names)):
             second.append(
@@ -138,12 +101,12 @@ class TestGdxMerge(unittest.TestCase):
                     f"{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[i]}.gdx",
                 ]
             )
-        self.assertEqual(len(first), len(file_names))
-        for item in first:
-            self.assertEqual(len(item), 2)
+        self.assertEqual(len(first), len(file_names))  # type: ignore
+        for item in first:  # type: ignore
+            self.assertEqual(len(item), 2)  # type: ignore
         for i in range(len(file_names)):
             self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])
+            self.assertRegex(first[i][1], second[i][1])  # type: ignore
 
     def test_empty_command(self) -> None:
         output = self.run_gdxmerge([])
@@ -165,7 +128,7 @@ class TestGdxMerge(unittest.TestCase):
         )
         self.check_output(output, return_code=0, first_offset=3, second_offset=3)
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["small_example", "seattle", ""],
                 ["small_example", "san-diego", ""],
@@ -301,7 +264,7 @@ class TestGdxMerge(unittest.TestCase):
             output, return_code=0, first_delete=[1, 1, 1], second_delete=[1, 1, 1]
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["small_example", "seattle", ""],
                 ["small_example", "san-diego", ""],
@@ -325,7 +288,7 @@ class TestGdxMerge(unittest.TestCase):
             output, return_code=0, first_delete=[2, 2, 2], second_delete=[2, 2, 2]
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["small_example", "seattle", ""],
                 ["small_example", "san-diego", ""],
@@ -388,7 +351,7 @@ class TestGdxMerge(unittest.TestCase):
             output, return_code=0, first_delete=[1, 1, 1], second_delete=[1, 1, 1]
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "j": [
                 ["small_example", "new-york", ""],
                 ["small_example", "chicago", ""],
@@ -519,7 +482,7 @@ class TestGdxMerge(unittest.TestCase):
             output, return_code=0, first_delete=[2, 2, 2], second_delete=[2, 2, 2]
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "d": [
                 ["small_example", "seattle", "new-york", 2.5],
                 ["small_example", "seattle", "chicago", 1.7],
@@ -671,7 +634,7 @@ class TestGdxMerge(unittest.TestCase):
         )
         self.check_output(output, return_code=0, first_offset=5, second_offset=5)
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["small_example", "seattle", ""],
                 ["small_example", "san-diego", ""],
@@ -824,7 +787,7 @@ class TestGdxMerge(unittest.TestCase):
         )
         self.check_output(output, return_code=0, first_offset=4, second_offset=4)
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["small_example", "seattle", ""],
                 ["small_example", "san-diego", ""],
@@ -961,7 +924,7 @@ class TestGdxMerge(unittest.TestCase):
         )
 
     @unittest.skipIf(
-        platform.system() == "Windows",
+        RUNNING_ON_WINDOWS,
         "Skipped on Windows due to temporary file behavior",
     )
     def test_commands_from_file(self) -> None:
@@ -970,8 +933,8 @@ class TestGdxMerge(unittest.TestCase):
                 temporary_file.write(
                     separator.join(
                         [
-                            self.FILE_PATHS["small_example"],
-                            self.FILE_PATHS["full_example"],
+                            str(self.FILE_PATHS["small_example"]),
+                            str(self.FILE_PATHS["full_example"]),
                             f"Output={self.FILE_PATHS['merge_file']}",
                         ]
                     )
@@ -986,7 +949,7 @@ class TestGdxMerge(unittest.TestCase):
                     second_offset=3,
                 )
 
-                symbols: dict[str, list[list[str | float]]] = {
+                symbols: GamsSymbols = {
                     "i": [
                         ["small_example", "seattle", ""],
                         ["small_example", "san-diego", ""],

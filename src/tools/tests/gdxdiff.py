@@ -1,38 +1,40 @@
-import unittest
 import os
-import platform
 import subprocess
-import inspect
-import gams.transfer as gt
+import unittest
+from pathlib import Path
 
-from examples.small_example import create_small_example
-from examples.full_example import create_full_example
-from examples.small_example_changed_data import create_small_example_changed_data
-from examples.full_example_changed_variables import (
-    create_full_example_changed_variables,
+from .common import (
+    DIRECTORY_PATHS,
+    ExecutableName,
+    GamsSymbols,
+    check_gdx_file,
+    check_output,
+    run_executable,
 )
-from examples.full_example_changed_data_and_variables import (
-    create_full_example_changed_data_and_variables,
-)
-from examples.default_values_examples import (
+from .examples.default_values_examples import (
     create_default_values_example_1,
     create_default_values_example_2,
 )
-from examples.domain_examples import create_domain_example_1, create_domain_example_2
-from examples.order_examples import create_order_example_1, create_order_example_2
-from examples.description_examples import (
+from .examples.description_examples import (
     create_description_example_1,
     create_description_example_2,
 )
+from .examples.domain_examples import create_domain_example_1, create_domain_example_2
+from .examples.full_example import create_full_example
+from .examples.full_example_changed_data_and_variables import (
+    create_full_example_changed_data_and_variables,
+)
+from .examples.full_example_changed_variables import (
+    create_full_example_changed_variables,
+)
+from .examples.order_examples import create_order_example_1, create_order_example_2
+from .examples.small_example import create_small_example
+from .examples.small_example_changed_data import create_small_example_changed_data
 
 
 class TestGdxDiff(unittest.TestCase):
-    TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
-    GDX_DIRECTORY_PATH = os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..")
-    DIRECTORY_PATHS = {
-        "examples": os.path.join(TESTS_DIRECTORY_PATH, "examples"),
-        "output": os.path.join(TESTS_DIRECTORY_PATH, "output", "gdxdiff"),
-    }
+    EXECUTABLE_NAME: ExecutableName = "gdxdiff"
+
     FILE_NAMES = [
         "small_example",
         "full_example",
@@ -49,12 +51,12 @@ class TestGdxDiff(unittest.TestCase):
         "description_example_2",
         "diff_file",
     ]
-    FILE_PATHS: dict[str, str]
+    FILE_PATHS: dict[str, Path]
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.FILE_PATHS = {
-            file_name: os.path.join(cls.DIRECTORY_PATHS["examples"], f"{file_name}.gdx")
+            file_name: DIRECTORY_PATHS.examples / f"{file_name}.gdx"
             for file_name in cls.FILE_NAMES
         }
 
@@ -82,40 +84,13 @@ class TestGdxDiff(unittest.TestCase):
             os.remove(file_path)
 
     @classmethod
-    def run_gdxdiff(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
-        EXECUTABLE_NAME = "gdxdiff"
-        if platform.system() == "Windows":
-            EXECUTABLE_PATH = (
-                ["Release", f"{EXECUTABLE_NAME}.exe"]
-                if os.path.isdir("Release")
-                else ["gdxtools", f"{EXECUTABLE_NAME}.exe"]
-            )
-        else:
-            build_directory_exists = os.path.isdir("build")
-            os.environ[
-                "LD_LIBRARY_PATH"
-                if platform.system() == "Linux"
-                else "DYLD_LIBRARY_PATH"
-            ] = (
-                os.path.join(cls.GDX_DIRECTORY_PATH, "build")
-                if build_directory_exists
-                else cls.GDX_DIRECTORY_PATH
-            )
-            EXECUTABLE_PATH = (
-                ["build", "src", "tools", EXECUTABLE_NAME, EXECUTABLE_NAME]
-                if build_directory_exists
-                else ["gdxtools", EXECUTABLE_NAME]
-            )
-        return subprocess.run(
-            [os.path.join(cls.GDX_DIRECTORY_PATH, *EXECUTABLE_PATH), *command],
-            capture_output=True,
-            text=True,
-        )
+    def run_gdxdiff(cls, command: list[str | Path]) -> subprocess.CompletedProcess[str]:
+        return run_executable(cls.EXECUTABLE_NAME, command)
 
     def check_output(
         self,
         output: subprocess.CompletedProcess[str],
-        return_code=0,
+        return_code: int = 0,
         file_name: str | None = None,
         first_offset: int | None = None,
         first_negative_offset: int | None = None,
@@ -124,46 +99,30 @@ class TestGdxDiff(unittest.TestCase):
         first_delete: list[int] = [],
         second_delete: list[int] = [],
     ) -> None:
-        self.assertEqual(output.returncode, return_code)
-        first = output.stdout.split("\n")[first_offset:first_negative_offset]
-        for i in first_delete:
-            del first[i]
-        if file_name is None:
-            file_name = f"{inspect.stack()[1].function.removeprefix('test_')}.txt"
-        with open(os.path.join(self.DIRECTORY_PATHS["output"], file_name), "r") as file:
-            second = file.read().split("\n")[second_offset:second_negative_offset]
-        for i in second_delete:
-            del second[i]
-        self.assertEqual(first, second)
-        self.assertEqual(output.stderr, "")
-
-    def check_gdx_file_symbols(
-        self, container: gt.Container, symbol_names: list[str]
-    ) -> None:
-        for symbol_name in symbol_names:
-            with self.subTest(symbol_name=symbol_name):
-                self.assertIn(symbol_name, container)
-        self.assertEqual(len(container), len(symbol_names))
-
-    def check_gdx_file_values(
-        self,
-        container: gt.Container,
-        symbol_name: str,
-        expected_values: list[list[str | float]],
-    ) -> None:
-        self.assertIn(symbol_name, container)
-        symbol: gt.Parameter = container[symbol_name]  # type: ignore
-        values = symbol.records.values.tolist()
-        self.assertEqual(values, expected_values)
-
-    def check_gdx_file(self, symbols: dict[str, list[list[str | float]]]) -> None:
-        container = gt.Container(
-            system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"),
-            load_from=self.FILE_PATHS["diff_file"],
+        check_output(
+            self,
+            self.EXECUTABLE_NAME,
+            output,
+            return_code,
+            file_name,
+            first_offset,
+            first_negative_offset,
+            second_offset,
+            second_negative_offset,
+            first_delete,
+            second_delete,
         )
-        self.check_gdx_file_symbols(container, list(symbols.keys()))
-        for symbol_name in symbols:
-            self.check_gdx_file_values(container, symbol_name, symbols[symbol_name])
+
+    def check_gdx_file(
+        self,
+        symbols: GamsSymbols,
+    ) -> None:
+        check_gdx_file(
+            self,
+            self.EXECUTABLE_NAME,
+            self.FILE_PATHS["diff_file"],
+            symbols,
+        )
 
     def test_empty_command(self) -> None:
         output = self.run_gdxdiff([])
@@ -193,7 +152,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "FilesCompared": [
                 ["File1", self.FILE_PATHS["small_example"]],
                 ["File2", self.FILE_PATHS["full_example"]],
@@ -218,7 +177,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "d": [
                 ["seattle", "new-york", "dif1", 2.5],
                 ["seattle", "new-york", "dif2", 3.5],
@@ -261,7 +220,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "d": [
                 ["seattle", "chicago", "dif1", 1.7],
                 ["seattle", "chicago", "dif2", 2.7],
@@ -294,7 +253,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "FilesCompared": [
                 ["File1", self.FILE_PATHS["small_example"]],
                 ["File2", self.FILE_PATHS["small_example_changed_data"]],
@@ -325,7 +284,7 @@ class TestGdxDiff(unittest.TestCase):
                     second_delete=[-3],
                 )
 
-                symbols: dict[str, list[list[str | float]]] = {
+                symbols: GamsSymbols = {
                     "FilesCompared": [
                         ["File1", self.FILE_PATHS["small_example"]],
                         ["File2", self.FILE_PATHS["small_example_changed_data"]],
@@ -350,7 +309,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "x": [
                 ["seattle", "new-york", "dif1", 50.0, 0.0, 0.0, float("inf"), 1.0],
                 ["seattle", "new-york", "dif2", 150.0, 0.0, 0.0, float("inf"), 1.0],
@@ -387,7 +346,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "x": [
                 ["seattle", "new-york", "dif1", 50.0, 0.0, 0.0, float("inf"), 1.0],
                 ["seattle", "new-york", "dif2", 150.0, 0.0, 0.0, float("inf"), 1.0],
@@ -424,7 +383,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "x": [
                 ["seattle", "new-york", "dif1", 50.0, 0.0, 0.0, float("inf"), 1.0],
                 ["seattle", "new-york", "dif2", 150.0, 0.0, 0.0, float("inf"), 1.0],
@@ -460,7 +419,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "FilesCompared": [
                 ["File1", self.FILE_PATHS["full_example"]],
                 ["File2", self.FILE_PATHS["full_example_changed_variables"]],
@@ -490,7 +449,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "x": [
                 ["seattle", "new-york", "dif1", 50.0],
                 ["seattle", "new-york", "dif2", 150.0],
@@ -530,7 +489,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "FilesCompared": [
                 ["File1", self.FILE_PATHS["full_example"]],
                 ["File2", self.FILE_PATHS["full_example_changed_variables"]],
@@ -555,7 +514,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "c": [
                 ["seattle", "new-york", "dif1", 0.225],
                 ["seattle", "new-york", "dif2", 0.315],
@@ -621,7 +580,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "x": [
                 ["seattle", "new-york", "dif1", 50.0, 0.0, 0.0, float("inf"), 1.0],
                 ["seattle", "new-york", "dif2", 150.0, 0.0, 0.0, float("inf"), 1.0],
@@ -679,7 +638,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "c": [
                 ["seattle", "new-york", "dif1", 0.225],
                 ["seattle", "new-york", "dif2", 0.315],
@@ -753,7 +712,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "c": [
                 ["seattle", "new-york", "dif1", 0.225],
                 ["seattle", "new-york", "dif2", 0.315],
@@ -829,7 +788,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "x": [
                 ["seattle", "new-york", "dif1", 50.0, 0.0, 0.0, float("inf"), 1.0],
                 ["seattle", "new-york", "dif2", 150.0, 0.0, 0.0, float("inf"), 1.0],
@@ -886,7 +845,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "x": [
                 ["seattle", "new-york", "Level", "dif1", 50.0],
                 ["seattle", "new-york", "Level", "dif2", 150.0],
@@ -921,7 +880,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "FilesCompared": [
                 ["File1", self.FILE_PATHS["default_values_example_1"]],
                 ["File2", self.FILE_PATHS["default_values_example_2"]],
@@ -949,7 +908,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "v": [["i0", "ins1", 0.0, 0.0, float("-inf"), float("inf"), 1.0]],
             "FilesCompared": [
                 ["File1", self.FILE_PATHS["default_values_example_1"]],
@@ -975,7 +934,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "FilesCompared": [
                 ["File1", self.FILE_PATHS["domain_example_1"]],
                 ["File2", self.FILE_PATHS["domain_example_2"]],
@@ -1001,7 +960,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "FilesCompared": [
                 ["File1", self.FILE_PATHS["domain_example_1"]],
                 ["File2", self.FILE_PATHS["domain_example_2"]],
@@ -1026,7 +985,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "t1": [
                 ["1988", "ins1", ""],
                 ["1990", "ins1", ""],
@@ -1075,7 +1034,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "t1": [
                 ["1988", "ins1", ""],
                 ["1990", "ins1", ""],
@@ -1125,7 +1084,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "i": [
                 ["seattle", "dif1", "text 1"],
                 ["seattle", "dif2", "text 3"],
@@ -1159,7 +1118,7 @@ class TestGdxDiff(unittest.TestCase):
             second_delete=[-3],
         )
 
-        symbols: dict[str, list[list[str | float]]] = {
+        symbols: GamsSymbols = {
             "FilesCompared": [
                 ["File1", self.FILE_PATHS["description_example_1"]],
                 ["File2", self.FILE_PATHS["description_example_2"]],
