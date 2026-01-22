@@ -1,10 +1,12 @@
-import sys
 import argparse
+import sys
 import unittest
-import gams
-from gdxdump import TestGdxDump
-from gdxdiff import TestGdxDiff
-from gdxmerge import TestGdxMerge
+
+import gams  # type: ignore
+
+from .gdxdiff import TestGdxDiff
+from .gdxdump import TestGdxDump
+from .gdxmerge import TestGdxMerge
 
 
 class TestGdxTools(unittest.TestCase):

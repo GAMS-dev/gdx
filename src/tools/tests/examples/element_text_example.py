@@ -1,9 +1,11 @@
-import gams.transfer as gt
-import pandas as pd
 import os
+from pathlib import Path
+
+import gams.transfer as gt  # type: ignore
+import pandas as pd
 
 
-def create_element_text_example(file_path: str) -> None:
+def create_element_text_example(file_path: Path) -> None:
     m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     # create the sets i, j
@@ -40,4 +42,4 @@ def create_element_text_example(file_path: str) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path)
+    m.write(file_path)  # type: ignore

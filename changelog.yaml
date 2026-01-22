@@ -1,4 +1,12 @@
 ---
+- 7.11.19:
+    - Extended and updated internal runtime library for use in other GAMS products
+    - Added unit test for trim functions and raw uel insertion
+    - Cleanup and minor touchups in GDX object module
+    - GDX tools
+      - Fully migrated to uv for all scripts, CI pipelines, and dependency caching.
+      - Fixed missing C++ namespaces/includes and consolidated shared Python test logic into common.py files.
+      - Added new pre-commit hooks and enforced strict validation for all Bash and Python code.
 - 7.11.18:
     - Fixed duplicated text piece in description of gdxAddSetText.
     - Many updates to shared internal infrastructure code (driven by static analysis).

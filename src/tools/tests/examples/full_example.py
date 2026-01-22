@@ -1,9 +1,11 @@
-import gams.transfer as gt
-import pandas as pd
 import os
+from pathlib import Path
+
+import gams.transfer as gt  # type: ignore
+import pandas as pd
 
 
-def create_full_example(file_path: str) -> None:
+def create_full_example(file_path: Path) -> None:
     # create an empty Container object
     m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
@@ -48,8 +50,8 @@ def create_full_example(file_path: str) -> None:
     d.setRecords(dist)
 
     # c(i,j) = f * d(i,j) / 1000;
-    cost = d.records.copy(deep=True)
-    cost["value"] = f.records.loc[0, "value"] * cost["value"] / 1000
+    cost = d.records.copy(deep=True)  # type: ignore
+    cost["value"] = f.records.loc[0, "value"] * cost["value"] / 1000  # type: ignore
     c.setRecords(cost)
 
     # add variables
@@ -89,7 +91,7 @@ def create_full_example(file_path: str) -> None:
     )
 
     # set equation records
-    cost.setRecords(
+    cost.setRecords(  # type: ignore
         pd.DataFrame(
             data=[[0, 1, 0, 0]], columns=["level", "marginal", "lower", "upper"]
         )
@@ -102,7 +104,7 @@ def create_full_example(file_path: str) -> None:
         ],
         columns=["from", "level", "marginal", "lower", "upper"],
     )
-    supply.setRecords(supplies)
+    supply.setRecords(supplies)  # type: ignore
 
     demands = pd.DataFrame(
         [
@@ -112,6 +114,6 @@ def create_full_example(file_path: str) -> None:
         ],
         columns=["from", "level", "marginal", "lower"],
     )
-    demand.setRecords(demands)
+    demand.setRecords(demands)  # type: ignore
 
-    m.write(file_path)
+    m.write(file_path)  # type: ignore

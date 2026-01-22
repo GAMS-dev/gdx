@@ -1,13 +1,15 @@
-import gams.transfer as gt
-import pandas as pd
 import os
+from pathlib import Path
+
+import gams.transfer as gt  # type: ignore
+import pandas as pd
 
 
-def get_test_string(count=255) -> str:
+def get_test_string(count: int = 255) -> str:
     return f"|{'_' * (count - 2)}|"
 
 
-def create_label_example(file_path: str) -> None:
+def create_label_example(file_path: Path) -> None:
     m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     # create the set i
@@ -51,4 +53,4 @@ def create_label_example(file_path: str) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path)
+    m.write(file_path)  # type: ignore

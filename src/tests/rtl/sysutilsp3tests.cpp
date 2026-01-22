@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
 *
-* Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
-* Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
+* Copyright (c) 2017-2026 GAMS Software GmbH <support@gams.com>
+* Copyright (c) 2017-2026 GAMS Development Corp. <support@gams.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -268,6 +268,22 @@ TEST_CASE("Test get current directory")
 #else
    REQUIRE( (GetCurrentDir().find( "gdx"s ) != std::string::npos) );
 #endif
+}
+
+TEST_CASE("Test trim functions left/right/both")
+{
+   REQUIRE_EQ("abc"s, TrimLeft( "  abc"s ));
+   REQUIRE_EQ("abc  "s, TrimLeft( "  abc  "s ));
+   REQUIRE_EQ("abc"s, TrimRight( "abc  "s ));
+   REQUIRE_EQ("  abc"s, TrimRight( "  abc  "s ));
+   REQUIRE_EQ("abc"s, Trim( "  abc  "s ));
+   REQUIRE_EQ("abc abc"s, Trim( "  abc abc  "s ));
+   REQUIRE_EQ(""s, Trim("            "s));
+   REQUIRE_EQ(""s, TrimLeft("            "s));
+   REQUIRE_EQ(""s, TrimRight("            "s));
+   REQUIRE_EQ(""s, Trim(""s));
+   REQUIRE_EQ(""s, TrimLeft(""s));
+   REQUIRE_EQ(""s, TrimRight(""s));
 }
 
 TEST_SUITE_END();

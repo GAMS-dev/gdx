@@ -1,4 +1,5 @@
 // #include <cassert>
+#include <cstddef>
 #include <cstring>
 #include <ostream>
 
@@ -14,7 +15,7 @@ ShortString::ShortString() {
 }
 
 ShortString::ShortString(const char *s) {
-  const size_t s_length{std::strlen(s)};
+  const std::size_t s_length{std::strlen(s)};
 
 #if defined(ENABLE_ASSERTIONS)
   assert(s_length < GMS_SSSIZE);
@@ -43,8 +44,8 @@ ShortString::operator std::string() const {
   return buffer.data();
 }
 
-uint8_t ShortString::length() const {
-  return static_cast<uint8_t>(
+std::uint8_t ShortString::length() const {
+  return static_cast<std::uint8_t>(
       std::strlen(buffer.data()));
 }
 
@@ -57,7 +58,7 @@ char ShortString::front() const {
 }
 
 char ShortString::back() const {
-  const uint8_t length{this->length()};
+  const std::uint8_t length{this->length()};
 
 #if defined(ENABLE_ASSERTIONS)
   assert(length > 0);
@@ -66,9 +67,9 @@ char ShortString::back() const {
   return buffer[length - 1];
 }
 
-char ShortString::at(const uint8_t i) const {
+char ShortString::at(const std::uint8_t i) const {
 #if defined(ENABLE_ASSERTIONS)
-  const uint8_t length{this->length()};
+  const std::uint8_t length{this->length()};
 
   if (i > 0) {
     assert(i < length);
@@ -80,7 +81,7 @@ char ShortString::at(const uint8_t i) const {
   return buffer[i];
 }
 
-char ShortString::operator[](const uint8_t i) const {
+char ShortString::operator[](const std::uint8_t i) const {
   return buffer[i];
 }
 
@@ -93,7 +94,7 @@ void ShortString::clear() {
 }
 
 void ShortString::append(const char c) {
-  const uint8_t length{this->length()};
+  const std::uint8_t length{this->length()};
 
 #if defined(ENABLE_ASSERTIONS)
   assert(length + 1 < GMS_SSSIZE);
@@ -104,8 +105,8 @@ void ShortString::append(const char c) {
 }
 
 void ShortString::append(const char *s) {
-  const uint8_t length{this->length()};
-  const size_t s_length{std::strlen(s)};
+  const std::uint8_t length{this->length()};
+  const std::size_t s_length{std::strlen(s)};
 
 #if defined(ENABLE_ASSERTIONS)
   assert(length + s_length < GMS_SSSIZE);
@@ -140,13 +141,13 @@ void ShortString::operator+=(const std::string &s) {
 }
 
 void ShortString::to_upper_case() {
-  for (uint8_t i{}; buffer[i] != '\0'; i++) {
+  for (std::uint8_t i{}; buffer[i] != '\0'; i++) {
     buffer[i] = utils::toupper(buffer[i]);
   }
 }
 
 ShortString &ShortString::operator=(const std::string &s) {
-  const size_t s_length{s.length()};
+  const std::size_t s_length{s.length()};
 
 #if defined(ENABLE_ASSERTIONS)
   assert(s_length < GMS_SSSIZE);

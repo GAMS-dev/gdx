@@ -1,8 +1,8 @@
 /**
  * GAMS - General Algebraic Modeling System C++ API
  *
- * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@
 namespace gdxmerge {
 
 bool DoBigSymbols, StrictMode;
-int64_t SizeCutOff;
+std::int64_t SizeCutOff;
 library::ShortString OutFile;
 std::unique_ptr<gdlib::gmsobj::TXStrings> FilePatterns;
 gdxHandle_t PGXMerge;
@@ -166,7 +166,7 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
   gdxUelIndex_t IndxI{};
   gdxValues_t Vals{};
   library::ShortString Txt, SyText, ErrMsg, FileId;
-  int64_t XCount, Size;
+  std::int64_t XCount, Size;
 
   FileName = fileList->FileName(FNr);
   FileId = fileList->FileId(FNr);
@@ -215,7 +215,7 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
     }
 
     // 64 bit
-    XCount = static_cast<int64_t>(DummyCount);
+    XCount = static_cast<std::int64_t>(DummyCount);
     Size = XCount * SyObj->SyDim;
     if (SyTyp == dt_var || SyTyp == dt_equ) {
       RecLen = 4;
@@ -229,7 +229,7 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
       SyObj->SySize += Size;
       SyObj->SyMemory +=
           XCount *
-          static_cast<int64_t>(
+          static_cast<std::int64_t>(
               (SyObj->SyDim * sizeof(int)) +
               (RecLen * sizeof(double)));
 
@@ -388,7 +388,7 @@ bool SymbolList::FindGDXFiles(const std::string &Path) {
 
       DT = rtl::sysutils_p3::FileDateToDateTime(Rec.Time);
 
-      uint16_t Year, Month, Day, Hour, Min, Sec, MSec;
+      std::uint16_t Year, Month, Day, Hour, Min, Sec, MSec;
       rtl::sysutils_p3::DecodeDate(DT, Year, Month, Day);
       rtl::sysutils_p3::DecodeTime(DT, Hour, Min, Sec, MSec);
 
@@ -569,8 +569,8 @@ void SymbolList::AddToExcludeList(const std::string &item) {
   ExcludeList.emplace_back(item);
 }
 
-std::string FormatDateTime(const uint16_t Year, const uint16_t Month, const uint16_t Day,
-                           const uint16_t Hour, const uint16_t Min, const uint16_t Sec) {
+std::string FormatDateTime(const std::uint16_t Year, const std::uint16_t Month, const std::uint16_t Day,
+                           const std::uint16_t Hour, const std::uint16_t Min, const std::uint16_t Sec) {
   auto Int2 = [](const int n) -> std::string {
     std::ostringstream oss;
     oss << std::setw(2) << std::setfill('0') << n;
@@ -582,7 +582,7 @@ std::string FormatDateTime(const uint16_t Year, const uint16_t Month, const uint
 }
 
 bool GetParameters(const int argc, const char *argv[]) {
-  enum class KP : uint8_t {
+  enum class KP : std::uint8_t {
     Id = 1,
     Exclude,
     Big,

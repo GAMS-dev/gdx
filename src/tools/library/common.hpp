@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -25,9 +26,9 @@ std::string specialValueStr(int i);
 
 std::vector<std::string> splitString(const std::string &string, char delimiter);
 
-bool canBeQuoted(const char *s, size_t slen);
+bool canBeQuoted(const char *s, std::size_t slen);
 
-bool goodUELString(const char *s, size_t slen);
+bool goodUELString(const char *s, std::size_t slen);
 
 class AuditLine {
   std::string

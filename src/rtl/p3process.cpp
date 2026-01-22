@@ -1,8 +1,8 @@
 /*
  * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -618,49 +618,68 @@ int p3GetNumberOfProcessors()
 const std::string CMD_WIN7 = R"(C:\windows\system32\cmd.exe)";
 const std::string CMD_WINNT = R"(C:\winnt\system32\cmd.exe)";
 
-int wShowWindow {};
+#if defined(_WIN32)
+static int wShowWindow {SW_SHOWNA};
+#endif
 
-static int CppCreateProc( const std::string &exeName, const std::string &cmdLine, bool inheritedHandles, int &exeRC )
+static int CppCreateProc( const std::string &exeName, const std::string &cmdLine, bool allowStdHandles, int &exeRC )
 {
-#if _WIN32 || _WIN64
-   STARTUPINFOA StartupInfo;
+#if defined(_WIN32)
    PROCESS_INFORMATION ProcessInformation;
-   DWORD exitcode;
-
-   ZeroMemory( &StartupInfo, sizeof( STARTUPINFOA ) );
-   StartupInfo.cb = sizeof( STARTUPINFOA );
    ZeroMemory( &ProcessInformation, sizeof( PROCESS_INFORMATION ) );
-
+   // Initialise the startup information to be the same as that of the
+   // calling application.  This is easier than initialising the many
+   // individual startup information fields and should be fine in most
+   // cases.
+   STARTUPINFOA StartupInfo;
    GetStartupInfoA( &StartupInfo );
+   StartupInfo.cbReserved2 = 0;
+   StartupInfo.lpReserved = nullptr;
+   StartupInfo.lpReserved2 = nullptr;
 
-   std::vector<char> cmdLineBuf( cmdLine.size() + 1 );
-   std::memcpy( cmdLineBuf.data(), cmdLine.c_str(), cmdLineBuf.size() );
+   // StartupInfo.wShowWindow determines whether the called application
+   // will be initially displayed normal, maximises, minimised or some
+   // other subtle variations
+   StartupInfo.wShowWindow = wShowWindow;
 
-   if( !CreateProcessA( exeName.empty() ? nullptr : exeName.c_str(), cmdLineBuf.data(), nullptr, nullptr, inheritedHandles, 0, nullptr, nullptr, &StartupInfo, &ProcessInformation ) )
+   // call with STARTF_USESTDHANDLES set only if inheritHandles is TRUE
+   if( !allowStdHandles )
+      StartupInfo.dwFlags &= ~STARTF_USESTDHANDLES;
+
+   std::vector<char> cmdLineBuf( cmdLine.length() + 1 );
+   std::memcpy( cmdLineBuf.data(), cmdLine.c_str(), cmdLine.length()+1 );
+
+   if( !CreateProcessA( exeName.empty() ? nullptr : exeName.c_str(), cmdLineBuf.data(), nullptr, nullptr, true, 0, nullptr, nullptr, &StartupInfo, &ProcessInformation ) )
    {
       exeRC = 0;
       return static_cast<int>(GetLastError());
    }
    WaitForSingleObject( ProcessInformation.hProcess, INFINITE );
-   GetExitCodeProcess( ProcessInformation.hProcess, &exitcode );
+   DWORD exitcode;
+   BOOL brc = GetExitCodeProcess( ProcessInformation.hProcess, &exitcode );
    CloseHandle( ProcessInformation.hThread );
    CloseHandle( ProcessInformation.hProcess );
-   exeRC = static_cast<int>( exitcode );
-   if( exeRC == 255 )
+   if (!brc || exitcode == 255) // failed call to GetExitCodeProcess
    {
       exeRC = 0;
       return 1;
    }
+   exeRC = static_cast<int>( exitcode );
    return 0;
 #else
+   exeRC = !exeName.empty() + !cmdLine.empty();
    return 1;
 #endif
 }
 
 static int System4Win( const std::string &CmdPtr, bool inheritedHandles, int &ProgRC )
 {
-   const auto cspec = getenv( "COMSPEC" );
-   std::string cs = cspec ? cspec : ""s;
+   // check if we have a command starting with "" and ending with " (and more than 2 chars)
+   static auto checkAddQuotes = []( const std::string &cp ) {
+      return cp.length() <= 2 || cp[0] != '\"' || cp[1] != '\"' || cp.back() != '\"';
+   };
+
+   std::string cs = rtl::sysutils_p3::QueryEnvironmentVariable( "COMSPEC" );
    if( cs.empty() )
    {
       if( FileExists( CMD_WIN7 ) )
@@ -670,7 +689,8 @@ static int System4Win( const std::string &CmdPtr, bool inheritedHandles, int &Pr
       else
          return 1;
    }
-   return CppCreateProc( cs, cs + " /C \""s + CmdPtr + '\"', inheritedHandles, ProgRC );
+   std::string arg = checkAddQuotes( CmdPtr ) ? cs + " /C \""s + CmdPtr + '\"' : cs + " /C "s + CmdPtr;
+   return CppCreateProc( cs, arg, inheritedHandles, ProgRC );
 }
 
 static int System4Unix( const std::string &CmdPtr, int &ProgRC )

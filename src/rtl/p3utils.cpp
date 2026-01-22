@@ -1,8 +1,8 @@
 /*
 * GAMS - General Algebraic Modeling System GDX API
  *
- * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -91,8 +91,7 @@ using utils::ui32;
 namespace rtl::p3utils
 {
 
-#if defined( _WIN32 )
-#else
+#if !defined( _WIN32 )
 static bool setEnvironmentVariableUnix( const std::string &name, const std::string &value = ""s )
 {
    if( name.empty() ) return false;
@@ -106,7 +105,7 @@ static bool setEnvironmentVariableUnix( const std::string &name, const std::stri
 }
 #endif
 
-static std::vector<std::string> paramstr;
+        static std::vector<std::string> paramstr;
 
 bool PrefixPath( const std::string &s )
 {
@@ -137,7 +136,11 @@ void P3UnSetEnv( const std::string &name )
 
 bool P3IsSetEnv( const std::string &name )
 {
+#if defined(_WIN32)
+   return GetEnvironmentVariableA( name.c_str(), NULL, 0 );
+#else
    return std::getenv( name.c_str() ) != nullptr;
+#endif
 }
 
 bool P3SetEnvPC( const std::string &name, const char *val )
@@ -640,8 +643,8 @@ int p3FileGetPointer(Tp3FileHandle h, int64_t &filePointer)
       return res;
    }
 #else
-   off_t newPos = lseek( h, 0, SEEK_CUR );
-   if( (off_t) -1 == newPos )
+   const off_t newPos = lseek( h, 0, SEEK_CUR );
+   if( static_cast<off_t>( -1 ) == newPos )
       return errno;
    filePointer = newPos;
 #endif
@@ -1097,7 +1100,7 @@ std::string ParamStrZero()
    return paramstr.front();
 }
 
-std::string ParamStr( int index )
+std::string ParamStr( const int index )
 {
    return index >= 0 && index < static_cast<int>( paramstr.size() ) ? paramstr[index] : ""s;
 }
@@ -1184,6 +1187,308 @@ bool PrefixEnv( const std::string &dir, const std::string &evName )
 #endif
 }
 
+#if !defined(_WIN32)
+char *safecat( char *dst, size_t dstSiz, char *end, const char *src );
+
+// Steve's routines from 23 Aug 2001 (3nd version)
+
+/* Like strcat(dst, src), but with a size guard and some efficiency.
+ * It returns a pointer to the terminating null byte, like stpcpy
+ * Assumptions:
+ *   dst & src are non-NULL and non-overlapping
+ *   dstSiz is the allocated size of dst
+ *   to get a nice result, end should point to the terminating null byte
+ *     of dst, or at least somewhere in dst.
+ * If strlen(dst) + strlen(src) + 1 > dstSiz, returns NULL
+ * otherwise, does strcat(dst,src) and returns (dst + strlen(dst))
+ */
+char *safecat( char *dst, size_t dstSiz, char *end, const char *src )
+{
+   size_t srcLen;
+   size_t used;
+
+   if ((NULL == end) || (dst > end) || (end >= dst+dstSiz))
+      return NULL;
+   if (*end) {                   /* push to the end */
+      used = end - dst;
+      end += strnlen (end, dstSiz - used);
+      if (end >= dst+dstSiz)      /* end is already too long */
+         return NULL;
+   }
+   used = end - dst;
+   srcLen = strnlen (src, dstSiz - used);
+   if (used + srcLen >= dstSiz)     /* result too long */
+      return NULL;
+   return stpcpy (end, src);
+}
+
+/* followSymLink ():
+ * replace input pathname (potentially a symlink) with actual file
+ * returns:
+ *   0      on success, or if input not a symlink
+ *   errno  on failure
+ */
+static int
+followSymLink (char absPathName[], const size_t absPathSiz)
+{
+   char newPathName[PATH_MAX];
+   const auto rc = readlink (absPathName, newPathName, sizeof(newPathName));
+   if (-1 == rc) {
+      if (EINVAL == errno) {
+         return 0;                 /* not a symlink */
+      }
+      return errno;
+   }
+   if( rc >= (long int)sizeof( newPathName ) )
+   { /* result buffer too small */
+      return ENAMETOOLONG;
+   }
+   /* the symlink was successfully followed,
+    * and the contents fit into newPathName
+    */
+   newPathName[rc] = '\0';
+   char *end = absPathName;            /* prep to overwrite completely */
+   if ('/' == newPathName[0]) {  /* just copy it */
+      /* end is already set for this */
+   }
+   else {                        /* if there is a slash, append after it */
+      char *p = strrchr(absPathName, '/');
+      if (p) {
+         end = p + 1;
+      }
+   }
+   *end = '\0';
+   end = safecat (absPathName, absPathSiz, end, newPathName);
+   if ( !end)
+      return ENAMETOOLONG;
+
+   return 0;
+} /* followSymLink */
+
+/* getAbsPath ():
+ * given a path to a file, returns the absolute path
+ * it assumes the file has a slash in it, i.e. its position
+ * relative to the current dir is specified explicitly
+ * return:
+ *    absPath   on success
+ *    NULL      on failure
+ */
+static char *
+getAbsPath (char absPath[], const size_t absPathSiz, const char *fname)
+{
+   char *end {};
+
+   if ('/' == fname[0]) { /* easiest case: path name absolute already */
+      *absPath = '\0';
+      end = safecat (absPath, absPathSiz, absPath, fname);
+   }
+   else {                        /* argument is relative to cwd */
+      if (!getcwd(absPath, absPathSiz)) {
+         *absPath = '\0';
+         return nullptr;
+      }
+      if ('.' == fname[0] && '/' == fname[1]) {
+         end = safecat (absPath, absPathSiz, absPath, fname+1);
+      }
+      else {
+         end = safecat (absPath, absPathSiz, absPath, "/");
+         end = safecat (absPath, absPathSiz, end, fname);
+      }
+   } /* relative path */
+
+   return !end ? nullptr : absPath;
+} /* getAbsPath */
+
+/* unixGetModuleFileName (prog, buf, bufSiz)
+ * get the full path of the executable being run
+ * in the process, follow symlinks and make relative paths absolute
+ * returns:
+ *    0 on failure
+ *    strlen of the returned buf on success (result < bufSiz)
+ *    bufSiz never returned
+ *    result > bufSiz to signal result buffer too small:
+ *       call again with bufSiz >= result
+ */
+static int unixGetModuleFileName(const char *prog, char *buf, const int bufSiz)
+{
+  char pathName[PATH_MAX];      /* may be relative or not */
+  char absPathName[PATH_MAX];
+  char *path = nullptr;
+  char *savePtr;
+  char *p, *end = nullptr, *dir;
+  int rc;
+  size_t len;
+  struct stat statBuf;
+
+  *buf = '\0';
+  *pathName = '\0';
+  /* easy case: absolute path name */
+  if ('/' == prog[0]) {
+    end = safecat (pathName, sizeof(pathName), pathName, prog);
+    if (!end)
+      return 0;
+    rc = followSymLink (pathName, sizeof(pathName));
+    if (rc)
+      return 0;
+    if ('/' == *pathName) {     /* path already absolute */
+      p = pathName;
+    }
+    else {
+      p = getAbsPath (absPathName, sizeof(absPathName), pathName);
+      if ( !p)
+        return 0;
+    }
+    len = strlen (p);
+    if (len < (size_t)bufSiz) {
+      (void) memcpy (buf, p, len);
+      buf[len] = '\0';
+    }
+    else {                      /* result too long */
+      len++;                    /* add one for the terminating null */
+    }
+    return (int) len;
+  }
+
+  /* relative path name */
+  if (strchr(prog, '/')) {
+    if (!getcwd (pathName, sizeof(pathName))) {
+      return 0;
+    }
+    if ('.' == prog[0] && '/' == prog[1]) {
+      end = safecat (pathName, sizeof(pathName), pathName, prog+1);
+    }
+    else {
+      end = safecat (pathName, sizeof(pathName), pathName, "/");
+      end = safecat (pathName, sizeof(pathName), end, prog);
+    }
+    rc = followSymLink (pathName, sizeof(pathName));
+    if (rc)
+      return 0;
+    if ('/' == *pathName) {     /* path already absolute */
+      p = pathName;
+    }
+    else {
+      p = getAbsPath (absPathName, sizeof(absPathName), pathName);
+      if (NULL == p)
+        return 0;
+    }
+    len = strlen (p);
+    if (len < (size_t)bufSiz) {
+      (void) memcpy (buf, p, len);
+      buf[len] = '\0';
+    }
+    else {                      /* result too long */
+      len++;                    /* add one for the terminating null */
+    }
+    return (int) len;
+  } /* relative path */
+
+  /* Third Step: Scan the path */
+  p = getenv ("PATH");
+  if (p) {
+    len = strlen (p);
+    path = static_cast<char *>( malloc( len + 1 ) );
+    if (!path) {
+      errno = ENOMEM;
+      return 0;
+    }
+    strcpy (path, p);
+    errno = 0;
+    for (dir = strtok_r (path, ":", &savePtr);
+         dir;
+         dir = strtok_r (nullptr, ":", &savePtr)) {
+      if ('.' == dir[0] && '\0' == dir[1]) {
+        if (! getcwd (pathName, sizeof(pathName))) {
+          goto wefail;
+        }
+        end = pathName + strlen(pathName);
+      }
+      else {
+        *pathName = '\0';
+        end = safecat (pathName, sizeof(pathName), pathName, dir);
+        if (!end)
+          goto wefail;
+      }
+      if (*(end-1) != '/') { /* SSN added; this helps */
+        end = safecat (pathName, sizeof(pathName), end, "/");
+      }
+      end = safecat (pathName, sizeof(pathName), end, prog);
+      if (!end)
+        goto wefail;
+      if (!access (pathName, X_OK)
+          && (0 == stat(pathName, &statBuf))
+          && ! S_ISDIR(statBuf.st_mode)
+          ) {
+        rc = followSymLink (pathName, sizeof(pathName));
+        if (rc)
+          goto wefail;
+        if ('/' == *pathName) { /* path already absolute */
+          p = pathName;
+        }
+        else {
+          p = getAbsPath (absPathName, sizeof(absPathName), pathName);
+          if (!p)
+            goto wefail;
+        }
+        len = strlen (p);
+        if (len < (size_t)bufSiz) {
+          (void) memcpy (buf, p, len);
+          buf[len] = '\0';
+        }
+        else {                      /* result too long */
+          len++;                    /* add one for the terminating null */
+        }
+        free (path);
+        return (int) len;
+      } /* if found in path */
+    } /* end loop over dirs in path */
+    free (path);
+    errno = ENOENT;
+    return 0;
+  } /* if (path is set) */
+
+ wefail:
+  if (path) {
+    free (path);
+  }
+  errno = ENOENT;
+  return 0;
+} /* unixGetModuleFileName */
+
+static char *wrapUnixGMFN (const char *argv0, char *res, const int maxLen)
+{
+   constexpr bool Test_GMFN {};
+   char appDir[PATH_MAX];
+
+   if (Test_GMFN)
+      printf ("argv[0] is '%s'\n", argv0);
+   int len = unixGetModuleFileName( argv0, appDir, sizeof( appDir ) );
+   if (0 == len) {
+      if (Test_GMFN)
+         printf ("wrapUnixGMFN(): Unable to get module file name of '%s'\n", argv0);
+   }
+   else if (len <= maxLen) {
+      if (Test_GMFN)
+         printf ("Module file name is '%s'\n", appDir);
+   }
+   else {
+      if (Test_GMFN) {
+         printf ("*** Error: Module file name too long:"
+                 " %d chars exceeds allowed length of %d\n", len, maxLen);
+         printf ("*** Module file name is '%s'\n", appDir);
+      }
+      len = 0;  /* just kill it, can't use it anyway */
+   }
+
+   /* Copy string of length len back to Pascal */
+   for ( int i = 1;  i <= len;  i++)
+      res[i] = appDir[i-1];
+   res[0] = static_cast<char>( len );
+
+   return res;
+}
+#endif
+
 void initParamStr( const int argc, const char **argv )
 {
    paramstr.resize( argc );
@@ -1193,12 +1498,53 @@ void initParamStr( const int argc, const char **argv )
       if( !i ) // absolute executable path
       {
 #if defined(_WIN32)
-         std::array<char, 261> buf {}; // length taken from Delphi's System.pas unit
-         const auto slen { GetModuleFileNameA( nullptr, buf.data(), 256 ) };
-         paramstr.front() = std::string { buf.data(), slen};
+         // length taken from Delphi's System.pas unit
+         std::array<WCHAR, MAX_PATH> bufW {}, shortNameW {};
+         std::array<char, MAX_PATH> bufA {};
+         auto r { GetModuleFileNameW( nullptr, bufW.data(), (DWORD)bufW.size() ) };
+         if(!r)
+         {
+            paramstr.front().clear();
+            continue;
+         }
+         if(r < 256 && allASCIIchars(bufW.data(), r))
+            cpW2A(bufA.data(), bufW.data(), r);
+         else
+         {
+            r = GetRobustShortPathW(bufW.data(), shortNameW.data(), 256);
+            if(!r)
+            {
+               paramstr.front().clear();
+               continue;
+            }
+            if(allANSIchars( shortNameW.data(), r ))
+            {
+               cpW2A(bufA.data(), shortNameW.data(), r);
+            }
+            else
+            {
+               // if we reach here all that is available is super-ANSI: return empty str
+               paramstr.front().clear();
+               continue;
+            }
+         }
+         paramstr.front() = std::string { bufA.data(), r };
 #else
-         if( std::string buf, msg; !xGetExecName( buf, msg ) )
-            paramstr.front() = buf;
+         std::string buf, msg;
+         utils::sstring fsbuf;
+         switch( [[maybe_unused]] int rc = xGetExecName( buf, msg ) )
+         {
+            case 0:
+               paramstr.front() = buf;
+               break;
+            case 1:
+               paramstr.front().clear();
+               continue;
+            default:
+               wrapUnixGMFN(argv[0], fsbuf.data(), fsbuf.size());
+               paramstr.front() = fsbuf.data();
+               break;
+         }
 #endif
       }
    }
@@ -1277,25 +1623,22 @@ int p3GetExecName( std::string &execName, std::string &msg )
    execName.clear();
 #if defined( _WIN32 )
    std::array<char, 256> buf {};
-   auto rc = GetModuleFileNameA( nullptr, buf.data(), (int) buf.size() );
+   const auto rc = GetModuleFileNameA( nullptr, buf.data(), static_cast<int>( buf.size() ) );
    if( !rc )
    {
       msg = "GetModuleFileNameA call failed";
       return 3;
    }
-   else if( rc >= 256 )
+   if( rc >= 256 )
    {
       buf.back() = '\0';
       execName.assign( buf.data() );
       msg = "result truncated to 255 chars";
       return 1;
    }
-   else
-   {
-      execName.assign( buf.data() );
-      msg.clear();
-      return 0;
-   }
+   execName.assign( buf.data() );
+   msg.clear();
+   return 0;
 #else
    msg = "P3: not yet implemented";
    return xGetExecName( execName, msg );

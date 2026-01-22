@@ -1,24 +1,26 @@
-import unittest
 import os
-import platform
 import subprocess
 import tempfile
-import inspect
+import unittest
+from pathlib import Path
 
-from examples.small_example import create_small_example
-from examples.full_example import create_full_example
-from examples.element_text_example import create_element_text_example
-from examples.special_values_example import create_special_values_example
-from examples.label_example import create_label_example
+from .common import (
+    DIRECTORY_PATHS,
+    RUNNING_ON_WINDOWS,
+    ExecutableName,
+    check_output,
+    run_executable,
+)
+from .examples.element_text_example import create_element_text_example
+from .examples.full_example import create_full_example
+from .examples.label_example import create_label_example
+from .examples.small_example import create_small_example
+from .examples.special_values_example import create_special_values_example
 
 
 class TestGdxDump(unittest.TestCase):
-    TESTS_DIRECTORY_PATH = os.path.dirname(os.path.abspath(__file__))
-    GDX_DIRECTORY_PATH = os.path.join(TESTS_DIRECTORY_PATH, "..", "..", "..")
-    DIRECTORY_PATHS = {
-        "examples": os.path.join(TESTS_DIRECTORY_PATH, "examples"),
-        "output": os.path.join(TESTS_DIRECTORY_PATH, "output", "gdxdump"),
-    }
+    EXECUTABLE_NAME: ExecutableName = "gdxdump"
+
     FILE_NAMES = [
         "small_example",
         "full_example",
@@ -26,12 +28,12 @@ class TestGdxDump(unittest.TestCase):
         "special_values_example",
         "label_example",
     ]
-    FILE_PATHS: dict[str, str]
+    FILE_PATHS: dict[str, Path]
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.FILE_PATHS = {
-            file_name: os.path.join(cls.DIRECTORY_PATHS["examples"], f"{file_name}.gdx")
+            file_name: DIRECTORY_PATHS.examples / f"{file_name}.gdx"
             for file_name in cls.FILE_NAMES
         }
 
@@ -47,40 +49,13 @@ class TestGdxDump(unittest.TestCase):
             os.remove(file_path)
 
     @classmethod
-    def run_gdxdump(cls, command: list[str]) -> subprocess.CompletedProcess[str]:
-        EXECUTABLE_NAME = "gdxdump"
-        if platform.system() == "Windows":
-            EXECUTABLE_PATH = (
-                ["Release", f"{EXECUTABLE_NAME}.exe"]
-                if os.path.isdir("Release")
-                else ["gdxtools", f"{EXECUTABLE_NAME}.exe"]
-            )
-        else:
-            build_directory_exists = os.path.isdir("build")
-            os.environ[
-                "LD_LIBRARY_PATH"
-                if platform.system() == "Linux"
-                else "DYLD_LIBRARY_PATH"
-            ] = (
-                os.path.join(cls.GDX_DIRECTORY_PATH, "build")
-                if build_directory_exists
-                else cls.GDX_DIRECTORY_PATH
-            )
-            EXECUTABLE_PATH = (
-                ["build", "src", "tools", EXECUTABLE_NAME, EXECUTABLE_NAME]
-                if build_directory_exists
-                else ["gdxtools", EXECUTABLE_NAME]
-            )
-        return subprocess.run(
-            [os.path.join(cls.GDX_DIRECTORY_PATH, *EXECUTABLE_PATH), *command],
-            capture_output=True,
-            text=True,
-        )
+    def run_gdxdump(cls, command: list[str | Path]) -> subprocess.CompletedProcess[str]:
+        return run_executable(cls.EXECUTABLE_NAME, command)
 
     def check_output(
         self,
         output: subprocess.CompletedProcess[str],
-        return_code=0,
+        return_code: int = 0,
         file_name: str | None = None,
         first_offset: int | None = None,
         first_negative_offset: int | None = None,
@@ -89,18 +64,19 @@ class TestGdxDump(unittest.TestCase):
         first_delete: list[int] = [],
         second_delete: list[int] = [],
     ) -> None:
-        self.assertEqual(output.returncode, return_code)
-        first = output.stdout.split("\n")[first_offset:first_negative_offset]
-        for i in first_delete:
-            del first[i]
-        if file_name is None:
-            file_name = f"{inspect.stack()[1].function.removeprefix('test_')}.txt"
-        with open(os.path.join(self.DIRECTORY_PATHS["output"], file_name), "r") as file:
-            second = file.read().split("\n")[second_offset:second_negative_offset]
-        for i in second_delete:
-            del second[i]
-        self.assertEqual(first, second)
-        self.assertEqual(output.stderr, "")
+        check_output(
+            self,
+            self.EXECUTABLE_NAME,
+            output,
+            return_code,
+            file_name,
+            first_offset,
+            first_negative_offset,
+            second_offset,
+            second_negative_offset,
+            first_delete,
+            second_delete,
+        )
 
     def test_empty_command(self) -> None:
         output = self.run_gdxdump([])
@@ -121,7 +97,7 @@ class TestGdxDump(unittest.TestCase):
         self.check_output(output)
 
     @unittest.skipIf(
-        platform.system() == "Windows",
+        RUNNING_ON_WINDOWS,
         "Skipped on Windows due to temporary file behavior",
     )
     def test_full_example_output(self) -> None:
@@ -132,9 +108,7 @@ class TestGdxDump(unittest.TestCase):
             self.assertEqual(output.returncode, 0)
             with open(temporary_file.name, "r") as file:
                 first = file.read().split("\n")
-            with open(
-                os.path.join(self.DIRECTORY_PATHS["output"], "full_example.txt"), "r"
-            ) as file:
+            with open(DIRECTORY_PATHS.output.gdxdump / "full_example.txt", "r") as file:
                 second = file.read().split("\n")
             self.assertEqual(first, second)
             self.assertEqual(output.stdout, "")

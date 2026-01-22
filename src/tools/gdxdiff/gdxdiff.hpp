@@ -15,7 +15,7 @@ namespace gdxdiff {
 
 using namespace std::literals::string_literals;
 
-enum class ErrorCode : uint8_t {
+enum class ErrorCode : std::uint8_t {
   ERR_DIFFERENT = 1,
   ERR_USAGE,
   ERR_NOFILE,
@@ -25,14 +25,14 @@ enum class ErrorCode : uint8_t {
   ERR_RENAME
 };
 
-enum class FldOnly : uint8_t {
+enum class FldOnly : std::uint8_t {
   fld_maybe,
   fld_yes,
   fld_no,
   fld_never
 };
 
-enum class StatusCode : uint8_t {
+enum class StatusCode : std::uint8_t {
   sc_same,
   sc_notf1,
   sc_notf2,
@@ -46,7 +46,7 @@ enum class StatusCode : uint8_t {
 };
 
 // TODO: Name correctly
-enum class KP : uint8_t {
+enum class KP : std::uint8_t {
   // kp_input,
   kp_eps = 1,
   kp_releps,

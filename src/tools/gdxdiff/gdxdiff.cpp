@@ -1,8 +1,8 @@
 /**
  * GAMS - General Algebraic Modeling System C++ API
  *
- * Copyright (c) 2017-2025 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2017-2025 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2017-2026 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,7 @@
 
 namespace gdxdiff {
 
-using tvarvaltype = uint8_t;
+using tvarvaltype = std::uint8_t;
 
 library::ShortString DiffTmpName;
 gdxHandle_t PGX1, PGX2, PGXDIF;

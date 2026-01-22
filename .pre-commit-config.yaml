@@ -1,6 +1,32 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      # - id: trailing-whitespace
+      #   args: [--markdown-linebreak-ext=md]
+      # - id: end-of-file-fixer
+      - id: check-json
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-toml
+      - id: check-added-large-files
+
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        name: check shell scripts
+
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.10.0
+    hooks:
+      - id: pip-audit
+        name: run pip-audit
+        args: [-r, ./requirements.txt]
+
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        args: [ '--baseline', '.secrets.baseline' ]
+        name: run detect-secrets
+        args: [--baseline, .secrets.baseline]
