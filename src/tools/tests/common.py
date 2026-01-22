@@ -84,6 +84,7 @@ def run_executable(
     command_as_strings: list[str] = [
         str(value) if isinstance(value, Path) else value for value in command
     ]
+
     return subprocess.run(
         [str(executable_path), *command_as_strings],
         capture_output=True,
@@ -105,9 +106,11 @@ def check_output(
     second_delete: list[int],
 ) -> None:
     test_instance.assertEqual(output.returncode, return_code)
+
     first = output.stdout.split("\n")[first_offset:first_negative_offset]
     for i in first_delete:
         del first[i]
+
     if file_name is None:
         file_name = f"{inspect.stack()[2].function.removeprefix('test_')}.txt"
     with open(
@@ -116,6 +119,7 @@ def check_output(
         second = file.read().split("\n")[second_offset:second_negative_offset]
     for i in second_delete:
         del second[i]
+
     test_instance.assertEqual(first, second)
     test_instance.assertEqual(output.stderr, "")
 
@@ -142,13 +146,16 @@ def check_gdx_file_values(
     symbol_name: str,
     expected_values: list[list[str | Path | float]],
 ) -> None:
+    test_instance.assertIn(symbol_name, container)
+
+    symbol: gt.Parameter = container[symbol_name]  # type: ignore
+    values = symbol.records.values.tolist()  # type: ignore
+
     path_values_as_strings: list[list[str | float]] = [
         [str(value) if isinstance(value, Path) else value for value in values]
         for values in expected_values
     ]
-    test_instance.assertIn(symbol_name, container)
-    symbol: gt.Parameter = container[symbol_name]  # type: ignore
-    values = symbol.records.values.tolist()  # type: ignore
+
     test_instance.assertEqual(values, path_values_as_strings)
 
 
