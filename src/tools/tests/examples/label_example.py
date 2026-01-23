@@ -1,8 +1,8 @@
 import os
 from pathlib import Path
 
-import gams.transfer as gt  # type: ignore
-import pandas as pd
+from gams.transfer import Container, Parameter, Set  # type: ignore
+from pandas import DataFrame
 
 
 def get_test_string(count: int = 255) -> str:
@@ -10,10 +10,10 @@ def get_test_string(count: int = 255) -> str:
 
 
 def create_label_example(file_path: Path) -> None:
-    m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
+    m = Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     # create the set i
-    i = gt.Set(
+    i = Set(
         m,
         "i",
         records=[("seattle", get_test_string()), ("san-diego", get_test_string())],
@@ -21,7 +21,7 @@ def create_label_example(file_path: Path) -> None:
     )
 
     # create the set j
-    j = gt.Set(
+    j = Set(
         m,
         "j",
         records=[
@@ -33,10 +33,10 @@ def create_label_example(file_path: Path) -> None:
     )
 
     # add 'd' parameter -- domain linked to set objects i and j
-    d = gt.Parameter(m, "d", [i, j], description=get_test_string())
+    d = Parameter(m, "d", [i, j], description=get_test_string())
 
     # create some data as a generic DataFrame
-    dist = pd.DataFrame(
+    dist = DataFrame(
         [
             ("seattle", "new-york", 2.5),
             ("seattle", "chicago", 1.7),
@@ -53,4 +53,4 @@ def create_label_example(file_path: Path) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path)  # type: ignore
+    m.write(file_path)  # pyright: ignore

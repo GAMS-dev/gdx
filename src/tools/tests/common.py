@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-import gams.transfer as gt  # type: ignore
+from gams.transfer import Container, Parameter  # type: ignore
 
 
 @dataclass(frozen=True)
@@ -127,7 +127,7 @@ def check_output(
 def check_gdx_file_symbols(
     test_instance: unittest.TestCase,
     executable_name: ExecutableName,
-    container: gt.Container,
+    container: Container,
     symbol_names: list[str],
 ) -> None:
     for symbol_name in symbol_names:
@@ -142,14 +142,14 @@ def check_gdx_file_symbols(
 
 def check_gdx_file_values(
     test_instance: unittest.TestCase,
-    container: gt.Container,
+    container: Container,
     symbol_name: str,
     expected_values: list[list[str | Path | float]],
 ) -> None:
     test_instance.assertIn(symbol_name, container)
 
-    symbol: gt.Parameter = container[symbol_name]  # type: ignore
-    values = symbol.records.values.tolist()  # type: ignore
+    symbol: Parameter = container[symbol_name]  # pyright: ignore
+    values = symbol.records.values.tolist()  # pyright: ignore
 
     path_values_as_strings: list[list[str | float]] = [
         [str(value) if isinstance(value, Path) else value for value in values]
@@ -167,8 +167,8 @@ def check_gdx_file(
     executable_name: ExecutableName,
     file_path: Path,
     symbols: GamsSymbols,
-) -> gt.Container:
-    container = gt.Container(
+) -> Container:
+    container = Container(
         system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"),
         load_from=file_path,
     )

@@ -1,22 +1,22 @@
 import os
 from pathlib import Path
 
-import gams.transfer as gt  # type: ignore
+from gams.transfer import Container, Set, Variable  # type: ignore
 
 
 def create_domain_example_1(file_path: Path) -> None:
-    m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
+    m = Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
-    i = gt.Set(m, "i", records=["i1", "i2"])
-    gt.Variable(m, "a", domain=[i])
+    i = Set(m, "i", records=["i1", "i2"])
+    Variable(m, "a", domain=[i])
 
-    m.write(file_path)  # type: ignore
+    m.write(file_path)  # pyright: ignore
 
 
 def create_domain_example_2(file_path: Path) -> None:
-    m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
+    m = Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
-    j = gt.Set(m, "j", records=["i1", "i2"])
-    gt.Variable(m, "a", domain=[j])
+    j = Set(m, "j", records=["i1", "i2"])
+    Variable(m, "a", domain=[j])
 
-    m.write(file_path)  # type: ignore
+    m.write(file_path)  # pyright: ignore

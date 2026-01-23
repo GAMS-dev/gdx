@@ -1,42 +1,48 @@
 import os
 from pathlib import Path
 
-import gams.transfer as gt  # type: ignore
-import pandas as pd
+from gams.transfer import (  # type: ignore
+    Container,
+    Equation,
+    Parameter,
+    Set,
+    Variable,
+)
+from pandas import DataFrame
 
 
 def create_full_example_changed_data_and_variables(file_path: Path) -> None:
     # create an empty Container object
-    m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
+    m = Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
     # add sets
-    i = gt.Set(m, "i", records=["seattle", "san-diego"], description="supply")
-    j = gt.Set(m, "j", records=["new-york", "chicago", "topeka"], description="markets")
+    i = Set(m, "i", records=["seattle", "san-diego"], description="supply")
+    j = Set(m, "j", records=["new-york", "chicago", "topeka"], description="markets")
 
     # add parameters
-    a = gt.Parameter(m, "a", ["*"], description="capacity of plant i in cases")
-    b = gt.Parameter(m, "b", [j], description="demand at market j in cases")
-    d = gt.Parameter(m, "d", [i, j], description="distance in thousands of miles")
-    f = gt.Parameter(
+    a = Parameter(m, "a", ["*"], description="capacity of plant i in cases")
+    b = Parameter(m, "b", [j], description="demand at market j in cases")
+    d = Parameter(m, "d", [i, j], description="distance in thousands of miles")
+    f = Parameter(
         m, "f", records=90, description="freight in dollars per case per thousand miles"
     )
-    c = gt.Parameter(
+    c = Parameter(
         m, "c", [i, j], description="transport cost in thousands of dollars per case"
     )
 
     # set parameter records
-    cap = pd.DataFrame(
+    cap = DataFrame(
         [("seattle", 350), ("san-diego", 600)], columns=["plant", "n_cases"]
     )
     a.setRecords(cap)
 
-    dem = pd.DataFrame(
+    dem = DataFrame(
         [("new-york", 325), ("chicago", 300), ("topeka", 275)],
         columns=["market", "n_cases"],
     )
     b.setRecords(dem)
 
-    dist = pd.DataFrame(
+    dist = DataFrame(
         [
             ("seattle", "new-york", 3.5),
             ("seattle", "chicago", 2.7),
@@ -50,12 +56,12 @@ def create_full_example_changed_data_and_variables(file_path: Path) -> None:
     d.setRecords(dist)
 
     # c(i,j) = f * d(i,j) / 1000;
-    cost = d.records.copy(deep=True)  # type: ignore
-    cost["value"] = f.records.loc[0, "value"] * cost["value"] / 1000  # type: ignore
+    cost = d.records.copy(deep=True)  # pyright: ignore
+    cost["value"] = f.records.loc[0, "value"] * cost["value"] / 1000  # pyright: ignore
     c.setRecords(cost)
 
     # add variables
-    q = pd.DataFrame(
+    q = DataFrame(
         [
             ("seattle", "new-york", 150, 0),
             ("seattle", "chicago", 400, 0),
@@ -66,7 +72,7 @@ def create_full_example_changed_data_and_variables(file_path: Path) -> None:
         ],
         columns=["from", "to", "level", "marginal"],
     )
-    gt.Variable(
+    Variable(
         m,
         "x",
         "positive",
@@ -74,39 +80,35 @@ def create_full_example_changed_data_and_variables(file_path: Path) -> None:
         records=q,
         description="shipment quantities in cases",
     )
-    gt.Variable(
+    Variable(
         m,
         "z",
-        records=pd.DataFrame(data=[153.675], columns=["level"]),
+        records=DataFrame(data=[153.675], columns=["level"]),
         description="total transportation costs in thousands of dollars",
     )
 
     # add equations
-    cost = gt.Equation(m, "cost", "eq", description="define objective function")
-    supply = gt.Equation(
+    cost = Equation(m, "cost", "eq", description="define objective function")
+    supply = Equation(
         m, "supply", "leq", [i], description="observe supply limit at plant i"
     )
-    demand = gt.Equation(
-        m, "demand", "geq", [j], description="satisfy demand at market j"
-    )
+    demand = Equation(m, "demand", "geq", [j], description="satisfy demand at market j")
 
     # set equation records
-    cost.setRecords(  # type: ignore
-        pd.DataFrame(
-            data=[[0, 1, 0, 0]], columns=["level", "marginal", "lower", "upper"]
-        )
+    cost.setRecords(  # pyright: ignore
+        DataFrame(data=[[0, 1, 0, 0]], columns=["level", "marginal", "lower", "upper"])
     )
 
-    supplies = pd.DataFrame(
+    supplies = DataFrame(
         [
             ("seattle", 350, "eps", float("-inf"), 350),
             ("san-diego", 550, 0, float("-inf"), 600),
         ],
         columns=["from", "level", "marginal", "lower", "upper"],
     )
-    supply.setRecords(supplies)  # type: ignore
+    supply.setRecords(supplies)  # pyright: ignore
 
-    demands = pd.DataFrame(
+    demands = DataFrame(
         [
             ("new-york", 325, 0.225, 325),
             ("chicago", 300, 0.153, 300),
@@ -114,6 +116,6 @@ def create_full_example_changed_data_and_variables(file_path: Path) -> None:
         ],
         columns=["from", "level", "marginal", "lower"],
     )
-    demand.setRecords(demands)  # type: ignore
+    demand.setRecords(demands)  # pyright: ignore
 
-    m.write(file_path)  # type: ignore
+    m.write(file_path)  # pyright: ignore
