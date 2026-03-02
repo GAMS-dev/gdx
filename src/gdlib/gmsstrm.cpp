@@ -1244,7 +1244,7 @@ void TBinaryTextFileIO::ReadLine( char *Buffer, int &Len, int MaxInp, char &Last
    }
 }
 
-void TBinaryTextFileIO::ReadLine( std::string &StrBuffer, int &Len, const int MaxInp, char &LastChar ) const
+void TBinaryTextFileIO::ReadLine( std::string &StrBuffer, int &Len, const int MaxInp, char &LastChar ) 
 {
    // moved here for performance reasons
    // reading a single byte at a time is avoided this way
