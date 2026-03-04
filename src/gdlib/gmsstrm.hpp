@@ -358,7 +358,22 @@ public:
    void ReadLine( char *buffer, int MaxInp, char &LastChar, int &Len );
 };
 
-class TBinaryTextFileIO
+class TBinaryTextIO
+{
+protected:
+   int64_t FRewindPoint{};
+
+public:
+   virtual ~TBinaryTextIO() {};
+   virtual uint32_t Read( char *Buffer, uint32_t Count ) = 0;
+   virtual void ReadLine( std::vector<uint8_t> &Buffer, int &Len, int MaxInp, char &LastChar ) = 0;
+   virtual void ReadLine( char *Buffer, int &Len, int MaxInp, char &LastChar ) = 0;
+   virtual void ReadLine( std::string &StrBuffer, int &Len, int MaxInp, char &LastChar ) = 0;
+   virtual void ReWind() = 0;
+   virtual int GetLastIOResult() = 0;
+};
+
+class TBinaryTextFileIO final : public TBinaryTextIO
 {
    std::unique_ptr<TBufferedFileStream> FS{};
    std::unique_ptr<TGZipInputStream> gzFS{};
@@ -374,7 +389,6 @@ class TBinaryTextFileIO
    } frw{fm_read};
    TFileSignature FFileSignature{fsign_text};
    uint8_t FMajorVersionRead{}, FMinorVersionRead{};
-   int64_t FRewindPoint{};
 
 public:
    // OpenForRead
@@ -383,13 +397,13 @@ public:
    TBinaryTextFileIO( const std::string &fn, const std::string &Producer, const std::string &PassWord, TFileSignature signature, bool comp, int &ErrNr, std::string &errMsg );
 
    uint32_t Read( char *Buffer, uint32_t Count );
-   char ReadCharacter();
+   char ReadCharacter(); //ohuber: looks unused
    void ReadLine( std::vector<uint8_t> &Buffer, int &Len, int MaxInp, char &LastChar );
    void ReadLine( char *Buffer, int &Len, int MaxInp, char &LastChar );
-   void ReadLine( std::string &StrBuffer, int &Len, int MaxInp, char &LastChar ) const;
+   void ReadLine( std::string &StrBuffer, int &Len, int MaxInp, char &LastChar );
    uint32_t Write( const char *Buffer, uint32_t Count ) const;
    bool UsesPassWord();
-   void ReWind();
+   virtual void ReWind();
    int GetLastIOResult();
 };
 
