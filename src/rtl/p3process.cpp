@@ -35,8 +35,8 @@
 #include "sysutils_p3.hpp"
 
 #if defined( _WIN32 ) || defined( _WIN64 )
-#include <Windows.h>
-#include <TlHelp32.h>
+#include <windows.h>
+#include <tlhelp32.h>
 #else
 #include <unistd.h>
 #include <sys/stat.h>

@@ -41,7 +41,7 @@
 #include <utility>  // for pair
 
 #if defined( _WIN32 )
-#include <Windows.h>
+#include <windows.h>
 #undef max
 #undef GetObject
 #endif
