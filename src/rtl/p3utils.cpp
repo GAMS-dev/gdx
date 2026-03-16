@@ -44,20 +44,22 @@
 
 #if defined(_WIN32)
    // Windows
-   #ifndef __GNUC__
+   // @aschnabel: it was __GNUC__, but it does not make sense with MINGW.
+   // Changed it to __CYGWIN__, but I don't think we target this??
+   #ifndef __CYGWIN__
       #pragma comment( lib, "iphlpapi.lib" )
       #pragma comment( lib, "Ws2_32.lib" )
       //#define _WINSOCK2API_
-      #define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
+      //#define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
       #include <winsock2.h>
       #include <ws2tcpip.h>
    #endif
-   #include <Windows.h>
+   #include <windows.h>
    #include <io.h>
    #include <psapi.h> /* enough if we run on Windows 7 or later */
    #include <iphlpapi.h>
    #include <shlobj.h>
-   #include <IPTypes.h>
+   #include <iptypes.h>
 #else
    // Unix
    #include <sys/socket.h>
