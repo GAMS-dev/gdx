@@ -39,7 +39,7 @@ namespace gdlib::strutilx
 class DelphiStrRef {
 public:
    uint8_t length;
-   char *chars;
+   const char *chars;
 
    [[nodiscard]] std::string str() const{
       return {chars, length};
