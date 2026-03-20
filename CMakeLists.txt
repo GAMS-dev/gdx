@@ -62,16 +62,13 @@ if (MSVC OR CMAKE_HOST_WIN32 OR CMAKE_GENERATOR_TOOLSET STREQUAL "ClangCL")
 endif ()
 
 find_package(ZLIB QUIET)
-
 if(ZLIB_FOUND)
 	message(STATUS "zlib found on system: ${ZLIB_LIBRARIES}")
-	# Define your units (empty as requested) and append the target
 	set(zlib-units "")
 	set(mylibs ${mylibs} ZLIB::ZLIB)
 else()
 	message(STATUS "zlib not found on system. Falling back to local sources.")
 	set(zlib-units
-
 		# ZLIB modules
 		# missing? run in project root: git clone https://github.com/madler/zlib zlib
 		zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c
