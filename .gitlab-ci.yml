@@ -483,7 +483,7 @@ perf-check-leg:
     - SUITE_NAME=gdxfiles
     - PERF_CALL="gams gdxperf procTreeMemMonitor=1 --RUN=suite --SUITE=${SUITE_NAME} --RUNDEFAULT=0 --RUNCAPI=1"
     - ARCHIVE_NAME="gdxfiles.zip"
-    - curl https://cloud.gams.com/s/pxSEJNMWszJn3if/download/gdxfiles.zip > $ARCHIVE_NAME
+    - curl https://cloud.gams.com/public.php/dav/files/pxSEJNMWszJn3if/?accept=zip > $ARCHIVE_NAME
     - unzip $ARCHIVE_NAME -d $SUITE_NAME
     - rm $ARCHIVE_NAME
     - cp -R /cache/gams-installs/`cat gams_folder_leg.txt` mygamsdist # need local copy as we modify libgdxcclib64.so

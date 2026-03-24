@@ -654,7 +654,7 @@ bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
 // Needed for peak working set size query
 #if defined( _WIN32 )
 #include <windows.h>
-#include <Psapi.h>
+#include <psapi.h>
 #include <processthreadsapi.h>
 #endif
 

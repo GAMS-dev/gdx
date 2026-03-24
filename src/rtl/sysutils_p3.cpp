@@ -35,7 +35,7 @@
 #include "utils.hpp"// for ui16
 
 #if defined( _WIN32 )
-#include <Windows.h>
+#include <windows.h>
 #include <io.h>
 #undef max
 #undef min
