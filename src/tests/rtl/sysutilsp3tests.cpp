@@ -172,7 +172,7 @@ TEST_CASE("Test integer to string conversion")
    std::array<char, 256> buf {};
    size_t len {};
    IntToStr( 23, buf.data(), len );
-   REQUIRE_EQ(2, len);
+   REQUIRE_EQ(2u, len);
    REQUIRE_EQ(buf.front(), '2');
    REQUIRE_EQ(buf[1], '3');
    REQUIRE_EQ(buf[2], '\0');
@@ -194,7 +194,7 @@ TEST_CASE("Test Find{First,Next,Close}")
    std::vector collectedFiles {F.Name};
    while(!FindNext( F ))
       collectedFiles.push_back( F.Name );
-   REQUIRE_EQ(nfiles, collectedFiles.size());
+   REQUIRE_EQ(nfiles, static_cast<int>( collectedFiles.size() ));
    for(int i{}; i<nfiles; i++)
    {
       const auto fn {"abc"s + std::to_string( i+1 ) + ".txt"s};
