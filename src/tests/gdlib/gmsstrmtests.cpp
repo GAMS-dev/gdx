@@ -91,7 +91,7 @@ TEST_CASE( "Use binary text file IO to write an uncompressed file" )
       TBinaryTextFileIO fs { exampleFn, "testCppMEX"s, pw, compression ? TFileSignature::fsign_gzip : TFileSignature::fsign_text, compression, errNr, errMsg };
       REQUIRE( errMsg.empty() );
       char buf { 23 };
-      REQUIRE_EQ( 1, fs.Write( &buf, 1 ) );
+      REQUIRE_EQ( 1u, fs.Write( &buf, 1 ) );
    };
 
    REQUIRE( std::filesystem::exists( exampleFn ) );
