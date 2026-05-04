@@ -45,6 +45,7 @@ endif (APPLE)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGC_NO_MUTEX")
 
+# Windows
 if (MSVC OR CMAKE_HOST_WIN32 OR CMAKE_GENERATOR_TOOLSET STREQUAL "ClangCL")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /D_CRT_SECURE_NO_WARNINGS /wd4267 /wd4996")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /EHs /D_CRT_SECURE_NO_WARNINGS /wd4267 /wd4996")
@@ -59,6 +60,22 @@ if (MSVC OR CMAKE_HOST_WIN32 OR CMAKE_GENERATOR_TOOLSET STREQUAL "ClangCL")
 	endif ()
 	set(mylibs "")
 endif ()
+
+find_package(ZLIB QUIET)
+if(ZLIB_FOUND)
+	message(STATUS "zlib found on system: ${ZLIB_LIBRARIES}")
+	set(zlib-units "")
+	set(mylibs ${mylibs} ZLIB::ZLIB)
+else()
+	message(STATUS "zlib not found on system. Falling back to local sources.")
+	set(zlib-units
+		# ZLIB modules
+		# missing? run in project root: git clone https://github.com/madler/zlib zlib
+		zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c
+		zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c
+		zlib/zutil.c
+	)
+endif()
 
 if (UNIX)
 	# -fsanitize=undefined -fno-inline
@@ -80,14 +97,6 @@ if (UNIX)
 		add_link_options(LINKER:-z,defs LINKER:-z,now LINKER:-z,relro LINKER:-z,noexecstack)
 	endif ()
 endif (UNIX)
-
-set(zlib-units
-	# ZLIB modules
-	# missing? run in project root: git clone https://github.com/madler/zlib zlib
-	zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c
-	zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c
-	zlib/zutil.c
-)
 
 set(gdx-core
 	# P3 runtime library

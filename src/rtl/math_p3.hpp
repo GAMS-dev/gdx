@@ -51,4 +51,7 @@ void ClearExceptions();
 
 double IntPower( double X, int I );
 
+bool IsNan( double AValue );
+bool IsInfinite( double AValue );
+
 }// namespace rtl::math_p3

@@ -305,7 +305,7 @@ TEST_CASE( "Test trimming blanks from the tail of a string" )
    int len;
    sstring buf {};
    const char *out = trimRight( s.c_str(), buf.data(), len );
-   REQUIRE_EQ( expectedStr.length(), len );
+   REQUIRE_EQ( static_cast<int>(expectedStr.length()), len );
    REQUIRE( !strcmp( expectedStr.c_str(), out ) );
 
    out = trimRight( " ", buf.data(), len );
@@ -622,7 +622,7 @@ TEST_CASE( "Test creating a new C-style string on the heap from the contents of 
    std::unique_ptr<char[]> s { NewString( "abc", 3, memSize ) };
    REQUIRE_FALSE( NewString( nullptr, 23 ) );
    REQUIRE( !std::strcmp( s.get(), "abc" ) );
-   REQUIRE_EQ( 4, memSize );
+   REQUIRE_EQ( 4u, memSize );
 }
 
 TEST_CASE("Test charset type") {

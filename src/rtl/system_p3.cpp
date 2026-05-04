@@ -1,7 +1,7 @@
 #include "system_p3.hpp"
 
 #if defined(_WIN32)
-#include <Windows.h>
+#include <windows.h>
 #else
 #include <unistd.h>
 #endif

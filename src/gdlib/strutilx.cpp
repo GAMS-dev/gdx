@@ -788,19 +788,19 @@ std::string ExtractToken( const std::string &s, int &p )
    if( p <= 0 ) return ""s;
    const auto L = static_cast<int>( s.length() );
    // skip leading blanks
-   while( p <= L && s[p] == ' ' ) p++;
+   while( p <= L && s[p-1] == ' ' ) p++;
    if( p > L ) return ""s;
    char Stop;
-   if( !in( s[p], '\'', '\"' ) ) Stop = ' ';
+   if( !in( s[p-1], '\'', '\"' ) ) Stop = ' ';
    else
    {
-      Stop = s[p];
+      Stop = s[p-1];
       p++;
    }
    const int rs = p;
-   while( p <= L && s[p] != Stop ) p++;
+   while( p <= L && s[p-1] != Stop ) p++;
    std::string res { s.substr( rs - 1, p - rs ) };
-   if( p <= L && s[p] == Stop ) p++;
+   if( p <= L && s[p-1] == Stop ) p++;
    return res;
 }
 
