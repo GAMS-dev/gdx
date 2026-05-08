@@ -44,10 +44,10 @@ TEST_CASE("Test P3_Str_dd0") {
    size_t len{};
    P3_Str_dd0(std::numeric_limits<double>::quiet_NaN(), buf.data(), static_cast<uint8_t>(buf.size()), &len);
    REQUIRE_EQ("                    Nan"s, buf.data());
-   REQUIRE_EQ(0, len);
+   REQUIRE_EQ(0u, len);
    P3_Str_dd0(23.42, buf.data(), static_cast<uint8_t>(buf.size()), &len);
    REQUIRE_EQ(" 2.34200000000000E+0001"s, buf.data());
-   REQUIRE_EQ(23, len);
+   REQUIRE_EQ(23u, len);
 }
 
 TEST_CASE( "Test dig2Exp" )

@@ -728,7 +728,7 @@ TEST_CASE( "Test write and read record in string mode" )
 
       REQUIRE( pgx.gdxSymbolInfoX( 2, NrRecs, UserInfo, ExplTxt ) );
       REQUIRE_EQ( 0, NrRecs );
-      REQUIRE_EQ( 255, std::strlen( ExplTxt ) );
+      REQUIRE_EQ( 255u, std::strlen( ExplTxt ) );
       REQUIRE_EQ( "String overflow: a"s + std::string( 255 - "String overflow: a..."s.length(), 'b' ) + "..."s, ExplTxt );
    } );
    fs::remove( fn );
@@ -2754,7 +2754,7 @@ TEST_CASE("Test opening 100 char long name GDX file inside two 100 char long nam
       std::string ErrMsg;
       TGXFileObj gdx {ErrMsg};
       int ErrNr;
-      REQUIRE_GE(gdxTargetFilenameBase.length(), 100 + 1 + 100 + 1 + 100 + 4); // >= 306 (long dirname + sep + long dirname + sep + long name + ".gdx")
+      REQUIRE_GE(static_cast<int>(gdxTargetFilenameBase.length()), 100 + 1 + 100 + 1 + 100 + 4); // >= 306 (long dirname + sep + long dirname + sep + long name + ".gdx")
       REQUIRE(gdx.gdxOpenRead( gdxTargetFilenameBase.c_str(), ErrNr ));
    }
 

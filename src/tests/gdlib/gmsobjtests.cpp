@@ -66,7 +66,7 @@ TEST_CASE( "Simple use TBooleanBitArray" )
    bba.SetBit( 4, true );
    REQUIRE_EQ( bba.MemoryUsed(), oldMem );
    auto vec = asBoolVec( bba );
-   REQUIRE_EQ( 5, vec.size() );
+   REQUIRE_EQ( 5u, vec.size() );
    std::vector<bool> expectedVec { false, false, false, true, true };
    for( int i {}; i < 5; i++ )
       REQUIRE_EQ( expectedVec[i], vec[i] );
@@ -89,7 +89,7 @@ TEST_CASE( "Simple use of TXList" )
       nums[i] = i + 1;
       REQUIRE_EQ( i, lst.Add( &nums[i] ) );
    }
-   REQUIRE_EQ( nums.size(), lst.GetCount() );
+   REQUIRE_EQ( static_cast<int>(nums.size()), lst.GetCount() );
    REQUIRE( lst.MemoryUsed() > 0 );
    for( int i = 0; i < lst.GetCount(); i++ )
       REQUIRE_EQ( &nums[i], lst[i] );
@@ -138,7 +138,7 @@ TEST_CASE( "Test CMove" )
 {
    constexpr std::array bufA { 1, 2, 3, 4, 5 };
    std::array<int, 32> bufB {};
-   CMove( bufA.data(), bufB.data(), sizeof( int ) * bufA.size() );
+   CMove( bufA.data(), bufB.data(), static_cast<int>( sizeof( int ) * bufA.size() ) );
    for( int i {}; i < static_cast<int>( bufA.size() ); i++ )
       REQUIRE_EQ( bufB[i], i + 1 );
 }
