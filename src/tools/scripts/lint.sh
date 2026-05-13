@@ -21,6 +21,10 @@ else
   PARALLEL_INSTANCES=$(nproc)
 fi
 
+# run-clang-tidy -p "$GDX_DIRECTORY/build" \
+#   -j "$PARALLEL_INSTANCES" \
+#   ./*/*.*pp
+
 uv run clangd-tidy \
   -j "$PARALLEL_INSTANCES" \
   ./*/*.*pp
