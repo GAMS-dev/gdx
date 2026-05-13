@@ -867,7 +867,7 @@ void WriteSetText() {
   rc = gdxGetElemText(PGX, hi, s.data(), &idummy);
   library::assertWithMessage(0 == rc, "Found text in position high(integer)");
   while (lo + 1 < hi) {
-    mid = lo + (hi - lo) / 2;
+    mid = lo + ((hi - lo) / 2);
     rc = gdxGetElemText(PGX, mid, s.data(), &idummy);
     if (1 == rc) {
       lo = mid;

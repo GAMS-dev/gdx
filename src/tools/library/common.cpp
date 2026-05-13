@@ -140,7 +140,7 @@ bool canBeQuoted(const char *s, const std::size_t slen) {
   }
 
   bool saw_single{}, saw_double{};
-  for (int i{}; i < (int)slen; i++) {
+  for (int i{}; i < static_cast<int>(slen); ++i) {
     char Ch{s[i]};
     if (Ch == '\'') {
       if (saw_double) {
