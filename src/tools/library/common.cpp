@@ -228,7 +228,7 @@ void AuditLine::setSystemName(const std::string &system_name) {
   setAuditLine();
 }
 
-std::string AuditLine::getAuditLine() const {
+const std::string &AuditLine::getAuditLine() const {
   return audit_line;
 }
 
