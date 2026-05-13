@@ -3,7 +3,6 @@
 #include <array>
 #include <cstdint>
 #include <string>
-#include <string_view>
 
 #include "library/common.hpp"
 #include "library/short_string.hpp"

@@ -40,8 +40,11 @@
 #include "gdlib/utils.hpp"
 #include "gdxdiff.hpp"
 #include "library/cmdpar.hpp"
-#include "rtl/p3process.hpp"
 #include "rtl/sysutils_p3.hpp"
+
+#if defined(_WIN32)
+#include "rtl/p3process.hpp"
+#endif
 
 // Global constants
 #include "generated/gclgms.h"
