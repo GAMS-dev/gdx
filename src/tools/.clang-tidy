@@ -20,7 +20,31 @@ Checks: >
   -hicpp-avoid-goto,
   -hicpp-no-array-decay,
   -cert-err33-c,
-  -cert-err58-cpp
+  -cert-err58-cpp,
+  -llvmlibc-*,
+  -fuchsia-*,
+  -altera-*,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-type-member-init,
+  -cppcoreguidelines-avoid-non-const-global-variables,
+  -cppcoreguidelines-interfaces-global-init,
+  -cppcoreguidelines-init-variables,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-avoid-goto,
+  -google-explicit-constructor,
+  -google-readability-todo,
+  -hicpp-explicit-conversions,
+  -hicpp-member-init,
+  -hicpp-special-member-functions,
+  -concurrency-mt-unsafe,
+  -misc-use-internal-linkage,
+  -readability-enum-initial-value,
+  -cert-int09-c,
+  -abseil-string-find-str-contains,
+  -misc-non-private-member-variables-in-classes,
+  -boost-use-ranges,
+  -modernize-use-nodiscard
 
 WarningsAsErrors: '*'
 FormatStyle: file
