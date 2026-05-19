@@ -150,6 +150,7 @@ set(tests
 	src/tests/gdlib/strhashtests.cpp
 	src/tests/gdlib/strutilxtests.cpp
 	src/tests/gdlib/utilstests.cpp
+	src/tests/gdlib/strindexbuftests.cpp
 
 	src/tests/rtl/p3iotests.cpp
 	src/tests/rtl/p3utilstests.cpp
