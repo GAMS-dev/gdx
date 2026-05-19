@@ -441,7 +441,7 @@ TEST_CASE( "Test write and read record raw" )
       // register UELs i1*i800
       for( int i {}; i < nMany; i++ )
       {
-         std::string uel { "i"s + std::to_string( i + 1 ) };
+         std::string uel { 'i' + std::to_string( i + 1 ) };
          REQUIRE( pgx.gdxUELRegisterRaw( uel.c_str() ) );
       }
       REQUIRE( pgx.gdxUELRegisterDone() );
@@ -1098,7 +1098,7 @@ TEST_CASE( "Test adding a set alias" )
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "A set", 1, dt_set, 0 ) );
       for( int i {}; i < elemCnt; i++ )
       {
-         sib.front() = "i"s + std::to_string( i + 1 );
+         sib.front() = 'i' + std::to_string( i + 1 );
          REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), vals.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -1400,7 +1400,7 @@ TEST_CASE( "Tests related to universe" )
       TgdxValues vals {};
       for( int i = 1; i <= 8; i++ )
       {
-         keys[0] = "uel_" + std::to_string( i );
+         keys[0] = "uel_"s + std::to_string( i );
          const char *keyptrs[] = { keys[0].c_str() };
          REQUIRE( pgx.gdxDataWriteStr( keyptrs, vals.data() ) );
       }
@@ -1464,7 +1464,7 @@ TEST_CASE( "Test domain checking for subset" )
       constexpr TgdxValues vals {};
       for( int i {}; i < 6; i++ )
       {
-         key = "i"s + std::to_string( i + 1 );
+         key = 'i' + std::to_string( i + 1 );
          const char *keyptrs[] = { key.c_str() };
          REQUIRE( pgx.gdxDataWriteStr( keyptrs, vals.data() ) );
       }
@@ -1478,7 +1478,7 @@ TEST_CASE( "Test domain checking for subset" )
       std::array<int, 2> subset = { 2, 4 };
       for( int i: subset )
       {
-         key = "i"s + std::to_string( i );
+         key = 'i' + std::to_string( i );
          keyptrs[0] = key.c_str();
          REQUIRE( pgx.gdxDataWriteStr( keyptrs, vals.data() ) );
       }
@@ -1520,7 +1520,7 @@ TEST_CASE( "Test writing a duplicate uel in string mode" )
       TgdxValues vals {};
       for( int i = 1; i <= 8; i++ )
       {
-         keys[0] = "uel_" + std::to_string( i );
+         keys[0] = "uel_"s + std::to_string( i );
          const char *keyptrs[] = { keys[0].c_str() };
          REQUIRE( pgx.gdxDataWriteStr( keyptrs, vals.data() ) );
       }
@@ -1764,7 +1764,7 @@ TEST_CASE( "Debug issue with SymbolSetDomain and write raw domain check uncovere
       REQUIRE( pgx.gdxDataWriteDone() );
       REQUIRE( pgx.gdxDataWriteRawStart( "jb", "", 1, dt_set, 0 ) );
       TgdxStrIndex domainNames {};
-      domainNames.front() = "j";
+      domainNames.front() = 'j';
       StrIndexBuffers domainIds { &domainNames };
       REQUIRE( pgx.gdxSymbolSetDomain( domainIds.cptrs() ) );
       key = 17;
@@ -1875,7 +1875,7 @@ TEST_CASE( "Test simple write/read with compression activated" )
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "set", 1, dt_set, 0 ) );
       for( int i {}; i < cardinality; i++ )
       {
-         sib.front() = "i"s + std::to_string( i + 1 );
+         sib.front() = 'i' + std::to_string( i + 1 );
          REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), vals.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -1888,7 +1888,7 @@ TEST_CASE( "Test simple write/read with compression activated" )
       for( int i {}; i < cardinality; i++ )
       {
          REQUIRE( pgx.gdxDataReadStr( sib.ptrs(), vals.data(), dimFrst ) );
-         REQUIRE_EQ( "i"s + std::to_string( i + 1 ), sib.front().str() );
+         REQUIRE_EQ( 'i' + std::to_string( i + 1 ), sib.front().str() );
       }
       REQUIRE( pgx.gdxDataReadDone() );
    } );
@@ -2149,7 +2149,7 @@ TEST_CASE( "Test reading methods with slices" )
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "three element set", 1, dt_set, 0 ) );
       for( int i {}; i < 3; i++ )
       {
-         keys.front() = "i"s + std::to_string( i + 1 );
+         keys.front() = 'i' + std::to_string( i + 1 );
          REQUIRE( pgx.gdxDataWriteStr( keys.cptrs(), values.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -2359,7 +2359,7 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
       REQUIRE( pgx.gdxDataWriteStrStart( "k", "", 1, dt_set, 0 ) );
       for( int i {}; i < 6; i++ )
       {
-         sib.front() = "k"s + std::to_string( i + 3 );
+         sib.front() = 'k' + std::to_string( i + 3 );
          REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), values.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -2369,7 +2369,7 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
       REQUIRE( pgx.gdxSymbolSetDomain( sib2.cptrs() ) );
       for( int i {}; i < 6; i++ )
       {
-         sib.front() = "k"s + std::to_string( i + 3 );
+         sib.front() = 'k' + std::to_string( i + 3 );
          REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), values.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -2381,7 +2381,7 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
       REQUIRE( pgx.gdxUELRegisterMapStart() );
       for( int i { 1 }; i <= 3; i++ )
       {
-         std::string s { "k" + std::to_string( i ) };
+         std::string s { 'k' + std::to_string( i ) };
          REQUIRE( pgx.gdxUELRegisterMap( i, s.c_str() ) );
       }
       REQUIRE( pgx.gdxUELRegisterDone() );

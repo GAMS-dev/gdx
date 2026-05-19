@@ -45,7 +45,7 @@ void runTest( const std::array<int, 10> &nums )
    // 0-based
    for( const int &n: nums )
    {
-      auto s { "i" + std::to_string( n ) };
+      auto s { 'i' + std::to_string( n ) };
       REQUIRE_EQ( n - 1, shlst.AddObject( s.c_str(), s.length(), n ) );
    }
    REQUIRE_EQ( 2, shlst.IndexOf( "i3" ) );

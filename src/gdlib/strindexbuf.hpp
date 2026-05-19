@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <cstring>
+#include <cassert>
 #include <array>
 #include <gclgms.h>
 
@@ -13,9 +15,11 @@ class StrRef
 public:
    explicit StrRef( char *_s ) : s( _s ) {}
 
-   StrRef &operator=( const std::string &other )
+   StrRef &operator=( std::string_view other )
    {
-      std::memcpy( s, other.c_str(), sizeof( char ) * ( other.length() + 1 ) );
+      assert( other.length() <= GMS_SSSIZE - 1 );
+      std::memmove( s, other.data(), other.length() );
+      s[other.length()] = '\0';
       return *this;
    }
 
@@ -31,21 +35,17 @@ public:
 
    explicit operator std::string() const
    {
-      std::string res;
-      res.assign( s );
-      return res;
+      return std::string( s );
    }
 
    [[nodiscard]] std::string str() const
    {
-      std::string res;
-      res.assign( s );
-      return res;
+      return std::string( s );
    }
 
-   bool operator==( const std::string &other ) const
+   bool operator==( std::string_view other ) const
    {
-      return !std::strcmp( other.c_str(), s );
+      return other == s;
    }
 };
 
@@ -63,7 +63,10 @@ public:
       {
          bufPtrs[i] = bufContents[i].data();
          if( strIndex )
-            std::memcpy( bufPtrs[i], ( *strIndex )[i].c_str(), ( *strIndex )[i].length() + 1 );
+         {
+            const auto &str = ( *strIndex )[i];
+            std::memmove( bufPtrs[i], str.c_str(), str.length() + 1 );
+         }
       }
    }
 
