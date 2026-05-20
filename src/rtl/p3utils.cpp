@@ -670,8 +670,8 @@ bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocN
 
    if( OSFileType() == OSFileWIN )
    {
-      const bool isConfigLoc { utils::in( locType, p3Config, p3AppConfig ) };
-      if( isConfigLoc || isDataLoc )
+      if( const bool isConfigLoc { utils::in( locType, p3Config, p3AppConfig ) };
+         isConfigLoc || isDataLoc )
       {
          const std::string suffix = appName.empty() ? ""s : PathDelim + appName;
          locNames.emplace_back( "C:\\ProgramData" + suffix );
@@ -691,7 +691,7 @@ bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocN
          if( !appName.empty() ) locNames.emplace_back( locNames.back() + PathDelim + appName );
       }
    }
-   else if( utils::in(OSPlatform(), p3platform::OSDarwin_x64, p3platform::OSDarwin_arm64) )
+   else if( utils::in(OSPlatform(), OSDarwin_x64, OSDarwin_arm64) )
    {
       if( isDataLoc )
       {
@@ -703,18 +703,18 @@ bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocN
             eCount++;
             return res;
          }
-         std::string execPath { ExcludeTrailingPathDelimiter( ExtractFilePath( execName ) ) };
-         if( LastDelimiter( "/", execPath ) >= 2 ) locNames.emplace_back( ExtractFilePath( execPath ) + "Resources"s );
+         if( const std::string execPath { ExcludeTrailingPathDelimiter( ExtractFilePath( execName ) ) };
+            LastDelimiter( "/", execPath ) >= 2 ) locNames.emplace_back( ExtractFilePath( execPath ) + "Resources"s );
          else
             eCount++;
       }
    }
    else
    {// neither Windows nor Mac, right now this must be Linux
-      /*bool  isPlainConfigLoc { p3Config == locType }; */
-      bool isAppConfigLoc { p3AppConfig == locType };
+      // bool  isPlainConfigLoc { p3Config == locType };
+      const bool isAppConfigLoc { p3AppConfig == locType };
       std::array<char, 256> buf {};
-      const auto bufLen = P3GetEnvPC( isDataLoc ? "XDG_DATA_DIRS" : "XDG_CONFIG_DIRS"s, buf.data(), static_cast<uint32_t>(buf.size()) );
+      const auto bufLen = P3GetEnvPC( isDataLoc ? "XDG_DATA_DIRS"s : "XDG_CONFIG_DIRS"s, buf.data(), static_cast<uint32_t>(buf.size()) );
       if( bufLen >= buf.size() )
       {// too much to handle
          eCount++;
@@ -722,25 +722,26 @@ bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocN
       }
       if( bufLen > 0 )
       {// we got something
-         std::string msg = ( isAppConfigLoc || isDataLoc ) && !appName.empty() ? "/"s + appName : ""s;
-         int dPos {}, k {};
+         const std::string msg = ( isAppConfigLoc || isDataLoc ) && !appName.empty() ? "/"s + appName : ""s;
+         int end {}, start {};
          do {
-            while( buf[dPos] != '\0' && buf[dPos] != ':' ) dPos++;
-            const int n = dPos - k;
-            if( n > 0 )
+            while( buf[end] != '\0' && buf[end] != ':' ) end++;
+            buf[end] = '\0';
+            if( const int n = end - start; n > 0 )
             {
-               if( locNames.size() >= NLocNames ) eCount++;
+               if( locNames.size() >= NLocNames )
+                  eCount++;
                else
-                  locNames.emplace_back( ""s + buf.data() + msg );
+                  locNames.emplace_back( ""s + &buf[start] + msg );
             }
-            dPos++;
-            k = dPos;
-         } while( k <= static_cast<int>( bufLen ) );
+            end++;
+            start = end;
+         } while( start <= static_cast<int>( bufLen ) );
       }
       else
       {
-         std::string prefix { "/etc/xdg" },
-                 suffix { ( ( isDataLoc || isAppConfigLoc ) && !appName.empty() ? "/"s + appName : ""s ) };
+         std::string prefix { "/etc/xdg" };
+         const std::string suffix { ( isDataLoc || isAppConfigLoc ) && !appName.empty() ? "/"s + appName : ""s };
          if( isDataLoc )
          {
             prefix = "/usr/local/share";
