@@ -31,7 +31,6 @@
     <ClCompile Include="src\rtl\dtoaLoc.c" />
     <ClCompile Include="src\rtl\math_p3.cpp" />
     <ClCompile Include="src\rtl\p3io.cpp" />
-    <ClCompile Include="src\rtl\p3platform.cpp" />
     <ClCompile Include="src\rtl\p3process.cpp" />
     <ClCompile Include="src\rtl\p3utils.cpp" />
     <ClCompile Include="src\rtl\system_p3.cpp" />

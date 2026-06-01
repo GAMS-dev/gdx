@@ -32,6 +32,7 @@
 #include <gclgms.h>        // for GLOBAL_MAX_INDEX_DIM, GMS_MAX_INDEX_DIM
 #include "gmsdata.hpp"       // for TTblGamsData
 #include "gmsobj.hpp"        // for TBooleanBitArray, TXList, TXStrings
+#include "sysutils_p3.hpp"   // for p3_global_storage
 #include "strhash.hpp"       // for TXCSStrHashList, TXStrHashList
 #include "utils.hpp"
 #include <array>           // for array
@@ -79,10 +80,10 @@ constexpr int DOMC_UNMAPPED = -2,// indicator for unmapped index pos
         DOMC_EXPAND = -1,        // indicator growing index pos
         DOMC_STRICT = 0;         // indicator mapped index pos
 
-const std::string BADUEL_PREFIX = "?L__",
-                  BADStr_PREFIX = "?Str__",
-                  strGDXCOMPRESS = "GDXCOMPRESS",
-                  strGDXCONVERT = "GDXCONVERT";
+constexpr std::string_view BADUEL_PREFIX = "?L__",
+                           BADStr_PREFIX = "?Str__",
+                           strGDXCOMPRESS = "GDXCOMPRESS",
+                           strGDXCONVERT = "GDXCONVERT";
 
 struct TDFilter final {
    int FiltNumber {}, FiltMaxUel {};
@@ -193,14 +194,19 @@ class TgxModeSet final : public utils::IContainsPredicate<TgxFileMode>
    uint8_t count {};
 
 public:
-   TgxModeSet( const std::initializer_list<TgxFileMode> &modes );
+   constexpr TgxModeSet( const std::initializer_list<TgxFileMode> &modes )
+   {
+      for( const auto mode: modes )
+      {
+         modeActive[mode] = true;
+         count++;
+      }
+   }
+
    ~TgxModeSet() override = default;
    [[nodiscard]] bool contains( const TgxFileMode &mode ) const override;
    [[nodiscard]] bool empty() const;
 };
-
-const TgxModeSet AnyWriteMode { fw_init, fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data, fw_map_data, fw_str_data },
-        AnyReadMode { fr_init, fr_raw_data, fr_map_data, fr_mapr_data, fr_str_data };
 
 enum class TgdxElemSize : uint8_t
 {
@@ -351,7 +357,7 @@ enum tvarvaltype : uint8_t
    valscale    // 5
 };
 
-extern std::string DLLLoadPath;// can be set by loader, so the "dll" knows where it is loaded from
+extern p3_global_storage std::string DLLLoadPath;// can be set by loader, so the "dll" knows where it is loaded from
 
 union uInt64
 {

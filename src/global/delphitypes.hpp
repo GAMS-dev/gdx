@@ -61,12 +61,12 @@ class OffsetArray : public std::array<T, ubIncl-lbIncl+1>
    // Hide direct buffer access as this could be error-prone
    T *data() { return nullptr; }
 public:
-   T& operator[]( const int ix) {
+   constexpr T& operator[]( const int ix) {
       assert( ix >= lbIncl && ix <= ubIncl && "Index must be in range!" );
       return std::array<T, ubIncl-lbIncl+1>::operator[](ix - lbIncl);
    }
 
-   const T& operator[]( const int ix) const {
+   constexpr const T& operator[]( const int ix) const {
       assert( ix >= lbIncl && ix <= ubIncl && "Index must be in range!" );
       return std::array<T, ubIncl-lbIncl+1>::operator[](ix - lbIncl);
    }
@@ -92,7 +92,7 @@ class Bounded
    T value;
 
 public:
-   Bounded() : value( lowerBoundIncl ) {}
+   constexpr Bounded() : value( lowerBoundIncl ) {}
 
    Bounded( T initialValue ) : value( initialValue )
    {
@@ -157,6 +157,11 @@ public:
       return temp;
    }
 
+   T operator+(int addend) const 
+   {
+       return static_cast<T>(value + addend);
+   }
+
    inline void checkBounds()
    {
 #if !defined(NDEBUG)
@@ -189,6 +194,7 @@ public:
    {
       return &value;
    }
+
 };
 
 inline double frac( const double v )

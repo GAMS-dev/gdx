@@ -107,6 +107,7 @@ static bool setEnvironmentVariableUnix( const std::string &name, const std::stri
 }
 #endif
 
+// OH: not considered part of a state, it only make sense for executables
 static std::vector<std::string> paramstr;
 
 #if defined(__IN_CPPMEX__)
@@ -880,7 +881,9 @@ bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::s
 }
 #endif
 
-const std::string zeros {std::string( 54, '0' )};
+static constexpr auto zeros = std::string_view(
+   "000000000000000000000000000000000000000000000000000000"
+);
 
 int p3Chmod( const std::string &path, int mode )
 {
@@ -981,7 +984,7 @@ std::string p3FloatToEfmt( double x, int width, int decimals )
       int eDigCnt = 2;
       int nDigits = std::min<int>( decimals + 1, width - 4 - eDigCnt );
       nDigits = std::min<int>( nDigits, 16 ); // no point to ask for or show more than 16 total for zero
-      return nDigits <= 0 ? " 0E+00"s : " 0."s + zeros.substr( 0, nDigits - 1 ) + "E+00"s; // shave off the decimal point
+      return nDigits <= 0 ? " 0E+00"s : " 0."s + zeros.substr( 0, nDigits - 1 ).data() + "E+00"s; // shave off the decimal point
    }
 
    std::string res;

@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 project(gdx)
 set(CMAKE_CXX_STANDARD 17)
 
+option(GDX_THREAD_SAFE "Build thread-safe version of GDX" OFF)
+option(NO_EXAMPLES "Skip building example programs/executables" OFF)
+option(NO_TESTS "Skip building unit tests" OFF)
+option(NO_TOOLS "Skip building GDX tools" OFF)
+
 # ccache and sccache
 if(NOT DEFINED CMAKE_C_COMPILER_LAUNCHER AND NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
 	find_program(CCACHE_FOUND ccache)
@@ -111,7 +116,6 @@ set(gdx-core
 	src/rtl/system_p3.hpp
 	src/rtl/system_p3.cpp
 	src/rtl/p3platform.hpp
-	src/rtl/p3platform.cpp
 	src/rtl/math_p3.hpp
 	src/rtl/math_p3.cpp
 

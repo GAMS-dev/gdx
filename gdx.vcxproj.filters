@@ -98,9 +98,6 @@
     <ClCompile Include="src\rtl\p3io.cpp">
       <Filter>rtl</Filter>
     </ClCompile>
-    <ClCompile Include="src\rtl\p3platform.cpp">
-      <Filter>rtl</Filter>
-    </ClCompile>
     <ClCompile Include="src\rtl\p3process.cpp">
       <Filter>rtl</Filter>
     </ClCompile>

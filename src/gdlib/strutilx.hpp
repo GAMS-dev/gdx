@@ -108,9 +108,9 @@ std::string ExtractToken( const std::string &s, int &p );
 
 int StrAsInt( const std::string &s );
 
-std::string ChangeFileExtEx( const std::string &FileName, const std::string &Extension );
-std::string CompleteFileExtEx( const std::string &FileName, const std::string &Extension );
-std::string ExtractFileExtEx( const std::string &FileName );
+std::string ChangeFileExtEx( const std::string_view FileName, const std::string_view Extension );
+std::string CompleteFileExtEx( const std::string_view FileName, const std::string_view Extension );
+std::string ExtractFileExtEx( std::string_view FileName );
 std::string CompleteFileNameEx(const std::string &directory, const std::string &filename, int fc, bool relPath);
 
 constexpr int maxBOMLen { 4 };

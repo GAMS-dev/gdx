@@ -57,9 +57,11 @@ using utils::ui16;
 // ==============================================================================================================
 namespace rtl::sysutils_p3
 {
-char PathDelim, DriveDelim, PathSep;
-static std::array<char, 3> PathAndDriveDelim { '?', '?', '\0' };
-std::string FileStopper, ExtStopper;
+
+static constexpr std::array<char, 3> PathAndDriveDelim { PathDelim, DriveDelim, '\0' };
+
+
+constexpr auto ExtStopper = OSFileType() == OSFileWIN ? "\\:." : "/.";
 
 std::string UpperCase( const std::string &S )
 {
@@ -1216,36 +1218,4 @@ DWORD GetRobustShortPathW (const WCHAR* longPathW, WCHAR* shortPathW, const DWOR
 }
 #endif
 
-static void initialization()
-{
-   switch( OSFileType() )
-   {
-      case OSFileWIN:
-         PathAndDriveDelim[0] = PathDelim = '\\';
-         PathAndDriveDelim[1] = DriveDelim = ':';
-         PathSep = ';';
-         FileStopper = "\\:";
-         ExtStopper = "\\:.";
-         break;
-
-      case OSFileUNIX:
-         PathAndDriveDelim[0] = PathDelim = '/';
-         PathAndDriveDelim[1] = DriveDelim = '\0';
-         PathSep = ':';
-         FileStopper = "/";
-         ExtStopper = "/.";
-         break;
-
-      default:
-         PathDelim = DriveDelim = PathSep = '?';
-         FileStopper = ExtStopper = "?";
-         break;
-   }
-}
-
-static void finalization()
-{
-}
-
-UNIT_INIT_FINI();
 }// namespace rtl::sysutils_p3

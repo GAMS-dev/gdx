@@ -76,6 +76,7 @@ public:
    {
    }
 
+   // TODO: once we compile in C++23, this can be made constexpr
    bsSet( const std::initializer_list<T> &syms )
    {
       for( const T s: syms )
@@ -769,6 +770,17 @@ template<int N, int firstValid=0>
 int indexOfSameText(const std::array<std::string, N> &strs, const std::string &s) {
    int i{firstValid};
    for(const std::string &s2 : strs) {
+      if(sameText(s, s2))
+         return i;
+      ++i;
+   }
+   return firstValid-1;
+}
+
+template<int N, int firstValid=0>
+int indexOfSameText(const std::array<std::string_view, N> &strs, const std::string_view s) {
+   int i{firstValid};
+   for(const std::string_view s2 : strs) {
       if(sameText(s, s2))
          return i;
       ++i;

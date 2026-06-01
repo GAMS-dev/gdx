@@ -20,6 +20,7 @@ public:
   [[nodiscard]] const char *data() const;
   [[nodiscard]] std::string string() const;
   [[nodiscard]] operator std::string() const;
+  [[nodiscard]] operator std::string_view() const;
 
   [[nodiscard]] std::uint8_t length() const;
 
