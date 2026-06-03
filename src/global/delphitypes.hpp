@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <sstream>
@@ -80,6 +81,12 @@ void FreeAndNil( T *&ptr )
       delete ptr;
       ptr = nullptr;
    }
+}
+
+template<typename T>
+void FreeAndNil( std::unique_ptr<T> &ptr )
+{
+   ptr = nullptr;
 }
 
 using tDateTime = double;

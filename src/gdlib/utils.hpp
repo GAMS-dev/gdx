@@ -70,7 +70,7 @@ class bsSet
    std::bitset<card> hasSym {};
 
 public:
-   bsSet() = default;
+   constexpr bsSet() = default;
 
    bsSet( const bsSet &other ) : hasSym( other.hasSym )
    {
