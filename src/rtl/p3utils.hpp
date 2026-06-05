@@ -75,7 +75,9 @@ enum Tp3Location : uint8_t
 bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocNames &locNames, int &eCount );
 bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::string &locName );
 
-bool PrefixPath( const std::string &s );
+#if defined( __IN_CPPMEX__ )
+bool PrefixPath( std::string_view s );
+#endif
 
 bool P3SetEnv( const std::string &name, const std::string &val );
 std::string P3GetEnv( const std::string &name );
