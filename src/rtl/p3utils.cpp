@@ -107,16 +107,44 @@ static bool setEnvironmentVariableUnix( const std::string &name, const std::stri
 }
 #endif
 
-        static std::vector<std::string> paramstr;
+static std::vector<std::string> paramstr;
 
-bool PrefixPath( const std::string &s )
+#if defined(__IN_CPPMEX__)
+bool PrefixPath( std::string_view s )
 {
-   if( s.empty() ) return true;
-
-   const auto prevPath = QueryEnvironmentVariable( "PATH" );
-   const std::string newPath = s + PathSep + prevPath;
-   return !AssignEnvironmentVariable( "PATH", newPath );
+   if( s.empty() )
+      return true;
+#if defined(_WIN32)
+   size_t slen = s.length();
+   DWORD plen = GetEnvironmentVariableA( "PATH", nullptr, 0 );
+   auto p = std::make_unique_for_overwrite<char[]>( slen + plen + 1 );
+   std::memcpy( p.get(), s.data(), slen );
+   if( plen > 0 )
+   {
+      p[slen] = PathSep;
+      auto tlen = GetEnvironmentVariableA( "PATH", p.get() + s.length() + 1, plen );
+      assert( tlen == plen - 1 );
+   }
+   else
+      p[slen] = '\0';
+   return SetEnvironmentVariableA( "PATH", p.get() );
+#else
+   const char *tptr = std::getenv("PATH");
+   const size_t plen = std::strlen(tptr), slen = s.length();
+   auto p = std::make_unique_for_overwrite<char[]>(slen+1+plen+1);
+   std::memcpy(p.get(), s.data(), slen);
+   if(plen > 0)
+   {
+      p[slen] = PathSep;
+      std::memcpy(p.get()+slen+1, tptr, plen);
+      p[slen+1+plen] = '\0';
+   }
+   else
+      p[slen] = '\0';
+   return setEnvironmentVariableUnix( "PATH", p.get() );
+#endif
 }
+#endif
 
 bool P3SetEnv( const std::string &name, const std::string &val )
 {
@@ -952,8 +980,8 @@ std::string p3FloatToEfmt( double x, int width, int decimals )
    {
       int eDigCnt = 2;
       int nDigits = std::min<int>( decimals + 1, width - 4 - eDigCnt );
-      nDigits = std::min<int>( nDigits, 16 );
-      return nDigits <= 0 ? " 0E+00"s : " 0."s + zeros.substr( 0, nDigits - 1 ) + "E+00"s;
+      nDigits = std::min<int>( nDigits, 16 ); // no point to ask for or show more than 16 total for zero
+      return nDigits <= 0 ? " 0E+00"s : " 0."s + zeros.substr( 0, nDigits - 1 ) + "E+00"s; // shave off the decimal point
    }
 
    std::string res;
@@ -973,40 +1001,43 @@ std::string p3FloatToEfmt( double x, int width, int decimals )
    int   eDigCntGuess { getCntGuess( xAbs ) },
          eDigCnt { eDigCntGuess },
          nDigits { std::min<int>( decimals + 1, width - 4 - eDigCnt ) };
-   nDigits = std::min<int>( nDigits, 17 );
+   nDigits = std::min<int>( nDigits, 17 ); // no point to ask for or show more than 17 total
    int digMode { 4 };
    std::string digits;
    int decPos, minusCnt;
    [[maybe_unused]] bool brc { p3GetDecDigits( xAbs, digMode, nDigits, digits, decPos, minusCnt ) };
    assert( brc && "getDecDigits failed" );
    assert( decPos < 999 && "Input xAbs is not finite" );
-   int digCnt { (int)digits.length() };
-   int eVal { decPos - 1 };
+   int digCnt { static_cast<int>( digits.length() ) };
+   int eVal { decPos - 1 }; // [ /-]d.DDDDDE+{eVal}
    bool eValNeg { eVal < 0 };
    if( eValNeg )
       eVal = -eVal;
    std::string eDigits;
    eDigCnt = digitRep( eVal, 2, eDigits );
-   if (eDigCntGuess != eDigCnt)
+   if (eDigCntGuess != eDigCnt) // this is quite unusual
    {
       if (!eValNeg)
       {
+         // we only get here going from 9.99999e99 -> 1.e100 or similar
          assert( eDigCntGuess + 1 == eDigCnt && "Bogus eDigCnt in positive eVal case" );
          nDigits = std::min<int>( decimals + 1, width - 4 - eDigCnt );
       }
       else
       {
+         // we only get here going from 9.99999e-100 -> 1.e-99 or similar
          assert( eDigCntGuess - 1 == eDigCnt && "Bogus eDigCnt in positive eVal case" );
          nDigits = std::min<int>( decimals + 1, width - 4 - eDigCnt );
       }
    }
 
+   // if we asked for 17 but did not get that many, pretend we asked for 16
    if( 17 == nDigits && digCnt < nDigits )
       nDigits--;
-   if (nDigits > 0)
+   if (nDigits > 0) // good case: we know we will not exceed specified width
    {
       res += digits[0] + "."s + digits.substr( 1, digCnt );
-      if( nDigits > digCnt )
+      if( nDigits > digCnt ) // zero-fill needed
          res += zeros.substr( 0, nDigits - digCnt );
       res += "E"s + ( eValNeg ? '-' : '+' ) + eDigits;
       result = res;
