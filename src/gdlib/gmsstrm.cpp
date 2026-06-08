@@ -1046,14 +1046,15 @@ double TMiBufferedStream::ReadGmsDouble()
 TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &PassWord, int &ErrNr, std::string &errMsg )
 : FS{std::make_unique<TBufferedFileStream>( fn, fmOpenRead )}
 {
-   ErrNr = FS->GetLastIOResult();
-   if( ErrNr )
-   {
+   auto exitfn = [&ErrNr, &errMsg]() -> void {
       errMsg = SysErrorMessage( ErrNr );
       ErrNr = strmErrorIOResult;
-      return;
-   }
+   };
+
+   if( ErrNr = FS->GetLastIOResult(); ErrNr ) { exitfn(); return; }
+
    const auto B1 = FS->ReadByte(), B2 = FS->ReadByte();
+   if( ErrNr = FS->GetLastIOResult(); ErrNr ) { exitfn(); return; }
    if( B1 == 31 && B2 == 139 )
    {//header for gzip
       //assume it is GZIP format
@@ -1070,6 +1071,7 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
    if( B1 != signature_header || srcBuf != signature_gams )
    {// nothing special
       const tBomIndic fileStart { B1, B2, FS->ReadByte(), FS->ReadByte() };
+      if( ErrNr = FS->GetLastIOResult(); ErrNr ) { exitfn(); return; }
       int BOMOffset;
       if( !checkBOMOffset( fileStart, BOMOffset, errMsg ) )
       {
@@ -1091,6 +1093,7 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
    FMajorVersionRead = FS->ReadByte();
    FMinorVersionRead = FS->ReadByte();
    char Ch { static_cast<char>( FS->ReadByte() ) };
+   if( ErrNr = FS->GetLastIOResult(); ErrNr ) { exitfn(); return; }
 
    bool hasPswd;
    if( Ch == 'P' ) hasPswd = true;
