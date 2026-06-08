@@ -1064,7 +1064,7 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
       return;
    }
 
-   std::string srcBuf;
+   std::string srcBuf {};
    srcBuf.resize( B2 );
    if( B1 == signature_header ) Read( srcBuf.data(), B2 );
    if( B1 != signature_header || srcBuf != signature_gams )
