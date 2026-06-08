@@ -66,7 +66,6 @@ double gdRoundTo( const double x, const int i )
    return std::trunc( x * zReciprocal + 0.5 * ( x > 0.0 ? 1.0 : -1.0 ) ) / zReciprocal;
 }
 
-constexpr TI64Rec t64 { 1 };
 constexpr bool bigEndian { endian::native == endian::big };
 
 constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
