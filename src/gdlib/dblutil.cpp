@@ -30,8 +30,28 @@
 #include "utils.hpp"
 
 #include <cmath>
+#include <string>
 
 using namespace std::literals::string_literals;
+
+#if __cplusplus >= 202002L
+#include <bit>
+using std::endian;
+#else
+
+enum class endian {
+#if defined(_MSC_VER) && !defined(__clang__)
+    little = 0,
+    big    = 1,
+    native = little
+#else
+    little = __ORDER_LITTLE_ENDIAN__,
+    big    = __ORDER_BIG_ENDIAN__,
+    native = __BYTE_ORDER__
+#endif
+};
+
+#endif
 
 namespace gdlib::dblutil
 {
@@ -46,8 +66,7 @@ double gdRoundTo( const double x, const int i )
    return std::trunc( x * zReciprocal + 0.5 * ( x > 0.0 ? 1.0 : -1.0 ) ) / zReciprocal;
 }
 
-constexpr TI64Rec t64 { 1 };
-const bool bigEndian { t64.bytes.back() == 1 };
+constexpr bool bigEndian { endian::native == endian::big };
 
 constexpr int64_t signMask { static_cast<int64_t>( 0x80000000 ) << 32 },
         expoMask { static_cast<int64_t>( 0x7ff00000 ) << 32 },
@@ -73,7 +92,7 @@ std::string dblToStrHex( const double x )
    uint8_t c;
    std::string result = "0x";
 
-   if( bigEndian )
+   if constexpr ( bigEndian )
    {
       for( int i {}; i < 8; i++ )
       {

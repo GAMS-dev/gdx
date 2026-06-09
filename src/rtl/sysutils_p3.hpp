@@ -39,7 +39,16 @@ struct _WIN32_FIND_DATAA;
 #include <array>                    // for array
 #include <string>                   // for string, basic_string
 #include <string_view>
+
 #include "delphitypes.hpp"// for tDateTime
+#include "p3platform.hpp"
+
+#ifdef P3_THREAD_SAFE
+#include <thread>
+#define p3_global_storage thread_local
+#else
+#define p3_global_storage
+#endif
 
 // ==============================================================================================================
 // Interface
@@ -104,8 +113,17 @@ struct TTimeStamp {
    int Date;// One plus number of days since 1/1/0001
 };
 
-extern char PathDelim, DriveDelim, PathSep;
-extern std::string FileStopper, ExtStopper;
+constexpr char DriveDelim = p3platform::OSFileWIN == p3platform::OSFileType() ?  ':'  :
+                            p3platform::OSFileUNIX == p3platform::OSFileType() ? '\0' :
+                                                                                 '?'  ;
+
+constexpr char PathDelim = p3platform::OSFileWIN == p3platform::OSFileType() ?  '\\' :
+                           p3platform::OSFileUNIX == p3platform::OSFileType() ? '/'  :
+                                                                                '?'  ;
+
+constexpr char PathSep = p3platform::OSFileWIN == p3platform::OSFileType() ?  ';' :
+                         p3platform::OSFileUNIX == p3platform::OSFileType() ? ':' :
+                                                                              '?' ;
 
 // Memory management routines
 template<typename T>

@@ -44,6 +44,10 @@ ShortString::operator std::string() const {
   return buffer.data();
 }
 
+ShortString::operator std::string_view() const {
+  return buffer.data();
+}
+
 std::uint8_t ShortString::length() const {
   return static_cast<std::uint8_t>(
       std::strlen(buffer.data()));

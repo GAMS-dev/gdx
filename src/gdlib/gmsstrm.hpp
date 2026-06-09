@@ -107,7 +107,8 @@ enum class RWType : uint8_t
    rw_pstring,
    rw_count
 };
-const std::array<std::string, 10> RWTypeText { "Byte", "Bool", "Char", "Word", "Integer", "Int64", "Double", "String", "PChar", "PString" };
+
+constexpr std::array RWTypeText { "Byte", "Bool", "Char", "Word", "Integer", "Int64", "Double", "String", "PChar", "PString" };
 
 /**
  * Defines the base class for a stream. Only to be used for defining derived objects.

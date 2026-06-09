@@ -53,24 +53,24 @@ using namespace utils;
 namespace gdx
 {
 
-std::string QueryEnvironmentVariable( const std::string &Name );
+std::string QueryEnvironmentVariable( const std::string_view Name );
 
-std::string QueryEnvironmentVariable( const std::string &Name )
+std::string QueryEnvironmentVariable( const std::string_view Name )
 {
 #if defined( _WIN32 )
-   int len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 );
+   int len = GetEnvironmentVariableA( Name.data(), nullptr, 0 );
    if( !len ) return ""s;
    else
    {
       std::vector<char> buf( len );
-      GetEnvironmentVariableA( Name.c_str(), buf.data(), len );
+      GetEnvironmentVariableA( Name.data(), buf.data(), len );
       std::string val( buf.begin(), buf.end() - 1 );// no terminating zero
       if( val.length() > 255 )
          val.resize( 255 );
       return val;
    }
 #else
-   const char *s = std::getenv( Name.c_str() );
+   const char *s = std::getenv( Name.data() );
    std::string sout = s == nullptr ? ""s : s;
    if( sout.length() > 255 ) sout = sout.substr( 0, 255 );
    return sout;
@@ -110,24 +110,31 @@ constexpr int MaxDimV148 = 10;
 using TIndex = std::array<int, GLOBAL_MAX_INDEX_DIM>;
 
 #if defined( __x86_64__ ) || defined( _M_X64 )
-static const auto archStr { "x86_64"s };
+#define archStr_ "x86_64"
 #elif defined( __aarch64__ ) || defined( _M_ARM )
-static const auto archStr { "arm64"s };
+#define archStr_ "arm64"
 #else
-static const auto archStr { "UnknownInstructionSet"s };
+#define archStr_ "UnknownInstructionSet"
 #endif
 
 #if defined( _WIN32 )
-static const auto opSysStr { "Windows"s };
+#define opSysStr_ "Windows"
 #elif defined( __APPLE__ )
-static const auto opSysStr { "macOS"s };
+#define opSysStr_ "macOS"
 #elif defined( __linux__ )
-static const auto opSysStr { "Linux"s };
+#define opSysStr_ "Linux"
 #else
-static const auto opSysStr { "UnknownOS"s };
+#define opSysStr_ "UnknownOS"
 #endif
 
-static const auto auditLine { "GDX Library C++ V7 (AUDIT) "s + __TIMESTAMP__ + " "s + archStr + " "s + opSysStr };
+constexpr auto auditLine { "GDX Library C++ V7 (AUDIT) " __TIMESTAMP__ " " archStr_ " " opSysStr_ };
+#if __cplusplus >= 202002L
+   static constexpr
+#else
+   static const
+#endif
+TgxModeSet AnyWriteMode { fw_init, fw_dom_raw, fw_dom_map, fw_dom_str, fw_raw_data, fw_map_data, fw_str_data };
+
 
 using UELTableImplChoice = TUELTable;
 
@@ -141,42 +148,42 @@ using UELTableImplChoice = TUELTable;
 //      relaxed domains
 constexpr int  VERSION = 7,    //--file version
                gdxHeaderNr = 123;//--patterns to recognize
-const std::string gdxHeaderId = "GAMSGDX";
+constexpr auto gdxHeaderId = "GAMSGDX";
 
 constexpr int MARK_BOI = 19510624;
 
-const std::string
-        MARK_UEL = "_UEL_"s,
-        MARK_SYMB = "_SYMB_"s,
-        MARK_DATA = "_DATA_"s,
-        MARK_SETT = "_SETT_"s,
-        MARK_ACRO = "_ACRO_"s,
-        MARK_DOMS = "_DOMS_"s;
+constexpr auto 
+        MARK_UEL = "_UEL_",
+        MARK_SYMB = "_SYMB_",
+        MARK_DATA = "_DATA_",
+        MARK_SETT = "_SETT_",
+        MARK_ACRO = "_ACRO_",
+        MARK_DOMS = "_DOMS_";
 
 constexpr int INDEX_INITIAL = -256;
 
-const std::array fmode_str {
-        "FileNotOpen"s, //f_not_open
-        "ReadCommand"s, //fr_init
-        "WriteCommand"s,//fw_init
-        "Write-Dom-Raw"s,
-        "Write-Dom-Map"s,
-        "Write-Dom-Str"s,
-        "Write-Raw"s,   //fw_raw_data
-        "Write-Map"s,   //fw_Map_data
-        "Write-Str"s,   //fw_str_data
-        "Regis-Raw"s,   //f_raw_elem
-        "Regis-Map"s,   //f_Map_elem
-        "Regis-Str"s,   //f_str_elem
-        "Read-Raw"s,    //fr_raw_data
-        "Read-Map"s,    //fr_Map_data
-        "Read_MapR"s,   //fr_MapR_data
-        "Read-Str"s,    //fr_str_data
-        "Regis-Filter"s,//fr_filter
-        "Read-Slice"s   //fr_slice
+constexpr std::array fmode_str {
+        "FileNotOpen", //f_not_open
+        "ReadCommand", //fr_init
+        "WriteCommand",//fw_init
+        "Write-Dom-Raw",
+        "Write-Dom-Map",
+        "Write-Dom-Str",
+        "Write-Raw",   //fw_raw_data
+        "Write-Map",   //fw_Map_data
+        "Write-Str",   //fw_str_data
+        "Regis-Raw",   //f_raw_elem
+        "Regis-Map",   //f_Map_elem
+        "Regis-Str",   //f_str_elem
+        "Read-Raw",    //fr_raw_data
+        "Read-Map",    //fr_Map_data
+        "Read_MapR",   //fr_MapR_data
+        "Read-Str",    //fr_str_data
+        "Regis-Filter",//fr_filter
+        "Read-Slice"   //fr_slice
 };
 
-std::string DLLLoadPath {};
+p3_global_storage std::string DLLLoadPath {};
 
 constexpr int
         ERR_NOERROR = 0,
@@ -1629,83 +1636,83 @@ void TGXFileObj::GetDefaultRecord( double *Avals ) const
    }
 }
 
-const std::map<int, std::string> errorCodeToStr {
-        { ERR_NOFILE, "File name is empty"s },
-        { ERR_FILEERROR, "File I/O error"s },
-        { ERR_NOERROR, "No error"s },
-        { ERR_BADMODE, "Bad mode"s },
-        { ERR_BADDIMENSION, "Bad dimension"s },
-        { ERR_BAD_ALIAS_DIM, "Bad dimension for aliased set"s },
-        { ERR_BADELEMENTINDEX, "Bad UEL Nr"s },
-        { ERR_BADSYMBOLINDEX, "Bad symbol number"s },
-        { ERR_ELEMENTSEQUENCE, "Element out of sequence"s },
-        { ERR_DUPLICATESYMBOL, "Duplicate symbol"s },
-        { ERR_DATANOTSORTED, "Data is not sorted"s },
-        { ERR_DATADUPLICATE, "Duplicate keys"s },
-        { ERR_UNKNOWNFILTER, "Unknown filter"s },
-        { ERR_BADSTRINGFORMAT, "Bad quotes"s },
-        { ERR_BADIDENTFORMAT, "Illegal identifier"s },
-        { ERR_UELCONFLICT, "UEL string with different index"s },
-        { ERR_DUPLICATESPECVAL, "Duplicate special value"s },
-        { ERR_BADERRORRECORD, "Bad Error record number"s },
-        { ERR_DUPLICATEUEL, "Duplicate UEL"s },
-        { ERR_BADUELSTR, "Bad UEL string"s },
-        { ERR_UNDEFUEL, "Unknown UEL"s },
-        { ERR_UELSECONDWRITE, "gdx file has UEL table already"s },
-        { ERR_UELNOTEMPTY, "UEL table is not empty"s },
-        { ERR_BAD_FILTER_NR, "Bad filter number"s },
-        { ERR_BAD_FILTER_INDX, "Bad index in filter"s },
-        { ERR_FILTER_UNMAPPED, "Unmapped index in filter"s },
-        { ERR_OBSOLETE_FUNCTION, "Use of obsolete function"s },
-        { ERR_RAWNOTSORTED, "Data not sorted when writing raw"s },
-        { ERR_BADACROINDEX, "Bad index for acronym"s },
-        { ERR_BADACRONUMBER, "Bad acronym record number"s },
-        { ERR_BADACRONAME, "Bad acronym name for update"s },
-        { ERR_ACRODUPEMAP, "Bad acronym index for update"s },
-        { ERR_ACROBADADDITION, "Bad addition to acronym table"s },
-        { ERR_UNKNOWNDOMAIN, "Unknown domain"s },
-        { ERR_BADDOMAIN, "Domain not set with dim=1"s },
-        { ERR_NODOMAINDATA, "Set has no data"s },
-        { ERR_ALIASSETEXPECTED, "Set expected for domain"s },
-        { ERR_BADDATATYPE, "Bad data type"s },
-        { ERR_NOSYMBOLFORCOMMENT, "No symbol to add comment to"s },
-        { ERR_DOMAINVIOLATION, "Domain violation"s },
-        { ERR_FILEALREADYOPEN, "File is already open"s },
-        { ERR_FILETOOLDFORAPPEND, "File version to old for append"s },
-        { ERR_OPEN_DOMSMARKER1, "Expected data marker (DOMS_1) not found in GDX file"s },
-        { ERR_OPEN_DOMSMARKER2, "Expected data marker (DOMS_2) not found in GDX file"s },
-        { ERR_OPEN_DOMSMARKER3, "Expected data marker (DOMS_3) not found in GDX file"s },
-        { ERR_BADDATAMARKER_DATA, "Expected data marker (DATA) not found in GDX file"s },
-        { ERR_BADDATAMARKER_DIM, "Expected data marker (DIM) not found in GDX file"s },
-        { ERR_OPEN_BOI, "Expected data marker (BOI) not found in GDX file"s },
-        { ERR_OPEN_FILEHEADER, "Expected data marker (FILEHEADER) not found in GDX file"s },
-        { ERR_OPEN_FILEMARKER, "Expected data marker (FILEMARKER) not found in GDX file"s },
-        { ERR_OPEN_SYMBOLMARKER1, "Expected data marker (SYMBOL_1) not found in GDX file"s },
-        { ERR_OPEN_SYMBOLMARKER2, "Expected data marker (SYMBOL_2) not found in GDX file"s },
-        { ERR_OPEN_UELMARKER1, "Expected data marker (UEL_1) not found in GDX file"s },
-        { ERR_OPEN_UELMARKER2, "Expected data marker (UEL_2) not found in GDX file"s },
-        { ERR_OPEN_TEXTMARKER1, "Expected data marker (TEXT_1) not found in GDX file"s },
-        { ERR_OPEN_TEXTMARKER2, "Expected data marker (TEXT_2) not found in GDX file"s },
-        { ERR_OPEN_ACROMARKER1, "Expected data marker (ACRO_1) not found in GDX file"s },
-        { ERR_OPEN_ACROMARKER2, "Expected data marker (ACRO_2) not found in GDX file"s },
-        { ERR_OPEN_FILEVERSION, "GDX file version not supported"s },
-        { ERR_BADDATAFORMAT, "File not recognized as a GDX file"s },
-        { ERR_OUT_OF_MEMORY, "Out of memory"s },
-        { ERR_ZLIB_NOT_FOUND, "Compression library not found"s },
-        { ERR_GDXCOPY, "GDXCOPY: Unknown error"s },
-        { ERR_PARAMETER, "GDXCOPY: Parameter error"s },
-        { ERR_DLL_NOT_FOUND, "GDXCOPY: DLL not found"s },
-        { ERR_CREATE_DIR, "GDXCOPY: Cannot create directory"s },
-        { ERR_FILE_OPEN, "GDXCOPY: File open failed"s },
-        { ERR_FILE_WRITE, "GDXCOPY: Cannot open file for write"s },
-        { ERR_UEL_LENGTH, "GDXCOPY: UEL length exceeds maximum"s },
-        { ERR_UEL_REGISTER, "GDXCOPY: Cannot register UELs"s },
-        { ERR_EXPL_TEXT, "GDXCOPY: Cannot save explanatory text"s },
-        { ERR_DIMENSION, "GDXCOPY: Dimension exceeds maximum"s },
-        { ERR_WRITE_SYMBOL, "GDXCOPY: Error writing symbol"s },
-        { ERR_CLOSE_FILE, "GDXCOPY: Error closing file"s },
-        { ERR_CANNOT_DELETE, "GDXCOPY: Cannot delete file"s },
-        { ERR_CANNOT_RENAME, "GDXCOPY: Cannot rename file"s } };
+static const std::map<int, const char *> errorCodeToStr {
+        { ERR_NOFILE, "File name is empty" },
+        { ERR_FILEERROR, "File I/O error" },
+        { ERR_NOERROR, "No error" },
+        { ERR_BADMODE, "Bad mode" },
+        { ERR_BADDIMENSION, "Bad dimension" },
+        { ERR_BAD_ALIAS_DIM, "Bad dimension for aliased set" },
+        { ERR_BADELEMENTINDEX, "Bad UEL Nr" },
+        { ERR_BADSYMBOLINDEX, "Bad symbol number" },
+        { ERR_ELEMENTSEQUENCE, "Element out of sequence" },
+        { ERR_DUPLICATESYMBOL, "Duplicate symbol" },
+        { ERR_DATANOTSORTED, "Data is not sorted" },
+        { ERR_DATADUPLICATE, "Duplicate keys" },
+        { ERR_UNKNOWNFILTER, "Unknown filter" },
+        { ERR_BADSTRINGFORMAT, "Bad quotes" },
+        { ERR_BADIDENTFORMAT, "Illegal identifier" },
+        { ERR_UELCONFLICT, "UEL string with different index" },
+        { ERR_DUPLICATESPECVAL, "Duplicate special value" },
+        { ERR_BADERRORRECORD, "Bad Error record number" },
+        { ERR_DUPLICATEUEL, "Duplicate UEL" },
+        { ERR_BADUELSTR, "Bad UEL string" },
+        { ERR_UNDEFUEL, "Unknown UEL" },
+        { ERR_UELSECONDWRITE, "gdx file has UEL table already" },
+        { ERR_UELNOTEMPTY, "UEL table is not empty" },
+        { ERR_BAD_FILTER_NR, "Bad filter number" },
+        { ERR_BAD_FILTER_INDX, "Bad index in filter" },
+        { ERR_FILTER_UNMAPPED, "Unmapped index in filter" },
+        { ERR_OBSOLETE_FUNCTION, "Use of obsolete function" },
+        { ERR_RAWNOTSORTED, "Data not sorted when writing raw" },
+        { ERR_BADACROINDEX, "Bad index for acronym" },
+        { ERR_BADACRONUMBER, "Bad acronym record number" },
+        { ERR_BADACRONAME, "Bad acronym name for update" },
+        { ERR_ACRODUPEMAP, "Bad acronym index for update" },
+        { ERR_ACROBADADDITION, "Bad addition to acronym table" },
+        { ERR_UNKNOWNDOMAIN, "Unknown domain" },
+        { ERR_BADDOMAIN, "Domain not set with dim=1" },
+        { ERR_NODOMAINDATA, "Set has no data" },
+        { ERR_ALIASSETEXPECTED, "Set expected for domain" },
+        { ERR_BADDATATYPE, "Bad data type" },
+        { ERR_NOSYMBOLFORCOMMENT, "No symbol to add comment to" },
+        { ERR_DOMAINVIOLATION, "Domain violation" },
+        { ERR_FILEALREADYOPEN, "File is already open" },
+        { ERR_FILETOOLDFORAPPEND, "File version to old for append" },
+        { ERR_OPEN_DOMSMARKER1, "Expected data marker (DOMS_1) not found in GDX file" },
+        { ERR_OPEN_DOMSMARKER2, "Expected data marker (DOMS_2) not found in GDX file" },
+        { ERR_OPEN_DOMSMARKER3, "Expected data marker (DOMS_3) not found in GDX file" },
+        { ERR_BADDATAMARKER_DATA, "Expected data marker (DATA) not found in GDX file" },
+        { ERR_BADDATAMARKER_DIM, "Expected data marker (DIM) not found in GDX file" },
+        { ERR_OPEN_BOI, "Expected data marker (BOI) not found in GDX file" },
+        { ERR_OPEN_FILEHEADER, "Expected data marker (FILEHEADER) not found in GDX file" },
+        { ERR_OPEN_FILEMARKER, "Expected data marker (FILEMARKER) not found in GDX file" },
+        { ERR_OPEN_SYMBOLMARKER1, "Expected data marker (SYMBOL_1) not found in GDX file" },
+        { ERR_OPEN_SYMBOLMARKER2, "Expected data marker (SYMBOL_2) not found in GDX file" },
+        { ERR_OPEN_UELMARKER1, "Expected data marker (UEL_1) not found in GDX file" },
+        { ERR_OPEN_UELMARKER2, "Expected data marker (UEL_2) not found in GDX file" },
+        { ERR_OPEN_TEXTMARKER1, "Expected data marker (TEXT_1) not found in GDX file" },
+        { ERR_OPEN_TEXTMARKER2, "Expected data marker (TEXT_2) not found in GDX file" },
+        { ERR_OPEN_ACROMARKER1, "Expected data marker (ACRO_1) not found in GDX file" },
+        { ERR_OPEN_ACROMARKER2, "Expected data marker (ACRO_2) not found in GDX file" },
+        { ERR_OPEN_FILEVERSION, "GDX file version not supported" },
+        { ERR_BADDATAFORMAT, "File not recognized as a GDX file" },
+        { ERR_OUT_OF_MEMORY, "Out of memory" },
+        { ERR_ZLIB_NOT_FOUND, "Compression library not found" },
+        { ERR_GDXCOPY, "GDXCOPY: Unknown error" },
+        { ERR_PARAMETER, "GDXCOPY: Parameter error" },
+        { ERR_DLL_NOT_FOUND, "GDXCOPY: DLL not found" },
+        { ERR_CREATE_DIR, "GDXCOPY: Cannot create directory" },
+        { ERR_FILE_OPEN, "GDXCOPY: File open failed" },
+        { ERR_FILE_WRITE, "GDXCOPY: Cannot open file for write" },
+        { ERR_UEL_LENGTH, "GDXCOPY: UEL length exceeds maximum" },
+        { ERR_UEL_REGISTER, "GDXCOPY: Cannot register UELs" },
+        { ERR_EXPL_TEXT, "GDXCOPY: Cannot save explanatory text" },
+        { ERR_DIMENSION, "GDXCOPY: Dimension exceeds maximum" },
+        { ERR_WRITE_SYMBOL, "GDXCOPY: Error writing symbol" },
+        { ERR_CLOSE_FILE, "GDXCOPY: Error closing file" },
+        { ERR_CANNOT_DELETE, "GDXCOPY: Cannot delete file" },
+        { ERR_CANNOT_RENAME, "GDXCOPY: Cannot rename file" } };
 
 int TGXFileObj::gdxErrorStr( int ErrNr, char *ErrMsg ) const
 {
@@ -1767,7 +1774,7 @@ int TGXFileObj::gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst )
 #endif
          }
          else
-            std::snprintf( KeyStr[D], GMS_UEL_IDENT_SIZE, "%s%d", BADUEL_PREFIX.c_str(), LED );// NOTE: Not covered by unit tests yet.
+            std::snprintf( KeyStr[D], GMS_UEL_IDENT_SIZE, "%s%d", BADUEL_PREFIX.data(), LED );// NOTE: Not covered by unit tests yet.
       }
       return true;
    }
@@ -2267,7 +2274,7 @@ int TGXFileObj::gdxGetElemText( int TxtNr, char *Txt, int &Node )
       return false;// NOTE: Not covered by unit tests yet.
    if( TxtNr < 0 || TxtNr >= SetTextList->size() )
    {
-      assignStrToBuf( BADStr_PREFIX + rtl::sysutils_p3::IntToStr( TxtNr ), Txt, GMS_SSSIZE );
+      assignStrToBuf( BADStr_PREFIX.data() + rtl::sysutils_p3::IntToStr( TxtNr ), Txt, GMS_SSSIZE );
       return false;
    }
    else
@@ -2652,7 +2659,7 @@ int TGXFileObj::gdxUMUelGet( int UelNr, char *Uel, int &UelMap )
       UelMap = UELTable->GetUserMap( UelNr );
       return true;
    }
-   assignStrToBuf( BADUEL_PREFIX + rtl::sysutils_p3::IntToStr( UelNr ), Uel );
+   assignStrToBuf( BADUEL_PREFIX.data() + rtl::sysutils_p3::IntToStr( UelNr ), Uel );
    UelMap = -1;
    return false;
 }
@@ -2712,7 +2719,7 @@ int TGXFileObj::gdxGetUEL( int uelNr, char *Uel ) const
    const int EN = UELTable->UsrUel2Ent->GetMapping( uelNr );
    if( EN >= 1 ) assignPCharToBuf( ( *UELTable )[EN], Uel );
    else
-      assignStrToBuf( BADUEL_PREFIX + rtl::sysutils_p3::IntToStr( uelNr ), Uel );
+      assignStrToBuf( BADUEL_PREFIX.data() + rtl::sysutils_p3::IntToStr( uelNr ), Uel );
    return EN >= 1;
 }
 
@@ -3040,6 +3047,13 @@ int TGXFileObj::gdxAcronymGetMapping( int N, int &orgIndx, int &newIndx, int &au
 
 int TGXFileObj::gdxFilterExists( int FilterNr )
 {
+#if __cplusplus >= 202002L
+   static constexpr
+#else
+   static const
+#endif
+   TgxModeSet AnyReadMode  { fr_init, fr_raw_data, fr_map_data, fr_mapr_data, fr_str_data };
+
    if( !MajorCheckMode( "FilterExists"s, AnyReadMode ) ) return false;
    return FilterList->FindFilter( FilterNr ) != nullptr;
 }
@@ -3894,14 +3908,6 @@ void TUELTable::ResetMapToUserStatus()
    FMapToUserStatus = TUELUserMapStatus::map_unknown;
 }
 
-TgxModeSet::TgxModeSet( const std::initializer_list<TgxFileMode> &modes )
-{
-   for( const auto mode: modes )
-   {
-      modeActive[mode] = true;
-      count++;
-   }
-}
 
 inline bool TgxModeSet::contains( const TgxFileMode &mode ) const
 {

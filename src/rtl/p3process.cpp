@@ -615,8 +615,8 @@ int p3GetNumberOfProcessors()
 #endif
 }
 
-const std::string CMD_WIN7 = R"(C:\windows\system32\cmd.exe)";
-const std::string CMD_WINNT = R"(C:\winnt\system32\cmd.exe)";
+constexpr auto CMD_WIN7 = R"(C:\windows\system32\cmd.exe)";
+constexpr auto CMD_WINNT = R"(C:\winnt\system32\cmd.exe)";
 
 #if defined(_WIN32)
 static int wShowWindow {SW_SHOWNA};
@@ -1425,7 +1425,7 @@ bool p3IsPIDValid( uint32_t pid )
 #endif
 }
 
-static tCtrlHandler CtrlHandler {};
+static p3_global_storage tCtrlHandler CtrlHandler {};
 
 #ifdef _WIN32
 static BOOL WINAPI P3Handler( DWORD s )
@@ -1441,16 +1441,21 @@ static BOOL WINAPI P3Handler( DWORD s )
    return FALSE;
 }
 #else
-static sigset_t sigSet;
-static struct sigaction newAction, oldAction;
+
+static p3_global_storage sigset_t sigSet;
+static p3_global_storage struct sigaction newAction, oldAction;
+
 extern "C" {
-static void ( *oldHandler )( int );
+
+static p3_global_storage void ( *oldHandler )( int );
+
 static void p3CtrlCHandler( int sig );
 }
 static void p3CtrlCHandler( int sig )
 {
    if( CtrlHandler ) ( *CtrlHandler )();
 }
+
 #endif
 
 CtrlHandlerState P3InstallCtrlHandler( tCtrlHandler newHandler )
