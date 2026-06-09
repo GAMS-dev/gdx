@@ -99,6 +99,8 @@ class Bounded
    T value;
 
 public:
+   using type = T;
+
    constexpr Bounded() : value( lowerBoundIncl ) {}
 
    Bounded( T initialValue ) : value( initialValue )
