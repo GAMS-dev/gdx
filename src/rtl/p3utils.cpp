@@ -881,9 +881,15 @@ bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::s
 }
 #endif
 
-static constexpr auto zeros = std::string_view(
-   "000000000000000000000000000000000000000000000000000000"
-);
+static inline std::string repeatChar( const int n, const char c )
+{
+   return n > 0 ? std::string( n, c ) : ""s;
+}
+
+static inline std::string zeros( const int n )
+{
+   return repeatChar( n, '0' );
+}
 
 int p3Chmod( const std::string &path, int mode )
 {
@@ -984,7 +990,7 @@ std::string p3FloatToEfmt( double x, int width, int decimals )
       int eDigCnt = 2;
       int nDigits = std::min<int>( decimals + 1, width - 4 - eDigCnt );
       nDigits = std::min<int>( nDigits, 16 ); // no point to ask for or show more than 16 total for zero
-      return nDigits <= 0 ? " 0E+00"s : " 0."s + zeros.substr( 0, nDigits - 1 ).data() + "E+00"s; // shave off the decimal point
+      return nDigits <= 0 ? " 0E+00"s : " 0."s + zeros(nDigits - 1 ) + "E+00"s; // shave off the decimal point
    }
 
    std::string res;
@@ -1041,7 +1047,7 @@ std::string p3FloatToEfmt( double x, int width, int decimals )
    {
       res += digits[0] + "."s + digits.substr( 1, digCnt );
       if( nDigits > digCnt ) // zero-fill needed
-         res += zeros.substr( 0, nDigits - digCnt );
+         res += zeros(nDigits - digCnt );
       res += "E"s + ( eValNeg ? '-' : '+' ) + eDigits;
       result = res;
    }
