@@ -140,7 +140,7 @@ std::string ExtractFileExt( const std::string &FileName )
 }
 
 #if defined( _WIN32 )
-static constexpr bool isAbs(const std::string &fName)
+static bool isAbs(const std::string &fName)
 {
    return std::isalpha( fName.front() ) && fName[1] == ':';
 }
