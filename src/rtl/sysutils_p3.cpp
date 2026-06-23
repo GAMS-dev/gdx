@@ -145,12 +145,12 @@ static bool isAbs(const std::string &fName)
    return std::isalpha( fName.front() ) && fName[1] == ':';
 }
 
-static constexpr bool hasLongPathPrefix(const std::string &fName)
+static bool hasLongPathPrefix(const std::string &fName)
 {
    return fName.length() >= 4 && fName[0] == '\\' && fName[1] == '\\' && fName[2] == '?' && fName[3] == '\\';
 }
 
-static constexpr DWORD QueryAbsPathLen(const std::string &p, wchar_t *widePath)
+static DWORD QueryAbsPathLen(const std::string &p, wchar_t *widePath)
 {
    if( const int wideLength = MultiByteToWideChar( CP_ACP, 0, p.c_str(), -1, widePath, 4096 ); !wideLength)
       return true;
