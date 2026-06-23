@@ -140,24 +140,60 @@ std::string ExtractFileExt( const std::string &FileName )
 }
 
 #if defined( _WIN32 )
+static constexpr bool isAbs(const std::string &fName)
+{
+   return std::isalpha( fName.front() ) && fName[1] == ':';
+}
+
+static constexpr bool hasLongPathPrefix(const std::string &fName)
+{
+   return fName.length() >= 4 && fName[0] == '\\' && fName[1] == '\\' && fName[2] == '?' && fName[3] == '\\';
+}
+
+static constexpr DWORD QueryAbsPathLen(const std::string &p, wchar_t *widePath)
+{
+   if( const int wideLength = MultiByteToWideChar( CP_ACP, 0, p.c_str(), -1, widePath, 4096 ); !wideLength)
+      return true;
+   return GetFullPathNameW( widePath, 0, nullptr, nullptr);
+}
+
+static std::string QueryAbsPath(const std::string &p)
+{
+   static wchar_t widePath[4096];
+   const auto len =  QueryAbsPathLen( p, widePath );
+   std::vector<wchar_t> buffer( len );
+   GetFullPathNameW(widePath, len, buffer.data(), nullptr);
+   const int sizeNeeded = WideCharToMultiByte( CP_ACP, 0, buffer.data(), -1, nullptr, 0, nullptr, nullptr );
+   std::string s(sizeNeeded-1, 0);
+   WideCharToMultiByte( CP_ACP, 0, buffer.data(), -1, s.data(), sizeNeeded, nullptr, nullptr );
+   return s;
+}
+
+bool isLongPath( const std::string &p)
+{
+   if(p.empty()) return false;
+   // has long path prefix \\?\: actually is long but doesn't need special treatment
+   if(hasLongPathPrefix(p)) return false;
+   if(p.length() > MAX_PATH) return true;
+   // Path is absolute already. Then we are safe
+   if(isAbs(p)) return false;
+   // Relative path might be short but absolute conversion can still be long
+   wchar_t widePath[4096];
+   const auto len = QueryAbsPathLen( p, widePath );
+   if(!len)
+      return true;
+   return len > MAX_PATH;
+}
+
 std::string tryFixingLongPath( const std::string &fName )
 {
-   const bool
-           isAbs { std::isalpha( fName.front() ) && fName[1] == ':' },
-           hasLongPathPrefix { fName[0] == '\\' && fName[1] == '\\' && fName[2] == '?' && fName[3] == '\\' };
+   const bool hlpp = hasLongPathPrefix( fName );
    std::string fNameBuf;
-   if( !hasLongPathPrefix && !isAbs )
-   {
-      // make path absolute to make the long path prefix work
-      if( const DWORD len { GetCurrentDirectoryA( 0, nullptr ) }; len > 0 )
-      {
-         std::vector<char> buffer( len );
-         GetCurrentDirectoryA( len, &buffer[0] );
-         fNameBuf = ""s + buffer.data() + '\\' + fName;
-      }
-   }
+   // Make path absolute so we can use long path prefix
+   if( !hlpp && !isAbs(fName) )
+      fNameBuf = QueryAbsPath(fName);
    const std::string &fNameRef { fNameBuf.empty() ? fName : fNameBuf };
-   const std::string forcedPrefix { hasLongPathPrefix ? ""s : R"(\\?\)" };
+   const std::string forcedPrefix { hlpp ? ""s : R"(\\?\)" };
    return forcedPrefix + fNameRef;
 }
 #endif
@@ -247,7 +283,7 @@ int FileAge( const std::string &FileName )
 bool FileExists( const std::string &FileName )
 {
 #if defined( _WIN32 )
-   return !_access( ( FileName.length() > MAX_PATH ? tryFixingLongPath( FileName ) : FileName ).c_str(), 0 );
+   return !_access( ( isLongPath(FileName) ? tryFixingLongPath( FileName ) : FileName ).c_str(), 0 );
 #else
    return !access( FileName.c_str(), F_OK );
 #endif
