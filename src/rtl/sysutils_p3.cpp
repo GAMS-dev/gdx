@@ -142,7 +142,7 @@ std::string ExtractFileExt( const std::string &FileName )
 #if defined( _WIN32 )
 static bool isAbs(const std::string &fName)
 {
-   return std::isalpha( fName.front() ) && fName[1] == ':';
+   return fName.length() >= 2 && std::isalpha( static_cast<unsigned char>(fName.front()) ) && fName[1] == ':';
 }
 
 static bool hasLongPathPrefix(const std::string &fName)
@@ -152,19 +152,24 @@ static bool hasLongPathPrefix(const std::string &fName)
 
 static DWORD QueryAbsPathLen(const std::string &p, wchar_t *widePath)
 {
-   if( const int wideLength = MultiByteToWideChar( CP_ACP, 0, p.c_str(), -1, widePath, 4096 ); !wideLength)
-      return true;
+   if( const int wideLength = MultiByteToWideChar( CP_ACP, 0, p.c_str(), -1, widePath, 4096 );
+      !wideLength)
+      return 0;
    return GetFullPathNameW( widePath, 0, nullptr, nullptr);
 }
 
 static std::string QueryAbsPath(const std::string &p)
 {
-   static wchar_t widePath[4096];
+   wchar_t widePath[4096];
    const auto len =  QueryAbsPathLen( p, widePath );
-   std::vector<wchar_t> buffer( len );
-   GetFullPathNameW(widePath, len, buffer.data(), nullptr);
+   if(!len)
+      return {};
+   std::vector<wchar_t> buffer( len+1 );
+   GetFullPathNameW(widePath, buffer.size(), buffer.data(), nullptr);
    const int sizeNeeded = WideCharToMultiByte( CP_ACP, 0, buffer.data(), -1, nullptr, 0, nullptr, nullptr );
-   std::string s(sizeNeeded-1, 0);
+   if(!sizeNeeded)
+      return {};
+   std::string s(sizeNeeded - 1, '\0');
    WideCharToMultiByte( CP_ACP, 0, buffer.data(), -1, s.data(), sizeNeeded, nullptr, nullptr );
    return s;
 }
@@ -193,6 +198,12 @@ std::string tryFixingLongPath( const std::string &fName )
    if( !hlpp && !isAbs(fName) )
       fNameBuf = QueryAbsPath(fName);
    const std::string &fNameRef { fNameBuf.empty() ? fName : fNameBuf };
+
+   // Handle UNC Network path edge case if it starts with "\\" but isn't a long prefix
+   if (!hlpp && fNameRef.length() >= 2 && fNameRef[0] == '\\' && fNameRef[1] == '\\') {
+      return R"(\\?\UNC\)" + fNameRef.substr(2);
+   }
+
    const std::string forcedPrefix { hlpp ? ""s : R"(\\?\)" };
    return forcedPrefix + fNameRef;
 }
