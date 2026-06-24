@@ -50,7 +50,7 @@ struct THashBucket {
 template<typename T>
 using PHashBucket = THashBucket<T> *;
 
-template<typename T>
+template<typename T, bool caseInsensitive = true>
 class TXStrHashList
 {
 protected:
@@ -63,6 +63,11 @@ protected:
    std::unique_ptr<std::vector<int>> SortMap {};
    int HashTableSize {}, ReHashCnt {}, FCount {};
    bool FSorted {};
+
+   inline PHashBucket<T> GetBucketByHash( int hash )
+   {
+      return ( *PHashTable )[hash];
+   }
 
    void ClearHashTable()
    {
@@ -120,23 +125,28 @@ protected:
       std::fill_n( PHashTable->begin(), HashTableSize, nullptr );
    }
 
-   virtual int Hash( const char *s )
+   int Hash( const char *s )
    {
       assert( HashTableSize > 0 );
       unsigned int res {};
-      for( int i {}; s[i] != '\0'; i++ )
-         res = 211 * res + utils::toupper( s[i] );
+      for( int i {}; s[i] != '\0'; i++ ) {
+         if constexpr (caseInsensitive) {
+            res = 211 * res + utils::toupper( s[i] );
+         } else {
+            res = 211 * res + s[i];
+         }
+      }
       return ( res & 0x7FFFFFFF ) % HashTableSize;
    }
 
-   virtual bool EntryEqual( const char *ps1, const char *ps2 )
+   bool EntryEqual( const char *ps1, const char *ps2 )
    {
-      return utils::sameTextPChar( ps1, ps2 );
+      return utils::sameTextPChar<caseInsensitive>( ps1, ps2 );
    }
 
-   virtual int Compare( const char *ps1, const char *ps2 )
+   int Compare( const char *ps1, const char *ps2 )
    {
-      return utils::strCompare( ps1, ps2 );
+      return utils::strCompare( ps1, ps2, caseInsensitive);
    }
 
    void HashAll()
@@ -245,7 +255,7 @@ public:
       ClearHashTable();
    }
 
-   virtual ~TXStrHashList()
+   ~TXStrHashList()
    {
       Clear();
    }
@@ -272,11 +282,6 @@ public:
    [[nodiscard]] T *GetObject( int N ) const
    {
       return &Buckets[N - ( OneBased ? 1 : 0 )]->Obj;
-   }
-
-   inline PHashBucket<T> GetBucketByHash( int hash )
-   {
-      return ( *PHashTable )[hash];
    }
 
    int StoreObject( const char *s, size_t slen, T AObj )
@@ -345,14 +350,18 @@ public:
       return res;
    }
 
-   virtual void FreeItem( int N )
+   void FreeItem( int N )
    {
       // noop by default
    }
 
    int Add( const char *s, size_t slen )
    {
-      return AddObject( s, slen, nullptr );
+      if constexpr (std::is_pointer_v<T>) {
+         return AddObject( s, slen, nullptr );
+      } else {
+         return AddObject( s, slen, 0);
+      }
    }
 
    int IndexOf( const char *s )
@@ -378,8 +387,9 @@ public:
       for( int N {}; N < Cnt; N++ )
       {
          uint8_t slen;
-         const char * str {s.ReadSString(slen)};
-         StoreObject( str, slen, nullptr );
+         char sbuf[256];
+         s.ReadSString(sbuf, slen);
+         StoreObject( sbuf, slen, 0 );
       }
    }
 
@@ -512,73 +522,7 @@ public:
    }
 };
 
-// Specialization when it is not a pointer type
-template<>
-inline int TXStrHashList<uint8_t>::Add( const char *s, size_t slen )
-{
-   return AddObject( s, slen, 0 );
-}
-
-template<>
-inline int TXStrHashList<int>::Add( const char *s, size_t slen )
-{
-   return AddObject( s, slen, 0 );
-}
-
-template<>
-template<typename T2>
-void TXStrHashList<uint8_t>::LoadFromStream( T2 &s )
-{
-   Clear();
-   const int Cnt { s.ReadInteger() };
-   SetCapacity( Cnt );
-   for( int N {}; N < Cnt; N++ )
-   {
-      char sbuf[256];
-      uint8_t slen;
-      s.ReadSString( sbuf, slen );
-      StoreObject( sbuf, slen, 0 );
-   }
-}
-
-template<>
-template<typename T2>
-inline void TXStrHashList<int>::LoadFromStream( T2 &s )
-{
-   Clear();
-   const int Cnt { s.ReadInteger() };
-   SetCapacity( Cnt );
-   for( int N {}; N < Cnt; N++ )
-   {
-      uint8_t slen;
-      char sbuf[256];
-      s.ReadSString( sbuf, slen );
-      StoreObject( sbuf, slen, 0 );
-   }
-}
-
 template<typename T>
-class TXCSStrHashList : public TXStrHashList<T>
-{
-protected:
-   int Hash( const char *s ) override
-   {
-      assert( this->HashTableSize > 0 );
-      unsigned int res {};
-      for( int i {}; s[i] != '\0'; i++ )
-         res = 211 * res + s[i];
-      return ( res & 0x7FFFFFFF ) % this->HashTableSize;
-   }
-
-   bool EntryEqual( const char *ps1, const char *ps2 ) override
-   {
-      return utils::sameTextPChar<false>( ps1, ps2 );
-   }
-
-   int Compare( const char *ps1, const char *ps2 ) override
-   {
-      return utils::strCompare( ps1, ps2, false );
-   }
-};
+using TXCSStrHashList = TXStrHashList<T, false>;
 
 }// namespace gdlib::strhash
