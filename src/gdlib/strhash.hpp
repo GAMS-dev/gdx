@@ -526,3 +526,7 @@ template<typename T>
 using TXCSStrHashList = TXStrHashList<T, false>;
 
 }// namespace gdlib::strhash
+
+namespace gdlib {
+namespace strhash = GDX_NS gdlib::strhash;
+}
