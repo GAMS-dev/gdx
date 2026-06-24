@@ -271,13 +271,8 @@ public:
    int AddUsrNew( const char *s, size_t slen );
    int AddUsrIndxNew( const char *s, size_t slen, int UelNr );
    [[nodiscard]] int GetMaxUELLength() const;
-   int IndexOf( const char *s );
-   int AddObject( const char *id, size_t idlen, int mapping );
-   int StoreObject( const char *id, size_t idlen, int mapping );
    const char *operator[]( int index ) const;
-   void RenameEntry( int N, const char *s );
    [[nodiscard]] int MemoryUsed() const;
-   void SaveToStream( gdlib::gmsstrm::TXStream &S );
    void LoadFromStream( gdlib::gmsstrm::TXStream &S );
    TUELUserMapStatus GetMapToUserStatus();
    void ResetMapToUserStatus();

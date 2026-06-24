@@ -3830,39 +3830,15 @@ TUELTable::TUELTable() : UsrUel2Ent {std::make_unique<TIntegerMapping>()}
    ResetMapToUserStatus();
 }
 
-int TUELTable::IndexOf( const char *s )
-{
-   return TXStrHashListImpl<int>::IndexOf( s );
-}
-
-int TUELTable::AddObject( const char *id, size_t idlen, int mapping )
-{
-   return TXStrHashListImpl<int>::AddObject( id, idlen, mapping );
-}
-
-int TUELTable::StoreObject( const char *id, size_t idlen, int mapping )
-{
-   return TXStrHashListImpl<int>::StoreObject( id, idlen, mapping );
-}
 
 const char *TUELTable::operator[]( int index ) const
 {
    return GetString( index );
 }
 
-void TUELTable::RenameEntry( int N, const char *s )
-{
-   TXStrHashListImpl<int>::RenameEntry( N, s );
-}
-
 int TUELTable::MemoryUsed() const
 {
    return static_cast<int>( TXStrHashListImpl<int>::MemoryUsed() ) + UsrUel2Ent->MemoryUsed();
-}
-
-void TUELTable::SaveToStream( TXStream &S )
-{
-   TXStrHashListImpl<int>::SaveToStream( S );
 }
 
 // NOTE: Not covered by unit tests yet.
