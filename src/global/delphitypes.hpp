@@ -38,7 +38,7 @@
 #include <cstdint>
 
 // Interface
-namespace global::delphitypes
+namespace GDX_NS global::delphitypes
 {
 
 // According to Embarcadero docs
@@ -212,3 +212,7 @@ inline double frac( const double v )
 }
 
 }// namespace global::delphitypes
+
+namespace global {
+namespace delphitypes = GDX_NS global::delphitypes;
+}

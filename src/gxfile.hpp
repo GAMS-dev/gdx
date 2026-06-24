@@ -44,14 +44,14 @@
 #include <optional>        // for optional
 #include <string>          // for string
 
-namespace gdlib::gmsstrm
+namespace GDX_NS gdlib::gmsstrm
 {
 class TXStream;
 }// namespace gdx::gmsstrm
 
 //======================================================================================================================
 
-namespace gdx
+namespace GDX_NS gdx
 {
 
 class TgdxUELIndex : public std::array<int, GMS_MAX_INDEX_DIM> {

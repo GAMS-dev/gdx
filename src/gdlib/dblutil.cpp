@@ -53,7 +53,7 @@ enum class endian {
 
 #endif
 
-namespace gdlib::dblutil
+namespace GDX_NS gdlib::dblutil
 {
 
 double gdRoundTo( const double x, const int i )

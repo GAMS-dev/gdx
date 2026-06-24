@@ -30,7 +30,7 @@
 #include <string>
 #include <array>
 
-namespace gdlib::dblutil
+namespace GDX_NS gdlib::dblutil
 {
 
 union TI64Rec
@@ -49,3 +49,7 @@ std::string dblToStrHex( double x );
 std::string dblToStrHexponential( double x );
 
 }// namespace gdlib::dblutil
+
+namespace gdlib {
+namespace dblutil = GDX_NS gdlib::dblutil;
+}

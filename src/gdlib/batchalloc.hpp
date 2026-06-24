@@ -30,7 +30,7 @@
 #include <cstdint>
 #include <cassert>
 
-namespace gdlib::batchalloc
+namespace GDX_NS gdlib::batchalloc
 {
 
 template<size_t batchSize, int byteAlign = 1>

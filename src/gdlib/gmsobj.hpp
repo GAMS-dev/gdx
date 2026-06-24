@@ -35,7 +35,7 @@
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace gdlib::gmsobj
+namespace GDX_NS gdlib::gmsobj
 {
 
 template<typename T>
@@ -877,3 +877,7 @@ public:
 void CMove( const void *src, void *dest, int len );
 
 }// namespace gdlib::gmsobj
+
+namespace gdlib {
+namespace gmsobj = GDX_NS gdlib::gmsobj;
+}

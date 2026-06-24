@@ -29,8 +29,12 @@
 #include <string>    // for string, operator""s
 #include <vector>    // for vector
 
-namespace gdx::tests::gdxtests
+//#include "gdx.hpp"
+
+namespace GDX_NS gdx::tests::gdxtests
 {
+
+using TGXFileObj = gdx::TGXFileObj ;
 
 bool setEnvironmentVar( const std::string &name, const std::string &val );
 void unsetEnvironmentVar( const std::string &name );

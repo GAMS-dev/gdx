@@ -30,7 +30,7 @@
 #include <cstdint>
 #include <string>
 
-namespace rtl::p3io
+namespace GDX_NS rtl::p3io
 {
 
 void dig2Exp( const char *dig, size_t digLen, int decPos, int isNeg, int width, int decimals, char *buf, size_t *bufLen );
@@ -80,3 +80,7 @@ struct P3File {
 bool mkdir( const std::string &s );
 
 }// namespace rtl::p3io
+
+namespace rtl {
+namespace p3io = GDX_NS rtl::p3io;
+}

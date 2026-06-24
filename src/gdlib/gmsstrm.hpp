@@ -56,7 +56,7 @@ inline int compress( void *dest, unsigned long *destLen, const void *source, uns
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace gdlib::gmsstrm
+namespace GDX_NS gdlib::gmsstrm
 {
 constexpr bool Paranoid = false;
 
@@ -411,3 +411,8 @@ public:
 void CompressTextFile( const std::string &fn, const std::string &fo, const std::string &PassWord, bool Comp, int &ErrNr, std::string &ErrMsg );
 void UnCompressTextFile( const std::string &fn, const std::string &fo, const std::string &PassWord, int &ErrNr, std::string &ErrMsg );
 }// namespace gdlib::gmsstrm
+
+namespace gdlib {
+namespace gmsstrm = GDX_NS gdlib::gmsstrm;
+}
+

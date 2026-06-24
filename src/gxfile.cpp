@@ -46,11 +46,11 @@
 #undef GetObject
 #endif
 
-using namespace gdlib::gmsstrm;
+using namespace GDX_NS gdlib::gmsstrm;
 using namespace std::literals::string_literals;
 using namespace utils;
 
-namespace gdx
+namespace GDX_NS gdx
 {
 
 std::string QueryEnvironmentVariable( const std::string_view Name );

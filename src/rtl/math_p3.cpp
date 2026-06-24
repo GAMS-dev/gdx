@@ -30,7 +30,7 @@
 #include <cmath>  // for log1p
 #include <stdexcept>
 
-namespace rtl::math_p3
+namespace GDX_NS rtl::math_p3
 {
 
 constexpr int64_t

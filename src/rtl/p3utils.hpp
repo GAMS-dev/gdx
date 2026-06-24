@@ -33,7 +33,7 @@
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace rtl::p3utils
+namespace GDX_NS rtl::p3utils
 {
 
 void initParamStr( int argc, const char **argv );
@@ -168,3 +168,7 @@ int xGetExecName( std::string &execName, std::string &msg );
 int p3SomeIOResult();
 
 }// namespace rtl::p3utils
+
+namespace rtl {
+namespace p3utils = GDX_NS rtl::p3utils;
+}

@@ -54,13 +54,13 @@
 #include "utils.hpp"
 
 using namespace std::literals::string_literals;
-using namespace gdx;
-using namespace utils;
-using namespace gdlib::strindexbuf;
+using namespace GDX_NS gdx;
+using namespace GDX_NS utils;
+using namespace GDX_NS gdlib::strindexbuf;
 
 namespace fs = std::filesystem;
 
-namespace gdx::tests::gdxtests
+namespace GDX_NS gdx::tests::gdxtests
 {
 TEST_SUITE_BEGIN( "GDX object tests" );
 

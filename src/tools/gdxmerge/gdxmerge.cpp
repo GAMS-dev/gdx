@@ -50,7 +50,7 @@ std::unique_ptr<SymbolList> SyList;
 
 GAMSSymbol::GAMSSymbol(const int ADim, const gdxSyType AType, const int ASubTyp)
     : SyDim(ADim), SySubTyp(ASubTyp), SyTyp(AType),
-      SyData(std::make_unique<gdlib::gmsdata::TTblGamsData<double>>(ADim, DataTypSize.at(AType) * sizeof(double))) {}
+      SyData(std::make_unique<GDX_NS gdlib::gmsdata::TTblGamsData<double>>(ADim, DataTypSize.at(AType) * sizeof(double))) {}
 
 GDXFileEntry::GDXFileEntry(std::string AFileName, std::string AFileId, std::string AFileInfo)
     : FFileName(std::move(AFileName)), FFileId(std::move(AFileId)), FFileInfo(std::move(AFileInfo)) {}

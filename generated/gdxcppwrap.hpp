@@ -37,7 +37,7 @@
 #include <cstdint>
 #include "gdxcc.h"
 
-namespace gdx
+namespace GDX_NS gdx
 {
 
 using TDomainIndexProc_t = void ( * )( int RawIndex, int MappedIndex, void *Uptr );

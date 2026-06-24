@@ -37,7 +37,7 @@
 #include <cassert>
 #include <numeric>
 
-namespace gdlib::strhash
+namespace GDX_NS gdlib::strhash
 {
 template<typename T>
 struct THashBucket {

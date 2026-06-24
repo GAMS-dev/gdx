@@ -33,7 +33,7 @@
 
 #include "gmsobj.hpp"
 
-namespace gdlib::gmsdata
+namespace GDX_NS gdlib::gmsdata
 {
 template<typename T>
 class TTblGamsData final

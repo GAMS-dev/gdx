@@ -28,7 +28,7 @@
 #include <set>
 #include <cstdint>
 
-namespace rtl::math_p3
+namespace GDX_NS rtl::math_p3
 {
 
 enum TFPUException : uint8_t
@@ -55,3 +55,7 @@ bool IsNan( double AValue );
 bool IsInfinite( double AValue );
 
 }// namespace rtl::math_p3
+
+namespace rtl {
+namespace math_p3 = GDX_NS rtl::math_p3;
+}

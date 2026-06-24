@@ -34,7 +34,7 @@
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace gdlib::strutilx
+namespace GDX_NS gdlib::strutilx
 {
 class DelphiStrRef {
 public:
@@ -139,3 +139,7 @@ int LStrPos(const std::string &Pat, const std::string &S);
 
 
 }// namespace gdlib::strutilx
+
+namespace gdlib {
+namespace strutilx = GDX_NS gdlib::strutilx;
+}

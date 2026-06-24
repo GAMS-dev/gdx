@@ -6,7 +6,7 @@
 #include <array>
 #include <gclgms.h>
 
-namespace gdlib::strindexbuf
+namespace GDX_NS gdlib::strindexbuf
 {
 class StrRef
 {
@@ -90,4 +90,8 @@ public:
    }
 };
 
+}
+
+namespace gdlib {
+namespace strindexbuf = GDX_NS gdlib::strindexbuf;
 }

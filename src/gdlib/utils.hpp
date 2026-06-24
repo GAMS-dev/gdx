@@ -61,7 +61,7 @@
 extern std::stringstream debugStream;
 #endif
 
-namespace utils
+namespace GDX_NS utils
 {
 
 template<typename T, int card>
@@ -825,3 +825,5 @@ class sstring : public std::array<char, 256> {
 double frac( double x );
 
 }// namespace utils
+
+namespace utils = GDX_NS utils;
