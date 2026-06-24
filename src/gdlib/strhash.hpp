@@ -350,7 +350,7 @@ public:
       return res;
    }
 
-   void FreeItem( int N )
+   virtual void FreeItem( int N )
    {
       // noop by default
    }
