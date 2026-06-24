@@ -50,7 +50,7 @@ inline int compress( void *dest, unsigned long *destLen, const void *source, uns
    return 0;
 }
 #else
-#include <zlib.h>
+#include "zlib.h"
 #endif
 
 // ==============================================================================================================
