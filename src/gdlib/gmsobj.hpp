@@ -71,7 +71,7 @@ protected:
    int FCount;
    T **FList;
 
-   virtual void Grow()
+   void Grow()
    {
       int delta { FCapacity >= 1024 * 1024 ? FCapacity / 4 : ( !FCapacity ? 16 : 7 * FCapacity ) };
       int64_t i64 = FCapacity;
@@ -230,7 +230,7 @@ public:
       return !FCount;
    }
 
-   virtual T *operator[]( const int Index )
+   T *operator[]( const int Index )
    {
       return Get( Index );
    }

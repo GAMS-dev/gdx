@@ -274,6 +274,7 @@ public:
 
 void reverseBytesMax8( const void *psrc, void *pdest, int sz );
 
+// This can't be final as TGAMSWorkFile derives from it
 class TMiBufferedStream : public TBufferedFileStream
 {
    uint8_t order_word {}, order_integer {}, order_double {}, size_word {}, size_integer {}, size_double {};
@@ -397,15 +398,15 @@ public:
    // OpenForWrite
    TBinaryTextFileIO( const std::string &fn, const std::string &Producer, const std::string &PassWord, TFileSignature signature, bool comp, int &ErrNr, std::string &errMsg );
 
-   uint32_t Read( char *Buffer, uint32_t Count );
+   uint32_t Read( char *Buffer, uint32_t Count ) override;
    char ReadCharacter(); //ohuber: looks unused
-   void ReadLine( std::vector<uint8_t> &Buffer, int &Len, int MaxInp, char &LastChar );
-   void ReadLine( char *Buffer, int &Len, int MaxInp, char &LastChar );
-   void ReadLine( std::string &StrBuffer, int &Len, int MaxInp, char &LastChar );
+   void ReadLine( std::vector<uint8_t> &Buffer, int &Len, int MaxInp, char &LastChar ) override;
+   void ReadLine( char *Buffer, int &Len, int MaxInp, char &LastChar ) override;
+   void ReadLine( std::string &StrBuffer, int &Len, int MaxInp, char &LastChar ) override;
    uint32_t Write( const char *Buffer, uint32_t Count ) const;
    bool UsesPassWord();
-   virtual void ReWind();
-   int GetLastIOResult();
+   void ReWind() override;
+   int GetLastIOResult() override;
 };
 
 void CompressTextFile( const std::string &fn, const std::string &fo, const std::string &PassWord, bool Comp, int &ErrNr, std::string &ErrMsg );
