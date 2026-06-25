@@ -111,3 +111,7 @@ public:
 };
 
 }// namespace gdlib::batchalloc
+
+namespace gdlib {
+namespace batchalloc = GDX_NS gdlib::batchalloc;
+}
