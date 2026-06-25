@@ -283,7 +283,7 @@ inline char *NewString( const char *s, const size_t slen, size_t &memSize )
    return buf;
 }
 
-class TXStrings final : public TXList<char>
+class TXStrings final : public TXList<char, FreeItemArrayDeleteFList>
 {
    size_t FStrMemory;
 
