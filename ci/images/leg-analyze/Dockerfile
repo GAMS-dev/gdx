@@ -38,8 +38,9 @@ RUN apt-get update &&                                   \
     ln -s /opt/codechecker_env/bin/CodeChecker /usr/local/bin/CodeChecker
 
 # Requirements for CodeChecker explicitly pinpointed to Clang 22
-RUN apt-get update && apt-get install -y clang-22 clang-tools-22 clang-tidy-22 cppcheck && \
+RUN apt-get update && apt-get install -y clang-22 clang-tools-22 clang-tidy-22 clang++-22 cppcheck && \
     ln -s /usr/bin/clang-22 /usr/bin/clang && \
+    ln -s /usr/bin/clang++-22 /usr/bin/clang++ && \
     ln -s /usr/bin/clang-tidy-22 /usr/bin/clang-tidy
 
 RUN apt-get clean
