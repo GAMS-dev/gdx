@@ -1,8 +1,4 @@
-# Stolen from @afust
-# See https://git.gams.com/devel/qt-machines/-/blob/main/leg/analyzer/Dockerfile
-# Didn't take his image directly as we don't need Qt here
-
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 RUN apt-get update &&                                   \
     DEBIAN_FRONTEND=noninteractive apt-get install -yq  \
@@ -38,4 +34,4 @@ RUN apt-get update &&                                   \
 RUN apt-get update && apt-get install -y clang clang-tools clang-tidy cppcheck
 RUN apt-get clean
 
-RUN ln -s /opt/codechecker_env/lib/python3.12/site-packages/codechecker_analyzer/ld_logger/lib/x86_64/ldlogger.so /lib/ldlogger.so
+RUN ln -s /opt/codechecker_env/lib/python3.14/site-packages/codechecker_analyzer/ld_logger/lib/x86_64/ldlogger.so /lib/ldlogger.so
