@@ -824,6 +824,15 @@ class sstring : public std::array<char, 256> {
 // Signed fraction; frac(x) = x - int(x)// Truncate towards zero
 double frac( double x );
 
+
+#include <type_traits>
+
+// Define a helper that always evaluates to false, 
+// but depends on a template parameter to delay evaluation.
+// This is used to report compile-time error in template with constexpr
+template <auto v> 
+struct always_false : std::false_type {};
+
 }// namespace utils
 
 namespace utils = GDX_NS utils;

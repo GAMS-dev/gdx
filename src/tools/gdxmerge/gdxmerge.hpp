@@ -48,9 +48,8 @@ struct GDXFileEntry {
 };
 
 template <typename T>
-struct FileList final : public gdlib::gmsobj::TXList<T> {
-  ~FileList() override;
-  void Clear() override;
+struct FileList final : public gdlib::gmsobj::TXList<T, gdlib::gmsobj::FreeItemDeleteFList> {
+  ~FileList() override = default;
   void AddFile(const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo);
   std::string FileName(int Index);
   std::string FileId(int Index);

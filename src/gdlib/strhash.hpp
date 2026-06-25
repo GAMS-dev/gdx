@@ -50,7 +50,12 @@ struct THashBucket {
 template<typename T>
 using PHashBucket = THashBucket<T> *;
 
-template<typename T, bool caseInsensitive = true>
+enum freeItemBehaviorType {
+   FreeItemNoOp,
+   FreeItemDeleteObject
+};
+
+template<typename T, bool caseInsensitive = true, enum freeItemBehaviorType freeItemBehavior = FreeItemNoOp>
 class TXStrHashList
 {
 protected:
@@ -255,7 +260,7 @@ public:
       ClearHashTable();
    }
 
-   ~TXStrHashList()
+   virtual ~TXStrHashList()
    {
       Clear();
    }
@@ -350,9 +355,17 @@ public:
       return res;
    }
 
-   virtual void FreeItem( int N )
+   void FreeItem( int N )
    {
-      // noop by default
+      if constexpr (freeItemBehavior == FreeItemNoOp) {
+         // noop by default
+      } else if constexpr (freeItemBehavior == FreeItemDeleteObject) {
+         delete *GetObject( N );
+      } else {
+         // generate compile-time error
+         static_assert(utils::always_false<freeItemBehavior>::value,
+                       "Unsupported freeItemBehavior provided!");
+      }
    }
 
    int Add( const char *s, size_t slen )

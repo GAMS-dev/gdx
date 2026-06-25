@@ -38,7 +38,13 @@
 namespace GDX_NS gdlib::gmsobj
 {
 
-template<typename T>
+enum freeItemBehaviorType {
+   FreeItemNoOp,
+   FreeItemArrayDeleteFList,
+   FreeItemDeleteFList,
+};
+
+template<typename T, enum freeItemBehaviorType freeItemBehavior = FreeItemNoOp>
 class TXList
 {
    int FCapacity;
@@ -86,9 +92,19 @@ protected:
       }
    }
 
-   virtual void FreeItem( int Index )
+   void FreeItem( int Index )
    {
+      if constexpr (freeItemBehavior == FreeItemNoOp) {
       // No-op
+      } else if constexpr (freeItemBehavior == FreeItemArrayDeleteFList) {
+         delete[] FList[Index];
+      } else if constexpr (freeItemBehavior == FreeItemDeleteFList) {
+         delete FList[Index];
+      } else {
+         // generate compile-time error
+         static_assert(utils::always_false<freeItemBehavior>::value,
+                       "Unsupported freeItemBehavior provided!");
+      }
    }
 
    bool OneBased;
@@ -119,7 +135,7 @@ public:
       return res;
    }
 
-   virtual void Clear()
+   void Clear()
    {
       for( int N { FCount - 1 + ( OneBased ? 1 : 0 ) }; N >= ( OneBased ? 1 : 0 ); N-- ) FreeItem( N );
       FCount = 0;
@@ -282,19 +298,10 @@ class TXStrings final : public TXList<char>
       return FList[Index - ( OneBased ? 1 : 0 )];
    }
 
-protected:
-   void FreeItem( const int Index ) override
-   {
-      delete[] FList[Index];
-   }
-
 public:
    TXStrings() : FStrMemory {} {}
 
-   ~TXStrings() override
-   {
-      Clear();
-   }
+   ~TXStrings() override = default;
 
    int Add( const char *Item, const size_t ItemLen )
    {
