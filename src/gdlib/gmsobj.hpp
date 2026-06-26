@@ -44,7 +44,7 @@ enum freeItemBehaviorType {
    FreeItemDeleteFList,
 };
 
-template<typename T, enum freeItemBehaviorType freeItemBehavior = FreeItemNoOp>
+template<typename T, freeItemBehaviorType freeItemBehavior = FreeItemNoOp>
 class TXList
 {
    int FCapacity;
