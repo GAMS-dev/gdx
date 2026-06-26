@@ -262,7 +262,6 @@ class TUELTable final : public TXStrHashListImpl<int>
 public:
    std::unique_ptr<TIntegerMapping> UsrUel2Ent {};// from user uelnr to table entry
    TUELTable();
-   //~TUELTable() override = default;
    [[nodiscard]] int size() const;
    [[nodiscard]] bool empty() const;
    [[nodiscard]] int GetUserMap( int i ) const;
