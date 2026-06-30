@@ -52,8 +52,7 @@ using namespace std::literals::string_literals;
 
 class WriteSolveReadExample
 {
-   std::string ErrMsg;
-   TGXFileObj pgdx { ErrMsg };
+   TGXFileObj pgdx;
    optHandle_t opt {};
 
    std::array<char, GMS_SSSIZE> msg {};
@@ -75,8 +74,6 @@ void WriteSolveReadExample::throwGDXError( const TGXFileObj &gdx, int i, const s
 
 WriteSolveReadExample::WriteSolveReadExample( const std::string &sysdir )
 {
-   if( !ErrMsg.empty() )
-      throw std::runtime_error( "Could not create gdx object "s + ErrMsg );
    if( !optCreateD( &opt, sysdir.c_str(), msg.data(), static_cast<int>( msg.size() ) ) )
       throw std::runtime_error( "Could not create opt object: "s + msg.data() );
 }

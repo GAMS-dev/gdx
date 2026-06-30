@@ -938,8 +938,7 @@ functions:
       group: File (Open/Close)
       code:
         cpp: |-
-          std::string errMsg;
-          TGXFileObj pgx{errMsg};
+          TGXFileObj pgx;
           pgx.gdxOpenRead("file1.gdx", ErrNr);
           if(ErrNr) {
             [...]
@@ -1004,8 +1003,7 @@ functions:
       group: File (Open/Close)
       code:
         cpp: |-
-          std::string errMsg;
-          TGXFileObj pgx{errMsg};
+          TGXFileObj pgx;
           if(!errMsg.empty()) {
               std::cout << "Failure with GDX: " << errMsg << std::endl;
               return;

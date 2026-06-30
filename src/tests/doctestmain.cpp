@@ -35,8 +35,7 @@
 
 int main(int argc, char** argv)
 {
-   std::string ErrMsg;
-   gdx::TGXFileObj pgx { ErrMsg };
+   gdx::TGXFileObj pgx;
    int ErrNr;
    const auto filename { R"(C:\Users\aschn\Downloads\model\MJjacobian_red2.gdx)" };
 

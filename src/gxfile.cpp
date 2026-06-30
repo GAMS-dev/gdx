@@ -675,9 +675,8 @@ void TGXFileObj::InitErrors()
    LastError = LastRepError = ERR_NOERROR;
 }
 
-TGXFileObj::TGXFileObj( std::string &ErrMsg )
+TGXFileObj::TGXFileObj()
 {
-   ErrMsg.clear();
    gdxResetSpecialValues();
 }
 

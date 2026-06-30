@@ -39,9 +39,8 @@ public:
    /**
     * Constructor of GDX file object
     * @brief Create a new GDX file object. Does not open a file yet.
-    * @param ErrMsg Out argument for storing potential error messages. Will be empty when there is no error.
      */
-   explicit TGXFileObj( std::string &ErrMsg );
+   explicit TGXFileObj();
 
    /**
     * Destructor of GDX file object
@@ -493,8 +492,7 @@ public:
     * @param ErrNr Returns an error code or zero if there is no error.
     * @return Returns non-zero if the file can be opened; zero otherwise.
     * @code
-      std::string errMsg;
-      TGXFileObj pgx{errMsg};
+      TGXFileObj pgx;
       pgx.gdxOpenRead("file1.gdx", ErrNr);
       if(ErrNr) {
         [...]
@@ -551,8 +549,7 @@ public:
     *   gdxClose; see gdxAutoConvert.
     * @return Returns non-zero if the file can be opened; zero otherwise.
     * @code
-      std::string errMsg;
-      TGXFileObj pgx{errMsg};
+      TGXFileObj pgx;
       if(!errMsg.empty()) {
           std::cout << "Failure with GDX: " << errMsg << std::endl;
           return;

@@ -196,12 +196,8 @@ gdxGetLoadPath_t gdxGetLoadPath = doGetLoadPath;
 
 GDX_INLINE int gdxCreate( TGXFileRec_t **TGXFile, char *errBuf, int bufSize )
 {
-   std::string ErrMsg;
-   auto *pgx = new gdx::TGXFileObj { ErrMsg };
-   if( !ErrMsg.empty() )
-      memcpy( errBuf, ErrMsg.c_str(), std::min<int>( (int) ErrMsg.length() + 1, bufSize ) );
-   else
-      errBuf[0] = '\0';
+   auto *pgx = new gdx::TGXFileObj;
+   errBuf[0] = '\0';
    *TGXFile = reinterpret_cast<TGXFileRec_t *>( pgx );
    return true;
 }
