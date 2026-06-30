@@ -113,8 +113,17 @@ gdxGetLoadPath_t gdxGetLoadPath = doGetLoadPath;
 
 GDX_INLINE int gdxCreate( TGXFileRec_t **TGXFile, char *errBuf, int bufSize )
 {
-   auto *pgx = new gdx::TGXFileObj;
    errBuf[0] = '\0';
+   gdx::TGXFileObj *pgx;
+   try
+   {
+      pgx = new gdx::TGXFileObj;
+   }
+   catch(std::bad_alloc &)
+   {
+      snprintf( errBuf, bufSize, "Cannot allocate GDX object!" );
+      return false;
+   }
    *TGXFile = reinterpret_cast<TGXFileRec_t *>( pgx );
    return true;
 }
