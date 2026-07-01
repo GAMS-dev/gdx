@@ -37,6 +37,10 @@
 #include <cstdint>
 #include "gdxcc.h"
 
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
 namespace GDX_NS gdx
 {
 

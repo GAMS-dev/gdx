@@ -37,6 +37,10 @@
 #include <cstring>
 #include <cstdint>
 
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
 // Interface
 namespace GDX_NS global::delphitypes
 {

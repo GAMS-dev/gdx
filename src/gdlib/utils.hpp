@@ -61,6 +61,10 @@
 extern std::stringstream debugStream;
 #endif
 
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
 namespace GDX_NS utils
 {
 

@@ -30,6 +30,10 @@
 #include <cstdint>
 #include <string>
 
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
 namespace GDX_NS rtl::p3io
 {
 

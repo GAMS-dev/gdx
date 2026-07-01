@@ -56,6 +56,10 @@ inline int compress( void *dest, unsigned long *destLen, const void *source, uns
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
 namespace GDX_NS gdlib::gmsstrm
 {
 constexpr bool Paranoid = false;

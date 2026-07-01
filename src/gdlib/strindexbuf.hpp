@@ -6,6 +6,10 @@
 #include <array>
 #include <gclgms.h>
 
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
 namespace GDX_NS gdlib::strindexbuf
 {
 class StrRef
