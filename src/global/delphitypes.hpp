@@ -181,7 +181,7 @@ public:
       if( value < lowerBoundIncl || value > upperBoundIncl )
       {
          std::stringstream msgStream;
-         msgStream << value << " is out of bounded range [" << lowerBoundIncl << "," << upperBoundIncl << "]";
+         msgStream << "In Bounded, value " << value << " is out of bounded range [" << lowerBoundIncl << "," << upperBoundIncl << "]";
          throw std::out_of_range( msgStream.str() );
       }
 #endif

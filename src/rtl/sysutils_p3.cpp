@@ -23,8 +23,9 @@
  * SOFTWARE.
  */
 
-#include <string> // for string
-#include <cstring>// for strerror, size_t, strcmp, strcpy
+#include <charconv> // for std::from_chars
+#include <string>   // for string
+#include <cstring>  // for strerror, size_t, strcmp, strcpy
 
 #include "p3io.hpp"
 #include "sysutils_p3.hpp"
@@ -200,15 +201,18 @@ int64_t StrToInt64( const std::string_view s )
    }
    else
    {
-      for( ; i < s.length(); ++i )
-      {
-         if( !std::isdigit( static_cast<unsigned char>( s[i] ) ) )
-         {
-            error = true;
-            break;
-         }
-         result = 10 * result + s[i] - '0';
+      i -= negative;
+      std::string_view sv = s.substr(i, s.size()-i);
+      if (sv.size() == 0)
+         return 0;
+
+      auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), result);
+
+      if (ptr != sv.data() + sv.size() || ec != std::errc()) {
+         return std::numeric_limits<int64_t>::min();
       }
+
+      return result;
    }
 
    if( error )
