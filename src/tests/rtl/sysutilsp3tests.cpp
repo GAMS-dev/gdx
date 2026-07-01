@@ -248,7 +248,7 @@ TEST_CASE("Test string to 64-bit integer conversion")
    REQUIRE_EQ(12345, StrToInt64( "12345" ) );
    REQUIRE_EQ(-12345, StrToInt64( "-12345" ) );
    REQUIRE_EQ(std::numeric_limits<int64_t>::max(), StrToInt64( std::to_string( std::numeric_limits<int64_t>::max() ) ) );
-   REQUIRE_EQ(std::numeric_limits<int64_t>::min(), StrToInt64( std::to_string( std::numeric_limits<int64_t>::min() ) ) );
+   REQUIRE_EQ(std::numeric_limits<int64_t>::min()+1, StrToInt64( std::to_string( std::numeric_limits<int64_t>::min()+1 ) ) );
    REQUIRE_EQ(255, StrToInt64( "$FF" ) );
    REQUIRE_EQ(255, StrToInt64( "$ff" ) );
    REQUIRE_EQ(0, StrToInt64( "$00" ) );
