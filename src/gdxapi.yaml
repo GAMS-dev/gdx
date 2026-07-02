@@ -1004,10 +1004,6 @@ functions:
       code:
         cpp: |-
           TGXFileObj pgx;
-          if(!errMsg.empty()) {
-              std::cout << "Failure with GDX: " << errMsg << std::endl;
-              return;
-          }
           int ErrCode;
           pgx.gdxOpenWriteEx("file1.gdx", "Examples", 1, ErrCode);
           pgx.gdxAutoConvert(0);
