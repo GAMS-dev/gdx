@@ -550,10 +550,6 @@ public:
     * @return Returns non-zero if the file can be opened; zero otherwise.
     * @code
       TGXFileObj pgx;
-      if(!errMsg.empty()) {
-          std::cout << "Failure with GDX: " << errMsg << std::endl;
-          return;
-      }
       int ErrCode;
       pgx.gdxOpenWriteEx("file1.gdx", "Examples", 1, ErrCode);
       pgx.gdxAutoConvert(0);
