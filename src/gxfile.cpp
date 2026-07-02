@@ -50,6 +50,20 @@ using namespace gdlib::gmsstrm;
 using namespace std::literals::string_literals;
 using namespace utils;
 
+#define NEED_UEL_TABLE() \
+   if(!UELTable && UelReadDeferred) \
+   { \
+      /* FIXME: Do proper error handling like gdxOpenRead... */ \
+      ReadUELTable(); \
+   }
+
+#define NEED_SET_TEXTS() \
+   if( !SetTextList && SetTextReadDeferred ) \
+   { \
+      /* FIXME: Do proper error handling like gdxOpenRead... */ \
+      ReadSetTextList(); \
+   }
+
 namespace gdx
 {
 
@@ -890,6 +904,8 @@ int TGXFileObj::PrepareSymbolRead( const std::string_view Caller, int SyNr, cons
    ErrorList = nullptr;
    CurSyPtr = nullptr;
    SortList = nullptr;
+
+   NEED_UEL_TABLE();
 
    if( !MajorCheckMode( Caller, fr_init ) )
    {
@@ -1856,6 +1872,93 @@ static inline std::string_view substr( const std::string_view s, int offset, int
    return ( s.empty() || offset > (int) s.size() - 1 ) ? std::string_view {} : s.substr( offset, len );
 }
 
+int TGXFileObj::ReadUELTable()
+{
+   const int64_t oldPos = FFile->GetPosition();
+   UelReadDeferred = false;
+   FFile->SetCompression( DoUncompress );
+   FFile->SetPosition( ReadUELPos );
+   UELTable = std::make_unique<UELTableImplChoice>();
+
+   if( ErrorCondition( FFile->ReadString() == MARK_UEL, ERR_OPEN_UELMARKER1 ) )
+   {
+      // NOTE: Not covered by unit tests yet.
+      FFile = nullptr;
+      return false;
+   }
+
+   int NrElem = FFile->ReadInteger();
+   // subtract 2*6 bytes for MARK_UEL ("_UEL_\0") and 4 bytes for UEL count integer
+   const auto uelLabelStrBytes { VersionRead >= 7 ? ReadAcronymPos - ReadUELPos - 6 * 2 - 4 : 0 };
+   UELTable->SetCapacity( NrElem, uelLabelStrBytes );
+   // bug for pre 2002
+   if( substr( FileSystemID, 15, 4 ) == "2001"s )
+      NrElem--;
+
+   while( UELTable->size() < NrElem )
+   {
+      uint8_t slen;
+      sstring s;
+      FFile->ReadSString( s.data(), slen );
+      UELTable->StoreObject( s.data(), slen, -1 );
+   }
+   UelCntOrig = UELTable->size();// needed when reading universe
+
+   if( ErrorCondition( FFile->ReadString() == MARK_UEL, ERR_OPEN_UELMARKER2 ) )
+   {
+      FFile = nullptr;
+      return false;
+   }
+
+   FFile->SetPosition( oldPos );
+   return true;
+}
+
+int TGXFileObj::ReadSetTextList()
+{
+   const int64_t oldPos = FFile->GetPosition();
+   FFile->SetCompression( DoUncompress );
+   FFile->SetPosition( ReadSetTextPos );
+   SetTextList = std::make_unique<TSetTextList>();
+   SetTextList->OneBased = false;
+   if (ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1))
+   {
+      FFile = nullptr;
+      return false;
+   }
+   int NrElem = FFile->ReadInteger();
+   // set text table (when there) is always before UEL table
+   // subtract bytes for length (4-byte) and twice 7 chars MARK_SETT (_SETT_\0)
+   const auto setTextStrBytes { ReadUELPos - ReadSetTextPos - 7 * 2 - 4 };
+   SetTextList->SetCapacity( NrElem, setTextStrBytes );
+   for( int N {}; N < NrElem; N++ )
+   {
+      uint8_t slen;
+      sstring s;
+      FFile->ReadSString( s.data(), slen );
+      if( const int TextNum { SetTextList->Add( s.data(), slen ) };
+          TextNum != N )
+      {// duplicates stored in GDX file, e.g. empty string
+         // NOTE: Not covered by unit tests yet.
+         if( !MapSetText )
+         {
+            MapSetText = std::make_unique<int[]>( NrElem );
+            for( int D {}; D < N; D++ )
+               MapSetText[D] = D;
+         }
+         MapSetText[N] = TextNum;
+      }
+   }
+   if (ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER2))
+   {
+      FFile = nullptr;
+      return false;
+   }
+
+   FFile->SetPosition( oldPos );
+   return true;
+}
+
 int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int &ErrNr )
 {
    if( fmode != f_not_open )
@@ -1925,24 +2028,24 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
    // read section/segment offsets
    MajorIndexPosition = FFile->GetPosition();
    if( ErrorCondition( FFile->ReadInteger() == MARK_BOI, ERR_OPEN_BOI ) ) return FileErrorNr();
-   int64_t AcronymPos {}, DomStrPos {}, SymbPos {}, UELPos {}, SetTextPos {};
+   int64_t DomStrPos {}, SymbPos {};
 
    if( VersionRead <= 5 )
    {
       // NOTE: Not covered by unit tests yet.
       SymbPos = FFile->ReadInteger();
-      UELPos = FFile->ReadInteger();
-      SetTextPos = FFile->ReadInteger();
+      ReadUELPos = FFile->ReadInteger();
+      ReadSetTextPos = FFile->ReadInteger();
       NextWritePosition = FFile->ReadInteger();
    }
    else
    {
       SymbPos = FFile->ReadInt64();
-      UELPos = FFile->ReadInt64();
-      SetTextPos = FFile->ReadInt64();
+      ReadUELPos = FFile->ReadInt64();
+      ReadSetTextPos = FFile->ReadInt64();
       if( VersionRead >= 7 )
       {
-         AcronymPos = FFile->ReadInt64();
+         ReadAcronymPos = FFile->ReadInt64();
          NextWritePosition = FFile->ReadInt64();
          DomStrPos = FFile->ReadInt64();
       }
@@ -2004,71 +2107,18 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
    }
    if( ErrorCondition( FFile->ReadString() == MARK_SYMB, ERR_OPEN_SYMBOLMARKER2 ) ) return FileErrorNr();
 
-   // reading UEL table
-   FFile->SetCompression( DoUncompress );
-   FFile->SetPosition( UELPos );
-   UELTable = std::make_unique<UELTableImplChoice>();
+   // reading UEL table (now deferred until needed)
+   UelReadDeferred = true;
 
-   if( ErrorCondition( FFile->ReadString() == MARK_UEL, ERR_OPEN_UELMARKER1 ) )
-      return FileErrorNr();// NOTE: Not covered by unit tests yet.
-
-   NrElem = FFile->ReadInteger();
-   // subtract 2*6 bytes for MARK_UEL ("_UEL_\0") and 4 bytes for UEL count integer
-   const auto uelLabelStrBytes { VersionRead >= 7 ? AcronymPos-UELPos - 6 * 2 - 4 : 0 };
-   UELTable->SetCapacity( NrElem, uelLabelStrBytes );
-   // bug for pre 2002
-   if( substr( FileSystemID, 15, 4 ) == "2001"s ) NrElem--;
-
-   while( UELTable->size() < NrElem )
-   {
-      uint8_t slen;
-      sstring s;
-      FFile->ReadSString( s.data(), slen );
-      UELTable->StoreObject( s.data(), slen, -1 );
-   }
-   UelCntOrig = UELTable->size(); // needed when reading universe
-
-   if( ErrorCondition( FFile->ReadString() == MARK_UEL, ERR_OPEN_UELMARKER2 ) ) return FileErrorNr();
-
-   // reading set text table
+   // reading set text table (now deferred until needed)
    if( ReadMode % 2 == 0 )
-   {
-      FFile->SetCompression( DoUncompress );
-      FFile->SetPosition( SetTextPos );
-      SetTextList = std::make_unique<TSetTextList>();
-      SetTextList->OneBased = false;
-      if( ErrorCondition( FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER1 ) ) return FileErrorNr();
-      NrElem = FFile->ReadInteger();
-      // set text table (when there) is always before UEL table
-      // subtract bytes for length (4-byte) and twice 7 chars MARK_SETT (_SETT_\0)
-      const auto setTextStrBytes { UELPos - SetTextPos - 7 * 2 - 4 };
-      SetTextList->SetCapacity( NrElem, setTextStrBytes );
-      for( int N {}; N < NrElem; N++ )
-      {
-         uint8_t slen;
-         sstring s;
-         FFile->ReadSString( s.data(), slen );
-         if( const int TextNum { SetTextList->Add( s.data(), slen ) };
-            TextNum != N )
-         {// duplicates stored in GDX file, e.g. empty string
-            // NOTE: Not covered by unit tests yet.
-            if( !MapSetText )
-            {
-               MapSetText = std::make_unique<int[]>( NrElem );
-               for( int D {}; D < N; D++ )
-                  MapSetText[D] = D;
-            }
-            MapSetText[N] = TextNum;
-         }
-      }
-      if( ErrorCondition( FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER2 ) ) return FileErrorNr();
-   }
+      SetTextReadDeferred = true;
 
    // reading acronym list
    if( VersionRead >= 7 )
    {
       FFile->SetCompression( DoUncompress );
-      FFile->SetPosition( AcronymPos );
+      FFile->SetPosition( ReadAcronymPos );
       if( ErrorCondition( FFile->ReadString() == MARK_ACRO, ERR_OPEN_ACROMARKER1 ) ) return FileErrorNr();
       AcronymList->LoadFromStream( *FFile );
       if( ErrorCondition( FFile->ReadString() == MARK_ACRO, ERR_OPEN_ACROMARKER2 ) ) return FileErrorNr();
@@ -2146,6 +2196,7 @@ int TGXFileObj::gdxAddAlias( const char *Id1, const char *Id2 )
 
 int TGXFileObj::gdxAddSetText( const char *Txt, int &TxtNr )
 {
+   NEED_SET_TEXTS();
    if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "AddSetText"s ) ) )
    {
       TxtNr = 0;
@@ -2264,6 +2315,7 @@ int TGXFileObj::gdxErrorCount() const
 int TGXFileObj::gdxGetElemText( int TxtNr, char *Txt, int &Node )
 {
    Node = 0;
+   NEED_SET_TEXTS();
    if( !SetTextList )
    {
       Txt[0] = '\0';
@@ -2443,6 +2495,7 @@ int TGXFileObj::gdxSymbolInfoX( int SyNr, int &RecCnt, int &UserInfo, char *Expl
 {
    if( !SyNr )
    {
+      NEED_UEL_TABLE();
       RecCnt = UelCntOrig;
       UserInfo = 0;
       assignPCharToBuf( "Universe", ExplTxt, GMS_SSSIZE );
@@ -2589,8 +2642,9 @@ int TGXFileObj::gdxSymbolSetDomainX( int SyNr, const char **DomainIDs )
    return true;
 }
 
-int TGXFileObj::gdxSystemInfo( int &SyCnt, int &UelCnt ) const
+int TGXFileObj::gdxSystemInfo( int &SyCnt, int &UelCnt )
 {
+   NEED_UEL_TABLE();
    UelCnt = UELTable ? (int) UELTable->size() : 0;
    SyCnt = NameList ? (int) NameList->size() : 0;
    return true;
@@ -2652,6 +2706,7 @@ int TGXFileObj::gdxUELRegisterStrStart()
 
 int TGXFileObj::gdxUMUelGet( int UelNr, char *Uel, int &UelMap )
 {
+   NEED_UEL_TABLE();
    if( UELTable && UelNr >= 1 && UelNr <= UELTable->size() )
    {
       assignPCharToBuf( ( *UELTable )[UelNr], Uel );
@@ -2663,13 +2718,14 @@ int TGXFileObj::gdxUMUelGet( int UelNr, char *Uel, int &UelMap )
    return false;
 }
 
-int TGXFileObj::gdxUMUelInfo( int &UelCnt, int &HighMap ) const
+int TGXFileObj::gdxUMUelInfo( int &UelCnt, int &HighMap )
 {
    if( !FFile )
    {// AS: Use FFile != nullptr as proxy for checking open has been called before
       UelCnt = HighMap = 0;
       return false;
    }
+   NEED_UEL_TABLE();
    UelCnt = UELTable ? UELTable->size() : 0;
    HighMap = UELTable->UsrUel2Ent->GetHighestIndex();// highest index
    return true;
@@ -2682,7 +2738,8 @@ int TGXFileObj::gdxCurrentDim() const
 
 int TGXFileObj::gdxRenameUEL( const char *OldName, const char *NewName )
 {
-   if( !UELTable )
+   NEED_UEL_TABLE();
+   if(!UELTable)
       return -1;
 
    int slen;
@@ -2708,8 +2765,9 @@ int TGXFileObj::gdxOpenReadEx( const char *FileName, int ReadMode, int &ErrNr )
    return gdxOpenReadXX( FileName, FileAccessMode::fmOpenRead, ReadMode, ErrNr );
 }
 
-int TGXFileObj::gdxGetUEL( int uelNr, char *Uel ) const
+int TGXFileObj::gdxGetUEL( int uelNr, char *Uel )
 {
+   NEED_UEL_TABLE();
    if( !UELTable )
    {
       Uel[0] = '\0';
@@ -2775,6 +2833,7 @@ int TGXFileObj::gdxUELRegisterMapStart()
 
 int TGXFileObj::gdxUELRegisterMap( int UMap, const char *Uel )
 {
+   NEED_UEL_TABLE();
    int svLen;
    static sstring svStorage;
    const char *SV { trimRight( Uel, svStorage.data(), svLen ) };
@@ -3117,6 +3176,7 @@ int TGXFileObj::gdxDataReadFilteredStart( int SyNr, const int *FilterAction, int
 
 int TGXFileObj::gdxSetTextNodeNr( int TxtNr, int Node )
 {
+   NEED_SET_TEXTS();
    if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "SetTextNodeNr" ) ) ) return false;
    auto &obj = *SetTextList;
    if( TxtNr >= 0 && TxtNr < obj.size() && !*obj.GetObject( TxtNr ) )
@@ -3575,14 +3635,17 @@ int TGXFileObj::gdxSymbolGetComment( int SyNr, int N, char *Txt )
    return false;
 }
 
-int TGXFileObj::gdxUELMaxLength() const
+int TGXFileObj::gdxUELMaxLength()
 {
+   NEED_UEL_TABLE();
+   if (!UELTable) return -1;
    return UELTable->GetMaxUELLength();
 }
 
 int TGXFileObj::gdxUMFindUEL( const char *Uel, int &UelNr, int &UelMap )
 {
    UelMap = -1;
+   NEED_UEL_TABLE();
    if( !UELTable )
    {
       UelNr = -1;
