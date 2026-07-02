@@ -127,8 +127,7 @@ void unsetEnvironmentVar( const std::string &name )
 
 void basicTest( const std::function<void( TGXFileObj & )> &cb )
 {
-   static std::string ErrMsg;
-   TGXFileObj pgx { ErrMsg };
+   TGXFileObj pgx;
    cb( pgx );
 }
 
@@ -137,8 +136,7 @@ void testRead( const std::string &filename, const std::function<void( TGXFileObj
    if( filename.empty() ) return;
 
    {
-      std::string ErrMsg;
-      TGXFileObj pgx { ErrMsg };
+      TGXFileObj pgx;
       int ErrNr, rc = pgx.gdxOpenRead( filename.c_str(), ErrNr );
       REQUIRE( rc );
       cb( pgx );
@@ -151,8 +149,7 @@ void testWrite( const std::string &filename, const std::function<void( TGXFileOb
    if( filename.empty() ) return;
 
    {
-      std::string ErrMsg;
-      TGXFileObj pgx { ErrMsg };
+      TGXFileObj pgx;
       int ErrNr;
       REQUIRE( pgx.gdxOpenWrite( filename.c_str(), "gdxtest", ErrNr ) );
       cb( pgx );
@@ -241,9 +238,8 @@ TEST_CASE( "Creating a file should also work when closing was forgotten" )
 {
    const auto fn { "tmp.gdx"s };
    {
-      std::string ErrMsg;
       int ErrNr;
-      TGXFileObj pgx { ErrMsg };
+      TGXFileObj pgx;
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxtest", ErrNr ) );
    }
    REQUIRE( fs::exists( fn ) );
@@ -738,8 +734,7 @@ TEST_CASE( "Test getting special values" )
 {
    std::array<double, GMS_SVIDX_MAX> specialValuesFromPort {};
    {
-      std::string ErrMsg;
-      TGXFileObj pgx { ErrMsg };
+      TGXFileObj pgx;
       REQUIRE( pgx.gdxGetSpecialValues( specialValuesFromPort.data() ) );
    }
 }
@@ -2268,7 +2263,7 @@ TEST_CASE( "Test domain violations more extensively" )
 TEST_CASE( "Test fallback behavior when trying GDX operations when no file is open" )
 {
    std::string msg;
-   TGXFileObj pgx { msg };
+   TGXFileObj pgx;
 
    char text[GMS_SSSIZE];
    int nodeNr;
@@ -2334,8 +2329,7 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
          const auto convertedGDXfn { modelName + "_"s + versSuff + ".gdx"s };
          fs::rename( outDir + "/"s + modelName + ".gdx"s, convertedGDXfn );
          fs::remove( outDir );
-         std::string ErrMsg;
-         TGXFileObj pgx { ErrMsg };
+         TGXFileObj pgx;
          int ErrNr;
          REQUIRE( pgx.gdxOpenRead( convertedGDXfn.c_str(), ErrNr ) );
          int syCnt, uelCnt;
@@ -2433,8 +2427,7 @@ TEST_CASE( "Open append should report error for old GDX file versions" )
    unsetEnvironmentVar( "GDXCONVERT" );
 
    {
-      std::string errMsg;
-      TGXFileObj pgx { errMsg };
+      TGXFileObj pgx;
       int errNr;
       REQUIRE_FALSE( pgx.gdxOpenAppend( "f.gdx", "gdxtests", errNr ) );
       REQUIRE_GT( pgx.gdxErrorCount(), 0 );
@@ -2751,8 +2744,7 @@ TEST_CASE("Test opening 100 char long name GDX file inside two 100 char long nam
    REQUIRE(fs::is_regular_file( gdxTargetFilename ));
 
    {
-      std::string ErrMsg;
-      TGXFileObj gdx {ErrMsg};
+      TGXFileObj gdx;
       int ErrNr;
       REQUIRE_GE(static_cast<int>(gdxTargetFilenameBase.length()), 100 + 1 + 100 + 1 + 100 + 4); // >= 306 (long dirname + sep + long dirname + sep + long name + ".gdx")
       REQUIRE(gdx.gdxOpenRead( gdxTargetFilenameBase.c_str(), ErrNr ));

@@ -938,8 +938,7 @@ functions:
       group: File (Open/Close)
       code:
         cpp: |-
-          std::string errMsg;
-          TGXFileObj pgx{errMsg};
+          TGXFileObj pgx;
           pgx.gdxOpenRead("file1.gdx", ErrNr);
           if(ErrNr) {
             [...]
@@ -1004,12 +1003,7 @@ functions:
       group: File (Open/Close)
       code:
         cpp: |-
-          std::string errMsg;
-          TGXFileObj pgx{errMsg};
-          if(!errMsg.empty()) {
-              std::cout << "Failure with GDX: " << errMsg << std::endl;
-              return;
-          }
+          TGXFileObj pgx;
           int ErrCode;
           pgx.gdxOpenWriteEx("file1.gdx", "Examples", 1, ErrCode);
           pgx.gdxAutoConvert(0);
