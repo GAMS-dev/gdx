@@ -867,7 +867,6 @@ functions:
       group: Special values
   - gdxGetUEL:
       type: int
-      const: True
       parameters:
       - UelNr:
           type: int
@@ -1230,7 +1229,6 @@ functions:
       group: Domain
   - gdxSystemInfo:
       type: int
-      const: True
       parameters:
       - SyCnt:
           type: Oint
@@ -1243,7 +1241,6 @@ functions:
       group: System/Symbol
   - gdxUELMaxLength:
       type: int
-      const: True
       description: Returns the length of the longest unique element (UEL) name.
       return: The length of the longest UEL name in the UEL table.
       details: '<p><b>See: </b><a href="#gdxSymbIndxMaxLength">gdxSymbIndxMaxLength</a>.</p>'
@@ -1341,7 +1338,6 @@ functions:
       group: Unique elements
   - gdxUMUelInfo:
       type: int
-      const: True
       parameters:
       - UelCnt:
           type: Oint

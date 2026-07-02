@@ -2,8 +2,8 @@
  *
  * GAMS - Loading mechanism for GAMS Expert-Level APIs
  *
- * Copyright (c) 2016-2025 GAMS Software GmbH <support@gams.com>
- * Copyright (c) 2016-2025 GAMS Development Corp. <support@gams.com>
+ * Copyright (c) 2016-2026 GAMS Software GmbH <support@gams.com>
+ * Copyright (c) 2016-2026 GAMS Development Corp. <support@gams.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

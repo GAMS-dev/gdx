@@ -1923,7 +1923,7 @@ TEST_CASE( "Test symbol index max UEL length" )
 
 TEST_CASE( "Test UEL table get max uel length" )
 {
-   testReadModelGDX( "trnsport"s, [&]( const TGXFileObj &pgx ) {
+   testReadModelGDX( "trnsport"s, [&]( TGXFileObj &pgx ) {
       REQUIRE_EQ( 9, pgx.gdxUELMaxLength() );
    } );
 }
