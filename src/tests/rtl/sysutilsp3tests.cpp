@@ -286,6 +286,20 @@ TEST_CASE("Test trim functions left/right/both")
    REQUIRE_EQ(""s, TrimRight(""s));
 }
 
+#if defined(_WIN32)
+TEST_CASE("Test long path detection and fixing routines")
+{
+   REQUIRE_FALSE(isLongPath( "C:\\abc"s ));
+   REQUIRE_FALSE(isLongPath( "\\\\?\\C:\\abc"s ));
+   const std::string longish(MAX_PATH+1, 'x');
+   REQUIRE(isLongPath( longish ));
+   const std::string relativeShortButAbsoluteLong(MAX_PATH-1, 'x');
+   REQUIRE(isLongPath( relativeShortButAbsoluteLong ));
+   const std::string fixedPath = tryFixingLongPath( relativeShortButAbsoluteLong );
+   REQUIRE_EQ(fixedPath.substr(0, 4), "\\\\?\\"s);
+}
+#endif
+
 TEST_SUITE_END();
 
 }

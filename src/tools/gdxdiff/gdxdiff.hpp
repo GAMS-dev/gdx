@@ -10,6 +10,8 @@
 
 // GDX library interface
 #include "generated/gdxcc.h"
+// Use this to debug instead:
+//#include "generated/gdxcwrap.h"
 
 namespace gdxdiff {
 

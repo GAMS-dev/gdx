@@ -421,7 +421,7 @@ int p3FileOpen( const std::string &fName, Tp3FileOpenAction mode, Tp3FileHandle 
    }
    else
    {
-      hFile = CreateFileA ((fName.length() > MAX_PATH ? tryFixingLongPath( fName ) : fName).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
+      hFile = CreateFileA ((isLongPath(fName) ? tryFixingLongPath( fName ) : fName).c_str(), accessMode[lowMode], shareMode[lowMode], nullptr,
                        createHow[lowMode], FILE_ATTRIBUTE_NORMAL, nullptr);
    }
    if( INVALID_HANDLE_VALUE == hFile )

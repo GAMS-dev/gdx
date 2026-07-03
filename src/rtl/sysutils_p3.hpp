@@ -211,6 +211,7 @@ int LastDelimiter( const char *Delimiters, const std::string &S );
 int LastDelimiter( std::string_view Delimiters, std::string_view S );
 
 #if defined(_WIN32)
+bool isLongPath(const std::string &p);
 std::string tryFixingLongPath(const std::string &fName);
 #endif
 
