@@ -87,14 +87,13 @@ public:
       trl_all
    };
 
-   explicit TGXFileObj( std::string &ErrMsg )
+   explicit TGXFileObj()
    {
       char buf[GMS_SSSIZE];
       if( !::gdxLibraryLoaded() && !::gdxGetReady( buf, GMS_SSSIZE ) )
          throw std::runtime_error( buf );
       if( !::gdxCreate( &pgx, buf, GMS_SSSIZE ) )
          throw std::runtime_error( buf );
-      ErrMsg.assign( buf );
    }
 
    ~TGXFileObj()
@@ -395,7 +394,7 @@ public:
      return ::gdxGetSpecialValues( pgx, AVals );
    }
 
-   int gdxGetUEL( int UelNr, char *Uel ) const
+   int gdxGetUEL( int UelNr, char *Uel )
    {
      return ::gdxGetUEL( pgx, UelNr, Uel );
    }
@@ -515,12 +514,12 @@ public:
      return ::gdxSymbolSetDomainX( pgx, SyNr, DomainIDs );
    }
 
-   int gdxSystemInfo( int &SyCnt, int &UelCnt ) const
+   int gdxSystemInfo( int &SyCnt, int &UelCnt )
    {
      return ::gdxSystemInfo( pgx, &SyCnt, &UelCnt );
    }
 
-   int gdxUELMaxLength() const
+   int gdxUELMaxLength()
    {
      return ::gdxUELMaxLength( pgx );
    }
@@ -570,7 +569,7 @@ public:
      return ::gdxUMUelGet( pgx, UelNr, Uel, &UelMap );
    }
 
-   int gdxUMUelInfo( int &UelCnt, int &HighMap ) const
+   int gdxUMUelInfo( int &UelCnt, int &HighMap )
    {
      return ::gdxUMUelInfo( pgx, &UelCnt, &HighMap );
    }
@@ -590,10 +589,6 @@ public:
      return ::gdxRenameUEL( pgx, OldName, NewName );
    }
 
-   int gdxUELMaxLength()
-   {
-      return ::gdxUELMaxLength( pgx );
-   }
 };
 
 }// namespace gdx

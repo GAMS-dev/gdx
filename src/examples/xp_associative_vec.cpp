@@ -60,11 +60,7 @@ int main( int argc, char *argv[] )
 
 std::map<std::vector<std::string>, double> loadXLevelMapFromGDX( const std::string &filename )
 {
-   std::string msg;
-   gdx::TGXFileObj gdx { msg };
-   if( !msg.empty() )
-      throw std::runtime_error( "*** Could not load GDX library!" );
-
+   gdx::TGXFileObj gdx;
    int errNr {};
    int rc = gdx.gdxOpenRead( filename.c_str(), errNr );
    if( !rc || errNr != 0 )
