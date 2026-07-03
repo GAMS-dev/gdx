@@ -53,7 +53,12 @@ struct _WIN32_FIND_DATAA;
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace rtl::sysutils_p3
+
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS rtl::sysutils_p3
 {
 // File attribute constants
 constexpr int faReadOnly = 0x00000001,
@@ -227,3 +232,7 @@ unsigned long GetRobustShortPathW( const wchar_t *longPathW, wchar_t *shortPathW
 #endif
 
 }// namespace rtl::sysutils_p3
+
+namespace rtl {
+   namespace sysutils_p3 = GDX_NS rtl::sysutils_p3;
+}

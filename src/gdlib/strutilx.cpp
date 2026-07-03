@@ -42,14 +42,14 @@
 #include "utils.hpp"               // for toupper, sameText, ord, in, val, cha...
 
 using namespace std::literals::string_literals;
-using namespace rtl::sysutils_p3;
-using namespace rtl::p3platform;
-using namespace utils;
+using namespace GDX_NS rtl::sysutils_p3;
+using namespace GDX_NS rtl::p3platform;
+using namespace GDX_NS utils;
 
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
-namespace gdlib::strutilx
+namespace GDX_NS gdlib::strutilx
 {
 
 constexpr auto MAXINT_S = "maxint", MININT_S = "minint";

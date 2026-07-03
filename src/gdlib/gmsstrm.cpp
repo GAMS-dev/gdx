@@ -46,8 +46,8 @@
 //#include <format>
 
 using namespace std::literals::string_literals;
-using namespace rtl::p3utils;
-using namespace utils;
+using namespace GDX_NS rtl::p3utils;
+using namespace GDX_NS utils;
 
 #if defined(__IN_CPPMEX__)
 #include "../gdlib/statlib.hpp"
@@ -56,7 +56,7 @@ using namespace utils;
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
-namespace gdlib::gmsstrm
+namespace GDX_NS gdlib::gmsstrm
 {
 
 std::string SysErrorMessage( int errorCode )

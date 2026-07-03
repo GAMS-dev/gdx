@@ -54,7 +54,7 @@ using namespace std::literals::string_literals;
 using namespace rtl::p3platform;
 using namespace rtl::sysutils_p3;
 
-namespace rtl::p3process
+namespace GDX_NS rtl::p3process
 {
 
 constexpr int debug {0};

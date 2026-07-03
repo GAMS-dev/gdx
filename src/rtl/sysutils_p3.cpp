@@ -56,7 +56,7 @@ using utils::ui16;
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
-namespace rtl::sysutils_p3
+namespace GDX_NS rtl::sysutils_p3
 {
 
 static constexpr std::array<char, 3> PathAndDriveDelim { PathDelim, DriveDelim, '\0' };

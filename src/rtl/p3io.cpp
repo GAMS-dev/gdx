@@ -42,7 +42,7 @@
 #include <direct.h>
 #endif
 
-namespace rtl::p3io
+namespace GDX_NS rtl::p3io
 {
 
 /* convert base-10 digits and implied decimal position into E-format string

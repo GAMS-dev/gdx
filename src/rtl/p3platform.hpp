@@ -37,7 +37,12 @@
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace rtl::p3platform
+
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS rtl::p3platform
 {
 enum tOSFileType : uint8_t
 {
@@ -137,3 +142,7 @@ constexpr auto OSNullFilename()
 }
 
 }// namespace rtl::p3platform
+
+namespace rtl {
+namespace p3platform = GDX_NS rtl::p3platform;
+}

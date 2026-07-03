@@ -53,6 +53,8 @@ namespace gdxdiff {
 
 using tvarvaltype = std::uint8_t;
 
+namespace gdlib = GDX_NS gdlib;
+
 library::ShortString DiffTmpName;
 gdxHandle_t PGX1, PGX2, PGXDIF;
 bool diffUELsRegistered;

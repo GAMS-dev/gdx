@@ -29,7 +29,11 @@
 
 #include "gxfile.hpp"
 
-namespace gdx
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS gdx
 {
 
 /// @details Class for reading and writing GDX files through a efficient low-level interface
@@ -1852,3 +1856,5 @@ bool gdxGetDomainElements_DP_CallByRef {},
 };
 
 }// namespace gdx
+
+namespace gdx = GDX_NS gdx;

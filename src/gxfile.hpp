@@ -44,14 +44,18 @@
 #include <optional>        // for optional
 #include <string>          // for string
 
-namespace gdlib::gmsstrm
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS gdlib::gmsstrm
 {
 class TXStream;
 }// namespace gdx::gmsstrm
 
 //======================================================================================================================
 
-namespace gdx
+namespace GDX_NS gdx
 {
 
 class TgdxUELIndex : public std::array<int, GMS_MAX_INDEX_DIM> {
@@ -262,7 +266,6 @@ class TUELTable final : public TXStrHashListImpl<int>
 public:
    std::unique_ptr<TIntegerMapping> UsrUel2Ent {};// from user uelnr to table entry
    TUELTable();
-   ~TUELTable() override = default;
    [[nodiscard]] int size() const;
    [[nodiscard]] bool empty() const;
    [[nodiscard]] int GetUserMap( int i ) const;
@@ -271,13 +274,8 @@ public:
    int AddUsrNew( const char *s, size_t slen );
    int AddUsrIndxNew( const char *s, size_t slen, int UelNr );
    [[nodiscard]] int GetMaxUELLength() const;
-   int IndexOf( const char *s );
-   int AddObject( const char *id, size_t idlen, int mapping );
-   int StoreObject( const char *id, size_t idlen, int mapping );
    const char *operator[]( int index ) const;
-   void RenameEntry( int N, const char *s );
    [[nodiscard]] int MemoryUsed() const;
-   void SaveToStream( gdlib::gmsstrm::TXStream &S );
    void LoadFromStream( gdlib::gmsstrm::TXStream &S );
    TUELUserMapStatus GetMapToUserStatus();
    void ResetMapToUserStatus();

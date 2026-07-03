@@ -31,7 +31,7 @@
 #include "tests/doctest.hpp"
 
 using namespace std::literals::string_literals;
-using namespace gdlib::strhash;
+using namespace GDX_NS gdlib::strhash;
 
 namespace tests::gdlibtests::strhashtests
 {

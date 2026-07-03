@@ -44,7 +44,11 @@
 #include "batchalloc.hpp"
 #endif
 
-namespace gdlib::datastorage
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS gdlib::datastorage
 {
 
 TLD_TEMPLATE_HEADER
@@ -235,3 +239,7 @@ public:
 };
 
 }// namespace gdlib::datastorage
+
+namespace gdlib {
+namespace datastorage = GDX_NS gdlib::datastorage;
+}

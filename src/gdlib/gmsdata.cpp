@@ -26,6 +26,6 @@
 
 #include "gmsdata.hpp"
 
-namespace gdlib::gmsdata
+namespace GDX_NS gdlib::gmsdata
 {
 }

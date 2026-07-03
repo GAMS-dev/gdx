@@ -29,7 +29,11 @@
 #include <string>    // for string, operator""s
 #include <vector>    // for vector
 
-namespace gdx::tests::gdxtests
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS gdx::tests::gdxtests
 {
 
 bool setEnvironmentVar( const std::string &name, const std::string &val );
