@@ -1,4 +1,9 @@
 ---
+- 7.11.22:
+    - Make UEL and set texts table loading lazy (defer until they are accessed)
+    - Allow building thread safe
+    - Drop unused error message GDX object constructor out argument
+    - Introduce top level namespace to avoid dynamic library loader name clashes when baking GDX library into different executables/libraries
 - 7.11.21:
     - Updated doctest header to release 2.5.2.
     - Fixed some type coercion warnings.
