@@ -159,6 +159,7 @@ Building GDX from source</h2>
 <div class="line">cmake -DNO_TESTS=ON -DNO_EXAMPLES=ON -DNO_TOOLS=ON .</div>
 <div class="line">cmake --build .</div>
 </div><!-- fragment --><p> Running this on Linux creates the dynamic library <code>libgdxcclib64.so</code> and the static library <code>libgdx-static.a</code>.</p>
+<p >To build a thread-safe version of the library, set the CMake option <code>GDX_THREAD_SAFE</code> to a true value. For instance add <code>-DGDX_THREAD_SAFE=1</code> to the <code>cmake</code> call above.</p>
 <p >This repository contains a GitLab CI YAML that describes a pipeline which</p>
 <ul>
 <li>builds GDX for all supported platforms (Windows, macOS, Linux) with Doxygen documentation, libraries, and examples,</li>
