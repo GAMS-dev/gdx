@@ -52,6 +52,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGC_NO_MUTEX")
 
 add_compile_definitions(GDX_NS=gdxlib::)
 
+if (GDX_THREAD_SAFE)
+   add_compile_definitions(P3_THREAD_SAFE)
+endif()
+
 # Windows
 if (MSVC OR CMAKE_HOST_WIN32 OR CMAKE_GENERATOR_TOOLSET STREQUAL "ClangCL")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /D_CRT_SECURE_NO_WARNINGS /wd4267 /wd4996")
