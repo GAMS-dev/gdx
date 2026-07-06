@@ -42,18 +42,18 @@
 #include "utils.hpp"               // for toupper, sameText, ord, in, val, cha...
 
 using namespace std::literals::string_literals;
-using namespace rtl::sysutils_p3;
-using namespace rtl::p3platform;
-using namespace utils;
+using namespace GDX_NS rtl::sysutils_p3;
+using namespace GDX_NS rtl::p3platform;
+using namespace GDX_NS utils;
 
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
-namespace gdlib::strutilx
+namespace GDX_NS gdlib::strutilx
 {
 
-const auto MAXINT_S = "maxint"s, MININT_S = "minint"s;
-const auto MAXDOUBLE_S = "maxdouble"s, EPSDOUBLE_S = "eps"s, MINDOUBLE_S = "mindouble"s;
+constexpr auto MAXINT_S = "maxint", MININT_S = "minint";
+constexpr auto MAXDOUBLE_S = "maxdouble", EPSDOUBLE_S = "eps", MINDOUBLE_S = "mindouble";
 
 bool sameTextSR( const DelphiStrRef &sr, const std::string &s )
 {
@@ -820,18 +820,18 @@ int StrAsInt( const std::string &s )
    return k ? 0 : res;
 }
 
-std::string CompleteFileExtEx( const std::string &FileName, const std::string &Extension )
+std::string CompleteFileExtEx( const std::string_view FileName, const std::string_view Extension )
 {
-   return ExtractFileExtEx( FileName ).empty() ? ChangeFileExtEx( FileName, Extension ) : FileName;
+   return ExtractFileExtEx( FileName ).empty() ? ChangeFileExtEx( FileName, Extension ) : std::string(FileName);
 }
 
-std::string ChangeFileExtEx( const std::string &FileName, const std::string &Extension )
+std::string ChangeFileExtEx( const std::string_view FileName, const std::string_view Extension )
 {
    const int I { LastDelimiter( OSFileType() == OSFileWIN ? "\\/:." : "/.", FileName ) };
-   return FileName.substr( 0, I == -1 || FileName[I] != '.' ? static_cast<int>( FileName.length() ) : I ) + Extension;
+   return std::string(FileName).substr( 0, I == -1 || FileName[I] != '.' ? static_cast<int>( FileName.length() ) : I ) + std::string(Extension);
 }
 
-std::string ExtractFileExtEx( const std::string &FileName )
+std::string ExtractFileExtEx( const std::string_view FileName )
 {
    const int I { LastDelimiter( OSFileType() == OSFileWIN ? "\\/:." : "/.", FileName ) };
    return I >= 0 && FileName[I] == '.' ? std::string { FileName.begin() + I, FileName.end() } : ""s;

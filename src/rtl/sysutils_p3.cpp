@@ -23,8 +23,9 @@
  * SOFTWARE.
  */
 
-#include <string> // for string
-#include <cstring>// for strerror, size_t, strcmp, strcpy
+#include <charconv> // for std::from_chars
+#include <string>   // for string
+#include <cstring>  // for strerror, size_t, strcmp, strcpy
 
 #include "p3io.hpp"
 #include "sysutils_p3.hpp"
@@ -55,11 +56,13 @@ using utils::ui16;
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
-namespace rtl::sysutils_p3
+namespace GDX_NS rtl::sysutils_p3
 {
-char PathDelim, DriveDelim, PathSep;
-static std::array<char, 3> PathAndDriveDelim { '?', '?', '\0' };
-std::string FileStopper, ExtStopper;
+
+static constexpr std::array<char, 3> PathAndDriveDelim { PathDelim, DriveDelim, '\0' };
+
+
+constexpr auto ExtStopper = OSFileType() == OSFileWIN ? "\\:." : "/.";
 
 std::string UpperCase( const std::string &S )
 {
@@ -138,24 +141,71 @@ std::string ExtractFileExt( const std::string &FileName )
 }
 
 #if defined( _WIN32 )
+static bool isAbs(const std::string &fName)
+{
+   return fName.length() >= 2 && std::isalpha( static_cast<unsigned char>(fName.front()) ) && fName[1] == ':';
+}
+
+static bool hasLongPathPrefix(const std::string &fName)
+{
+   return fName.length() >= 4 && fName[0] == '\\' && fName[1] == '\\' && fName[2] == '?' && fName[3] == '\\';
+}
+
+static DWORD QueryAbsPathLen(const std::string &p, wchar_t *widePath)
+{
+   if( const int wideLength = MultiByteToWideChar( CP_ACP, 0, p.c_str(), -1, widePath, 4096 );
+      !wideLength)
+      return 0;
+   return GetFullPathNameW( widePath, 0, nullptr, nullptr);
+}
+
+static std::string QueryAbsPath(const std::string &p)
+{
+   wchar_t widePath[4096];
+   const auto len =  QueryAbsPathLen( p, widePath );
+   if(!len)
+      return {};
+   std::vector<wchar_t> buffer( len+1 );
+   GetFullPathNameW(widePath, buffer.size(), buffer.data(), nullptr);
+   const int sizeNeeded = WideCharToMultiByte( CP_ACP, 0, buffer.data(), -1, nullptr, 0, nullptr, nullptr );
+   if(!sizeNeeded)
+      return {};
+   std::string s(sizeNeeded - 1, '\0');
+   WideCharToMultiByte( CP_ACP, 0, buffer.data(), -1, s.data(), sizeNeeded, nullptr, nullptr );
+   return s;
+}
+
+bool isLongPath( const std::string &p)
+{
+   if(p.empty()) return false;
+   // has long path prefix \\?\: actually is long but doesn't need special treatment
+   if(hasLongPathPrefix(p)) return false;
+   if(p.length() > MAX_PATH) return true;
+   // Path is absolute already. Then we are safe
+   if(isAbs(p)) return false;
+   // Relative path might be short but absolute conversion can still be long
+   wchar_t widePath[4096];
+   const auto len = QueryAbsPathLen( p, widePath );
+   if(!len)
+      return true;
+   return len > MAX_PATH;
+}
+
 std::string tryFixingLongPath( const std::string &fName )
 {
-   const bool
-           isAbs { std::isalpha( fName.front() ) && fName[1] == ':' },
-           hasLongPathPrefix { fName[0] == '\\' && fName[1] == '\\' && fName[2] == '?' && fName[3] == '\\' };
+   const bool hlpp = hasLongPathPrefix( fName );
    std::string fNameBuf;
-   if( !hasLongPathPrefix && !isAbs )
-   {
-      // make path absolute to make the long path prefix work
-      if( const DWORD len { GetCurrentDirectoryA( 0, nullptr ) }; len > 0 )
-      {
-         std::vector<char> buffer( len );
-         GetCurrentDirectoryA( len, &buffer[0] );
-         fNameBuf = ""s + buffer.data() + '\\' + fName;
-      }
-   }
+   // Make path absolute so we can use long path prefix
+   if( !hlpp && !isAbs(fName) )
+      fNameBuf = QueryAbsPath(fName);
    const std::string &fNameRef { fNameBuf.empty() ? fName : fNameBuf };
-   const std::string forcedPrefix { hasLongPathPrefix ? ""s : R"(\\?\)" };
+
+   // Handle UNC Network path edge case if it starts with "\\" but isn't a long prefix
+   if (!hlpp && fNameRef.length() >= 2 && fNameRef[0] == '\\' && fNameRef[1] == '\\') {
+      return R"(\\?\UNC\)" + fNameRef.substr(2);
+   }
+
+   const std::string forcedPrefix { hlpp ? ""s : R"(\\?\)" };
    return forcedPrefix + fNameRef;
 }
 #endif
@@ -198,15 +248,18 @@ int64_t StrToInt64( const std::string_view s )
    }
    else
    {
-      for( ; i < s.length(); ++i )
-      {
-         if( !std::isdigit( static_cast<unsigned char>( s[i] ) ) )
-         {
-            error = true;
-            break;
-         }
-         result = 10 * result + s[i] - '0';
+      i -= negative;
+      std::string_view sv = s.substr(i, s.size()-i);
+      if (sv.size() == 0)
+         return 0;
+
+      auto [ptr, ec] = std::from_chars(sv.data(), sv.data() + sv.size(), result);
+
+      if (ptr != sv.data() + sv.size() || ec != std::errc()) {
+         return std::numeric_limits<int64_t>::min();
       }
+
+      return result;
    }
 
    if( error )
@@ -245,7 +298,7 @@ int FileAge( const std::string &FileName )
 bool FileExists( const std::string &FileName )
 {
 #if defined( _WIN32 )
-   return !_access( ( FileName.length() > MAX_PATH ? tryFixingLongPath( FileName ) : FileName ).c_str(), 0 );
+   return !_access( ( isLongPath(FileName) ? tryFixingLongPath( FileName ) : FileName ).c_str(), 0 );
 #else
    return !access( FileName.c_str(), F_OK );
 #endif
@@ -1216,36 +1269,4 @@ DWORD GetRobustShortPathW (const WCHAR* longPathW, WCHAR* shortPathW, const DWOR
 }
 #endif
 
-static void initialization()
-{
-   switch( OSFileType() )
-   {
-      case OSFileWIN:
-         PathAndDriveDelim[0] = PathDelim = '\\';
-         PathAndDriveDelim[1] = DriveDelim = ':';
-         PathSep = ';';
-         FileStopper = "\\:";
-         ExtStopper = "\\:.";
-         break;
-
-      case OSFileUNIX:
-         PathAndDriveDelim[0] = PathDelim = '/';
-         PathAndDriveDelim[1] = DriveDelim = '\0';
-         PathSep = ':';
-         FileStopper = "/";
-         ExtStopper = "/.";
-         break;
-
-      default:
-         PathDelim = DriveDelim = PathSep = '?';
-         FileStopper = ExtStopper = "?";
-         break;
-   }
-}
-
-static void finalization()
-{
-}
-
-UNIT_INIT_FINI();
 }// namespace rtl::sysutils_p3

@@ -54,13 +54,13 @@
 #include "utils.hpp"
 
 using namespace std::literals::string_literals;
-using namespace gdx;
-using namespace utils;
-using namespace gdlib::strindexbuf;
+using namespace GDX_NS gdx;
+using namespace GDX_NS utils;
+using namespace GDX_NS gdlib::strindexbuf;
 
 namespace fs = std::filesystem;
 
-namespace gdx::tests::gdxtests
+namespace GDX_NS gdx::tests::gdxtests
 {
 TEST_SUITE_BEGIN( "GDX object tests" );
 
@@ -127,8 +127,7 @@ void unsetEnvironmentVar( const std::string &name )
 
 void basicTest( const std::function<void( TGXFileObj & )> &cb )
 {
-   static std::string ErrMsg;
-   TGXFileObj pgx { ErrMsg };
+   TGXFileObj pgx;
    cb( pgx );
 }
 
@@ -137,8 +136,7 @@ void testRead( const std::string &filename, const std::function<void( TGXFileObj
    if( filename.empty() ) return;
 
    {
-      std::string ErrMsg;
-      TGXFileObj pgx { ErrMsg };
+      TGXFileObj pgx;
       int ErrNr, rc = pgx.gdxOpenRead( filename.c_str(), ErrNr );
       REQUIRE( rc );
       cb( pgx );
@@ -151,8 +149,7 @@ void testWrite( const std::string &filename, const std::function<void( TGXFileOb
    if( filename.empty() ) return;
 
    {
-      std::string ErrMsg;
-      TGXFileObj pgx { ErrMsg };
+      TGXFileObj pgx;
       int ErrNr;
       REQUIRE( pgx.gdxOpenWrite( filename.c_str(), "gdxtest", ErrNr ) );
       cb( pgx );
@@ -241,9 +238,8 @@ TEST_CASE( "Creating a file should also work when closing was forgotten" )
 {
    const auto fn { "tmp.gdx"s };
    {
-      std::string ErrMsg;
       int ErrNr;
-      TGXFileObj pgx { ErrMsg };
+      TGXFileObj pgx;
       REQUIRE( pgx.gdxOpenWrite( fn.c_str(), "gdxtest", ErrNr ) );
    }
    REQUIRE( fs::exists( fn ) );
@@ -441,7 +437,7 @@ TEST_CASE( "Test write and read record raw" )
       // register UELs i1*i800
       for( int i {}; i < nMany; i++ )
       {
-         std::string uel { "i"s + std::to_string( i + 1 ) };
+         std::string uel { 'i' + std::to_string( i + 1 ) };
          REQUIRE( pgx.gdxUELRegisterRaw( uel.c_str() ) );
       }
       REQUIRE( pgx.gdxUELRegisterDone() );
@@ -738,8 +734,7 @@ TEST_CASE( "Test getting special values" )
 {
    std::array<double, GMS_SVIDX_MAX> specialValuesFromPort {};
    {
-      std::string ErrMsg;
-      TGXFileObj pgx { ErrMsg };
+      TGXFileObj pgx;
       REQUIRE( pgx.gdxGetSpecialValues( specialValuesFromPort.data() ) );
    }
 }
@@ -1098,7 +1093,7 @@ TEST_CASE( "Test adding a set alias" )
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "A set", 1, dt_set, 0 ) );
       for( int i {}; i < elemCnt; i++ )
       {
-         sib.front() = "i"s + std::to_string( i + 1 );
+         sib.front() = 'i' + std::to_string( i + 1 );
          REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), vals.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -1400,7 +1395,7 @@ TEST_CASE( "Tests related to universe" )
       TgdxValues vals {};
       for( int i = 1; i <= 8; i++ )
       {
-         keys[0] = "uel_" + std::to_string( i );
+         keys[0] = "uel_"s + std::to_string( i );
          const char *keyptrs[] = { keys[0].c_str() };
          REQUIRE( pgx.gdxDataWriteStr( keyptrs, vals.data() ) );
       }
@@ -1464,7 +1459,7 @@ TEST_CASE( "Test domain checking for subset" )
       constexpr TgdxValues vals {};
       for( int i {}; i < 6; i++ )
       {
-         key = "i"s + std::to_string( i + 1 );
+         key = 'i' + std::to_string( i + 1 );
          const char *keyptrs[] = { key.c_str() };
          REQUIRE( pgx.gdxDataWriteStr( keyptrs, vals.data() ) );
       }
@@ -1478,7 +1473,7 @@ TEST_CASE( "Test domain checking for subset" )
       std::array<int, 2> subset = { 2, 4 };
       for( int i: subset )
       {
-         key = "i"s + std::to_string( i );
+         key = 'i' + std::to_string( i );
          keyptrs[0] = key.c_str();
          REQUIRE( pgx.gdxDataWriteStr( keyptrs, vals.data() ) );
       }
@@ -1520,7 +1515,7 @@ TEST_CASE( "Test writing a duplicate uel in string mode" )
       TgdxValues vals {};
       for( int i = 1; i <= 8; i++ )
       {
-         keys[0] = "uel_" + std::to_string( i );
+         keys[0] = "uel_"s + std::to_string( i );
          const char *keyptrs[] = { keys[0].c_str() };
          REQUIRE( pgx.gdxDataWriteStr( keyptrs, vals.data() ) );
       }
@@ -1764,7 +1759,7 @@ TEST_CASE( "Debug issue with SymbolSetDomain and write raw domain check uncovere
       REQUIRE( pgx.gdxDataWriteDone() );
       REQUIRE( pgx.gdxDataWriteRawStart( "jb", "", 1, dt_set, 0 ) );
       TgdxStrIndex domainNames {};
-      domainNames.front() = "j";
+      domainNames.front() = 'j';
       StrIndexBuffers domainIds { &domainNames };
       REQUIRE( pgx.gdxSymbolSetDomain( domainIds.cptrs() ) );
       key = 17;
@@ -1875,7 +1870,7 @@ TEST_CASE( "Test simple write/read with compression activated" )
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "set", 1, dt_set, 0 ) );
       for( int i {}; i < cardinality; i++ )
       {
-         sib.front() = "i"s + std::to_string( i + 1 );
+         sib.front() = 'i' + std::to_string( i + 1 );
          REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), vals.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -1888,7 +1883,7 @@ TEST_CASE( "Test simple write/read with compression activated" )
       for( int i {}; i < cardinality; i++ )
       {
          REQUIRE( pgx.gdxDataReadStr( sib.ptrs(), vals.data(), dimFrst ) );
-         REQUIRE_EQ( "i"s + std::to_string( i + 1 ), sib.front().str() );
+         REQUIRE_EQ( 'i' + std::to_string( i + 1 ), sib.front().str() );
       }
       REQUIRE( pgx.gdxDataReadDone() );
    } );
@@ -1928,7 +1923,7 @@ TEST_CASE( "Test symbol index max UEL length" )
 
 TEST_CASE( "Test UEL table get max uel length" )
 {
-   testReadModelGDX( "trnsport"s, [&]( const TGXFileObj &pgx ) {
+   testReadModelGDX( "trnsport"s, [&]( TGXFileObj &pgx ) {
       REQUIRE_EQ( 9, pgx.gdxUELMaxLength() );
    } );
 }
@@ -2149,7 +2144,7 @@ TEST_CASE( "Test reading methods with slices" )
       REQUIRE( pgx.gdxDataWriteStrStart( "i", "three element set", 1, dt_set, 0 ) );
       for( int i {}; i < 3; i++ )
       {
-         keys.front() = "i"s + std::to_string( i + 1 );
+         keys.front() = 'i' + std::to_string( i + 1 );
          REQUIRE( pgx.gdxDataWriteStr( keys.cptrs(), values.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -2268,7 +2263,7 @@ TEST_CASE( "Test domain violations more extensively" )
 TEST_CASE( "Test fallback behavior when trying GDX operations when no file is open" )
 {
    std::string msg;
-   TGXFileObj pgx { msg };
+   TGXFileObj pgx;
 
    char text[GMS_SSSIZE];
    int nodeNr;
@@ -2334,8 +2329,7 @@ TEST_CASE( "Test reading reading GDX files in legacy versions (V5 and V6)" )
          const auto convertedGDXfn { modelName + "_"s + versSuff + ".gdx"s };
          fs::rename( outDir + "/"s + modelName + ".gdx"s, convertedGDXfn );
          fs::remove( outDir );
-         std::string ErrMsg;
-         TGXFileObj pgx { ErrMsg };
+         TGXFileObj pgx;
          int ErrNr;
          REQUIRE( pgx.gdxOpenRead( convertedGDXfn.c_str(), ErrNr ) );
          int syCnt, uelCnt;
@@ -2359,7 +2353,7 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
       REQUIRE( pgx.gdxDataWriteStrStart( "k", "", 1, dt_set, 0 ) );
       for( int i {}; i < 6; i++ )
       {
-         sib.front() = "k"s + std::to_string( i + 3 );
+         sib.front() = 'k' + std::to_string( i + 3 );
          REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), values.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -2369,7 +2363,7 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
       REQUIRE( pgx.gdxSymbolSetDomain( sib2.cptrs() ) );
       for( int i {}; i < 6; i++ )
       {
-         sib.front() = "k"s + std::to_string( i + 3 );
+         sib.front() = 'k' + std::to_string( i + 3 );
          REQUIRE( pgx.gdxDataWriteStr( sib.cptrs(), values.data() ) );
       }
       REQUIRE( pgx.gdxDataWriteDone() );
@@ -2381,7 +2375,7 @@ TEST_CASE( "Re-create basic dc.gms (from idc01) test" )
       REQUIRE( pgx.gdxUELRegisterMapStart() );
       for( int i { 1 }; i <= 3; i++ )
       {
-         std::string s { "k" + std::to_string( i ) };
+         std::string s { 'k' + std::to_string( i ) };
          REQUIRE( pgx.gdxUELRegisterMap( i, s.c_str() ) );
       }
       REQUIRE( pgx.gdxUELRegisterDone() );
@@ -2433,8 +2427,7 @@ TEST_CASE( "Open append should report error for old GDX file versions" )
    unsetEnvironmentVar( "GDXCONVERT" );
 
    {
-      std::string errMsg;
-      TGXFileObj pgx { errMsg };
+      TGXFileObj pgx;
       int errNr;
       REQUIRE_FALSE( pgx.gdxOpenAppend( "f.gdx", "gdxtests", errNr ) );
       REQUIRE_GT( pgx.gdxErrorCount(), 0 );
@@ -2751,8 +2744,7 @@ TEST_CASE("Test opening 100 char long name GDX file inside two 100 char long nam
    REQUIRE(fs::is_regular_file( gdxTargetFilename ));
 
    {
-      std::string ErrMsg;
-      TGXFileObj gdx {ErrMsg};
+      TGXFileObj gdx;
       int ErrNr;
       REQUIRE_GE(static_cast<int>(gdxTargetFilenameBase.length()), 100 + 1 + 100 + 1 + 100 + 4); // >= 306 (long dirname + sep + long dirname + sep + long name + ".gdx")
       REQUIRE(gdx.gdxOpenRead( gdxTargetFilenameBase.c_str(), ErrNr ));

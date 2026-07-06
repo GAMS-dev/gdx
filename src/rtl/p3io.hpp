@@ -30,7 +30,11 @@
 #include <cstdint>
 #include <string>
 
-namespace rtl::p3io
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS rtl::p3io
 {
 
 void dig2Exp( const char *dig, size_t digLen, int decPos, int isNeg, int width, int decimals, char *buf, size_t *bufLen );
@@ -77,13 +81,10 @@ struct P3File {
    std::string nam;
 };
 
-extern uint8_t SYSTEM_filemode;
-
-#ifdef __IN_CPPMEX__
-void P3FileOpn( P3File *fil, uint8_t status, P3FileType type, uint32_t block_size );
-void P3FileOpn(P3File *fil, const char *s);
-#endif
-
 bool mkdir( const std::string &s );
 
 }// namespace rtl::p3io
+
+namespace rtl {
+namespace p3io = GDX_NS rtl::p3io;
+}

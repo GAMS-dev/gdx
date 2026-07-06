@@ -29,7 +29,11 @@
 
 #include "gxfile.hpp"
 
-namespace gdx
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS gdx
 {
 
 /// @details Class for reading and writing GDX files through a efficient low-level interface
@@ -39,9 +43,8 @@ public:
    /**
     * Constructor of GDX file object
     * @brief Create a new GDX file object. Does not open a file yet.
-    * @param ErrMsg Out argument for storing potential error messages. Will be empty when there is no error.
      */
-   explicit TGXFileObj( std::string &ErrMsg );
+   explicit TGXFileObj();
 
    /**
     * Destructor of GDX file object
@@ -493,8 +496,7 @@ public:
     * @param ErrNr Returns an error code or zero if there is no error.
     * @return Returns non-zero if the file can be opened; zero otherwise.
     * @code
-      std::string errMsg;
-      TGXFileObj pgx{errMsg};
+      TGXFileObj pgx;
       pgx.gdxOpenRead("file1.gdx", ErrNr);
       if(ErrNr) {
         [...]
@@ -551,12 +553,7 @@ public:
     *   gdxClose; see gdxAutoConvert.
     * @return Returns non-zero if the file can be opened; zero otherwise.
     * @code
-      std::string errMsg;
-      TGXFileObj pgx{errMsg};
-      if(!errMsg.empty()) {
-          std::cout << "Failure with GDX: " << errMsg << std::endl;
-          return;
-      }
+      TGXFileObj pgx;
       int ErrCode;
       pgx.gdxOpenWriteEx("file1.gdx", "Examples", 1, ErrCode);
       pgx.gdxAutoConvert(0);
@@ -645,7 +642,7 @@ public:
     * @return Return non-zero if the index is in a valid range, zero otherwise.
     * @see gdxUMUelGet
     */
-   int gdxGetUEL( int UelNr, char *Uel ) const;
+   int gdxGetUEL( int UelNr, char *Uel );
 
    /// @}
 
@@ -674,7 +671,7 @@ public:
     * @return The length of the longest UEL name in the UEL table.
     * @see gdxSymbIndxMaxLength
     */
-   int gdxUELMaxLength() const;
+   int gdxUELMaxLength();
 
    /// @}
 
@@ -1188,7 +1185,7 @@ public:
     * @param UelCnt Number of unique elements (UELs) stored in the GDX file.
     * @return Returns a non-zero value.
     */
-   int gdxSystemInfo( int &SyCnt, int &UelCnt ) const;
+   int gdxSystemInfo( int &SyCnt, int &UelCnt );
 
    /**
     * @brief Returns the dimension of the currently active symbol When reading or writing data, the dimension of
@@ -1381,7 +1378,7 @@ public:
     * @return Always returns non-zero.
     * @see gdxUMUelGet
     */
-   int gdxUMUelInfo( int &UelCnt, int &HighMap ) const;
+   int gdxUMUelInfo( int &UelCnt, int &HighMap );
 
    /**
     * @brief Rename unique element OldName to NewName.
@@ -1813,6 +1810,9 @@ const bool verboseTrace { true };
 TDataStoreFiltProc_t gdxDataReadRawFastFilt_DP {};
 TDomainIndexProc_t gdxGetDomainElements_DP {};
 
+int64_t ReadUELPos {}, ReadAcronymPos {}, ReadSetTextPos {};
+bool UelReadDeferred {}, SetTextReadDeferred {};
+
 bool PrepareSymbolWrite( std::string_view Caller, const char *AName, const char *AText, int ADim, int AType, int AUserInfo );
 int PrepareSymbolRead( std::string_view Caller, int SyNr, const int *ADomainNrs, TgxFileMode newmode );
 
@@ -1840,6 +1840,8 @@ bool IsGoodNewSymbol( const char *s );
 bool ResultWillBeSorted( const int *ADomainNrs ) const;
 
 int gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int &ErrNr );
+int ReadUELTable();
+int ReadSetTextList();
 
 // This one is a helper function for a callback from a Fortran client
 void gdxGetDomainElements_DP_FC( int RawIndex, int MappedIndex, void *Uptr );
@@ -1854,3 +1856,5 @@ bool gdxGetDomainElements_DP_CallByRef {},
 };
 
 }// namespace gdx
+
+namespace gdx = GDX_NS gdx;

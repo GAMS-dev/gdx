@@ -31,7 +31,7 @@ enum class ProcessPass : std::uint8_t {
 struct GAMSSymbol {
   int SyDim, SySubTyp;
   gdxSyType SyTyp;
-  std::unique_ptr<gdlib::gmsdata::TTblGamsData<double>> SyData;
+  std::unique_ptr<GDX_NS gdlib::gmsdata::TTblGamsData<double>> SyData;
   library::ShortString SyExplTxt;
   std::int64_t SySize{}, SyMemory{};
   bool SySkip{};
@@ -48,9 +48,8 @@ struct GDXFileEntry {
 };
 
 template <typename T>
-struct FileList final : public gdlib::gmsobj::TXList<T> {
-  ~FileList() override;
-  void Clear() override;
+struct FileList final : public gdlib::gmsobj::TXList<T, gdlib::gmsobj::FreeItemDeleteFList> {
+  ~FileList() override = default;
   void AddFile(const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo);
   std::string FileName(int Index);
   std::string FileId(int Index);

@@ -23,31 +23,27 @@
 * SOFTWARE.
 */
 
-#pragma once
+#include "strindexbuf.hpp"
+#include "utils.hpp"
+#include "../doctest.hpp"
 
-#include <functional>// for function
-#include <string>    // for string, operator""s
-#include <vector>    // for vector
+using namespace std::literals::string_literals;
+using namespace gdlib::strindexbuf;
+using namespace utils;
 
-#ifndef GDX_NS
-#define GDX_NS gdxlib::
-#endif
-
-namespace GDX_NS gdx::tests::gdxtests
+namespace tests::gdlibtests::strindexbuftests
 {
 
-bool setEnvironmentVar( const std::string &name, const std::string &val );
-void unsetEnvironmentVar( const std::string &name );
+TEST_SUITE_BEGIN( "gdlib::strindexbuftests" );
 
-void basicTest( const std::function<void( TGXFileObj & )> &cb );
-void testRead( const std::string &filename, const std::function<void( TGXFileObj & )> &cb );
-void testWrite( const std::string &filename, const std::function<void( TGXFileObj & )> &cb );
+TEST_CASE( "Basic usage" )
+{
+   StrIndexBuffers sib;
+   sib.front() = "one"s;
+   sib[1] = "two"s;
+   sib.clear();
+}
 
-void writeMappedRecordsOutOfOrder( TGXFileObj &pgx );
-void domainSetGetTestSetupPrefix( TGXFileObj &pgx );
-std::string acquireGDXforModel( const std::string &model );
-void commonSetGetDomainTests( const std::vector<std::string> &domainNames, const std::vector<int> &domainIndices );
-void testReadModelGDX( const std::string &model, const std::function<void( TGXFileObj & )> &func );
-void testWithCompressConvert( bool compress, const std::string &convert );
+TEST_SUITE_END();
 
-}// namespace gdx::tests::gdxtests
+}

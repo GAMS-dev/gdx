@@ -53,6 +53,8 @@ namespace gdxdiff {
 
 using tvarvaltype = std::uint8_t;
 
+namespace gdlib = GDX_NS gdlib;
+
 library::ShortString DiffTmpName;
 gdxHandle_t PGX1, PGX2, PGXDIF;
 bool diffUELsRegistered;
@@ -932,9 +934,9 @@ int main(const int argc, const char *argv[]) {
             } else {
               ID = S.string().substr(0, k);
               S = S.string().erase(0, k + 1);
-              S = utils::trim(S);
+              S = utils::trim(S.string());
             }
-            ID = utils::trim(ID);
+            ID = utils::trim(ID.string());
             if (!ID.empty()) {
               if (idList->IndexOf(ID.data()) < 0) {
                 idList->Add(ID.data(), ID.length());

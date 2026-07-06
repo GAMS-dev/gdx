@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <sstream>
@@ -36,8 +37,12 @@
 #include <cstring>
 #include <cstdint>
 
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
 // Interface
-namespace global::delphitypes
+namespace GDX_NS global::delphitypes
 {
 
 // According to Embarcadero docs
@@ -61,12 +66,12 @@ class OffsetArray : public std::array<T, ubIncl-lbIncl+1>
    // Hide direct buffer access as this could be error-prone
    T *data() { return nullptr; }
 public:
-   T& operator[]( const int ix) {
+   constexpr T& operator[]( const int ix) {
       assert( ix >= lbIncl && ix <= ubIncl && "Index must be in range!" );
       return std::array<T, ubIncl-lbIncl+1>::operator[](ix - lbIncl);
    }
 
-   const T& operator[]( const int ix) const {
+   constexpr const T& operator[]( const int ix) const {
       assert( ix >= lbIncl && ix <= ubIncl && "Index must be in range!" );
       return std::array<T, ubIncl-lbIncl+1>::operator[](ix - lbIncl);
    }
@@ -82,6 +87,12 @@ void FreeAndNil( T *&ptr )
    }
 }
 
+template<typename T>
+void FreeAndNil( std::unique_ptr<T> &ptr )
+{
+   ptr = nullptr;
+}
+
 using tDateTime = double;
 using Text = std::fstream*;
 
@@ -92,7 +103,9 @@ class Bounded
    T value;
 
 public:
-   Bounded() : value( lowerBoundIncl ) {}
+   using type = T;
+
+   constexpr Bounded() : value( lowerBoundIncl ) {}
 
    Bounded( T initialValue ) : value( initialValue )
    {
@@ -157,13 +170,18 @@ public:
       return temp;
    }
 
+   T operator+(int addend) const 
+   {
+       return static_cast<T>(value + addend);
+   }
+
    inline void checkBounds()
    {
 #if !defined(NDEBUG)
       if( value < lowerBoundIncl || value > upperBoundIncl )
       {
          std::stringstream msgStream;
-         msgStream << value << " is out of bounded range [" << lowerBoundIncl << "," << upperBoundIncl << "]";
+         msgStream << "In Bounded, value " << value << " is out of bounded range [" << lowerBoundIncl << "," << upperBoundIncl << "]";
          throw std::out_of_range( msgStream.str() );
       }
 #endif
@@ -189,6 +207,7 @@ public:
    {
       return &value;
    }
+
 };
 
 inline double frac( const double v )
@@ -197,3 +216,7 @@ inline double frac( const double v )
 }
 
 }// namespace global::delphitypes
+
+namespace global {
+namespace delphitypes = GDX_NS global::delphitypes;
+}

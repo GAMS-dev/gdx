@@ -54,7 +54,7 @@ using namespace std::literals::string_literals;
 using namespace rtl::p3platform;
 using namespace rtl::sysutils_p3;
 
-namespace rtl::p3process
+namespace GDX_NS rtl::p3process
 {
 
 constexpr int debug {0};
@@ -615,8 +615,8 @@ int p3GetNumberOfProcessors()
 #endif
 }
 
-const std::string CMD_WIN7 = R"(C:\windows\system32\cmd.exe)";
-const std::string CMD_WINNT = R"(C:\winnt\system32\cmd.exe)";
+constexpr auto CMD_WIN7 = R"(C:\windows\system32\cmd.exe)";
+constexpr auto CMD_WINNT = R"(C:\winnt\system32\cmd.exe)";
 
 #if defined(_WIN32)
 static int wShowWindow {SW_SHOWNA};
@@ -1233,11 +1233,9 @@ int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg )
 {
 #ifdef _WIN32
    int res {};
-   HANDLE h;
-   DWORD p, rc, exitCode;
-   //char ebuf[256];
-   p = (DWORD) procInfo.pid;
-   h = (HANDLE) procInfo.hProcess;
+   DWORD rc, exitCode;
+   const auto p = static_cast<DWORD>( procInfo.pid );
+   auto h = static_cast<HANDLE>( procInfo.hProcess );
    if( !h )
    {
       h = OpenProcess( PROCESS_ALL_ACCESS, FALSE, p );
@@ -1286,59 +1284,59 @@ int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg )
          CloseHandle( h );
          procInfo.hProcess = nullptr;
          return res;
-         break;
       case WAIT_TIMEOUT: /* still running normally */
          return 1;
-         break;
       default:
          msg = "Unexpected return from wait";
          return 0;
    }           /* end switch */
    return res; /* should never get here */
 #else
-   if( !procInfo.pid ) return 0;
+   if( !procInfo.pid )
+      return 0;
+   
+   const auto pid = static_cast<pid_t>( procInfo.pid );
+   
+   // PIDs are positive
+   if (pid <= 0) {                  
+		msg = "Invalid PID"s;
+		return 0;
+	}
 
-   pid_t pid, p2;
-   int wstat, *progrc = &progRC;
-
-   pid = (pid_t) procInfo.pid;
-   /*if (pid <= 0) {                  // PIDs are positive
-			msg ="Invalid PID";
-			return 0;
-		}*/
+   // we only use/set the pid on non-windows
    if( procInfo.tid || procInfo.hProcess )
-   { /* we only use/set the pid on non-windows  */
-      msg = "Corrupt or bogus procInfo";
+   {
+      msg = "Corrupt or bogus procInfo"s;
       return 0;
    }
-   p2 = waitpid( pid, &wstat, WNOHANG );
+
+   int wstat;
+   
+   pid_t p2 = waitpid( pid, &wstat, WNOHANG );
    if( pid == p2 )
-   { /* process p has changed state - assume it was to exit */
-      /* consider using waitid() instead of waitpid() to get
-			* "more precise control over which child state changes to wait for" */
-      if( !WIFEXITED( wstat ) )
-      { /* no exit code is available */
+   {
+      // process p has changed state - assume it was to exit
+      // consider using waitid() instead of waitpid() to get
+		// "more precise control over which child state changes to wait for"
+      if( !WIFEXITED( wstat ) ) // no exit code is available
          return 3;
-      }
-      *progrc = WEXITSTATUS( wstat );
-      if( 127 == *progrc )
-      { /* return for fork & failed exec */
+      progRC = WEXITSTATUS( wstat );
+      if( 127 == progRC )// return for fork & failed exec
          return 127;
-      }
-      else
-         return 2; /* we really have something to return */
+      else // we really have something to return
+         return 2; 
    }
+   // error, e.g. no such process or not a child
    else if( -1 == p2 )
-   { /* error, e.g. no such process or not a child */
-      msg = "No such process or not a child";
+   {
+      msg = "No such process or not a child"s;
       return 4;
    }
-   else if( 0 == p2 )
-   { /* child exists but has not exited */
+   // child exists but has not exited
+   else if( !p2 )
       return 1;
-   }
 
-   msg = "Unexpected return from wait";
+   msg = "Unexpected return from wait"s;
    return 0;
 #endif
 }
@@ -1427,7 +1425,7 @@ bool p3IsPIDValid( uint32_t pid )
 #endif
 }
 
-static tCtrlHandler CtrlHandler {};
+static p3_global_storage tCtrlHandler CtrlHandler {};
 
 #ifdef _WIN32
 static BOOL WINAPI P3Handler( DWORD s )
@@ -1443,16 +1441,21 @@ static BOOL WINAPI P3Handler( DWORD s )
    return FALSE;
 }
 #else
-static sigset_t sigSet;
-static struct sigaction newAction, oldAction;
+
+static p3_global_storage sigset_t sigSet;
+static p3_global_storage struct sigaction newAction, oldAction;
+
 extern "C" {
-static void ( *oldHandler )( int );
+
+static p3_global_storage void ( *oldHandler )( int );
+
 static void p3CtrlCHandler( int sig );
 }
 static void p3CtrlCHandler( int sig )
 {
    if( CtrlHandler ) ( *CtrlHandler )();
 }
+
 #endif
 
 CtrlHandlerState P3InstallCtrlHandler( tCtrlHandler newHandler )

@@ -35,10 +35,20 @@
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace gdlib::gmsobj
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS gdlib::gmsobj
 {
 
-template<typename T>
+enum freeItemBehaviorType {
+   FreeItemNoOp,
+   FreeItemArrayDeleteFList,
+   FreeItemDeleteFList,
+};
+
+template<typename T, freeItemBehaviorType freeItemBehavior = FreeItemNoOp>
 class TXList
 {
    int FCapacity;
@@ -71,7 +81,7 @@ protected:
    int FCount;
    T **FList;
 
-   virtual void Grow()
+   void Grow()
    {
       int delta { FCapacity >= 1024 * 1024 ? FCapacity / 4 : ( !FCapacity ? 16 : 7 * FCapacity ) };
       int64_t i64 = FCapacity;
@@ -86,9 +96,19 @@ protected:
       }
    }
 
-   virtual void FreeItem( int Index )
+   void FreeItem( int Index )
    {
+      if constexpr (freeItemBehavior == FreeItemNoOp) {
       // No-op
+      } else if constexpr (freeItemBehavior == FreeItemArrayDeleteFList) {
+         delete[] FList[Index];
+      } else if constexpr (freeItemBehavior == FreeItemDeleteFList) {
+         delete FList[Index];
+      } else {
+         // generate compile-time error
+         static_assert(utils::always_false<freeItemBehavior>::value,
+                       "Unsupported freeItemBehavior provided!");
+      }
    }
 
    bool OneBased;
@@ -119,7 +139,7 @@ public:
       return res;
    }
 
-   virtual void Clear()
+   void Clear()
    {
       for( int N { FCount - 1 + ( OneBased ? 1 : 0 ) }; N >= ( OneBased ? 1 : 0 ); N-- ) FreeItem( N );
       FCount = 0;
@@ -230,7 +250,7 @@ public:
       return !FCount;
    }
 
-   virtual T *operator[]( const int Index )
+   T *operator[]( const int Index )
    {
       return Get( Index );
    }
@@ -267,7 +287,7 @@ inline char *NewString( const char *s, const size_t slen, size_t &memSize )
    return buf;
 }
 
-class TXStrings final : public TXList<char>
+class TXStrings final : public TXList<char, FreeItemArrayDeleteFList>
 {
    size_t FStrMemory;
 
@@ -282,19 +302,10 @@ class TXStrings final : public TXList<char>
       return FList[Index - ( OneBased ? 1 : 0 )];
    }
 
-protected:
-   void FreeItem( const int Index ) override
-   {
-      delete[] FList[Index];
-   }
-
 public:
    TXStrings() : FStrMemory {} {}
 
-   ~TXStrings() override
-   {
-      Clear();
-   }
+   ~TXStrings() override = default;
 
    int Add( const char *Item, const size_t ItemLen )
    {
@@ -877,3 +888,7 @@ public:
 void CMove( const void *src, void *dest, int len );
 
 }// namespace gdlib::gmsobj
+
+namespace gdlib {
+namespace gmsobj = GDX_NS gdlib::gmsobj;
+}

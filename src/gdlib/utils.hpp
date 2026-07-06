@@ -61,7 +61,11 @@
 extern std::stringstream debugStream;
 #endif
 
-namespace utils
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS utils
 {
 
 template<typename T, int card>
@@ -70,12 +74,13 @@ class bsSet
    std::bitset<card> hasSym {};
 
 public:
-   bsSet() = default;
+   constexpr bsSet() = default;
 
    bsSet( const bsSet &other ) : hasSym( other.hasSym )
    {
    }
 
+   // TODO: once we compile in C++23, this can be made constexpr
    bsSet( const std::initializer_list<T> &syms )
    {
       for( const T s: syms )
@@ -776,6 +781,17 @@ int indexOfSameText(const std::array<std::string, N> &strs, const std::string &s
    return firstValid-1;
 }
 
+template<int N, int firstValid=0>
+int indexOfSameText(const std::array<std::string_view, N> &strs, const std::string_view s) {
+   int i{firstValid};
+   for(const std::string_view s2 : strs) {
+      if(sameText(s, s2))
+         return i;
+      ++i;
+   }
+   return firstValid-1;
+}
+
 template<typename T>
 auto ui8(const T x)
 {
@@ -812,4 +828,15 @@ class sstring : public std::array<char, 256> {
 // Signed fraction; frac(x) = x - int(x)// Truncate towards zero
 double frac( double x );
 
+
+#include <type_traits>
+
+// Define a helper that always evaluates to false, 
+// but depends on a template parameter to delay evaluation.
+// This is used to report compile-time error in template with constexpr
+template <auto v> 
+struct always_false : std::false_type {};
+
 }// namespace utils
+
+namespace utils = GDX_NS utils;

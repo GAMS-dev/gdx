@@ -30,7 +30,11 @@
 
 #include "delphitypes.hpp"
 
-namespace rtl::p3process
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS rtl::p3process
 {
 
 enum TKillHow : uint8_t
@@ -102,3 +106,7 @@ int P3UninstallCtrlHandler();
 tCtrlHandler P3GetCtrlHandler();
 
 }// namespace rtl::p3process
+
+namespace rtl {
+namespace p3process = GDX_NS rtl::p3process;
+}

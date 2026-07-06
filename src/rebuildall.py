@@ -5,6 +5,7 @@
 
 import os
 import subprocess
+import sys
 
 import yaml2doxy
 import yaml2cwrap
@@ -34,6 +35,6 @@ yaml2cwrap.generate_c_wrapper(
 )
 
 # Rebuild gdxcc.{h,c} and gdxcclib.cpp
-cmd = ('python src/apigenerator/src/mkapi.py' +
+cmd = ('src/apigenerator/src/mkapi.py' +
        f' --apidef {os.getcwd()}/gdxapi.yaml --outputpath generated/ --output cc cpplib')
-subprocess.run(cmd.split(' '), shell=False, cwd='../')
+subprocess.run([sys.executable] + cmd.split(' '), shell=False, cwd='../')

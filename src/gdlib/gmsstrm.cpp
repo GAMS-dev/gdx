@@ -46,8 +46,8 @@
 //#include <format>
 
 using namespace std::literals::string_literals;
-using namespace rtl::p3utils;
-using namespace utils;
+using namespace GDX_NS rtl::p3utils;
+using namespace GDX_NS utils;
 
 #if defined(__IN_CPPMEX__)
 #include "../gdlib/statlib.hpp"
@@ -56,7 +56,7 @@ using namespace utils;
 // ==============================================================================================================
 // Implementation
 // ==============================================================================================================
-namespace gdlib::gmsstrm
+namespace GDX_NS gdlib::gmsstrm
 {
 
 std::string SysErrorMessage( int errorCode )
@@ -80,7 +80,7 @@ enum CustomOpenAction : uint8_t
 };
 
 constexpr uint8_t signature_header = 0xFF;
-const std::string signature_gams = "*GAMS*"s;
+constexpr auto signature_gams = "*GAMS*";
 constexpr int verify_offset = 100;
 
 constexpr static char substChar { 0x1A };
@@ -1046,14 +1046,15 @@ double TMiBufferedStream::ReadGmsDouble()
 TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &PassWord, int &ErrNr, std::string &errMsg )
 : FS{std::make_unique<TBufferedFileStream>( fn, fmOpenRead )}
 {
-   ErrNr = FS->GetLastIOResult();
-   if( ErrNr )
-   {
+   auto exitfn = [&ErrNr, &errMsg]() -> void {
       errMsg = SysErrorMessage( ErrNr );
       ErrNr = strmErrorIOResult;
-      return;
-   }
+   };
+
+   if( ErrNr = FS->GetLastIOResult(); ErrNr ) { exitfn(); return; }
+
    const auto B1 = FS->ReadByte(), B2 = FS->ReadByte();
+   if( ErrNr = FS->GetLastIOResult(); ErrNr ) { exitfn(); return; }
    if( B1 == 31 && B2 == 139 )
    {//header for gzip
       //assume it is GZIP format
@@ -1064,12 +1065,13 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
       return;
    }
 
-   std::string srcBuf;
+   std::string srcBuf {};
    srcBuf.resize( B2 );
    if( B1 == signature_header ) Read( srcBuf.data(), B2 );
    if( B1 != signature_header || srcBuf != signature_gams )
    {// nothing special
       const tBomIndic fileStart { B1, B2, FS->ReadByte(), FS->ReadByte() };
+      if( ErrNr = FS->GetLastIOResult(); ErrNr ) { exitfn(); return; }
       int BOMOffset;
       if( !checkBOMOffset( fileStart, BOMOffset, errMsg ) )
       {
@@ -1091,6 +1093,7 @@ TBinaryTextFileIO::TBinaryTextFileIO( const std::string &fn, const std::string &
    FMajorVersionRead = FS->ReadByte();
    FMinorVersionRead = FS->ReadByte();
    char Ch { static_cast<char>( FS->ReadByte() ) };
+   if( ErrNr = FS->GetLastIOResult(); ErrNr ) { exitfn(); return; }
 
    bool hasPswd;
    if( Ch == 'P' ) hasPswd = true;

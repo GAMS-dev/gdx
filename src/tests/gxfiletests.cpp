@@ -26,7 +26,7 @@
 #include "doctest.hpp"// for ResultBuilder, Expressi...
 #include "../gxfile.hpp"
 
-using namespace gdx;
+using namespace GDX_NS gdx;
 using namespace std::literals::string_literals;
 
 namespace gdx::tests::gxfiletests

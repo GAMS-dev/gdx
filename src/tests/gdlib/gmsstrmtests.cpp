@@ -29,7 +29,7 @@
 #include <filesystem>
 
 using namespace std::literals::string_literals;
-using namespace gdlib::gmsstrm;
+using namespace GDX_NS gdlib::gmsstrm;
 
 namespace tests::gdlibtests::gmsstrmtests
 {

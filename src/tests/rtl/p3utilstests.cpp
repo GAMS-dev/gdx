@@ -41,6 +41,14 @@ TEST_CASE( "Test get digits" )
    REQUIRE_EQ( "23"s, getDigits( 23 ) );
 }
 
+TEST_CASE( "Test p3StandardLocations" )
+{
+   int count;
+   TLocNames dirNames;
+   p3StandardLocations( p3Data, "APPNAME"s, dirNames, count );
+   REQUIRE_FALSE(dirNames.empty());
+}
+
 TEST_SUITE_END();
 
 }

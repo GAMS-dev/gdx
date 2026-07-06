@@ -51,7 +51,7 @@ using namespace std::literals::string_literals;
 std::stringstream debugStream;
 #endif
 
-namespace utils
+namespace GDX_NS utils
 {
 
 bool anychar( const std::function<bool( char )> &predicate, const std::string_view s )
@@ -658,7 +658,7 @@ bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
 #include <processthreadsapi.h>
 #endif
 
-namespace utils
+namespace GDX_NS utils
 {
 int64_t queryPeakRSS()
 {

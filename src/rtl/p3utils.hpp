@@ -33,7 +33,12 @@
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace rtl::p3utils
+
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS rtl::p3utils
 {
 
 void initParamStr( int argc, const char **argv );
@@ -75,7 +80,9 @@ enum Tp3Location : uint8_t
 bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocNames &locNames, int &eCount );
 bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::string &locName );
 
-bool PrefixPath( const std::string &s );
+#if defined( __IN_CPPMEX__ )
+bool PrefixPath( std::string_view s );
+#endif
 
 bool P3SetEnv( const std::string &name, const std::string &val );
 std::string P3GetEnv( const std::string &name );
@@ -166,3 +173,7 @@ int xGetExecName( std::string &execName, std::string &msg );
 int p3SomeIOResult();
 
 }// namespace rtl::p3utils
+
+namespace rtl {
+namespace p3utils = GDX_NS rtl::p3utils;
+}

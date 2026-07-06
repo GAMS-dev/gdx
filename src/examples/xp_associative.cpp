@@ -59,11 +59,7 @@ int main( int argc, const char **argv )
 
 std::map<std::string, double> fillXLevelMapFromGDX(const std::string &filename)
 {
-   std::string msg;
-   gdx::TGXFileObj gdx { msg };
-   if(!msg.empty())
-      throw std::runtime_error("Unable to instantiate GDX object: "s + msg);
-
+   gdx::TGXFileObj gdx;
    int errNr {};
    int rc {gdx.gdxOpenRead( filename.c_str(), errNr )};
    if( !rc || errNr != 0 )

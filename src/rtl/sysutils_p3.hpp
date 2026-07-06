@@ -39,12 +39,26 @@ struct _WIN32_FIND_DATAA;
 #include <array>                    // for array
 #include <string>                   // for string, basic_string
 #include <string_view>
+
 #include "delphitypes.hpp"// for tDateTime
+#include "p3platform.hpp"
+
+#ifdef P3_THREAD_SAFE
+#include <thread>
+#define p3_global_storage thread_local
+#else
+#define p3_global_storage
+#endif
 
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace rtl::sysutils_p3
+
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS rtl::sysutils_p3
 {
 // File attribute constants
 constexpr int faReadOnly = 0x00000001,
@@ -104,8 +118,17 @@ struct TTimeStamp {
    int Date;// One plus number of days since 1/1/0001
 };
 
-extern char PathDelim, DriveDelim, PathSep;
-extern std::string FileStopper, ExtStopper;
+constexpr char DriveDelim = p3platform::OSFileWIN == p3platform::OSFileType() ?  ':'  :
+                            p3platform::OSFileUNIX == p3platform::OSFileType() ? '\0' :
+                                                                                 '?'  ;
+
+constexpr char PathDelim = p3platform::OSFileWIN == p3platform::OSFileType() ?  '\\' :
+                           p3platform::OSFileUNIX == p3platform::OSFileType() ? '/'  :
+                                                                                '?'  ;
+
+constexpr char PathSep = p3platform::OSFileWIN == p3platform::OSFileType() ?  ';' :
+                         p3platform::OSFileUNIX == p3platform::OSFileType() ? ':' :
+                                                                              '?' ;
 
 // Memory management routines
 template<typename T>
@@ -193,6 +216,7 @@ int LastDelimiter( const char *Delimiters, const std::string &S );
 int LastDelimiter( std::string_view Delimiters, std::string_view S );
 
 #if defined(_WIN32)
+bool isLongPath(const std::string &p);
 std::string tryFixingLongPath(const std::string &fName);
 #endif
 
@@ -208,3 +232,7 @@ unsigned long GetRobustShortPathW( const wchar_t *longPathW, wchar_t *shortPathW
 #endif
 
 }// namespace rtl::sysutils_p3
+
+namespace rtl {
+   namespace sysutils_p3 = GDX_NS rtl::sysutils_p3;
+}

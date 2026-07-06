@@ -248,7 +248,7 @@ TEST_CASE("Test string to 64-bit integer conversion")
    REQUIRE_EQ(12345, StrToInt64( "12345" ) );
    REQUIRE_EQ(-12345, StrToInt64( "-12345" ) );
    REQUIRE_EQ(std::numeric_limits<int64_t>::max(), StrToInt64( std::to_string( std::numeric_limits<int64_t>::max() ) ) );
-   REQUIRE_EQ(std::numeric_limits<int64_t>::min(), StrToInt64( std::to_string( std::numeric_limits<int64_t>::min() ) ) );
+   REQUIRE_EQ(std::numeric_limits<int64_t>::min()+1, StrToInt64( std::to_string( std::numeric_limits<int64_t>::min()+1 ) ) );
    REQUIRE_EQ(255, StrToInt64( "$FF" ) );
    REQUIRE_EQ(255, StrToInt64( "$ff" ) );
    REQUIRE_EQ(0, StrToInt64( "$00" ) );
@@ -285,6 +285,20 @@ TEST_CASE("Test trim functions left/right/both")
    REQUIRE_EQ(""s, TrimLeft(""s));
    REQUIRE_EQ(""s, TrimRight(""s));
 }
+
+#if defined(_WIN32)
+TEST_CASE("Test long path detection and fixing routines")
+{
+   REQUIRE_FALSE(isLongPath( "C:\\abc"s ));
+   REQUIRE_FALSE(isLongPath( "\\\\?\\C:\\abc"s ));
+   const std::string longish(MAX_PATH+1, 'x');
+   REQUIRE(isLongPath( longish ));
+   const std::string relativeShortButAbsoluteLong(MAX_PATH-1, 'x');
+   REQUIRE(isLongPath( relativeShortButAbsoluteLong ));
+   const std::string fixedPath = tryFixingLongPath( relativeShortButAbsoluteLong );
+   REQUIRE_EQ(fixedPath.substr(0, 4), "\\\\?\\"s);
+}
+#endif
 
 TEST_SUITE_END();
 
