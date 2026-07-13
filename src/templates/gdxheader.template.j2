@@ -223,8 +223,8 @@ bool IsGoodNewSymbol( const char *s );
 bool ResultWillBeSorted( const int *ADomainNrs ) const;
 
 int gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int &ErrNr );
-int ReadUELTable();
-int ReadSetTextList();
+int ReadUELTable(bool isDeferred);
+int ReadSetTextList(bool isDeferred);
 
 // This one is a helper function for a callback from a Fortran client
 void gdxGetDomainElements_DP_FC( int RawIndex, int MappedIndex, void *Uptr );
