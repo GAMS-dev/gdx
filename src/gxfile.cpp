@@ -54,14 +54,14 @@ using namespace utils;
    if(!UELTable && UelReadDeferred) \
    { \
       /* FIXME: Do proper error handling like gdxOpenRead... */ \
-      ReadUELTable(); \
+      ReadUELTable(true); \
    }
 
 #define NEED_SET_TEXTS() \
    if( !SetTextList && SetTextReadDeferred ) \
    { \
       /* FIXME: Do proper error handling like gdxOpenRead... */ \
-      ReadSetTextList(); \
+      ReadSetTextList(true); \
    }
 
 namespace GDX_NS gdx
@@ -1872,7 +1872,7 @@ static inline std::string_view substr( const std::string_view s, int offset, int
    return ( s.empty() || offset > (int) s.size() - 1 ) ? std::string_view {} : s.substr( offset, len );
 }
 
-int TGXFileObj::ReadUELTable()
+int TGXFileObj::ReadUELTable(bool isDeferred)
 {
    const int64_t oldPos = FFile->GetPosition();
    UelReadDeferred = false;
@@ -1910,11 +1910,12 @@ int TGXFileObj::ReadUELTable()
       return false;
    }
 
-   FFile->SetPosition( oldPos );
+   if(isDeferred)
+     FFile->SetPosition( oldPos );
    return true;
 }
 
-int TGXFileObj::ReadSetTextList()
+int TGXFileObj::ReadSetTextList(bool isDeferred)
 {
    const int64_t oldPos = FFile->GetPosition();
    FFile->SetCompression( DoUncompress );
@@ -1955,7 +1956,8 @@ int TGXFileObj::ReadSetTextList()
       return false;
    }
 
-   FFile->SetPosition( oldPos );
+   if(isDeferred)
+     FFile->SetPosition( oldPos );
    return true;
 }
 
@@ -2107,12 +2109,16 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
    }
    if( ErrorCondition( FFile->ReadString() == MARK_SYMB, ERR_OPEN_SYMBOLMARKER2 ) ) return FileErrorNr();
 
-   // reading UEL table (now deferred until needed)
-   UelReadDeferred = true;
+   // reading UEL table (could be deferred until needed)
+   UelReadDeferred = false;
+   ReadUELTable( false );
 
-   // reading set text table (now deferred until needed)
+   // reading set text table (could be deferred until needed)
    if( ReadMode % 2 == 0 )
-      SetTextReadDeferred = true;
+   {
+      SetTextReadDeferred = false;
+      ReadSetTextList( false );
+   }
 
    // reading acronym list
    if( VersionRead >= 7 )
