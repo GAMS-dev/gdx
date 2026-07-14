@@ -489,8 +489,8 @@ $(document).ready(function(){initNavTree('gdx_8hpp_source.html',''); initResizab
 <div class="line"><a id="l01840" name="l01840"></a><span class="lineno"> 1840</span><span class="keywordtype">bool</span> ResultWillBeSorted( <span class="keyword">const</span> <span class="keywordtype">int</span> *ADomainNrs ) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l01841" name="l01841"></a><span class="lineno"> 1841</span> </div>
 <div class="line"><a id="l01842" name="l01842"></a><span class="lineno"> 1842</span><span class="keywordtype">int</span> gdxOpenReadXX( <span class="keyword">const</span> <span class="keywordtype">char</span> *Afn, <span class="keywordtype">int</span> filemode, <span class="keywordtype">int</span> ReadMode, <span class="keywordtype">int</span> &amp;ErrNr );</div>
-<div class="line"><a id="l01843" name="l01843"></a><span class="lineno"> 1843</span><span class="keywordtype">int</span> ReadUELTable();</div>
-<div class="line"><a id="l01844" name="l01844"></a><span class="lineno"> 1844</span><span class="keywordtype">int</span> ReadSetTextList();</div>
+<div class="line"><a id="l01843" name="l01843"></a><span class="lineno"> 1843</span><span class="keywordtype">int</span> ReadUELTable(<span class="keywordtype">bool</span> isDeferred);</div>
+<div class="line"><a id="l01844" name="l01844"></a><span class="lineno"> 1844</span><span class="keywordtype">int</span> ReadSetTextList(<span class="keywordtype">bool</span> isDeferred);</div>
 <div class="line"><a id="l01845" name="l01845"></a><span class="lineno"> 1845</span> </div>
 <div class="line"><a id="l01846" name="l01846"></a><span class="lineno"> 1846</span><span class="comment">// This one is a helper function for a callback from a Fortran client</span></div>
 <div class="line"><a id="l01847" name="l01847"></a><span class="lineno"> 1847</span><span class="keywordtype">void</span> gdxGetDomainElements_DP_FC( <span class="keywordtype">int</span> RawIndex, <span class="keywordtype">int</span> MappedIndex, <span class="keywordtype">void</span> *Uptr );</div>
