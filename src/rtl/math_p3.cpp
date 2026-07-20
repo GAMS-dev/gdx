@@ -100,13 +100,13 @@ TFPUExceptionMask GetExceptionMask()
    };
 #if defined( _WIN32 )
    {
-      unsigned int cw = _control87( 0, 0 );
-      if( cw & _EM_INVALID ) ADD2MASK( exInvalidOp );
-      if( cw & _EM_DENORMAL ) ADD2MASK( exDenormalized );
-      if( cw & _EM_ZERODIVIDE ) ADD2MASK( exZeroDivide );
-      if( cw & _EM_OVERFLOW ) ADD2MASK( exOverflow );
-      if( cw & _EM_UNDERFLOW ) ADD2MASK( exUnderflow );
-      if( cw & _EM_INEXACT ) ADD2MASK( exPrecision );
+      int flags = std::fetestexcept( FE_ALL_EXCEPT );
+      if( flags & FE_INVALID ) ADD2MASK( exInvalidOp );
+      if( flags & FE_DIVBYZERO ) ADD2MASK( exZeroDivide );
+      if( flags & FE_OVERFLOW ) ADD2MASK( exOverflow );
+      if( flags & FE_UNDERFLOW ) ADD2MASK( exUnderflow );
+      if( flags & FE_INEXACT ) ADD2MASK( exPrecision );
+      ADD2MASK( exDenormalized );
    }
 #elif defined( __APPLE__ ) && defined( __arm64__ )
    {
@@ -196,21 +196,14 @@ TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
    };
 #if defined( _WIN32 )
    {
-      unsigned int cw = _control87( 0, 0 );
-      if( cw & _EM_INVALID ) ADD2MASK( exInvalidOp );
-      if( cw & _EM_DENORMAL ) ADD2MASK( exDenormalized );
-      if( cw & _EM_ZERODIVIDE ) ADD2MASK( exZeroDivide );
-      if( cw & _EM_OVERFLOW ) ADD2MASK( exOverflow );
-      if( cw & _EM_UNDERFLOW ) ADD2MASK( exUnderflow );
-      if( cw & _EM_INEXACT ) ADD2MASK( exPrecision );
-      unsigned int tcw {};
-      if( ISINMASK( exInvalidOp ) ) tcw |= _EM_INVALID;
-      if( ISINMASK( exDenormalized ) ) tcw |= _EM_DENORMAL;
-      if( ISINMASK( exZeroDivide ) ) tcw |= _EM_ZERODIVIDE;
-      if( ISINMASK( exOverflow ) ) tcw |= _EM_OVERFLOW;
-      if( ISINMASK( exUnderflow ) ) tcw |= _EM_UNDERFLOW;
-      if( ISINMASK( exPrecision ) ) tcw |= _EM_INEXACT;
-      _control87( tcw, _MCW_EM );
+      int new_flags = 0;
+      if( ISINMASK( exInvalidOp ) ) new_flags |= FE_INVALID;
+      if( ISINMASK( exZeroDivide ) ) new_flags |= FE_DIVBYZERO;
+      if( ISINMASK( exOverflow ) ) new_flags |= FE_OVERFLOW;
+      if( ISINMASK( exUnderflow ) ) new_flags |= FE_UNDERFLOW;
+      if( ISINMASK( exPrecision ) ) new_flags |= FE_INEXACT;
+      std::feclearexcept( FE_ALL_EXCEPT );
+      if( new_flags != 0 ) std::feraiseexcept( new_flags );
    }
 #elif defined( __APPLE__ ) && defined( __arm64__ )
    {
@@ -357,8 +350,7 @@ void SetExceptionMask2P3()
 
 void ClearExceptions()
 {
-   throw std::runtime_error( "Not implemented yet!" );
-   // ...
+   std::feclearexcept( FE_ALL_EXCEPT );
 }
 
 }// namespace rtl::math_p3
