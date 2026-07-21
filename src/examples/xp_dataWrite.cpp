@@ -118,18 +118,22 @@ void worker::PrintDiff( const std::string &msg, clock_t tm ) const
 
 void worker::initC( const std::string &sysDir )
 {
-   std::string msgStr;
-   gdx = std::make_unique<gdx::TGXFileObj>( msgStr );
-   if( !msgStr.empty() )
-      throw std::runtime_error( "**** Could not load GDX (c) library\n**** \n"s );
+   try
+   {
+      gdx = std::make_unique<gdx::TGXFileObj>();
+   }
+   catch(std::exception &e)
+   {
+      throw std::runtime_error( "Could not load GDX library"s );
+   }
 
    char msg[GMS_SSSIZE];
-   gdx->gdxGetDLLVersion( msg );
+   gdx::TGXFileObj::gdxGetDLLVersion( msg );
    std::cout << "Using GDX DLL version: " << msg << std::endl;
 
    if( !gmdCreateD( &gmdHandle, sysDir.c_str(), msg, sizeof( msg ) ) )
    {
-      std::cout << "**** Could not load GMD (c) library" << std::endl
+      std::cout << "**** Could not load GMD library\n"
                 << "**** " << msg << std::endl;
       exit( 1 );
    }
