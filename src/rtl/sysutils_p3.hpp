@@ -220,7 +220,7 @@ bool isLongPath(const std::string &p);
 std::string tryFixingLongPath(const std::string &fName);
 #endif
 
-std::string QueryEnvironmentVariable( const std::string &Name );
+std::string QueryEnvironmentVariable( std::string_view Name );
 int AssignEnvironmentVariable( const std::string &name, const std::string &value );
 void DropEnvironmentVariable( const std::string &name );
 
