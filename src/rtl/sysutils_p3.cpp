@@ -482,10 +482,12 @@ std::string QueryEnvironmentVariable( std::string_view Name )
    return val;
 #else
    const char *s { std::getenv( Name.data() ) };
-   std::string sout { !s ? ""s : s };
-   if( sout.length() > 255 )
-      sout.resize( 255 );
-   return sout;
+   if( !s )
+      return ""s;
+   std::string_view sv { s };
+   if( sv.length() > 255 )
+      sv = sv.substr( 255 );
+   return std::string { sv };
 #endif
 }
 
