@@ -55,6 +55,7 @@
 #include "utils.hpp"
 
 using namespace std::literals::string_literals;
+using namespace std::literals::string_view_literals;
 using namespace GDX_NS gdx;
 using namespace GDX_NS utils;
 using namespace GDX_NS gdlib::strindexbuf;
@@ -2777,7 +2778,7 @@ TEST_CASE("Example from README markdown")
 {
    // skip test in CI
    if( const char *val = std::getenv( "GITLAB_CI" );
-      val != nullptr && std::string(val) == "true"s)
+      val != nullptr && std::string_view(val) == "true"sv)
       return;
 
    constexpr char testFn[] = "test.gdx";
