@@ -67,22 +67,19 @@ using namespace utils;
 namespace GDX_NS gdx
 {
 
-std::string QueryEnvironmentVariable( const std::string_view Name );
-
+static std::string QueryEnvironmentVariable( std::string_view Name );
 std::string QueryEnvironmentVariable( const std::string_view Name )
 {
+   assert(Name.back() == '\0');
 #if defined( _WIN32 )
    int len = GetEnvironmentVariableA( Name.data(), nullptr, 0 );
    if( !len ) return ""s;
-   else
-   {
-      std::vector<char> buf( len );
-      GetEnvironmentVariableA( Name.data(), buf.data(), len );
-      std::string val( buf.begin(), buf.end() - 1 );// no terminating zero
-      if( val.length() > 255 )
-         val.resize( 255 );
-      return val;
-   }
+   std::vector<char> buf( len );
+   GetEnvironmentVariableA( Name.data(), buf.data(), len );
+   std::string val( buf.begin(), buf.end() - 1 );// no terminating zero
+   if( val.length() > 255 )
+      val.resize( 255 );
+   return val;
 #else
    const char *s = std::getenv( Name.data() );
    std::string sout = s == nullptr ? ""s : s;
@@ -738,9 +735,15 @@ int TGXFileObj::gdxResetSpecialValues()
 
 static inline void assignExplanatoryText( std::string_view userText, char *buf )
 {
-   if( userText.length() < GMS_SSSIZE ) assignViewToBuf( userText, buf, GMS_SSSIZE );
+   if( userText.length() < GMS_SSSIZE )
+      assignViewToBuf( userText, buf, GMS_SSSIZE );
    else
-      std::snprintf( buf, GMS_SSSIZE, "String overflow: %.*s...", GMS_SSSIZE - 21, userText.data() );
+   {
+      constexpr int
+         reservedSpace = 21,
+         availableSpace = GMS_SSSIZE > reservedSpace ? GMS_SSSIZE - reservedSpace : 0;
+      std::snprintf( buf, GMS_SSSIZE, "String overflow: %.*s...", availableSpace, userText.data() );
+   }
 }
 
 bool TGXFileObj::PrepareSymbolWrite( const std::string_view Caller,
@@ -1789,7 +1792,8 @@ int TGXFileObj::gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst )
 #endif
          }
          else
-            std::snprintf( KeyStr[D], GMS_UEL_IDENT_SIZE, "%s%d", BADUEL_PREFIX.data(), LED );// NOTE: Not covered by unit tests yet.
+            std::snprintf( KeyStr[D], GMS_UEL_IDENT_SIZE, "%.*s%d",
+               static_cast<int>(BADUEL_PREFIX.size()), BADUEL_PREFIX.data(), LED ); // NOTE: Not covered by unit tests yet.
       }
       return true;
    }
