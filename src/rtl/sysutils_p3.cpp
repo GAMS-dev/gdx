@@ -486,7 +486,7 @@ std::string QueryEnvironmentVariable( std::string_view Name )
       return ""s;
    std::string_view sv { s };
    if( sv.length() > 255 )
-      sv = sv.substr( 255 );
+      sv = sv.substr( 0, 255 );
    return std::string { sv };
 #endif
 }
