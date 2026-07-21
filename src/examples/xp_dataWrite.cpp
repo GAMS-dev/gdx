@@ -124,7 +124,7 @@ void worker::initC( const std::string &sysDir )
    }
    catch(std::exception &e)
    {
-      throw std::runtime_error( "Could not load GDX library"s );
+      throw std::runtime_error( "Could not load GDX library: "s + e.what() );
    }
 
    char msg[GMS_SSSIZE];
