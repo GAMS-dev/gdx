@@ -738,12 +738,7 @@ static inline void assignExplanatoryText( std::string_view userText, char *buf )
    if( userText.length() < GMS_SSSIZE )
       assignViewToBuf( userText, buf, GMS_SSSIZE );
    else
-   {
-      constexpr int
-         reservedSpace = 21,
-         availableSpace = GMS_SSSIZE > reservedSpace ? GMS_SSSIZE - reservedSpace : 0;
-      std::snprintf( buf, GMS_SSSIZE, "String overflow: %.*s...", availableSpace, userText.data() );
-   }
+      std::snprintf( buf, GMS_SSSIZE, "String overflow: %.*s...", GMS_SSSIZE - 21, userText.data() );
 }
 
 bool TGXFileObj::PrepareSymbolWrite( const std::string_view Caller,
