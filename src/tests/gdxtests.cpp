@@ -2781,6 +2781,7 @@ TEST_CASE("Example from README markdown")
       return;
 
    constexpr char testFn[] = "test.gdx";
+   constexpr int vallevel = GMS_VAL_LEVEL;
 
    {
       //Create GDX object and open file for writing
