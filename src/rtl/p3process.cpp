@@ -679,7 +679,7 @@ static int System4Win( const std::string &CmdPtr, bool inheritedHandles, int &Pr
       return cp.length() <= 2 || cp[0] != '\"' || cp[1] != '\"' || cp.back() != '\"';
    };
 
-   std::string cs = rtl::sysutils_p3::QueryEnvironmentVariable( "COMSPEC" );
+   std::string cs = QueryEnvironmentVariable( "COMSPEC" );
    if( cs.empty() )
    {
       if( FileExists( CMD_WIN7 ) )

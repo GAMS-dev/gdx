@@ -468,24 +468,26 @@ bool DeleteFileFromDisk( const std::string &FileName )
 #endif
 }
 
-std::string QueryEnvironmentVariable( const std::string &Name )
+std::string QueryEnvironmentVariable( std::string_view Name )
 {
 #if defined( _WIN32 )
-   if( const uint32_t len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 ); !len ) return ""s;
-   else
-   {
-      std::vector<char> buf( len );
-      GetEnvironmentVariableA( Name.c_str(), buf.data(), len );
-      std::string val( buf.begin(), buf.end() - 1 );// no terminating zero
-      if( val.length() > 255 ) val = val.substr( 0, 255 );
-      return val;
-   }
+   DWORD len = GetEnvironmentVariableA( Name.data(), nullptr, 0 );
+   if( !len )
+      return ""s;
+   std::string val;
+   val.resize( len - 1 );
+   GetEnvironmentVariableA( Name.data(), val.data(), len );
+   if( val.length() > 255 )
+      val.resize( 255 );
+   return val;
 #else
-   const char *s { std::getenv( Name.c_str() ) };
-   std::string sout { !s ? ""s : s };
-   if( sout.length() > 255 )
-      sout.resize( 255 );
-   return sout;
+   const char *s { std::getenv( Name.data() ) };
+   if( !s )
+      return ""s;
+   std::string_view sv { s };
+   if( sv.length() > 255 )
+      sv = sv.substr( 0, 255 );
+   return std::string { sv };
 #endif
 }
 

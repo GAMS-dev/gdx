@@ -67,30 +67,6 @@ using namespace utils;
 namespace GDX_NS gdx
 {
 
-std::string QueryEnvironmentVariable( const std::string_view Name );
-
-std::string QueryEnvironmentVariable( const std::string_view Name )
-{
-#if defined( _WIN32 )
-   int len = GetEnvironmentVariableA( Name.data(), nullptr, 0 );
-   if( !len ) return ""s;
-   else
-   {
-      std::vector<char> buf( len );
-      GetEnvironmentVariableA( Name.data(), buf.data(), len );
-      std::string val( buf.begin(), buf.end() - 1 );// no terminating zero
-      if( val.length() > 255 )
-         val.resize( 255 );
-      return val;
-   }
-#else
-   const char *s = std::getenv( Name.data() );
-   std::string sout = s == nullptr ? ""s : s;
-   if( sout.length() > 255 ) sout = sout.substr( 0, 255 );
-   return sout;
-#endif
-}
-
 int64_t dblToI64( double x );
 
 bool CanBeQuoted( const char *s, size_t slen )
@@ -320,7 +296,7 @@ static int SystemP( const std::string &cmd, int &ProgRC )
 
 int ConvertGDXFile( const std::string &fn, const std::string &MyComp )
 {
-   std::string Conv { trim( uppercase( QueryEnvironmentVariable( strGDXCONVERT ) ) ) };
+   std::string Conv { trim( uppercase( rtl::sysutils_p3::QueryEnvironmentVariable( strGDXCONVERT.data() ) ) ) };
    if( Conv.empty() ) Conv = "V7"s;
    const std::string Comp = Conv == "V5" ? ""s : ( !GetEnvCompressFlag() ? "U" : "C" );
    if( sameText( Conv + Comp, "V7"s + MyComp ) ) return 0;
@@ -404,7 +380,7 @@ void copyIntlMapDblToI64( const TIntlValueMapDbl &dMap, TIntlValueMapI64 &iMap )
 
 int GetEnvCompressFlag()
 {
-   const std::string s { QueryEnvironmentVariable( strGDXCOMPRESS ) };
+   const std::string s { rtl::sysutils_p3::QueryEnvironmentVariable( strGDXCOMPRESS.data() ) };
    // Note: the default is disabled
    if( s.empty() ) return 0;
    const char c { toupper( s.front() ) };
@@ -738,7 +714,8 @@ int TGXFileObj::gdxResetSpecialValues()
 
 static inline void assignExplanatoryText( std::string_view userText, char *buf )
 {
-   if( userText.length() < GMS_SSSIZE ) assignViewToBuf( userText, buf, GMS_SSSIZE );
+   if( userText.length() < GMS_SSSIZE )
+      assignViewToBuf( userText, buf, GMS_SSSIZE );
    else
       std::snprintf( buf, GMS_SSSIZE, "String overflow: %.*s...", GMS_SSSIZE - 21, userText.data() );
 }
@@ -1789,7 +1766,8 @@ int TGXFileObj::gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst )
 #endif
          }
          else
-            std::snprintf( KeyStr[D], GMS_UEL_IDENT_SIZE, "%s%d", BADUEL_PREFIX.data(), LED );// NOTE: Not covered by unit tests yet.
+            std::snprintf( KeyStr[D], GMS_UEL_IDENT_SIZE, "%.*s%d",
+               static_cast<int>(BADUEL_PREFIX.size()), BADUEL_PREFIX.data(), LED ); // NOTE: Not covered by unit tests yet.
       }
       return true;
    }
