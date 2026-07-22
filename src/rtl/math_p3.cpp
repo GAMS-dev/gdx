@@ -188,9 +188,11 @@ TFPUExceptionMask GetExceptionMask()
 TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
 {
    std::set<TFPUException> result {};
+#if !defined(_WIN32)
    auto ADD2MASK = [&result]( TFPUException e ) {
       result.insert( e );
    };
+#endif
    auto ISINMASK = [&result]( TFPUException e ) {
       return result.count( e );
    };
