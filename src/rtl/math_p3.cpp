@@ -100,13 +100,14 @@ TFPUExceptionMask GetExceptionMask()
    };
 #if defined( _WIN32 )
    {
-      int flags = std::fetestexcept( FE_ALL_EXCEPT );
-      if( flags & FE_INVALID ) ADD2MASK( exInvalidOp );
-      if( flags & FE_DIVBYZERO ) ADD2MASK( exZeroDivide );
-      if( flags & FE_OVERFLOW ) ADD2MASK( exOverflow );
-      if( flags & FE_UNDERFLOW ) ADD2MASK( exUnderflow );
-      if( flags & FE_INEXACT ) ADD2MASK( exPrecision );
-      ADD2MASK( exDenormalized );
+      unsigned int cw = 0;
+      _controlfp_s( &cw, 0, 0 );
+      if( cw & _EM_INVALID ) ADD2MASK( exInvalidOp );
+      if( cw & _EM_DENORMAL ) ADD2MASK( exDenormalized );
+      if( cw & _EM_ZERODIVIDE ) ADD2MASK( exZeroDivide );
+      if( cw & _EM_OVERFLOW ) ADD2MASK( exOverflow );
+      if( cw & _EM_UNDERFLOW ) ADD2MASK( exUnderflow );
+      if( cw & _EM_INEXACT ) ADD2MASK( exPrecision );
    }
 #elif defined( __APPLE__ ) && defined( __arm64__ )
    {
@@ -188,24 +189,34 @@ TFPUExceptionMask GetExceptionMask()
 TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
 {
    std::set<TFPUException> result {};
-#if !defined(_WIN32)
    auto ADD2MASK = [&result]( TFPUException e ) {
       result.insert( e );
    };
-#endif
    auto ISINMASK = [&result]( TFPUException e ) {
       return result.count( e );
    };
 #if defined( _WIN32 )
    {
-      int new_flags = 0;
-      if( ISINMASK( exInvalidOp ) ) new_flags |= FE_INVALID;
-      if( ISINMASK( exZeroDivide ) ) new_flags |= FE_DIVBYZERO;
-      if( ISINMASK( exOverflow ) ) new_flags |= FE_OVERFLOW;
-      if( ISINMASK( exUnderflow ) ) new_flags |= FE_UNDERFLOW;
-      if( ISINMASK( exPrecision ) ) new_flags |= FE_INEXACT;
-      std::feclearexcept( FE_ALL_EXCEPT );
-      if( new_flags != 0 ) std::feraiseexcept( new_flags );
+      unsigned int cw = 0;
+      _controlfp_s(&cw, 0, 0);
+
+      if (cw & _EM_INVALID)   ADD2MASK(exInvalidOp);
+      if (cw & _EM_DENORMAL)  ADD2MASK(exDenormalized);
+      if (cw & _EM_ZERODIVIDE) ADD2MASK(exZeroDivide);
+      if (cw & _EM_OVERFLOW)  ADD2MASK(exOverflow);
+      if (cw & _EM_UNDERFLOW) ADD2MASK(exUnderflow);
+      if (cw & _EM_INEXACT)   ADD2MASK(exPrecision);
+
+      unsigned int tcw = 0;
+      if (ISINMASK(exInvalidOp))   tcw |= _EM_INVALID;
+      if (ISINMASK(exDenormalized)) tcw |= _EM_DENORMAL;
+      if (ISINMASK(exZeroDivide))  tcw |= _EM_ZERODIVIDE;
+      if (ISINMASK(exOverflow))    tcw |= _EM_OVERFLOW;
+      if (ISINMASK(exUnderflow))   tcw |= _EM_UNDERFLOW;
+      if (ISINMASK(exPrecision))   tcw |= _EM_INEXACT;
+
+      unsigned int current_cw = 0;
+      _controlfp_s(&current_cw, tcw, _MCW_EM);
    }
 #elif defined( __APPLE__ ) && defined( __arm64__ )
    {
