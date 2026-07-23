@@ -443,8 +443,8 @@ bool SetCurrentDir( const std::string &Dir )
 bool DirectoryExists( const std::string &Directory )
 {
 #if defined( _WIN32 )
-   const auto attribs = GetFileAttributesA( ( Directory.size() > MAX_PATH ? tryFixingLongPath( Directory ) : Directory ).c_str() );
-   return -1 != attribs && ( attribs & FILE_ATTRIBUTE_DIRECTORY );
+   DWORD attribs = GetFileAttributesA( ( Directory.size() > MAX_PATH ? tryFixingLongPath( Directory ) : Directory ).c_str() );
+   return INVALID_FILE_ATTRIBUTES != attribs && ( attribs & FILE_ATTRIBUTE_DIRECTORY );
 #else
    struct stat statBuf;
    return !stat( Directory.c_str(), &statBuf ) ? S_ISDIR( statBuf.st_mode ) : false;

@@ -46,7 +46,7 @@
    // Windows
    // @aschnabel: it was __GNUC__, but it does not make sense with MINGW.
    // Changed it to __CYGWIN__, but I don't think we target this??
-   #ifndef __CYGWIN__
+   #if defined(_MSC_VER)
       #pragma comment( lib, "iphlpapi.lib" )
       #pragma comment( lib, "Ws2_32.lib" )
       //#define _WINSOCK2API_
