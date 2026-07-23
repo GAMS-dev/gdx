@@ -29,6 +29,7 @@
 #include <cstdlib>// for abs
 #include <cmath>  // for log1p
 #include <stdexcept>
+#include <cfloat>
 
 namespace GDX_NS rtl::math_p3
 {
