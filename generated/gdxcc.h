@@ -159,6 +159,7 @@ int  GDX_CALLCONV d_gdxClose (gdxHandle_t pgdx);
 int  GDX_CALLCONV d_gdxDataErrorCount (gdxHandle_t pgdx);
 int  GDX_CALLCONV d_gdxDataErrorRecord (gdxHandle_t pgdx, int RecNr, int KeyInt[], double Values[]);
 int  GDX_CALLCONV d_gdxDataErrorRecordX (gdxHandle_t pgdx, int RecNr, int KeyInt[], double Values[]);
+int  GDX_CALLCONV d_gdxSetErrorRecordCutoff (gdxHandle_t pgdx, int maxDataErrorRecords);
 int  GDX_CALLCONV d_gdxDataReadDone (gdxHandle_t pgdx);
 int  GDX_CALLCONV d_gdxDataReadFilteredStart (gdxHandle_t pgdx, int SyNr, const int FilterAction[], int *NrRecs);
 int  GDX_CALLCONV d_gdxDataReadMap (gdxHandle_t pgdx, int RecNr, int KeyInt[], double Values[], int *DimFrst);
@@ -400,6 +401,15 @@ typedef int  (GDX_CALLCONV *gdxDataErrorRecordX_t) (gdxHandle_t pgdx, int RecNr,
  * @return Non-zero if the record number is valid, zero otherwise.
  */
 GDX_FUNCPTR(gdxDataErrorRecordX);
+
+typedef int  (GDX_CALLCONV *gdxSetErrorRecordCutoff_t) (gdxHandle_t pgdx, int maxDataErrorRecords);
+/** Adjust the limit of error records stored. The default is 11.
+ *
+ * @param pgdx gdx object handle
+ * @param maxDataErrorRecords Maximum number of error records being stored.
+ * @return Previous cutoff.
+ */
+GDX_FUNCPTR(gdxSetErrorRecordCutoff);
 
 typedef int  (GDX_CALLCONV *gdxDataReadDone_t) (gdxHandle_t pgdx);
 /** Finish reading of a symbol in any mode (raw, mapped, string). . Returns zero if the operation is not possible.

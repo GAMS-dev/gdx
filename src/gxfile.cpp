@@ -1513,7 +1513,7 @@ double TGXFileObj::AcronymRemap( double V )
 void TGXFileObj::AddToErrorListDomErrs( const std::array<int, GLOBAL_MAX_INDEX_DIM> &AElements, const double *AVals )
 {
    if( !ErrorList ) ErrorList = std::make_unique<TTblGamsDataImpl<double>>( FCurrentDim, (int) ( DataSize * sizeof( double ) ) );
-   else if( ErrorList->GetCount() >= 11 )
+   else if( ErrorList->GetCount() >= MaxErrorRecords )
       return;// NOTE: Not covered by unit tests yet.
 
    static std::array<int, GLOBAL_MAX_INDEX_DIM> keys {};
@@ -1547,7 +1547,7 @@ void TGXFileObj::AddToErrorList( const int *AElements, const double *AVals )
 {
    if( !ErrorList )
       ErrorList = std::make_unique<TTblGamsDataImpl<double>>( FCurrentDim, (int) ( DataSize * sizeof( double ) ) );
-   else if( ErrorList->GetCount() >= 11 )// avoid storing too many errors
+   else if( ErrorList->GetCount() >= MaxErrorRecords )// avoid storing too many errors
       return;                            // NOTE: Not covered by unit tests yet.
    ErrorList->AddRecord( AElements, AVals );
 }
@@ -2229,6 +2229,13 @@ int TGXFileObj::gdxDataErrorRecordX( int RecNr, int *KeyInt, double *Values )
    }
 
    return false;// NOTE: Not covered by unit tests yet.
+}
+
+int TGXFileObj::gdxSetErrorRecordCutoff( int maxDataErrorRecords )
+{
+   int previousCutoff = MaxErrorRecords;
+   MaxErrorRecords = maxDataErrorRecords;
+   return previousCutoff;
 }
 
 int TGXFileObj::gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst )

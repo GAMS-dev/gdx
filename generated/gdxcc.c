@@ -420,6 +420,18 @@ int  GDX_CALLCONV d_gdxDataErrorRecordX (gdxHandle_t pgdx, int RecNr, int KeyInt
   printAndReturn(gdxDataErrorRecordX,3,int )
 }
 
+/** Adjust the limit of error records stored. The default is 11.
+ * @param pgdx gdx object handle
+ * @param maxDataErrorRecords Maximum number of error records being stored.
+ */
+int  GDX_CALLCONV d_gdxSetErrorRecordCutoff (gdxHandle_t pgdx, int maxDataErrorRecords)
+{
+  int d_s[]={3,3};
+  GAMS_UNUSED(pgdx)
+  GAMS_UNUSED(maxDataErrorRecords)
+  printAndReturn(gdxSetErrorRecordCutoff,1,int )
+}
+
 /** Finish reading of a symbol in any mode (raw, mapped, string). . Returns zero if the operation is not possible.
  * @param pgdx gdx object handle
  */
@@ -1826,6 +1838,7 @@ XLibraryLoad (const char *dllName, char *errBuf, int errBufSize)
   {int s[]={3}; CheckAndLoad(gdxDataErrorCount,0,"C__"); }
   {int s[]={3,3,52,54}; CheckAndLoad(gdxDataErrorRecord,3,"C__"); }
   {int s[]={3,3,52,54}; CheckAndLoad(gdxDataErrorRecordX,3,"C__"); }
+  {int s[]={3,3}; CheckAndLoad(gdxSetErrorRecordCutoff,1,"C__"); }
   {int s[]={3}; CheckAndLoad(gdxDataReadDone,0,"C__"); }
   {int s[]={3,3,51,4}; CheckAndLoad(gdxDataReadFilteredStart,3,"C__"); }
   {int s[]={3,3,52,54,4}; CheckAndLoad(gdxDataReadMap,4,"C__"); }

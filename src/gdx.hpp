@@ -733,6 +733,18 @@ public:
    int gdxDataErrorRecordX( int RecNr, int *KeyInt, double *Values );
 
    /**
+    * @brief Adjust the limit of error records stored. The default is 11.
+    * @details 
+    *   
+    *   This method can be used to modify the limit of error records (e.g. duplicates, unordered keys in
+    *   raw mode, domain violations) stored by GDX.
+    * @param maxDataErrorRecords Maximum number of error records being stored.
+    * @return Previous cutoff.
+    * @see gdxDataErrorCount
+    */
+   int gdxSetErrorRecordCutoff( int maxDataErrorRecords );
+
+   /**
     * @brief Finish reading of a symbol in any mode (raw, mapped, string). . Returns zero if the operation is not
     *   possible.
     * @return Non-zero if the operation is possible, zero otherwise.
@@ -1764,6 +1776,7 @@ std::unique_ptr<TDomainStrList> DomainStrList;
 std::unique_ptr<LinkedDataType> SortList;
 std::optional<LinkedDataIteratorType> ReadPtr;
 std::unique_ptr<TTblGamsDataImpl<double>> ErrorList;
+int MaxErrorRecords {11};
 PgdxSymbRecord CurSyPtr {};
 int ErrCnt {}, ErrCntTotal {};
 int LastError {}, LastRepError {};

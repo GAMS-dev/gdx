@@ -79,6 +79,7 @@
 #define C__gdxDataErrorCount c__gdxdataerrorcount
 #define C__gdxDataErrorRecord c__gdxdataerrorrecord
 #define C__gdxDataErrorRecordX c__gdxdataerrorrecordx
+#define C__gdxSetErrorRecordCutoff c__gdxseterrorrecordcutoff
 #define C__gdxDataReadDone c__gdxdatareaddone
 #define C__gdxDataReadFilteredStart c__gdxdatareadfilteredstart
 #define C__gdxDataReadMap c__gdxdatareadmap
@@ -498,6 +499,11 @@ GDX_API int GDX_CALLCONV C__XCheck(const char *funcn, int ClNrArg, int Clsign[],
   {
     DLLsign[0] = 3;DLLsign[1] = 3;DLLsign[2] = 52;DLLsign[3] = 54;
     return CheckSign(funcn,3,ClNrArg,DLLsign,Clsign,Msg);
+  }
+  else if(!strcmp(funcn,"gdxSetErrorRecordCutoff"))
+  {
+    DLLsign[0] = 3;DLLsign[1] = 3;
+    return CheckSign(funcn,1,ClNrArg,DLLsign,Clsign,Msg);
   }
   else if(!strcmp(funcn,"gdxDataReadDone"))
   {
@@ -1042,6 +1048,12 @@ GDX_API int GDX_CALLCONV C__gdxDataErrorRecordX(TGXFileRec_t *TGXFile, int RecNr
 GDX_API int GDX_CALLCONV C__gdxDataErrorRecordX(TGXFileRec_t *TGXFile, int RecNr, int KeyInt[], double Values[])
 {
   return gdxDataErrorRecordX(TGXFile, RecNr, KeyInt, Values);
+}
+
+GDX_API int GDX_CALLCONV C__gdxSetErrorRecordCutoff(TGXFileRec_t *TGXFile, int maxDataErrorRecords);
+GDX_API int GDX_CALLCONV C__gdxSetErrorRecordCutoff(TGXFileRec_t *TGXFile, int maxDataErrorRecords)
+{
+  return gdxSetErrorRecordCutoff(TGXFile, maxDataErrorRecords);
 }
 
 GDX_API int GDX_CALLCONV C__gdxDataReadDone(TGXFileRec_t *TGXFile);
