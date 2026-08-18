@@ -1,5 +1,6 @@
 ---
 - 7.11.23:
+    - Reinstate lazy loading of UELs and set texts tables
     - Add `gdxSetErrorRecordCutoff` to allow modifying the default data error record limit of 11.
     - Improve robustness of floating point exception handling, especially on Windows.
 - 7.11.22b:
