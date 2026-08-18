@@ -47,6 +47,7 @@
 #endif
 
 using namespace GDX_NS gdlib::gmsstrm;
+using namespace GDX_NS rtl::sysutils_p3;
 using namespace std::literals::string_literals;
 using namespace utils;
 

@@ -162,6 +162,7 @@ std::string ExtractFilePath( const std::string &FileName );
 std::string ExtractFileName( const std::string &FileName );
 std::string ExtractFileExt( const std::string &FileName );
 std::string ExtractShortPathName( const std::string &FileName );
+std::wstring ExtractShortPathName( const std::wstring &FileName );
 double FileDateToDateTime( int fd );
 int DateTimeToFileDate( double dt );
 std::string GetCurrentDir();
@@ -211,7 +212,7 @@ void Sleep( uint32_t milliseconds );
 
 // File/Directory routines
 std::string IncludeTrailingPathDelimiter( const std::string &S );
-std::string ExcludeTrailingPathDelimiter( const std::string &S );
+std::string ExcludeTrailingPathDelimiter( std::string_view S );
 int LastDelimiter( const char *Delimiters, const std::string &S );
 int LastDelimiter( std::string_view Delimiters, std::string_view S );
 
@@ -220,7 +221,20 @@ bool isLongPath(const std::string &p);
 std::string tryFixingLongPath(const std::string &fName);
 #endif
 
+
+#if __cplusplus >= 202002L
+std::u8string to_u8string(const wchar_t* wstr);
+std::u8string to_u8string(const char* str);
+std::u8string QueryEnvironmentVariable( std::u8string_view Name );
+#if defined( _WIN32 )
+std::wstring  to_wstring(std::u8string_view utf8_str);
+std::wstring QueryEnvironmentVariable( std::wstring_view name );
+#endif
+#endif
+
+
 std::string QueryEnvironmentVariable( std::string_view Name );
+
 int AssignEnvironmentVariable( const std::string &name, const std::string &value );
 void DropEnvironmentVariable( const std::string &name );
 

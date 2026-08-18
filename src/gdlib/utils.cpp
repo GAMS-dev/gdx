@@ -117,14 +117,6 @@ bool sameTextInvariant( const std::string_view a,
 #endif
 }
 
-std::string_view trim( const std::string_view s )
-{
-   if( s.empty() ) return {};
-   const auto firstNonBlank = s.find_first_not_of( " \t\n\r" );
-   const auto lastNonBlank = s.find_last_not_of( " \t\n\r" );
-   return s.substr( firstNonBlank, lastNonBlank - firstNonBlank + 1 );
-}
-
 std::string getLineWithSep( std::istream &fs )
 {
    std::string line;
@@ -157,6 +149,34 @@ std::string trim( const std::string &s )
    const auto lastNonBlank = s.find_last_not_of( " \t\n\r" );
    return s.substr( firstNonBlank, lastNonBlank - firstNonBlank + 1 );
 }
+
+std::string_view trim( std::string_view s )
+{
+   if( s.empty() ) return {};
+   const auto firstNonBlank = s.find_first_not_of( " \t\n\r" );
+   const auto lastNonBlank = s.find_last_not_of( " \t\n\r" );
+   return s.substr( firstNonBlank, lastNonBlank - firstNonBlank + 1 );
+}
+
+std::wstring_view trim( std::wstring_view s )
+{
+   if( s.empty() ) return s;
+   const auto firstNonBlank = s.find_first_not_of( L" \t\n\r" );
+   if(firstNonBlank == std::string::npos) return L"";
+   const auto lastNonBlank = s.find_last_not_of( L" \t\n\r" );
+   return s.substr( firstNonBlank, lastNonBlank - firstNonBlank + 1 );
+}
+
+#if __cplusplus >= 202002L
+std::u8string trim( const std::u8string &s )
+{
+   if( s.empty() ) return s;
+   const auto firstNonBlank = s.find_first_not_of( u8" \t\n\r" );
+   if(firstNonBlank == std::u8string::npos) return u8"";
+   const auto lastNonBlank = s.find_last_not_of( u8" \t\n\r" );
+   return s.substr( firstNonBlank, lastNonBlank - firstNonBlank + 1 );
+}
+#endif
 
 std::string trimRight( const std::string &s )
 {

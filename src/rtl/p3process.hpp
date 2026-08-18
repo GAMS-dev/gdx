@@ -79,7 +79,23 @@ public:
 bool p3GetCPUInfo( int &nSockets, int &nCores, int &nThreads, int &coresPerSocket, int &threadsPerCore );
 int p3GetNumberOfProcessors();
 
+#ifdef _WIN32
+// can't use DWORD here
+using p3_pid_t = uint32_t;
+using NativePathChar = wchar_t;
+using NativePathString = std::wstring;
+#define NativePathCharArray(S) L ## S
+#else
+using p3_pid_t = pid_t;
+using NativePathChar = char;
+using NativePathString = std::string;
+#define NativePathCharArray(S) S
+#endif
+
+p3_pid_t p3GetPID(void);
+
 int P3SystemP( const std::string &CmdPtr, int &ProgRC );
+int P3SystemP( const std::wstring &CmdPtr, int &ProgRC );
 int P3ExecP( const std::string &CmdPtr, int &ProgRC );
 
 int P3SystemL( const std::string &ProgName, const TExecArgList &ProgParams, int &ProgRC );
@@ -91,6 +107,8 @@ int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg );
 
 bool p3KillProcGroupTP( const TProcInfo &procInfo, TKillHow how );
 bool p3IsPIDValid( uint32_t pid );
+
+int P3ExecArgv(std::vector<const NativePathChar *> &argv, int &progRC, int &errCode, std::string &errMsg);
 
 using tCtrlHandler = void(*)();
 
