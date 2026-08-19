@@ -167,7 +167,7 @@ build-debug-musl:
     - cp apifiles/* src/
     - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja CMakeLists.txt
-    - cmake --build . -- -j$(nproc) 2>&1
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv gdxtest gdxtest_dbg
   needs: [fetch-ci-scripts,apigenerator]
@@ -317,6 +317,7 @@ test-musl:
     entrypoint: [""]
   needs: [fetch-ci-scripts,build-musl]
   script:
+    - apk add --no-cache libgcc libstdc++
     - ./gdxtest --reporters=junit --out=doctest_results_musl.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_musl.xml
   artifacts:
@@ -334,6 +335,7 @@ test-debug-musl:
     entrypoint: [""]
   needs: [fetch-ci-scripts,build-debug-musl]
   script:
+    - apk add --no-cache libgcc libstdc++
     - ./gdxtest --reporters=junit --out=doctest_results_musl.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_musl.xml
   artifacts:
