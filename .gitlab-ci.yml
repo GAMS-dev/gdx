@@ -66,7 +66,7 @@ apigenerator:
       python3
       src/yaml2cwrap.py
       --input src/gdxapi.yaml
-      --output apifiles/gdxcppwrap.hpp 
+      --output apifiles/gdxcppwrap.hpp
       --template_folder src/templates
       --template gdxcppwrap.template.j2
     # somehow I need absolute path for apidef arg
@@ -111,6 +111,33 @@ build-leg:
     expire_in: 2 hours
     reports:
       junit: warnings.xml
+
+build-leg-cxx20:
+  stage: build
+  tags: [linux]
+  image:
+    name: $MACHINES_CONTAINER_REG/leg/builder-devel:latest
+    entrypoint: [""]
+  script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-leg]
+    - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
+    - sed -i -e 's:CMAKE_CXX_STANDARD 17:CMAKE_CXX_STANDARD 20:' CMakeLists.txt
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
+    - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
+    - mkdir -p ./gdxtools
+    - for tool in gdxdump gdxdiff gdxmerge; do mv ./src/tools/$tool/$tool ./gdxtools; done
+    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_leg.xml
+    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH=$(pwd) ./gdxwraptest --reporters=junit --out=doctest_results_wrap_leg.xml
+  needs: [fetch-ci-scripts,apigenerator]
+  artifacts:
+    reports:
+      junit:
+        - warnings.xml
+        - doctest_results*_leg.xml
 
 build-debug-leg:
   stage: build
