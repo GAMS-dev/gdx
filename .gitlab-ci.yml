@@ -172,7 +172,7 @@ build-debug-musl:
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-debug-musl
-    paths: [gdxtest,gdxwraptest]
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so]
     expire_in: 2 hours
     reports:
       junit: warnings.xml
