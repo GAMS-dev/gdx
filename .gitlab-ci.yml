@@ -139,7 +139,7 @@ build-musl:
     name: alpine:latest
     entrypoint: [""]
   script:
-    - apk add g++ ccache cmake ninja git musl-dev
+    - apk add g++ ccache cmake ninja git musl-dev python3
     - cp apifiles/* src/
     - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Release -G Ninja CMakeLists.txt
@@ -163,17 +163,20 @@ build-debug-musl:
     name: alpine:latest
     entrypoint: [""]
   script:
-    - apk add g++ ccache cmake ninja git musl-dev
+    - apk add g++ ccache cmake ninja git musl-dev python3
     - cp apifiles/* src/
     - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
     - cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja CMakeLists.txt
     - cmake --build . -- -j$(nproc) 2>&1
+    - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
     - mv gdxtest gdxtest_dbg
   needs: [fetch-ci-scripts,apigenerator]
   artifacts:
     name: gdx-debug-musl
     paths: [gdxtest_dbg]
     expire_in: 2 hours
+    reports:
+      junit: warnings.xml
 
 build-lag:
   stage: build
@@ -313,6 +316,23 @@ test-musl:
     name: alpine:latest
     entrypoint: [""]
   needs: [fetch-ci-scripts,build-musl]
+  script:
+    - ./gdxtest --reporters=junit --out=doctest_results_musl.xml
+    - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_musl.xml
+  artifacts:
+    name: unittest-results-musl
+    paths: [./*.xml]
+    expire_in: 2 hours
+    reports:
+      junit: doctest_results_*musl.xml
+
+test-debug-musl:
+  stage: test
+  tags: [linux]
+  image:
+    name: alpine:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-debug-musl]
   script:
     - ./gdxtest --reporters=junit --out=doctest_results_musl.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_musl.xml
