@@ -97,7 +97,7 @@ else()
       zlib/zutil.c
    )
 
-   # From contrib/zlib1-dll/CMakeLists.txt
+   # From zlib1/CMakeLists.txt
    include(CheckIncludeFile)
    include(CheckFunctionExists)
    # Check for stdarg.h
@@ -106,13 +106,16 @@ else()
    check_include_file(unistd.h HAVE_UNISTD_H)
    # Check for fseeko
    check_function_exists(fseeko HAVE_FSEEKO)
-   set(ZLIB_DEFS
-      "HAVE_UNISTD_H=$<BOOL:${HAVE_UNISTD_H}>"
-      "HAVE_STDARG_H=$<BOOL:${HAVE_STDARG_H}>"
-      "$<$<NOT:$<BOOL:${HAVE_FSEEKO}>>:NO_FSEEKO>"
+
+   # These are needed since we include "zconf.h" throught src/gdlib/gmsstrm.hpp
+   add_compile_definitions(
+      HAVE_UNISTD_H=$<BOOL:${HAVE_UNISTD_H}>
+      HAVE_STDARG_H=$<BOOL:${HAVE_STDARG_H}>
    )
 
-   set_source_files_properties(${zlib-units} PROPERTIES COMPILE_DEFINITIONS "${ZLIB_DEFS}")
+   if (NOT HAVE_FSEEKO)
+      set_source_files_properties(${zlib-units} PROPERTIES COMPILE_DEFINITIONS NO_FSEEKO)
+   endif()
 endif()
 
 if (UNIX)

@@ -50,18 +50,6 @@ inline int compress( void *dest, unsigned long *destLen, const void *source, uns
    return 0;
 }
 #else
-
-// zlib expected ./configure to set these
-// all 3 platform we target support stdarg.h
-#define HAVE_STDARG_H 1
-
-// The only non-windows platform we compile for are Darwin and Linux, where unistd.h available
-#ifdef _WIN32
-#define HAVE_UNISTD_H 0
-#else
-#define HAVE_UNISTD_H 1
-#endif
-
 #include "zlib.h"
 #endif
 
