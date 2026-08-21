@@ -261,6 +261,7 @@ TEST_CASE("Test integer to hex string conversion")
    REQUIRE_EQ("FF"s, IntToHex(255, 2));
 }
 
+// NOTE: this test make the binary not portable. Also, it is a bit of a luck involve here...
 TEST_CASE("Test get current directory")
 {
 #if defined(__IN_CPPMEX__)

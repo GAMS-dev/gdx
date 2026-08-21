@@ -62,6 +62,35 @@ using namespace GDX_NS gdlib::strindexbuf;
 
 namespace fs = std::filesystem;
 
+// small test function for detecting the wine emulator
+// This is used as a workaround for a small bug
+static bool IsRunningUnderWine()
+{
+#ifdef _WIN32
+    // 1. The Classic DLL Export Check (Fast, but easily hidden by Bottles/Proton)
+    HMODULE hNTDLL = GetModuleHandleA("ntdll.dll");
+    if (hNTDLL && GetProcAddress(hNTDLL, "wine_get_version")) {
+        return true;
+    }
+
+    // 2. The Registry Check (Highly reliable fallback)
+    HKEY hKey;
+    
+    // Check Machine-level Wine configuration
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "Software\\Wine", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        RegCloseKey(hKey);
+        return true;
+    }
+    
+    // Check User-level Wine configuration
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Wine", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        RegCloseKey(hKey);
+        return true;
+    }
+#endif
+    return false;
+}
+
 namespace GDX_NS gdx::tests::gdxtests
 {
 TEST_SUITE_BEGIN( "GDX object tests" );
@@ -1893,7 +1922,8 @@ TEST_CASE( "Test simple write/read with compression activated" )
    fs::remove( fn );
 }
 
-TEST_CASE( "Test opening a file for reading and then deleting (while it is open)")
+TEST_CASE( "Test opening a file for reading and then deleting (while it is open)"
+          * doctest::skip(IsRunningUnderWine()))
 {
    const auto fn {"unlocked.gdx"s};
    testWrite(fn, [&](TGXFileObj &pgx) {
@@ -1908,7 +1938,16 @@ TEST_CASE( "Test opening a file for reading and then deleting (while it is open)
       int key, dimFrst;
       double val;
       REQUIRE_FALSE(pgx.gdxDataReadRaw( &key, &val, dimFrst ));
-      REQUIRE_FALSE(fs::exists( fn ));
+
+      std::error_code ec;
+      bool fileExists = fs::exists(fn, ec);
+
+      if (ec) {
+         INFO("fs::exists encountered an OS error: ", ec.message());
+         INFO("Error value: ", ec.value());
+      }
+
+      REQUIRE_FALSE(fileExists);
    } );
 }
 
@@ -2749,7 +2788,8 @@ TEST_CASE("Test opening 100 char long name GDX file inside two 100 char long nam
       TGXFileObj gdx;
       int ErrNr;
       REQUIRE_GE(static_cast<int>(gdxTargetFilenameBase.length()), 100 + 1 + 100 + 1 + 100 + 4); // >= 306 (long dirname + sep + long dirname + sep + long name + ".gdx")
-      REQUIRE(gdx.gdxOpenRead( gdxTargetFilenameBase.c_str(), ErrNr ));
+      REQUIRE_MESSAGE(gdx.gdxOpenRead( gdxTargetFilenameBase.c_str(), ErrNr ),
+                      "ERROR when calling gdxOpenRead on : " <<  gdxTargetFilenameBase);
    }
 
    REQUIRE(fs::remove( gdxTargetFilename));

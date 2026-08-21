@@ -64,8 +64,6 @@ namespace GDX_NS gdlib::gmsstrm
 {
 constexpr bool Paranoid = false;
 
-std::string SysErrorMessage( int errorCore );
-
 constexpr int
         // TXStream seek origins
         soFromBeginning = 0,

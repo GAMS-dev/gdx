@@ -8,6 +8,11 @@
 
 namespace GDX_NS rtl::system_p3 {
 
+
+// FIXME: this is a MS-DOS hack that "moving" to a location X: actually tries
+// to move to the last known working directory for that specific drive.
+// The official documentation does not mention this, but Raymond Chen delivers:
+// https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133
 void getdir(uint8_t d, std::string &s)
 {
 #if defined(_WIN32)

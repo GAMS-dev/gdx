@@ -490,7 +490,11 @@ bool sameTextPChar( const char *a,
 #endif
 }
 
+
 std::string_view trim( std::string_view s );
+std::wstring_view trim( std::wstring_view s );
+inline std::wstring_view trim( const std::wstring &s ) { return trim(static_cast<std::wstring_view>(s)); };
+
 
 std::string getLineWithSep( std::istream &fs );
 
@@ -502,6 +506,9 @@ inline void fputstr(FILE* f, std::string_view s) {
 }
 
 std::string trim( const std::string &s );
+#if __cplusplus >= 202002L
+std::u8string trim( const std::u8string &s );
+#endif
 std::string trimRight( const std::string &s );
 void trimRight( const std::string &s, std::string &storage );
 const char *trimRight( const char *s, char *storage, int &slen );

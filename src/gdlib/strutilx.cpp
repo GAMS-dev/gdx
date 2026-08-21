@@ -30,6 +30,7 @@
 #include <cassert>               // for assert
 #include <cmath>                 // for isinf, isnan, modf, trunc
 #include <cstring>               // for memcpy, strlen, memmove, size_t
+#include <filesystem>
 #include <limits>                // for numeric_limits
 #include <stdexcept>             // for runtime_error
 #include <string>                // for basic_string, string, operator+, all...
@@ -41,10 +42,20 @@
 
 #include "utils.hpp"               // for toupper, sameText, ord, in, val, cha...
 
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 using namespace std::literals::string_literals;
 using namespace GDX_NS rtl::sysutils_p3;
 using namespace GDX_NS rtl::p3platform;
 using namespace GDX_NS utils;
+
+namespace fs = std::filesystem;
 
 // ==============================================================================================================
 // Implementation
@@ -449,6 +460,237 @@ static void fileCase( const int fc, std::string &gs )
    }
 }
 
+// heavily LLM-inspired
+#if __cplusplus >= 202002L
+#ifndef _WIN32
+
+#include <locale.h>
+#include <langinfo.h>
+#include <strings.h>
+#include <cwchar>
+#include <cstdlib>
+
+// 1. Check if a specific locale object uses UTF-8
+static bool isThreadLocaleUtf8(locale_t loc)
+{
+    if (loc == (locale_t)0) return false;
+
+    const char* codeset = nl_langinfo_l(CODESET, loc);
+    return (strcasecmp(codeset, "UTF-8") == 0 || strcasecmp(codeset, "utf8") == 0);
+}
+
+// 2. Safely acquire the best available UTF-8 locale
+static locale_t acquireUtf8Locale()
+{
+    locale_t target_locale = newlocale(LC_CTYPE_MASK, "", (locale_t)0);
+    if (target_locale != (locale_t)0 && isThreadLocaleUtf8(target_locale)) {
+        return target_locale;
+    }
+    if (target_locale != (locale_t)0) freelocale(target_locale);
+
+    target_locale = newlocale(LC_CTYPE_MASK, "en_US.UTF-8", (locale_t)0);
+    if (target_locale != (locale_t)0) return target_locale;
+
+    target_locale = newlocale(LC_CTYPE_MASK, "C.UTF-8", (locale_t)0);
+    if (target_locale != (locale_t)0) return target_locale;
+
+   // for Darwin, maybe BSD
+   target_locale = newlocale(LC_CTYPE_MASK, "UTF-8", (locale_t)0);
+   if (target_locale != (locale_t)0) return target_locale;
+
+    return (locale_t)0; // System has absolutely no UTF-8 locales
+}
+
+enum CaseAction {
+   ToUpper,
+   ToLower
+};
+
+template<enum CaseAction action>
+static std::u8string caseChangeUtf8(const std::u8string& input)
+{
+   if (input.empty()) return input;
+
+   locale_t utf8_locale = acquireUtf8Locale();
+
+   // ==========================================
+   // FALLBACK: Pure ASCII Lowercasing
+   // ==========================================
+   if (utf8_locale == (locale_t)0) {
+      std::u8string result = input;
+      for (char8_t &c : result) {
+         // Cast to unsigned char to safely check bounds
+         auto uc = static_cast<unsigned char>(c);
+
+         if (uc > 127) {
+            throw std::runtime_error(
+               "System lacks UTF-8 support, and a non-ASCII character "
+               "was encountered during fallback processing.\n" +
+               "The string was: "s + reinterpret_cast<const char *>(input.data()) + "\n"
+               "Hint: either set LC_CTYPE to a UTF-8 locale of your choice, "
+               "or make sure that one of the following locale is available: en_US.UTF-8, C.UTF-8, UTF-8"
+            );
+         }
+
+         // Standard ASCII lowercase conversion
+         if constexpr (action == ToLower) {
+            if (uc >= 'A' && uc <= 'Z') {
+               c |= 0x20;
+            }
+         } else {
+            if (uc >= 'a' && uc <= 'z') {
+               c &= ~0x20;
+            }
+
+         }
+      }
+      return result;
+   }
+
+   // ==========================================
+   // PRIMARY: Thread-Local UTF-8 Lowercasing
+   // ==========================================
+
+   // Apply the UTF-8 locale strictly to this thread
+   locale_t old_locale = uselocale(utf8_locale);
+
+   // Convert UTF-8 to Wide String
+   std::vector<wchar_t> wstr(input.size() + 1);
+   const char *input_s = reinterpret_cast<const char*>(input.c_str());
+   size_t converted = std::mbstowcs(wstr.data(), input_s, wstr.size());
+
+   if (converted == static_cast<size_t>(-1)) {
+      uselocale(old_locale);
+      freelocale(utf8_locale);
+      throw std::runtime_error("Invalid UTF-8 sequence encountered in input.");
+   }
+
+   // Lowercase wide characters using the thread's active locale
+   for (size_t i = 0; i < converted; ++i) {
+      if constexpr (action == ToLower)
+         wstr[i] = std::towlower(wstr[i]);
+      else
+         wstr[i] = std::towupper(wstr[i]);
+   }
+
+   // Convert back to UTF-8
+   // MB_CUR_MAX is context-aware and respects the current thread's locale
+   // but it might be broken on Darwin and BSD: 4 is the UTF-8 upper bound
+   std::vector<char> lower_utf8(converted * 4 + 1);
+   std::wcstombs(lower_utf8.data(), wstr.data(), lower_utf8.size());
+
+   // Clean up thread state and free memory
+   uselocale(old_locale);
+   freelocale(utf8_locale);
+
+   return std::u8string(reinterpret_cast<const char8_t*>(lower_utf8.data()));
+}
+
+#endif // !_WIN32
+
+static fs::path toLowerPath(const fs::path& path)
+{
+   if (path.empty()) { return path; }
+    auto str = path.native();
+
+#ifdef _WIN32
+
+   int reqSize = LCMapStringW(
+      LOCALE_USER_DEFAULT, // Use user's locale (important for the German 'ß', etc.)
+      LCMAP_LOWERCASE,     // Flag to lowercase
+      str.c_str(),
+      static_cast<int>(str.length()),
+      nullptr,
+      0
+   );
+
+   if (reqSize == 0) { throw std::runtime_error("LCMapStringW failed"); }
+
+   std::wstring lowerStr(reqSize, L'\0');
+   LCMapStringW(
+      LOCALE_USER_DEFAULT,
+      LCMAP_LOWERCASE,
+      str.c_str(),
+      static_cast<int>(str.length()),
+      lowerStr.data(),
+      reqSize
+   );
+
+   return fs::path(lowerStr);
+
+#else
+
+   return fs::path(caseChangeUtf8<ToLower>(path.u8string()));
+
+#endif
+}
+
+static fs::path ToUpperPath(const fs::path& path)
+{
+   if (path.empty()) { return path; }
+    auto str = path.native();
+
+#ifdef _WIN32
+
+   int reqSize = LCMapStringW(
+      LOCALE_USER_DEFAULT, // Use user's locale (important for the German 'ß', etc.)
+      LCMAP_UPPERCASE,
+      str.c_str(),
+      static_cast<int>(str.length()),
+      nullptr,
+      0
+   );
+
+   if (reqSize == 0) { throw std::runtime_error("LCMapStringW failed"); }
+
+   std::wstring lowerStr(reqSize, L'\0');
+   LCMapStringW(
+      LOCALE_USER_DEFAULT,
+      LCMAP_UPPERCASE,
+      str.c_str(),
+      static_cast<int>(str.length()),
+      lowerStr.data(),
+      reqSize
+   );
+
+   return fs::path(lowerStr);
+
+#else
+
+   return fs::path(caseChangeUtf8<ToUpper>(path.u8string()));
+
+#endif
+
+}
+
+static fs::path fileCase( const int fc, fs::path &p )
+{
+   switch( fc )
+   {
+      // Causes GAMS to upper case file names including the path of the file
+      case 1:
+         p = ToUpperPath( p );
+         break;
+         // Causes GAMS to lower case file names including the path of the file
+      case 2:
+         p = toLowerPath( p );
+         break;
+         // Causes GAMS to upper case file names only (leave the path alone)
+      case 3:
+         return p.parent_path() / ToUpperPath( p.filename() );
+         break;
+         // Causes GAMS to lower case file names only (leave the path alone)
+      case 4:
+         return p.parent_path() / toLowerPath( p.filename() );
+         break;
+      default: ;
+   }
+
+   return p;
+}
+
+#endif // C++20
+
 static int gsposchar( const std::string &s, int p, const char c )
 {
    // TODO: Replace gsposchar calls in cleanpath and XXXexpand with LChPosSp
@@ -534,7 +776,8 @@ void cleanpath( std::string &path, const char delim )
    }
 }
 
-std::string CompleteDirEx( const std::string &dir1, const std::string &dir2, int fc, bool relPath )
+std::string CompleteDirEx( const std::string_view dir1, const std::string_view dir2,
+                          int fc, bool relPath )
 {
    /*
    complete d2 with information from dir1
@@ -569,9 +812,9 @@ std::string CompleteDirEx( const std::string &dir1, const std::string &dir2, int
          {
             // combine
             if( utils::in( gsgetchar( res, 1 ), '\\', '/' ) ) // \xxx | /xxx
-               res = dir1.substr( 0, 2 ) + res; // assumes dir1 is a:
+               res = std::string(dir1.substr( 0, 2 )) + res; // assumes dir1 is a:
             else
-               res = IncludeTrailingPathDelimiterEx( dir1 ) + res;
+               res = IncludeTrailingPathDelimiterEx( std::string(dir1) ) + res;
          }
 
          // d:xxxxx
@@ -603,7 +846,7 @@ std::string CompleteDirEx( const std::string &dir1, const std::string &dir2, int
          if( gsgetchar( res, 1 ) == '/' || ( relPath && gsgetchar( res, 1 ) == '.' ) )
             noexpansion = true;
          if( !noexpansion )
-            res = IncludeTrailingPathDelimiterEx( dir1 ) + res;
+            res = IncludeTrailingPathDelimiterEx( std::string(dir1) ) + res;
          res = IncludeTrailingPathDelimiterEx( res );
          cleanpath( res, '/' );
          break;
@@ -613,6 +856,239 @@ std::string CompleteDirEx( const std::string &dir1, const std::string &dir2, int
    fileCase( fc, res );
    return res;
 }
+
+#if __cplusplus >= 202002L
+
+#ifdef _WIN32
+/**
+ * @brief Extract the volume name of a path (windows only)
+ *
+ * @param path  the path
+ *
+ * @return      the volume name
+ */
+static fs::path extractVolumeName(const fs::path &p)
+{
+   /*
+    * input                    output
+    *
+    * C:\[xxx]                 C:\
+    * \\?C:\[xxx]              \\?C:\
+    * \\Server[\xxx]           \\Server
+    * \\?\Server[\xxx]         \\?\Server
+    * \\?\UNC\Server[\xxx]     \\?\UNC\Server
+    */
+   // Win32 File Namespace prefix
+   constexpr std::wstring_view WFNprefix = LR"(\\?)";
+   constexpr std::wstring_view UNCprefix = LR"(UNC)";
+
+   // Sadly, \\?\UNC\Server\share\... has relative path UNC\Server\share\...
+   //        \\?\UNC\SERVER is actually the volume name we want
+   fs::path dirRelative = p.relative_path();
+   std::wstring dirRelativeStr = dirRelative.wstring();
+   fs::path rootName = p.root_name();
+
+   if (rootName.empty()) { return fs::path(); }
+
+   // no \\?[\UNC] shenanigans: return "X:\" or "\\Server"
+   // TODO: "\\." could be another prefix
+   if (rootName != WFNprefix) {
+      return rootName / p.root_directory();
+   }
+
+   // \\?\C:[\xxx] -> call extractVolumeName(C:[\xxx])
+   if (dirRelativeStr.length() >= 2 && dirRelativeStr[1] == L':') {
+      // NOTE: we are really fighting the fs library here.
+      // The `\\?\` prefix is not maintained if not necessary, as below
+      //return fs::path(WFNprefix) / extractVolumeName(dirRelative);
+      //we need to go to string manipulation
+      return fs::path(std::wstring(WFNprefix) + L"\\" + extractVolumeName(dirRelative).wstring());
+
+   }
+
+   // find first separator in (\\UNC)\xxx[\yyy]
+   // NOTE: there is an edge case when dir is \\?\UNC\Server
+   size_t offset = dirRelativeStr.starts_with(UNCprefix) ? UNCprefix.length()+1 : 0;
+   size_t nextSep = dirRelativeStr.find_first_of(LR"(/\)", offset);
+
+   auto subPathStr = dirRelativeStr.substr(0, nextSep);
+
+   return rootName / fs::path(subPathStr);
+}
+
+#endif // _WIN32
+
+enum class CompletePathType {
+   Dir,
+   File,
+};
+
+/**
+ * @brief Apply filecase and ensures there is a trailing separator for a directory
+ *
+ * @param path   the path to operate on
+ * @param fc     if nonzero, force either the filename or the full path to be either upper or lower case
+ *
+ * @return       the resulting path
+ */
+template<CompletePathType type>
+static fs::path applyFileCase(fs::path &path, int fc)
+{
+   if constexpr (type == CompletePathType::Dir) { // ensure trailing separator
+      if (path.native().back() != fs::path::preferred_separator) {
+         path += fs::path::preferred_separator;
+      }
+   }
+
+   return fileCase( fc, path );
+}
+
+/**
+ * @brief Complete, if needed, a path using either the argument, or some working directory
+ *
+ * On UNIX, the semantics are trivial: if the path is relative and keepRelPath is false,
+ * output prefixDir / path.
+ *
+ * On Windows, look at the code
+ *
+ * @param prefixDir     the prefix directory
+ * @param path          the path to operate on
+ * @param fc            if nonzero, force either the filename or the full path to be either upper or lower case
+ * @param keepRelPath   if true, keep the path relative in some cases, but not others (see code)
+ *
+ * @return              the potentially completed path, with casing as specified
+ */
+template<CompletePathType type>
+static fs::path CompletePathEx(const fs::path &prefixDir, const fs::path &path, int fc, bool keepRelPath )
+{
+   assert(prefixDir.is_absolute()); // untested with relative path
+
+   fs::path outPath {}, outPathClean {};
+   if (path.empty()) {
+      outPathClean = prefixDir.lexically_normal();
+      return applyFileCase<type>(outPathClean, fc);
+   }
+
+   // NOTE: d:xxx is NOT absolute
+   if (path.is_absolute()) {
+      outPathClean = path.lexically_normal();
+      return applyFileCase<type>(outPathClean, fc);
+   }
+
+   auto pathStr = path.native();
+   bool hasLeadingDot = (pathStr.length() > 0 && pathStr[0] == '.');
+
+
+   // path starts with '.': if it starts with '..', take normalized form;
+   //                       else keep the leading '.'
+   if (keepRelPath && hasLeadingDot) {
+
+      if (pathStr.length() >= 2 && pathStr[1] == '.') { // path starts with '..'
+         outPathClean = path.lexically_normal();
+      } else { // path is ".\dir", but inputDir is "dir"
+         outPathClean = fs::path(*path.begin()) / path.lexically_normal();
+      }
+
+      return applyFileCase<type>(outPathClean, fc);
+   }
+
+#ifdef _WIN32
+   // NOTE: the original comment made no sense. This is my interpreted version --OH
+   /*
+         prefixDir         dir         outputDir
+         ---------    -----------      ---------
+         z:\xxx[\]      \yy\yy[\]      z:\yy\yy       case 1
+                         yy\yy[\]      z:\xxx\yy\yy   case 2a
+                       .\yy\yy         z:\xxx\yy\yy   case 2b [keepRelPath ignored]
+                       d:yy[\]         $PWD\yy\       case 3
+                         empty         z:\xxx         case 4
+                      d:\yy[\]         unchanged      case 5
+         */
+   fs::path inPath { path.lexically_normal() };
+   fs::path relPath { inPath.relative_path() };
+
+   // FIXME: is this needed?
+   inPath.make_preferred(); // convert '/' to '\'; just in case
+
+   // split path C:\test\p1 into  'C:' '\' 'test\p1'
+   auto rootName = inPath.root_name();
+   auto rootDir = inPath.root_directory();
+   bool isRel = inPath.is_relative();
+
+   if (isRel && !rootDir.empty() && rootName.empty()) { // case 1, unconditional
+      //
+      assert(rootName.empty());
+      outPath = extractVolumeName(prefixDir) / inPath.relative_path();
+
+   } else if (rootName.empty() && (!keepRelPath || relPath.wstring()[0] != L'.')) {
+      // case 2a
+      if( rootName.empty() && !rootDir.empty()) {
+
+         if (prefixDir.is_relative()) {
+            std::runtime_error("unexpected relative path as prefixDir in CompleteDirEx");
+         }
+
+         outPath = extractVolumeName(prefixDir) / inPath;
+      } // case 2b
+      else
+      outPath = prefixDir / inPath;
+
+   } else {
+      outPath = inPath;
+   }
+
+   // case 3: d:yy -> d:xxx\yy
+   if(!keepRelPath && outPath.root_directory().empty()) {
+      // NOTE: different behavior for directory or file
+      //
+      if constexpr (type == CompletePathType::Dir) {
+         outPath = fs::current_path() / inPath.relative_path();
+      } else if constexpr (type == CompletePathType::File) {
+         outPath = fs::absolute(inPath);
+         if (outPath.is_relative()) { // fix when there is no cwd for that disk
+            outPath = outPath.root_path() / outPath.relative_path();
+         }
+      } else {
+         std::runtime_error("Unhandled complete type");
+      }
+
+   }
+
+   // catch all
+   if (outPath.empty()) {
+      outPath = inPath;
+   }
+
+#else //_WIN32
+   /*
+      If inputDir is absolute, like /xxx  => done
+      else outDir = prefixDir / inputDir
+   */
+   if( path.is_relative() && !keepRelPath )
+      outPath = prefixDir / path;
+
+#endif //_WIN32
+
+   outPathClean = outPath.lexically_normal();
+
+   return applyFileCase<type>(outPathClean, fc);
+}
+
+/**
+ * @brief  If needed, complete a given directory to make it absolute
+ *
+ * @param prefixDir    the prefix directory
+ * @param path         the path to operate on
+ * @param fc           file case value: a nonzero value induces changes
+ * @param keepRelPath  if true, keep relative path as is (do not change to an absolute path)
+ *
+ * @return         the modified path
+ */
+fs::path CompleteDirEx( const fs::path &prefixDir, const fs::path &path, int fc, bool keepRelPath )
+{
+   return CompletePathEx<CompletePathType::Dir>(prefixDir, path, fc, keepRelPath);
+}
+#endif
 
 // assumes all different strings
 // curdir must be a full path including the drive:
@@ -847,6 +1323,17 @@ std::string CompleteFileNameEx( const std::string &directory, const std::string 
    return res;
 }
 
+#if __cplusplus >= 202002L
+fs::path CompleteFileNameEx( const fs::path &directory, const fs::path &filename, int fc, bool keepRelPath )
+{
+   if(directory.empty() || filename.native().front() == '@')
+      return filename;
+
+   // FIXME: This needs to be tested but porting the XXXexpand function should be avoided
+   return CompletePathEx<CompletePathType::File>(directory, filename, fc, keepRelPath);
+}
+#endif
+
 bool checkBOMOffset( const tBomIndic &potBOM, int &BOMOffset, std::string &msg )
 {
    enum tBOM : uint8_t
@@ -923,6 +1410,7 @@ std::string ReplaceStr( const std::string &substr, const std::string &replacemen
    return replaceSubstrs( S, substr, replacement );
 }
 
+#if __cplusplus >= 202002L
 // Brief:
 //   Converts a file name to the short 8.3 form
 // Arguments:
@@ -933,16 +1421,28 @@ std::string ReplaceStr( const std::string &substr, const std::string &replacemen
 //   This function throws an exception if there was no conversion an the result
 //   contains a blank or an unicode character. Both can be problematic. (distinguish which should cause an error by argument?)
 //   see also http://blogs.msdn.com/b/winsdk/archive/2013/10/09/getshortpathname-doesn-t-return-short-path-name.aspx
-std::string ExtractShortPathNameExcept( const std::string &FileName )
+template<typename T>
+T ExtractShortPathNameExcept( const T &FileName )
 {
-   std::string res { ExtractShortPathName( FileName ) };
-   for( const char c: res )
+
+   T res { ExtractShortPathName( FileName ) };
+   for( auto c : res )
    {
-      if( static_cast<unsigned char>( c ) >= 128 ) throw std::runtime_error( "Problem extracting short path, result contains extended ASCII codes: "s + res + " (maybe 8.3 form is disabled)"s );
-      if( c == ' ' ) throw std::runtime_error( "Problem extracting short path, result contains spaces: "s + res + " (maybe 8.3 form is disabled)"s );
+      if( static_cast<unsigned char>( c ) >= 128 )
+         throw std::runtime_error( "Problem extracting short path, result contains extended ASCII codes: "s
+                                  + reinterpret_cast<const char *>(to_u8string(res.c_str()).c_str())
+                                  + " (maybe 8.3 form is disabled)"s );
+      if( c == ' ' ) throw std::runtime_error( "Problem extracting short path, result contains spaces: "s
+                                              + reinterpret_cast<const char *>(to_u8string(res.c_str()).c_str())
+                                              + " (maybe 8.3 form is disabled)"s );
    }
    return res;
 }
+
+template std::string ExtractShortPathNameExcept(const std::string &FileName);
+template std::wstring ExtractShortPathNameExcept(const std::wstring &FileName);
+
+#endif
 
 /**
      * PORTING NOTES FROM ANDRE
