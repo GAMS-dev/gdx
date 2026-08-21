@@ -7,6 +7,10 @@
 #include "gdlib/strutilx.hpp"
 #include "gdlib/utils.hpp"
 
+#if __cplusplus >= 202002L
+#include <format>
+#endif
+
 namespace library::cmdpar {
 
 void CmdParams::ClearParams() {
@@ -340,7 +344,11 @@ std::string CmdParams::GetParamText(int key) const {
       return pair.first;
     }
   }
-  return std::string{"?"} + std::to_string(key) + "?";
+#if __cplusplus >= 202002L
+  return std::format("?{}?", key);
+#else
+  return "?" + std::to_string(key) + "?";
+#endif
 }
 
 } // namespace library::cmdpar
