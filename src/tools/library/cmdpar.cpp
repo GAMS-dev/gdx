@@ -340,7 +340,7 @@ std::string CmdParams::GetParamText(int key) const {
       return pair.first;
     }
   }
-  return "?" + std::to_string(key) + "?";
+  return std::string{"?"} + std::to_string(key) + "?";
 }
 
 } // namespace library::cmdpar
