@@ -63,7 +63,6 @@
 #else
    // Unix
    #include <sys/socket.h>
-   #include <sys/fcntl.h>
    #include <sys/utsname.h>
    #include <sys/stat.h>
    #if( defined( __linux__ ) || defined( __APPLE__ ) ) /* at least, maybe for others too */
@@ -77,8 +76,10 @@
       #endif
    #endif
    #include <netinet/in.h>
-   #include <unistd.h>
+   #include <fcntl.h>
+   #include <limits.h>
    #include <poll.h>
+   #include <unistd.h>
 #endif
 #include "dtoaLoc.h"
 
