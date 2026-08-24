@@ -1035,7 +1035,7 @@ static int GetExecNameUnix( fs::path &execPath, std::string &msg )
 
    if (res >= MAX_PATH) {
       std::wstring pathTestLong { 32768 };
-      res = GetModuleFileNameW( nullptr, pathTestLong.data(), pathTestLong.size());
+      res = GetModuleFileNameW( nullptr, pathTestLong.data(), (DWORD)pathTestLong.size());
 
       if (res >= 32768) {
           msg = "GetModuleFileNameW call failed with buffer size " + std::to_string(pathTestLong.size());
@@ -1112,7 +1112,7 @@ bool p3WritableLocation( Tp3Location locType, const std::u8string &appName, fs::
    else if( locType == p3Documents )
       folderId = FOLDERID_Documents;
    else
-      std::runtime_error("Unhandled location value " + std::to_string(locType));
+      throw std::runtime_error("Unhandled location value " + std::to_string(locType));
 
    PWCHAR wideBuf;
    if( SHGetKnownFolderPath( folderId, 0, nullptr, &wideBuf ) == S_OK )
