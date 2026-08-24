@@ -38,7 +38,7 @@
 #include <format>
 #endif
 
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
 #include <windows.h>
 #include <tlhelp32.h>
 #else
@@ -791,7 +791,7 @@ static int System4Win( const std::wstring &cmdPtr, bool inheritedHandles, int &p
 
 static int System4Unix( const std::string &CmdPtr, int &ProgRC )
 {
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
    return 1;
 #else
    const std::string newPtr = CmdPtr.empty() ? "sh"s : CmdPtr;

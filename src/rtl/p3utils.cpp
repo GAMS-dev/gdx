@@ -212,7 +212,7 @@ bool PrefixPath( const fs::path &p )
 
 bool P3SetEnv( const std::string &name, const std::string &val )
 {
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
    return SetEnvironmentVariableA( name.c_str(), val.c_str() );
 #else
    return setEnvironmentVariableUnix( name, val );
@@ -228,7 +228,7 @@ bool P3SetEnv( const std::wstring &name, const fs::path &p )
 
 void P3UnSetEnv( const std::string &name )
 {
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
    SetEnvironmentVariableA( name.c_str(), nullptr );
 #else
    setEnvironmentVariableUnix( name );

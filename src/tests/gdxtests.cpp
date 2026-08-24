@@ -139,7 +139,7 @@ static bool setEnvironmentVariableUnix( const std::string &name, const std::stri
 
 bool setEnvironmentVar( const std::string &name, const std::string &val )
 {
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
    return SetEnvironmentVariableA( name.c_str(), val.c_str() );
 #else
    return setEnvironmentVariableUnix( name, val );
@@ -149,7 +149,7 @@ bool setEnvironmentVar( const std::string &name, const std::string &val )
 
 void unsetEnvironmentVar( const std::string &name )
 {
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
    SetEnvironmentVariableA( name.c_str(), nullptr );
 #else
    setEnvironmentVariableUnix( name );
