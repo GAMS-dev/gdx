@@ -1025,7 +1025,7 @@ static fs::path CompletePathEx(const fs::path &prefixDir, const fs::path &path, 
       if( rootName.empty() && !rootDir.empty()) {
 
          if (prefixDir.is_relative()) {
-            std::runtime_error("unexpected relative path as prefixDir in CompleteDirEx");
+            throw std::runtime_error("unexpected relative path as prefixDir in CompleteDirEx");
          }
 
          outPath = extractVolumeName(prefixDir) / inPath;
@@ -1049,7 +1049,7 @@ static fs::path CompletePathEx(const fs::path &prefixDir, const fs::path &path, 
             outPath = outPath.root_path() / outPath.relative_path();
          }
       } else {
-         std::runtime_error("Unhandled complete type");
+         throw std::runtime_error("Unhandled complete type");
       }
 
    }

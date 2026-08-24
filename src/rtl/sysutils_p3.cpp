@@ -185,7 +185,7 @@ static std::string QueryAbsPath(const std::string &p)
    if(!len)
       return {};
    std::vector<wchar_t> buffer( len+1 );
-   GetFullPathNameW(widePath, buffer.size(), buffer.data(), nullptr);
+   GetFullPathNameW(widePath, static_cast<DWORD>( buffer.size() ), buffer.data(), nullptr);
    const int sizeNeeded = WideCharToMultiByte( CP_ACP, 0, buffer.data(), -1, nullptr, 0, nullptr, nullptr );
    if(!sizeNeeded)
       return {};

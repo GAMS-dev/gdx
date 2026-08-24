@@ -1158,7 +1158,7 @@ static void getWinErrMsg256 (int errCode, const char prefix[], char buf256[256])
   size_t k;
   char msgBuf[1024];
 
-  n = FormatMessage(
+  n = FormatMessageA(
         FORMAT_MESSAGE_FROM_SYSTEM,
         NULL,
         errCode,
