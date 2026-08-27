@@ -39,6 +39,7 @@ struct _WIN32_FIND_DATAA;
 #include <array>                    // for array
 #include <string>                   // for string, basic_string
 #include <string_view>
+#include <new>
 
 #include "delphitypes.hpp"// for tDateTime
 #include "p3platform.hpp"
