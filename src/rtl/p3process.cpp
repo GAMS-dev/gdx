@@ -1790,6 +1790,7 @@ bool p3IsPIDValid( uint32_t pid )
 static p3_global_storage tCtrlHandler CtrlHandler {};
 
 #ifdef _WIN32
+
 static BOOL WINAPI P3Handler( DWORD s )
 {
    if( CTRL_C_EVENT == s )
@@ -1802,6 +1803,7 @@ static BOOL WINAPI P3Handler( DWORD s )
    }
    return FALSE;
 }
+
 #else
 
 static p3_global_storage sigset_t sigSet;
