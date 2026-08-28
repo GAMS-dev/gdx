@@ -1424,6 +1424,7 @@ std::string ReplaceStr( const std::string &substr, const std::string &replacemen
 template<typename T>
 T ExtractShortPathNameExcept( const T &FileName )
 {
+   if (FileName.empty()) { return FileName; }
 
    T res { ExtractShortPathName( FileName ) };
    for( auto c : res )
