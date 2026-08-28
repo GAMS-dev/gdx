@@ -1138,13 +1138,15 @@ static auto whatQuote(T arg)
    if( const T targ { utils::trim( arg ) };
       targ.length() > 1 && targ.front() == '"' && targ.back() == '"')
       c[0] = 0; // already quoted, do not quote it again
-   if(arg.empty()) //FIXME: why not targ.empty()?
+   else if (arg.empty()) // we want to quote empty arguments
       c[0] = '"';
-   for(int i{}; i<(int)arg.length(); i++)
+   else {
+      for(int i{}; i<(int)arg.length(); i++)
       if(arg[i] <= ' ') {// found a space, quote the whole thing
          c[0] = '"';
          break;
       }
+   }
 
    return std::basic_string<Char>(c);
 }
