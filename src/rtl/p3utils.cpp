@@ -103,6 +103,8 @@ using utils::ui32;
 namespace GDX_NS rtl::p3utils
 {
 
+constexpr p3pid_t pidSelf = INT_MAX;
+
 #if !defined( _WIN32 )
 static bool setEnvironmentVariableUnix( const std::string &name, const std::string &value = ""s )
 {
@@ -320,6 +322,61 @@ bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss )
 #endif
 }
 
+bool p3GetMemoryInfoEx( p3pid_t pid, uint64_t &rss, uint64_t &vss )
+{
+   // TODO: do the reverse -> p3GetMemoryInfo calls p3GetMemoryInfoEx;
+   if (pid == pidSelf) {
+      return p3GetMemoryInfo(rss, vss);
+   }
+
+#if defined( _WIN32 )
+   PROCESS_MEMORY_COUNTERS info;
+   HANDLE h = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
+   if (!h) { return false; }
+
+   if (!GetProcessMemoryInfo( GetCurrentProcess(), &info, sizeof( info ) )) {
+      return false; /* failure */
+   }
+
+   rss = static_cast<int64_t>( info.WorkingSetSize );
+   vss = static_cast<int64_t>( info.PagefileUsage );
+   return true; /* success */
+
+#elif defined( __linux )
+
+   size_t sz;
+   char buf[32];
+   snprintf(buf, sizeof(buf), "/proc/%d/statm", pid);
+   FILE *fp = std::fopen( "/proc/self/statm", "r" );
+   if( !fp )
+      return false; /* failure */
+   /* first two are VmSize, VmRSS */
+   unsigned long urss, uvss;
+   const int n = fscanf( fp, "%lu %lu", &uvss, &urss );
+   std::fclose( fp );
+   if( 2 != n )
+      return false; /* failure */
+   sz = sysconf( _SC_PAGESIZE );
+   rss = sz * urss;
+   vss = sz * uvss;
+   return true; /* success */
+
+#elif defined( __APPLE__ )
+
+   int ret;
+   struct proc_taskinfo procTaskInfo;
+   ret = proc_pidinfo( pid, PROC_PIDTASKINFO, 0,
+                       (void *) &procTaskInfo, sizeof( procTaskInfo ) );
+   if( ret < (int) sizeof( procTaskInfo ) )
+      return false; /* failure */
+   rss = (int64_t) procTaskInfo.pti_resident_size;
+   vss = (int64_t) procTaskInfo.pti_virtual_size;
+   return true; /* success */
+#else
+   throw std::runtime_error( "Unknown platform for getMemoryInfo!" );
+   return false; /* fail */
+#endif
+}
 void p3SetConsoleTitle( const std::string &s )
 {
 #if defined( _WIN32 )
@@ -1019,7 +1076,7 @@ static int GetExecNameUnix( fs::path &execPath, std::string &msg )
    return rc;
 }
 
-[[maybe_unused]] static int p3GetExecName( fs::path &execNameFull, std::string &msg )
+int p3GetExecName( fs::path &execNameFull, std::string &msg )
 {
    execNameFull.clear();
 #if defined( _WIN32 )

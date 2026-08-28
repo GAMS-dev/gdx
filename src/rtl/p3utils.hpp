@@ -46,6 +46,13 @@ namespace GDX_NS rtl::p3utils
 using locpath_t = std::vector<std::filesystem::path>;
 #endif
 
+#if defined(_WIN32)
+// NOTE: technicalla DWORD, but don't want to bring a lot of headers here
+typedef uint32_t p3pid_t;
+#else
+typedef pid_t p3pid_t;
+#endif
+
 void initParamStr( int argc, const char **argv );
 
 int p3Chmod( const std::string &path, int mode );
@@ -111,8 +118,10 @@ bool P3SetEnvPC( const std::string &name, const char *val );
 uint32_t P3GetEnvPC( const std::string &name, char *buf, uint32_t bufSize );
 
 int p3GetExecName( std::string &execName, std::string &msg );
+int p3GetExecName( std::filesystem::path &execNameFull, std::string &msg );
 
 bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss );
+bool p3GetMemoryInfoEx( p3pid_t pid, uint64_t &rss, uint64_t &vss );
 
 void p3SetConsoleTitle( const std::string &s );
 void p3NoPopups();
