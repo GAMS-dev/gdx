@@ -1,8 +1,9 @@
 ---
 title       : GAMS Data Exchange API
 prefix      : gdx
-apiversion  : 11
-compatibleversion : [11,10,9,8,7]
+apiversion  : 12
+compatibleversion : [12,11,10,9,8,7]
+# Bumped API version to 12 for gdxSetErrorRecordCutoff. Done in version 12
 
 location  : https://gams-dev.github.io/gdx/
 
