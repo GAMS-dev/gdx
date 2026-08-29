@@ -583,6 +583,7 @@ std::u8string to_u8string(const wchar_t* wstr)
 
 std::u8string to_u8string(const char* str)
 {
+   if (!str || str[0] == '\0') [[unlikely]] { return std::u8string(u8""); }
    return std::u8string(reinterpret_cast<const char8_t*>(str));
 }
 

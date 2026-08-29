@@ -334,7 +334,7 @@ bool p3GetMemoryInfoEx( p3pid_t pid, uint64_t &rss, uint64_t &vss )
    HANDLE h = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
    if (!h) { return false; }
 
-   if (!GetProcessMemoryInfo( GetCurrentProcess(), &info, sizeof( info ) )) {
+   if (!GetProcessMemoryInfo( h, &info, sizeof( info ) )) {
       return false; /* failure */
    }
 
@@ -347,7 +347,7 @@ bool p3GetMemoryInfoEx( p3pid_t pid, uint64_t &rss, uint64_t &vss )
    size_t sz;
    char buf[32];
    snprintf(buf, sizeof(buf), "/proc/%d/statm", pid);
-   FILE *fp = std::fopen( "/proc/self/statm", "r" );
+   FILE *fp = std::fopen( buf, "r" );
    if( !fp )
       return false; /* failure */
    /* first two are VmSize, VmRSS */
@@ -373,7 +373,7 @@ bool p3GetMemoryInfoEx( p3pid_t pid, uint64_t &rss, uint64_t &vss )
    vss = (int64_t) procTaskInfo.pti_virtual_size;
    return true; /* success */
 #else
-   throw std::runtime_error( "Unknown platform for getMemoryInfo!" );
+   throw std::runtime_error( "Unknown platform for getMemoryInfoEx!" );
    return false; /* fail */
 #endif
 }
@@ -1207,18 +1207,22 @@ bool p3WritableLocation( Tp3Location locType, const std::u8string &appName, fs::
       return true;
 
 #else
+
       // everything neither Windows nor macOS: only Linux in July 2022
       // see https://specifications.freedesktop.org/basedir/latest/
       if( p3Config == locType || p3AppConfig == locType ) {
 
          std::u8string cfgHomeDir = QueryEnvironmentVariable(u8"XDG_CONFIG_HOME");
          if (!cfgHomeDir.empty()) {
-            locName = fs::path(cfgHomeDir);
+            locName = std::move(fs::path(cfgHomeDir));
          }  else {
             locName = getHomeLikeSubdir(".config", appName);
+         // FIXME: remove this
+         if (p3AppConfig == locType) { locName /= appName; }
          }
 
-         if (p3AppConfig == locType) {
+         // FIXME: current GAMS behavior is a BUG
+         if (false && p3AppConfig == locType) {
             locName /= appName;
          }
 
@@ -1227,7 +1231,9 @@ bool p3WritableLocation( Tp3Location locType, const std::u8string &appName, fs::
       {
          std::u8string dataHomeDir = QueryEnvironmentVariable( u8"XDG_DATA_HOME" );
          if (!dataHomeDir.empty()) {
-            locName = fs::path(dataHomeDir) / appName;
+            locName = fs::path(dataHomeDir);
+            // FIXME: current GAMS behavior is a BUG
+            if (false && locType != p3Data) locName /= appName;
          } else {
             locName = getHomeLikeSubdir(fs::path(".local/share") / appName, appName);
          }
