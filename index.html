@@ -497,82 +497,91 @@ Dealing with acronyms</h2>
 <div class="line">i1 1.000,    i2 acro1,    i3 3.000,    i4 acro2,    i5 5.000</div>
 </div><!-- fragment --><p >As we write data to a GDX file, the system keeps track which acronyms were used in the data written. Before we close the GDX file, we share the identifiers used for each acronym used. When reading a GDX file, we share all acronym identifiers and their corresponding index before reading any data. Doing so will replace the acronym indices stored in the GDX file by the one we provide.</p>
 <p >The example below illustrates these steps.</p>
-<div class="fragment"><div class="line">TGXFileObj gdx;</div>
-<div class="line">TgdxUELIndex UELS;</div>
-<div class="line">TgdxValues Vals;</div>
-<div class="line"><span class="keywordtype">int</span> FDim, N, NrRecs, ErrNr, acrindx;</div>
-<div class="line">std::array&lt;char, GMS_SSSIZE&gt; ErrMsg, acrtext, acrname;</div>
-<div class="line"><span class="comment">//Check the library</span></div>
-<div class="line"><span class="keywordflow">if</span>(!gdxGetReadyX(ErrMsg)) {</div>
-<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;Error loading GDX library, msg = &quot;</span> &lt;&lt; ErrMsg &lt;&lt; std::endl;</div>
-<div class="line">   exit(1);</div>
-<div class="line">}</div>
-<div class="line"><span class="comment">//Create GDX object and open file for writing</span></div>
-<div class="line">gdx.gdxCreateX( ErrMsg);</div>
-<div class="line">gdx.gdxOpenWriteEx( <span class="stringliteral">&quot;test.gdx&quot;</span>, <span class="stringliteral">&quot;testing&quot;</span>, 0, ErrNr);</div>
+<div class="fragment"><div class="line"><span class="keyword">constexpr</span> <span class="keywordtype">char</span> testFn[] = <span class="stringliteral">&quot;test.gdx&quot;</span>;</div>
+<div class="line">{</div>
+<div class="line">  <span class="comment">//Create GDX object and open file for writing</span></div>
+<div class="line">  <span class="keywordtype">int</span> ErrNr;</div>
+<div class="line">  TGXFileObj gdx;</div>
+<div class="line">  gdx.gdxOpenWriteEx( testFn, <span class="stringliteral">&quot;testing&quot;</span>, 0, ErrNr);</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">//register some unique elements</span></div>
-<div class="line">gdx.gdxUELRegisterRawStart();</div>
-<div class="line"><span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{}; N&lt;5; N++)</div>
-<div class="line">   gdx.gdxUELRegisterRaw( <span class="stringliteral">&quot;uel&quot;</span> + std::to_string(N));</div>
-<div class="line">gdx.gdxUELRegisterDone();</div>
+<div class="line">  <span class="comment">//register some unique elements</span></div>
+<div class="line">  gdx.gdxUELRegisterRawStart();</div>
+<div class="line">  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{}; N&lt;5; N++)</div>
+<div class="line">  {</div>
+<div class="line">     std::array&lt;char, 32&gt; buf {<span class="stringliteral">&quot;uel&quot;</span>};</div>
+<div class="line">     <span class="keyword">auto</span> [ptr, ec] = std::to_chars(buf.data()+3, buf.data()+buf.size()-1, N);</div>
+<div class="line">     *ptr = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line">     gdx.gdxUELRegisterRaw( buf.data() );</div>
+<div class="line">  }</div>
+<div class="line">  gdx.gdxUELRegisterDone();</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">//write a parameter with two acronyms</span></div>
-<div class="line">gdx.gdxDataWriteRawStart( <span class="stringliteral">&quot;symb1&quot;</span>, <span class="stringliteral">&quot;text for symb1&quot;</span>, 1, dt_par, 0);</div>
-<div class="line"><span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{}; N&lt;5; N++) {</div>
-<div class="line">   UELS[0] = N;</div>
-<div class="line">   Vals[vallevel] = (N == 1 || N == 3) ? gdx.gdxAcronymValue( N) : N;</div>
-<div class="line">   gdx.gdxDataWriteRaw( UELS, Vals);</div>
-<div class="line">}</div>
-<div class="line">gdx.gdxDataWriteDone();</div>
+<div class="line">  <span class="comment">//write a parameter with two acronyms</span></div>
+<div class="line">  TgdxUELIndex uels;</div>
+<div class="line">  TgdxValues values;</div>
+<div class="line">  gdx.gdxDataWriteRawStart( <span class="stringliteral">&quot;symb1&quot;</span>, <span class="stringliteral">&quot;text for symb1&quot;</span>, 1, dt_par, 0);</div>
+<div class="line">  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{}; N&lt;5; N++) {</div>
+<div class="line">     uels[0] = N;</div>
+<div class="line">     values[vallevel] = (N == 1 || N == 3) ? gdx.gdxAcronymValue( N ) : N;</div>
+<div class="line">     gdx.gdxDataWriteRaw( uels.data(), values.data());</div>
+<div class="line">  }</div>
+<div class="line">  gdx.gdxDataWriteDone();</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">//provide the names for the acronyms used</span></div>
-<div class="line"><span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{}; N&lt;gdx.gdxAcronymCount(); N++) {</div>
-<div class="line">   gdx.gdxAcronymGetInfo( N, acrname, acrtext, acrindx);</div>
-<div class="line">   <span class="keywordflow">if</span>(acrindx == 2)</div>
-<div class="line">      gdx.gdxAcronymSetInfo( N, <span class="stringliteral">&quot;acro1&quot;</span>, <span class="stringliteral">&quot;Some text for acro1&quot;</span>, acrindx)</div>
-<div class="line">   <span class="keywordflow">else</span> <span class="keywordflow">if</span>(acrindx == 4)</div>
-<div class="line">      gdx.gdxAcronymSetInfo( N, <span class="stringliteral">&quot;acro2&quot;</span>, <span class="stringliteral">&quot;Some text for acro2&quot;</span>, acrindx)</div>
-<div class="line">}</div>
+<div class="line">  <span class="comment">//provide the names for the acronyms used</span></div>
+<div class="line">  <span class="keywordtype">int</span> acrindx;</div>
+<div class="line">  <span class="keywordtype">char</span> acrtext[256], acrname[256];</div>
+<div class="line">  <span class="keywordflow">for</span>(<span class="keywordtype">int</span> N{}; N&lt;gdx.gdxAcronymCount(); N++) {</div>
+<div class="line">     gdx.gdxAcronymGetInfo( N, acrname, acrtext, acrindx);</div>
+<div class="line">     <span class="keywordflow">if</span>(acrindx == 2)</div>
+<div class="line">        gdx.gdxAcronymSetInfo( N, <span class="stringliteral">&quot;acro1&quot;</span>, <span class="stringliteral">&quot;Some text for acro1&quot;</span>, acrindx);</div>
+<div class="line">     <span class="keywordflow">else</span> <span class="keywordflow">if</span>(acrindx == 4)</div>
+<div class="line">        gdx.gdxAcronymSetInfo( N, <span class="stringliteral">&quot;acro2&quot;</span>, <span class="stringliteral">&quot;Some text for acro2&quot;</span>, acrindx);</div>
+<div class="line">  }</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">//final check for errors before we close the file</span></div>
-<div class="line">N = gdx.gdxClose();</div>
-<div class="line"><span class="keywordflow">if</span>(N) {</div>
-<div class="line">   gdxErrorStr(Nil, N, ErrMsg);</div>
-<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;Error writing file = &quot;</span> &lt;&lt; ErrMsg &lt;&lt; std::endl;</div>
-<div class="line">   exit(1);</div>
-<div class="line">}</div>
-<div class="line">gdx.gdxFree();</div>
-<div class="line"> </div>
-<div class="line"><span class="comment">//open the file we just created</span></div>
-<div class="line">gdx.gdxCreateX( ErrMsg);</div>
-<div class="line">gdx.gdxOpenRead( <span class="stringliteral">&quot;test.gdx&quot;</span>, ErrNr);</div>
-<div class="line"><span class="keywordflow">if</span>(ErrNr) {</div>
-<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;Error opening file, nr = &quot;</span> &lt;&lt; ErrNr &lt;&lt; std::endl;</div>
-<div class="line">   exit(1);</div>
+<div class="line">  <span class="comment">//final check for errors before we close the file</span></div>
+<div class="line">  <span class="keywordflow">if</span>( <span class="keywordtype">int</span> N = gdx.gdxClose() ) {</div>
+<div class="line">     <span class="keywordtype">char</span> ErrMsg[256];</div>
+<div class="line">     gdx.gdxErrorStr(N, ErrMsg);</div>
+<div class="line">     std::cout &lt;&lt; <span class="stringliteral">&quot;Error writing file = &quot;</span> &lt;&lt; ErrMsg &lt;&lt; std::endl;</div>
+<div class="line">     exit(1);</div>
+<div class="line">  }</div>
 <div class="line">}</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">//give acronym indices using the name of the acronym</span></div>
-<div class="line">gdx.gdxAcronymSetInfo( 1, <span class="stringliteral">&quot;acro1&quot;</span>, <span class="stringliteral">&quot;&quot;</span>, 1000);</div>
-<div class="line">gdx.gdxAcronymSetInfo( 2, <span class="stringliteral">&quot;acro2&quot;</span>, <span class="stringliteral">&quot;&quot;</span>, 1001);</div>
+<div class="line">{</div>
+<div class="line">  TGXFileObj gdx;</div>
+<div class="line">  <span class="keywordtype">int</span> ErrNr;</div>
+<div class="line">  <span class="comment">//open the file we just created</span></div>
+<div class="line">  gdx.gdxOpenRead( testFn, ErrNr);</div>
+<div class="line">  <span class="keywordflow">if</span>(ErrNr) {</div>
+<div class="line">     std::cout &lt;&lt; <span class="stringliteral">&quot;Error opening file, nr = &quot;</span> &lt;&lt; ErrNr &lt;&lt; std::endl;</div>
+<div class="line">     exit(1);</div>
+<div class="line">  }</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">//read the parameter</span></div>
-<div class="line">gdx.gdxDataReadRawStart( 1, NrRecs);</div>
-<div class="line"><span class="keywordflow">while</span>(gdx.gdxDataReadRaw( UELs, Vals, FDim)) {</div>
-<div class="line">   N = gdx.gdxAcronymIndex( Vals[vallevel]);</div>
-<div class="line">   <span class="keywordflow">if</span>(!N) std::cout &lt;&lt; Vals[vallevel])</div>
-<div class="line">   <span class="keywordflow">else</span> std::cout &lt;&lt; <span class="stringliteral">&quot;Acronym: index = &quot;</span> &lt;&lt; N &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
-<div class="line">}</div>
-<div class="line">gdx.gdxDataReadDone();</div>
+<div class="line">  <span class="comment">//give acronym indices using the name of the acronym</span></div>
+<div class="line">  gdx.gdxAcronymSetInfo( 1, <span class="stringliteral">&quot;acro1&quot;</span>, <span class="stringliteral">&quot;&quot;</span>, 1000);</div>
+<div class="line">  gdx.gdxAcronymSetInfo( 2, <span class="stringliteral">&quot;acro2&quot;</span>, <span class="stringliteral">&quot;&quot;</span>, 1001);</div>
 <div class="line"> </div>
-<div class="line">ErrNr = gdx.gdxClose();</div>
-<div class="line"><span class="comment">//final error check before closing the file</span></div>
-<div class="line"><span class="keywordflow">if</span>(ErrNr) {</div>
-<div class="line">   gdxErrorStr(nil, ErrNr, ErrMsg);</div>
-<div class="line">   std::cout &lt;&lt; <span class="stringliteral">&quot;Error reading file = &quot;</span>, ErrMsg);</div>
-<div class="line">   exit(1);</div>
+<div class="line">  <span class="comment">//read the parameter</span></div>
+<div class="line">  TgdxUELIndex UELs;</div>
+<div class="line">  TgdxValues Vals;</div>
+<div class="line">  <span class="keywordtype">int</span> NrRecs, FDim;</div>
+<div class="line">  gdx.gdxDataReadRawStart( 1, NrRecs);</div>
+<div class="line">  <span class="keywordflow">while</span>(gdx.gdxDataReadRaw( UELs.data(), Vals.data(), FDim)) {</div>
+<div class="line">     <span class="keywordflow">if</span>( <span class="keywordtype">int</span> N = gdx.gdxAcronymIndex( Vals[vallevel] ); !N)</div>
+<div class="line">        std::cout &lt;&lt; Vals[vallevel];</div>
+<div class="line">     <span class="keywordflow">else</span></div>
+<div class="line">        std::cout &lt;&lt; <span class="stringliteral">&quot;Acronym: index = &quot;</span> &lt;&lt; N &lt;&lt; <span class="charliteral">&#39;\n&#39;</span>;</div>
+<div class="line">  }</div>
+<div class="line">  gdx.gdxDataReadDone();</div>
+<div class="line"> </div>
+<div class="line">  ErrNr = gdx.gdxClose();</div>
+<div class="line">  <span class="comment">//final error check before closing the file</span></div>
+<div class="line">  <span class="keywordflow">if</span>(ErrNr) {</div>
+<div class="line">     <span class="keywordtype">char</span> ErrMsg[256];</div>
+<div class="line">     gdx.gdxErrorStr(ErrNr, ErrMsg);</div>
+<div class="line">     std::cout &lt;&lt; <span class="stringliteral">&quot;Error reading file = &quot;</span> &lt;&lt; ErrMsg;</div>
+<div class="line">     FAIL(<span class="stringliteral">&quot;Error reading file = &quot;</span>, ErrMsg);</div>
+<div class="line">  }</div>
 <div class="line">}</div>
-<div class="line">gdx.gdxFree();</div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md19"></a>
 Functions by Category</h1>
 <p >The following table organizes the functions by category:</p>
@@ -683,9 +692,7 @@ Example 2 (C)</h2>
 <div class="line"><span class="preprocessor">#include &quot;gclgms.h&quot;</span></div>
 <div class="line"> </div>
 <div class="line"><span class="keywordtype">char</span> *val2str(gdxHandle_t Tptr, <span class="keywordtype">double</span> val, <span class="keywordtype">char</span> *s) {</div>
-<div class="line"> </div>
 <div class="line">  <span class="keywordtype">int</span> sv;</div>
-<div class="line"> </div>
 <div class="line">  <span class="keywordflow">if</span> (gdxAcronymName(Tptr, val, s)) {</div>
 <div class="line">    <span class="keywordflow">return</span> s;</div>
 <div class="line">  } <span class="keywordflow">else</span> {</div>
@@ -865,7 +872,6 @@ Example 2 (C)</h2>
 <div class="line">   printf(<span class="stringliteral">&quot;**** %d reference(s) to unique elements without a string representation\n&quot;</span>, BadUels);</div>
 <div class="line"> </div>
 <div class="line"> gdxFree(&amp;Tptr);</div>
-<div class="line"> </div>
 <div class="line">}</div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md23"></a>
 Example 3 (C++)</h2>

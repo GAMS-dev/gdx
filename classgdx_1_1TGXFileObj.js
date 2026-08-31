@@ -68,6 +68,7 @@ var classgdx_1_1TGXFileObj =
     [ "gdxOpenWriteEx", "classgdx_1_1TGXFileObj.html#ae2898bf8665047a95a703b02591b10e9", null ],
     [ "gdxRenameUEL", "classgdx_1_1TGXFileObj.html#a214ad8a4379db5a5621002d4a2308df4", null ],
     [ "gdxResetSpecialValues", "classgdx_1_1TGXFileObj.html#abfb8b5e1ba0c1b50c787bd63fd9a6302", null ],
+    [ "gdxSetErrorRecordCutoff", "classgdx_1_1TGXFileObj.html#af77bebcef2e22d450512a1bb57cc1866", null ],
     [ "gdxSetHasText", "classgdx_1_1TGXFileObj.html#a9360b7db76756999e2bb4bff78863e76", null ],
     [ "gdxSetReadSpecialValues", "classgdx_1_1TGXFileObj.html#ab1cd89ae92e7de2bedd73a8ec097af78", null ],
     [ "gdxSetSpecialValues", "classgdx_1_1TGXFileObj.html#a2cbb3175846239f39dc52a158d5586cc", null ],
