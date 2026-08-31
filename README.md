@@ -577,82 +577,91 @@ acronym indices stored in the GDX file by the one we provide.
 The example below illustrates these steps.
 
 ```cpp
-TGXFileObj gdx;
-TgdxUELIndex UELS;
-TgdxValues Vals;
-int FDim, N, NrRecs, ErrNr, acrindx;
-std::array<char, GMS_SSSIZE> ErrMsg, acrtext, acrname;
-//Check the library
-if(!gdxGetReadyX(ErrMsg)) {
-   std::cout << "Error loading GDX library, msg = " << ErrMsg << std::endl;
-   exit(1);
-}
-//Create GDX object and open file for writing
-gdx.gdxCreateX( ErrMsg);
-gdx.gdxOpenWriteEx( "test.gdx", "testing", 0, ErrNr);
+constexpr char testFn[] = "test.gdx";
+{
+  //Create GDX object and open file for writing
+  int ErrNr;
+  TGXFileObj gdx;
+  gdx.gdxOpenWriteEx( testFn, "testing", 0, ErrNr);
 
-//register some unique elements
-gdx.gdxUELRegisterRawStart();
-for(int N{}; N<5; N++)
-   gdx.gdxUELRegisterRaw( "uel" + std::to_string(N));
-gdx.gdxUELRegisterDone();
+  //register some unique elements
+  gdx.gdxUELRegisterRawStart();
+  for(int N{}; N<5; N++)
+  {
+     std::array<char, 32> buf {"uel"};
+     auto [ptr, ec] = std::to_chars(buf.data()+3, buf.data()+buf.size()-1, N);
+     *ptr = '\0';
+     gdx.gdxUELRegisterRaw( buf.data() );
+  }
+  gdx.gdxUELRegisterDone();
 
-//write a parameter with two acronyms
-gdx.gdxDataWriteRawStart( "symb1", "text for symb1", 1, dt_par, 0);
-for(int N{}; N<5; N++) {
-   UELS[0] = N;
-   Vals[vallevel] = (N == 1 || N == 3) ? gdx.gdxAcronymValue( N) : N;
-   gdx.gdxDataWriteRaw( UELS, Vals);
-}
-gdx.gdxDataWriteDone();
+  //write a parameter with two acronyms
+  TgdxUELIndex uels;
+  TgdxValues values;
+  gdx.gdxDataWriteRawStart( "symb1", "text for symb1", 1, dt_par, 0);
+  for(int N{}; N<5; N++) {
+     uels[0] = N;
+     values[vallevel] = (N == 1 || N == 3) ? gdx.gdxAcronymValue( N ) : N;
+     gdx.gdxDataWriteRaw( uels.data(), values.data());
+  }
+  gdx.gdxDataWriteDone();
 
-//provide the names for the acronyms used
-for(int N{}; N<gdx.gdxAcronymCount(); N++) {
-   gdx.gdxAcronymGetInfo( N, acrname, acrtext, acrindx);
-   if(acrindx == 2)
-      gdx.gdxAcronymSetInfo( N, "acro1", "Some text for acro1", acrindx)
-   else if(acrindx == 4)
-      gdx.gdxAcronymSetInfo( N, "acro2", "Some text for acro2", acrindx)
-}
+  //provide the names for the acronyms used
+  int acrindx;
+  char acrtext[256], acrname[256];
+  for(int N{}; N<gdx.gdxAcronymCount(); N++) {
+     gdx.gdxAcronymGetInfo( N, acrname, acrtext, acrindx);
+     if(acrindx == 2)
+        gdx.gdxAcronymSetInfo( N, "acro1", "Some text for acro1", acrindx);
+     else if(acrindx == 4)
+        gdx.gdxAcronymSetInfo( N, "acro2", "Some text for acro2", acrindx);
+  }
 
-//final check for errors before we close the file
-N = gdx.gdxClose();
-if(N) {
-   gdxErrorStr(Nil, N, ErrMsg);
-   std::cout << "Error writing file = " << ErrMsg << std::endl;
-   exit(1);
-}
-gdx.gdxFree();
-
-//open the file we just created
-gdx.gdxCreateX( ErrMsg);
-gdx.gdxOpenRead( "test.gdx", ErrNr);
-if(ErrNr) {
-   std::cout << "Error opening file, nr = " << ErrNr << std::endl;
-   exit(1);
+  //final check for errors before we close the file
+  if( int N = gdx.gdxClose() ) {
+     char ErrMsg[256];
+     gdx.gdxErrorStr(N, ErrMsg);
+     std::cout << "Error writing file = " << ErrMsg << std::endl;
+     exit(1);
+  }
 }
 
-//give acronym indices using the name of the acronym
-gdx.gdxAcronymSetInfo( 1, "acro1", "", 1000);
-gdx.gdxAcronymSetInfo( 2, "acro2", "", 1001);
+{
+  TGXFileObj gdx;
+  int ErrNr;
+  //open the file we just created
+  gdx.gdxOpenRead( testFn, ErrNr);
+  if(ErrNr) {
+     std::cout << "Error opening file, nr = " << ErrNr << std::endl;
+     exit(1);
+  }
 
-//read the parameter
-gdx.gdxDataReadRawStart( 1, NrRecs);
-while(gdx.gdxDataReadRaw( UELs, Vals, FDim)) {
-   N = gdx.gdxAcronymIndex( Vals[vallevel]);
-   if(!N) std::cout << Vals[vallevel])
-   else std::cout << "Acronym: index = " << N << '\n';
-}
-gdx.gdxDataReadDone();
+  //give acronym indices using the name of the acronym
+  gdx.gdxAcronymSetInfo( 1, "acro1", "", 1000);
+  gdx.gdxAcronymSetInfo( 2, "acro2", "", 1001);
 
-ErrNr = gdx.gdxClose();
-//final error check before closing the file
-if(ErrNr) {
-   gdxErrorStr(nil, ErrNr, ErrMsg);
-   std::cout << "Error reading file = ", ErrMsg);
-   exit(1);
+  //read the parameter
+  TgdxUELIndex UELs;
+  TgdxValues Vals;
+  int NrRecs, FDim;
+  gdx.gdxDataReadRawStart( 1, NrRecs);
+  while(gdx.gdxDataReadRaw( UELs.data(), Vals.data(), FDim)) {
+     if( int N = gdx.gdxAcronymIndex( Vals[vallevel] ); !N)
+        std::cout << Vals[vallevel];
+     else
+        std::cout << "Acronym: index = " << N << '\n';
+  }
+  gdx.gdxDataReadDone();
+
+  ErrNr = gdx.gdxClose();
+  //final error check before closing the file
+  if(ErrNr) {
+     char ErrMsg[256];
+     gdx.gdxErrorStr(ErrNr, ErrMsg);
+     std::cout << "Error reading file = " << ErrMsg;
+     FAIL("Error reading file = ", ErrMsg);
+  }
 }
-gdx.gdxFree();
 ```
 
 ## Functions by Category
@@ -847,9 +856,7 @@ execute 'gdxexdp.exe %gams.sysdir% results.gdx'; // do something with the soluti
 #include "gclgms.h"
 
 char *val2str(gdxHandle_t Tptr, double val, char *s) {
-
   int sv;
-
   if (gdxAcronymName(Tptr, val, s)) {
     return s;
   } else {
@@ -1029,7 +1036,6 @@ int main (int argc, char *argv[]) {
    printf("**** %d reference(s) to unique elements without a string representation\n", BadUels);
 
  gdxFree(&Tptr);
-
 }
 ```
 

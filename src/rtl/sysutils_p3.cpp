@@ -122,6 +122,25 @@ std::string ExtractShortPathName( const std::string &FileName )
 #endif
 }
 
+#if __cplusplus >= 202002L
+std::wstring ExtractShortPathName( const std::wstring &FileName )
+{
+#if defined( _WIN32 )
+   std::array<wchar_t, 260> buf {};
+   const auto rc = GetShortPathNameW( FileName.c_str(), buf.data(), static_cast<DWORD>( sizeof( char ) * buf.size() ) );
+   assert( rc );
+   if( !rc )
+      throw std::runtime_error( "Failed to determine short path name: \"{}\""s +
+                               reinterpret_cast<const char *>(to_u8string(FileName.c_str()).c_str())
+      );
+   return buf.data();
+#else
+   // TODO: Does this make sense?
+   return L"ERROR";
+#endif
+}
+#endif
+
 std::string ExtractFilePath( const std::string &FileName )
 {
    const auto I { LastDelimiter( PathAndDriveDelim.data(), FileName ) };
@@ -166,7 +185,7 @@ static std::string QueryAbsPath(const std::string &p)
    if(!len)
       return {};
    std::vector<wchar_t> buffer( len+1 );
-   GetFullPathNameW(widePath, buffer.size(), buffer.data(), nullptr);
+   GetFullPathNameW(widePath, static_cast<DWORD>( buffer.size() ), buffer.data(), nullptr);
    const int sizeNeeded = WideCharToMultiByte( CP_ACP, 0, buffer.data(), -1, nullptr, 0, nullptr, nullptr );
    if(!sizeNeeded)
       return {};
@@ -443,18 +462,32 @@ bool SetCurrentDir( const std::string &Dir )
 bool DirectoryExists( const std::string &Directory )
 {
 #if defined( _WIN32 )
-   const auto attribs = GetFileAttributesA( ( Directory.size() > MAX_PATH ? tryFixingLongPath( Directory ) : Directory ).c_str() );
-   return -1 != attribs && ( attribs & FILE_ATTRIBUTE_DIRECTORY );
+   DWORD attribs = GetFileAttributesA( ( Directory.size() > MAX_PATH ? tryFixingLongPath( Directory ) : Directory ).c_str() );
+   return INVALID_FILE_ATTRIBUTES != attribs && ( attribs & FILE_ATTRIBUTE_DIRECTORY );
 #else
    struct stat statBuf;
    return !stat( Directory.c_str(), &statBuf ) ? S_ISDIR( statBuf.st_mode ) : false;
 #endif
 }
 
-std::string SysErrorMessage( const int errorCode )
+/**
+ * @brief Get the description associated with an error code
+ *
+ * @param errorCode  the error code
+ *
+ * @return           the description
+ */
+std::string SysErrorMessage( int errorCode )
 {
-   const char *errMsg = strerror( errorCode );
-   if( !errMsg ) return "Unknown error " + IntToStr( errorCode );
+   /* strerror is not MT-safe on windows; it is on Linux and MacOs; use strerror_s on windows */
+#if defined( _WIN32 )
+   static utils::sstring errMsgBuf;
+   strerror_s( errMsgBuf.data(), (int) errMsgBuf.size(), errorCode );
+   char *errMsg = errMsgBuf.data();
+#else
+   char *errMsg = strerror( errorCode );
+   if( !errMsg ) return "Unknown error " + rtl::sysutils_p3::IntToStr( errorCode );
+#endif
    return errMsg;
 }
 
@@ -468,26 +501,158 @@ bool DeleteFileFromDisk( const std::string &FileName )
 #endif
 }
 
-std::string QueryEnvironmentVariable( const std::string &Name )
+std::string QueryEnvironmentVariable( std::string_view Name )
 {
 #if defined( _WIN32 )
-   if( const uint32_t len = GetEnvironmentVariableA( Name.c_str(), nullptr, 0 ); !len ) return ""s;
-   else
-   {
-      std::vector<char> buf( len );
-      GetEnvironmentVariableA( Name.c_str(), buf.data(), len );
-      std::string val( buf.begin(), buf.end() - 1 );// no terminating zero
-      if( val.length() > 255 ) val = val.substr( 0, 255 );
-      return val;
-   }
+   DWORD len = GetEnvironmentVariableA( Name.data(), nullptr, 0 );
+   if( !len )
+      return ""s;
+   std::string val;
+   val.resize( len - 1 );
+   GetEnvironmentVariableA( Name.data(), val.data(), len );
+   if( val.length() > 255 )
+      val.resize( 255 );
+   return val;
 #else
-   const char *s { std::getenv( Name.c_str() ) };
-   std::string sout { !s ? ""s : s };
-   if( sout.length() > 255 )
-      sout.resize( 255 );
-   return sout;
+   const char *s { std::getenv( Name.data() ) };
+   if( !s )
+      return ""s;
+   std::string_view sv { s };
+   if( sv.length() > 255 )
+      sv = sv.substr( 0, 255 );
+   return std::string { sv };
 #endif
 }
+
+#if __cplusplus >= 202002L
+
+// LLM generated
+std::u8string to_u8string(const wchar_t* wstr)
+{
+   #ifdef _WIN32
+    if (!wstr || *wstr == L'\0') {
+        return u8"";
+    }
+
+    int wlen = static_cast<int>(wcslen(wstr));
+
+    int size_needed = WideCharToMultiByte(
+        CP_UTF8, 0,
+        wstr, wlen,
+        nullptr, 0,
+        nullptr, nullptr
+    );
+
+    if (size_needed <= 0) {
+        throw std::runtime_error("Failed to convert wide string to UTF-8");
+    }
+
+    std::u8string result(size_needed, u8'\0');
+
+    // 3. Perform the actual conversion directly into the string's memory
+    WideCharToMultiByte(
+        CP_UTF8, 0,
+        wstr, wlen,
+        reinterpret_cast<char*>(result.data()), size_needed,
+        nullptr, nullptr
+    );
+
+#else
+   std::u8string result(u8"ERROR");
+#endif
+    return result;
+
+}
+
+std::u8string to_u8string(const char* str)
+{
+   return std::u8string(reinterpret_cast<const char8_t*>(str));
+}
+
+
+#ifdef _WIN32
+
+std::wstring to_wstring(std::u8string_view utf8_str)
+{
+    if (utf8_str.empty()) {
+        return L"";
+    }
+
+    // 1. Ask Windows how many wide characters (wchar_t) are needed
+    int size_needed = MultiByteToWideChar(
+        CP_UTF8, 0,
+        reinterpret_cast<const char*>(utf8_str.data()),
+        static_cast<int>(utf8_str.size()),
+        nullptr, 0
+    );
+
+    if (size_needed <= 0) {
+        throw std::runtime_error("Failed to convert UTF-8 to wide string");
+    }
+
+    // 2. Pre-allocate the exact size needed in the std::wstring
+    std::wstring result(size_needed, L'\0');
+
+    // 3. Perform the actual conversion directly into the string's memory
+    MultiByteToWideChar(
+        CP_UTF8, 0,
+        reinterpret_cast<const char*>(utf8_str.data()),
+        static_cast<int>(utf8_str.size()),
+        result.data(), size_needed
+    );
+
+    return result;
+}
+
+#endif
+
+std::u8string QueryEnvironmentVariable( std::u8string_view name )
+{
+#if defined( _WIN32 )
+
+   std::wstring namew = to_wstring(name);
+   DWORD len = GetEnvironmentVariableW( namew.c_str(), nullptr, 0 );
+   if( !len )
+      return u8"";
+   std::wstring val;
+   val.resize( len - 1 );
+   GetEnvironmentVariableW( namew.c_str(), val.data(), len );
+   if( val.length() > 255 )
+      val.resize( 255 );
+   return to_u8string(val.data());
+
+#else
+
+   const char *s { std::getenv( reinterpret_cast<const char*>(name.data()) ) };
+   if( !s )
+      return u8"";
+   std::u8string_view sv { reinterpret_cast<const char8_t *>(s) };
+   if( sv.length() > 255 )
+      sv = sv.substr( 0, 255 );
+
+   return std::u8string { sv };
+
+#endif
+
+}
+
+#if defined( _WIN32 )
+std::wstring QueryEnvironmentVariable( std::wstring_view name )
+{
+   DWORD len = GetEnvironmentVariableW( name.data(), nullptr, 0 );
+   if( !len )
+      return L"";
+   std::wstring val;
+   val.resize( len - 1 );
+   GetEnvironmentVariableW( name.data(), val.data(), len );
+   if( val.length() > 255 )
+      val.resize( 255 );
+   return val;
+
+}
+#endif // _WIN32
+
+#endif //C++20
 
 // TODO: Potentially port P3SetEnv and P3UnSetEnv from portbin/rtl/p3utils
 int AssignEnvironmentVariable( const std::string &sid, const std::string &setval )
@@ -507,7 +672,7 @@ void DropEnvironmentVariable( const std::string &name )
    AssignEnvironmentVariable( name, "" );
 }
 
-std::string ExcludeTrailingPathDelimiter( const std::string &S )
+std::string ExcludeTrailingPathDelimiter( std::string_view S )
 {
    std::string res { S };
    if( !res.empty() && PathDelim == res[res.length() - 1] )

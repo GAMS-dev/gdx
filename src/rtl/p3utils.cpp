@@ -46,14 +46,14 @@
    // Windows
    // @aschnabel: it was __GNUC__, but it does not make sense with MINGW.
    // Changed it to __CYGWIN__, but I don't think we target this??
-   #ifndef __CYGWIN__
+   #if defined(_MSC_VER)
       #pragma comment( lib, "iphlpapi.lib" )
       #pragma comment( lib, "Ws2_32.lib" )
       //#define _WINSOCK2API_
       //#define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
-      #include <winsock2.h>
-      #include <ws2tcpip.h>
    #endif
+   #include <winsock2.h>
+   #include <ws2tcpip.h>
    #include <windows.h>
    #include <io.h>
    #include <psapi.h> /* enough if we run on Windows 7 or later */
@@ -62,8 +62,8 @@
    #include <iptypes.h>
 #else
    // Unix
+   #include <limits.h>
    #include <sys/socket.h>
-   #include <sys/fcntl.h>
    #include <sys/utsname.h>
    #include <sys/stat.h>
    #if( defined( __linux__ ) || defined( __APPLE__ ) ) /* at least, maybe for others too */
@@ -75,16 +75,27 @@
          #include <net/if_dl.h>
          #include <libproc.h>
       #endif
+
+      #ifdef __linux__
+         #include <sys/auxv.h> // for getauxval
+      #endif
    #endif
    #include <netinet/in.h>
-   #include <unistd.h>
+   #include <fcntl.h>
+   #include <limits.h>
    #include <poll.h>
+   #include <unistd.h>
 #endif
 #include "dtoaLoc.h"
+
+#if __cplusplus >= 202002L
+#include <format>
+#endif
 
 using namespace rtl::sysutils_p3;
 using namespace rtl::p3platform;
 using namespace std::literals::string_literals;
+namespace fs = std::filesystem;
 using utils::ui32;
 
 // ==============================================================================================================
@@ -104,6 +115,20 @@ static bool setEnvironmentVariableUnix( const std::string &name, const std::stri
       return true;
    }
    return !setenv( name.c_str(), value.c_str(), 1 );
+}
+
+[[maybe_unused]] static bool
+setEnvironmentVariableUnix(std::string_view name, std::string_view value = std::string_view(""))
+{
+   if( name.empty() ) return false;
+   const char *name_ = name.data();
+   if( value.empty() )
+   {
+      // delete name from env
+      unsetenv( name_ );
+      return true;
+   }
+   return !setenv(name_ , value.data(), 1 );
 }
 #endif
 
@@ -142,23 +167,68 @@ bool PrefixPath( std::string_view s )
    }
    else
       p[slen] = '\0';
-   return setEnvironmentVariableUnix( "PATH", p.get() );
+   return setEnvironmentVariableUnix( std::string_view("PATH"), p.get() );
+#endif
+}
+
+bool PrefixPath( const fs::path &p )
+{
+   if( p.empty() )
+      return true;
+#if defined(_WIN32)
+
+   std::wstring s = p.native();
+   size_t slen = s.length();
+   DWORD plen = GetEnvironmentVariableW( L"PATH", nullptr, 0 );
+   auto v = std::make_unique_for_overwrite<wchar_t[]>( slen + plen + 1 );
+   std::memcpy( v.get(), s.data(), slen * sizeof(wchar_t) );
+   if( plen > 0 )
+   {
+      v[slen] = PathSep;
+      auto tlen = GetEnvironmentVariableW( L"PATH", v.get() + s.length() + 1, plen );
+      assert( tlen == plen - 1 );
+   }
+   else
+      v[slen] = '\0';
+   return SetEnvironmentVariableW( L"PATH", v.get() );
+#else
+   const char *tptr = std::getenv("PATH");
+   const char *s = p.c_str();
+   const size_t plen = std::strlen(tptr), slen = std::strlen(s);
+   auto v = std::make_unique_for_overwrite<char[]>(slen+1+plen+1);
+   std::memcpy(v.get(), s, slen);
+   if(plen > 0)
+   {
+      v[slen] = PathSep;
+      std::memcpy(v.get()+slen+1, tptr, plen);
+      v[slen+1+plen] = '\0';
+   }
+   else
+      v[slen] = '\0';
+   return setEnvironmentVariableUnix( std::string_view("PATH"), v.get() );
 #endif
 }
 #endif
 
 bool P3SetEnv( const std::string &name, const std::string &val )
 {
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
    return SetEnvironmentVariableA( name.c_str(), val.c_str() );
 #else
    return setEnvironmentVariableUnix( name, val );
 #endif
 }
 
+#ifdef _WIN32
+bool P3SetEnv( const std::wstring &name, const fs::path &p )
+{
+   return SetEnvironmentVariableW( name.c_str(), p.native().c_str() );
+}
+#endif
+
 void P3UnSetEnv( const std::string &name )
 {
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
    SetEnvironmentVariableA( name.c_str(), nullptr );
 #else
    setEnvironmentVariableUnix( name );
@@ -683,11 +753,11 @@ int p3FileGetPointer(Tp3FileHandle h, int64_t &filePointer)
 }
 
 /*
-     * Get a list(of sorts) of directories to search for config / data / doc / etc files
-     * by convention, the first element in this list is the writableLocation
-     * return true if we follow this convention(i.e.p3WritableLocation succeeds), false otherwise
-     *  But even on false, locCountand locNames are valid
-     */
+ * Get a list(of sorts) of directories to search for config / data / doc / etc files
+ * by convention, the first element in this list is the writableLocation
+ * return true if we follow this convention(i.e.p3WritableLocation succeeds), false otherwise
+ *  But even on false, locCountand locNames are valid
+ */
 bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocNames &locNames, int &eCount )
 {
    eCount = 0;
@@ -733,7 +803,7 @@ bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocN
             return res;
          }
          if( const std::string execPath { ExcludeTrailingPathDelimiter( ExtractFilePath( execName ) ) };
-            LastDelimiter( "/", execPath ) >= 2 ) locNames.emplace_back( ExtractFilePath( execPath ) + "Resources"s );
+            LastDelimiter( "/", execPath ) >= 1 ) locNames.emplace_back( ExtractFilePath( execPath ) + "Resources"s );
          else
             eCount++;
       }
@@ -802,9 +872,9 @@ static bool homePlus( const std::string &dd1, const std::string &dd2, std::strin
 bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::string &locName ) { return false; }
 #else
 /*
-     * Get the name of the directory to write config/data/doc/etc files to
-     * return true on success (i.e. we can construct the name), false on failure
-     */
+ * Get the name of the directory to write config/data/doc/etc files to
+ * return true on success (i.e. we can construct the name), false on failure
+ */
 bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::string &locName )
 {
 #ifdef _WIN32
@@ -879,7 +949,338 @@ bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::s
    }
 #endif
 }
+#endif // MINGW
+
+#if __cplusplus >= 202002L
+static int GetExecNameUnix( fs::path &execPath, std::string &msg )
+{
+   int rc { 8 };
+#if defined( __APPLE__ )
+   char execBuf[PROC_PIDPATHINFO_MAXSIZE];
+   auto pid = getpid();
+   int k = proc_pidpath( pid, execBuf, sizeof( execBuf ) );
+   if( k <= 0 )
+   {
+      msg = std::format("proc_pidpath(pid={},...) failed: {}", pid, SysErrorMessage(errno));
+      execPath.clear();
+      rc = 4;
+   }
+   else
+   {
+      execPath.assign( execBuf );
+      rc = 0;
+   }
+
+
+#elif defined( __linux__ )
+   char execBuf[PATH_MAX];
+   auto ssz = readlink( "/proc/self/exe", execBuf, sizeof( execBuf ));
+   if( ssz < 0 || (size_t)ssz >= sizeof( execBuf ))
+   {
+      /* Some container do not mount /proc */
+      const char *exec_path = (const char *)getauxval(AT_EXECFN);
+      int errno_ = errno;
+      if (exec_path) {
+         // this form of realpath is more robust, see man realpath
+         char *execName = realpath(exec_path, nullptr);
+
+         if (execName) {
+            execPath.assign( execName );
+            free(execName);
+            rc = 0;
+         } else {
+            msg = "both readlink(/proc/self/exe,...) and getauxval failed";
+            if (ssz == -1) {
+               msg += ": " + SysErrorMessage(errno_);
+            }
+            rc = 4;
+         }
+
+      }
+      else
+      {
+         msg = std::format("readlink(/proc/self/exe,...) failed: {}", SysErrorMessage(errno));
+         execPath.clear();
+         rc = 4;
+      }
+   }
+   else
+   {
+      // man 3p readlink has
+      // "Conforming applications should not assume that the returned contents of the
+      // symbolic link are null-terminated."
+      execBuf[ssz] = '\0';
+      execPath.assign( execBuf );
+      rc = 0;
+   }
+#else
+   execPath.clear();
+   msg.assign("not implemented for this platform");
 #endif
+   return rc;
+}
+
+[[maybe_unused]] static int p3GetExecName( fs::path &execNameFull, std::string &msg )
+{
+   execNameFull.clear();
+#if defined( _WIN32 )
+   WCHAR pathText[MAX_PATH];
+
+   DWORD res = GetModuleFileNameW( nullptr, pathText, MAX_PATH );
+
+   if (!res) {
+      msg = "GetModuleFileNameW call failed: " + std::to_string(GetLastError());
+      return 3;
+   }
+
+   if (res >= MAX_PATH) {
+      std::wstring pathTestLong { 32768 };
+      res = GetModuleFileNameW( nullptr, pathTestLong.data(), (DWORD)pathTestLong.size());
+
+      if (res >= 32768) {
+          msg = "GetModuleFileNameW call failed with buffer size " + std::to_string(pathTestLong.size());
+         return 3;
+      }
+
+      execNameFull.assign(pathTestLong);
+   } else {
+      execNameFull.assign(pathText);
+   }
+
+   msg.clear();
+   return 0;
+#else
+   msg = "P3: not yet implemented";
+   return GetExecNameUnix( execNameFull, msg );
+#endif
+}
+
+#ifdef __linux__
+#include <pwd.h>
+#include <unistd.h>
+
+/**
+ * @brief Get a subdirectory in a $HOME-like directory
+ *
+ * The "home" dir is obtained as follows
+ * 1. If $HOME is defined, use it
+ * 2. Else if a home is available via /etc/passwd, use it
+ *
+ * If any of the above succeeds, return homedir / subdir / appName
+ *
+ * 3. Else return "/var/tmp/appName-uid/subdir"
+ *
+ * @param subdir    the subdir
+ * @param appName   the application name
+ *
+ * @return          the desired subdirectory
+ */
+static fs::path getHomeLikeSubdir(const fs::path & subdir, std::u8string_view appName)
+{
+   std::u8string home = QueryEnvironmentVariable(u8"HOME");
+   if (!home.empty()) {
+      return fs::path(home) / subdir;
+   }
+
+   struct passwd *pw = getpwuid(getuid());
+
+   // Check if entry exists and pw_dir is non-empty
+   if (pw && pw->pw_dir && pw->pw_dir[0] != '\0') {
+      return fs::path(pw->pw_dir) / subdir;
+   }
+
+   fs::path appDir { std::u8string(appName) + std::u8string(u8"-") + to_u8string(std::to_string(getuid()).c_str()) };
+   return fs::path("/var/tmp") / appDir / subdir;
+}
+
+#endif
+
+/*
+ * Get the name of the directory to write config/data/doc/etc files to
+ * return true on success (i.e. we can construct the name), false on failure
+ */
+bool p3WritableLocation( Tp3Location locType, const std::u8string &appName, fs::path &locName )
+{
+#ifdef _WIN32
+   locName.clear();
+
+   KNOWNFOLDERID folderId;
+   if( utils::in( locType, p3Config, p3AppConfig, p3Data, p3AppLocalData ) )
+      folderId = FOLDERID_LocalAppData; // %LOCALAPPDATA%
+   else if( locType == p3AppData )
+      folderId = FOLDERID_RoamingAppData; // %APPDATA%
+   else if( locType == p3Documents )
+      folderId = FOLDERID_Documents;
+   else
+      throw std::runtime_error("Unhandled location value " + std::to_string(locType));
+
+   PWCHAR wideBuf;
+   if( SHGetKnownFolderPath( folderId, 0, nullptr, &wideBuf ) == S_OK )
+   {
+      locName = fs::path(wideBuf);
+
+   } // TODO: deal with failure
+   CoTaskMemFree(wideBuf);
+
+   // FIXME: cleanup the mess here: in gdlib::gamsdirs::GMSDataLocations we do this
+   // for p3Documents
+   if( !locName.empty() && !appName.empty() && utils::in( locType, p3Config, p3AppConfig, p3Data, p3AppData, p3AppLocalData ) )
+      locName /= appName;
+   return !locName.empty();
+
+#elif defined( __APPLE__ )
+
+      std::u8string home = QueryEnvironmentVariable(u8"HOME");
+      if (home.empty()) { return false; }
+      locName = fs::path(home);
+
+      if( p3Config == locType ) {
+         locName /= "Library/Preferences";
+      } else if( p3AppConfig == locType ) {
+         locName /= "Library/Preferences";
+         locName /= appName;
+      } else if( utils::in( locType, p3Data, p3AppData, p3AppLocalData ) ) {
+         locName /= "Library/Application Support";
+         locName /= appName;
+      } else if( p3Documents == locType ) {
+         locName /= "Documents";
+      } else {
+         return false;
+      }
+
+      return true;
+
+#else
+      // everything neither Windows nor macOS: only Linux in July 2022
+      // see https://specifications.freedesktop.org/basedir/latest/
+      if( p3Config == locType || p3AppConfig == locType ) {
+
+         std::u8string cfgHomeDir = QueryEnvironmentVariable(u8"XDG_CONFIG_HOME");
+         if (!cfgHomeDir.empty()) {
+            locName = fs::path(cfgHomeDir);
+         }  else {
+            locName = getHomeLikeSubdir(".config", appName);
+         }
+
+         if (p3AppConfig == locType) {
+            locName /= appName;
+         }
+
+      }
+      else if( utils::in( locType, p3Data, p3AppData, p3AppLocalData ) )
+      {
+         std::u8string dataHomeDir = QueryEnvironmentVariable( u8"XDG_DATA_HOME" );
+         if (!dataHomeDir.empty()) {
+            locName = fs::path(dataHomeDir) / appName;
+         } else {
+            locName = getHomeLikeSubdir(fs::path(".local/share") / appName, appName);
+         }
+      }
+      else if( locType == p3Documents )
+      {
+         locName = getHomeLikeSubdir(fs::path("Documents") / appName, appName);
+      }
+      else
+         return false;
+
+   return true;
+#endif
+}
+
+/*
+ * Get a list(of sorts) of directories to search for config / data / doc / etc files
+ * by convention, the first element in this list is the writableLocation
+ * return true if we follow this convention(i.e.p3WritableLocation succeeds), false otherwise
+ *  But even on false, locCount and locNames are valid
+ */
+bool p3StandardLocations(Tp3Location locType, const std::u8string &appName,
+                         locpath_t &locNames, int &eCount )
+{
+   eCount = 0;
+   locNames = { u8"" };// { GetCurrentDir() };
+   const bool res = p3WritableLocation( locType, appName, locNames.front() );
+   if( p3Documents == locType ) return res;
+
+   const bool isDataLoc { utils::in( locType, p3Data, p3AppData, p3AppLocalData ) };
+
+#ifdef _WIN32
+   if( const bool isConfigLoc { utils::in( locType, p3Config, p3AppConfig ) };
+      isConfigLoc || isDataLoc ) {
+      PWSTR pathText = nullptr;
+      if (SHGetKnownFolderPath(FOLDERID_ProgramData, 0, nullptr, &pathText) == S_OK) {
+         locNames.emplace_back(fs::path(pathText) / appName);
+      }
+      CoTaskMemFree(pathText);
+   }
+
+   if( isDataLoc ) {
+      fs::path execName {};
+      if( std::string msg; p3GetExecName( execName, msg ) ) {
+         eCount++;
+         return res;
+      }
+
+      fs::path execParentPath { execName.parent_path() };
+      locNames.emplace_back( execParentPath );
+      execParentPath /= "data";
+      locNames.emplace_back( execParentPath );
+      if( !appName.empty() ) locNames.emplace_back( execParentPath / appName );
+   }
+#elif defined(__APPLE__)
+   // NOTE: in p3pas, this was condtional on isDataLoc; however this makes no sense
+
+   locNames.emplace_back( fs::path("/Library/Application Support") / appName );
+
+   fs::path execName {};
+   if( std::string msg; p3GetExecName( execName, msg ) ) {
+      eCount++;
+      return res;
+   }
+
+   fs::path execParentPath { execName.parent_path() };
+   if( LastDelimiter( "/", execParentPath.string() ) >= 1 )
+      locNames.emplace_back( execParentPath.parent_path() / "Resources" );
+   else
+      eCount++;
+#else
+   // neither Windows nor Mac, right now this must be Linux
+   // see https://specifications.freedesktop.org/basedir/latest/
+   // bool  isPlainConfigLoc { p3Config == locType };
+   const bool isAppConfigLoc { p3AppConfig == locType };
+   std::u8string xdgDir = isDataLoc ? QueryEnvironmentVariable(u8"XDG_DATA_DIRS") :
+                                      QueryEnvironmentVariable(u8"XDG_CONFIG_DIRS");
+
+   if( !xdgDir.empty() ) {
+
+      const std::u8string empty{}, &suffix { ( isDataLoc || isAppConfigLoc ) ? appName : empty };
+      size_t start = 0, pos, sz = xdgDir.size();
+      do {
+         pos = xdgDir.find_first_of(':', start);
+         if (pos > start) {
+            locNames.emplace_back( fs::path(xdgDir.substr(start, pos-start)) / suffix );
+         }
+         start = pos+1;
+      } while (pos < sz-1);
+
+   }
+   else
+   {
+      const std::u8string empty{}, &suffix { ( isDataLoc || isAppConfigLoc ) ? appName : empty };
+      if( isDataLoc )
+      {
+         locNames.emplace_back( fs::path("/usr/local/share") / suffix );
+         locNames.emplace_back( fs::path("/usr/share") / suffix);
+      } else {
+         locNames.emplace_back( fs::path("/etc/xdg") / suffix );
+         locNames.emplace_back( fs::path("/etc") / suffix ); // OH addition
+      }
+   }
+#endif
+   return res;
+}
+
+#endif
+
 
 static inline std::string repeatChar( const int n, const char c )
 {
@@ -1625,15 +2026,27 @@ int xGetExecName( std::string &execName, std::string &msg )
    else
       rc = 0;
 #elif defined( __linux )
+   static_assert(execBuf.size() >= PATH_MAX);
    std::array<char, 2048> tmpBuf {};
    auto ssz = readlink( "/proc/self/exe", execBuf.data(), sizeof( char ) * execBuf.size() );
    execName.assign( execBuf.data() );
    if( ssz < 0 )
    {
-      myStrError( errno, tmpBuf.data(), tmpBuf.size() * sizeof( char ) );
-      msg = "readlink(/proc/self/exe,...) failure: "s + std::string( tmpBuf.begin(), tmpBuf.end() );
-      execName.clear();
-      rc = 4;
+      /* Some container do not mount /proc */
+      const char *exec_path = (const char *)getauxval(AT_EXECFN);
+      if (exec_path && realpath(exec_path, execBuf.data())) {
+
+         execName.assign( execBuf.data() );
+         ssz = execBuf.size() - 1;
+         rc = 0;
+
+      } else {
+
+         myStrError( errno, tmpBuf.data(), tmpBuf.size() * sizeof( char ) );
+         msg = "readlink(/proc/self/exe,...) failure: "s + std::string( tmpBuf.begin(), tmpBuf.end() );
+         execName.clear();
+         return 4;
+      }
    }
    else
    {
@@ -1687,6 +2100,8 @@ int p3GetExecName( std::string &execName, std::string &msg )
    return xGetExecName( execName, msg );
 #endif
 }
+
+
 
 #ifdef __IN_CPPMEX__
 // Get the first MAC address as a shortstring, in form aa:bb:1f:0a:b1:22

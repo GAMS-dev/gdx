@@ -47,6 +47,7 @@
 
 using namespace std::literals::string_literals;
 using namespace GDX_NS rtl::p3utils;
+using namespace GDX_NS rtl::sysutils_p3;
 using namespace GDX_NS utils;
 
 #if defined(__IN_CPPMEX__)
@@ -58,19 +59,6 @@ using namespace GDX_NS utils;
 // ==============================================================================================================
 namespace GDX_NS gdlib::gmsstrm
 {
-
-std::string SysErrorMessage( int errorCode )
-{
-#if defined( _WIN32 )
-   static sstring errMsgBuf;
-   strerror_s( errMsgBuf.data(), (int) errMsgBuf.size(), errorCode );
-   char *errMsg = errMsgBuf.data();
-#else
-   char *errMsg = strerror( errorCode );
-   if( !errMsg ) return "Unknown error " + rtl::sysutils_p3::IntToStr( errorCode );
-#endif
-   return errMsg;
-}
 
 enum CustomOpenAction : uint8_t
 {

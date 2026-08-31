@@ -87,6 +87,7 @@ int gdxClose( TGXFileRec_t *pgdx);
 int gdxDataErrorCount( TGXFileRec_t *pgdx);
 int gdxDataErrorRecord( TGXFileRec_t *pgdx, int RecNr, int *KeyInt, double *Values );
 int gdxDataErrorRecordX( TGXFileRec_t *pgdx, int RecNr, int *KeyInt, double *Values );
+int gdxSetErrorRecordCutoff( TGXFileRec_t *pgdx, int maxDataErrorRecords );
 int gdxDataReadDone( TGXFileRec_t *pgdx);
 int gdxDataReadFilteredStart( TGXFileRec_t *pgdx, int SyNr, const int *FilterAction, int *NrRecs );
 int gdxDataReadMap( TGXFileRec_t *pgdx, int RecNr, int *KeyInt, double *Values, int *DimFrst );
@@ -294,6 +295,11 @@ GDX_INLINE int gdxDataErrorRecord( TGXFileRec_t *pgx, int RecNr, int *KeyInt, do
 GDX_INLINE int gdxDataErrorRecordX( TGXFileRec_t *pgx, int RecNr, int *KeyInt, double *Values )
 {
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataErrorRecordX(RecNr, KeyInt, Values );
+}
+
+GDX_INLINE int gdxSetErrorRecordCutoff( TGXFileRec_t *pgx, int maxDataErrorRecords )
+{
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxSetErrorRecordCutoff(maxDataErrorRecords );
 }
 
 GDX_INLINE int gdxDataReadDone( TGXFileRec_t *pgx)

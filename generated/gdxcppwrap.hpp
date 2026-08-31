@@ -214,6 +214,11 @@ public:
      return ::gdxDataErrorRecordX( pgx, RecNr, KeyInt, Values );
    }
 
+   int gdxSetErrorRecordCutoff( int maxDataErrorRecords )
+   {
+     return ::gdxSetErrorRecordCutoff( pgx, maxDataErrorRecords );
+   }
+
    int gdxDataReadDone()
    {
      return ::gdxDataReadDone( pgx );

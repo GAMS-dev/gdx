@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(gdx)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(GDX_THREAD_SAFE "Build thread-safe version of GDX" OFF)
 option(NO_EXAMPLES "Skip building example programs/executables" OFF)
@@ -32,8 +33,6 @@ if(NOT DEFINED CMAKE_C_COMPILER_LAUNCHER AND NOT DEFINED CMAKE_CXX_COMPILER_LAUN
 	endif()
 endif()
 
-set(mylibs ${CMAKE_DL_LIBS} pthread m)
-
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_SKIP_RPATH FALSE)
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
@@ -57,56 +56,89 @@ if (GDX_THREAD_SAFE)
 endif()
 
 # Windows
-if (MSVC OR CMAKE_HOST_WIN32 OR CMAKE_GENERATOR_TOOLSET STREQUAL "ClangCL")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /D_CRT_SECURE_NO_WARNINGS /wd4267 /wd4996")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /EHs /D_CRT_SECURE_NO_WARNINGS /wd4267 /wd4996")
-	if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
-	else ()
-		# use strict floating point mode and not fast, as some 0.0 become eps in GDX files in fast mode for Intel clang
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:precise -Wno-microsoft-include")
-	endif ()
-	if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable")
-	endif ()
-	set(mylibs "")
+if (CMAKE_SYSTEM_NAME MATCHES "Windows" AND NOT CYGWIN)
+   add_compile_definitions(_CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_WARNINGS)
+else()
+   set(mylibs ${CMAKE_DL_LIBS} pthread m)
+endif()
+
+if (MSVC OR CMAKE_GENERATOR_TOOLSET STREQUAL "ClangCL")
+
+   if("x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
+      add_compile_options(/Zc:__cplusplus /W3 /wd4267 /wd4996 /wd5105)
+      if (NOT CMAKE_C_COMPILER_ID MATCHES "Clang" AND NOT CMAKE_C_COMPILER_ID MATCHES "IntelLLVM")
+         add_compile_options(/Zc:preprocessor)
+      endif()
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHs")
+   endif()
+
+   if (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+      # use strict floating point mode and not fast, as some 0.0 become eps in GDX files in fast mode for Intel clang
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:precise -Wno-microsoft-include")
+   endif ()
+   if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable")
+   endif ()
 endif ()
 
+# FIXME: do we still want this? Isn't it safer to always vendor zlib?
 find_package(ZLIB QUIET)
 if(ZLIB_FOUND)
-	message(STATUS "zlib found on system: ${ZLIB_LIBRARIES}")
-	set(zlib-units "")
-	set(mylibs ${mylibs} ZLIB::ZLIB)
+   message(STATUS "zlib found on system: ${ZLIB_LIBRARIES}")
+   set(zlib-units "")
+   set(mylibs ${mylibs} ZLIB::ZLIB)
 else()
-	message(STATUS "zlib not found on system. Falling back to local sources.")
-	set(zlib-units
-		# ZLIB modules
-		# missing? run in project root: git clone https://github.com/madler/zlib zlib
-		zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c
-		zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c
-		zlib/zutil.c
-	)
+   message(STATUS "zlib not found on system. Falling back to local sources.")
+   set(zlib-units
+      # ZLIB modules
+      # missing? run in project root: git clone https://github.com/madler/zlib zlib
+      zlib/adler32.c zlib/compress.c zlib/crc32.c zlib/deflate.c zlib/gzclose.c zlib/gzlib.c zlib/gzread.c
+      zlib/gzwrite.c zlib/infback.c zlib/inffast.c zlib/inflate.c zlib/inftrees.c zlib/trees.c zlib/uncompr.c
+      zlib/zutil.c
+   )
+
+   # From zlib1/CMakeLists.txt
+   include(CheckIncludeFile)
+   include(CheckFunctionExists)
+   # Check for stdarg.h
+   check_include_file(stdarg.h HAVE_STDARG_H)
+   # Check for unistd.h
+   check_include_file(unistd.h HAVE_UNISTD_H)
+   # Check for fseeko
+   check_function_exists(fseeko HAVE_FSEEKO)
+
+   # These are needed since we include "zconf.h" throught src/gdlib/gmsstrm.hpp
+   add_compile_definitions(
+      HAVE_UNISTD_H=$<BOOL:${HAVE_UNISTD_H}>
+      HAVE_STDARG_H=$<BOOL:${HAVE_STDARG_H}>
+   )
+
+   if (NOT HAVE_FSEEKO)
+      set_source_files_properties(${zlib-units} PROPERTIES COMPILE_DEFINITIONS NO_FSEEKO)
+   endif()
 endif()
 
 if (UNIX)
-	# -fsanitize=undefined -fno-inline
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas -pedantic -Wextra -Wno-unused-parameter -Wno-deprecated-copy")
-	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wconversion -funsigned-char") # aggressive signage warnings
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZ_HAVE_UNISTD_H")
-	if (NOT APPLE AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-truncation=0")
-	endif ()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-cast-function-type")
-	# strictly handle alignment and structure padding around flexible arrays (only newer compilers)
-	if ((CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16) OR
-	(CMAKE_CXX_COMPILER_ID MATCHES "GCC" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13))
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-flex-arrays=3")
-	endif ()
-	# ADD common hardening features on Linux
-	if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3 ")
-		add_link_options(LINKER:-z,defs LINKER:-z,now LINKER:-z,relro LINKER:-z,noexecstack)
-	endif ()
+   # -fsanitize=undefined -fno-inline
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wreturn-type -Wmissing-declarations -Wno-unknown-pragmas -pedantic -Wextra -Wno-unused-parameter -Wno-deprecated-copy")
+   #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wconversion -funsigned-char") # aggressive signage warnings
+   if (NOT APPLE AND NOT CMAKE_C_COMPILER_ID STREQUAL "Clang")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wformat-truncation=0")
+   endif ()
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-cast-function-type")
+   # strictly handle alignment and structure padding around flexible arrays (only newer compilers)
+   if ((CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16) OR
+   (CMAKE_CXX_COMPILER_ID MATCHES "GCC" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13))
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fstrict-flex-arrays=3")
+   endif ()
+   # ADD common hardening features on Linux
+   if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+      if (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE MATCHES "[AM]san"))
+         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3 ")
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3 ")
+      endif()
+      add_link_options(LINKER:-z,defs LINKER:-z,now LINKER:-z,relro LINKER:-z,noexecstack)
+   endif ()
 endif (UNIX)
 
 set(gdx-core

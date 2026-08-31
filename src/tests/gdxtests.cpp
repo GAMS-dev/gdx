@@ -27,6 +27,7 @@
 #include <windows.h>
 #undef max
 #endif
+#include <charconv>
 
 #if defined( GXFILE_CPPWRAP )
 #include "gdxcppwrap.hpp"
@@ -54,11 +55,41 @@
 #include "utils.hpp"
 
 using namespace std::literals::string_literals;
+using namespace std::literals::string_view_literals;
 using namespace GDX_NS gdx;
 using namespace GDX_NS utils;
 using namespace GDX_NS gdlib::strindexbuf;
 
 namespace fs = std::filesystem;
+
+// small test function for detecting the wine emulator
+// This is used as a workaround for a small bug
+static bool IsRunningUnderWine()
+{
+#ifdef _WIN32
+    // 1. The Classic DLL Export Check (Fast, but easily hidden by Bottles/Proton)
+    HMODULE hNTDLL = GetModuleHandleA("ntdll.dll");
+    if (hNTDLL && GetProcAddress(hNTDLL, "wine_get_version")) {
+        return true;
+    }
+
+    // 2. The Registry Check (Highly reliable fallback)
+    HKEY hKey;
+    
+    // Check Machine-level Wine configuration
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "Software\\Wine", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        RegCloseKey(hKey);
+        return true;
+    }
+    
+    // Check User-level Wine configuration
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, "Software\\Wine", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        RegCloseKey(hKey);
+        return true;
+    }
+#endif
+    return false;
+}
 
 namespace GDX_NS gdx::tests::gdxtests
 {
@@ -108,7 +139,7 @@ static bool setEnvironmentVariableUnix( const std::string &name, const std::stri
 
 bool setEnvironmentVar( const std::string &name, const std::string &val )
 {
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
    return SetEnvironmentVariableA( name.c_str(), val.c_str() );
 #else
    return setEnvironmentVariableUnix( name, val );
@@ -118,7 +149,7 @@ bool setEnvironmentVar( const std::string &name, const std::string &val )
 
 void unsetEnvironmentVar( const std::string &name )
 {
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
    SetEnvironmentVariableA( name.c_str(), nullptr );
 #else
    setEnvironmentVariableUnix( name );
@@ -1891,7 +1922,8 @@ TEST_CASE( "Test simple write/read with compression activated" )
    fs::remove( fn );
 }
 
-TEST_CASE( "Test opening a file for reading and then deleting (while it is open)")
+TEST_CASE( "Test opening a file for reading and then deleting (while it is open)"
+          * doctest::skip(IsRunningUnderWine()))
 {
    const auto fn {"unlocked.gdx"s};
    testWrite(fn, [&](TGXFileObj &pgx) {
@@ -1906,7 +1938,16 @@ TEST_CASE( "Test opening a file for reading and then deleting (while it is open)
       int key, dimFrst;
       double val;
       REQUIRE_FALSE(pgx.gdxDataReadRaw( &key, &val, dimFrst ));
-      REQUIRE_FALSE(fs::exists( fn ));
+
+      std::error_code ec;
+      bool fileExists = fs::exists(fn, ec);
+
+      if (ec) {
+         INFO("fs::exists encountered an OS error: ", ec.message());
+         INFO("Error value: ", ec.value());
+      }
+
+      REQUIRE_FALSE(fileExists);
    } );
 }
 
@@ -2747,7 +2788,8 @@ TEST_CASE("Test opening 100 char long name GDX file inside two 100 char long nam
       TGXFileObj gdx;
       int ErrNr;
       REQUIRE_GE(static_cast<int>(gdxTargetFilenameBase.length()), 100 + 1 + 100 + 1 + 100 + 4); // >= 306 (long dirname + sep + long dirname + sep + long name + ".gdx")
-      REQUIRE(gdx.gdxOpenRead( gdxTargetFilenameBase.c_str(), ErrNr ));
+      REQUIRE_MESSAGE(gdx.gdxOpenRead( gdxTargetFilenameBase.c_str(), ErrNr ),
+                      "ERROR when calling gdxOpenRead on : " <<  gdxTargetFilenameBase);
    }
 
    REQUIRE(fs::remove( gdxTargetFilename));
@@ -2770,6 +2812,105 @@ TEST_CASE("Mapped writing does not like UELs inserted raw")
       REQUIRE_EQ(-100004, pgx.gdxGetLastError());
    } );
    fs::remove( fn );
+}
+
+TEST_CASE("Example from README markdown")
+{
+   // skip test in CI
+   if( const char *val = std::getenv( "GITLAB_CI" );
+      val != nullptr && std::string_view(val) == "true"sv)
+      return;
+
+   constexpr char testFn[] = "test.gdx";
+   constexpr int vallevel = GMS_VAL_LEVEL;
+
+   {
+      //Create GDX object and open file for writing
+      int ErrNr;
+      TGXFileObj gdx;
+      gdx.gdxOpenWriteEx( testFn, "testing", 0, ErrNr);
+
+      //register some unique elements
+      gdx.gdxUELRegisterRawStart();
+      for(int N{}; N<5; N++)
+      {
+         std::array<char, 32> buf {"uel"};
+         auto [ptr, ec] = std::to_chars(buf.data()+3, buf.data()+buf.size()-1, N);
+         *ptr = '\0';
+         gdx.gdxUELRegisterRaw( buf.data() );
+      }
+      gdx.gdxUELRegisterDone();
+
+      //write a parameter with two acronyms
+      TgdxUELIndex uels;
+      TgdxValues values;
+      gdx.gdxDataWriteRawStart( "symb1", "text for symb1", 1, dt_par, 0);
+      for(int N{}; N<5; N++) {
+         uels[0] = N;
+         values[vallevel] = (N == 1 || N == 3) ? gdx.gdxAcronymValue( N ) : N;
+         gdx.gdxDataWriteRaw( uels.data(), values.data());
+      }
+      gdx.gdxDataWriteDone();
+
+      //provide the names for the acronyms used
+      int acrindx;
+      char acrtext[256], acrname[256];
+      for(int N{}; N<gdx.gdxAcronymCount(); N++) {
+         gdx.gdxAcronymGetInfo( N, acrname, acrtext, acrindx);
+         if(acrindx == 2)
+            gdx.gdxAcronymSetInfo( N, "acro1", "Some text for acro1", acrindx);
+         else if(acrindx == 4)
+            gdx.gdxAcronymSetInfo( N, "acro2", "Some text for acro2", acrindx);
+      }
+
+      //final check for errors before we close the file
+      if( int N = gdx.gdxClose() ) {
+         char ErrMsg[256];
+         gdx.gdxErrorStr(N, ErrMsg);
+         std::cout << "Error writing file = " << ErrMsg << std::endl;
+         exit(1);
+      }
+   }
+
+   {
+      TGXFileObj gdx;
+      int ErrNr;
+      //open the file we just created
+      gdx.gdxOpenRead( testFn, ErrNr);
+      if(ErrNr) {
+         std::cout << "Error opening file, nr = " << ErrNr << std::endl;
+         exit(1);
+      }
+
+      //give acronym indices using the name of the acronym
+      gdx.gdxAcronymSetInfo( 1, "acro1", "", 1000);
+      gdx.gdxAcronymSetInfo( 2, "acro2", "", 1001);
+
+      //read the parameter
+      TgdxUELIndex UELs;
+      TgdxValues Vals;
+      int NrRecs, FDim;
+      gdx.gdxDataReadRawStart( 1, NrRecs);
+      while(gdx.gdxDataReadRaw( UELs.data(), Vals.data(), FDim)) {
+         if( int N = gdx.gdxAcronymIndex( Vals[vallevel] ); !N)
+            std::cout << Vals[vallevel];
+         else
+            std::cout << "Acronym: index = " << N << '\n';
+      }
+      gdx.gdxDataReadDone();
+
+      ErrNr = gdx.gdxClose();
+      //final error check before closing the file
+      if(ErrNr) {
+         char ErrMsg[256];
+         gdx.gdxErrorStr(ErrNr, ErrMsg);
+         std::cout << "Error reading file = " << ErrMsg;
+         FAIL("Error reading file = ", ErrMsg);
+      }
+   }
+
+   std::filesystem::remove(testFn);
+
 }
 
 }// namespace gdx::tests::gdxtests

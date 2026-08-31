@@ -66,7 +66,7 @@ apigenerator:
       python3
       src/yaml2cwrap.py
       --input src/gdxapi.yaml
-      --output apifiles/gdxcppwrap.hpp 
+      --output apifiles/gdxcppwrap.hpp
       --template_folder src/templates
       --template gdxcppwrap.template.j2
     # somehow I need absolute path for apidef arg
@@ -112,6 +112,34 @@ build-leg:
     reports:
       junit: warnings.xml
 
+build-leg-cxx20:
+  stage: build
+  tags: [linux]
+  image:
+    name: $MACHINES_CONTAINER_REG/leg/builder-devel:latest
+    entrypoint: [""]
+  script:
+    - !reference [.get-gams]
+    - !reference [.gams-folder-leg]
+    - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
+    - sed -i -e 's:CMAKE_CXX_STANDARD 17:CMAKE_CXX_STANDARD 20:' CMakeLists.txt
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF CMakeLists.txt
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
+    - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
+    - mkdir -p ./gdxtools
+    - for tool in gdxdump gdxdiff gdxmerge; do mv ./src/tools/$tool/$tool ./gdxtools; done
+    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
+    - export PATH="$GAMS_PATH:$PATH"
+    - LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_leg.xml
+    - LD_LIBRARY_PATH=$(pwd) ./gdxwraptest --reporters=junit --out=doctest_results_wrap_leg.xml
+  needs: [fetch-ci-scripts,apigenerator]
+  artifacts:
+    reports:
+      junit:
+        - warnings.xml
+        - doctest_results*_leg.xml
+
 build-debug-leg:
   stage: build
   tags: [linux]
@@ -131,6 +159,51 @@ build-debug-leg:
     name: gdx-debug-leg
     paths: [gdxtest_dbg]
     expire_in: 2 hours
+
+build-musl:
+  stage: build
+  tags: [linux]
+  image:
+    name: alpine:latest
+    entrypoint: [""]
+  script:
+    - apk add g++ ccache cmake ninja git musl-dev python3
+    - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
+    - cmake -DCMAKE_BUILD_TYPE=Release -G Ninja CMakeLists.txt
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
+    - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
+    - mv libgdx-static.a libgdx-linux.a
+    - mkdir -p ./gdxtools
+    - for tool in gdxdump gdxdiff gdxmerge; do mv ./src/tools/$tool/$tool ./gdxtools; done
+  needs: [fetch-ci-scripts,apigenerator]
+  artifacts:
+    name: gdx-musl
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a,gdxtools]
+    expire_in: 2 hours
+    reports:
+      junit: warnings.xml
+
+build-debug-musl:
+  stage: build
+  tags: [linux]
+  image:
+    name: alpine:latest
+    entrypoint: [""]
+  script:
+    - apk add g++ ccache cmake ninja git musl-dev python3
+    - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
+    - cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja CMakeLists.txt
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
+    - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
+  needs: [fetch-ci-scripts,apigenerator]
+  artifacts:
+    name: gdx-debug-musl
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so]
+    expire_in: 2 hours
+    reports:
+      junit: warnings.xml
 
 build-lag:
   stage: build
@@ -230,6 +303,39 @@ build-wei:
     reports:
       junit: warnings.xml
 
+build-test-wei-cxx20:
+  stage: build
+  tags: [windows]
+  image:
+    name: $MACHINES_CONTAINER_REG/wei/builder-full:latest
+  when: manual
+  script:
+    - !reference [.get-gams-wei]
+    - !reference [.gams-folder-wei]
+    - cp apifiles/* src/
+    - $env:SCCACHE_DIR="C:\Cache\sccache"
+    - sed -i -e 's:CMAKE_CXX_STANDARD 17:CMAKE_CXX_STANDARD 20:' CMakeLists.txt
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -G Ninja CMakeLists.txt
+    - cmake --build  . --config Release 2>&1 | Tee-Object -FilePath 'build_log.txt'
+    - python ciscripts/report_for_log.py msvc build_log.txt warnings.xml
+    - New-Item -ItemType 'Directory' -Path '.\gdxtools' | Out-Null
+    - |
+      'gdxdump', 'gdxdiff', 'gdxmerge' | ForEach-Object {
+        Move-Item -Path ".\src\tools\$_\$_.exe" -Destination '.\gdxtools'
+      }
+    - $gmsdirname = Get-Content mygmsdir.tmp -Raw
+    - $GAMS_PATH = "C:\Cache\gams-installs\$gmsdirname"
+    - $env:Path = "$GAMS_PATH;$GAMS_PATH\gbin;" + $env:Path
+    - $env:GAMSDIR = "$GAMS_PATH;$GAMS_PATH\gbin"
+    - ./gdxtest --reporters=junit --out=doctest_results_wei.xml
+    - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_wei.xml
+  needs: [fetch-ci-scripts,apigenerator]
+  artifacts:
+    reports:
+      junit:
+        - warnings.xml
+        - doctest_results_*wei.xml
+
 #=======================================================================================================================
 
 codechecker-leg-debug:
@@ -254,7 +360,8 @@ test-leg:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_leg.xml
+    - export PATH="$GAMS_PATH:$PATH"
+    - LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_leg.xml
     - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_leg.xml
   artifacts:
     name: unittest-results-leg
@@ -262,6 +369,42 @@ test-leg:
     expire_in: 2 hours
     reports:
       junit: doctest_results_*leg.xml
+
+test-musl:
+  stage: test
+  tags: [linux]
+  image:
+    name: alpine:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-musl]
+  script:
+    - apk add --no-cache libgcc libstdc++
+    - ./gdxtest --reporters=junit --out=doctest_results_musl.xml
+    - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_musl.xml
+  artifacts:
+    name: unittest-results-musl
+    paths: [./*.xml]
+    expire_in: 2 hours
+    reports:
+      junit: doctest_results_*musl.xml
+
+test-debug-musl:
+  stage: test
+  tags: [linux]
+  image:
+    name: alpine:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-debug-musl]
+  script:
+    - apk add --no-cache libgcc libstdc++
+    - ./gdxtest --reporters=junit --out=doctest_results_musl.xml
+    - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_musl.xml
+  artifacts:
+    name: unittest-results-musl
+    paths: [./*.xml]
+    expire_in: 2 hours
+    reports:
+      junit: doctest_results_*musl.xml
 
 test-lag:
   stage: test
@@ -274,7 +417,8 @@ test-lag:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-leg ]
     - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`/
-    - PATH=$GAMS_PATH:$PATH LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_lag.xml
+    - export PATH="$GAMS_PATH:$PATH"
+    - LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./gdxtest --reporters=junit --out=doctest_results_lag.xml
     - LD_LIBRARY_PATH=`pwd` ./gdxwraptest --reporters=junit --out=doctest_results_wrap_lag.xml
   artifacts:
     name: unittest-results-lag
@@ -291,7 +435,8 @@ test-deg:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-deg ]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_deg.txt`
-    - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.12.dylib ./gdxtest --reporters=junit --out=doctest_results_deg.xml
+    - export PATH="$GAMS_PATH:$PATH"
+    - DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.12.dylib ./gdxtest --reporters=junit --out=doctest_results_deg.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_deg.xml
   artifacts:
     name: unittest-results-deg
@@ -307,7 +452,8 @@ test-dac:
     - !reference [ .get-gams ]
     - !reference [ .gams-folder-dac ]
     - GAMS_PATH=$HOME/cache/gams-installs/`cat gams_folder_dac.txt`
-    - PATH=$GAMS_PATH:$PATH DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.12.dylib ./gdxtest --reporters=junit --out=doctest_results_dac.xml
+    - export PATH="$GAMS_PATH:$PATH"
+    - DYLD_LIBRARY_PATH=$(pwd)/lib:$GAMS_PATH GMSPYTHONLIB=$GAMS_PATH/GMSPython/lib/libpython3.12.dylib ./gdxtest --reporters=junit --out=doctest_results_dac.xml
     - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_dac.xml
   artifacts:
     name: unittest-results-dac

@@ -510,7 +510,7 @@ protected:
       }
    }
 
-   void FreeObject( const int Index )
+   void FreeObject( [[maybe_unused]] const int Index )
    {
       // noop
    }
@@ -812,7 +812,7 @@ class TXSortedStringList final : public TXCustomStringList<T>
    bool FSorted { true };
 
 public:
-   bool Find( const char *S, const size_t slen, int &Index )
+   bool Find( const char *S, [[maybe_unused]] const size_t slen, int &Index )
    {
       bool res {};
       int L {}, H { this->FCount - 1 };

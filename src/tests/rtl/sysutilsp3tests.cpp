@@ -261,6 +261,7 @@ TEST_CASE("Test integer to hex string conversion")
    REQUIRE_EQ("FF"s, IntToHex(255, 2));
 }
 
+// NOTE: this test make the binary not portable. Also, it is a bit of a luck involve here...
 TEST_CASE("Test get current directory")
 {
 #if defined(__IN_CPPMEX__)
@@ -285,6 +286,15 @@ TEST_CASE("Test trim functions left/right/both")
    REQUIRE_EQ(""s, TrimLeft(""s));
    REQUIRE_EQ(""s, TrimRight(""s));
 }
+
+#if !defined(_WIN32)
+TEST_CASE("Query environment variable") {
+   std::string path = QueryEnvironmentVariable( "PATH" );
+   REQUIRE_FALSE(path.empty());
+   REQUIRE_EQ('/', path.front());
+   REQUIRE_LE( static_cast<int>( path.length() ), 255);
+}
+#endif
 
 #if defined(_WIN32)
 TEST_CASE("Test long path detection and fixing routines")

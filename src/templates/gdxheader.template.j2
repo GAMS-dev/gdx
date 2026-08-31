@@ -147,6 +147,7 @@ std::unique_ptr<TDomainStrList> DomainStrList;
 std::unique_ptr<LinkedDataType> SortList;
 std::optional<LinkedDataIteratorType> ReadPtr;
 std::unique_ptr<TTblGamsDataImpl<double>> ErrorList;
+int MaxErrorRecords {11};
 PgdxSymbRecord CurSyPtr {};
 int ErrCnt {}, ErrCntTotal {};
 int LastError {}, LastRepError {};
