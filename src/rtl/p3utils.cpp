@@ -335,11 +335,15 @@ bool p3GetMemoryInfoEx( p3pid_t pid, uint64_t &rss, uint64_t &vss )
    if (!h) { return false; }
 
    if (!GetProcessMemoryInfo( h, &info, sizeof( info ) )) {
+      CloseHandle(h);
       return false; /* failure */
    }
 
    rss = static_cast<int64_t>( info.WorkingSetSize );
    vss = static_cast<int64_t>( info.PagefileUsage );
+
+   CloseHandle(h);
+
    return true; /* success */
 
 #elif defined( __linux )
