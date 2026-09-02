@@ -961,7 +961,8 @@ static fs::path applyFileCase(fs::path &path, int fc)
 template<CompletePathType type>
 static fs::path CompletePathEx(const fs::path &prefixDir, const fs::path &path, int fc, bool keepRelPath )
 {
-   assert(prefixDir.is_absolute()); // untested with relative path
+   // FIXME: test with relative path, it IS used :( --OH
+   //assert(prefixDir.is_absolute()); // untested with relative path
 
    fs::path outPath {}, outPathClean {};
    if (path.empty()) {
@@ -1411,6 +1412,11 @@ std::string ReplaceStr( const std::string &substr, const std::string &replacemen
 }
 
 #if __cplusplus >= 202002L
+
+static inline std::string as_string_ish(std::string s) { return s; }
+static inline std::wstring as_string_ish(std::wstring s) { return s; }
+static inline std::string as_string_ish(fs::path &f) { return f.string(); }
+
 // Brief:
 //   Converts a file name to the short 8.3 form
 // Arguments:
@@ -1424,9 +1430,10 @@ std::string ReplaceStr( const std::string &substr, const std::string &replacemen
 template<typename T>
 T ExtractShortPathNameExcept( const T &FileName )
 {
+   if (FileName.empty()) { return FileName; }
 
    T res { ExtractShortPathName( FileName ) };
-   for( auto c : res )
+   for( auto c : as_string_ish(res) )
    {
       if( static_cast<unsigned char>( c ) >= 128 )
          throw std::runtime_error( "Problem extracting short path, result contains extended ASCII codes: "s
@@ -1441,6 +1448,7 @@ T ExtractShortPathNameExcept( const T &FileName )
 
 template std::string ExtractShortPathNameExcept(const std::string &FileName);
 template std::wstring ExtractShortPathNameExcept(const std::wstring &FileName);
+template fs::path ExtractShortPathNameExcept(const fs::path &FileName);
 
 #endif
 

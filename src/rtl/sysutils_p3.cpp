@@ -24,6 +24,7 @@
  */
 
 #include <charconv> // for std::from_chars
+#include <filesystem>
 #include <string>   // for string
 #include <cstring>  // for strerror, size_t, strcmp, strcpy
 
@@ -112,7 +113,6 @@ std::string ExtractShortPathName( const std::string &FileName )
 #if defined( _WIN32 )
    std::array<char, 260> buf {};
    const auto rc = GetShortPathNameA( FileName.c_str(), buf.data(), static_cast<DWORD>( sizeof( char ) * buf.size() ) );
-   assert( rc );
    if( !rc )
       throw std::runtime_error( "Failed to determine short path name: \""s + FileName + "\""s );
    return buf.data();
@@ -123,12 +123,26 @@ std::string ExtractShortPathName( const std::string &FileName )
 }
 
 #if __cplusplus >= 202002L
+std::filesystem::path ExtractShortPathName( const std::filesystem::path &p )
+{
+#if defined( _WIN32 )
+   std::array<wchar_t, 260> buf {};
+   const auto rc = GetShortPathNameW( p.native().c_str(), buf.data(), static_cast<DWORD>( sizeof( char ) * buf.size() ) );
+   if( !rc )
+      throw std::runtime_error( std::format("Failed to determine short path name: \"{}\"",
+                                            reinterpret_cast<const char *>(p.u8string().c_str()) ) );
+   return buf.data();
+#else
+   // TODO: Does this make sense?
+   return ""s;
+#endif
+}
+
 std::wstring ExtractShortPathName( const std::wstring &FileName )
 {
 #if defined( _WIN32 )
    std::array<wchar_t, 260> buf {};
    const auto rc = GetShortPathNameW( FileName.c_str(), buf.data(), static_cast<DWORD>( sizeof( char ) * buf.size() ) );
-   assert( rc );
    if( !rc )
       throw std::runtime_error( "Failed to determine short path name: \"{}\""s +
                                reinterpret_cast<const char *>(to_u8string(FileName.c_str()).c_str())
@@ -547,7 +561,7 @@ std::u8string to_u8string(const wchar_t* wstr)
         throw std::runtime_error("Failed to convert wide string to UTF-8");
     }
 
-    std::u8string result(size_needed, u8'\0');
+    std::u8string result(size_needed+1, u8'\0');
 
     // 3. Perform the actual conversion directly into the string's memory
     WideCharToMultiByte(
@@ -566,6 +580,7 @@ std::u8string to_u8string(const wchar_t* wstr)
 
 std::u8string to_u8string(const char* str)
 {
+   if (!str || str[0] == '\0') [[unlikely]] { return std::u8string(u8""); }
    return std::u8string(reinterpret_cast<const char8_t*>(str));
 }
 

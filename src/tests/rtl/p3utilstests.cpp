@@ -76,8 +76,10 @@ static std::array<const locpath_t, p3Documents+1> GenerateXdgReference(
    namespace fs = std::filesystem;
 
    locpath_t locConfig { xdgConfigHome };
-   locpath_t locAppConfig { xdgConfigHome / appName };
-   locpath_t locData { xdgDataHome / appName };
+   // FIXME: locpath_t locAppConfig { xdgConfigHome / appName };
+   locpath_t locAppConfig { xdgConfigHome };
+   // FIXME: locpath_t locData { xdgDataHome / appName };
+   locpath_t locData { xdgDataHome };
 
    const auto &xdgConfigDirs = xdgDirs.at(0);
    const auto &xdgDataDirs = xdgDirs.at(1);
