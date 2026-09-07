@@ -46,6 +46,7 @@
 #include <cstdint>
 #include <numeric>
 #include <bitset>
+#include <type_traits>
 #include <cassert>// for assert
 
 #ifndef _WIN32
@@ -835,8 +836,6 @@ class sstring : public std::array<char, 256> {
 // Signed fraction; frac(x) = x - int(x)// Truncate towards zero
 double frac( double x );
 
-
-#include <type_traits>
 
 // Define a helper that always evaluates to false, 
 // but depends on a template parameter to delay evaluation.
