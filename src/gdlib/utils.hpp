@@ -46,6 +46,7 @@
 #include <cstdint>
 #include <numeric>
 #include <bitset>
+#include <type_traits>
 #include <cassert>// for assert
 
 #ifndef _WIN32
@@ -63,6 +64,14 @@ extern std::stringstream debugStream;
 
 #ifndef GDX_NS
 #define GDX_NS gdxlib::
+#endif
+
+#if __cplusplus >= 202002L
+#define GDX_LIKELY [[likely]]
+#define GDX_UNLIKELY [[unlikely]]
+#else
+#define GDX_LIKELY
+#define GDX_UNLIKELY
 #endif
 
 namespace GDX_NS utils
@@ -835,8 +844,6 @@ class sstring : public std::array<char, 256> {
 // Signed fraction; frac(x) = x - int(x)// Truncate towards zero
 double frac( double x );
 
-
-#include <type_traits>
 
 // Define a helper that always evaluates to false, 
 // but depends on a template parameter to delay evaluation.

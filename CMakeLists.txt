@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(gdx)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_OSX_DEPLOYMENT_TARGET 14.4)
 
 option(GDX_THREAD_SAFE "Build thread-safe version of GDX" OFF)
 option(NO_EXAMPLES "Skip building example programs/executables" OFF)

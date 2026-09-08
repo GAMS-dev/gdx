@@ -27,6 +27,7 @@
 
 // compatible subset of Delphi SysUtils
 
+#include <filesystem>
 #if defined(_WIN32)
 // Forward declarations of Windows header stuff
 typedef void *HANDLE;
@@ -227,6 +228,7 @@ std::string tryFixingLongPath(const std::string &fName);
 std::u8string to_u8string(const wchar_t* wstr);
 std::u8string to_u8string(const char* str);
 std::u8string QueryEnvironmentVariable( std::u8string_view Name );
+std::filesystem::path ExtractShortPathName( const std::filesystem::path &p );
 #if defined( _WIN32 )
 std::wstring  to_wstring(std::u8string_view utf8_str);
 std::wstring QueryEnvironmentVariable( std::wstring_view name );

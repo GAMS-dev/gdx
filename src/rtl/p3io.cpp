@@ -33,6 +33,7 @@
 
 #include "p3io.hpp"
 #include "dtoaLoc.h"
+#include "utils.hpp"// for GDX_LIKELY
 
 #if !defined(_WIN32)
 #include <errno.h>
@@ -90,9 +91,13 @@ void dig2Exp( const char *dig, size_t digLen, int decPos, int isNeg, int width, 
    }
    else
       *d++ = '+';
-   *bufLen = d - buf;
 
-   std::snprintf( d, 255, "%04d", e );
+   std::ptrdiff_t written = d - buf, remaining = 255 - written;
+   *bufLen = written;
+
+   if (remaining > 0) GDX_LIKELY {
+      std::snprintf( d, remaining, "%04d", e );
+   }
    *bufLen += 4;
 }
 
