@@ -66,6 +66,14 @@ extern std::stringstream debugStream;
 #define GDX_NS gdxlib::
 #endif
 
+#if __cplusplus >= 202002L
+#define GDX_LIKELY [[likely]]
+#define GDX_UNLIKELY [[unlikely]]
+#else
+#define GDX_LIKELY
+#define GDX_UNLIKELY
+#endif
+
 namespace GDX_NS utils
 {
 
