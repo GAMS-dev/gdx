@@ -336,6 +336,57 @@ build-test-wei-cxx20:
         - warnings.xml
         - doctest_results_*wei.xml
 
+codecov-leg:
+  stage: build
+  tags: [linux,fast]
+  image:
+    name: huberoli/debian-c-compile-analyse:latest
+#    pull_policy: [always, if-not-present]
+    entrypoint: [""]
+  script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-leg ]
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
+    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`
+    # As of 2026.02.024 this is broken. The deadline was 2026.02.01
+    - sed -i 's/\(sha1\.second_preimage_resistance =\).*/\1 9999-01-01/' /usr/share/apt/default-sequoia.config
+    - apt-get update -y
+    - apt-get install -y python3-pip python3-venv
+    - python3 -m venv /tmp/venv
+    - . /tmp/venv/bin/activate
+    - pip install gcovr
+    # 2026.03.14: on the linux builder, an update to date GCC is installed, but an old binutils is installed
+    - cmake -B build -DCMAKE_BUILD_TYPE=Codecov -S .
+    - cmake --build build -- -j$(nproc) 2>&1 | tee build_log.txt
+    - export PATH="$GAMS_PATH:$PATH"
+    - LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./build/gdxtest
+    - ./build/gdxwraptest
+    - mkdir coverage
+    - GCOVR_EXCLUDE='-e build/ -e src/tests/ -e src/examples -e src/tools -e zlib/'
+    - GCOVR_ARGS="--gcov-ignore-parse-errors --exclude-throw-branches --decisions"
+    - gcovr $GCOVR_ARGS $GCOVR_EXCLUDE --xml coverage/coverage.xml --jacoco coverage/jacoco.xml --html-nested coverage/coverage.html -r . --txt
+
+  needs: [fetch-ci-scripts]
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /fast-ci/
+
+  coverage: /^TOTAL.*\s+(\d+\%)$/
+  artifacts:
+    expire_in: 7 days
+    paths: [coverage]
+    reports:
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: coverage/coverage.xml
+      coverage_report:
+        coverage_format: jacoco
+        path: coverage/coverage-jacoco.xml
+  environment:
+    name: coverage/$CI_COMMIT_REF_SLUG
+    url: "https://pages.gams.com/$CI_PROJECT_NAMESPACE/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/coverage/coverage.html"
+    auto_stop_in: 14 days
+
 #=======================================================================================================================
 
 codechecker-leg-debug:
