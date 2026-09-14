@@ -4,10 +4,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 14.4)
 
+# Set cmake modules directory (i.e. the one which contains all user-defined FindXXX.cmake files among other things)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
 option(GDX_THREAD_SAFE "Build thread-safe version of GDX" OFF)
 option(NO_EXAMPLES "Skip building example programs/executables" OFF)
 option(NO_TESTS "Skip building unit tests" OFF)
 option(NO_TOOLS "Skip building GDX tools" OFF)
+
+include(codecov-profile)
 
 # ccache and sccache
 if(NOT DEFINED CMAKE_C_COMPILER_LAUNCHER AND NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
@@ -134,7 +139,9 @@ if (UNIX)
    endif ()
    # ADD common hardening features on Linux
    if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-      if (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE MATCHES "[AM]san"))
+      if (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE MATCHES "[AM]san" OR
+               CMAKE_BUILD_TYPE STREQUAL "Codecov"))
+         MESSAGE(STATUS "Adding fortify flags")
          set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3 ")
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3 ")
       endif()
