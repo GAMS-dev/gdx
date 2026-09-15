@@ -47,6 +47,26 @@ if ((APPLE OR CMAKE_C_COMPILER_ID STREQUAL "Clang") AND CMAKE_C_COMPILER_VERSION
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-non-prototype")
 endif ()
 
+# Injecting the SDK headers via -isystem results in build failures (of dtoaLoc.c) when using homebrew GCC
+if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  # 1. Fetch the active SDK path
+  execute_process(
+    COMMAND xcrun --show-sdk-path
+    OUTPUT_VARIABLE APPLE_SDK_PATH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  # 2. Add both the full SDK path and standard paths to implicit exclusions
+  list(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
+    "${APPLE_SDK_PATH}/usr/include"
+    "/usr/include"
+  )
+  list(APPEND CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES
+    "${APPLE_SDK_PATH}/usr/include"
+    "/usr/include"
+  )
+endif()
+
 if (APPLE)
 	set(CMAKE_BUILD_RPATH @executable_path/.)
 else ()

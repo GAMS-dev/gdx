@@ -237,7 +237,7 @@ build-deg:
     - !reference [.get-gams]
     - !reference [.gams-folder-deg]
     - cp apifiles/* src/
-    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ CMakeLists.txt
     - cmake --build . -- -j$(sysctl -n hw.ncpu) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-macos.a
