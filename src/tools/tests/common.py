@@ -89,7 +89,7 @@ def run_executable(
         [str(executable_path), *command_as_strings],
         capture_output=True,
         text=True,
-        check=True,
+        check=False,
     )
 
 
