@@ -21,13 +21,13 @@ from .examples.special_values_example import create_special_values_example
 class TestGdxDump(unittest.TestCase):
     EXECUTABLE_NAME: ExecutableName = "gdxdump"
 
-    FILE_NAMES = [
+    FILE_NAMES: tuple[str, ...] = (
         "small_example",
         "full_example",
         "element_text_example",
         "special_values_example",
         "label_example",
-    ]
+    )
     FILE_PATHS: dict[str, Path]
 
     @classmethod

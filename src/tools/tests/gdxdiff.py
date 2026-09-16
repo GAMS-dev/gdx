@@ -35,7 +35,7 @@ from .examples.small_example_changed_data import create_small_example_changed_da
 class TestGdxDiff(unittest.TestCase):
     EXECUTABLE_NAME: ExecutableName = "gdxdiff"
 
-    FILE_NAMES = [
+    FILE_NAMES: tuple[str, ...] = (
         "small_example",
         "full_example",
         "small_example_changed_data",
@@ -50,7 +50,7 @@ class TestGdxDiff(unittest.TestCase):
         "description_example_1",
         "description_example_2",
         "diff_file",
-    ]
+    )
     FILE_PATHS: dict[str, Path]
 
     @classmethod

@@ -23,12 +23,12 @@ from .examples.small_example_changed_data import create_small_example_changed_da
 class TestGdxMerge(unittest.TestCase):
     EXECUTABLE_NAME: ExecutableName = "gdxmerge"
 
-    FILE_NAMES = [
+    FILE_NAMES: tuple[str, ...] = (
         "small_example",
         "full_example",
         "small_example_changed_data",
         "merge_file",
-    ]
+    )
     FILE_PATHS: dict[str, Path]
 
     @classmethod
