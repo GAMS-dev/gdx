@@ -20,8 +20,6 @@ lint-cpp = [
     "clangd-tidy>=1.1.1",
 ]
 lint-python = [
-    "mypy>=1.19.1",
-    "pandas-stubs>=2.3.3.260113",
     "ruff>=0.14.13",
     "ty>=0.0.9",
 ]

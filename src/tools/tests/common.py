@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from gams.transfer import Container, Parameter  # type: ignore
+from gams.transfer import Container, Parameter
 
 
 @dataclass(frozen=True)
@@ -149,8 +149,8 @@ def check_gdx_file_values(
 ) -> None:
     test_instance.assertIn(symbol_name, container)
 
-    symbol: Parameter = container[symbol_name]  # pyright: ignore
-    values = symbol.records.values.tolist()  # pyright: ignore
+    symbol: Parameter = container[symbol_name]
+    values = symbol.records.values.tolist()
 
     path_values_as_strings: list[list[str | float]] = [
         [str(value) if isinstance(value, Path) else value for value in values]

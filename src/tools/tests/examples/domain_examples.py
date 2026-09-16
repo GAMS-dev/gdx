@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from gams.transfer import Container, Set, Variable  # type: ignore
+from gams.transfer import Container, Set, Variable
 
 
 def create_domain_example_1(file_path: Path) -> None:
@@ -10,7 +10,7 @@ def create_domain_example_1(file_path: Path) -> None:
     i = Set(m, "i", records=["i1", "i2"])
     Variable(m, "a", domain=[i])
 
-    m.write(file_path)  # pyright: ignore
+    m.write(file_path)
 
 
 def create_domain_example_2(file_path: Path) -> None:
@@ -19,4 +19,4 @@ def create_domain_example_2(file_path: Path) -> None:
     j = Set(m, "j", records=["i1", "i2"])
     Variable(m, "a", domain=[j])
 
-    m.write(file_path)  # pyright: ignore
+    m.write(file_path)

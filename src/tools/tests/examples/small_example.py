@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from gams.transfer import Container, Parameter, Set  # type: ignore
+from gams.transfer import Container, Parameter, Set
 from pandas import DataFrame
 
 
@@ -32,4 +32,4 @@ def create_small_example(file_path: Path) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path)  # pyright: ignore
+    m.write(file_path)

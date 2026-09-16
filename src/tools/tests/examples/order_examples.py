@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from gams.transfer import Container, Set  # type: ignore
+from gams.transfer import Container, Set
 
 
 def create_order_example_1(file_path: Path) -> None:
@@ -11,7 +11,7 @@ def create_order_example_1(file_path: Path) -> None:
     Set(m, "t2", records=[1983, 1984, 1985, 1986, 1987])
     Set(m, "t3", records=[1987, 1989, 1991, 1983, 1985])
 
-    m.write(file_path)  # pyright: ignore
+    m.write(file_path)
 
 
 def create_order_example_2(file_path: Path) -> None:
@@ -21,4 +21,4 @@ def create_order_example_2(file_path: Path) -> None:
     Set(m, "t3", records=[1983, 1984, 1985, 1986, 1987])
     Set(m, "t1", records=[1987, 1989, 1991, 1983, 1985])
 
-    m.write(file_path)  # pyright: ignore
+    m.write(file_path)

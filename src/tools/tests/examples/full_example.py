@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from gams.transfer import (  # type: ignore
+from gams.transfer import (
     Container,
     Equation,
     Parameter,
@@ -56,8 +56,8 @@ def create_full_example(file_path: Path) -> None:
     d.setRecords(dist)
 
     # c(i,j) = f * d(i,j) / 1000;
-    cost = d.records.copy(deep=True)  # pyright: ignore
-    cost["value"] = f.records.loc[0, "value"] * cost["value"] / 1000  # pyright: ignore
+    cost = d.records.copy(deep=True)
+    cost["value"] = f.records.loc[0, "value"] * cost["value"] / 1000
     c.setRecords(cost)
 
     # add variables
@@ -95,7 +95,7 @@ def create_full_example(file_path: Path) -> None:
     demand = Equation(m, "demand", "geq", [j], description="satisfy demand at market j")
 
     # set equation records
-    cost.setRecords(  # pyright: ignore
+    cost.setRecords(
         DataFrame(data=[[0, 1, 0, 0]], columns=["level", "marginal", "lower", "upper"])
     )
 
@@ -106,7 +106,7 @@ def create_full_example(file_path: Path) -> None:
         ],
         columns=["from", "level", "marginal", "lower", "upper"],
     )
-    supply.setRecords(supplies)  # pyright: ignore
+    supply.setRecords(supplies)
 
     demands = DataFrame(
         [
@@ -116,6 +116,6 @@ def create_full_example(file_path: Path) -> None:
         ],
         columns=["from", "level", "marginal", "lower"],
     )
-    demand.setRecords(demands)  # pyright: ignore
+    demand.setRecords(demands)
 
-    m.write(file_path)  # pyright: ignore
+    m.write(file_path)

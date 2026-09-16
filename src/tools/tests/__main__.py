@@ -2,7 +2,7 @@ import argparse
 import sys
 import unittest
 
-import gams  # type: ignore
+import gams
 
 from .gdxdiff import TestGdxDiff
 from .gdxdump import TestGdxDump

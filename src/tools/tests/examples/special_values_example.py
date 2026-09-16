@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from gams.transfer import Container, Parameter, Set, SpecialValues  # type: ignore
+from gams.transfer import Container, Parameter, Set, SpecialValues
 from pandas import DataFrame
 
 
@@ -32,4 +32,4 @@ def create_special_values_example(file_path: Path) -> None:
     d.setRecords(dist)
 
     # write the GDX
-    m.write(file_path, eps_to_zero=False)  # pyright: ignore
+    m.write(file_path, eps_to_zero=False)

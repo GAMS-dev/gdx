@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from gams.transfer import Parameter  # type: ignore
+from gams.transfer import Parameter
 
 from .common import (
     DIRECTORY_PATHS,
@@ -96,8 +96,8 @@ class TestGdxMerge(unittest.TestCase):
             symbols,
         )
 
-        symbol: Parameter = container["Merged_set_1"]  # pyright: ignore
-        first = symbol.records.values.tolist()  # pyright: ignore
+        symbol: Parameter = container["Merged_set_1"]
+        first = symbol.records.values.tolist()
         second: list[list[str]] = []
         for i in range(len(file_names)):
             second.append(
@@ -106,12 +106,12 @@ class TestGdxMerge(unittest.TestCase):
                     f"{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[i]}.gdx",
                 ]
             )
-        self.assertEqual(len(first), len(file_names))  # pyright: ignore
-        for item in first:  # pyright: ignore
-            self.assertEqual(len(item), 2)  # pyright: ignore
+        self.assertEqual(len(first), len(file_names))
+        for item in first:
+            self.assertEqual(len(item), 2)
         for i in range(len(file_names)):
             self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])  # pyright: ignore
+            self.assertRegex(first[i][1], second[i][1])
 
     def test_empty_command(self) -> None:
         output = self.run_gdxmerge([])
