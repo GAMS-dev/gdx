@@ -62,9 +62,14 @@ class TestGdxMerge(unittest.TestCase):
         first_negative_offset: int | None = None,
         second_offset: int | None = None,
         second_negative_offset: int | None = None,
-        first_delete: list[int] = [],
-        second_delete: list[int] = [],
+        first_delete: list[int] | None = None,
+        second_delete: list[int] | None = None,
     ) -> None:
+        if first_delete is None:
+            first_delete = []
+        if second_delete is None:
+            second_delete = []
+
         check_output(
             self,
             self.EXECUTABLE_NAME,
