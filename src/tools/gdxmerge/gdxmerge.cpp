@@ -50,42 +50,30 @@ std::unique_ptr<SymbolList> SyList;
 
 GAMSSymbol::GAMSSymbol(const int ADim, const gdxSyType AType, const int ASubTyp)
     : SyDim(ADim), SySubTyp(ASubTyp), SyTyp(AType),
-      SyData(std::make_unique<gdlib::gmsdata::TTblGamsData<double>>(ADim, DataTypSize.at(AType) * sizeof(double))) {}
+      SyData(std::make_unique<GDX_NS gdlib::gmsdata::TTblGamsData<double>>(ADim, DataTypSize.at(AType) * sizeof(double))) {}
 
 GDXFileEntry::GDXFileEntry(std::string AFileName, std::string AFileId, std::string AFileInfo)
     : FFileName(std::move(AFileName)), FFileId(std::move(AFileId)), FFileInfo(std::move(AFileInfo)) {}
 
-template <typename T>
-FileList<T>::~FileList() {
-  Clear();
-}
-
-template <typename T>
-void FileList<T>::Clear() {
-  for (int i{}; i < this->GetCount(); i++) {
-    delete (*this)[i];
-  }
-  gdlib::gmsobj::TXList<T>::Clear();
-}
 
 template <typename T>
 void FileList<T>::AddFile(const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo) {
-  gdlib::gmsobj::TXList<T>::Add(new GDXFileEntry(AFileName, AFileId, AFileInfo));
+  this->Add(new GDXFileEntry(AFileName, AFileId, AFileInfo));
 }
 
 template <typename T>
 std::string FileList<T>::FileName(const int Index) {
-  return gdlib::gmsobj::TXList<T>::GetConst(Index)->FFileName;
+  return this->GetConst(Index)->FFileName;
 }
 
 template <typename T>
 std::string FileList<T>::FileId(const int Index) {
-  return gdlib::gmsobj::TXList<T>::GetConst(Index)->FFileId;
+  return this->GetConst(Index)->FFileId;
 }
 
 template <typename T>
 std::string FileList<T>::FileInfo(const int Index) {
-  return gdlib::gmsobj::TXList<T>::GetConst(Index)->FFileInfo;
+  return this->GetConst(Index)->FFileInfo;
 }
 
 SymbolList::SymbolList()

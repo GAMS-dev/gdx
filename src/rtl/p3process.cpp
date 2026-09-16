@@ -34,7 +34,11 @@
 #include "../gdlib/utils.hpp"
 #include "sysutils_p3.hpp"
 
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if __cplusplus >= 202002L
+#include <format>
+#endif
+
+#if defined( _WIN32 )
 #include <windows.h>
 #include <tlhelp32.h>
 #else
@@ -54,7 +58,7 @@ using namespace std::literals::string_literals;
 using namespace rtl::p3platform;
 using namespace rtl::sysutils_p3;
 
-namespace rtl::p3process
+namespace GDX_NS rtl::p3process
 {
 
 constexpr int debug {0};
@@ -222,7 +226,7 @@ static const char* GetParamShortStr(const char* p, std::string& param)
    static utils::sstring buf;
    int len {};
    char *r { buf.data() };
-   
+
    auto pushChar = [&]( const char c ) {
       if (len < (int)buf.size() - 1)
       {
@@ -615,10 +619,16 @@ int p3GetNumberOfProcessors()
 #endif
 }
 
-const std::string CMD_WIN7 = R"(C:\windows\system32\cmd.exe)";
-const std::string CMD_WINNT = R"(C:\winnt\system32\cmd.exe)";
+constexpr auto CMD_WIN7 = R"(C:\windows\system32\cmd.exe)";
+constexpr auto CMD_WINNT = R"(C:\winnt\system32\cmd.exe)";
 
 #if defined(_WIN32)
+
+#if __cplusplus >= 202002L
+constexpr auto CMD_WIN7_W = LR"(C:\windows\system32\cmd.exe)";
+constexpr auto CMD_WINNT_W = LR"(C:\winnt\system32\cmd.exe)";
+#endif
+
 static int wShowWindow {SW_SHOWNA};
 #endif
 
@@ -679,7 +689,7 @@ static int System4Win( const std::string &CmdPtr, bool inheritedHandles, int &Pr
       return cp.length() <= 2 || cp[0] != '\"' || cp[1] != '\"' || cp.back() != '\"';
    };
 
-   std::string cs = rtl::sysutils_p3::QueryEnvironmentVariable( "COMSPEC" );
+   std::string cs = QueryEnvironmentVariable( "COMSPEC" );
    if( cs.empty() )
    {
       if( FileExists( CMD_WIN7 ) )
@@ -693,9 +703,95 @@ static int System4Win( const std::string &CmdPtr, bool inheritedHandles, int &Pr
    return CppCreateProc( cs, arg, inheritedHandles, ProgRC );
 }
 
+#ifdef __IN_CPPMEX__
+#if defined(_WIN32)
+static int CppCreateProc( const std::wstring &exeName, const std::wstring &cmdLine,
+                         bool allowStdHandles, int &exeRC )
+{
+   PROCESS_INFORMATION ProcessInformation;
+   ZeroMemory( &ProcessInformation, sizeof( PROCESS_INFORMATION ) );
+   // Initialise the startup information to be the same as that of the
+   // calling application.  This is easier than initialising the many
+   // individual startup information fields and should be fine in most
+   // cases.
+   STARTUPINFOW StartupInfo;
+   GetStartupInfoW( &StartupInfo );
+   StartupInfo.cbReserved2 = 0;
+   StartupInfo.lpReserved = nullptr;
+   StartupInfo.lpReserved2 = nullptr;
+
+   // StartupInfo.wShowWindow determines whether the called application
+   // will be initially displayed normal, maximises, minimised or some
+   // other subtle variations
+   StartupInfo.wShowWindow = wShowWindow;
+
+   // call with STARTF_USESTDHANDLES set only if inheritHandles is TRUE
+   if( !allowStdHandles )
+      StartupInfo.dwFlags &= ~STARTF_USESTDHANDLES;
+
+   std::vector<wchar_t> cmdLineBuf( cmdLine.length() + 1 );
+   std::memcpy( cmdLineBuf.data(), cmdLine.c_str(), (cmdLine.length()+1)*sizeof(wchar_t) );
+
+   if( !CreateProcessW(
+      exeName.empty() ? nullptr : exeName.c_str(),
+      cmdLineBuf.data(),
+      nullptr,
+      nullptr,
+      true,
+      0,
+      nullptr,
+      nullptr,
+      &StartupInfo,
+      &ProcessInformation
+   ) )
+   {
+      exeRC = 0;
+      return static_cast<int>(GetLastError());
+   }
+
+   WaitForSingleObject( ProcessInformation.hProcess, INFINITE );
+   DWORD exitcode;
+   BOOL brc = GetExitCodeProcess( ProcessInformation.hProcess, &exitcode );
+   CloseHandle( ProcessInformation.hThread );
+   CloseHandle( ProcessInformation.hProcess );
+   if (!brc || exitcode == 255) // failed call to GetExitCodeProcess
+   {
+      exeRC = 0;
+      return 1;
+   }
+   exeRC = static_cast<int>( exitcode );
+   return 0;
+}
+
+static int System4Win( const std::wstring &cmdPtr, bool inheritedHandles, int &progRC )
+{
+   // check if we have a command starting with "" and ending with " (and more than 2 chars)
+   static auto needQuote = []( const std::wstring &cp ) {
+      return cp.length() <= 2 || cp[0] != L'\"' || cp[1] != L'\"' || cp.back() != L'\"';
+   };
+
+   std::wstring cs = QueryEnvironmentVariable( L"COMSPEC" );
+   if( cs.empty() )
+   {
+      if( FileExists( CMD_WIN7 ) )
+         cs = CMD_WIN7_W;
+      else if( FileExists( CMD_WINNT ) )
+         cs = CMD_WINNT_W;
+      else
+         return 1;
+   }
+
+   std::wstring q = needQuote(cmdPtr) ? L"\"" : L"";
+   std::wstring arg = std::format(L"{} /C {}{}{}", cs, q, cmdPtr, q);
+   return CppCreateProc( cs, arg, inheritedHandles, progRC );
+}
+#endif
+
+#endif
+
 static int System4Unix( const std::string &CmdPtr, int &ProgRC )
 {
-#if defined( _WIN32 ) || defined( _WIN64 )
+#if defined( _WIN32 )
    return 1;
 #else
    const std::string newPtr = CmdPtr.empty() ? "sh"s : CmdPtr;
@@ -746,6 +842,18 @@ int P3SystemP( const std::string &CmdPtr, int &ProgRC )
 }
 
 #if defined(__IN_CPPMEX__)
+int P3SystemP( const std::wstring &CmdPtr, int &ProgRC )
+{
+
+#ifdef _WIN32
+   return System4Win(CmdPtr, true, ProgRC);
+#else
+
+   throw std::runtime_error( "P3SystemP with wide cmdline is only usable on windows" );
+
+#endif
+}
+
 #define myexit _exit
 #else
 #define myexit(x) while(false);
@@ -809,6 +917,7 @@ static int LibcForkExec( int argc, char *const argv[], int *exeRC )
    } /* end parent code */
    return result;
 } /* LibcForkExec */
+
 
 /* libcASyncForkExec does a fork/exec to start a process,
 	* but it does not wait for it.  Instead it returns the PID.
@@ -1018,17 +1127,262 @@ int P3ExecP( const std::string &CmdPtr, int &ProgRC )
    return res;
 }
 
-static std::string whatQuote(const std::string &arg)
+// FIXME: this is a bit naive, as a path containing " would need case
+// a first improvement is to use ' as a quote in that case.
+// TODO: need proper fix
+template<typename T = std::string_view>
+static auto whatQuote(T arg)
 {
-   if( const std::string targ { utils::trim( arg ) };
+   using Char = typename T::value_type;
+   Char c[2] = {0};
+   if( const T targ { utils::trim( arg ) };
       targ.length() > 1 && targ.front() == '"' && targ.back() == '"')
-      return ""s; // already quoted, do not quote it again
-   if(arg.empty())
-      return "\""s;
-   for(int i{}; i<(int)arg.length(); i++)
-      if(arg[i] <= ' ') // found a space, quote the whole thing
-         return "\""s;
-   return ""s;
+      c[0] = 0; // already quoted, do not quote it again
+   else if (arg.empty()) // we want to quote empty arguments
+      c[0] = '"';
+   else {
+      for(int i{}; i<(int)arg.length(); i++)
+      if(arg[i] <= ' ') {// found a space, quote the whole thing
+         c[0] = '"';
+         break;
+      }
+   }
+
+   return std::basic_string<Char>(c);
+}
+
+// NOTE: this is verbatim from P3process.pas, but rewired for the wide character
+#if __cplusplus >= 202002L
+#ifdef _WIN32
+static void getWinErrMsg256 (int errCode, const char prefix[], char buf256[256])
+{
+  DWORD n;
+  size_t k;
+  char msgBuf[1024];
+
+  n = FormatMessageA(
+        FORMAT_MESSAGE_FROM_SYSTEM,
+        NULL,
+        errCode,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+        msgBuf,
+        sizeof(msgBuf),
+        NULL
+        );
+  strcpy (buf256, prefix);
+  if (0 == n) {
+    strcat (buf256, "error message too long or unavailable");
+  }
+  else {
+    k = 256 - 1 - strlen(prefix);
+    strncat (buf256, msgBuf, k);
+  }
+} /* getWinErrMsg256 */
+
+static int Win32CreateProcEx(const wchar_t *exeName, wchar_t *cmdLine,
+                             bool inheritedHandles, int *exeRC, int *errCode, char errMsg[256])
+{
+   PROCESS_INFORMATION processinformation;
+   STARTUPINFOW        startupinfo;
+   DWORD               exitcode;
+   int                 result;
+   BOOL brc;
+
+   *errMsg = '\0';
+   *errCode = 0;
+   /* Initialise the startup information to be the same as that of the
+   * calling application.  This is easier than initialising the many
+   * individual startup information fields and should be fine in most
+   * cases. */
+   GetStartupInfoW(&startupinfo);
+   startupinfo.cbReserved2 = 0;
+   startupinfo.lpReserved  = NULL;
+   startupinfo.lpReserved2 = NULL;
+
+   /* StartupInfo.wShowWindow determines whether the called application
+   * will be initially displayed normal, maximises, minimised or some
+   * other subtle variations */
+   startupinfo.wShowWindow = wShowWindow;
+
+   /* call with STARTF_USESTDHANDLES set only if inheritHandles is TRUE */
+   if (!inheritedHandles)
+      startupinfo.dwFlags &= ~STARTF_USESTDHANDLES;
+
+   if (! CreateProcessW(
+      exeName,               /* ApplicationName */
+      cmdLine,               /* lpCommandLine */
+      nullptr,               /* lpProcessAttributes */
+      nullptr,               /* lpThreadAttribute */
+      inheritedHandles,      /* bInheritedHandles */
+      0,                     /* dwCreationFlags */
+      nullptr,               /* lpEnvironment */
+      nullptr,               /* lpCurrentDirectory */
+      &startupinfo,          /* lpStartupInfo */
+      &processinformation    /* lpProcessInformation */
+   )) {
+
+      *exeRC = 0;
+      *errCode = GetLastError();  /* failed to execute */
+      getWinErrMsg256 (*errCode, "CreateProcess() call failed: ", errMsg);
+      result = 1;
+
+   } else {
+
+      WaitForSingleObject(processinformation.hProcess,INFINITE);
+      brc = GetExitCodeProcess(processinformation.hProcess,&exitcode);
+      CloseHandle(processinformation.hThread);
+      CloseHandle(processinformation.hProcess);
+      if (255 == exitcode) { /* abnormal child termination */
+         *exeRC = 0;
+         return 2;
+      }
+      if (! brc) {        /* failed call to GetExitCodeProcess */
+         *exeRC = 0;
+         *errCode = GetLastError();  /* failed to execute */
+         getWinErrMsg256 (*errCode, "GetExitCodeProcess() call failed: ", errMsg);
+         return 3;
+      }
+      *exeRC = exitcode;
+      result = 0;
+   }
+   return result;
+} /* Win32CreateProcEx */
+#endif
+
+#ifndef _WIN32
+static int LibcForkExecEx( int argc, const char * argv[], int &exeRC, int &errCode,
+                          std::string &errMsg )
+{
+   int result = 1;
+   int pid, pid2;
+   int wstat;
+   errMsg = "";
+   errCode = 0;
+   pid = fork();
+   if( pid < 0 )
+   { /* could not fork */
+      exeRC = 0;
+      errCode = errno;
+      errMsg = "fork() called failed: " + SysErrorMessage( errno );
+      result = 1;
+   }
+   else if( !pid ) { /* I am the child */
+      if( execvp( argv[0], (char *const *)argv ) == -1 )
+         debugStream << "Failure to execute because: " << SysErrorMessage(errno) << '\n';
+      execl( "/bin/sh", "/bin/sh", "-c", "exit 255", nullptr );
+      /* if we are here, it is trouble */
+      /* _exit() is a more immediate termination, less likely to flush stdio */
+      myexit( 255 ); /* -1 tells parent we could not exec */
+   }
+   else
+   { /* I am the parent */
+      for( ;; )
+      {
+         wstat = 0;
+         pid2 = waitpid( pid, &wstat, 0 );
+         if( pid == pid2 ) break;
+
+         if ((-1 == pid2) && (EINTR == errno))
+            continue;
+         exeRC = 0;
+         errCode = errno;
+         errMsg = "waitpid() call failed: " + SysErrorMessage(errno);
+         return 3;    /* failed waitpid */
+
+      }
+      if( WIFEXITED( wstat ) )
+      { /* normal exit from child */
+         if( 255 == WEXITSTATUS( wstat ) )
+         { /* because it couldn't exec */
+            exeRC = 0;
+            result = 2;
+         }
+         else
+         {
+            exeRC = WEXITSTATUS( wstat );
+            result = 0;
+         }
+      }
+      else
+      { /* abnormal return from child */
+         exeRC = 0;
+         result = 4;
+      }
+   } /* end parent code */
+   return result;
+}/* LibcForkExecEx */
+#endif // _WIN32
+
+
+// LLM code, to be replace with std::views::join_with in C++-23
+// This template accepts ANY range (vector, view, list, etc.)
+template <std::ranges::input_range R>
+std::wstring join_range(R&& range, std::wstring_view delimiter) {
+   std::wstring result;
+    auto it = std::ranges::begin(range);
+    auto end = std::ranges::end(range);
+
+    // If the range is completely empty, return early
+    if (it == end) return result;
+
+    // Append the first element
+    result += *it;
+    ++it;
+
+    // Append the delimiter and the rest of the elements
+    for (; it != end; ++it) {
+        result += delimiter;
+        result += *it;
+    }
+
+    return result;
+}
+
+
+/**
+ * @brief Start a new process using execve semantics. On windows, serialize to a cmdline
+ *
+ * @warning On windows, the callee is responsible for quoting the argv args that need it
+ *
+ * @param argv    the sequence of arguments, MUST be NULL-terminated
+ * @param progRC  the return code of the program
+ * @param errCode the error code
+ * @param errMsg  the error message
+ *
+ * @return        some undocumented error number
+ */
+int P3ExecArgv(std::vector<const NativePathChar *> &argv, int &progRC, int &errCode,
+               std::string &errMsg)
+{
+   errCode = 0;
+   errMsg = "";
+
+   if (argv.size() < 2) {
+      errMsg.assign("ERROR: argv size must be at least 2");
+      return 5;
+   }
+
+   if (argv.back() != nullptr) {
+      errMsg.assign("ERROR: the last element of argv must be NULL");
+      return 5;
+   }
+
+#ifdef _WIN32
+
+   char errMsgBuf[256];
+   std::wstring_view exeName = std::wstring_view(argv[0]);
+   std::wstring quote = whatQuote<std::wstring_view> (exeName);
+   auto args = std::ranges::subrange(argv.begin() + 1, argv.end() - 1);
+
+   std::wstring cmdline = std::format(L"{}{}{} {}", quote, exeName, quote, join_range(args, L" "));
+   int result = Win32CreateProcEx (nullptr, cmdline.data(), true, &progRC, &errCode, errMsgBuf);
+   errMsg.assign(errMsgBuf);
+   return result;
+
+#else
+   return LibcForkExecEx(-1, argv.data(), progRC, errCode, errMsg);
+#endif
+
 }
 
 int P3SystemL( const std::string &ProgName, const TExecArgList &ProgParams, int &ProgRC )
@@ -1055,6 +1409,7 @@ int P3SystemL( const std::string &ProgName, const TExecArgList &ProgParams, int 
    assert(false && "unimplemented P3systemL for OSFileType");
    return 0;
 }
+#endif
 
 int win32ASyncCreateProc( const char *exeName, char *cmdLine, int newConsole, int inheritedHandles, TProcInfo &procInfo );
 
@@ -1233,11 +1588,9 @@ int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg )
 {
 #ifdef _WIN32
    int res {};
-   HANDLE h;
-   DWORD p, rc, exitCode;
-   //char ebuf[256];
-   p = (DWORD) procInfo.pid;
-   h = (HANDLE) procInfo.hProcess;
+   DWORD rc, exitCode;
+   const auto p = static_cast<DWORD>( procInfo.pid );
+   auto h = static_cast<HANDLE>( procInfo.hProcess );
    if( !h )
    {
       h = OpenProcess( PROCESS_ALL_ACCESS, FALSE, p );
@@ -1286,60 +1639,69 @@ int p3ASyncStatus( TProcInfo &procInfo, int &progRC, std::string &msg )
          CloseHandle( h );
          procInfo.hProcess = nullptr;
          return res;
-         break;
       case WAIT_TIMEOUT: /* still running normally */
          return 1;
-         break;
       default:
          msg = "Unexpected return from wait";
          return 0;
    }           /* end switch */
    return res; /* should never get here */
 #else
-   if( !procInfo.pid ) return 0;
+   if( !procInfo.pid )
+      return 0;
 
-   pid_t pid, p2;
-   int wstat, *progrc = &progRC;
+   const auto pid = static_cast<pid_t>( procInfo.pid );
 
-   pid = (pid_t) procInfo.pid;
-   /*if (pid <= 0) {                  // PIDs are positive
-			msg ="Invalid PID";
-			return 0;
-		}*/
+   // PIDs are positive
+   if (pid <= 0) {
+		msg = "Invalid PID"s;
+		return 0;
+	}
+
+   // we only use/set the pid on non-windows
    if( procInfo.tid || procInfo.hProcess )
-   { /* we only use/set the pid on non-windows  */
-      msg = "Corrupt or bogus procInfo";
+   {
+      msg = "Corrupt or bogus procInfo"s;
       return 0;
    }
-   p2 = waitpid( pid, &wstat, WNOHANG );
+
+   int wstat;
+
+   pid_t p2 = waitpid( pid, &wstat, WNOHANG );
    if( pid == p2 )
-   { /* process p has changed state - assume it was to exit */
-      /* consider using waitid() instead of waitpid() to get
-			* "more precise control over which child state changes to wait for" */
-      if( !WIFEXITED( wstat ) )
-      { /* no exit code is available */
+   {
+      // process p has changed state - assume it was to exit
+      // consider using waitid() instead of waitpid() to get
+		// "more precise control over which child state changes to wait for"
+      if( !WIFEXITED( wstat ) ) // no exit code is available
          return 3;
-      }
-      *progrc = WEXITSTATUS( wstat );
-      if( 127 == *progrc )
-      { /* return for fork & failed exec */
+      progRC = WEXITSTATUS( wstat );
+      if( 127 == progRC )// return for fork & failed exec
          return 127;
-      }
-      else
-         return 2; /* we really have something to return */
+      else // we really have something to return
+         return 2;
    }
+   // error, e.g. no such process or not a child
    else if( -1 == p2 )
-   { /* error, e.g. no such process or not a child */
-      msg = "No such process or not a child";
+   {
+      msg = "No such process or not a child"s;
       return 4;
    }
-   else if( 0 == p2 )
-   { /* child exists but has not exited */
+   // child exists but has not exited
+   else if( !p2 )
       return 1;
-   }
 
-   msg = "Unexpected return from wait";
+   msg = "Unexpected return from wait"s;
    return 0;
+#endif
+}
+
+p3_pid_t p3GetPID(void)
+{
+#ifdef _WIN32
+   return GetCurrentProcessId();
+#else
+   return getpid();
 #endif
 }
 
@@ -1427,9 +1789,10 @@ bool p3IsPIDValid( uint32_t pid )
 #endif
 }
 
-static tCtrlHandler CtrlHandler {};
+static p3_global_storage tCtrlHandler CtrlHandler {};
 
 #ifdef _WIN32
+
 static BOOL WINAPI P3Handler( DWORD s )
 {
    if( CTRL_C_EVENT == s )
@@ -1442,17 +1805,23 @@ static BOOL WINAPI P3Handler( DWORD s )
    }
    return FALSE;
 }
+
 #else
-static sigset_t sigSet;
-static struct sigaction newAction, oldAction;
+
+static p3_global_storage sigset_t sigSet;
+static p3_global_storage struct sigaction newAction, oldAction;
+
 extern "C" {
-static void ( *oldHandler )( int );
+
+static p3_global_storage void ( *oldHandler )( int );
+
 static void p3CtrlCHandler( int sig );
 }
 static void p3CtrlCHandler( int sig )
 {
    if( CtrlHandler ) ( *CtrlHandler )();
 }
+
 #endif
 
 CtrlHandlerState P3InstallCtrlHandler( tCtrlHandler newHandler )

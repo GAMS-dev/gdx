@@ -26,7 +26,7 @@
 
 #include "gmsobj.hpp"
 
-namespace gdlib::gmsobj
+namespace GDX_NS gdlib::gmsobj
 {
 
 void TQuickSortClass::SortN( int n )

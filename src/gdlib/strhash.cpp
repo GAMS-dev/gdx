@@ -26,6 +26,6 @@
 
 #include "strhash.hpp"
 
-namespace gdlib::strhash
+namespace GDX_NS gdlib::strhash
 {
 }

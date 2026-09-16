@@ -87,6 +87,7 @@ int gdxClose( TGXFileRec_t *pgdx);
 int gdxDataErrorCount( TGXFileRec_t *pgdx);
 int gdxDataErrorRecord( TGXFileRec_t *pgdx, int RecNr, int *KeyInt, double *Values );
 int gdxDataErrorRecordX( TGXFileRec_t *pgdx, int RecNr, int *KeyInt, double *Values );
+int gdxSetErrorRecordCutoff( TGXFileRec_t *pgdx, int maxDataErrorRecords );
 int gdxDataReadDone( TGXFileRec_t *pgdx);
 int gdxDataReadFilteredStart( TGXFileRec_t *pgdx, int SyNr, const int *FilterAction, int *NrRecs );
 int gdxDataReadMap( TGXFileRec_t *pgdx, int RecNr, int *KeyInt, double *Values, int *DimFrst );
@@ -196,12 +197,17 @@ gdxGetLoadPath_t gdxGetLoadPath = doGetLoadPath;
 
 GDX_INLINE int gdxCreate( TGXFileRec_t **TGXFile, char *errBuf, int bufSize )
 {
-   std::string ErrMsg;
-   auto *pgx = new gdx::TGXFileObj { ErrMsg };
-   if( !ErrMsg.empty() )
-      memcpy( errBuf, ErrMsg.c_str(), std::min<int>( (int) ErrMsg.length() + 1, bufSize ) );
-   else
-      errBuf[0] = '\0';
+   errBuf[0] = '\0';
+   gdx::TGXFileObj *pgx;
+   try
+   {
+      pgx = new gdx::TGXFileObj;
+   }
+   catch(std::bad_alloc &)
+   {
+      snprintf( errBuf, bufSize, "Cannot allocate GDX object!" );
+      return false;
+   }
    *TGXFile = reinterpret_cast<TGXFileRec_t *>( pgx );
    return true;
 }
@@ -289,6 +295,11 @@ GDX_INLINE int gdxDataErrorRecord( TGXFileRec_t *pgx, int RecNr, int *KeyInt, do
 GDX_INLINE int gdxDataErrorRecordX( TGXFileRec_t *pgx, int RecNr, int *KeyInt, double *Values )
 {
    return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxDataErrorRecordX(RecNr, KeyInt, Values );
+}
+
+GDX_INLINE int gdxSetErrorRecordCutoff( TGXFileRec_t *pgx, int maxDataErrorRecords )
+{
+   return reinterpret_cast<gdx::TGXFileObj *>( pgx )->gdxSetErrorRecordCutoff(maxDataErrorRecords );
 }
 
 GDX_INLINE int gdxDataReadDone( TGXFileRec_t *pgx)

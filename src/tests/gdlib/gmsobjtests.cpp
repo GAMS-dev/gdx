@@ -138,7 +138,7 @@ TEST_CASE( "Test CMove" )
 {
    constexpr std::array bufA { 1, 2, 3, 4, 5 };
    std::array<int, 32> bufB {};
-   CMove( bufA.data(), bufB.data(), sizeof( int ) * bufA.size() );
+   CMove( bufA.data(), bufB.data(), static_cast<int>( sizeof( int ) * bufA.size() ) );
    for( int i {}; i < static_cast<int>( bufA.size() ); i++ )
       REQUIRE_EQ( bufB[i], i + 1 );
 }

@@ -27,6 +27,25 @@
 #include "utils.hpp"
 #include "../doctest.hpp"
 
+#include <filesystem>
+#include <iostream>
+#include <string>
+
+#if __cplusplus >= 202002L
+#include <format>
+#include <ranges>
+#endif
+
+namespace fs = std::filesystem;
+
+struct PathTestCase {
+    std::string description;
+    std::string prefixDir;
+    std::string path;
+    fs::path expectedPath;
+};
+
+
 using namespace std::literals::string_literals;
 using namespace gdlib::strutilx;
 using namespace utils;
@@ -299,6 +318,556 @@ TEST_CASE("Test cleaning a path")
 #endif
    // TODO: Extend unit test!
 }
+
+#if __cplusplus >= 202002L
+
+static std::vector<PathTestCase> GetAsciiDirTests(void)
+{
+#if _WIN32
+   return {
+      // ======================================================================
+      // CASE 1: Root directory without root name (Starts with '\')
+      // Appends to the drive or server root of the prefix.
+      // ======================================================================
+      { "Standard Local: Replaces path, keeps drive",
+         R"(C:\ProgramData\MyApp)",     R"(\Logs\session\)",       R"(C:\Logs\session\)" },
+
+      // ======================================================================
+      // CASE 2a: Pure Relative Path
+      // Appends normally to the prefix.
+      // ======================================================================
+      { "Standard Local: Normal append",
+         R"(C:\ProgramData\MyApp)",     R"(Cache\thumbnails\)",       R"(C:\ProgramData\MyApp\Cache\thumbnails\)" },
+
+      // ======================================================================
+      // CASE 2b: Relative Path with Dot (e.g. .\dir\test)
+      // Resolves the dot out, appends normally.
+      // ======================================================================
+      { "Standard Local: Explicit current dir",
+         R"(C:\ProgramData\MyApp\)",     R"(.\Cache\thumbnails\)",     R"(C:\ProgramData\MyApp\Cache\thumbnails\)" },
+
+      // ======================================================================
+      // CASE 2c: Relative Path with double Dot (e.g. ..\dir\test)
+      // Resolves the dot out, appends normally.
+      // ======================================================================
+      { "Standard Local: Explicit relative dir",
+         R"(C:\ProgramData\MyApp\)",     R"(..\Cache\thumbnails\)",     R"(C:\ProgramData\Cache\thumbnails\)" },
+
+
+
+      // ======================================================================
+      // CASE 4: Empty Directory
+      // Returns the prefix unaltered.
+      // ======================================================================
+      { "Empty dir against Standard UNC",
+         R"(\\FileServer\Public\Data\)", "",                           R"(\\FileServer\Public\Data\)" },
+
+      // there is a bug in libc++
+#ifndef _LIBCPP_VERSION
+      { "Empty dir against Long Local",
+         R"(\\?\D:\Database\Main)", "",                           R"(\\?\D:\Database\Main\)" },
+#endif
+
+
+      // ======================================================================
+      // CASE 5: Absolute Directory
+      // Completely overrides the prefix.
+      // ======================================================================
+      { "Absolute Local overriding UNC prefix",
+         R"(\\FileServer\Public\Data)", R"(D:\LocalCache\Temp\)",     R"(D:\LocalCache\Temp\)" },
+
+      { "Absolute UNC overriding Local prefix",
+         R"(C:\ProgramData\MyApp)",     R"(\\BackupServer\ColdStorage\)", R"(\\BackupServer\ColdStorage\)" },
+
+      { "Absolute Long UNC overriding Standard UNC",
+         R"(\\FileServer\Public)",      R"(\\?\UNC\NAS01\Archive\)",  R"(\\?\UNC\NAS01\Archive\)" },
+
+      // there is a bug in libc++
+#ifndef _LIBCPP_VERSION
+      { "Absolute Local UNC overriding Standard UNC",
+         R"(\\FileServer\Public)",      R"(\\?\E:\NAS01\Archive\)",  R"(\\?\E:\NAS01\Archive\)" }
+#endif
+   };
+#else
+   return {
+
+   };
+#endif
+}
+
+static std::vector<PathTestCase> GetAsciiFileTests(void)
+{
+#ifdef _WIN32
+   return {
+      // ======================================================================
+      // CASE 1: Root directory without root name (Starts with '\')
+      // Appends to the drive or server root of the prefix.
+      // ======================================================================
+      { "Standard Local: Replaces path, keeps drive",
+         R"(C:\ProgramData\MyApp\)",     R"(\Logs\session\test.log)",       R"(C:\Logs\session\test.log)" },
+
+      // ======================================================================
+      // CASE 2a: Pure Relative Path
+      // Appends normally to the prefix.
+      // ======================================================================
+      { "Standard Local: Normal append",
+         R"(C:\ProgramData\MyApp\)",     R"(Cache\thumbnails\test.log)",       R"(C:\ProgramData\MyApp\Cache\thumbnails\test.log)" },
+
+      // ======================================================================
+      // CASE 2b: Relative Path with Dot (e.g. .\dir\test)
+      // Resolves the dot out, appends normally.
+      // ======================================================================
+      { "Standard Local: Explicit current dir",
+         R"(C:\ProgramData\MyApp\)",     R"(.\Cache\thumbnails\test.log)",     R"(C:\ProgramData\MyApp\Cache\thumbnails\test.log)" },
+
+      // ======================================================================
+      // CASE 2c: Relative Path with double Dot (e.g. ..\dir\test)
+      // Resolves the dot out, appends normally.
+      // ======================================================================
+      { "Standard Local: Explicit relative dir",
+         R"(C:\ProgramData\MyApp\)",     R"(..\Cache\thumbnails\test.log)",     R"(C:\ProgramData\Cache\thumbnails\test.log)" },
+
+
+
+      // ======================================================================
+      // CASE 4: Empty Directory
+      // Returns the prefix unaltered.
+      // ======================================================================
+      { "Empty dir against Standard UNC",
+         R"(\\FileServer\Public\Data\)", "test.log",                           R"(\\FileServer\Public\Data\test.log)" },
+
+      // there is a bug in libc++
+#ifndef _LIBCPP_VERSION
+      { "Empty dir against Long Local",
+         R"(\\?\D:\Database\Main\)", "test.log",                           R"(\\?\D:\Database\Main\test.log)" },
+#endif
+
+
+      // ======================================================================
+      // CASE 5: Absolute Directory
+      // Completely overrides the prefix.
+      // ======================================================================
+      { "Absolute Local overriding UNC prefix",
+         R"(\\FileServer\Public\Data\)", R"(D:\LocalCache\Temp\test.log)",     R"(D:\LocalCache\Temp\test.log)" },
+
+      { "Absolute UNC overriding Local prefix",
+         R"(C:\ProgramData\MyApp\)",     R"(\\BackupServer\ColdStorage\test.log)", R"(\\BackupServer\ColdStorage\test.log)" },
+
+      { "Absolute Long UNC overriding Standard UNC",
+         R"(\\FileServer\Public\)",      R"(\\?\UNC\NAS01\Archive\test.log)",  R"(\\?\UNC\NAS01\Archive\test.log)" },
+
+      // there is a bug in libc++
+#ifndef _LIBCPP_VERSION
+      { "Absolute Local UNC overriding Standard UNC",
+         R"(\\FileServer\Public\)",      R"(\\?\E:\NAS01\Archive\test.log)",  R"(\\?\E:\NAS01\Archive\test.log)" }
+#endif
+   };
+   #else
+
+   return {};
+
+   #endif
+}
+
+static std::vector<PathTestCase> GetAdvancedDirTests(void)
+{
+
+#ifdef _WIN32
+      return {
+
+      // case 1
+      { "Standard UNC: Replaces path, keeps \\server",
+         R"(\\FileServer\Public\Data)", R"(\Archive\2026\)",          R"(\\FileServer\Archive\2026\)" },
+
+      { "Standard UNC: Replaces path, keeps \\server",
+         R"(\\FileServer)", R"(\Archive\2026\)",          R"(\\FileServer\Archive\2026\)" },
+
+      { "Long UNC: Replaces path, keeps Win32 UNC root",
+         R"(\\?\UNC\Server\Share\App)", R"(\Backups\db\)",         R"(\\?\UNC\Server\Backups\db\)" },
+
+      { "Long UNC: Replaces path, keeps Win32 UNC root",
+         R"(\\?\UNC\Server)", R"(\Backups\db\)",         R"(\\?\UNC\Server\Backups\db\)" },
+
+      // there is a bug in libc++
+#ifndef _LIBCPP_VERSION
+      { "Long Local: Replaces path, keeps Win32 drive",
+         R"(\\?\C:\ProgramData\MyApp)", R"(\System Volume Info\)",     R"(\\?\C:\System Volume Info\)" },
+
+      { "Long Local: Replaces path, keeps Win32 drive",
+         R"(\\?\C:)", R"(\System Volume Info\)",     R"(\\?\C:\System Volume Info\)" },
+#endif
+
+      //case 2a
+      { "Standard UNC: Normal append",
+         R"(\\FileServer\Public)",      R"(Engineering\Specs\)",   R"(\\FileServer\Public\Engineering\Specs\)" },
+
+      { "Standard UNC: Normal append",
+         R"(\\FileServer)",      R"(Engineering\Specs\)",   R"(\\FileServer\Engineering\Specs\)" },
+
+      { "Long UNC: Normal append",
+         R"(\\?\UNC\Server\Share\App)", R"(Backups\db\)",         R"(\\?\UNC\Server\Share\App\Backups\db\)" },
+
+      { "Long UNC: Normal append",
+         R"(\\?\UNC\Server)", R"(Backups\db\)",         R"(\\?\UNC\Server\Backups\db\)" },
+
+      // there is a bug in libc++
+#ifndef _LIBCPP_VERSION
+      { "Long Local: Normal append",
+         R"(\\?\C:\ProgramData\MyApp)", R"(System Volume Info\)",     R"(\\?\C:\ProgramData\MyApp\System Volume Info\)" },
+
+      { "Long Local: Normal append",
+         R"(\\?\C:)", R"(System Volume Info\)",     R"(\\?\C:\System Volume Info\)" },
+#endif
+
+      { "Standard UNC: Explicit current dir",
+         R"(\\FileServer\Public\)",      R"(.\Engineering\Specs\)", R"(\\FileServer\Public\Engineering\Specs\)" },
+
+      { "Standard UNC: Explicit current dir",
+         R"(\\FileServer)",      R"(.\Engineering\Specs\)", R"(\\FileServer\Engineering\Specs\)" },
+
+      { "Long UNC: Explicit current dir",
+         R"(\\?\FileServer\Public\)",      R"(.\Engineering\Specs\)", R"(\\?\FileServer\Public\Engineering\Specs\)" },
+
+      // there is a bug in libc++
+#ifndef _LIBCPP_VERSION
+      { "Long Local: Explicit current dir",
+         R"(\\?\D:\Database\Main)",     R"(.\Logs\transaction\)",  R"(\\?\D:\Database\Main\Logs\transaction\)" },
+
+      { "Long Local: Explicit current dir",
+         R"(\\?\D:)",     R"(.\Logs\transaction\)",  R"(\\?\D:\Logs\transaction\)" },
+#endif
+   };
+
+#else
+
+   return {};
+
+#endif
+}
+
+static bool checkOldVsNewCompleteDir(const struct PathTestCase &tc, int fc, bool keepRelPath)
+{
+   // First try the old function
+   std::string oldRes = CompleteDirEx(std::string_view(tc.prefixDir),
+                                      std::string_view(tc.path),
+                                      fc,
+                                      keepRelPath);
+
+
+   fs::path newRes = CompleteDirEx(fs::path(tc.prefixDir),
+                                   fs::path(tc.path),
+                                   fc,
+                                   keepRelPath);
+
+   if (fs::path(oldRes) != newRes) {
+
+      std::cerr << std::format("\n\nDifferences detected: fc = {}; keepRelPath = {}\n", fc, keepRelPath);
+      std::cerr << "Old function: " << oldRes << "\n";
+      std::cerr << "New function: " << newRes.string() << "\n";
+      if (fc == 0 && keepRelPath == false) {
+         std::cerr << "Expected dir: " << reinterpret_cast<const char *>(tc.expectedPath.u8string().c_str()) << "\n";
+      }
+      std::cerr << "prefix dir  : " << tc.prefixDir << "\n";
+      std::cerr << "input dir   : " << tc.path << "\n";
+
+      return false;
+   }
+
+   if (fc == 0 && keepRelPath == false && newRes != tc.expectedPath) {
+      std::cerr << std::format("\n\nDifferences detected: fc = {}; keepRelPath = {}\n", fc, keepRelPath);
+      std::cerr << "Returned dir: " << reinterpret_cast<const char*>(newRes.u8string().c_str()) << "\n";
+      std::cerr << "Expected dir: " << reinterpret_cast<const char*>(tc.expectedPath.u8string().c_str()) << "\n";
+      std::cerr << "prefix dir  : " << tc.prefixDir << "\n";
+      std::cerr << "input dir   : " << tc.path << "\n";
+   }
+
+   return true;
+}
+
+static bool checkOldVsNewCompleteFile(const struct PathTestCase &tc, int fc, bool keepRelPath)
+{
+   // First try the old function
+   std::string oldRes = CompleteFileNameEx(tc.prefixDir,
+                                           tc.path,
+                                           fc,
+                                           keepRelPath);
+
+
+   fs::path newRes = CompleteFileNameEx(fs::path(tc.prefixDir),
+                                        fs::path(tc.path),
+                                        fc,
+                                        keepRelPath);
+
+   if (fs::path(oldRes) != newRes) {
+
+      std::cerr << std::format("\n\nDifferences detected: fc = {}; keepRelPath = {}\n", fc, keepRelPath);
+      std::cerr << "Old function: " << oldRes << "\n";
+      std::cerr << "New function: " << newRes.string() << "\n";
+      if (fc == 0 && keepRelPath == false) {
+         std::cerr << "Expected file: " << reinterpret_cast<const char *>(tc.expectedPath.u8string().c_str()) << "\n";
+      }
+      std::cerr << "prefix dir  : " << tc.prefixDir << "\n";
+      std::cerr << "input  file : " << tc.path << "\n";
+
+      return false;
+   }
+
+   if (fc == 0 && keepRelPath == false && newRes != tc.expectedPath) {
+      std::cerr << std::format("\n\nDifferences detected: fc = {}; keepRelPath = {}\n", fc, keepRelPath);
+      std::cerr << "Returned file: " << reinterpret_cast<const char*>(newRes.u8string().c_str()) << "\n";
+      std::cerr << "Expected file: " << reinterpret_cast<const char*>(tc.expectedPath.u8string().c_str()) << "\n";
+      std::cerr << "prefix file  : " << tc.prefixDir << "\n";
+      std::cerr << "input file   : " << tc.path << "\n";
+   }
+   return true;
+}
+
+[[maybe_unused]] static bool checkNewCompleteDir(const struct PathTestCase &tc, int fc, bool keepRelPath)
+{
+   fs::path output = CompleteDirEx(fs::path(tc.prefixDir),
+                                   fs::path(tc.path),
+                                   fc,
+                                   keepRelPath);
+
+   if (fc == 0 && keepRelPath == false && output != tc.expectedPath) {
+
+      std::cerr << std::format("\n\nDifferences detected: fc = {}; keepRelPath = {}\n", fc, keepRelPath);
+      std::cerr << "Returned dir: " << reinterpret_cast<const char*>(output.u8string().c_str()) << "\n";
+      std::cerr << "Expected dir: " << reinterpret_cast<const char*>(tc.expectedPath.u8string().c_str()) << "\n";
+      std::cerr << "prefix dir  : " << tc.prefixDir << "\n";
+      std::cerr << "input dir   : " << tc.path << "\n";
+
+      return false;
+   }
+
+   return true;
+}
+
+[[maybe_unused]] static bool checkNewCompleteFile(const struct PathTestCase &tc, int fc, bool keepRelPath)
+{
+   fs::path output = CompleteFileNameEx(fs::path(tc.prefixDir),
+                                        fs::path(tc.path),
+                                        fc,
+                                        keepRelPath);
+
+   if (fc == 0 && keepRelPath == false && output != tc.expectedPath) {
+
+      std::cerr << std::format("\n\nDifferences detected: fc = {}; keepRelPath = {}\n", fc, keepRelPath);
+      std::cerr << "Returned file: " << reinterpret_cast<const char*>(output.u8string().c_str()) << "\n";
+      std::cerr << "Expected file: " << reinterpret_cast<const char*>(tc.expectedPath.u8string().c_str()) << "\n";
+      std::cerr << "prefix dir   : " << tc.prefixDir << "\n";
+      std::cerr << "input file   : " << tc.path << "\n";
+
+      return false;
+   }
+
+   return true;
+}
+
+TEST_CASE("Test completeDirEx")
+{
+   size_t nerr = 0;
+
+   for (const auto &tc : GetAsciiDirTests()) {
+
+      for (auto fc : std::views::iota(0, 5)) {
+
+         for ( bool keepRelPath : { false, true }) {
+
+            nerr += !checkOldVsNewCompleteDir(tc, fc, keepRelPath);
+
+         }
+
+      }
+   }
+
+   for (const auto &tc : GetAsciiFileTests()) {
+
+      for (auto fc : std::views::iota(0, 5)) {
+
+         for ( bool keepRelPath : { false, true }) {
+
+            nerr += !checkOldVsNewCompleteFile(tc, fc, keepRelPath);
+
+         }
+
+      }
+   }
+#ifdef _WIN32
+   // ======================================================================
+   // CASE 3: Drive-Relative Path (Windows quirk: Drive letter, no slash)
+   // Resolves against the current working directory of that specific drive.
+   // ======================================================================
+   //
+   struct PathTestCase local_prefix[] = {
+
+      { "Drive-relative overriding local prefix",
+         R"(C:\ProgramData\MyApp)",     R"(C:db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\FileServer\Public)",      R"(C:db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\UNC\FileServer\Public)",      R"(C:db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\E:\test\dir)",      R"(C:db_dump)",           "" },
+
+      { "Drive-relative overriding local prefix",
+         R"(C:\ProgramData\MyApp)",     R"(C:.\db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\FileServer\Public)",      R"(C:.\db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\UNC\FileServer\Public)",      R"(C:.\db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\E:\test\dir)",      R"(C:.\db_dump)",           "" },
+
+      { "Drive-relative overriding local prefix",
+         R"(C:\ProgramData\MyApp)",     R"(C:tmp\db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\FileServer\Public)",      R"(C:tmp\db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\UNC\FileServer\Public)",      R"(C:tmp\db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\E:\test\dir)",      R"(C:tmp\db_dump)",           "" },
+
+// check with LLVM >=23
+#ifndef _LIBCPP_VERSION
+      { "Drive-relative overriding local prefix",
+         R"(C:\ProgramData\MyApp)",     R"(C:..\db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\FileServer\Public)",      R"(C:..\db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\UNC\FileServer\Public)",      R"(C:..\db_dump)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\E:\test\dir)",      R"(C:..\db_dump)",           "" },
+#endif
+/* This is broken in the old code
+Differences detected: fc = 0; keepRelPath = false
+Old function: C:\home\nb\ohuber\cppmex\db_dump\
+New function: C:\home\nb\ohuber\db_dump\
+Expected dir: C:\home\nb\ohuber\db_dump
+prefix dir  : C:\ProgramData\MyApp
+input dir   : C:..\db_dump
+*/
+   };
+
+      struct PathTestCase local_prefix_file[] = {
+      { "Drive-relative overriding local prefix",
+         R"(C:\ProgramData\MyApp)",     R"(C:db_dump.log)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\FileServer\Public)",      R"(C:db_dump.log)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\UNC\FileServer\Public)",      R"(C:db_dump.log)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\E:\test\dir)",      R"(C:db_dump.log)",           "" },
+
+      { "Drive-relative overriding local prefix",
+         R"(C:\ProgramData\MyApp)",     R"(C:.\db_dump.log)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\FileServer\Public)",      R"(C:.\db_dump.log)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\UNC\FileServer\Public)",      R"(C:.\db_dump.log)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\E:\test\dir)",      R"(C:.\db_dump.log)",           "" },
+
+
+#ifndef _LIBCPP_VERSION
+      { "Drive-relative overriding local prefix",
+         R"(C:\ProgramData\MyApp)",     R"(C:..\db_dump.log)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\FileServer\Public)",      R"(C:..\db_dump.log)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\UNC\FileServer\Public)",      R"(C:..\db_dump.log)",           "" },
+
+      { "Drive-relative overriding UNC prefix",
+         R"(\\?\E:\test\dir)",      R"(C:..\db_dump.log)",           "" },
+#endif
+/* the old code is broken
+Differences detected: fc = 0; keepRelPath = false
+Old function: C:\home\nb\ohuber\cppmex\db_dump.log
+New function: C:\home\nb\ohuber\db_dump.log
+Expected file: C:\home\nb\ohuber\db_dump.log
+*/
+   };
+
+   fs::path curDir = fs::current_path();
+
+   for (unsigned i = 0, len = sizeof(local_prefix) / sizeof(*local_prefix); i < len; ++i) {
+      struct PathTestCase &tc = local_prefix[i];
+      tc.expectedPath = fs::absolute(tc.path) / "";
+
+      for (auto fc : std::views::iota(0, 5)) {
+
+
+         if (i < len-4) {
+            nerr += !checkOldVsNewCompleteDir(tc, fc, false);
+         } else {
+            nerr += !checkNewCompleteDir(tc, fc, false);
+         }
+
+      }
+
+   }
+
+   // If the drive has no wd, then it is not too meaningful
+   if (!fs::absolute(L"C:").relative_path().empty()) {
+
+      for (unsigned i = 0, len = sizeof(local_prefix_file) / sizeof(*local_prefix_file); i < len; ++i) {
+         struct PathTestCase &tc = local_prefix_file[i];
+         tc.expectedPath = fs::absolute(tc.path);
+
+         for (auto fc : std::views::iota(0, 5)) {
+
+         if (i < len-4) {
+            nerr += !checkOldVsNewCompleteFile(tc, fc, false);
+         } else {
+            nerr += !checkNewCompleteFile(tc, fc, false);
+         }
+
+         }
+
+      }
+
+   }
+
+#endif
+
+   for (const auto &tc : GetAdvancedDirTests()) {
+
+      for (auto fc : std::views::iota(0, 5)) {
+
+         for ( bool keepRelPath : { false, true }) {
+
+            nerr += !checkNewCompleteDir(tc, fc, keepRelPath);
+
+         }
+
+      }
+
+   }
+
+   REQUIRE_FALSE(nerr);
+}
+
+#endif //C++20
 
 TEST_SUITE_END();
 

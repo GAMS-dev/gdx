@@ -37,7 +37,12 @@
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace rtl::p3platform
+
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS rtl::p3platform
 {
 enum tOSFileType : uint8_t
 {
@@ -46,7 +51,7 @@ enum tOSFileType : uint8_t
    OSFileMissing
 };
 
-const std::array<std::string, 3> OSFileTypeText { "WIN", "UNIX", "XXX" };
+constexpr std::array OSFileTypeText { "WIN", "UNIX", "XXX" };
 
 enum tOSPlatform : uint8_t
 {
@@ -60,7 +65,7 @@ enum tOSPlatform : uint8_t
    OSPlatformCount
 };
 
-const std::array<std::string, OSPlatformCount> OSPlatformText {
+constexpr std::array<std::string_view, OSPlatformCount> OSPlatformText {
         "WinNT",
         "Win64EMT",
         "Linux86_64",
@@ -69,7 +74,7 @@ const std::array<std::string, OSPlatformCount> OSPlatformText {
         "Darwin-arm64",
         "Missing" };
 
-const std::array<std::string, OSPlatformCount> OSDllExtension {
+constexpr std::array<std::string_view, OSPlatformCount> OSDllExtension {
         ".dll",
         ".dll",
         ".so",
@@ -78,7 +83,7 @@ const std::array<std::string, OSPlatformCount> OSDllExtension {
         ".dylib",
         ".XXX" };
 
-const std::array<std::string, OSPlatformCount> OSDllPrefix {
+constexpr std::array<std::string_view, OSPlatformCount> OSDllPrefix {
         "",
         "",
         "lib",
@@ -87,11 +92,57 @@ const std::array<std::string, OSPlatformCount> OSDllPrefix {
         "lib",
         "lib" };
 
-tOSFileType OSFileType();
-tOSPlatform OSPlatform();
-std::string OSNullFilename();
-std::string OSConsoleName();
-std::string OSLanguagePascal();
-std::string OSLanguageC();
-bool nativeIsLittleEndian();
+constexpr tOSFileType OSFileType()
+{
+#if defined( WIN32 ) || defined( _WIN64 ) || defined( __WIN32__ ) || defined( _WIN32 ) || defined( __NT__ )
+   return OSFileWIN;
+#elif defined( __APPLE__ ) || defined( __linux__ ) || defined( __unix__ )
+   return OSFileUNIX;
+#else
+   return OSFileMissing;
+#endif
+}
+
+constexpr tOSPlatform OSPlatform()
+{
+#if defined( _WIN64 ) || defined( WIN32 ) || defined( __WIN32__ )
+   return OSWindows64EMT;
+#elif defined( __APPLE__ )
+   #if defined( __x86_64__ ) || defined( _M_X64 )
+      return OSDarwin_x64;
+   #else
+      return OSDarwin_arm64;
+   #endif
+#elif defined( __linux__ )
+   #if defined( __x86_64__ ) || defined( _M_X64 )
+      return OSLinux86_64;
+   #else
+      return OSLinux_arm64;
+   #endif
+#else
+   return OSMissing;
+#endif
+}
+
+constexpr auto OSNullFilename()
+{
+
+   switch( OSFileType() )
+   {
+   case OSFileWIN:
+      return "nul";
+   case OSFileUNIX:
+      return "/dev/null";
+   case OSFileMissing:
+      return "";
+   }
+
+   // this is needed to compile with GCC in debug mode
+   return "";
+}
+
 }// namespace rtl::p3platform
+
+namespace rtl {
+namespace p3platform = GDX_NS rtl::p3platform;
+}

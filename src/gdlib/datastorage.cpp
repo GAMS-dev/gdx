@@ -26,6 +26,6 @@
 
 #include "datastorage.hpp"
 
-namespace gdlib::datastorage
+namespace GDX_NS gdlib::datastorage
 {
 }

@@ -27,6 +27,7 @@
 
 // compatible subset of Delphi SysUtils
 
+#include <filesystem>
 #if defined(_WIN32)
 // Forward declarations of Windows header stuff
 typedef void *HANDLE;
@@ -39,12 +40,27 @@ struct _WIN32_FIND_DATAA;
 #include <array>                    // for array
 #include <string>                   // for string, basic_string
 #include <string_view>
+#include <new>
+
 #include "delphitypes.hpp"// for tDateTime
+#include "p3platform.hpp"
+
+#ifdef P3_THREAD_SAFE
+#include <thread>
+#define p3_global_storage thread_local
+#else
+#define p3_global_storage
+#endif
 
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace rtl::sysutils_p3
+
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS rtl::sysutils_p3
 {
 // File attribute constants
 constexpr int faReadOnly = 0x00000001,
@@ -104,8 +120,17 @@ struct TTimeStamp {
    int Date;// One plus number of days since 1/1/0001
 };
 
-extern char PathDelim, DriveDelim, PathSep;
-extern std::string FileStopper, ExtStopper;
+constexpr char DriveDelim = p3platform::OSFileWIN == p3platform::OSFileType() ?  ':'  :
+                            p3platform::OSFileUNIX == p3platform::OSFileType() ? '\0' :
+                                                                                 '?'  ;
+
+constexpr char PathDelim = p3platform::OSFileWIN == p3platform::OSFileType() ?  '\\' :
+                           p3platform::OSFileUNIX == p3platform::OSFileType() ? '/'  :
+                                                                                '?'  ;
+
+constexpr char PathSep = p3platform::OSFileWIN == p3platform::OSFileType() ?  ';' :
+                         p3platform::OSFileUNIX == p3platform::OSFileType() ? ':' :
+                                                                              '?' ;
 
 // Memory management routines
 template<typename T>
@@ -139,6 +164,7 @@ std::string ExtractFilePath( const std::string &FileName );
 std::string ExtractFileName( const std::string &FileName );
 std::string ExtractFileExt( const std::string &FileName );
 std::string ExtractShortPathName( const std::string &FileName );
+std::wstring ExtractShortPathName( const std::wstring &FileName );
 double FileDateToDateTime( int fd );
 int DateTimeToFileDate( double dt );
 std::string GetCurrentDir();
@@ -188,15 +214,30 @@ void Sleep( uint32_t milliseconds );
 
 // File/Directory routines
 std::string IncludeTrailingPathDelimiter( const std::string &S );
-std::string ExcludeTrailingPathDelimiter( const std::string &S );
+std::string ExcludeTrailingPathDelimiter( std::string_view S );
 int LastDelimiter( const char *Delimiters, const std::string &S );
 int LastDelimiter( std::string_view Delimiters, std::string_view S );
 
 #if defined(_WIN32)
+bool isLongPath(const std::string &p);
 std::string tryFixingLongPath(const std::string &fName);
 #endif
 
-std::string QueryEnvironmentVariable( const std::string &Name );
+
+#if __cplusplus >= 202002L
+std::u8string to_u8string(const wchar_t* wstr);
+std::u8string to_u8string(const char* str);
+std::u8string QueryEnvironmentVariable( std::u8string_view Name );
+std::filesystem::path ExtractShortPathName( const std::filesystem::path &p );
+#if defined( _WIN32 )
+std::wstring  to_wstring(std::u8string_view utf8_str);
+std::wstring QueryEnvironmentVariable( std::wstring_view name );
+#endif
+#endif
+
+
+std::string QueryEnvironmentVariable( std::string_view Name );
+
 int AssignEnvironmentVariable( const std::string &name, const std::string &value );
 void DropEnvironmentVariable( const std::string &name );
 
@@ -208,3 +249,7 @@ unsigned long GetRobustShortPathW( const wchar_t *longPathW, wchar_t *shortPathW
 #endif
 
 }// namespace rtl::sysutils_p3
+
+namespace rtl {
+   namespace sysutils_p3 = GDX_NS rtl::sysutils_p3;
+}

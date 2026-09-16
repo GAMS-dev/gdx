@@ -27,14 +27,31 @@
 
 #include <cstdio>  // for fclose, FILE
 #include <cstdint>  // for uint32_t, int64_t, uint64_t, uint8_t
+#include <filesystem>
 #include <string>   // for basic_string, string
 #include <vector>   // for vector
 
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace rtl::p3utils
+
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS rtl::p3utils
 {
+
+#if __cplusplus >= 202002L
+using locpath_t = std::vector<std::filesystem::path>;
+#endif
+
+#if defined(_WIN32)
+// NOTE: technicalla DWORD, but don't want to bring a lot of headers here
+typedef uint32_t p3pid_t;
+#else
+typedef pid_t p3pid_t;
+#endif
 
 void initParamStr( int argc, const char **argv );
 
@@ -59,6 +76,7 @@ std::string loadPathVarName();
 bool PrefixLoadPath( const std::string &dir );
 bool PrefixEnv( const std::string &dir, const std::string &evName );
 
+// FIXME: this should be deleted. std::vector can be arbitrary large.
 constexpr int NLocNames = 8;
 using TLocNames = std::vector<std::string>;
 
@@ -75,7 +93,21 @@ enum Tp3Location : uint8_t
 bool p3StandardLocations( Tp3Location locType, const std::string &appName, TLocNames &locNames, int &eCount );
 bool p3WritableLocation( Tp3Location locType, const std::string &appName, std::string &locName );
 
-bool PrefixPath( const std::string &s );
+#if __cplusplus >= 202002L
+bool p3StandardLocations(Tp3Location locType, const std::u8string &appName,
+                         locpath_t &locPaths, int &eCount );
+bool p3WritableLocation(Tp3Location locType, const std::u8string &appName,
+                        std::filesystem::path &locPath );
+#endif
+
+#ifdef _WIN32
+bool P3SetEnv( const std::wstring &name, const std::filesystem::path &p );
+#endif
+
+#if defined( __IN_CPPMEX__ )
+bool PrefixPath( std::string_view s );
+bool PrefixPath( const std::filesystem::path &p );
+#endif
 
 bool P3SetEnv( const std::string &name, const std::string &val );
 std::string P3GetEnv( const std::string &name );
@@ -86,8 +118,10 @@ bool P3SetEnvPC( const std::string &name, const char *val );
 uint32_t P3GetEnvPC( const std::string &name, char *buf, uint32_t bufSize );
 
 int p3GetExecName( std::string &execName, std::string &msg );
+int p3GetExecName( std::filesystem::path &execNameFull, std::string &msg );
 
 bool p3GetMemoryInfo( uint64_t &rss, uint64_t &vss );
+bool p3GetMemoryInfoEx( p3pid_t pid, uint64_t &rss, uint64_t &vss );
 
 void p3SetConsoleTitle( const std::string &s );
 void p3NoPopups();
@@ -166,3 +200,7 @@ int xGetExecName( std::string &execName, std::string &msg );
 int p3SomeIOResult();
 
 }// namespace rtl::p3utils
+
+namespace rtl {
+namespace p3utils = GDX_NS rtl::p3utils;
+}

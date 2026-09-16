@@ -19,7 +19,6 @@ add_library(gdx-static STATIC ${gdx-core})
 target_include_directories(gdx-static PRIVATE ${inc-dirs})
 set_property(TARGET gdx-static PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-set(NO_TESTS OFF CACHE BOOL "Skip building unit tests")
 if(NOT NO_TESTS)
 # Unit test suite (against statically compiled GDX)
 add_executable(gdxtest ${test-deps} ${tests})
@@ -38,7 +37,6 @@ endif()
 set_property(TARGET gdxcclib64 PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
 set_property(TARGET gdxtest PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})]]
 
-set(NO_EXAMPLES OFF CACHE BOOL "Skip building example programs/executables")
 if(NOT NO_EXAMPLES)
 # Standalone GDX example program 1
 add_executable(xp_example1 ${gdx-core} src/examples/xp_example1.cpp)
@@ -88,7 +86,6 @@ endif ()
 
 endif()
 
-set(NO_TOOLS OFF CACHE BOOL "Skip building GDX tools")
 if(NOT NO_TOOLS)
 add_subdirectory(src/tools)
 endif(NOT NO_TOOLS)

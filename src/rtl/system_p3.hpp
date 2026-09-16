@@ -3,7 +3,11 @@
 #include <cstdint>
 #include <string>
 
-namespace rtl::system_p3 {
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS rtl::system_p3 {
 
 void getdir(uint8_t d, std::string &s);
 

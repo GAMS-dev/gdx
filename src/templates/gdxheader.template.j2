@@ -29,7 +29,11 @@
 
 #include "gxfile.hpp"
 
-namespace gdx
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS gdx
 {
 
 /// @details Class for reading and writing GDX files through a efficient low-level interface
@@ -39,9 +43,8 @@ public:
    /**
     * Constructor of GDX file object
     * @brief Create a new GDX file object. Does not open a file yet.
-    * @param ErrMsg Out argument for storing potential error messages. Will be empty when there is no error.
      */
-   explicit TGXFileObj( std::string &ErrMsg );
+   explicit TGXFileObj();
 
    /**
     * Destructor of GDX file object
@@ -144,6 +147,7 @@ std::unique_ptr<TDomainStrList> DomainStrList;
 std::unique_ptr<LinkedDataType> SortList;
 std::optional<LinkedDataIteratorType> ReadPtr;
 std::unique_ptr<TTblGamsDataImpl<double>> ErrorList;
+int MaxErrorRecords {11};
 PgdxSymbRecord CurSyPtr {};
 int ErrCnt {}, ErrCntTotal {};
 int LastError {}, LastRepError {};
@@ -190,6 +194,9 @@ const bool verboseTrace { true };
 TDataStoreFiltProc_t gdxDataReadRawFastFilt_DP {};
 TDomainIndexProc_t gdxGetDomainElements_DP {};
 
+int64_t ReadUELPos {}, ReadAcronymPos {}, ReadSetTextPos {};
+bool UelReadDeferred {}, SetTextReadDeferred {};
+
 bool PrepareSymbolWrite( std::string_view Caller, const char *AName, const char *AText, int ADim, int AType, int AUserInfo );
 int PrepareSymbolRead( std::string_view Caller, int SyNr, const int *ADomainNrs, TgxFileMode newmode );
 
@@ -217,6 +224,8 @@ bool IsGoodNewSymbol( const char *s );
 bool ResultWillBeSorted( const int *ADomainNrs ) const;
 
 int gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int &ErrNr );
+int ReadUELTable(bool isDeferred);
+int ReadSetTextList(bool isDeferred);
 
 // This one is a helper function for a callback from a Fortran client
 void gdxGetDomainElements_DP_FC( int RawIndex, int MappedIndex, void *Uptr );
@@ -232,3 +241,4 @@ bool gdxGetDomainElements_DP_CallByRef {},
 
 }// namespace gdx
 
+namespace gdx = GDX_NS gdx;

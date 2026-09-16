@@ -46,6 +46,7 @@
 #include <cstdint>
 #include <numeric>
 #include <bitset>
+#include <type_traits>
 #include <cassert>// for assert
 
 #ifndef _WIN32
@@ -61,7 +62,19 @@
 extern std::stringstream debugStream;
 #endif
 
-namespace utils
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+#if __cplusplus >= 202002L
+#define GDX_LIKELY [[likely]]
+#define GDX_UNLIKELY [[unlikely]]
+#else
+#define GDX_LIKELY
+#define GDX_UNLIKELY
+#endif
+
+namespace GDX_NS utils
 {
 
 template<typename T, int card>
@@ -70,12 +83,13 @@ class bsSet
    std::bitset<card> hasSym {};
 
 public:
-   bsSet() = default;
+   constexpr bsSet() = default;
 
    bsSet( const bsSet &other ) : hasSym( other.hasSym )
    {
    }
 
+   // TODO: once we compile in C++23, this can be made constexpr
    bsSet( const std::initializer_list<T> &syms )
    {
       for( const T s: syms )
@@ -485,7 +499,11 @@ bool sameTextPChar( const char *a,
 #endif
 }
 
+
 std::string_view trim( std::string_view s );
+std::wstring_view trim( std::wstring_view s );
+inline std::wstring_view trim( const std::wstring &s ) { return trim(static_cast<std::wstring_view>(s)); };
+
 
 std::string getLineWithSep( std::istream &fs );
 
@@ -497,6 +515,9 @@ inline void fputstr(FILE* f, std::string_view s) {
 }
 
 std::string trim( const std::string &s );
+#if __cplusplus >= 202002L
+std::u8string trim( const std::u8string &s );
+#endif
 std::string trimRight( const std::string &s );
 void trimRight( const std::string &s, std::string &storage );
 const char *trimRight( const char *s, char *storage, int &slen );
@@ -776,6 +797,17 @@ int indexOfSameText(const std::array<std::string, N> &strs, const std::string &s
    return firstValid-1;
 }
 
+template<int N, int firstValid=0>
+int indexOfSameText(const std::array<std::string_view, N> &strs, const std::string_view s) {
+   int i{firstValid};
+   for(const std::string_view s2 : strs) {
+      if(sameText(s, s2))
+         return i;
+      ++i;
+   }
+   return firstValid-1;
+}
+
 template<typename T>
 auto ui8(const T x)
 {
@@ -812,4 +844,13 @@ class sstring : public std::array<char, 256> {
 // Signed fraction; frac(x) = x - int(x)// Truncate towards zero
 double frac( double x );
 
+
+// Define a helper that always evaluates to false, 
+// but depends on a template parameter to delay evaluation.
+// This is used to report compile-time error in template with constexpr
+template <auto v> 
+struct always_false : std::false_type {};
+
 }// namespace utils
+
+namespace utils = GDX_NS utils;

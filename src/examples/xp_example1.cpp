@@ -51,8 +51,7 @@ class SimpleWriteReadExample
    void WriteData( const char *s, double V );
    static void ReportIOError( int N, const std::string &msg );
 
-   std::string ErrMsg;
-   TGXFileObj pgx { ErrMsg };
+   TGXFileObj pgx;
 
 public:
    explicit SimpleWriteReadExample();
@@ -84,9 +83,6 @@ void SimpleWriteReadExample::WriteData( const char *s, double V )
 
 SimpleWriteReadExample::SimpleWriteReadExample()
 {
-   if( !ErrMsg.empty() )
-      throw std::runtime_error( "**** Could not load GDX library\n**** "s + ErrMsg );
-
    std::array<char, GMS_SSSIZE> Msg {};
    TGXFileObj::gdxGetDLLVersion( Msg.data() );
    std::cout << "Using GDX DLL version: " << Msg.data() << std::endl;

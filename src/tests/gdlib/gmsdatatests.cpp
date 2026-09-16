@@ -30,7 +30,7 @@
 #include <array>       // for array
 
 using namespace std::literals::string_literals;
-using namespace gdlib::gmsdata;
+using namespace GDX_NS gdlib::gmsdata;
 
 namespace tests::gdlibtests::gmsdatatests
 {

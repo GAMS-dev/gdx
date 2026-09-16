@@ -27,6 +27,7 @@
 
 #include <array>                // for array
 #include <cstdint>              // for uint8_t, int64_t
+#include <filesystem>
 #include <string>               // for string, basic_string
 #include <string_view>          // for string_view, basic_string_view
 #include "utils.hpp"              // for charset
@@ -34,7 +35,11 @@
 // ==============================================================================================================
 // Interface
 // ==============================================================================================================
-namespace gdlib::strutilx
+#ifndef GDX_NS
+#define GDX_NS gdxlib::
+#endif
+
+namespace GDX_NS gdlib::strutilx
 {
 class DelphiStrRef {
 public:
@@ -95,7 +100,10 @@ std::string IncludeTrailingPathDelimiterEx( const std::string &S );
 std::string ExcludeTrailingPathDelimiterEx( const std::string &S );
 
 void cleanpath(std::string &path, char delim);
-std::string CompleteDirEx( const std::string &dir1, const std::string &dir2, int fc, bool relPath );
+std::string CompleteDirEx( std::string_view dir1, std::string_view dir2, int fc, bool relPath );
+std::filesystem::path CompleteDirEx(const std::filesystem::path &prefixDir,
+                                    const std::filesystem::path &dir,
+                                    int fc, bool keepRelPath );
 
 std::string ExtractFileNameEx( const std::string &FileName );
 
@@ -108,10 +116,11 @@ std::string ExtractToken( const std::string &s, int &p );
 
 int StrAsInt( const std::string &s );
 
-std::string ChangeFileExtEx( const std::string &FileName, const std::string &Extension );
-std::string CompleteFileExtEx( const std::string &FileName, const std::string &Extension );
-std::string ExtractFileExtEx( const std::string &FileName );
+std::string ChangeFileExtEx( const std::string_view FileName, const std::string_view Extension );
+std::string CompleteFileExtEx( const std::string_view FileName, const std::string_view Extension );
+std::string ExtractFileExtEx( std::string_view FileName );
 std::string CompleteFileNameEx(const std::string &directory, const std::string &filename, int fc, bool relPath);
+std::filesystem::path CompleteFileNameEx( const std::filesystem::path &directory, const std::filesystem::path &filename, int fc, bool keepRelPath );
 
 constexpr int maxBOMLen { 4 };
 using tBomIndic = std::array<uint8_t, maxBOMLen>;
@@ -121,7 +130,8 @@ std::string ReplaceChar( const utils::charset &ChSet, char New, const std::strin
 
 std::string ReplaceStr( const std::string &substr, const std::string &replacement, const std::string &S );
 
-std::string ExtractShortPathNameExcept( const std::string &FileName );
+template<typename T = std::string>
+T ExtractShortPathNameExcept( const T &FileName );
 
 int strConvCtoDelphi( char *cstr );
 void strConvDelphiToC( char *delphistr );
@@ -139,3 +149,7 @@ int LStrPos(const std::string &Pat, const std::string &S);
 
 
 }// namespace gdlib::strutilx
+
+namespace gdlib {
+namespace strutilx = GDX_NS gdlib::strutilx;
+}
