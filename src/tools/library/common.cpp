@@ -141,7 +141,7 @@ bool canBeQuoted(const char *s, const std::size_t slen) {
 
   bool saw_single{}, saw_double{};
   for (int i{}; i < static_cast<int>(slen); ++i) {
-    char Ch{s[i]};
+    const char Ch{s[i]};
     if (Ch == '\'') {
       if (saw_double) {
         return false;
@@ -168,7 +168,7 @@ void AuditLine::setAuditLine() {
   std::string
       GDL_REL_PLT,
       GDL_BLD_COD;
-  bool auditreldates_header_file_found{};
+  const bool auditreldates_header_file_found{};
 
   audit_line = system_name;
   audit_line.resize(17, ' ');

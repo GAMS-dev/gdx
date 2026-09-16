@@ -292,7 +292,7 @@ void WriteSymbol(const int SyNr) {
   gdxValues_t Vals{};
   std::array<double, GMS_VAL_MAX> DefaultValues{};
 
-  auto WriteItem = [&](const std::uint8_t &ValNr) {
+  auto const WriteItem = [&](const std::uint8_t &ValNr) {
     if (!IsScalar && ATyp != dt_set &&
         (FilterDef && Vals[ValNr] == DefaultValues[ValNr]) &&
         (ATyp != dt_equ || (ValNr != GMS_VAL_LOWER && ValNr != GMS_VAL_UPPER))) {
@@ -364,7 +364,7 @@ void WriteSymbol(const int SyNr) {
     LineCount++;
   };
 
-  auto WriteComments = [&]() {
+  auto const WriteComments = [&] {
     library::ShortString S;
     for (int N{1}; N <= std::numeric_limits<int>::max(); N++) {
       if (gdxSymbolGetComment(PGX, SyNr, N, S.data()) == 0) {
@@ -564,7 +564,7 @@ void WriteSymbolCSV(const int SyNr) {
   gdxStrIndexPtrs_t DomSPtrs;
   GDXSTRINDEXPTRS_INIT(DomS, DomSPtrs);
 
-  auto GetDomainNames = [&]() {
+  auto const GetDomainNames = [&] {
     gdxStrIndex_t gdxDomS{};
     gdxStrIndexPtrs_t gdxDomSPtrs;
     GDXSTRINDEXPTRS_INIT(gdxDomS, gdxDomSPtrs);
@@ -960,7 +960,7 @@ std::string NextParam() {
   } else if (ParamNr <= ParamCount) {
     result = ParamStr[ParamNr];
     ParamNr++;
-    std::size_t k = result.find('=');
+    const std::size_t k = result.find('=');
     if (k != std::string::npos) {
       ParamHold = result.substr(k + 1);
       // Keep the '=':
@@ -1014,7 +1014,7 @@ int main(const int argc, const char *argv[]) {
   ParamCount = argc - 1;
   ParamStr = argv;
 
-  library::AuditLine auditLine{"GDXDUMP"};
+  const library::AuditLine auditLine{"GDXDUMP"};
   if (ParamCount > 0 && gdlib::strutilx::StrUEqual(ParamStr[1], "AUDIT")) {
     std::cout << auditLine.getAuditLine() << '\n';
     return 0;
