@@ -168,7 +168,8 @@ void AuditLine::setAuditLine() {
   std::string
       GDL_REL_PLT,
       GDL_BLD_COD;
-  const bool auditreldates_header_file_found{};
+  // NOLINTNEXTLINE(misc-const-correctness)
+  bool auditreldates_header_file_found{};
 
   audit_line = system_name;
   audit_line.resize(17, ' ');
