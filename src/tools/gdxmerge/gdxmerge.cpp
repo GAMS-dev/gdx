@@ -55,7 +55,6 @@ GAMSSymbol::GAMSSymbol(const int ADim, const gdxSyType AType, const int ASubTyp)
 GDXFileEntry::GDXFileEntry(std::string AFileName, std::string AFileId, std::string AFileInfo)
     : FFileName(std::move(AFileName)), FFileId(std::move(AFileId)), FFileInfo(std::move(AFileInfo)) {}
 
-
 template <typename T>
 void FileList<T>::AddFile(const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo) {
   this->Add(new GDXFileEntry(AFileName, AFileId, AFileInfo));
