@@ -475,6 +475,9 @@ static bool isThreadLocaleUtf8(locale_t loc)
 {
     if (loc == (locale_t)0) return false;
 
+// in a DEG NB, `nl_langinfo_l` was not found.
+// This failure is tied to the use of GCC on DEG. Very hard to reproduce.
+// Let's invest time in this if it becomes an issue ...
 #if defined(__APPLE__) && !defined(__clang__)
     return false;
 #else
