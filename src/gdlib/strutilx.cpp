@@ -475,8 +475,12 @@ static bool isThreadLocaleUtf8(locale_t loc)
 {
     if (loc == (locale_t)0) return false;
 
+#if defined(__APPLE__) && !defined(__clang__)
+    return false;
+#else
     const char* codeset = nl_langinfo_l(CODESET, loc);
     return (strcasecmp(codeset, "UTF-8") == 0 || strcasecmp(codeset, "utf8") == 0);
+#endif
 }
 
 // 2. Safely acquire the best available UTF-8 locale
