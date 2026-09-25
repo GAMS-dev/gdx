@@ -93,12 +93,20 @@ double LnXP1( double x )
    return log1p( x );
 }
 
+/**
+ * @brief Get current IEEE-754 exception mask (FPE mask) 
+ * 
+ * Note that a bit set to 1 means that no FPE is raised for the corresponding invalid operation
+ *
+ * @return       the current FPE mask 
+ */
 TFPUExceptionMask GetExceptionMask()
 {
-   std::set<TFPUException> result {};
+   TFPUExceptionMask result {};
    auto ADD2MASK = [&result]( TFPUException e ) {
-      result.insert( e );
+      result.set( e );
    };
+
 #if defined( _WIN32 )
    {
       unsigned int cw = 0;
@@ -187,15 +195,26 @@ TFPUExceptionMask GetExceptionMask()
    return result;
 }
 
-TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask )
+/**
+ * @brief Set IEEE-754 exception mask (FPE mask) from argument and return current values
+ * 
+ * Note that a bit set to 1 means that no FPE is raised for the corresponding invalid operation
+ *
+ * @param mask   the desired FPE mask
+ *
+ * @return       the FPE mask before the call
+ */
+TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &mask )
 {
-   std::set<TFPUException> result {};
-   auto ADD2MASK = [&result]( TFPUException e ) {
-      result.insert( e );
+   TFPUExceptionMask curMask {};
+   [[maybe_unused]] auto ADD2MASK = [&curMask]( TFPUException e ) {
+      curMask.set( e );
    };
-   auto ISINMASK = [&result]( TFPUException e ) {
-      return result.count( e );
+
+   auto ISINMASK = [&mask]( TFPUException e ) {
+      return mask.test( e );
    };
+
 #if defined( _WIN32 )
    {
       unsigned int cw = 0;
