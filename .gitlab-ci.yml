@@ -184,6 +184,30 @@ build-musl:
     reports:
       junit: warnings.xml
 
+build-musl-lag:
+  stage: build
+  tags: [linux-arm64]
+  image:
+    name: alpine:latest
+    entrypoint: [""]
+  script:
+    - apk add g++ ccache cmake ninja git musl-dev python3
+    - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
+    - cmake -DCMAKE_BUILD_TYPE=Release -G Ninja CMakeLists.txt
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
+    - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
+    - mv libgdx-static.a libgdx-linux.a
+    - mkdir -p ./gdxtools
+    - for tool in gdxdump gdxdiff gdxmerge; do mv ./src/tools/$tool/$tool ./gdxtools; done
+  needs: [fetch-ci-scripts,apigenerator]
+  artifacts:
+    name: gdx-musl
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a,gdxtools]
+    expire_in: 2 hours
+    reports:
+      junit: warnings.xml
+
 build-debug-musl:
   stage: build
   tags: [linux]
@@ -477,6 +501,24 @@ test-lag:
     expire_in: 2 hours
     reports:
       junit: doctest_results_*lag.xml
+
+test-musl-lag:
+  stage: test
+  tags: [linux-arm64]
+  image:
+    name: alpine:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-musl-lag]
+  script:
+    - apk add --no-cache libgcc libstdc++
+    - ./gdxtest --reporters=junit --out=doctest_results_musl.xml
+    - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_musl.xml
+  artifacts:
+    name: unittest-results-musl
+    paths: [./*.xml]
+    expire_in: 2 hours
+    reports:
+      junit: doctest_results_*musl.xml
 
 test-deg:
   stage: test
