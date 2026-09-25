@@ -29,6 +29,7 @@
 #include <cfenv>
 #include <cfloat>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #if defined( _WIN32 )
 #ifndef WIN32_LEAN_AND_MEAN
@@ -42,6 +43,11 @@
 #if defined( __x86_64__ ) || defined( __i386__ ) || defined( _M_X64 ) || defined( _M_IX86 )
 #define MATHP3TESTS_X86
 #include <xmmintrin.h>
+#elif defined( __aarch64__ ) || defined( _M_ARM64 )
+#define MATHP3TESTS_AARCH64
+#if defined( _MSC_VER ) && !defined( __clang__ )
+#include <intrin.h>
+#endif
 #endif
 #include <ostream>
 #include <string>
@@ -266,7 +272,7 @@ static TFPUExceptionMask allMasked()
 // Trapping FPEs is optional on aarch64: on CPUs without support, unmasking has no effect
 static bool trapsSupported()
 {
-#if defined( __aarch64__ ) || defined( _M_ARM64 )
+#if defined( MATHP3TESTS_AARCH64 )
    FPEGuard guard;
    SetExceptionMask( TFPUExceptionMask {} );
    const bool supported = !GetExceptionMask().test( exZeroDivide );
@@ -277,8 +283,23 @@ static bool trapsSupported()
 #endif
 }
 
-// The denormal operand exception cannot always be unmasked (e.g. glibc does not support it), and never
-// triggers when denormal operands are treated as zero (DAZ bit in MXCSR, e.g. set by -ffast-math)
+#if defined( MATHP3TESTS_AARCH64 )
+static uint64_t readFPCR()
+{
+#if defined( _MSC_VER ) && !defined( __clang__ )
+   return _ReadStatusReg( ARM64_FPCR );
+#else
+   uint64_t fpcr;
+   __asm__ __volatile__( "mrs %0, fpcr" : "=r"( fpcr ) );
+   return fpcr;
+#endif
+}
+#endif
+
+// The denormal operand exception cannot always be unmasked (e.g. glibc does not support it).
+// On x86, it never triggers when denormal operands are treated as zero (DAZ bit in MXCSR, e.g. set by -ffast-math).
+// On aarch64, the input denormal exception is only raised when a denormal input is flushed to zero, i.e. only
+// in flush-to-zero mode (FZ bit in FPCR). Otherwise, denormals are processed normally without any exception
 static bool denormalTrapSupported( const TFPUExceptionMask &mask )
 {
    FPEGuard guard;
@@ -292,6 +313,12 @@ static bool denormalTrapSupported( const TFPUExceptionMask &mask )
    if( _mm_getcsr() & ( 1u << 6 ) )
    {
       MESSAGE( "Denormals are treated as zero (DAZ), skipping exDenormalized check" );
+      return false;
+   }
+#elif defined( MATHP3TESTS_AARCH64 )
+   if( !( readFPCR() & ( 1u << 24 ) ) )
+   {
+      MESSAGE( "Input denormal exception requires flush-to-zero mode on aarch64, skipping exDenormalized check" );
       return false;
    }
 #endif
@@ -333,7 +360,6 @@ TEST_CASE( "Unmasked IEEE-754 exceptions raise an FPE" )
       auto m = allMasked();
       m.reset( c.ex );
       if( c.ex == exDenormalized && !denormalTrapSupported( m ) ) continue;
-      // On x86-64, SSE arithmetic on doubles is governed by MXCSR, not by the x87 control word
       const bool raised = raisesFPE( m, c.op );
       CHECK_MESSAGE( raised, std::string { c.name } << ": no FPE raised although unmasked. " );
       if( raised ) checkFPECode( c.ex, c.name );
