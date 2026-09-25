@@ -31,6 +31,18 @@
 #include <stdexcept>
 #include <cfloat>
 
+// NOTE(OH): after introducing a test, an LLM vastly modify the code below to fix it
+//
+// DETAIL: on x86_64, there are two controls for FPE:
+// - x87 one (for long double and others)
+// - MXCSR for SSE (double arithmetic)
+//
+// When "manually" changing traps, both are, but only MXCSR is read. If we were to read
+// both, we would have to reconcile the differences.
+//
+// On Windows and Linux/GLIBC, we use a libc function that is more robust
+
+
 #if defined( __linux__ ) && !defined( __GLIBC__ )
 #if defined( __x86_64__ )
 #include <xmmintrin.h>
