@@ -88,11 +88,20 @@ static const std::array<FPECase, 7> fpeCases { {
         { exPrecision, "exPrecision", opPrecision },
 } };
 
-// Saves the FPE mask and installs the SIGFPE handler, restores both on destruction
+// macOS on arm64 delivers floating-point traps as SIGILL instead of SIGFPE
+// NOTE: keeping this as an std::array in case SIGFPE is raised on some platform
+// at some point --OH
+#if defined( __APPLE__ ) && defined( __arm64__ )
+static constexpr std::array fpeSignals { SIGILL };
+#else
+static constexpr std::array fpeSignals { SIGFPE };
+#endif
+
+// Saves the FPE mask and installs the FPE signal handler, restores both on destruction
 class FPEGuard
 {
    TFPUExceptionMask savedMask;
-   struct sigaction oldAction {};
+   std::array<struct sigaction, fpeSignals.size()> oldActions {};
 
 public:
    FPEGuard() : savedMask { GetExceptionMask() }
@@ -100,14 +109,16 @@ public:
       struct sigaction sa {};
       sa.sa_handler = sigfpeHandler;
       sigemptyset( &sa.sa_mask );
-      sigaction( SIGFPE, &sa, &oldAction );
+      for( size_t i {}; i < fpeSignals.size(); i++ )
+         sigaction( fpeSignals[i], &sa, &oldActions[i] );
    }
 
    ~FPEGuard()
    {
       ClearExceptions();
       SetExceptionMask( savedMask );
-      sigaction( SIGFPE, &oldAction, nullptr );
+      for( size_t i {}; i < fpeSignals.size(); i++ )
+         sigaction( fpeSignals[i], &oldActions[i], nullptr );
    }
 };
 
