@@ -31,6 +31,14 @@
 #include <stdexcept>
 #include <cfloat>
 
+#if defined( __linux__ ) && !defined( __GLIBC__ )
+#if defined( __x86_64__ )
+#include <xmmintrin.h>
+#elif !defined( __aarch64__ )
+#error "FPE mask handling without glibc is only implemented on x86-64 and aarch64"
+#endif
+#endif
+
 namespace GDX_NS rtl::math_p3
 {
 
@@ -87,6 +95,30 @@ double IntPower( double X, const int I )
       res = 1.0 / res;
    return res;
 }
+
+#if defined( __linux__ ) && !defined( __GLIBC__ ) && defined( __x86_64__ ) // LLM-generated; OH: TEST NEEDED
+// MXCSR exception mask bits (a set bit masks the exception)
+constexpr unsigned int mxcsrInvalid = 1u << 7, mxcsrDenormal = 1u << 8, mxcsrZeroDivide = 1u << 9,
+                       mxcsrOverflow = 1u << 10, mxcsrUnderflow = 1u << 11, mxcsrPrecision = 1u << 12;
+constexpr unsigned int mxcsrManaged = mxcsrInvalid | mxcsrDenormal | mxcsrZeroDivide | mxcsrOverflow | mxcsrUnderflow | mxcsrPrecision;
+#elif defined( __linux__ ) && !defined( __GLIBC__ ) && defined( __aarch64__ )
+// FPCR exception trap enable bits (a set bit makes the exception trap)
+constexpr uint64_t fpcrInvalid = 1u << 8, fpcrZeroDivide = 1u << 9, fpcrOverflow = 1u << 10,
+                   fpcrUnderflow = 1u << 11, fpcrPrecision = 1u << 12, fpcrDenormal = 1u << 15;
+constexpr uint64_t fpcrManaged = fpcrInvalid | fpcrDenormal | fpcrZeroDivide | fpcrOverflow | fpcrUnderflow | fpcrPrecision;
+
+static uint64_t readFPCR()
+{
+   uint64_t fpcr;
+   __asm__ __volatile__( "mrs %0, fpcr" : "=r"( fpcr ) );
+   return fpcr;
+}
+
+static void writeFPCR( uint64_t fpcr )
+{
+   __asm__ __volatile__( "msr fpcr, %0" : : "r"( fpcr ) );
+}
+#endif
 
 double LnXP1( double x )
 {
@@ -151,42 +183,45 @@ TFPUExceptionMask GetExceptionMask()
       if( cw & FE_UNDERFLOW ) ADD2MASK( exUnderflow );
       if( cw & FE_INEXACT ) ADD2MASK( exPrecision );
    }
-#elif defined( __linux__ ) && defined( __aarch64__ )
+#elif defined( __linux__ ) && defined( __GLIBC__ ) // LLM-generated; OH checked
    {
-      fenv_t fenv;
-      unsigned long long cw;
-
-      /* on AARCH64, __control_world is replaced by __fpcr and bits are shifted by FE_EXCEPT_SHIFT */
-      (void) fegetenv( &fenv );
-      cw = ( fenv.__fpcr >> FE_EXCEPT_SHIFT ) & FE_ALL_EXCEPT;
-      if( ( cw & FE_INVALID ) ) ADD2MASK( exInvalidOp );
-#if defined( FE_DENORMAL ) /* not present on almalinux8/aarch64 */
-      if( ( cw & FE_DENORMAL ) ) ADD2MASK( exDenormalized );
-#else                      // assume always on if FE_DENORMAL not defined
-      ADD2MASK( exDenormalized );
-#endif
-      if( ( cw & FE_DIVBYZERO ) ) ADD2MASK( exZeroDivide );
-      if( ( cw & FE_OVERFLOW ) ) ADD2MASK( exOverflow );
-      if( ( cw & FE_UNDERFLOW ) ) ADD2MASK( exUnderflow );
-      if( ( cw & FE_INEXACT ) ) ADD2MASK( exPrecision );
-   }
-#elif defined( __linux )
-   {
-      std::fenv_t fenv;
-      (void) fegetenv( &fenv );
-      fesetenv( &fenv );
-      unsigned short ex = fenv.__control_word & FE_ALL_EXCEPT;
-      if( ex & FE_INVALID ) ADD2MASK( exInvalidOp );
+      // fegetexcept returns the exceptions that are enabled, i.e. that trap (not masked)
+      // On x86-64, it reflects both the x87 control word and MXCSR, on aarch64 the FPCR
+      const int enabled = fegetexcept();
+      if( !( enabled & FE_INVALID ) )   ADD2MASK( exInvalidOp );
 #if defined( FE_DENORMAL )
-      if( ex & FE_DENORMAL ) ADD2MASK( exDenormalized );
-#else
-      // assume always on if FE_DENORMAL not defined
-      ADD2MASK( exDenormalized );
+      if( !( enabled & FE_DENORMAL ) )  ADD2MASK( exDenormalized );
+#else// assume always on if FE_DENORMAL not defined
+                                        ADD2MASK( exDenormalized );
 #endif
-      if( ex & FE_DIVBYZERO ) ADD2MASK( exZeroDivide );
-      if( ex & FE_OVERFLOW ) ADD2MASK( exOverflow );
-      if( ex & FE_UNDERFLOW ) ADD2MASK( exUnderflow );
-      if( ex & FE_INEXACT ) ADD2MASK( exPrecision );
+      if( !( enabled & FE_DIVBYZERO ) ) ADD2MASK( exZeroDivide );
+      if( !( enabled & FE_OVERFLOW ) )  ADD2MASK( exOverflow );
+      if( !( enabled & FE_UNDERFLOW ) ) ADD2MASK( exUnderflow );
+      if( !( enabled & FE_INEXACT ) )   ADD2MASK( exPrecision );
+   }
+#elif defined( __linux__ ) && defined( __x86_64__ )  // LLM-generated; OH checked
+   {
+      // non-glibc libc (e.g. musl) without feenableexcept: read MXCSR, which governs SSE arithmetic on doubles
+      // a bit set in MXCSR means that the exception is masked
+      const unsigned int csr = _mm_getcsr();
+      if( csr & mxcsrInvalid )    ADD2MASK( exInvalidOp );
+      if( csr & mxcsrDenormal )   ADD2MASK( exDenormalized );
+      if( csr & mxcsrZeroDivide ) ADD2MASK( exZeroDivide );
+      if( csr & mxcsrOverflow )   ADD2MASK( exOverflow );
+      if( csr & mxcsrUnderflow )  ADD2MASK( exUnderflow );
+      if( csr & mxcsrPrecision )  ADD2MASK( exPrecision );
+   }
+#elif defined( __linux__ ) && defined( __aarch64__ ) // LLM-generated; OH checked
+   {
+      // non-glibc libc (e.g. musl) without feenableexcept: read FPCR
+      // a bit set in FPCR means that the exception traps (not masked)
+      const uint64_t fpcr = readFPCR();
+      if( !( fpcr & fpcrInvalid ) )    ADD2MASK( exInvalidOp );
+      if( !( fpcr & fpcrDenormal ) )   ADD2MASK( exDenormalized );
+      if( !( fpcr & fpcrZeroDivide ) ) ADD2MASK( exZeroDivide );
+      if( !( fpcr & fpcrOverflow ) )   ADD2MASK( exOverflow );
+      if( !( fpcr & fpcrUnderflow ) )  ADD2MASK( exUnderflow );
+      if( !( fpcr & fpcrPrecision ) )  ADD2MASK( exPrecision );
    }
 #else
 // ...
@@ -305,80 +340,66 @@ TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &mask )
       fenv.__control |= newcw;
       (void) fesetenv( &fenv );
    } /* macOS on Intel */
-#elif defined( __linux__ ) && defined( __aarch64__ )
+#elif defined( __linux__ ) && defined( __GLIBC__ ) // LLM-generated; OH checked
    {
-      fenv_t fenv;
-      unsigned long long oldcw, newcw;
+      curMask = GetExceptionMask();
 
-      /* on AARCH64, __control_world is replaced by __fpcr and bits are shifted by FE_EXCEPT_SHIFT
-* however, trapping exceptions is optional, so that the below fesetenv() may have no effect
-* on wally's CPU, this seems to be the case (or is it because it is a VM?)
-*/
-      (void) fegetenv( &fenv );
-      oldcw = ( fenv.__fpcr >> FE_EXCEPT_SHIFT ) & FE_ALL_EXCEPT;
-      if( ( oldcw & FE_INVALID ) ) ADD2MASK( exInvalidOp );
+      // feenableexcept/fedisableexcept update both the x87 control word and MXCSR on x86-64, the FPCR on aarch64
+      // Note that trapping is optional on aarch64: on CPUs without support, feenableexcept fails and has no effect
+      int enabled = 0;
+      if( !ISINMASK( exInvalidOp ) )  enabled |= FE_INVALID;
 #if defined( FE_DENORMAL )
-      if( ( oldcw & FE_DENORMAL ) ) ADD2MASK( exDenormalized );
-#else// assume always on if FE_DENORMAL not defined
-      ADD2MASK( exDenormalized );
+      if( !ISINMASK( exDenormalized ) ) enabled |= FE_DENORMAL;
 #endif
-      if( ( oldcw & FE_DIVBYZERO ) ) ADD2MASK( exZeroDivide );
-      if( ( oldcw & FE_OVERFLOW ) ) ADD2MASK( exOverflow );
-      if( ( oldcw & FE_UNDERFLOW ) ) ADD2MASK( exUnderflow );
-      if( ( oldcw & FE_INEXACT ) ) ADD2MASK( exPrecision );
-
-      newcw = 0;
-      if( ISINMASK( exInvalidOp ) ) newcw |= FE_INVALID;
-#if defined( FE_DENORMAL )
-      if( ISINMASK( exDenormalized ) ) newcw |= FE_DENORMAL;
-#endif
-      if( ISINMASK( exZeroDivide ) ) newcw |= FE_DIVBYZERO;
-      if( ISINMASK( exOverflow ) ) newcw |= FE_OVERFLOW;
-      if( ISINMASK( exUnderflow ) ) newcw |= FE_UNDERFLOW;
-      if( ISINMASK( exPrecision ) ) newcw |= FE_INEXACT;
-      fenv.__fpcr &= ~( FE_ALL_EXCEPT << FE_EXCEPT_SHIFT );
-      fenv.__fpcr |= newcw << FE_EXCEPT_SHIFT;
-      (void) fesetenv( &fenv );
+      if( !ISINMASK( exZeroDivide ) ) enabled |= FE_DIVBYZERO;
+      if( !ISINMASK( exOverflow ) )   enabled |= FE_OVERFLOW;
+      if( !ISINMASK( exUnderflow ) )  enabled |= FE_UNDERFLOW;
+      if( !ISINMASK( exPrecision ) )  enabled |= FE_INEXACT;
+      (void) fedisableexcept( FE_ALL_EXCEPT & ~enabled );
+      (void) feenableexcept( enabled );
    }
-#elif defined( __linux )
+#elif defined( __linux__ ) && defined( __x86_64__ ) // LLM-generated; OH checked
    {
-      std::fenv_t fenv;
-      (void) fegetenv( &fenv );
-      unsigned short oldcw = fenv.__control_word & FE_ALL_EXCEPT;
-      if( oldcw & FE_INVALID ) ADD2MASK( exInvalidOp );
-#if defined( FE_DENORMAL )
-      if( oldcw & FE_DENORMAL ) ADD2MASK( exDenormalized );
-#else
-      ADD2MASK( exDenormalized );
-#endif
-      if( oldcw & FE_DIVBYZERO ) ADD2MASK( exZeroDivide );
-      if( oldcw & FE_OVERFLOW ) ADD2MASK( exOverflow );
-      if( oldcw & FE_UNDERFLOW ) ADD2MASK( exUnderflow );
-      if( oldcw & FE_INEXACT ) ADD2MASK( exPrecision );
+      curMask = GetExceptionMask();
 
-      unsigned short newcw = 0;
-      if( ISINMASK( exInvalidOp ) ) newcw |= FE_INVALID;
-#if defined( FE_DENORMAL )
-      if( ISINMASK( exdenormalized ) ) newcw |= FE_DENORMAL;
-#endif
-      if( ISINMASK( exZeroDivide ) ) newcw |= FE_DIVBYZERO;
-      if( ISINMASK( exOverflow ) ) newcw |= FE_OVERFLOW;
-      if( ISINMASK( exUnderflow ) ) newcw |= FE_UNDERFLOW;
-      if( ISINMASK( exPrecision ) ) newcw |= FE_INEXACT;
-      fenv.__control_word &= ~FE_ALL_EXCEPT;
-      fenv.__control_word |= newcw;
-      (void) fesetenv( &fenv );
+      // non-glibc libc (e.g. musl) without feenableexcept: update MXCSR for SSE and the x87 control word
+      // for long double. A bit set means that the exception is masked
+      unsigned int masked = 0;
+      if( ISINMASK( exInvalidOp ) )    masked |= mxcsrInvalid;
+      if( ISINMASK( exDenormalized ) ) masked |= mxcsrDenormal;
+      if( ISINMASK( exZeroDivide ) )   masked |= mxcsrZeroDivide;
+      if( ISINMASK( exOverflow ) )     masked |= mxcsrOverflow;
+      if( ISINMASK( exUnderflow ) )    masked |= mxcsrUnderflow;
+      if( ISINMASK( exPrecision ) )    masked |= mxcsrPrecision;
+      _mm_setcsr( ( _mm_getcsr() & ~mxcsrManaged ) | masked );
+
+      // the x87 control word has the same layout, shifted by 7 bits
+      unsigned short cw;
+      __asm__ __volatile__( "fnstcw %0" : "=m"( cw ) );
+      cw = static_cast<unsigned short>( ( cw & ~( mxcsrManaged >> 7 ) ) | ( masked >> 7 ) );
+      __asm__ __volatile__( "fldcw %0" : : "m"( cw ) );
+   }
+#elif defined( __linux__ ) && defined( __aarch64__ ) // LLM-generated; OH checked, NEED test
+   {
+      curMask = GetExceptionMask();
+
+      // non-glibc libc (e.g. musl) without feenableexcept: update FPCR. A bit set means that the exception traps
+      // Note that trapping is optional on aarch64: on CPUs without support, these bits are ignored (read as zero)
+      uint64_t enabled = 0;
+      if( !ISINMASK( exInvalidOp ) )    enabled |= fpcrInvalid;
+      if( !ISINMASK( exDenormalized ) ) enabled |= fpcrDenormal;
+      if( !ISINMASK( exZeroDivide ) )   enabled |= fpcrZeroDivide;
+      if( !ISINMASK( exOverflow ) )     enabled |= fpcrOverflow;
+      if( !ISINMASK( exUnderflow ) )    enabled |= fpcrUnderflow;
+      if( !ISINMASK( exPrecision ) )    enabled |= fpcrPrecision;
+      writeFPCR( ( readFPCR() & ~fpcrManaged ) | enabled );
    }
 #else
 #error "function SetExceptionMask not implemented for this OS or compiler" is_not_implemented;
    // ...
 #endif
-   return result;
-}
 
-void SetExceptionMask2P3()
-{
-   SetExceptionMask( { exDenormalized, exUnderflow, exPrecision, exInvalidOp, exZeroDivide, exOverflow } );
+   return curMask;
 }
 
 void ClearExceptions()

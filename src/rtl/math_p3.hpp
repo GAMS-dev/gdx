@@ -52,7 +52,6 @@ double LnXP1( double x );
 
 TFPUExceptionMask GetExceptionMask();
 TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask );
-void SetExceptionMask2P3();
 void ClearExceptions();
 
 double IntPower( double X, int I );
