@@ -171,10 +171,13 @@ TFPUExceptionMask GetExceptionMask()
       fenv_t fenv;
       unsigned short cw;
       (void) fegetenv( &fenv );
-      cw = fenv.__control & FE_ALL_EXCEPT;
+      // SSE arithmetic on doubles is governed by MXCSR, whose mask bits are the x87 ones shifted by 7
+      cw = ( fenv.__mxcsr >> 7 ) & FE_ALL_EXCEPT;
       if( cw & FE_INVALID ) ADD2MASK( exInvalidOp );
 #if defined( FE_DENORMAL )
       if( cw & FE_DENORMAL ) ADD2MASK( exDenormalized );
+#elif defined( FE_DENORMALOPERAND )// name used by macOS on Intel
+      if( cw & FE_DENORMALOPERAND ) ADD2MASK( exDenormalized );
 #else// assume always on if FE_DENORMAL not defined
       ADD2MASK( exDenormalized );
 #endif
@@ -308,10 +311,13 @@ TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &mask )
       unsigned short oldcw, newcw;
 
       (void) fegetenv( &fenv );
-      oldcw = fenv.__control & FE_ALL_EXCEPT;
+      // SSE arithmetic on doubles is governed by MXCSR, whose mask bits are the x87 ones shifted by 7
+      oldcw = ( fenv.__mxcsr >> 7 ) & FE_ALL_EXCEPT;
       if( oldcw & FE_INVALID ) ADD2MASK( exInvalidOp );
 #if defined( FE_DENORMAL )
       if( oldcw & FE_DENORMAL ) ADD2MASK( exDenormalized );
+#elif defined( FE_DENORMALOPERAND )// name used by macOS on Intel
+      if( oldcw & FE_DENORMALOPERAND ) ADD2MASK( exDenormalized );
 #else// assume always on if FE_DENORMAL not defined
       ADD2MASK( exDenormalized );
 #endif
@@ -325,12 +331,16 @@ TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &mask )
       newcw -= FE_INVALID + FE_DIVBYZERO + FE_OVERFLOW + FE_UNDERFLOW + FE_INEXACT;
 #if defined( FE_DENORMAL )
       newcw -= FE_DENORMAL;
+#elif defined( FE_DENORMALOPERAND )
+      newcw -= FE_DENORMALOPERAND;
 #endif
       // all of this respects bits that must stay set
 
       if( ISINMASK( exInvalidOp ) ) newcw |= FE_INVALID;
 #if defined( FE_DENORMAL )
       if( ISINMASK( exDenormalized ) ) newcw |= FE_DENORMAL;
+#elif defined( FE_DENORMALOPERAND )// name used by macOS on Intel
+      if( ISINMASK( exDenormalized ) ) newcw |= FE_DENORMALOPERAND;
 #endif
       if( ISINMASK( exZeroDivide ) ) newcw |= FE_DIVBYZERO;
       if( ISINMASK( exOverflow ) ) newcw |= FE_OVERFLOW;
@@ -338,6 +348,8 @@ TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &mask )
       if( ISINMASK( exPrecision ) ) newcw |= FE_INEXACT;
       fenv.__control &= ~FE_ALL_EXCEPT;
       fenv.__control |= newcw;
+      fenv.__mxcsr &= ~( FE_ALL_EXCEPT << 7 );
+      fenv.__mxcsr |= newcw << 7;
       (void) fesetenv( &fenv );
    } /* macOS on Intel */
 #elif defined( __linux__ ) && defined( __GLIBC__ ) // LLM-generated; OH checked
