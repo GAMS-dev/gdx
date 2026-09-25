@@ -96,7 +96,7 @@ double IntPower( double X, const int I )
    return res;
 }
 
-#if defined( __linux__ ) && !defined( __GLIBC__ ) && defined( __x86_64__ ) // LLM-generated; OH: TEST NEEDED
+#if defined( __linux__ ) && !defined( __GLIBC__ ) && defined( __x86_64__ ) // LLM-generated; reviewed by OH
 // MXCSR exception mask bits (a set bit masks the exception)
 constexpr unsigned int mxcsrInvalid = 1u << 7, mxcsrDenormal = 1u << 8, mxcsrZeroDivide = 1u << 9,
                        mxcsrOverflow = 1u << 10, mxcsrUnderflow = 1u << 11, mxcsrPrecision = 1u << 12;
@@ -391,7 +391,7 @@ TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &mask )
       cw = static_cast<unsigned short>( ( cw & ~( mxcsrManaged >> 7 ) ) | ( masked >> 7 ) );
       __asm__ __volatile__( "fldcw %0" : : "m"( cw ) );
    }
-#elif defined( __linux__ ) && defined( __aarch64__ ) // LLM-generated; OH checked, NEED test
+#elif defined( __linux__ ) && defined( __aarch64__ ) // LLM-generated; OH checked;
    {
       curMask = GetExceptionMask();
 
