@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <set>
+#include <bitset>
 #include <cstdint>
 
 #ifndef GDX_NS
@@ -44,13 +44,14 @@ enum TFPUException : uint8_t
    exUnderflow,
    exPrecision
 };
-using TFPUExceptionMask = std::set<TFPUException>;
+
+static_assert(exPrecision < 8);
+using TFPUExceptionMask = std::bitset<8>; //picking 8 as it doesn't make sense of having a smaller size
 
 double LnXP1( double x );
 
 TFPUExceptionMask GetExceptionMask();
 TFPUExceptionMask SetExceptionMask( const TFPUExceptionMask &Mask );
-void SetExceptionMask2P3();
 void ClearExceptions();
 
 double IntPower( double X, int I );

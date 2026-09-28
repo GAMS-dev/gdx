@@ -222,6 +222,7 @@ set(tests
 	src/tests/gdlib/utilstests.cpp
 	src/tests/gdlib/strindexbuftests.cpp
 
+	src/tests/rtl/mathp3tests.cpp
 	src/tests/rtl/p3iotests.cpp
 	src/tests/rtl/p3utilstests.cpp
 	src/tests/rtl/sysutilsp3tests.cpp
