@@ -574,10 +574,17 @@ void CompareSy(const int Sy1, const int Sy2) {
 
   // Create default record for this type
   if (ST == dt_var || ST == dt_equ) {
+    // userInfo is the variable type for a variable, but GMS_EQU_USERINFO_BASE + the equation type for an
+    // equation, so it must go through gmsFixVarType/gmsFixEquType before indexing the default-record tables.
+    // Like gxfile, fall back to the unknown variable type / the =e= equation type if the type is not valid.
     if (ST == dt_var) {
-      std::copy(std::begin(gmsDefRecVar[VarEquType]), std::end(gmsDefRecVar[VarEquType]), std::begin(DefValues));
+      const int T{gmsFixVarType(VarEquType)};
+      const int VarType{T >= GMS_VARTYPE_UNKNOWN && T < GMS_VARTYPE_MAX ? T : GMS_VARTYPE_UNKNOWN};
+      std::copy(std::begin(gmsDefRecVar[VarType]), std::end(gmsDefRecVar[VarType]), std::begin(DefValues));
     } else {
-      std::copy(std::begin(gmsDefRecEqu[VarEquType]), std::end(gmsDefRecEqu[VarEquType]), std::begin(DefValues));
+      const int T{gmsFixEquType(VarEquType)};
+      const int EquType{T >= GMS_EQUTYPE_E && T < GMS_EQUTYPE_MAX ? T : GMS_EQUTYPE_E};
+      std::copy(std::begin(gmsDefRecEqu[EquType]), std::end(gmsDefRecEqu[EquType]), std::begin(DefValues));
     }
   }
 
