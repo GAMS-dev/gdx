@@ -15,6 +15,10 @@ from .examples.default_values_examples import (
     create_default_values_example_1,
     create_default_values_example_2,
 )
+from .examples.equation_default_values_examples import (
+    create_equation_default_values_example_1,
+    create_equation_default_values_example_2,
+)
 from .examples.description_examples import (
     create_description_example_1,
     create_description_example_2,
@@ -43,6 +47,8 @@ class TestGdxDiff(unittest.TestCase):
         "full_example_changed_data_and_variables",
         "default_values_example_1",
         "default_values_example_2",
+        "equation_default_values_example_1",
+        "equation_default_values_example_2",
         "domain_example_1",
         "domain_example_2",
         "order_example_1",
@@ -71,6 +77,12 @@ class TestGdxDiff(unittest.TestCase):
         )
         create_default_values_example_1(cls.FILE_PATHS["default_values_example_1"])
         create_default_values_example_2(cls.FILE_PATHS["default_values_example_2"])
+        create_equation_default_values_example_1(
+            cls.FILE_PATHS["equation_default_values_example_1"]
+        )
+        create_equation_default_values_example_2(
+            cls.FILE_PATHS["equation_default_values_example_2"]
+        )
         create_domain_example_1(cls.FILE_PATHS["domain_example_1"])
         create_domain_example_2(cls.FILE_PATHS["domain_example_2"])
         create_order_example_1(cls.FILE_PATHS["order_example_1"])
@@ -884,6 +896,33 @@ class TestGdxDiff(unittest.TestCase):
             "FilesCompared": [
                 ["File1", self.FILE_PATHS["default_values_example_1"]],
                 ["File2", self.FILE_PATHS["default_values_example_2"]],
+            ]
+        }
+        self.check_gdx_file(symbols)
+
+    def test_equation_default_values_example_1_and_equation_default_values_example_2(
+        self,
+    ) -> None:
+        output = self.run_gdxdiff(
+            [
+                self.FILE_PATHS["equation_default_values_example_1"],
+                self.FILE_PATHS["equation_default_values_example_2"],
+                self.FILE_PATHS["diff_file"],
+            ]
+        )
+        self.check_output(
+            output,
+            return_code=0,
+            first_offset=3,
+            second_offset=3,
+            first_delete=[-3],
+            second_delete=[-3],
+        )
+
+        symbols: GamsSymbols = {
+            "FilesCompared": [
+                ["File1", self.FILE_PATHS["equation_default_values_example_1"]],
+                ["File2", self.FILE_PATHS["equation_default_values_example_2"]],
             ]
         }
         self.check_gdx_file(symbols)
