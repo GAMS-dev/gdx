@@ -15,15 +15,15 @@ from .examples.default_values_examples import (
     create_default_values_example_1,
     create_default_values_example_2,
 )
-from .examples.equation_default_values_examples import (
-    create_equation_default_values_example_1,
-    create_equation_default_values_example_2,
-)
 from .examples.description_examples import (
     create_description_example_1,
     create_description_example_2,
 )
 from .examples.domain_examples import create_domain_example_1, create_domain_example_2
+from .examples.equation_default_values_examples import (
+    create_equation_default_values_example_1,
+    create_equation_default_values_example_2,
+)
 from .examples.full_example import create_full_example
 from .examples.full_example_changed_data_and_variables import (
     create_full_example_changed_data_and_variables,
