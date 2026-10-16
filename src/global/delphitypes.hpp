@@ -66,6 +66,9 @@ class OffsetArray : public std::array<T, ubIncl-lbIncl+1>
    // Hide direct buffer access as this could be error-prone
    T *data() { return nullptr; }
 public:
+   static constexpr int lb = lbIncl;
+   static constexpr int ub = ubIncl;
+
    constexpr T& operator[]( const int ix) {
       assert( ix >= lbIncl && ix <= ubIncl && "Index must be in range!" );
       return std::array<T, ubIncl-lbIncl+1>::operator[](ix - lbIncl);
@@ -170,7 +173,7 @@ public:
       return temp;
    }
 
-   T operator+(int addend) const 
+   T operator+(int addend) const
    {
        return static_cast<T>(value + addend);
    }
