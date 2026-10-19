@@ -28,6 +28,10 @@
 #include <string>   // for string
 #include <cstring>  // for strerror, size_t, strcmp, strcpy
 
+#if __cplusplus >= 202002L
+#include <format>
+#endif
+
 #include "p3io.hpp"
 #include "sysutils_p3.hpp"
 #include "p3platform.hpp"// for OSFileType, tOSFileType
@@ -590,7 +594,7 @@ std::u8string to_u8string(const char* str)
 std::wstring to_wstring(std::u8string_view utf8_str)
 {
     if (utf8_str.empty()) {
-        return L"";
+        return std::wstring(L"");
     }
 
     // 1. Ask Windows how many wide characters (wchar_t) are needed
@@ -631,7 +635,7 @@ std::u8string QueryEnvironmentVariable( std::u8string_view name )
       return u8"";
    std::wstring val;
    val.resize( len - 1 );
-   GetEnvironmentVariableW( namew.c_str(), val.data(), len );
+   GetEnvironmentVariableW( namew.data(), val.data(), len );
    if( val.length() > 255 )
       val.resize( 255 );
    return to_u8string(val.data());
@@ -656,7 +660,7 @@ std::wstring QueryEnvironmentVariable( std::wstring_view name )
 {
    DWORD len = GetEnvironmentVariableW( name.data(), nullptr, 0 );
    if( !len )
-      return L"";
+      return std::wstring(L"");
    std::wstring val;
    val.resize( len - 1 );
    GetEnvironmentVariableW( name.data(), val.data(), len );
