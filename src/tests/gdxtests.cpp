@@ -2913,4 +2913,148 @@ TEST_CASE("Example from README markdown")
 
 }
 
+TEST_CASE( "Test reading truncated and damaged GDX files fails with an error code instead of allocating without bound" )
+{
+   const std::string fn { "damaged_src.gdx"s }, damagedFn { "damaged.gdx"s };
+   const std::array symbolNames { "o_iterationNumber", "s80_bool", "all_regi", "p80_repy" };
+
+   // A small but complete file: scalars, a set with element texts, a parameter with domain info and an acronym
+   testWrite( fn, [&]( TGXFileObj &pgx ) {
+      TgdxUELIndex keys {};
+      TgdxValues vals {};
+      int txtNr, syNr;
+      REQUIRE( pgx.gdxAcronymAdd( "acr", "an acronym", 1 ) );
+      REQUIRE( pgx.gdxUELRegisterRawStart() );
+      for( const char *uel: { "CAZ", "CHA", "EUR", "modelstat", "solvestat" } )
+         REQUIRE( pgx.gdxUELRegisterRaw( uel ) );
+      REQUIRE( pgx.gdxUELRegisterDone() );
+      for( const auto &[name, val]: { std::pair { "o_iterationNumber", 12.0 }, std::pair { "s80_bool", 1.0 } } )
+      {
+         REQUIRE( pgx.gdxDataWriteRawStart( name, "scalar", 0, dt_par, 0 ) );
+         vals[GMS_VAL_LEVEL] = val;
+         REQUIRE( pgx.gdxDataWriteRaw( nullptr, vals.data() ) );
+         REQUIRE( pgx.gdxDataWriteDone() );
+      }
+      for( int i { 1 }; i <= 3; i++ )
+         REQUIRE( pgx.gdxAddSetText( ( "region "s + std::to_string( i ) ).c_str(), txtNr ) );
+      REQUIRE( pgx.gdxDataWriteRawStart( "all_regi", "regions", 1, dt_set, 0 ) );
+      for( int i { 1 }; i <= 3; i++ )
+      {
+         keys[0] = i;
+         vals[GMS_VAL_LEVEL] = i;// element text number
+         REQUIRE( pgx.gdxDataWriteRaw( keys.data(), vals.data() ) );
+      }
+      REQUIRE( pgx.gdxDataWriteDone() );
+      REQUIRE( pgx.gdxDataWriteRawStart( "p80_repy", "report", 2, dt_par, 0 ) );
+      for( int i { 1 }; i <= 3; i++ )
+         for( int j { 4 }; j <= 5; j++ )
+         {
+            keys[0] = i;
+            keys[1] = j;
+            vals[GMS_VAL_LEVEL] = 10 * i + j;
+            REQUIRE( pgx.gdxDataWriteRaw( keys.data(), vals.data() ) );
+         }
+      REQUIRE( pgx.gdxDataWriteDone() );
+      REQUIRE( pgx.gdxFindSymbol( "p80_repy", syNr ) );
+      const char *domains[] { "all_regi", "solveinfo80" };
+      REQUIRE( pgx.gdxSymbolSetDomainX( syNr, domains ) );
+   } );
+
+   std::vector<char> data;
+   {
+      std::ifstream ifs { fn, std::ios::binary | std::ios::ate };
+      REQUIRE( ifs );
+      data.resize( static_cast<size_t>( ifs.tellg() ) );
+      ifs.seekg( 0 );
+      REQUIRE( ifs.read( data.data(), static_cast<std::streamsize>( data.size() ) ) );
+   }
+   REQUIRE_GT( data.size(), 200 );
+
+   // Open the damaged bytes and use them like a reader would: no call may throw and every failure must be an error code
+   const auto readDamaged = [&]( const std::vector<char> &bytes, const std::string &what ) {
+      {
+         std::ofstream ofs { damagedFn, std::ios::binary | std::ios::trunc };
+         ofs.write( bytes.data(), static_cast<std::streamsize>( bytes.size() ) );
+      }
+      INFO( what );
+      TGXFileObj pgx;
+      int errNr { -1 }, rc {};
+      CHECK_NOTHROW( rc = pgx.gdxOpenRead( damagedFn.c_str(), errNr ) );
+      if( !rc )
+      {
+         char msg[GMS_SSSIZE];
+         CHECK_NE( 0, errNr );
+         CHECK( pgx.gdxErrorStr( errNr, msg ) );
+      }
+      else
+      {
+         CHECK_EQ( 0, errNr );
+         int syCnt, uelCnt, syNr, dim, typ, nrRecs, dimFrst;
+         char syId[GMS_SSSIZE];
+         TgdxUELIndex keys {};
+         TgdxValues vals {};
+         CHECK_NOTHROW( pgx.gdxSystemInfo( syCnt, uelCnt ) );
+         for( const char *name: symbolNames )
+         {
+            CHECK_NOTHROW( rc = pgx.gdxFindSymbol( name, syNr ) );
+            if( !rc ) continue;
+            CHECK_NOTHROW( pgx.gdxSymbolInfo( syNr, syId, dim, typ ) );
+            CHECK_NOTHROW( rc = pgx.gdxDataReadRawStart( syNr, nrRecs ) );
+            if( !rc ) continue;
+            for( int i {}; i < 3 && rc; i++ )
+               CHECK_NOTHROW( rc = pgx.gdxDataReadRaw( keys.data(), vals.data(), dimFrst ) );
+            CHECK_NOTHROW( pgx.gdxDataReadDone() );
+         }
+      }
+      CHECK_NOTHROW( pgx.gdxClose() );
+   };
+
+   // Every prefix of the file: an interrupted write or download
+   for( size_t len {}; len <= data.size(); len++ )
+      readDamaged( std::vector<char>( data.begin(), data.begin() + static_cast<std::ptrdiff_t>( len ) ),
+                   "prefix of "s + std::to_string( len ) + " bytes"s );
+
+   // A prefix padded with junk to the original size: counts and positions become garbage instead of being cut off
+   for( const char filler: { '\xFF', '\x7F' } )
+      for( size_t len {}; len <= data.size(); len++ )
+      {
+         std::vector<char> bytes( data.begin(), data.begin() + static_cast<std::ptrdiff_t>( len ) );
+         bytes.resize( data.size(), filler );
+         readDamaged( bytes, "prefix of "s + std::to_string( len ) + " bytes padded with "s + std::to_string( static_cast<int>( static_cast<uint8_t>( filler ) ) ) );
+      }
+
+   // Major index entries pointing outside the file or to the wrong place. Header layout: 17 bytes of byte order
+   // patterns, gdxHeaderNr (1), "GAMSGDX" (8), version (4), compression (4), two strings (file system id and producer),
+   // then MARK_BOI (4) and six int64 section offsets.
+   size_t pos { 17 + 1 + 8 + 4 + 4 };
+   pos += 1 + static_cast<uint8_t>( data[pos] );
+   pos += 1 + static_cast<uint8_t>( data[pos] );
+   int boi;
+   std::memcpy( &boi, &data[pos], sizeof( int ) );
+   REQUIRE_EQ( 19510624, boi );// MARK_BOI
+   pos += sizeof( int );
+   for( int ix {}; ix < 6; ix++ )
+      for( const int64_t offset: { static_cast<int64_t>( data.size() ) + 1000, int64_t { -1 }, std::numeric_limits<int64_t>::max(), int64_t { 0 } } )
+      {
+         std::vector<char> bytes { data };
+         std::memcpy( &bytes[pos + ix * sizeof( int64_t )], &offset, sizeof( int64_t ) );
+         readDamaged( bytes, "major index entry "s + std::to_string( ix ) + " set to "s + std::to_string( offset ) );
+      }
+
+   // A compressed file whose first block claims more bytes than the decompression buffers hold
+   {
+      std::vector<char> bytes { data };
+      const int compressed { 1 };
+      std::memcpy( &bytes[17 + 1 + 8 + 4], &compressed, sizeof( int ) );// compression flag in the header
+      int64_t symbPos;
+      std::memcpy( &symbPos, &bytes[pos], sizeof( int64_t ) );
+      bytes[static_cast<size_t>( symbPos )] = 1;// compressed block of 65535 bytes
+      bytes[static_cast<size_t>( symbPos ) + 1] = bytes[static_cast<size_t>( symbPos ) + 2] = '\xFF';
+      readDamaged( bytes, "compressed block longer than the buffer"s );
+   }
+
+   fs::remove( fn );
+   fs::remove( damagedFn );
+}
+
 }// namespace gdx::tests::gdxtests
