@@ -345,16 +345,23 @@ std::string TXStream::ReadString()
    return s;
 }
 
-void TXStream::ReadSString(char *s, uint8_t &len)
+bool TXStream::ReadSString( char *s, uint8_t &len )
 {
    if( Paranoid ) ParCheck( RWType::rw_string );
-   if( !Read( &len, 1 ) || !len )
+   if( !Read( &len, 1 ) )
+   {
+      len = 0;
+      s[0] = '\0';
+      return false;
+   }
+   if( !len )
    {
       s[0] = '\0';
-      return;
+      return true;
    }
-   Read( s, len );
+   const bool complete { Read( s, len ) == len };
    s[len] = '\0';
+   return complete;
 }
 
 double TXStream::ReadDouble()
@@ -473,13 +480,9 @@ std::string TXFileStream::RandString( int L )
 
 int64_t TXFileStream::GetSize()
 {
-#ifdef __IN_CPPMEX__
-   int64_t res;
+   int64_t res {};
    SetLastIOResult( p3FileGetSize( FS, res ) );
    return res;
-#else
-   return 0;
-#endif
 }
 
 int64_t TXFileStream::GetPosition()
@@ -595,12 +598,15 @@ bool TBufferedFileStream::FillBuffer()
       else
       {
          const auto WLen = ui16( ( CBufPtr->cxHeader.cxB1 << 8 ) + CBufPtr->cxHeader.cxB2 );
-         if( !CBufPtr->cxHeader.cxTyp ) NrLoaded = TXFileStream::Read( BufPtr.data(), WLen );
+         // the block length comes from the file: a damaged file must not make us read past the buffers
+         if( WLen > ( CBufPtr->cxHeader.cxTyp ? CBufSize : BufSize ) ) NrLoaded = 0;
+         else if( !CBufPtr->cxHeader.cxTyp )
+            NrLoaded = TXFileStream::Read( BufPtr.data(), WLen );
          else
          {
-            TXFileStream::Read( &CBufPtr->cxData, WLen );
+            const auto CLen = TXFileStream::Read( &CBufPtr->cxData, WLen );
             unsigned long XLen = BufSize;// we need a var parameter
-            uncompress( BufPtr.data(), &XLen, &CBufPtr->cxData, WLen );
+            uncompress( BufPtr.data(), &XLen, &CBufPtr->cxData, CLen );
             NrLoaded = ui32(XLen);
          }
       }

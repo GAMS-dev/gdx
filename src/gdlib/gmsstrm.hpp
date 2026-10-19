@@ -136,7 +136,7 @@ protected:
    T ReadValue( RWType rwt )
    {
       if( Paranoid ) ParCheck( rwt );
-      T res;
+      T res {};// stays zero when the stream ends early (truncated file)
 #if !defined( NDEBUG ) && defined(__IN_CPPMEX__)
       auto numBytesRead { Read( &res, sizeof( T ) ) };
       // is not required to generally hold and code automatically detects EOF otherwise
@@ -147,12 +147,12 @@ protected:
       return res;
    }
 
+public:
+   virtual ~TXStream() = default;
+
    virtual int64_t GetPosition() = 0;
    virtual void SetPosition( int64_t P ) = 0;
    virtual int64_t GetSize() = 0;
-
-public:
-   virtual ~TXStream() = default;
 
    virtual uint32_t Read( void *Buffer, uint32_t Count ) = 0;
    virtual uint32_t Write( const void *Buffer, uint32_t Count ) = 0;
@@ -180,7 +180,7 @@ public:
    void WritePChar( const char *s, int L );
 
    std::string ReadString();
-   void ReadSString(char *s, uint8_t &len);
+   bool ReadSString( char *s, uint8_t &len );// false when the stream ended before the whole string
    virtual double ReadDouble();
    virtual int ReadInteger();
    uint8_t ReadByte();
@@ -254,9 +254,6 @@ class TBufferedFileStream : public TXFileStream
 
    bool FillBuffer();
 
-protected:
-   int64_t GetSize() override;
-
 public:
    TBufferedFileStream( const std::string &FileName, uint16_t Mode );
    ~TBufferedFileStream() override;
@@ -272,6 +269,8 @@ public:
    int64_t GetPosition() override;
 
    void SetPosition( int64_t p ) override;
+
+   int64_t GetSize() override;
 };
 
 void reverseBytesMax8( const void *psrc, void *pdest, int sz );
@@ -286,11 +285,11 @@ class TMiBufferedStream : public TBufferedFileStream
    T ReadValueOrdered( RWType rwt, bool order_type )
    {
       if( Paranoid ) ParCheck( rwt );
-      T res;
+      T res {};// stays zero when the stream ends early (truncated file)
       if( !order_type ) Read( &res, sizeof( T ) );
       else
       {
-         T tmp;
+         T tmp {};
          Read( &tmp, sizeof( T ) );
          reverseBytesMax8( &tmp, &res, sizeof( T ) );
       }

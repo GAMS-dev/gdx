@@ -647,7 +647,7 @@ int TGXFileObj::gdxClose()
    ErrorList = nullptr;
    FilterList = nullptr;
    AcronymList = nullptr;
-   MapSetText = nullptr;
+   MapSetText.clear();
 
    fmode = f_not_open;
    fstatus = stat_notopen;
@@ -1406,7 +1406,8 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
    }
 
    uint8_t B;
-   FFile->Read( &B, 1 );
+   // the writer never stores 0 here: a short read or a 0 means the data ends early (damaged file)
+   if( !FFile->Read( &B, 1 ) || !B ) return false;
    if( B > DeltaForRead )
    {// relative change in last dimension
       if( B == 255 ) return false;
@@ -1451,12 +1452,12 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
          }
          AVals[DV] = SV != vm_normal ? readIntlValueMapDbl[SV] : maybeRemap( FFile->ReadDouble() );
       }
-      if( MapSetText && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set )
+      if( !MapSetText.empty() && AVals[GMS_VAL_LEVEL] != 0.0 && CurSyPtr->SDataType == dt_set )
       {// remap settext number
          // NOTE: Not covered by unit tests yet.
          const double X { AVals[GMS_VAL_LEVEL] };
          if( const int D { ( utils::round<int>( X ) ) };
-            std::abs( X - D ) < 1e-12 && D >= 0 && D <= SetTextList->GetCapacity() )
+             std::abs( X - D ) < 1e-12 && D >= 0 && D < static_cast<int>( MapSetText.size() ) )
             AVals[GMS_VAL_LEVEL] = MapSetText[D];
       }
       if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
@@ -1851,6 +1852,13 @@ static inline std::string_view substr( const std::string_view s, int offset, int
    return ( s.empty() || offset > (int) s.size() - 1 ) ? std::string_view {} : s.substr( offset, len );
 }
 
+// An element count read from a damaged file can be anything: reserve no more entries than there are bytes left in the
+// file to read them from (reserving less than a valid compressed file needs only costs a reallocation later)
+static int EntriesToReserve( TXStream &S, const int Cnt )
+{
+   return static_cast<int>( std::max<int64_t>( 0, std::min<int64_t>( Cnt, S.GetSize() - S.GetPosition() ) ) );
+}
+
 int TGXFileObj::ReadUELTable(bool isDeferred)
 {
    const int64_t oldPos = FFile->GetPosition();
@@ -1869,7 +1877,7 @@ int TGXFileObj::ReadUELTable(bool isDeferred)
    int NrElem = FFile->ReadInteger();
    // subtract 2*6 bytes for MARK_UEL ("_UEL_\0") and 4 bytes for UEL count integer
    const auto uelLabelStrBytes { VersionRead >= 7 ? ReadAcronymPos - ReadUELPos - 6 * 2 - 4 : 0 };
-   UELTable->SetCapacity( NrElem, uelLabelStrBytes );
+   UELTable->SetCapacity( EntriesToReserve( *FFile, NrElem ), uelLabelStrBytes );
    // bug for pre 2002
    if( substr( FileSystemID, 15, 4 ) == "2001"s )
       NrElem--;
@@ -1878,7 +1886,7 @@ int TGXFileObj::ReadUELTable(bool isDeferred)
    {
       uint8_t slen;
       sstring s;
-      FFile->ReadSString( s.data(), slen );
+      if( !FFile->ReadSString( s.data(), slen ) ) break;// file ends early: the end marker check below reports it
       UELTable->StoreObject( s.data(), slen, -1 );
    }
    UelCntOrig = UELTable->size();// needed when reading universe
@@ -1906,27 +1914,24 @@ int TGXFileObj::ReadSetTextList(bool isDeferred)
       FFile = nullptr;
       return false;
    }
-   int NrElem = FFile->ReadInteger();
+   const int NrElem = FFile->ReadInteger();
    // set text table (when there) is always before UEL table
    // subtract bytes for length (4-byte) and twice 7 chars MARK_SETT (_SETT_\0)
    const auto setTextStrBytes { ReadUELPos - ReadSetTextPos - 7 * 2 - 4 };
-   SetTextList->SetCapacity( NrElem, setTextStrBytes );
+   SetTextList->SetCapacity( EntriesToReserve( *FFile, NrElem ), setTextStrBytes );
    for( int N {}; N < NrElem; N++ )
    {
       uint8_t slen;
       sstring s;
-      FFile->ReadSString( s.data(), slen );
+      if( !FFile->ReadSString( s.data(), slen ) ) break;// file ends early: the end marker check below reports it
       if( const int TextNum { SetTextList->Add( s.data(), slen ) };
           TextNum != N )
       {// duplicates stored in GDX file, e.g. empty string
          // NOTE: Not covered by unit tests yet.
-         if( !MapSetText )
-         {
-            MapSetText = std::make_unique<int[]>( NrElem );
+         if( MapSetText.empty() )
             for( int D {}; D < N; D++ )
-               MapSetText[D] = D;
-         }
-         MapSetText[N] = TextNum;
+               MapSetText.push_back( D );
+         MapSetText.push_back( TextNum );
       }
    }
    if (ErrorCondition(FFile->ReadString() == MARK_SETT, ERR_OPEN_TEXTMARKER2))
@@ -2031,6 +2036,15 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
          DomStrPos = FFile->ReadInt64();
       }
    }
+   // the section positions come from the file: a damaged file must not make us seek outside of it
+   const int64_t FileSize { FFile->GetSize() };
+   const auto InFile = [&]( const int64_t Pos ) { return Pos >= 0 && Pos < FileSize; };
+   if( ErrorCondition( InFile( SymbPos ), ERR_OPEN_SYMBOLMARKER1 ) ||
+       ErrorCondition( InFile( ReadUELPos ), ERR_OPEN_UELMARKER1 ) ||
+       ErrorCondition( InFile( ReadSetTextPos ), ERR_OPEN_TEXTMARKER1 ) ||
+       ErrorCondition( VersionRead < 7 || InFile( ReadAcronymPos ), ERR_OPEN_ACROMARKER1 ) ||
+       ErrorCondition( VersionRead < 7 || !DomStrPos || InFile( DomStrPos ), ERR_OPEN_DOMSMARKER1 ) ) return FileErrorNr();
+
    // reading symbol table
    FFile->SetCompression( DoUncompress );
    FFile->SetPosition( SymbPos );
@@ -2038,7 +2052,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
    int NrElem { FFile->ReadInteger() };
    NameList = std::make_unique<TNameList>();
    NameList->OneBased = true;
-   NameList->SetCapacity( NrElem );
+   NameList->SetCapacity( EntriesToReserve( *FFile, NrElem ) );
    AcronymList = std::make_unique<TAcronymList>(true);
    FilterList = std::make_unique<TFilterList>();
    const int NrElemsOfSym = NrElem;
@@ -2046,8 +2060,9 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
    {
       uint8_t Slen;
       sstring S;
-      FFile->ReadSString(S.data(), Slen);
+      if( !FFile->ReadSString( S.data(), Slen ) ) break;// file ends early: the end marker check below reports it
       CurSyPtr = new TgdxSymbRecord {};
+      CurSyPtr->SSyNr = NameList->StoreObject( S.data(), Slen, CurSyPtr );// owned by the list from here on
       CurSyPtr->SPosition = VersionRead <= 5 ? FFile->ReadInteger() : FFile->ReadInt64();
       CurSyPtr->SDim = FFile->ReadInteger();
       uint8_t B { FFile->ReadByte() };
@@ -2055,6 +2070,10 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
       CurSyPtr->SUserInfo = FFile->ReadInteger();
       CurSyPtr->SDataCount = FFile->ReadInteger();
       CurSyPtr->SErrors = FFile->ReadInteger();
+      // dimension, type and data position come from the file: they index fixed size tables and the file itself
+      if( ErrorCondition( CurSyPtr->SDim >= 0 && CurSyPtr->SDim <= GLOBAL_MAX_INDEX_DIM, ERR_BADDIMENSION ) ||
+          ErrorCondition( B <= dt_alias, ERR_BADDATATYPE ) ||
+          ErrorCondition( InFile( CurSyPtr->SPosition ), ERR_BADDATAMARKER_DATA ) ) return FileErrorNr();
       B = FFile->ReadByte();
       CurSyPtr->SSetText = B;
       assignStrToBuf( FFile->ReadString(), CurSyPtr->SExplTxt.data(), GMS_SSSIZE );
@@ -2077,26 +2096,25 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
             {
                sstring s;
                uint8_t slen;
-               FFile->ReadSString( s.data(), slen );
+               if( !FFile->ReadSString( s.data(), slen ) ) break;// file ends early: the end marker check below reports it
                CurSyPtr->SCommentsList->Add( s.data(), slen );
             }
          }
       }
       CurSyPtr->SSetBitMap = nullptr;
       CurSyPtr->SDomStrings = nullptr;
-      CurSyPtr->SSyNr = NameList->StoreObject( S.data(), Slen, CurSyPtr );
    }
    if( ErrorCondition( FFile->ReadString() == MARK_SYMB, ERR_OPEN_SYMBOLMARKER2 ) ) return FileErrorNr();
 
    // reading UEL table (could be deferred until needed)
    UelReadDeferred = false;
-   ReadUELTable( false );
+   if( !ReadUELTable( false ) ) return FileErrorNr();
 
    // reading set text table (could be deferred until needed)
    if( ReadMode % 2 == 0 )
    {
       SetTextReadDeferred = false;
-      ReadSetTextList( false );
+      if( !ReadSetTextList( false ) ) return FileErrorNr();
    }
 
    // reading acronym list
@@ -2123,6 +2141,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
       {
          const int SyNr = FFile->ReadInteger();
          if( SyNr <= 0 ) break;
+         if( ErrorCondition( SyNr <= NameList->size(), ERR_BADSYMBOLINDEX ) ) return FileErrorNr();
          const auto sym = *NameList->GetObject( SyNr );
          sym->SDomStrings = std::make_unique<int[]>( sym->SDim );
          for( int D {}; D < sym->SDim; D++ )
@@ -4005,13 +4024,16 @@ void TAcronymList::LoadFromStream( TXStream &S )
 {
    const int Cnt { S.ReadInteger() };
    FList.Clear();
-   FList.SetCapacity( Cnt );
+   const int CntToReserve { EntriesToReserve( S, Cnt ) };
+   FList.SetCapacity( CntToReserve );
    if(useBatchAlloc)
-      batchAlloc.SetFirstBatchSize( Cnt * sizeof(TAcronym) );
+      batchAlloc.SetFirstBatchSize( CntToReserve * sizeof( TAcronym ) );
    while( FList.GetCount() < Cnt )
    {
       TAcronym *acro = useBatchAlloc ? new (batchAlloc.GetBytes<TAcronym>()) TAcronym { S } : new TAcronym { S };
       FList.Add( acro );
+      // the writer never stores an empty name: the stream ended early or is damaged (the caller misses the end marker)
+      if( acro->AcrName.empty() ) break;
    }
 }
 

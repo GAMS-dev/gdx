@@ -36,6 +36,7 @@
 #include <string>
 #include <cassert>
 #include <numeric>
+#include <algorithm>
 
 #ifndef GDX_NS
 #define GDX_NS gdxlib::
@@ -400,12 +401,13 @@ public:
    {
       Clear();
       const int Cnt { s.ReadInteger() };
-      SetCapacity( Cnt );
+      // the count comes from the file: reserve no more entries than there are bytes left to read them from
+      SetCapacity( static_cast<int>( std::min<int64_t>( Cnt, s.GetSize() - s.GetPosition() ) ) );
       for( int N {}; N < Cnt; N++ )
       {
          uint8_t slen;
          char sbuf[256];
-         s.ReadSString(sbuf, slen);
+         if( !s.ReadSString( sbuf, slen ) ) break;// stream ended early: the caller misses the end marker and reports it
          StoreObject( sbuf, slen, 0 );
       }
    }

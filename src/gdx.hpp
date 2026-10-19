@@ -1765,7 +1765,7 @@ enum : uint8_t
 int fComprLev {};
 std::unique_ptr<TUELTable> UELTable;
 std::unique_ptr<TSetTextList> SetTextList {};
-std::unique_ptr<int[]> MapSetText {};
+std::vector<int> MapSetText {};
 int FCurrentDim {};
 std::array<int, GLOBAL_MAX_INDEX_DIM> LastElem {}, PrevElem {}, MinElem {}, MaxElem {};
 std::array<std::array<char, GLOBAL_UEL_IDENT_SIZE>, GLOBAL_MAX_INDEX_DIM> LastStrElem {};
