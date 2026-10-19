@@ -40,8 +40,11 @@
 #include "gdlib/utils.hpp"
 #include "gdxdiff.hpp"
 #include "library/cmdpar.hpp"
-#include "rtl/p3process.hpp"
 #include "rtl/sysutils_p3.hpp"
+
+#if defined(_WIN32)
+#include "rtl/p3process.hpp"
+#endif
 
 // Global constants
 #include "generated/gclgms.h"
@@ -115,7 +118,7 @@ void FatalError2(const std::string &Msg1, const std::string &Msg2, const int Err
 }
 
 void CheckGDXError(const gdxHandle_t &PGX) {
-  int ErrNr{gdxGetLastError(PGX)};
+  const int ErrNr{gdxGetLastError(PGX)};
   if (ErrNr != 0) {
     library::ShortString S;
     gdxErrorStr(PGX, ErrNr, S.data());
@@ -199,7 +202,7 @@ void CompareSy(const int Sy1, const int Sy2) {
     return SymbOpen;
   };
 
-  auto SymbClose = [&]() -> void {
+  auto const SymbClose = [&]() -> void {
     if (SymbOpen) {
       SymbOpen = false;
       CheckGDXError(PGXDIF);
@@ -298,7 +301,7 @@ void CompareSy(const int Sy1, const int Sy2) {
 #endif
 
   auto DoublesEqual = [](const double V1, const double V2) -> bool {
-    auto DMin = [](const double a, const double b) -> double {
+    auto const DMin = [](const double a, const double b) -> double {
       return a <= b ? a : b;
     };
 
@@ -340,7 +343,7 @@ void CompareSy(const int Sy1, const int Sy2) {
     return result;
   };
 
-  auto CheckParDifference = [&](const gdxUelIndex_t &Keys, const gdxValues_t &V1, const gdxValues_t &V2) -> bool {
+  auto const CheckParDifference = [&](const gdxUelIndex_t &Keys, const gdxValues_t &V1, const gdxValues_t &V2) -> bool {
     bool result{true};
     if (ST == dt_par) {
       result = DoublesEqual(V1[GMS_VAL_LEVEL], V2[GMS_VAL_LEVEL]);
@@ -388,7 +391,7 @@ void CompareSy(const int Sy1, const int Sy2) {
     return result;
   };
 
-  auto CheckSetDifference = [&](const gdxUelIndex_t &Keys, const int txt1, const int txt2) -> bool {
+  auto const CheckSetDifference = [&](const gdxUelIndex_t &Keys, const int txt1, const int txt2) -> bool {
     library::ShortString S1, S2;
     int iNode;
     if (txt1 == 0) {
@@ -402,7 +405,7 @@ void CompareSy(const int Sy1, const int Sy2) {
       gdxGetElemText(PGX2, txt2, S2.data(), &iNode);
     }
 
-    bool result{S1 == S2};
+    const bool result{S1 == S2};
     if (!result) {
 #if VERBOSE >= 2
       std::cout << "Associated text is different ";
@@ -422,7 +425,7 @@ void CompareSy(const int Sy1, const int Sy2) {
     return result;
   };
 
-  auto ShowInsert = [&](const std::string &Act, const gdxUelIndex_t &Keys, gdxValues_t &Vals) -> void {
+  auto const ShowInsert = [&](const std::string &Act, const gdxUelIndex_t &Keys, gdxValues_t &Vals) -> void {
     // We check if this insert has values we want to ignore
     bool Eq{};
 
@@ -698,7 +701,7 @@ label999:
 bool GetAsDouble(const library::ShortString &S, double &V) {
   int k;
   utils::val(S, V, k);
-  bool result{k == 0 && V >= 0};
+  const bool result{k == 0 && V >= 0};
   if (!result) {
     V = 0;
   }
@@ -749,7 +752,7 @@ int main(const int argc, const char *argv[]) {
 
   gdxValues_t StrVals{};
 
-  library::AuditLine auditLine{"GDXDIFF"};
+  const library::AuditLine auditLine{"GDXDIFF"};
   if (argc > 1 && gdlib::strutilx::StrUEqual(argv[1], "AUDIT")) {
     std::cout << auditLine.getAuditLine() << '\n';
     return 0;
@@ -922,19 +925,22 @@ int main(const int argc, const char *argv[]) {
   ShowDefRec = CmdParams->HasKey(static_cast<int>(KP::kp_showdef));
   CompDomains = CmdParams->HasKey(static_cast<int>(KP::kp_cmpdomain));
 
-  auto populateListFromParams = [&](const gdxdiff::KP paramKey,
-                                    std::unique_ptr<gdlib::gmsobj::TXStrings> &idList) {
+  auto const populateListFromParams = [&](const gdxdiff::KP paramKey,
+                                          std::unique_ptr<gdlib::gmsobj::TXStrings> &idList) {
     if (CmdParams->HasParam(static_cast<int>(paramKey), S)) {
       idList = std::make_unique<gdlib::gmsobj::TXStrings>();
+
       for (int N{}; N < CmdParams->GetParamCount(); N++) {
         if (CmdParams->GetParams(N).Key == static_cast<int>(paramKey)) {
           S = utils::trim(CmdParams->GetParams(N).KeyS);
           // std::cout << S << '\n';
+
           while (!S.empty()) {
-            int k{gdlib::strutilx::LChSetPos(
+            const int k{gdlib::strutilx::LChSetPos(
                 ", ",
                 S.data(),
                 static_cast<int>(S.length()))};
+
             if (k == -1) {
               ID = S;
               S.clear();
@@ -943,7 +949,10 @@ int main(const int argc, const char *argv[]) {
               S = S.string().erase(0, k + 1);
               S = utils::trim(S.string());
             }
+
             ID = utils::trim(ID.string());
+
+            // NOLINTNEXTLINE(readability-redundant-nested-if)
             if (!ID.empty()) {
               if (idList->IndexOf(ID.data()) < 0) {
                 idList->Add(ID.data(), ID.length());
@@ -1018,7 +1027,7 @@ int main(const int argc, const char *argv[]) {
 
   gdxOpenWrite(PGXDIF, DiffTmpName.data(), "GDXDIFF", &ErrNr);
   if (ErrNr != 0) {
-    int N{gdxGetLastError(PGXDIF)};
+    const int N{gdxGetLastError(PGXDIF)};
     // Nil is used instead of PGXDIF in Delphi code
     gdxErrorStr(PGXDIF, N, S.data());
     FatalError2("Cannot create file: " + DiffTmpName, S, static_cast<int>(ErrorCode::ERR_WRITEGDX));

@@ -140,8 +140,8 @@ bool canBeQuoted(const char *s, const std::size_t slen) {
   }
 
   bool saw_single{}, saw_double{};
-  for (int i{}; i < (int)slen; i++) {
-    char Ch{s[i]};
+  for (int i{}; i < static_cast<int>(slen); ++i) {
+    const char Ch{s[i]};
     if (Ch == '\'') {
       if (saw_double) {
         return false;
@@ -168,6 +168,7 @@ void AuditLine::setAuditLine() {
   std::string
       GDL_REL_PLT,
       GDL_BLD_COD;
+  // NOLINTNEXTLINE(misc-const-correctness)
   bool auditreldates_header_file_found{};
 
   audit_line = system_name;
@@ -228,7 +229,7 @@ void AuditLine::setSystemName(const std::string &system_name) {
   setAuditLine();
 }
 
-std::string AuditLine::getAuditLine() const {
+const std::string &AuditLine::getAuditLine() const {
   return audit_line;
 }
 

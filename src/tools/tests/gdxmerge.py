@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import gams.transfer as gt  # type: ignore
+from gams.transfer import Parameter
 
 from .common import (
     DIRECTORY_PATHS,
@@ -23,12 +23,12 @@ from .examples.small_example_changed_data import create_small_example_changed_da
 class TestGdxMerge(unittest.TestCase):
     EXECUTABLE_NAME: ExecutableName = "gdxmerge"
 
-    FILE_NAMES = [
+    FILE_NAMES: tuple[str, ...] = (
         "small_example",
         "full_example",
         "small_example_changed_data",
         "merge_file",
-    ]
+    )
     FILE_PATHS: dict[str, Path]
 
     @classmethod
@@ -62,9 +62,14 @@ class TestGdxMerge(unittest.TestCase):
         first_negative_offset: int | None = None,
         second_offset: int | None = None,
         second_negative_offset: int | None = None,
-        first_delete: list[int] = [],
-        second_delete: list[int] = [],
+        first_delete: list[int] | None = None,
+        second_delete: list[int] | None = None,
     ) -> None:
+        if first_delete is None:
+            first_delete = []
+        if second_delete is None:
+            second_delete = []
+
         check_output(
             self,
             self.EXECUTABLE_NAME,
@@ -91,8 +96,8 @@ class TestGdxMerge(unittest.TestCase):
             symbols,
         )
 
-        symbol: gt.Parameter = container["Merged_set_1"]  # type: ignore
-        first = symbol.records.values.tolist()  # type: ignore
+        symbol: Parameter = container["Merged_set_1"]
+        first = symbol.records.values.tolist()
         second: list[list[str]] = []
         for i in range(len(file_names)):
             second.append(
@@ -101,12 +106,12 @@ class TestGdxMerge(unittest.TestCase):
                     f"{r'\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}  .+[/\\]examples[/\\]'}{file_names[i]}.gdx",
                 ]
             )
-        self.assertEqual(len(first), len(file_names))  # type: ignore
-        for item in first:  # type: ignore
-            self.assertEqual(len(item), 2)  # type: ignore
+        self.assertEqual(len(first), len(file_names))
+        for item in first:
+            self.assertEqual(len(item), 2)
         for i in range(len(file_names)):
             self.assertEqual(first[i][0], second[i][0])
-            self.assertRegex(first[i][1], second[i][1])  # type: ignore
+            self.assertRegex(first[i][1], second[i][1])
 
     def test_empty_command(self) -> None:
         output = self.run_gdxmerge([])

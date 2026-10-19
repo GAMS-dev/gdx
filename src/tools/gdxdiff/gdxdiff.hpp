@@ -3,7 +3,6 @@
 #include <array>
 #include <cstdint>
 #include <string>
-#include <string_view>
 
 #include "library/common.hpp"
 #include "library/short_string.hpp"
@@ -11,7 +10,7 @@
 // GDX library interface
 #include "generated/gdxcc.h"
 // Use this to debug instead:
-//#include "generated/gdxcwrap.h"
+// #include "generated/gdxcwrap.h"
 
 namespace gdxdiff {
 
