@@ -21,13 +21,13 @@ from .examples.special_values_example import create_special_values_example
 class TestGdxDump(unittest.TestCase):
     EXECUTABLE_NAME: ExecutableName = "gdxdump"
 
-    FILE_NAMES = [
+    FILE_NAMES: tuple[str, ...] = (
         "small_example",
         "full_example",
         "element_text_example",
         "special_values_example",
         "label_example",
-    ]
+    )
     FILE_PATHS: dict[str, Path]
 
     @classmethod
@@ -61,9 +61,14 @@ class TestGdxDump(unittest.TestCase):
         first_negative_offset: int | None = None,
         second_offset: int | None = None,
         second_negative_offset: int | None = None,
-        first_delete: list[int] = [],
-        second_delete: list[int] = [],
+        first_delete: list[int] | None = None,
+        second_delete: list[int] | None = None,
     ) -> None:
+        if first_delete is None:
+            first_delete = []
+        if second_delete is None:
+            second_delete = []
+
         check_output(
             self,
             self.EXECUTABLE_NAME,

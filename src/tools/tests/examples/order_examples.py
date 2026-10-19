@@ -1,24 +1,24 @@
 import os
 from pathlib import Path
 
-import gams.transfer as gt  # type: ignore
+from gams.transfer import Container, Set
 
 
 def create_order_example_1(file_path: Path) -> None:
-    m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
+    m = Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
-    gt.Set(m, "t1", records=[1987, 1988, 1989, 1990, 1991])
-    gt.Set(m, "t2", records=[1983, 1984, 1985, 1986, 1987])
-    gt.Set(m, "t3", records=[1987, 1989, 1991, 1983, 1985])
+    Set(m, "t1", records=[1987, 1988, 1989, 1990, 1991])
+    Set(m, "t2", records=[1983, 1984, 1985, 1986, 1987])
+    Set(m, "t3", records=[1987, 1989, 1991, 1983, 1985])
 
-    m.write(file_path)  # type: ignore
+    m.write(file_path)
 
 
 def create_order_example_2(file_path: Path) -> None:
-    m = gt.Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
+    m = Container(system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"))
 
-    gt.Set(m, "t2", records=[1987, 1988, 1989, 1990, 1991])
-    gt.Set(m, "t3", records=[1983, 1984, 1985, 1986, 1987])
-    gt.Set(m, "t1", records=[1987, 1989, 1991, 1983, 1985])
+    Set(m, "t2", records=[1987, 1988, 1989, 1990, 1991])
+    Set(m, "t3", records=[1983, 1984, 1985, 1986, 1987])
+    Set(m, "t1", records=[1987, 1989, 1991, 1983, 1985])
 
-    m.write(file_path)  # type: ignore
+    m.write(file_path)

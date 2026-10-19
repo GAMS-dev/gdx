@@ -55,7 +55,6 @@ GAMSSymbol::GAMSSymbol(const int ADim, const gdxSyType AType, const int ASubTyp)
 GDXFileEntry::GDXFileEntry(std::string AFileName, std::string AFileId, std::string AFileInfo)
     : FFileName(std::move(AFileName)), FFileId(std::move(AFileId)), FFileInfo(std::move(AFileInfo)) {}
 
-
 template <typename T>
 void FileList<T>::AddFile(const std::string &AFileName, const std::string &AFileId, const std::string &AFileInfo) {
   this->Add(new GDXFileEntry(AFileName, AFileId, AFileInfo));
@@ -111,7 +110,7 @@ int SymbolList::AddUEL(const library::ShortString &S) {
 }
 
 int SymbolList::AddSymbol(const std::string &AName, const int ADim, const gdxSyType AType, const int ASubTyp) {
-  auto is_in_list = [](const std::vector<std::string> &list, const std::string &value) {
+  auto const is_in_list = [](const std::vector<std::string> &list, const std::string &value) {
     return std::find(list.begin(), list.end(), value) != list.end();
   };
 
@@ -128,8 +127,8 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
   library::ShortString SyName;
   std::string FileName;
 
-  auto CheckError = [&](const bool Cnd, const std::string &Msg) -> bool {
-    bool Result{!Cnd};
+  auto const CheckError = [&](const bool Cnd, const std::string &Msg) -> bool {
+    bool const Result{!Cnd};
     if (Result) {
       FErrorCount++;
       if (FrstError) {
@@ -462,7 +461,7 @@ void SymbolList::WriteNameList() {
 }
 
 void SymbolList::KeepNewAcronyms(const gdxHandle_t &PGX) {
-  int NN{gdxAcronymNextNr(PGX, -1)};
+  int const NN{gdxAcronymNextNr(PGX, -1)};
   if (NN <= NextAcroNr) {
     return;
   }
@@ -559,7 +558,7 @@ void SymbolList::AddToExcludeList(const std::string &item) {
 
 std::string FormatDateTime(const std::uint16_t Year, const std::uint16_t Month, const std::uint16_t Day,
                            const std::uint16_t Hour, const std::uint16_t Min, const std::uint16_t Sec) {
-  auto Int2 = [](const int n) -> std::string {
+  auto const Int2 = [](const int n) -> std::string {
     std::ostringstream oss;
     oss << std::setw(2) << std::setfill('0') << n;
     return oss.str();
@@ -603,7 +602,7 @@ bool GetParameters(const int argc, const char *argv[]) {
   if (Result) {
     ParNr = 0;
     do {
-      library::cmdpar::ParamRec paramRec{CmdParams->GetParams(ParNr)};
+      library::cmdpar::ParamRec const paramRec{CmdParams->GetParams(ParNr)};
       KW = paramRec.Key;
       KS = paramRec.KeyS;
 
@@ -699,7 +698,7 @@ int main(const int argc, const char *argv[]) {
   library::ShortString Msg;
   int N, ErrNr;
 
-  library::AuditLine auditLine{"GDXMERGE"};
+  library::AuditLine const auditLine{"GDXMERGE"};
   if (argc > 1 && gdlib::strutilx::StrUEqual(argv[1], "AUDIT")) {
     std::cout << auditLine.getAuditLine() << '\n';
     return {};

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-import gams.transfer as gt  # type: ignore
+from gams.transfer import Container, Parameter
 
 
 @dataclass(frozen=True)
@@ -84,10 +84,12 @@ def run_executable(
     command_as_strings: list[str] = [
         str(value) if isinstance(value, Path) else value for value in command
     ]
+
     return subprocess.run(
         [str(executable_path), *command_as_strings],
         capture_output=True,
         text=True,
+        check=False,
     )
 
 
@@ -105,9 +107,11 @@ def check_output(
     second_delete: list[int],
 ) -> None:
     test_instance.assertEqual(output.returncode, return_code)
+
     first = output.stdout.split("\n")[first_offset:first_negative_offset]
     for i in first_delete:
         del first[i]
+
     if file_name is None:
         file_name = f"{inspect.stack()[2].function.removeprefix('test_')}.txt"
     with open(
@@ -116,6 +120,7 @@ def check_output(
         second = file.read().split("\n")[second_offset:second_negative_offset]
     for i in second_delete:
         del second[i]
+
     test_instance.assertEqual(first, second)
     test_instance.assertEqual(output.stderr, "")
 
@@ -123,7 +128,7 @@ def check_output(
 def check_gdx_file_symbols(
     test_instance: unittest.TestCase,
     executable_name: ExecutableName,
-    container: gt.Container,
+    container: Container,
     symbol_names: list[str],
 ) -> None:
     for symbol_name in symbol_names:
@@ -138,17 +143,20 @@ def check_gdx_file_symbols(
 
 def check_gdx_file_values(
     test_instance: unittest.TestCase,
-    container: gt.Container,
+    container: Container,
     symbol_name: str,
     expected_values: list[list[str | Path | float]],
 ) -> None:
+    test_instance.assertIn(symbol_name, container)
+
+    symbol: Parameter = container[symbol_name]
+    values = symbol.records.values.tolist()
+
     path_values_as_strings: list[list[str | float]] = [
         [str(value) if isinstance(value, Path) else value for value in values]
         for values in expected_values
     ]
-    test_instance.assertIn(symbol_name, container)
-    symbol: gt.Parameter = container[symbol_name]  # type: ignore
-    values = symbol.records.values.tolist()  # type: ignore
+
     test_instance.assertEqual(values, path_values_as_strings)
 
 
@@ -160,8 +168,8 @@ def check_gdx_file(
     executable_name: ExecutableName,
     file_path: Path,
     symbols: GamsSymbols,
-) -> gt.Container:
-    container = gt.Container(
+) -> Container:
+    container = Container(
         system_directory=os.environ.get("GAMS_SYSTEM_DIRECTORY"),
         load_from=file_path,
     )

@@ -586,7 +586,7 @@ test-wei:
 
   cache:
     key:
-      files: [uv.lock]
+      files: [src/tools/pyproject.toml, src/tools/.python-version]
     paths: [.cache/uv]
 
   after_script: uv cache prune --ci
@@ -601,7 +601,7 @@ test-wei:
   before_script:
     - curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="$UV_BIN_DIR" sh
     - PATH="$UV_BIN_DIR:$PATH"
-    - uv python install --default
+    - uv python install --default --directory ./src/tools
 
   after_script:
     - PATH="$UV_BIN_DIR:$PATH"

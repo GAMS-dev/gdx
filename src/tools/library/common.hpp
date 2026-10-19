@@ -42,7 +42,7 @@ public:
 
   void setSystemName(const std::string &system_name);
 
-  std::string getAuditLine() const;
+  const std::string &getAuditLine() const;
 };
 
 } // namespace library

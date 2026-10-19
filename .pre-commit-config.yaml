@@ -17,16 +17,19 @@ repos:
       - id: shellcheck
         name: check shell scripts
 
-  - repo: https://github.com/pypa/pip-audit
-    rev: v2.10.0
+  - repo: https://github.com/pysentry/pysentry-pre-commit
+    rev: v0.4.5
     hooks:
-      - id: pip-audit
-        name: run pip-audit
-        args: [-r, ./requirements.txt]
+      - id: pysentry
+        name: audit dependencies (GDX)
+
+      - id: pysentry
+        name: audit dependencies (GDX tools)
+        args: [./src/tools]
 
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        name: run detect-secrets
+        name: detect secrets
         args: [--baseline, .secrets.baseline]

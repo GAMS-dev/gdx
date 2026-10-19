@@ -5,26 +5,23 @@ description = "Command-line utilities for GDX files"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "gamsapi[transfer]>=52.3.0",
+    "gamsapi[transfer]>=54.4.0",
 ]
 
 [dependency-groups]
 dev = [
-    # "detect-secrets>=1.5.0",
-    "pre-commit>=4.5.1",
-    # { include-group = "lint-cpp" },
+    # "detect-secrets>=1.5.0,<2.0.0",
+    "pre-commit>=4.6.2,<5.0.0",
+    { include-group = "lint-cpp" },
     { include-group = "lint-python" },
 ]
 lint-cpp = [
-    "clang-format>=21.1.8",
-    "clang-tidy>=21.1.6",
-    "cppcheck>=1.5.1",
+    "clang-format>=23.1.1,<24.0.0",
+    "clangd-tidy>=1.1.1,<2.0.0",
 ]
 lint-python = [
-    "mypy>=1.19.1",
-    "pandas-stubs>=2.3.3.260113",
-    "ruff>=0.14.13",
-    "ty>=0.0.9",
+    "ruff>=0.16.7,<1.0.0",
+    "ty>=0.0.81,<1.0.0",
 ]
 
 [tool.ruff.lint]
