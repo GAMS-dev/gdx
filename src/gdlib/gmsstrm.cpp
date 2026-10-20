@@ -350,6 +350,7 @@ void TXStream::ReadSString(char *s, uint8_t &len)
    if( Paranoid ) ParCheck( RWType::rw_string );
    if( !Read( &len, 1 ) || !len )
    {
+      len = 0;
       s[0] = '\0';
       return;
    }

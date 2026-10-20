@@ -136,7 +136,7 @@ protected:
    T ReadValue( RWType rwt )
    {
       if( Paranoid ) ParCheck( rwt );
-      T res;
+      T res {}; // stays zero when the stream ends early (truncated file)
 #if !defined( NDEBUG ) && defined(__IN_CPPMEX__)
       auto numBytesRead { Read( &res, sizeof( T ) ) };
       // is not required to generally hold and code automatically detects EOF otherwise
@@ -286,11 +286,11 @@ class TMiBufferedStream : public TBufferedFileStream
    T ReadValueOrdered( RWType rwt, bool order_type )
    {
       if( Paranoid ) ParCheck( rwt );
-      T res;
+      T res {}; // stays zero when the stream ends early (truncated file)
       if( !order_type ) Read( &res, sizeof( T ) );
       else
       {
-         T tmp;
+         T tmp {};
          Read( &tmp, sizeof( T ) );
          reverseBytesMax8( &tmp, &res, sizeof( T ) );
       }
