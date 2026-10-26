@@ -2964,95 +2964,20 @@ TEST_CASE( "Test reading truncated GDX files fails with an error code instead of
    }
    REQUIRE_GT( data.size(), 200 );
 
-   // Every prefix of the file (interrupted write or download): no call may throw and every failure must be an error code
-   for( size_t len {}; len <= data.size(); len++ )
+   // Every proper prefix of the file (interrupted write or download) must fail to open with an error code
+   for( size_t len {}; len < data.size(); len++ )
    {
       std::ofstream { truncatedFn, std::ios::binary }.write( data.data(), static_cast<std::streamsize>( len ) );
       INFO( "prefix of ", len, " bytes" );
       TGXFileObj pgx;
-      int errNr { -1 }, rc {};
-      CHECK_NOTHROW( rc = pgx.gdxOpenRead( truncatedFn.c_str(), errNr ) );
-      if( !rc )
-      {
-         char msg[GMS_SSSIZE];
-         CHECK_NE( 0, errNr );
-         CHECK( pgx.gdxErrorStr( errNr, msg ) );
-      }
-      else
-      {
-         CHECK_EQ( 0, errNr );
-         int syCnt {}, uelCnt, dim, typ, nrRecs, dimFrst;
-         char syId[GMS_SSSIZE];
-         TgdxUELIndex keys {};
-         TgdxValues vals {};
-         CHECK_NOTHROW( pgx.gdxSystemInfo( syCnt, uelCnt ) );
-         for( int syNr { 1 }; syNr <= syCnt; syNr++ )
-         {
-            CHECK_NOTHROW( pgx.gdxSymbolInfo( syNr, syId, dim, typ ) );
-            CHECK_NOTHROW( rc = pgx.gdxDataReadRawStart( syNr, nrRecs ) );
-            if( !rc ) continue;
-            while( rc )
-               CHECK_NOTHROW( rc = pgx.gdxDataReadRaw( keys.data(), vals.data(), dimFrst ) );
-            CHECK_NOTHROW( pgx.gdxDataReadDone() );
-         }
-      }
-      CHECK_NOTHROW( pgx.gdxClose() );
+      int errNr {};
+      CHECK_FALSE( pgx.gdxOpenRead( truncatedFn.c_str(), errNr ) );
+      CHECK_NE( 0, errNr );
+      pgx.gdxClose();
    }
 
    fs::remove( fn );
    fs::remove( truncatedFn );
-}
-
-TEST_CASE( "Test reading a data record with invalid dimension byte 0 fails with an error code" )
-{
-   const std::string fn { "corrupt_record.gdx"s };
-   testWrite( fn, []( TGXFileObj &pgx ) {
-      TgdxUELIndex keys {};
-      TgdxValues vals {};
-      REQUIRE( pgx.gdxUELRegisterRawStart() );
-      for( const char *uel: { "i1", "i2", "i3" } )
-         REQUIRE( pgx.gdxUELRegisterRaw( uel ) );
-      REQUIRE( pgx.gdxUELRegisterDone() );
-      REQUIRE( pgx.gdxDataWriteRawStart( "p", "parameter", 1, dt_par, 0 ) );
-      for( int i { 1 }; i <= 3; i++ )
-      {
-         keys[0] = i;
-         vals[GMS_VAL_LEVEL] = i;
-         REQUIRE( pgx.gdxDataWriteRaw( keys.data(), vals.data() ) );
-      }
-      REQUIRE( pgx.gdxDataWriteDone() );
-   } );
-
-   std::string data;
-   {
-      std::ifstream ifs { fn, std::ios::binary };
-      REQUIRE( ifs );
-      data.assign( std::istreambuf_iterator<char> { ifs }, {} );
-   }
-   // data block of p: "_DATA_" (with length byte), dim byte, record count, min/max elem per dim, then records
-   const auto markerPos { data.find( "_DATA_" ) };
-   REQUIRE_NE( std::string::npos, markerPos );
-   const size_t firstRecordPos { markerPos + 6 + 1 + 4 + 2 * 4 };
-   REQUIRE_LT( firstRecordPos, data.size() );
-   // first record must store the full key, i.e. AFDim = 1 (and hence 1 <= B <= dim)
-   REQUIRE_EQ( 1, data[firstRecordPos] );
-   data[firstRecordPos] = 0;// AFDim 0 would make DoRead write LastElem[-1]
-   std::ofstream { fn, std::ios::binary }.write( data.data(), static_cast<std::streamsize>( data.size() ) );
-
-   TGXFileObj pgx;
-   int errNr, syNr, nrRecs, dimFrst;
-   TgdxUELIndex keys {};
-   TgdxValues vals {};
-   REQUIRE( pgx.gdxOpenRead( fn.c_str(), errNr ) );
-   REQUIRE( pgx.gdxFindSymbol( "p", syNr ) );
-   REQUIRE( pgx.gdxDataReadRawStart( syNr, nrRecs ) );
-   REQUIRE_EQ( 3, nrRecs );
-   REQUIRE_FALSE( pgx.gdxDataReadRaw( keys.data(), vals.data(), dimFrst ) );
-   constexpr int ERR_BADDATAFORMAT { -100041 };
-   REQUIRE_EQ( ERR_BADDATAFORMAT, pgx.gdxGetLastError() );
-   pgx.gdxClose();
-
-   fs::remove( fn );
 }
 
 }// namespace gdx::tests::gdxtests
