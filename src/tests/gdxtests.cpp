@@ -3003,4 +3003,56 @@ TEST_CASE( "Test reading truncated GDX files fails with an error code instead of
    fs::remove( truncatedFn );
 }
 
+TEST_CASE( "Test reading a data record with invalid dimension byte 0 fails with an error code" )
+{
+   const std::string fn { "corrupt_record.gdx"s };
+   testWrite( fn, []( TGXFileObj &pgx ) {
+      TgdxUELIndex keys {};
+      TgdxValues vals {};
+      REQUIRE( pgx.gdxUELRegisterRawStart() );
+      for( const char *uel: { "i1", "i2", "i3" } )
+         REQUIRE( pgx.gdxUELRegisterRaw( uel ) );
+      REQUIRE( pgx.gdxUELRegisterDone() );
+      REQUIRE( pgx.gdxDataWriteRawStart( "p", "parameter", 1, dt_par, 0 ) );
+      for( int i { 1 }; i <= 3; i++ )
+      {
+         keys[0] = i;
+         vals[GMS_VAL_LEVEL] = i;
+         REQUIRE( pgx.gdxDataWriteRaw( keys.data(), vals.data() ) );
+      }
+      REQUIRE( pgx.gdxDataWriteDone() );
+   } );
+
+   std::string data;
+   {
+      std::ifstream ifs { fn, std::ios::binary };
+      REQUIRE( ifs );
+      data.assign( std::istreambuf_iterator<char> { ifs }, {} );
+   }
+   // data block of p: "_DATA_" (with length byte), dim byte, record count, min/max elem per dim, then records
+   const auto markerPos { data.find( "_DATA_" ) };
+   REQUIRE_NE( std::string::npos, markerPos );
+   const size_t firstRecordPos { markerPos + 6 + 1 + 4 + 2 * 4 };
+   REQUIRE_LT( firstRecordPos, data.size() );
+   // first record must store the full key, i.e. AFDim = 1 (and hence 1 <= B <= dim)
+   REQUIRE_EQ( 1, data[firstRecordPos] );
+   data[firstRecordPos] = 0;// AFDim 0 would make DoRead write LastElem[-1]
+   std::ofstream { fn, std::ios::binary }.write( data.data(), static_cast<std::streamsize>( data.size() ) );
+
+   TGXFileObj pgx;
+   int errNr, syNr, nrRecs, dimFrst;
+   TgdxUELIndex keys {};
+   TgdxValues vals {};
+   REQUIRE( pgx.gdxOpenRead( fn.c_str(), errNr ) );
+   REQUIRE( pgx.gdxFindSymbol( "p", syNr ) );
+   REQUIRE( pgx.gdxDataReadRawStart( syNr, nrRecs ) );
+   REQUIRE_EQ( 3, nrRecs );
+   REQUIRE_FALSE( pgx.gdxDataReadRaw( keys.data(), vals.data(), dimFrst ) );
+   constexpr int ERR_BADDATAFORMAT { -100041 };
+   REQUIRE_EQ( ERR_BADDATAFORMAT, pgx.gdxGetLastError() );
+   pgx.gdxClose();
+
+   fs::remove( fn );
+}
+
 }// namespace gdx::tests::gdxtests

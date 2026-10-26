@@ -1406,7 +1406,8 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
    }
 
    uint8_t B;
-   FFile->Read( &B, 1 );
+   // truncated file: no end-of-data marker (255) before EOF
+   if( ErrorCondition( FFile->Read( &B, 1 ) == 1, ERR_BADDATAFORMAT ) ) return false;
    if( B > DeltaForRead )
    {// relative change in last dimension
       if( B == 255 ) return false;
@@ -1416,6 +1417,8 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
    else
    {
       AFDim = B;
+      // AFDim 0 would index LastElem[-1] below
+      if( ErrorCondition( AFDim >= 1, ERR_BADDATAFORMAT ) ) return false;
       assert( AFDim >= 1 && AFDim <= GLOBAL_MAX_INDEX_DIM );
       for( int D { AFDim - 1 }; D < FCurrentDim; D++ )
       {
@@ -1439,7 +1442,7 @@ bool TGXFileObj::DoRead( double *AVals, int &AFDim )
       for( int DV { GMS_VAL_LEVEL }; DV <= LastDataField; DV++ )
       {
          uint8_t BSV;
-         FFile->Read( &BSV, 1 );
+         if( ErrorCondition( FFile->Read( &BSV, 1 ) == 1, ERR_BADDATAFORMAT ) ) return false;
          TgdxIntlValTyp SV { static_cast<TgdxIntlValTyp>( BSV ) };
          // Delphi doesn't bound check here and just writes adjacent junk
          // but we at least consistently write 0
