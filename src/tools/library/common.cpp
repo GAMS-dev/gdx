@@ -6,6 +6,8 @@
 #include <sstream>
 
 #include "common.hpp"
+#include "gdlib/strutilx.hpp"
+#include "rtl/sysutils_p3.hpp"
 // Global constants
 #include "generated/gclgms.h"
 
@@ -162,6 +164,18 @@ bool canBeQuoted(const char *s, const std::size_t slen) {
 
 bool goodUELString(const char *s, const std::size_t slen) {
   return slen < GLOBAL_UEL_IDENT_SIZE && canBeQuoted(s, slen);
+}
+
+std::string defaultGdxExtension(const std::string &fileName) {
+  if (!gdlib::strutilx::ExtractFileExtEx(fileName).empty()) {
+    return fileName;
+  }
+  // Prefer the .gdx file, so a directory or another file without extension doesn't shadow it
+  std::string gdxFileName{gdlib::strutilx::ChangeFileExtEx(fileName, ".gdx")};
+  if (rtl::sysutils_p3::FileExists(gdxFileName) || !rtl::sysutils_p3::FileExists(fileName)) {
+    return gdxFileName;
+  }
+  return fileName;
 }
 
 void AuditLine::setAuditLine() {

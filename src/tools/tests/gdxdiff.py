@@ -5,11 +5,13 @@ from pathlib import Path
 
 from .common import (
     DIRECTORY_PATHS,
+    SHADOW_KINDS,
     ExecutableName,
     GamsSymbols,
     check_gdx_file,
     check_output,
     run_executable,
+    shadowing_path,
 )
 from .examples.default_values_examples import (
     create_default_values_example_1,
@@ -215,6 +217,52 @@ class TestGdxDiff(unittest.TestCase):
             ],
         }
         self.check_gdx_file(symbols)
+
+    def test_small_example_and_small_example_changed_data_without_extension(
+        self,
+    ) -> None:
+        for kind in SHADOW_KINDS:
+            with (
+                self.subTest(kind=kind),
+                shadowing_path(self.FILE_PATHS["small_example"], kind) as path_1,
+                shadowing_path(
+                    self.FILE_PATHS["small_example_changed_data"], kind
+                ) as path_2,
+            ):
+                output = self.run_gdxdiff(
+                    [path_1, path_2, self.FILE_PATHS["diff_file"]]
+                )
+                self.check_output(
+                    output,
+                    return_code=1,
+                    file_name="small_example_and_small_example_changed_data.txt",
+                    first_offset=3,
+                    second_offset=3,
+                    first_delete=[-3],
+                    second_delete=[-3],
+                )
+
+                symbols: GamsSymbols = {
+                    "d": [
+                        ["seattle", "new-york", "dif1", 2.5],
+                        ["seattle", "new-york", "dif2", 3.5],
+                        ["seattle", "chicago", "dif1", 1.7],
+                        ["seattle", "chicago", "dif2", 2.7],
+                        ["seattle", "topeka", "dif1", 1.8],
+                        ["seattle", "topeka", "dif2", 2.8],
+                        ["san-diego", "new-york", "dif1", 2.5],
+                        ["san-diego", "new-york", "dif2", 3.5],
+                        ["san-diego", "chicago", "dif1", 1.8],
+                        ["san-diego", "chicago", "dif2", 2.8],
+                        ["san-diego", "topeka", "dif1", 1.4],
+                        ["san-diego", "topeka", "dif2", 2.4],
+                    ],
+                    "FilesCompared": [
+                        ["File1", self.FILE_PATHS["small_example"]],
+                        ["File2", self.FILE_PATHS["small_example_changed_data"]],
+                    ],
+                }
+                self.check_gdx_file(symbols)
 
     def test_small_example_and_small_example_changed_data_epsilon_absolute_1(
         self,

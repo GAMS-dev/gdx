@@ -734,9 +734,7 @@ void Usage(const library::AuditLine &auditLine) {
 // void CopyAcronyms( const gdxHandle_t &PGX ) {}
 
 void CheckFile(std::string &fn) {
-  if (!rtl::sysutils_p3::FileExists(fn) && gdlib::strutilx::ExtractFileExtEx(fn).empty()) {
-    fn = gdlib::strutilx::ChangeFileExtEx(fn, ".gdx");
-  }
+  fn = library::defaultGdxExtension(fn);
 }
 
 int main(const int argc, const char *argv[]) {

@@ -1331,10 +1331,7 @@ int main(const int argc, const char *argv[]) {
     goto End;
   }
 
-  if (!rtl::sysutils_p3::FileExists(InputFile) &&
-      gdlib::strutilx::ExtractFileExtEx(InputFile).empty()) {
-    InputFile = gdlib::strutilx::ChangeFileExtEx(InputFile, ".gdx");
-  }
+  InputFile = library::defaultGdxExtension(InputFile);
 
   if (!rtl::sysutils_p3::FileExists(InputFile)) {
     library::printErrorMessage("GDX file not found: " + InputFile);
