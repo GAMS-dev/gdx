@@ -171,7 +171,7 @@ std::string defaultGdxExtension(const std::string &fileName) {
     return fileName;
   }
   // Prefer the .gdx file, so a directory or another file without extension doesn't shadow it
-  std::string gdxFileName{gdlib::strutilx::ChangeFileExtEx(fileName, ".gdx")};
+  std::string gdxFileName{fileName + ".gdx"};
   if (rtl::sysutils_p3::FileExists(gdxFileName) || !rtl::sysutils_p3::FileExists(fileName)) {
     return gdxFileName;
   }
