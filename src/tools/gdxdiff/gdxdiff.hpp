@@ -113,8 +113,6 @@ void Usage(const library::AuditLine &auditLine);
 
 // void CopyAcronyms( const gdxHandle_t &PGX );
 
-void CheckFile(std::string &fn);
-
 int main(int argc, const char *argv[]);
 
 } // namespace gdxdiff

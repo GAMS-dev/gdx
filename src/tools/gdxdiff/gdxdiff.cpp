@@ -733,10 +733,6 @@ void Usage(const library::AuditLine &auditLine) {
 // Function is empty in Delphi code
 // void CopyAcronyms( const gdxHandle_t &PGX ) {}
 
-void CheckFile(std::string &fn) {
-  fn = library::defaultGdxExtension(fn);
-}
-
 int main(const int argc, const char *argv[]) {
   int ErrorCode, ErrNr, Dim, iST, StrNr;
   library::ShortString S, ID, DiffFileName;
@@ -987,8 +983,8 @@ int main(const int argc, const char *argv[]) {
 
   std::cout << auditLine.getAuditLine() << '\n';
 
-  CheckFile(InFile1);
-  CheckFile(InFile2);
+  InFile1 = library::defaultGdxExtension(InFile1);
+  InFile2 = library::defaultGdxExtension(InFile2);
 
   std::cout
       << "File1 : " << InFile1 << '\n'
