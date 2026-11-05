@@ -1,4 +1,7 @@
 ---
+- 7.12.2:
+    - GDX tools
+      - gdxdiff and gdxdump now prefer `name.gdx` for an input file name without extension, so a directory or file called `name` next to it no longer shadows it.
 - 7.12.1:
     - GDX can now be built with the muscl libc on linux
     - Fix build with clang 23
