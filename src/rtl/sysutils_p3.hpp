@@ -208,7 +208,8 @@ constexpr std::array<TDayTable, 2> MonthDays {{
 }};
 
 // System error messages
-std::string SysErrorMessage( int errorCore );
+std::string SysErrorMessage( int errorCode );
+const char* SysErrorMessageSafe( int errorCode ) noexcept;
 
 void Sleep( uint32_t milliseconds );
 
