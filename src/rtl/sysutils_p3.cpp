@@ -498,13 +498,41 @@ bool DirectoryExists( const std::string &Directory )
 std::string SysErrorMessage( int errorCode )
 {
    /* strerror is not MT-safe on windows; it is on Linux and MacOs; use strerror_s on windows */
+   static p3_global_storage utils::sstring errMsgBuf;
 #if defined( _WIN32 )
-   static utils::sstring errMsgBuf;
    strerror_s( errMsgBuf.data(), (int) errMsgBuf.size(), errorCode );
    char *errMsg = errMsgBuf.data();
 #else
    char *errMsg = strerror( errorCode );
-   if( !errMsg ) return "Unknown error " + rtl::sysutils_p3::IntToStr( errorCode );
+   if( !errMsg ) {
+      snprintf(errMsgBuf.data(), (int) errMsgBuf.size(), "errno: Unknown error %d", errorCode );
+      errMsg = errMsgBuf.data();
+   }
+#endif
+   return errMsg;
+}
+
+/**
+ * @brief Get the description associated with an error code
+ *
+ * @param errorCode  the error code
+ *
+ * @return           the description
+ */
+const char* SysErrorMessageSafe( int errorCode ) noexcept
+{
+   static p3_global_storage utils::sstring errMsgBuf;
+   char *errMsg;
+   /* strerror is not MT-safe on windows; it is on Linux and MacOs; use strerror_s on windows */
+#if defined( _WIN32 )
+   strerror_s( errMsgBuf.data(), (int) errMsgBuf.size(), errorCode );
+   errMsg = errMsgBuf.data();
+#else
+   errMsg = strerror( errorCode );
+   if( !errMsg ) {
+      snprintf(errMsgBuf.data(), (int) errMsgBuf.size(), "errno: Unknown error %d", errorCode );
+      errMsg = errMsgBuf.data();
+   }
 #endif
    return errMsg;
 }

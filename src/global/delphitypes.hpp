@@ -136,7 +136,7 @@ public:
       return *this;
    }
 
-   operator T() const
+   operator T() const noexcept
    {
       return value;
    }
@@ -190,23 +190,23 @@ public:
 #endif
    }
 
-   constexpr static T getLowerBound()
+   constexpr static T getLowerBound() noexcept
    {
       return lowerBoundIncl;
    }
 
-   constexpr static T getUpperBound()
+   constexpr static T getUpperBound() noexcept
    {
       return upperBoundIncl;
    }
 
    // Number of elements from lower bound to upper bound (both inclusive)
-   constexpr static T getCount()
+   constexpr static T getCount() noexcept
    {
       return upperBoundIncl - lowerBoundIncl + 1;
    }
 
-   T *getStorage()
+   T *getStorage() noexcept
    {
       return &value;
    }
