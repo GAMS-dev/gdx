@@ -2913,4 +2913,71 @@ TEST_CASE("Example from README markdown")
 
 }
 
+TEST_CASE( "Test reading truncated GDX files fails with an error code instead of allocating without bound" )
+{
+   const std::string fn { "truncated_src.gdx"s }, truncatedFn { "truncated.gdx"s };
+
+   // Small file touching every section: acronym, UELs (i1..i3 = 1..3, j1..j2 = 4..5), set texts, domain strings
+   // and data of scalar s, set i with element texts and parameter p(i,j) with relaxed domain (i exists, j does not)
+   testWrite( fn, []( TGXFileObj &pgx ) {
+      TgdxUELIndex keys {};
+      TgdxValues vals {};
+      int txtNr, syNr;
+      REQUIRE( pgx.gdxAcronymAdd( "acr", "acronym", 1 ) );
+      REQUIRE( pgx.gdxUELRegisterRawStart() );
+      for( const char *uel: { "i1", "i2", "i3", "j1", "j2" } )
+         REQUIRE( pgx.gdxUELRegisterRaw( uel ) );
+      REQUIRE( pgx.gdxUELRegisterDone() );
+      REQUIRE( pgx.gdxDataWriteRawStart( "s", "scalar", 0, dt_par, 0 ) );
+      vals[GMS_VAL_LEVEL] = 1;
+      REQUIRE( pgx.gdxDataWriteRaw( keys.data(), vals.data() ) );
+      REQUIRE( pgx.gdxDataWriteDone() );
+      REQUIRE( pgx.gdxDataWriteRawStart( "i", "set", 1, dt_set, 0 ) );
+      for( int i { 1 }; i <= 3; i++ )
+      {
+         REQUIRE( pgx.gdxAddSetText( ( "text i"s + std::to_string( i ) ).c_str(), txtNr ) );
+         keys[0] = i;
+         vals[GMS_VAL_LEVEL] = txtNr;
+         REQUIRE( pgx.gdxDataWriteRaw( keys.data(), vals.data() ) );
+      }
+      REQUIRE( pgx.gdxDataWriteDone() );
+      REQUIRE( pgx.gdxDataWriteRawStart( "p", "parameter", 2, dt_par, 0 ) );
+      for( int i { 1 }; i <= 3; i++ )
+         for( int j { 4 }; j <= 5; j++ )
+         {
+            keys[0] = i;
+            keys[1] = j;
+            vals[GMS_VAL_LEVEL] = 10 * i + j;
+            REQUIRE( pgx.gdxDataWriteRaw( keys.data(), vals.data() ) );
+         }
+      REQUIRE( pgx.gdxDataWriteDone() );
+      REQUIRE( pgx.gdxFindSymbol( "p", syNr ) );
+      const char *domains[] { "i", "j" };
+      REQUIRE( pgx.gdxSymbolSetDomainX( syNr, domains ) );
+   } );
+
+   std::vector<char> data;
+   {
+      std::ifstream ifs { fn, std::ios::binary };
+      REQUIRE( ifs );
+      data.assign( std::istreambuf_iterator<char> { ifs }, {} );
+   }
+   REQUIRE_GT( data.size(), 200 );
+
+   // Every proper prefix of the file (interrupted write or download) must fail to open with an error code
+   for( size_t len {}; len < data.size(); len++ )
+   {
+      std::ofstream { truncatedFn, std::ios::binary }.write( data.data(), static_cast<std::streamsize>( len ) );
+      INFO( "prefix of ", len, " bytes" );
+      TGXFileObj pgx;
+      int errNr {};
+      CHECK_FALSE( pgx.gdxOpenRead( truncatedFn.c_str(), errNr ) );
+      CHECK_NE( 0, errNr );
+      pgx.gdxClose();
+   }
+
+   fs::remove( fn );
+   fs::remove( truncatedFn );
+}
+
 }// namespace gdx::tests::gdxtests
