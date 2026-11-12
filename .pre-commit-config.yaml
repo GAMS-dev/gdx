@@ -27,9 +27,10 @@ repos:
         name: audit dependencies (GDX tools)
         args: [./src/tools]
 
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
+  - repo: https://github.com/betterleaks/betterleaks
+    rev: v1.10.0
     hooks:
-      - id: detect-secrets
+      - id: betterleaks
         name: detect secrets
-        args: [--baseline, .secrets.baseline]
+        entry: betterleaks dir --no-banner --redact --verbose
+        pass_filenames: true

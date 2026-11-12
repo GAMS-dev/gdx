@@ -3,6 +3,8 @@ import os
 import platform
 import subprocess
 import unittest
+from collections.abc import Generator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -45,6 +47,29 @@ DIRECTORY_PATHS = DirectoryPaths(
 
 
 type ExecutableName = Literal["gdxdump", "gdxdiff", "gdxmerge"]
+
+type ShadowKind = Literal["directory", "file"]
+SHADOW_KINDS: tuple[ShadowKind, ...] = ("directory", "file")
+
+
+@contextmanager
+def shadowing_path(gdx_file_path: Path, kind: ShadowKind) -> Generator[Path]:
+    """Create a directory or an empty file named like the GDX file without extension.
+
+    Yields the path without extension, which the tools must resolve to the GDX file.
+    """
+    path = gdx_file_path.with_suffix("")
+    if kind == "directory":
+        path.mkdir()
+    else:
+        path.touch()
+    try:
+        yield path
+    finally:
+        if kind == "directory":
+            path.rmdir()
+        else:
+            path.unlink()
 
 
 def get_executable_path(executable_name: ExecutableName) -> Path:
