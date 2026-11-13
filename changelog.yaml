@@ -5,6 +5,7 @@
     - Fixed build failures reported by CRAN with clang and warnings for `likely`/`unlikely` attributes before C++20.
     - Set a reasonable `OSX_DEPLOYMENT_TARGET` in the CMake project and silenced many GCC/MinGW warnings.
     - gdxdiff no longer reports false differences for equation records that only contain default values.
+    - Reading a truncated or corrupt GDX file now fails with an error instead of continuing with uninitialized data.
     - gdxdiff and gdxdump now prefer `name.gdx` for an input file name without extension, so a directory or file called `name` next to it no longer shadows it.
     - Small additions to shared GAMS infrastructure code (e.g. `SysErrorMessageSafe`, `ExtractShortPathName`, `p3GetMemoryInfoEx`, `p3GetExecName`).
     - CI now also builds and tests on musl/aarch64, reports code coverage and uses betterleaks for secret detection.
