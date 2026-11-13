@@ -30,4 +30,4 @@ def benchmark_executable(
     print(f"{' '.join(full_command)}\n")
 
     os.makedirs(DIRECTORY_PATHS.results, exist_ok=True)
-    subprocess.run(full_command)
+    subprocess.run(full_command, check=True)

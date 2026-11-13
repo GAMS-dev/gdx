@@ -28,6 +28,10 @@
 #include <string>   // for string
 #include <cstring>  // for strerror, size_t, strcmp, strcpy
 
+#if __cplusplus >= 202002L
+#include <format>
+#endif
+
 #include "p3io.hpp"
 #include "sysutils_p3.hpp"
 #include "p3platform.hpp"// for OSFileType, tOSFileType
@@ -494,13 +498,41 @@ bool DirectoryExists( const std::string &Directory )
 std::string SysErrorMessage( int errorCode )
 {
    /* strerror is not MT-safe on windows; it is on Linux and MacOs; use strerror_s on windows */
+   static p3_global_storage utils::sstring errMsgBuf;
 #if defined( _WIN32 )
-   static utils::sstring errMsgBuf;
    strerror_s( errMsgBuf.data(), (int) errMsgBuf.size(), errorCode );
    char *errMsg = errMsgBuf.data();
 #else
    char *errMsg = strerror( errorCode );
-   if( !errMsg ) return "Unknown error " + rtl::sysutils_p3::IntToStr( errorCode );
+   if( !errMsg ) {
+      snprintf(errMsgBuf.data(), (int) errMsgBuf.size(), "errno: Unknown error %d", errorCode );
+      errMsg = errMsgBuf.data();
+   }
+#endif
+   return errMsg;
+}
+
+/**
+ * @brief Get the description associated with an error code
+ *
+ * @param errorCode  the error code
+ *
+ * @return           the description
+ */
+const char* SysErrorMessageSafe( int errorCode ) noexcept
+{
+   static p3_global_storage utils::sstring errMsgBuf;
+   char *errMsg;
+   /* strerror is not MT-safe on windows; it is on Linux and MacOs; use strerror_s on windows */
+#if defined( _WIN32 )
+   strerror_s( errMsgBuf.data(), (int) errMsgBuf.size(), errorCode );
+   errMsg = errMsgBuf.data();
+#else
+   errMsg = strerror( errorCode );
+   if( !errMsg ) {
+      snprintf(errMsgBuf.data(), (int) errMsgBuf.size(), "errno: Unknown error %d", errorCode );
+      errMsg = errMsgBuf.data();
+   }
 #endif
    return errMsg;
 }
@@ -590,7 +622,7 @@ std::u8string to_u8string(const char* str)
 std::wstring to_wstring(std::u8string_view utf8_str)
 {
     if (utf8_str.empty()) {
-        return L"";
+        return std::wstring(L"");
     }
 
     // 1. Ask Windows how many wide characters (wchar_t) are needed
@@ -631,7 +663,7 @@ std::u8string QueryEnvironmentVariable( std::u8string_view name )
       return u8"";
    std::wstring val;
    val.resize( len - 1 );
-   GetEnvironmentVariableW( namew.c_str(), val.data(), len );
+   GetEnvironmentVariableW( namew.data(), val.data(), len );
    if( val.length() > 255 )
       val.resize( 255 );
    return to_u8string(val.data());
@@ -656,7 +688,7 @@ std::wstring QueryEnvironmentVariable( std::wstring_view name )
 {
    DWORD len = GetEnvironmentVariableW( name.data(), nullptr, 0 );
    if( !len )
-      return L"";
+      return std::wstring(L"");
    std::wstring val;
    val.resize( len - 1 );
    GetEnvironmentVariableW( name.data(), val.data(), len );

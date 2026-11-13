@@ -2090,13 +2090,13 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
 
    // reading UEL table (could be deferred until needed)
    UelReadDeferred = false;
-   ReadUELTable( false );
+   if( !ReadUELTable( false ) ) return FileErrorNr();
 
    // reading set text table (could be deferred until needed)
    if( ReadMode % 2 == 0 )
    {
       SetTextReadDeferred = false;
-      ReadSetTextList( false );
+      if( !ReadSetTextList( false ) ) return FileErrorNr();
    }
 
    // reading acronym list
@@ -2123,6 +2123,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
       {
          const int SyNr = FFile->ReadInteger();
          if( SyNr <= 0 ) break;
+         if( ErrorCondition( SyNr <= NameList->size(), ERR_BADSYMBOLINDEX ) ) return FileErrorNr();
          const auto sym = *NameList->GetObject( SyNr );
          sym->SDomStrings = std::make_unique<int[]>( sym->SDim );
          for( int D {}; D < sym->SDim; D++ )

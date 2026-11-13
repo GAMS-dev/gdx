@@ -185,7 +185,7 @@ protected:
 
    char *GetSortedString( int N )
    {
-      if( FSorted ) Sort();
+      if( !FSorted ) Sort();
       return Buckets[( *SortMap )[N - ( OneBased ? 1 : 0 )]]->StrP;
    }
 

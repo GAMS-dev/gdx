@@ -30,6 +30,10 @@ bool canBeQuoted(const char *s, std::size_t slen);
 
 bool goodUELString(const char *s, std::size_t slen);
 
+// Appends the default extension .gdx to a file name without extension,
+// unless only the name as given exists
+std::string defaultGdxExtension(const std::string &fileName);
+
 class AuditLine {
   std::string
       system_name,
@@ -42,7 +46,7 @@ public:
 
   void setSystemName(const std::string &system_name);
 
-  std::string getAuditLine() const;
+  const std::string &getAuditLine() const;
 };
 
 } // namespace library

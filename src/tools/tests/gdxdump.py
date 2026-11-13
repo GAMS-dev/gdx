@@ -7,9 +7,11 @@ from pathlib import Path
 from .common import (
     DIRECTORY_PATHS,
     RUNNING_ON_WINDOWS,
+    SHADOW_KINDS,
     ExecutableName,
     check_output,
     run_executable,
+    shadowing_path,
 )
 from .examples.element_text_example import create_element_text_example
 from .examples.full_example import create_full_example
@@ -21,13 +23,13 @@ from .examples.special_values_example import create_special_values_example
 class TestGdxDump(unittest.TestCase):
     EXECUTABLE_NAME: ExecutableName = "gdxdump"
 
-    FILE_NAMES = [
+    FILE_NAMES: tuple[str, ...] = (
         "small_example",
         "full_example",
         "element_text_example",
         "special_values_example",
         "label_example",
-    ]
+    )
     FILE_PATHS: dict[str, Path]
 
     @classmethod
@@ -61,9 +63,14 @@ class TestGdxDump(unittest.TestCase):
         first_negative_offset: int | None = None,
         second_offset: int | None = None,
         second_negative_offset: int | None = None,
-        first_delete: list[int] = [],
-        second_delete: list[int] = [],
+        first_delete: list[int] | None = None,
+        second_delete: list[int] | None = None,
     ) -> None:
+        if first_delete is None:
+            first_delete = []
+        if second_delete is None:
+            second_delete = []
+
         check_output(
             self,
             self.EXECUTABLE_NAME,
@@ -91,6 +98,15 @@ class TestGdxDump(unittest.TestCase):
     def test_small_example(self) -> None:
         output = self.run_gdxdump([self.FILE_PATHS["small_example"]])
         self.check_output(output)
+
+    def test_small_example_without_extension(self) -> None:
+        for kind in SHADOW_KINDS:
+            with (
+                self.subTest(kind=kind),
+                shadowing_path(self.FILE_PATHS["small_example"], kind) as path,
+            ):
+                output = self.run_gdxdump([path])
+                self.check_output(output, file_name="small_example.txt")
 
     def test_full_example(self) -> None:
         output = self.run_gdxdump([self.FILE_PATHS["full_example"]])

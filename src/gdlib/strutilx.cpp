@@ -475,8 +475,15 @@ static bool isThreadLocaleUtf8(locale_t loc)
 {
     if (loc == (locale_t)0) return false;
 
+// in a DEG NB, `nl_langinfo_l` was not found.
+// This failure is tied to the use of GCC on DEG. Very hard to reproduce.
+// Let's invest time in this if it becomes an issue ...
+#if defined(__APPLE__) && !defined(__clang__)
+    return false;
+#else
     const char* codeset = nl_langinfo_l(CODESET, loc);
     return (strcasecmp(codeset, "UTF-8") == 0 || strcasecmp(codeset, "utf8") == 0);
+#endif
 }
 
 // 2. Safely acquire the best available UTF-8 locale

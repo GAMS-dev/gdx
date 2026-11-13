@@ -5,20 +5,32 @@ set -e
 # shellcheck source=./src/tools/scripts/directories.sh
 source "$(dirname "$0")/directories.sh"
 
-pushd "$GDX_DIRECTORY" > /dev/null
+pushd "$GDX_DIRECTORY" >/dev/null
 
 "$SCRIPTS_DIRECTORY/configure.sh"
 
-pushd "$TOOLS_DIRECTORY" > /dev/null
+pushd "$TOOLS_DIRECTORY" >/dev/null
 
-clang-tidy -p "$GDX_DIRECTORY/build" \
-  --fix-errors \
-  ./*/*.*pp
+if [[ "$(uname)" == 'Darwin' ]]; then
+  PARALLEL_INSTANCES=$(sysctl -n hw.logicalcpu)
+else
+  PARALLEL_INSTANCES=$(nproc)
+fi
 
-# run-clang-tidy -p "$GDX_DIRECTORY/build" \
-#   -fix -j 4 ./*/*.*pp
+set +e
 
-clang-format -i ./*/*.*pp
+run-clang-tidy -p "$GDX_DIRECTORY/build" \
+  -j "$PARALLEL_INSTANCES" \
+  -fix ./*/*.*pp
 
-popd > /dev/null
-popd > /dev/null
+EXIT_CODE=$?
+
+set -e
+
+export UV_PROJECT_ENVIRONMENT="$VENV_DIRECTORY"
+uv run clang-format -i ./*/*.*pp
+
+popd >/dev/null
+popd >/dev/null
+
+exit $EXIT_CODE

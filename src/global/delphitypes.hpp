@@ -66,6 +66,9 @@ class OffsetArray : public std::array<T, ubIncl-lbIncl+1>
    // Hide direct buffer access as this could be error-prone
    T *data() { return nullptr; }
 public:
+   static constexpr int lb = lbIncl;
+   static constexpr int ub = ubIncl;
+
    constexpr T& operator[]( const int ix) {
       assert( ix >= lbIncl && ix <= ubIncl && "Index must be in range!" );
       return std::array<T, ubIncl-lbIncl+1>::operator[](ix - lbIncl);
@@ -133,7 +136,7 @@ public:
       return *this;
    }
 
-   operator T() const
+   operator T() const noexcept
    {
       return value;
    }
@@ -170,7 +173,7 @@ public:
       return temp;
    }
 
-   T operator+(int addend) const 
+   T operator+(int addend) const
    {
        return static_cast<T>(value + addend);
    }
@@ -187,23 +190,23 @@ public:
 #endif
    }
 
-   constexpr static T getLowerBound()
+   constexpr static T getLowerBound() noexcept
    {
       return lowerBoundIncl;
    }
 
-   constexpr static T getUpperBound()
+   constexpr static T getUpperBound() noexcept
    {
       return upperBoundIncl;
    }
 
    // Number of elements from lower bound to upper bound (both inclusive)
-   constexpr static T getCount()
+   constexpr static T getCount() noexcept
    {
       return upperBoundIncl - lowerBoundIncl + 1;
    }
 
-   T *getStorage()
+   T *getStorage() noexcept
    {
       return &value;
    }

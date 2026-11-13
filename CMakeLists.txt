@@ -4,10 +4,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_OSX_DEPLOYMENT_TARGET 14.4)
 
+# Set cmake modules directory (i.e. the one which contains all user-defined FindXXX.cmake files among other things)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
 option(GDX_THREAD_SAFE "Build thread-safe version of GDX" OFF)
 option(NO_EXAMPLES "Skip building example programs/executables" OFF)
 option(NO_TESTS "Skip building unit tests" OFF)
 option(NO_TOOLS "Skip building GDX tools" OFF)
+
+include(codecov-profile)
 
 # ccache and sccache
 if(NOT DEFINED CMAKE_C_COMPILER_LAUNCHER AND NOT DEFINED CMAKE_CXX_COMPILER_LAUNCHER)
@@ -41,6 +46,26 @@ set(CMAKE_SKIP_BUILD_RPATH FALSE)
 if ((APPLE OR CMAKE_C_COMPILER_ID STREQUAL "Clang") AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 14)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-non-prototype")
 endif ()
+
+# Injecting the SDK headers via -isystem results in build failures (of dtoaLoc.c) when using homebrew GCC
+if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  # 1. Fetch the active SDK path
+  execute_process(
+    COMMAND xcrun --show-sdk-path
+    OUTPUT_VARIABLE APPLE_SDK_PATH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+  # 2. Add both the full SDK path and standard paths to implicit exclusions
+  list(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
+    "${APPLE_SDK_PATH}/usr/include"
+    "/usr/include"
+  )
+  list(APPEND CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES
+    "${APPLE_SDK_PATH}/usr/include"
+    "/usr/include"
+  )
+endif()
 
 if (APPLE)
 	set(CMAKE_BUILD_RPATH @executable_path/.)
@@ -134,7 +159,9 @@ if (UNIX)
    endif ()
    # ADD common hardening features on Linux
    if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-      if (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE MATCHES "[AM]san"))
+      if (NOT (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE MATCHES "[AM]san" OR
+               CMAKE_BUILD_TYPE STREQUAL "Codecov"))
+         MESSAGE(STATUS "Adding fortify flags")
          set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3 ")
          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3 ")
       endif()
@@ -195,6 +222,7 @@ set(tests
 	src/tests/gdlib/utilstests.cpp
 	src/tests/gdlib/strindexbuftests.cpp
 
+	src/tests/rtl/mathp3tests.cpp
 	src/tests/rtl/p3iotests.cpp
 	src/tests/rtl/p3utilstests.cpp
 	src/tests/rtl/sysutilsp3tests.cpp

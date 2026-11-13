@@ -6,6 +6,8 @@
 #include <sstream>
 
 #include "common.hpp"
+#include "gdlib/strutilx.hpp"
+#include "rtl/sysutils_p3.hpp"
 // Global constants
 #include "generated/gclgms.h"
 
@@ -140,8 +142,8 @@ bool canBeQuoted(const char *s, const std::size_t slen) {
   }
 
   bool saw_single{}, saw_double{};
-  for (int i{}; i < (int)slen; i++) {
-    char Ch{s[i]};
+  for (int i{}; i < static_cast<int>(slen); ++i) {
+    const char Ch{s[i]};
     if (Ch == '\'') {
       if (saw_double) {
         return false;
@@ -164,10 +166,23 @@ bool goodUELString(const char *s, const std::size_t slen) {
   return slen < GLOBAL_UEL_IDENT_SIZE && canBeQuoted(s, slen);
 }
 
+std::string defaultGdxExtension(const std::string &fileName) {
+  if (!gdlib::strutilx::ExtractFileExtEx(fileName).empty()) {
+    return fileName;
+  }
+  // Prefer the .gdx file, so a directory or another file without extension doesn't shadow it
+  std::string gdxFileName{fileName + ".gdx"};
+  if (rtl::sysutils_p3::FileExists(gdxFileName) || !rtl::sysutils_p3::FileExists(fileName)) {
+    return gdxFileName;
+  }
+  return fileName;
+}
+
 void AuditLine::setAuditLine() {
   std::string
       GDL_REL_PLT,
       GDL_BLD_COD;
+  // NOLINTNEXTLINE(misc-const-correctness)
   bool auditreldates_header_file_found{};
 
   audit_line = system_name;
@@ -228,7 +243,7 @@ void AuditLine::setSystemName(const std::string &system_name) {
   setAuditLine();
 }
 
-std::string AuditLine::getAuditLine() const {
+const std::string &AuditLine::getAuditLine() const {
   return audit_line;
 }
 

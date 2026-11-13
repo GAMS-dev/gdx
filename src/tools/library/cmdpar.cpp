@@ -64,7 +64,7 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
   std::string FParams;
   int xr, maxr;
 
-  auto SkipBl = [&]() {
+  auto SkipBl = [&] {
     while (xr <= maxr && FParams.at(xr) <= ' ') {
       xr++;
     }
@@ -101,7 +101,7 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
     return result;
   };
 
-  auto NextKey = [&](std::string &s) -> int {
+  auto const NextKey = [&](std::string &s) -> int {
     s.clear();
     std::string T{NextToken()};
     if (T.empty()) {
@@ -145,7 +145,7 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
     return result;
   };
 
-  auto ExpandCommandLine = [&]() -> std::string {
+  auto const ExpandCommandLine = [&]() -> std::string {
     std::string result;
 
     for (int N{1}; N < ParamCount; N++) {
@@ -158,7 +158,7 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
       if (S.find(' ') == std::string::npos) {
         result.append(' ' + S);
       } else {
-        std::size_t k{S.find('=')};
+        const std::size_t k{S.find('=')};
         if (k == std::string::npos) {
           if (S.front() != '@') {
             result.append(" \"" + S + '"');
@@ -176,7 +176,7 @@ bool CmdParams::AddParameters(const int AInsP, const std::string &CmdLine, const
     return result;
   };
 
-  auto ExpandFiles = [](const std::string &Src, std::string &Dest) -> bool {
+  auto const ExpandFiles = [](const std::string &Src, std::string &Dest) -> bool {
     constexpr int MAXBUF{4};
     bool result{true};
     Dest.clear();
@@ -306,8 +306,8 @@ void CmdParams::AddParam(int v, const std::string &s) {
 }
 
 bool CmdParams::HasParam(int v, library::ShortString &s) {
-  int N = FindKeyV(v);
-  bool result = N >= 0;
+  const int N = FindKeyV(v);
+  const bool result = N >= 0;
   if (!result) {
     s.clear();
   } else {

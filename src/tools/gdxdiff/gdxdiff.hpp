@@ -3,7 +3,6 @@
 #include <array>
 #include <cstdint>
 #include <string>
-#include <string_view>
 
 #include "library/common.hpp"
 #include "library/short_string.hpp"
@@ -11,7 +10,7 @@
 // GDX library interface
 #include "generated/gdxcc.h"
 // Use this to debug instead:
-//#include "generated/gdxcwrap.h"
+// #include "generated/gdxcwrap.h"
 
 namespace gdxdiff {
 
@@ -113,8 +112,6 @@ bool GetAsDouble(const library::ShortString &S, double &V);
 void Usage(const library::AuditLine &auditLine);
 
 // void CopyAcronyms( const gdxHandle_t &PGX );
-
-void CheckFile(std::string &fn);
 
 int main(int argc, const char *argv[]);
 

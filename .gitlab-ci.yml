@@ -184,6 +184,30 @@ build-musl:
     reports:
       junit: warnings.xml
 
+build-musl-lag:
+  stage: build
+  tags: [linux-arm64]
+  image:
+    name: alpine:latest
+    entrypoint: [""]
+  script:
+    - apk add g++ ccache cmake ninja git musl-dev python3
+    - cp apifiles/* src/
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
+    - cmake -DCMAKE_BUILD_TYPE=Release -G Ninja CMakeLists.txt
+    - cmake --build . -- -j$(nproc) 2>&1 | tee build_log.txt
+    - python3 ciscripts/report_for_log.py gcc build_log.txt warnings.xml
+    - mv libgdx-static.a libgdx-linux.a
+    - mkdir -p ./gdxtools
+    - for tool in gdxdump gdxdiff gdxmerge; do mv ./src/tools/$tool/$tool ./gdxtools; done
+  needs: [fetch-ci-scripts,apigenerator]
+  artifacts:
+    name: gdx-musl
+    paths: [gdxtest,gdxwraptest,libgdxcclib64.so,libgdx-linux.a,gdxtools]
+    expire_in: 2 hours
+    reports:
+      junit: warnings.xml
+
 build-debug-musl:
   stage: build
   tags: [linux]
@@ -237,7 +261,7 @@ build-deg:
     - !reference [.get-gams]
     - !reference [.gams-folder-deg]
     - cp apifiles/* src/
-    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DCMAKE_CXX_COMPILER=clang++ CMakeLists.txt
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ CMakeLists.txt
     - cmake --build . -- -j$(sysctl -n hw.ncpu) 2>&1 | tee build_log.txt
     - python3 ciscripts/report_for_log.py clang build_log.txt warnings.xml
     - mv libgdx-static.a libgdx-macos.a
@@ -336,6 +360,57 @@ build-test-wei-cxx20:
         - warnings.xml
         - doctest_results_*wei.xml
 
+codecov-leg:
+  stage: build
+  tags: [linux,fast]
+  image:
+    name: huberoli/debian-c-compile-analyse:latest
+#    pull_policy: [always, if-not-present]
+    entrypoint: [""]
+  script:
+    - !reference [ .get-gams ]
+    - !reference [ .gams-folder-leg ]
+    - test -d /cache/ccache && export CCACHE_DIR=/cache/ccache
+    - GAMS_PATH=/cache/gams-installs/`cat gams_folder_leg.txt`
+    # As of 2026.02.024 this is broken. The deadline was 2026.02.01
+    - sed -i 's/\(sha1\.second_preimage_resistance =\).*/\1 9999-01-01/' /usr/share/apt/default-sequoia.config
+    - apt-get update -y
+    - apt-get install -y python3-pip python3-venv
+    - python3 -m venv /tmp/venv
+    - . /tmp/venv/bin/activate
+    - pip install gcovr
+    # 2026.03.14: on the linux builder, an update to date GCC is installed, but an old binutils is installed
+    - cmake -B build -DCMAKE_BUILD_TYPE=Codecov -S .
+    - cmake --build build -- -j$(nproc) 2>&1 | tee build_log.txt
+    - export PATH="$GAMS_PATH:$PATH"
+    - LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./build/gdxtest
+    - ./build/gdxwraptest
+    - mkdir coverage
+    - GCOVR_EXCLUDE='-e build/ -e src/tests/ -e src/examples -e src/tools -e zlib/'
+    - GCOVR_ARGS="--gcov-ignore-parse-errors --exclude-throw-branches --decisions"
+    - gcovr $GCOVR_ARGS $GCOVR_EXCLUDE --xml coverage/coverage.xml --jacoco coverage/jacoco.xml --html-nested coverage/coverage.html -r . --txt
+
+  needs: [fetch-ci-scripts]
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /fast-ci/
+
+  coverage: /^TOTAL.*\s+(\d+\%)$/
+  artifacts:
+    expire_in: 7 days
+    paths: [coverage]
+    reports:
+#      coverage_report:
+#        coverage_format: cobertura
+#        path: coverage/coverage.xml
+      coverage_report:
+        coverage_format: jacoco
+        path: coverage/coverage-jacoco.xml
+  environment:
+    name: coverage/$CI_COMMIT_REF_SLUG
+    url: "https://pages.gams.com/$CI_PROJECT_NAMESPACE/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/coverage/coverage.html"
+    auto_stop_in: 14 days
+
 #=======================================================================================================================
 
 codechecker-leg-debug:
@@ -427,6 +502,24 @@ test-lag:
     reports:
       junit: doctest_results_*lag.xml
 
+test-musl-lag:
+  stage: test
+  tags: [linux-arm64]
+  image:
+    name: alpine:latest
+    entrypoint: [""]
+  needs: [fetch-ci-scripts,build-musl-lag]
+  script:
+    - apk add --no-cache libgcc libstdc++
+    - ./gdxtest --reporters=junit --out=doctest_results_musl.xml
+    - ./gdxwraptest --reporters=junit --out=doctest_results_wrap_musl.xml
+  artifacts:
+    name: unittest-results-musl
+    paths: [./*.xml]
+    expire_in: 2 hours
+    reports:
+      junit: doctest_results_*musl.xml
+
 test-deg:
   stage: test
   tags: [macos]
@@ -493,7 +586,7 @@ test-wei:
 
   cache:
     key:
-      files: [uv.lock]
+      files: [src/tools/pyproject.toml, src/tools/.python-version]
     paths: [.cache/uv]
 
   after_script: uv cache prune --ci
@@ -508,7 +601,7 @@ test-wei:
   before_script:
     - curl -LsSf https://astral.sh/uv/install.sh | env UV_UNMANAGED_INSTALL="$UV_BIN_DIR" sh
     - PATH="$UV_BIN_DIR:$PATH"
-    - uv python install --default
+    - uv python install --default --directory ./src/tools
 
   after_script:
     - PATH="$UV_BIN_DIR:$PATH"
