@@ -261,14 +261,21 @@ TEST_CASE("Test integer to hex string conversion")
    REQUIRE_EQ("FF"s, IntToHex(255, 2));
 }
 
-// NOTE: this test make the binary not portable. Also, it is a bit of a luck involve here...
 TEST_CASE("Test get current directory")
 {
-#if defined(__IN_CPPMEX__)
-   REQUIRE( (GetCurrentDir().find( "CPPMEX"s ) != std::string::npos || GetCurrentDir().find( "cppmex"s ) != std::string::npos) );
-#else
-   REQUIRE( (GetCurrentDir().find( "gdx"s ) != std::string::npos) );
-#endif
+   namespace fs = std::filesystem;
+   const fs::path prev { fs::current_path() };
+   CHECK( fs::equivalent( GetCurrentDir(), prev ) );
+
+   // must also follow a change of the workdir
+   const fs::path tmp { fs::temp_directory_path() / "sysutilsp3tests_cwd" };
+   fs::create_directories( tmp );
+   fs::current_path( tmp );
+   const std::string cwd { GetCurrentDir() };
+   fs::current_path( prev );
+   CHECK( fs::path { cwd }.is_absolute() );
+   CHECK( fs::equivalent( cwd, tmp ) );
+   fs::remove( tmp );
 }
 
 TEST_CASE("Test trim functions left/right/both")
