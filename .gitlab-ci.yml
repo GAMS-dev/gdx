@@ -386,7 +386,7 @@ codecov-leg:
     - LD_LIBRARY_PATH="$GAMS_PATH" GMSPYTHONLIB="$GAMS_PATH/GMSPython/lib/libpython3.12.so" ./build/gdxtest
     - ./build/gdxwraptest
     - mkdir coverage
-    - GCOVR_EXCLUDE='-e build/ -e src/tests/ -e src/examples -e src/tools -e zlib/'
+    - GCOVR_EXCLUDE='-e build/ -e src/tests/ -e src/examples -e src/tools -e zlib/ -e generated/optcc.c -e src/rtl/dtoaLoc.c'
     - GCOVR_ARGS="--gcov-ignore-parse-errors --exclude-throw-branches --decisions"
     - gcovr $GCOVR_ARGS $GCOVR_EXCLUDE --xml coverage/coverage.xml --jacoco coverage/jacoco.xml --html-nested coverage/coverage.html -r . --txt
 
@@ -405,7 +405,7 @@ codecov-leg:
 #        path: coverage/coverage.xml
       coverage_report:
         coverage_format: jacoco
-        path: coverage/coverage-jacoco.xml
+        path: coverage/jacoco.xml
   environment:
     name: coverage/$CI_COMMIT_REF_SLUG
     url: "https://pages.gams.com/$CI_PROJECT_NAMESPACE/-/$CI_PROJECT_NAME/-/jobs/$CI_JOB_ID/artifacts/coverage/coverage.html"
