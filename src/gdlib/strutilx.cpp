@@ -1494,12 +1494,8 @@ void strConvDelphiToC( char *delphistr )
 // Value-copy conversion of Pascal/Delphi string (size byte prefix) to C++ standard library (STL) string
 std::string strConvDelphiToCpp( const char *delphistr )
 {
-   sstring buffer {};
    const auto len = static_cast<uint8_t>( delphistr[0] );
-   for( int i = 0; i < len; i++ )
-      buffer[i] = delphistr[i + 1];
-   buffer[len] = '\0';
-   return std::string { buffer.data() };
+   return { delphistr + 1, len };
 }
 
 // Convert C++ standard library string to Delphi short string
