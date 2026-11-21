@@ -460,7 +460,7 @@ int TGXFileObj::gdxOpenWriteEx( const char *FileName, const char *Producer, int 
 
 int TGXFileObj::gdxDataWriteStrStart( const char *SyId, const char *ExplTxt, int Dim, int Typ, int UserInfo )
 {
-   if( !PrepareSymbolWrite( "DataWriteStrStart"s, SyId, ExplTxt, Dim, Typ, UserInfo ) ) return false;
+   if( !PrepareSymbolWrite( "DataWriteStrStart", SyId, ExplTxt, Dim, Typ, UserInfo ) ) return false;
    for( int D {}; D < FCurrentDim; D++ )
       LastStrElem[D].front() = std::numeric_limits<char>::max();
    SortList = std::make_unique<LinkedDataType>( FCurrentDim, DataSize * static_cast<int>( sizeof( double ) ) );
@@ -474,7 +474,7 @@ int TGXFileObj::gdxDataWriteStr( const char **KeyStr, const double *Values )
    if( TraceLevel >= TraceLevels::trl_all || fmode != fw_str_data )
    {
       // NOTE: Not covered by unit tests yet.
-      if( !CheckMode( "DataWriteStr"s, fw_str_data ) ) return false;
+      if( !CheckMode( "DataWriteStr", fw_str_data ) ) return false;
       debugStream << "  Index =\n";
       for( int D {}; D < FCurrentDim; D++ )
          debugStream << " " << KeyStr[D] << ( D + 1 < FCurrentDim ? "," : "" ) << "\n";
@@ -507,7 +507,7 @@ int TGXFileObj::gdxDataWriteStr( const char **KeyStr, const double *Values )
 int TGXFileObj::gdxDataWriteDone()
 {
    static const TgxModeSet AllowedModes { fw_raw_data, fw_map_data, fw_str_data, fw_dom_raw, fw_dom_map, fw_dom_str };
-   if( !MajorCheckMode( "DataWriteDone"s, AllowedModes ) ) return false;
+   if( !MajorCheckMode( "DataWriteDone", AllowedModes ) ) return false;
    if( !in( fmode, fw_raw_data, fw_dom_raw ) )
    {
       InitDoWrite( SortList->Count() );
@@ -1746,7 +1746,7 @@ int TGXFileObj::gdxFindSymbol( const char *SyId, int &SyNr )
 
 int TGXFileObj::gdxDataReadStr( char **KeyStr, double *Values, int &DimFrst )
 {
-   if( ( TraceLevel >= TraceLevels::trl_all || fmode != fr_str_data ) && !CheckMode( "DataReadStr"s, fr_str_data ) )
+   if( ( TraceLevel >= TraceLevels::trl_all || fmode != fr_str_data ) && !CheckMode( "DataReadStr", fr_str_data ) )
       return false;// NOTE: Not covered by unit tests yet.
    if( !DoRead( Values, DimFrst ) )
    {
@@ -1779,7 +1779,7 @@ int TGXFileObj::gdxDataReadDone()
    static const TgxModeSet AllowedMode { fr_init, fr_raw_data, fr_map_data, fr_mapr_data, fr_str_data, fr_slice };
    SortList = nullptr;
    CurSyPtr = nullptr;
-   if( !MajorCheckMode( "DataReadDone"s, AllowedMode ) )
+   if( !MajorCheckMode( "DataReadDone", AllowedMode ) )
    {
       // NOTE: Not covered by unit tests yet.
       fmode = fr_init;
@@ -1841,7 +1841,7 @@ int TGXFileObj::gdxSymbolInfo( int SyNr, char *SyId, int &Dim, int &Typ )
 int TGXFileObj::gdxDataReadStrStart( int SyNr, int &NrRecs )
 {
    auto XDomains { arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED ) };
-   NrRecs = PrepareSymbolRead( "DataReadStrStart"s, SyNr, XDomains.data(), fr_str_data );
+   NrRecs = PrepareSymbolRead( "DataReadStrStart", SyNr, XDomains.data(), fr_str_data );
    return NrRecs >= 0;
 }
 
@@ -2142,7 +2142,7 @@ int TGXFileObj::gdxOpenReadXX( const char *Afn, int filemode, int ReadMode, int 
 
 int TGXFileObj::gdxAddAlias( const char *Id1, const char *Id2 )
 {
-   if( !MajorCheckMode( "AddAlias"s, AnyWriteMode ) ) return false;
+   if( !MajorCheckMode( "AddAlias", AnyWriteMode ) ) return false;
    int SyNr1 { !strcmp( Id1, "*" ) ? std::numeric_limits<int>::max() : NameList->IndexOf( Id1 ) };
    int SyNr2 { !strcmp( Id2, "*" ) ? std::numeric_limits<int>::max() : NameList->IndexOf( Id2 ) };
    if( ErrorCondition( ( SyNr1 >= 0 ) != ( SyNr2 >= 0 ), ERR_ALIASSETEXPECTED ) ) return false;
@@ -2183,7 +2183,7 @@ int TGXFileObj::gdxAddAlias( const char *Id1, const char *Id2 )
 int TGXFileObj::gdxAddSetText( const char *Txt, int &TxtNr )
 {
    NEED_SET_TEXTS();
-   if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "AddSetText"s ) ) )
+   if( !SetTextList || ( TraceLevel >= TraceLevels::trl_all && !CheckMode( "AddSetText" ) ) )
    {
       TxtNr = 0;
       return false;
@@ -2242,7 +2242,7 @@ int TGXFileObj::gdxSetErrorRecordCutoff( int maxDataErrorRecords )
 
 int TGXFileObj::gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst )
 {
-   if( ( TraceLevel >= TraceLevels::trl_all || fmode != fr_raw_data ) && !CheckMode( "DataReadRaw"s, fr_raw_data ) ) return false;
+   if( ( TraceLevel >= TraceLevels::trl_all || fmode != fr_raw_data ) && !CheckMode( "DataReadRaw", fr_raw_data ) ) return false;
    if( !DoRead( Values, DimFrst ) ) gdxDataReadDone();
    else
    {
@@ -2264,14 +2264,14 @@ int TGXFileObj::gdxDataReadRaw( int *KeyInt, double *Values, int &DimFrst )
 int TGXFileObj::gdxDataReadRawStart( int SyNr, int &NrRecs )
 {
    auto XDomains { arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED ) };
-   NrRecs = PrepareSymbolRead( "DataReadRawStart"s, SyNr, XDomains.data(), fr_raw_data );
+   NrRecs = PrepareSymbolRead( "DataReadRawStart", SyNr, XDomains.data(), fr_raw_data );
    return NrRecs >= 0;
 }
 
 int TGXFileObj::gdxDataWriteRaw( const int *KeyInt, const double *Values )
 {
    if( fmode == fw_dom_raw ) fmode = fw_raw_data;
-   if( ( TraceLevel >= TraceLevels::trl_some || fmode != fw_raw_data ) && !CheckMode( "DataWriteRaw"s, fw_raw_data ) ) return false;
+   if( ( TraceLevel >= TraceLevels::trl_some || fmode != fw_raw_data ) && !CheckMode( "DataWriteRaw", fw_raw_data ) ) return false;
    if( DoWrite( KeyInt, Values ) ) return true;
    return false;
 }
@@ -2279,7 +2279,7 @@ int TGXFileObj::gdxDataWriteRaw( const int *KeyInt, const double *Values )
 int TGXFileObj::gdxDataWriteRawStart( const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                       int UserInfo )
 {
-   if( !PrepareSymbolWrite( "DataWriteRawStart"s, SyId, ExplTxt, Dimen, Typ, UserInfo ) ) return false;
+   if( !PrepareSymbolWrite( "DataWriteRawStart", SyId, ExplTxt, Dimen, Typ, UserInfo ) ) return false;
    // we overwrite the initialization
    std::fill_n( MinElem.begin(), FCurrentDim, 0 );// no assumptions about the range for a uel
    std::fill_n( MaxElem.begin(), FCurrentDim, std::numeric_limits<int>::max() );
@@ -2291,7 +2291,7 @@ int TGXFileObj::gdxDataWriteRawStart( const char *SyId, const char *ExplTxt, int
 int TGXFileObj::gdxDataWriteRawStartKeyBounds( const char *SyId, const char *ExplTxt, int Dimen, int Typ,
                                       int UserInfo, const int *MinUELIndices, const int *MaxUELIndices )
 {
-   if( !PrepareSymbolWrite( "DataWriteRawStart"s, SyId, ExplTxt, Dimen, Typ, UserInfo ) ) return false;
+   if( !PrepareSymbolWrite( "DataWriteRawStart", SyId, ExplTxt, Dimen, Typ, UserInfo ) ) return false;
    // we overwrite the initialization
    std::memcpy(MinElem.data(), MinUELIndices, sizeof(int)*FCurrentDim);
    std::memcpy(MaxElem.data(), MaxUELIndices, sizeof(int)*FCurrentDim);
@@ -2510,7 +2510,7 @@ int TGXFileObj::gdxSymbolInfoX( int SyNr, int &RecCnt, int &UserInfo, char *Expl
 int TGXFileObj::gdxSymbolSetDomain( const char **DomainIDs )
 {
    static const TgxModeSet AllowedModes { fw_dom_raw, fw_dom_map, fw_dom_str };
-   if( !MajorCheckMode( "SymbolSetDomain"s, AllowedModes ) || !CurSyPtr ) return false;
+   if( !MajorCheckMode( "SymbolSetDomain", AllowedModes ) || !CurSyPtr ) return false;
 
    if( verboseTrace && TraceLevel == TraceLevels::trl_all )
    {
@@ -2646,7 +2646,7 @@ int TGXFileObj::gdxSystemInfo( int &SyCnt, int &UelCnt )
 int TGXFileObj::gdxUELRegisterDone()
 {
    static const TgxModeSet AllowedModes { f_raw_elem, f_map_elem, f_str_elem };
-   if( !MajorCheckMode( "UELRegisterDone"s, AllowedModes ) ) return false;
+   if( !MajorCheckMode( "UELRegisterDone", AllowedModes ) ) return false;
    fmode = fmode_AftReg;
    return true;
 }
@@ -2656,7 +2656,7 @@ int TGXFileObj::gdxUELRegisterRaw( const char *Uel )
    if( verboseTrace && TraceLevel >= TraceLevels::trl_all )
       debugStream << "Uel=" << Uel << '\n';// NOTE: Not covered by unit tests yet.
 
-   if( ( TraceLevel >= TraceLevels::trl_all || fmode != f_raw_elem ) && !CheckMode( "UELRegisterRaw"s, f_raw_elem ) )
+   if( ( TraceLevel >= TraceLevels::trl_all || fmode != f_raw_elem ) && !CheckMode( "UELRegisterRaw", f_raw_elem ) )
       return false;// NOTE: Not covered by unit tests yet.
 
    static sstring svStorage;
@@ -2669,7 +2669,7 @@ int TGXFileObj::gdxUELRegisterRaw( const char *Uel )
 
 int TGXFileObj::gdxUELRegisterRawStart()
 {
-   if( !MajorCheckMode( "UELRegisterRawStart"s, fw_init ) ) return false;
+   if( !MajorCheckMode( "UELRegisterRawStart", fw_init ) ) return false;
    fmode_AftReg = fw_init;
    fmode = f_raw_elem;
    return true;
@@ -2677,7 +2677,7 @@ int TGXFileObj::gdxUELRegisterRawStart()
 
 int TGXFileObj::gdxUELRegisterStr( const char *Uel, int &UelNr )
 {
-   if( ( TraceLevel >= TraceLevels::trl_all || fmode != f_str_elem ) && !CheckMode( "UELRegisterStr"s, f_str_elem ) )
+   if( ( TraceLevel >= TraceLevels::trl_all || fmode != f_str_elem ) && !CheckMode( "UELRegisterStr", f_str_elem ) )
       return false; // not covered by unit test
    static sstring SVstorage;
    int svlen;
@@ -2691,7 +2691,7 @@ int TGXFileObj::gdxUELRegisterStr( const char *Uel, int &UelNr )
 int TGXFileObj::gdxUELRegisterStrStart()
 {
    static const TgxModeSet AllowedModes { fr_init, fw_init };
-   if( !MajorCheckMode( "UELRegisterStrStart"s, AllowedModes ) ) return false;
+   if( !MajorCheckMode( "UELRegisterStrStart", AllowedModes ) ) return false;
    fmode_AftReg = fmode == fw_init ? fw_init : fr_init;
    fmode = f_str_elem;
    return true;
@@ -2775,7 +2775,7 @@ int TGXFileObj::gdxGetUEL( int uelNr, char *Uel )
 
 int TGXFileObj::gdxDataWriteMapStart( const char *SyId, const char *ExplTxt, int Dimen, int Typ, int UserInfo )
 {
-   if( !PrepareSymbolWrite( "DataWriteMapStart"s, SyId, ExplTxt, Dimen, Typ, UserInfo ) ) return false;
+   if( !PrepareSymbolWrite( "DataWriteMapStart", SyId, ExplTxt, Dimen, Typ, UserInfo ) ) return false;
    SortList = std::make_unique<LinkedDataType>( FCurrentDim, static_cast<int>( DataSize * sizeof( double ) ) );
    fmode = fw_dom_map;
    return true;
@@ -2789,7 +2789,7 @@ int TGXFileObj::gdxDataWriteMap( const int *KeyInt, const double *Values )
    if( TraceLevel >= TraceLevels::trl_all || fmode != fw_map_data )
    {
       // NOTE: Not covered by unit tests yet.
-      if( !CheckMode( "DataWriteMap"s, fw_map_data ) ) return false;
+      if( !CheckMode( "DataWriteMap", fw_map_data ) ) return false;
       debugStream << "   Index =";
       for( int D {}; D < FCurrentDim; D++ )
       {
@@ -2817,7 +2817,7 @@ int TGXFileObj::gdxDataWriteMap( const int *KeyInt, const double *Values )
 int TGXFileObj::gdxUELRegisterMapStart()
 {
    static const TgxModeSet AllowedModes { fr_init, fw_init };
-   if( !MajorCheckMode( "UELRegisterMapStart"s, AllowedModes ) )
+   if( !MajorCheckMode( "UELRegisterMapStart", AllowedModes ) )
       return false;
    fmode_AftReg = fmode == fw_init ? fw_init : fr_init;
    fmode = f_map_elem;
@@ -2833,7 +2833,7 @@ int TGXFileObj::gdxUELRegisterMap( int UMap, const char *Uel )
    if( TraceLevel >= TraceLevels::trl_all || fmode != f_map_elem )
    {
       // NOTE: Not covered by unit tests yet.
-      if( !CheckMode( "UELRegisterMap"s, f_map_elem ) )
+      if( !CheckMode( "UELRegisterMap", f_map_elem ) )
          return false;
       debugStream << "   Enter UEL: " << SV << " with number " << UMap << "\n";
    }
@@ -2846,7 +2846,7 @@ int TGXFileObj::gdxUELRegisterMap( int UMap, const char *Uel )
 int TGXFileObj::gdxDataReadMapStart( int SyNr, int &NrRecs )
 {
    const auto XDomains = arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_STRICT );
-   NrRecs = PrepareSymbolRead( "DataReadMapStart"s, SyNr, XDomains.data(), fr_map_data );
+   NrRecs = PrepareSymbolRead( "DataReadMapStart", SyNr, XDomains.data(), fr_map_data );
    return NrRecs >= 0;
 }
 
@@ -3105,13 +3105,13 @@ int TGXFileObj::gdxFilterExists( int FilterNr )
 #endif
    TgxModeSet AnyReadMode  { fr_init, fr_raw_data, fr_map_data, fr_mapr_data, fr_str_data };
 
-   if( !MajorCheckMode( "FilterExists"s, AnyReadMode ) ) return false;
+   if( !MajorCheckMode( "FilterExists", AnyReadMode ) ) return false;
    return FilterList->FindFilter( FilterNr ) != nullptr;
 }
 
 int TGXFileObj::gdxFilterRegisterStart( int FilterNr )
 {
-   if( !MajorCheckMode( "FilterRegisterStart"s, fr_init ) ||
+   if( !MajorCheckMode( "FilterRegisterStart", fr_init ) ||
        ErrorCondition( FilterNr >= 1, ERR_BAD_FILTER_NR ) ) return false;
    CurFilter = new TDFilter { FilterNr, UELTable->UsrUel2Ent->GetHighestIndex() };
    FilterList->AddFilter( CurFilter );
@@ -3122,7 +3122,7 @@ int TGXFileObj::gdxFilterRegisterStart( int FilterNr )
 int TGXFileObj::gdxFilterRegister( int UelMap )
 {
    if( ( TraceLevel >= TraceLevels::trl_all || fmode != fr_filter ) &&
-       !CheckMode( "FilterRegister"s, fr_filter ) ) return false;
+       !CheckMode( "FilterRegister", fr_filter ) ) return false;
    auto &obj = *CurFilter;
    if( ErrorCondition( UelMap >= 1 && UelMap <= obj.FiltMaxUel, ERR_BAD_FILTER_INDX ) ) return false;
    int EN { UELTable->UsrUel2Ent->GetMapping( UelMap ) };
@@ -3138,7 +3138,7 @@ int TGXFileObj::gdxFilterRegister( int UelMap )
 
 int TGXFileObj::gdxFilterRegisterDone()
 {
-   if( !MajorCheckMode( "FilterRegisterDone"s, fr_filter ) ) return false;
+   if( !MajorCheckMode( "FilterRegisterDone", fr_filter ) ) return false;
    fmode = fr_init;
    CurFilter->FiltSorted = true;
    if( UELTable && UELTable->GetMapToUserStatus() == TUELUserMapStatus::map_unsorted )
@@ -3163,7 +3163,7 @@ int TGXFileObj::gdxFilterRegisterDone()
 
 int TGXFileObj::gdxDataReadFilteredStart( int SyNr, const int *FilterAction, int &NrRecs )
 {
-   NrRecs = PrepareSymbolRead( "DataReadStartFiltered"s, SyNr, FilterAction, fr_map_data );
+   NrRecs = PrepareSymbolRead( "DataReadStartFiltered", SyNr, FilterAction, fr_map_data );
    return NrRecs >= 0;
 }
 
@@ -3200,7 +3200,7 @@ int TGXFileObj::gdxGetDomainElements( int SyNr, int DimPos, int FilterNr, TDomai
    TIndex XDomains = arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED );
 
    // Following call also clears ErrorList
-   PrepareSymbolRead( "gdxGetDomain"s, SyNr, XDomains.data(), fr_raw_data );
+   PrepareSymbolRead( "gdxGetDomain", SyNr, XDomains.data(), fr_raw_data );
    int AFDim;
    std::array<double, GMS_VAL_SCALE + 1> AVals {};
    while( DoRead( AVals.data(), AFDim ) )
@@ -3365,7 +3365,7 @@ int TGXFileObj::gdxDataReadSliceStart( int SyNr, int *ElemCounts )
    //-- Note: PrepareSymbolRead checks for the correct status
    const auto XDomains = arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED );
    SliceSyNr = SyNr;
-   PrepareSymbolRead( "DataReadSliceStart"s, SliceSyNr, XDomains.data(), fr_raw_data );
+   PrepareSymbolRead( "DataReadSliceStart", SliceSyNr, XDomains.data(), fr_raw_data );
 
    memset( ElemCounts, 0, sizeof( int ) * GLOBAL_MAX_INDEX_DIM );
 
@@ -3403,7 +3403,7 @@ int TGXFileObj::gdxDataReadSliceStart( int SyNr, int *ElemCounts )
 
 int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataStoreProc_t DP )
 {
-   if( !MajorCheckMode( "DataReadSlice"s, fr_slice ) )
+   if( !MajorCheckMode( "DataReadSlice", fr_slice ) )
       return false; // not covered by unit tests yet!
    bool GoodIndx { true };
    Dimen = 0;
@@ -3425,7 +3425,7 @@ int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataSt
    fmode = fr_init;
    if( !GoodIndx ) return false;
    const auto XDomains = arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED );
-   PrepareSymbolRead( "DataReadSlice"s, SliceSyNr, XDomains.data(), fr_slice );
+   PrepareSymbolRead( "DataReadSlice", SliceSyNr, XDomains.data(), fr_slice );
    TgdxValues Values;
    TgdxUELIndex HisIndx;
    int FDim;
@@ -3447,7 +3447,7 @@ int TGXFileObj::gdxDataReadSlice( const char **UelFilterStr, int &Dimen, TDataSt
 
 int TGXFileObj::gdxDataSliceUELS( const int *SliceKeyInt, char **KeyStr )
 {
-   if( !MajorCheckMode( "DataSliceUELS"s, fr_slice ) ) return false;
+   if( !MajorCheckMode( "DataSliceUELS", fr_slice ) ) return false;
    int HisDim {};
    for( int D {}; D < FCurrentDim; D++ )
    {
@@ -3555,7 +3555,7 @@ int TGXFileObj::gdxSymbIndxMaxLength( int SyNr, int *LengthInfo )
    memset( LengthInfo, 0, GLOBAL_MAX_INDEX_DIM * sizeof( int ) );
 
    int NrRecs;
-   if( ( ( TraceLevel >= TraceLevels::trl_some || fmode != fr_init ) && !CheckMode( "SymbIndxMaxLength"s, fr_init ) ) || ( SyNr < 0 || SyNr > NameList->size() ) || !gdxDataReadRawStart( SyNr, NrRecs ) )
+   if( ( ( TraceLevel >= TraceLevels::trl_some || fmode != fr_init ) && !CheckMode( "SymbIndxMaxLength", fr_init ) ) || ( SyNr < 0 || SyNr > NameList->size() ) || !gdxDataReadRawStart( SyNr, NrRecs ) )
       return 0; // not covered by unit tests yet!
 
    int res {};
@@ -3595,7 +3595,7 @@ int TGXFileObj::gdxSymbMaxLength() const
 
 int TGXFileObj::gdxSymbolAddComment( int SyNr, const char *Txt )
 {
-   if( !MajorCheckMode( "SymbolAddComment"s, AnyWriteMode ) ) return false;
+   if( !MajorCheckMode( "SymbolAddComment", AnyWriteMode ) ) return false;
    PgdxSymbRecord SyPtr;
    if( SyNr <= 0 )
       SyPtr = CurSyPtr;
@@ -3689,7 +3689,7 @@ int TGXFileObj::gdxDataReadRawFastFilt( int SyNr, const char **UelFilterStr, TDa
    bool res {};
    const auto XDomains { arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED ) };
    // -- Note: PrepareSymbolRead checks for the correct status
-   const int NrRecs { PrepareSymbolRead( "gdxDataReadRawFastFilt"s, SyNr, XDomains.data(), fr_raw_data ) };
+   const int NrRecs { PrepareSymbolRead( "gdxDataReadRawFastFilt", SyNr, XDomains.data(), fr_raw_data ) };
    if( NrRecs >= 0 )
    {
       bool GoodIndx { true };
@@ -3739,7 +3739,7 @@ int TGXFileObj::gdxDataReadRawFastFilt( int SyNr, const char **UelFilterStr, TDa
 int TGXFileObj::gdxDataReadRawFast( int SyNr, TDataStoreProc_t DP, int &NrRecs )
 {
    const auto XDomains { arrayWithValue<int, GLOBAL_MAX_INDEX_DIM>( DOMC_UNMAPPED ) };
-   NrRecs = PrepareSymbolRead( "gdxDataReadRawFast"s, SyNr, XDomains.data(), fr_raw_data );
+   NrRecs = PrepareSymbolRead( "gdxDataReadRawFast", SyNr, XDomains.data(), fr_raw_data );
    std::array<double, GMS_VAL_SCALE + 1> AVals {};
    int AFDim;
    while( DoRead( AVals.data(), AFDim ) )
@@ -3754,7 +3754,7 @@ int TGXFileObj::gdxDataReadRawFastEx( int SyNr, TDataStoreExProc_t DP, int &NrRe
    TgdxUELIndex XDomains;
    //do not know dimension yet
    std::fill( XDomains.begin(), XDomains.end(), DOMC_UNMAPPED );
-   NrRecs = PrepareSymbolRead( "gdxDataReadRawFastEx"s, SyNr, XDomains.data(), fr_raw_data );
+   NrRecs = PrepareSymbolRead( "gdxDataReadRawFastEx", SyNr, XDomains.data(), fr_raw_data );
    std::array<double, valscale + 1> AVals {};
    int AFDim;
    if( gdxDataReadRawFastEx_DP_CallByRef )
