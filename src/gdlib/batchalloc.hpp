@@ -43,12 +43,12 @@ class BatchAllocator
    struct DataBatch {
       DataBatch *next;
       uint8_t *ptr;
-   
+
       explicit DataBatch( const size_t count ) : next {}, ptr { new uint8_t[count] }
       {
          assert(count % byteAlign == 0);
       }
-   
+
       ~DataBatch()
       {
          delete[] ptr;
@@ -57,6 +57,7 @@ class BatchAllocator
 
    DataBatch *head {}, *tail {};
    size_t offsetInTail {}, firstBatchSize {batchSize};
+
 public:
    BatchAllocator() = default;
 
@@ -112,6 +113,8 @@ public:
    {
       return reinterpret_cast<T *>( GetBytes( sizeof( T ) ) );
    }
+
+   static constexpr int alignment = byteAlign;
 };
 
 }// namespace gdlib::batchalloc

@@ -142,6 +142,14 @@ public:
       return FCount * FTotalSize;
    }
 
+   void Reserve([[maybe_unused]] uint64_t cnt)
+   {
+#if defined( TSH_BATCH_ALLOCS )
+      uint64_t sz = (FTotalSize + ( batchAllocator.alignment - 1 )) & ~( batchAllocator.alignment - 1 );
+      batchAllocator.SetFirstBatchSize( cnt * sz );
+#endif
+   }
+
    int* AllocIndex()
    {
       return new int[FDimension];
