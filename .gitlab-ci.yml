@@ -378,7 +378,7 @@ codecov-leg:
     - apt-get install -y python3-pip python3-venv
     - python3 -m venv /tmp/venv
     - . /tmp/venv/bin/activate
-    - pip install gcovr
+    - python -m pip install gcovr
     # 2026.03.14: on the linux builder, an update to date GCC is installed, but an old binutils is installed
     - cmake -B build -DCMAKE_BUILD_TYPE=Codecov -S .
     - cmake --build build -- -j$(nproc) 2>&1 | tee build_log.txt
