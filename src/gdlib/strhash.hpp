@@ -148,9 +148,28 @@ protected:
       return ( res & 0x7FFFFFFF ) % HashTableSize;
    }
 
+   int Hash( const char *s, size_t slen )
+   {
+      assert( HashTableSize > 0 );
+      unsigned int res {};
+      for( size_t i {}; i < slen; i++ ) {
+         if constexpr (caseInsensitive) {
+            res = 211 * res + utils::toupper( s[i] );
+         } else {
+            res = 211 * res + s[i];
+         }
+      }
+      return ( res & 0x7FFFFFFF ) % HashTableSize;
+   }
+
    bool EntryEqual( const char *ps1, const char *ps2 )
    {
       return utils::sameTextPChar<caseInsensitive>( ps1, ps2 );
+   }
+
+   bool EntryEqual( const char *ps1, const char *ps2, size_t ps2len )
+   {
+      return utils::sameTextInvariant( ps1, std::string_view(ps2, ps2len) );
    }
 
    int Compare( const char *ps1, const char *ps2 )
@@ -325,11 +344,11 @@ public:
    {
       assert( FCount < std::numeric_limits<int>::max() );
       if( FCount >= ReHashCnt ) HashAll();
-      int HV { Hash( s ) };
+      int HV { Hash( s, slen ) };
       PHashBucket<T> PBuck = GetBucketByHash( HV );
       while( PBuck )
       {
-         if( !EntryEqual( PBuck->StrP, s ) ) PBuck = PBuck->NextBucket;
+         if( !EntryEqual( PBuck->StrP, s, slen ) ) PBuck = PBuck->NextBucket;
          else
             return PBuck->StrNr + ( OneBased ? 1 : 0 );
       }

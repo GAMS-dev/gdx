@@ -143,7 +143,7 @@ constexpr auto gdxHeaderId = "GAMSGDX";
 
 constexpr int MARK_BOI = 19510624;
 
-constexpr auto 
+constexpr auto
         MARK_UEL = "_UEL_",
         MARK_SYMB = "_SYMB_",
         MARK_DATA = "_DATA_",
@@ -2824,23 +2824,30 @@ int TGXFileObj::gdxUELRegisterMapStart()
    return true;
 }
 
-int TGXFileObj::gdxUELRegisterMap( int UMap, const char *Uel )
+int TGXFileObj::UELRegisterMap( int UMap, std::string_view sv)
 {
    NEED_UEL_TABLE();
-   int svLen;
-   static sstring svStorage;
-   const char *SV { trimRight( Uel, svStorage.data(), svLen ) };
    if( TraceLevel >= TraceLevels::trl_all || fmode != f_map_elem )
    {
       // NOTE: Not covered by unit tests yet.
       if( !CheckMode( "UELRegisterMap", f_map_elem ) )
          return false;
-      debugStream << "   Enter UEL: " << SV << " with number " << UMap << "\n";
+      debugStream << "   Enter UEL: " << sv << " with number " << UMap << "\n";
    }
-   if( ErrorCondition( GoodUELString( SV, svLen ), ERR_BADUELSTR ) ||
-       ErrorCondition( UELTable->AddUsrIndxNew( SV, svLen, UMap ) >= 0, ERR_UELCONFLICT ) )
+
+   if( ErrorCondition( GoodUELString( sv.data(), sv.length() ), ERR_BADUELSTR ) ||
+       ErrorCondition( UELTable->AddUsrIndxNew( sv.data(), sv.length(), UMap ) >= 0, ERR_UELCONFLICT ) )
       return false;
+
    return true;
+}
+
+int TGXFileObj::gdxUELRegisterMap( int UMap, const char *Uel )
+{
+   int svLen;
+   static sstring svStorage;
+   const char *SV { trimRight( Uel, svStorage.data(), svLen ) };
+   return UELRegisterMap ( UMap, std::string_view( SV, svLen ) );
 }
 
 int TGXFileObj::gdxDataReadMapStart( int SyNr, int &NrRecs )
