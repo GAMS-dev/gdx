@@ -726,8 +726,10 @@ inline void assignStrToBuf( const std::string &s, char *buf, const int outBufSiz
 
 inline void assignPCharToBuf( const char *s, const size_t slen, char *buf, const size_t outBufSize = 256 )
 {
+   // FIXME: silent drop
    if( slen + 1 > outBufSize ) return;
-   std::memcpy( buf, s, slen + 1 );
+   std::memcpy( buf, s, slen );
+   buf[slen] = '\0';
 }
 
 inline void assignPCharToBuf( const char *s, char *buf, const size_t outBufSize = 256 )
@@ -845,10 +847,10 @@ class sstring : public std::array<char, 256> {
 double frac( double x );
 
 
-// Define a helper that always evaluates to false, 
+// Define a helper that always evaluates to false,
 // but depends on a template parameter to delay evaluation.
 // This is used to report compile-time error in template with constexpr
-template <auto v> 
+template <auto v>
 struct always_false : std::false_type {};
 
 }// namespace utils

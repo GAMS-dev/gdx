@@ -123,6 +123,8 @@ public:
 {% endif -%}
 {% endfor %}
 
+   int UELRegisterMap( int UMap, std::string_view sv);
+
 private:
 std::unique_ptr<gdlib::gmsstrm::TMiBufferedStream> FFile;
 std::string lastFileName {};

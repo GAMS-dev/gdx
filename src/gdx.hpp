@@ -149,7 +149,7 @@ public:
    /**
     * @brief Add a new acronym entry. This can be used to add entries before data is written. Returns negative
     *   value (<0) if the entry is not added.
-    * @details 
+    * @details
     *     This function can be used to add entries before data is written. When entries are added
     *   implicitly use gdxAcronymSetInfo to update the table.
     * @param AName Name of the acronym (up to 63 characters) The first character of a symbol must be a letter.
@@ -734,8 +734,8 @@ public:
 
    /**
     * @brief Adjust the limit of error records stored. The default is 11.
-    * @details 
-    *   
+    * @details
+    *
     *   This method can be used to modify the limit of error records (e.g. duplicates, unordered keys in
     *   raw mode, domain violations) stored by GDX.
     * @param maxDataErrorRecords Maximum number of error records being stored.
@@ -759,7 +759,7 @@ public:
     *   record.
     *   When new unique elements are returned, they are added to the user index space automatically.
     *   The actual reading of records is done with DataReadMap.
-    * 
+    *
     * The action codes are as follows:
     * <table>
     *  <tr>
@@ -989,11 +989,11 @@ public:
     *   each dimension.
     * @param Values The data of the record (level, marginal, lower-, upper-bound, scale).
     * @param DimFrst The first index position in KeyStr that changed.
-    * @attention 
+    * @attention
     *     KeyStr must point to one string for each symbol dimension where each string buffer must have size
     *   of 64 bytes.
     *     Values must have length >=5 double entries.
-    *   
+    *
     *   '
     * @return Non-zero if the operation is possible; return zero if the operation is not possible or if there is
     *   no more data.
@@ -1750,6 +1750,7 @@ public:
 
    /// @}
 
+   int UELRegisterMap( int UMap, std::string_view sv);
 
 
 private:
