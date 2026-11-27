@@ -82,7 +82,7 @@ SymbolList::SymbolList()
   StrPool->Add(empty_string.data(), empty_string.length());
   fileList = std::make_unique<FileList<GDXFileEntry>>();
   library::ShortString Msg;
-  gdxCreate(&PGXMerge, Msg.data(), Msg.length());
+  gdxCreate(&PGXMerge, Msg.data(), GMS_SSSIZE);
 }
 
 SymbolList::~SymbolList() {
@@ -159,7 +159,7 @@ void SymbolList::AddPGXFile(const int FNr, const ProcessPass Pass) {
   FileId = fileList->FileId(FNr);
 
   std::cout << "Reading file: " << FileName << '\n';
-  gdxCreate(&PGX, ErrMsg.data(), ErrMsg.length());
+  gdxCreate(&PGX, ErrMsg.data(), GMS_SSSIZE);
   gdxOpenRead(PGX, FileName.data(), &ErrNr);
   if (ErrNr != 0) {
     gdxErrorStr(PGX, ErrNr, ErrMsg.data());
@@ -307,7 +307,7 @@ bool SymbolList::CollectBigOne(const int SyNr) {
   for (FNr = 0; FNr < fileList->size(); FNr++) {
     FileName = fileList->FileName(FNr);
     FileId = fileList->FileId(FNr);
-    gdxCreate(&PGX, ErrMsg.data(), ErrMsg.length());
+    gdxCreate(&PGX, ErrMsg.data(), GMS_SSSIZE);
     gdxOpenRead(PGX, FileName.data(), &ErrNr);
     if (ErrNr != 0) {
       gdxErrorStr(PGX, ErrNr, ErrMsg.data());
@@ -709,7 +709,7 @@ int main(const int argc, const char *argv[]) {
     return {};
   }
 
-  if (gdxGetReady(Msg.data(), Msg.length()) == 0) {
+  if (gdxGetReady(Msg.data(), GMS_SSSIZE) == 0) {
     library::printErrorMessage("*** Error: Unable to load gdx library, message:\n" + Msg);
     return 1;
   }

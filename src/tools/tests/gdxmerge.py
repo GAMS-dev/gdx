@@ -9,11 +9,14 @@ from gams.transfer import Parameter
 from .common import (
     DIRECTORY_PATHS,
     RUNNING_ON_WINDOWS,
+    WINDOWS_LIBRARY_SEARCH_REASON,
     ExecutableName,
     GamsSymbols,
     check_gdx_file,
+    check_gdx_library_load_error,
     check_output,
     run_executable,
+    run_executable_without_gdx_library,
 )
 from .examples.full_example import create_full_example
 from .examples.small_example import create_small_example
@@ -121,6 +124,23 @@ class TestGdxMerge(unittest.TestCase):
             file_name="usage.txt",
             first_delete=[1],
             second_delete=[1],
+        )
+
+    @unittest.skipIf(RUNNING_ON_WINDOWS, WINDOWS_LIBRARY_SEARCH_REASON)
+    def test_gdx_library_not_loadable(self) -> None:
+        output = run_executable_without_gdx_library(
+            self.EXECUTABLE_NAME,
+            [
+                self.FILE_PATHS["small_example"],
+                self.FILE_PATHS["full_example"],
+                f"Output={self.FILE_PATHS['merge_file']}",
+            ],
+        )
+        check_gdx_library_load_error(
+            self,
+            output,
+            return_code=1,
+            message_prefix="*** Error: Unable to load gdx library, message:\n",
         )
 
     def test_small_example_and_full_example(self) -> None:
