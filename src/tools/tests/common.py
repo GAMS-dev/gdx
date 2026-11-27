@@ -2,6 +2,7 @@ import inspect
 import os
 import platform
 import subprocess
+import tempfile
 import unittest
 from collections.abc import Generator
 from contextlib import contextmanager
@@ -29,6 +30,17 @@ class DirectoryPaths:
 
 
 RUNNING_ON_WINDOWS = platform.system() == "Windows"
+
+LIBRARY_PATH_VARIABLE = (
+    "LD_LIBRARY_PATH" if platform.system() == "Linux" else "DYLD_LIBRARY_PATH"
+)
+
+# The tools pass a buffer of GMS_SSSIZE bytes to the GDX library for its error messages.
+GMS_SSSIZE = 256
+
+WINDOWS_LIBRARY_SEARCH_REASON = (
+    "Windows also searches the executable's directory and PATH for the GDX library"
+)
 
 TESTS_DIRECTORY_PATH = Path(__file__).resolve().parent
 GDX_DIRECTORY_PATH = TESTS_DIRECTORY_PATH.parents[2]
@@ -82,10 +94,7 @@ def get_executable_path(executable_name: ExecutableName) -> Path:
         else:
             return DIRECTORY_PATHS.gdx / "gdxtools" / executable_name_with_suffix
     else:
-        environment_variable = (
-            "LD_LIBRARY_PATH" if platform.system() == "Linux" else "DYLD_LIBRARY_PATH"
-        )
-        os.environ[environment_variable] = str(
+        os.environ[LIBRARY_PATH_VARIABLE] = str(
             DIRECTORY_PATHS.build if build_directory_exists else DIRECTORY_PATHS.gdx
         )
 
@@ -116,6 +125,51 @@ def run_executable(
         text=True,
         check=False,
     )
+
+
+def run_executable_without_gdx_library(
+    executable_name: ExecutableName,
+    command: list[str | Path],
+) -> subprocess.CompletedProcess[str]:
+    """Run a tool with an empty library search path, so loading the GDX library fails.
+
+    Not usable on Windows, where the loader also searches the executable's directory and PATH.
+    """
+    executable_path = get_executable_path(executable_name)
+    command_as_strings: list[str] = [
+        str(value) if isinstance(value, Path) else value for value in command
+    ]
+
+    with tempfile.TemporaryDirectory() as empty_directory:
+        environment = dict(os.environ)
+        environment[LIBRARY_PATH_VARIABLE] = empty_directory
+        return subprocess.run(
+            [str(executable_path), *command_as_strings],
+            capture_output=True,
+            text=True,
+            check=False,
+            env=environment,
+            cwd=empty_directory,
+        )
+
+
+def check_gdx_library_load_error(
+    test_instance: unittest.TestCase,
+    output: subprocess.CompletedProcess[str],
+    return_code: int,
+    message_prefix: str,
+) -> None:
+    """Check that a tool reported the loader message for a GDX library it could not load."""
+    test_instance.assertEqual(output.returncode, return_code)
+    test_instance.assertEqual(output.stderr, "")
+
+    message_start = output.stdout.find(message_prefix)
+    test_instance.assertNotEqual(message_start, -1, output.stdout)
+    message = output.stdout[message_start + len(message_prefix) :].split("\n", 1)[0]
+    test_instance.assertTrue(
+        message.startswith("Could not load shared library "), message
+    )
+    test_instance.assertLessEqual(len(message), GMS_SSSIZE - 1)
 
 
 def check_output(

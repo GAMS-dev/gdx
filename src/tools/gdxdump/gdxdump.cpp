@@ -1350,13 +1350,13 @@ int main(const int argc, const char *argv[]) {
   {
     library::ShortString error_message;
 
-    if (gdxGetReady(error_message.data(), error_message.length()) == 0) {
+    if (gdxGetReady(error_message.data(), GMS_SSSIZE) == 0) {
       library::printErrorMessage("Error loading GDX library: " + error_message);
       ExitCode = 3;
       goto End;
     }
 
-    if (gdxCreate(&PGX, error_message.data(), error_message.length()) == 0) {
+    if (gdxCreate(&PGX, error_message.data(), GMS_SSSIZE) == 0) {
       library::printErrorMessage("Error using GDX library: " + error_message);
       ExitCode = 3;
       goto End;

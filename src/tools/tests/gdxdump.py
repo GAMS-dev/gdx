@@ -8,9 +8,12 @@ from .common import (
     DIRECTORY_PATHS,
     RUNNING_ON_WINDOWS,
     SHADOW_KINDS,
+    WINDOWS_LIBRARY_SEARCH_REASON,
     ExecutableName,
+    check_gdx_library_load_error,
     check_output,
     run_executable,
+    run_executable_without_gdx_library,
     shadowing_path,
 )
 from .examples.element_text_example import create_element_text_example
@@ -93,6 +96,15 @@ class TestGdxDump(unittest.TestCase):
             file_name="usage.txt",
             first_delete=[1],
             second_delete=[1],
+        )
+
+    @unittest.skipIf(RUNNING_ON_WINDOWS, WINDOWS_LIBRARY_SEARCH_REASON)
+    def test_gdx_library_not_loadable(self) -> None:
+        output = run_executable_without_gdx_library(
+            self.EXECUTABLE_NAME, [self.FILE_PATHS["small_example"]]
+        )
+        check_gdx_library_load_error(
+            self, output, return_code=3, message_prefix="Error loading GDX library: "
         )
 
     def test_small_example(self) -> None:

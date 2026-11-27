@@ -132,7 +132,7 @@ void OpenGDX(const std::string &fn, gdxHandle_t &PGX) {
   }
 
   library::ShortString S;
-  if (gdxCreate(&PGX, S.data(), S.length()) == 0) {
+  if (gdxCreate(&PGX, S.data(), GMS_SSSIZE) == 0) {
     FatalError("Cannot load GDX library " + S, static_cast<int>(ErrorCode::ERR_LOADDLL));
   }
 
@@ -1007,7 +1007,7 @@ int main(const int argc, const char *argv[]) {
   }
 
   library::ShortString S2;
-  if (gdxCreate(&PGXDIF, S2.data(), S2.length()) == 0) {
+  if (gdxCreate(&PGXDIF, S2.data(), GMS_SSSIZE) == 0) {
     FatalError("Unable to load GDX library: " + S2, static_cast<int>(ErrorCode::ERR_LOADDLL));
   }
 
